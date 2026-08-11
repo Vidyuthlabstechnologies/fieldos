@@ -1,0 +1,23 @@
+# Large reference PDFs and derived data (kept locally, not versioned)
+*.pdf
+*.pkl
+advanced_kb/
+*_pages.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.log
+
+# Node / Next.js (future frontend)
+node_modules/
+.next/
+out/
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
