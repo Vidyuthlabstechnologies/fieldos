@@ -65,7 +65,7 @@ class Task(Base):
     __tablename__ = "tasks"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
-    project_id: Mapped[str] = mapped_column(String(36), ForeignKey("projects.id"), nullable=False)
+    project_id: Mapped[str] = mapped_column(String(36), ForeignKey("projects.id"), nullable=False, index=True)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     assignee_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     due_date: Mapped[date | None] = mapped_column(Date, nullable=True)
