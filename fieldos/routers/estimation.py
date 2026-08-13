@@ -108,6 +108,22 @@ def create_cost_head(
     return cost_head
 
 
+@router.get("/estimations/{estimation_id}/cost-heads", response_model=list[CostHeadOut])
+def list_cost_heads(
+    estimation_id: str,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    estimation = get_estimation_or_404(db, estimation_id)
+    require_project_access(db, estimation.project_id, current_user.id)
+    return (
+        db.query(CostHead)
+        .filter(CostHead.estimation_id == estimation_id)
+        .order_by(CostHead.sort_order)
+        .all()
+    )
+
+
 @router.post(
     "/cost-heads/{cost_head_id}/measurement-entries",
     response_model=MeasurementEntryOut,

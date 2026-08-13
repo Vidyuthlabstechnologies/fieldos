@@ -57,6 +57,32 @@ def test_create_cost_head(db_session):
     assert response.json()["calculation_type"] == "volume"
 
 
+def test_list_cost_heads_for_an_estimation(db_session):
+    client = build_client(db_session, user_id="owner-1")
+    _, project = _create_company_and_project(client)
+    estimation = client.post(f"/projects/{project['id']}/estimations", json={"name": "Est 1"}).json()
+    client.post(
+        f"/estimations/{estimation['id']}/cost-heads",
+        json={"name": "Brick Work", "calculation_type": "volume", "raw_unit": "CFT", "billing_unit": "CFT"},
+    )
+    client.post(
+        f"/estimations/{estimation['id']}/cost-heads",
+        json={
+            "name": "Column Reinforcement",
+            "calculation_type": "steel_weight",
+            "raw_unit": "KG",
+            "billing_unit": "TONNES",
+            "conversion_factor": "0.001",
+        },
+    )
+
+    response = client.get(f"/estimations/{estimation['id']}/cost-heads")
+
+    assert response.status_code == 200
+    types = {c["calculation_type"] for c in response.json()}
+    assert types == {"volume", "steel_weight"}
+
+
 def test_measurement_entry_rejected_for_steel_cost_head(db_session):
     client = build_client(db_session, user_id="owner-1")
     _, project = _create_company_and_project(client)

@@ -62,6 +62,10 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     <main className="mx-auto grid max-w-4xl gap-8 p-6">
       {dashboard && <DashboardWidget dashboard={dashboard} />}
 
+      <a href={`/projects/${projectId}/estimations`} className="text-sm font-medium text-slate-700 underline">
+        Estimations (BOQ) →
+      </a>
+
       <section>
         <h2 className="mb-2 text-lg font-semibold">Tasks</h2>
         <div className="mb-3 flex gap-2">

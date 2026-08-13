@@ -116,3 +116,107 @@ export function getSiteFeed(projectId: string) {
 export function getDashboard(projectId: string) {
   return apiFetch<Dashboard>(`/projects/${projectId}/dashboard`);
 }
+
+// Estimation / BOQ. Money and quantity fields are kept as strings (not
+// parsed to JS number) to preserve the exact Decimal precision the backend
+// sends -- converting to a JS float would reintroduce the rounding-error
+// risk the whole calculation engine exists to avoid.
+export type CalculationType = "volume" | "area" | "steel_weight" | "count";
+
+export type Estimation = {
+  id: string;
+  project_id: string;
+  name: string;
+  status: string;
+  contractor_profit_percent: string | null;
+  created_by: string;
+};
+
+export type CostHead = {
+  id: string;
+  estimation_id: string;
+  name: string;
+  calculation_type: CalculationType;
+  raw_unit: string;
+  billing_unit: string;
+  conversion_factor: string;
+  rate_per_unit: string | null;
+  sort_order: number;
+};
+
+export type BOQLine = {
+  cost_head_id: string;
+  name: string;
+  billing_unit: string;
+  raw_quantity: string;
+  billing_quantity: string;
+  rate_per_unit: string | null;
+  amount: string | null;
+};
+
+export type BOQ = {
+  lines: BOQLine[];
+  subtotal: string;
+  contractor_profit_percent: string | null;
+  contractor_profit_amount: string;
+  grand_total: string;
+};
+
+export function listEstimations(projectId: string) {
+  return apiFetch<Estimation[]>(`/projects/${projectId}/estimations`);
+}
+
+export function listCostHeads(estimationId: string) {
+  return apiFetch<CostHead[]>(`/estimations/${estimationId}/cost-heads`);
+}
+
+export function createEstimation(
+  projectId: string,
+  data: { name: string; contractor_profit_percent?: string }
+) {
+  return apiFetch<Estimation>(`/projects/${projectId}/estimations`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function createCostHead(
+  estimationId: string,
+  data: {
+    name: string;
+    calculation_type: CalculationType;
+    raw_unit: string;
+    billing_unit: string;
+    conversion_factor?: string;
+    rate_per_unit?: string;
+  }
+) {
+  return apiFetch<CostHead>(`/estimations/${estimationId}/cost-heads`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function createMeasurementEntry(
+  costHeadId: string,
+  data: { description: string; length?: string; width?: string; depth?: string; nos: string; is_deduction?: boolean }
+) {
+  return apiFetch(`/cost-heads/${costHeadId}/measurement-entries`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function createSteelEntry(
+  costHeadId: string,
+  data: { description: string; bar_dia_mm: string; nos: string; length_ft: string }
+) {
+  return apiFetch(`/cost-heads/${costHeadId}/steel-entries`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function getBoq(estimationId: string) {
+  return apiFetch<BOQ>(`/estimations/${estimationId}/boq`);
+}
