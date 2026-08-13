@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from fieldos.routers import companies, dpr, projects, tasks
+from fieldos.routers import companies, dpr, issues, projects, tasks
 
 
 def create_fieldos_app() -> FastAPI:
@@ -9,4 +9,5 @@ def create_fieldos_app() -> FastAPI:
     app.include_router(projects.router)
     app.include_router(tasks.router)
     app.include_router(dpr.router)
+    app.include_router(issues.router)
     return app

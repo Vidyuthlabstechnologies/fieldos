@@ -113,3 +113,22 @@ class DPRPhotoOut(BaseModel):
     photo_url: str
     caption: Optional[str]
     created_at: datetime
+
+
+# Issues
+class IssueCreate(BaseModel):
+    description: str
+    severity: str = "medium"
+    dpr_entry_id: Optional[str] = None
+
+
+class IssueOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    dpr_entry_id: Optional[str]
+    description: str
+    severity: str
+    status: str
+    created_at: datetime
+    resolved_at: Optional[datetime]
