@@ -1,7 +1,19 @@
 import uuid
 from datetime import date, datetime
+from decimal import Decimal
 
-from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fieldos.db import Base
@@ -114,3 +126,59 @@ class Issue(Base):
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="open")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class Estimation(Base):
+    __tablename__ = "estimations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
+    project_id: Mapped[str] = mapped_column(String(36), ForeignKey("projects.id"), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft")
+    contractor_profit_percent: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
+    created_by: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class CostHead(Base):
+    __tablename__ = "cost_heads"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
+    estimation_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("estimations.id"), nullable=False, index=True
+    )
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    calculation_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    raw_unit: Mapped[str] = mapped_column(String(20), nullable=False)
+    billing_unit: Mapped[str] = mapped_column(String(20), nullable=False)
+    conversion_factor: Mapped[Decimal] = mapped_column(Numeric(18, 10), nullable=False, default=Decimal("1"))
+    rate_per_unit: Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+class MeasurementEntry(Base):
+    __tablename__ = "measurement_entries"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
+    cost_head_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("cost_heads.id"), nullable=False, index=True
+    )
+    description: Mapped[str] = mapped_column(String(200), nullable=False)
+    length: Mapped[Decimal | None] = mapped_column(Numeric(14, 6), nullable=True)
+    width: Mapped[Decimal | None] = mapped_column(Numeric(14, 6), nullable=True)
+    depth: Mapped[Decimal | None] = mapped_column(Numeric(14, 6), nullable=True)
+    nos: Mapped[Decimal] = mapped_column(Numeric(14, 6), nullable=False, default=Decimal("1"))
+    is_deduction: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class SteelEntry(Base):
+    __tablename__ = "steel_entries"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
+    cost_head_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("cost_heads.id"), nullable=False, index=True
+    )
+    description: Mapped[str] = mapped_column(String(200), nullable=False)
+    bar_dia_mm: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
+    nos: Mapped[Decimal] = mapped_column(Numeric(14, 6), nullable=False)
+    length_ft: Mapped[Decimal] = mapped_column(Numeric(14, 6), nullable=False)
