@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fieldos.db import Base
@@ -23,10 +23,11 @@ class Company(Base):
 
 class CompanyMember(Base):
     __tablename__ = "company_members"
+    __table_args__ = (UniqueConstraint("company_id", "user_id"),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
-    company_id: Mapped[str] = mapped_column(String(36), ForeignKey("companies.id"), nullable=False)
-    user_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    company_id: Mapped[str] = mapped_column(String(36), ForeignKey("companies.id"), nullable=False, index=True)
+    user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     role: Mapped[str] = mapped_column(String(30), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
