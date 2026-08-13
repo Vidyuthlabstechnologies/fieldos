@@ -54,3 +54,26 @@ class ProjectMemberOut(BaseModel):
     project_id: str
     user_id: str
     role: str
+
+
+# Tasks
+class TaskCreate(BaseModel):
+    title: str
+    assignee_id: Optional[str] = None
+    due_date: Optional[date] = None
+
+
+class TaskStatusUpdate(BaseModel):
+    status: str
+
+
+class TaskOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    title: str
+    assignee_id: Optional[str]
+    due_date: Optional[date]
+    status: str
+    created_at: datetime
+    updated_at: datetime
