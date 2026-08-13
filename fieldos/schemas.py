@@ -132,3 +132,17 @@ class IssueOut(BaseModel):
     status: str
     created_at: datetime
     resolved_at: Optional[datetime]
+
+
+# Dashboard / feed
+class DashboardOut(BaseModel):
+    percent_tasks_complete: float
+    dpr_streak_days: int
+    open_issue_count: int
+
+
+class FeedItemOut(BaseModel):
+    type: str
+    id: str
+    occurred_at: datetime
+    summary: str
