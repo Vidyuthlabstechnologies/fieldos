@@ -31,13 +31,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from fieldos.routers import companies, dashboard, dpr, issues, projects, tasks
+from fieldos.routers import companies, dashboard, dpr, estimation, issues, projects, tasks
 
 app.include_router(companies.router)
 app.include_router(projects.router)
 app.include_router(tasks.router)
 app.include_router(dpr.router)
 app.include_router(issues.router)
+app.include_router(estimation.router)
 app.include_router(dashboard.router)
 
 retriever = None

@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from decimal import Decimal
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
@@ -146,3 +147,98 @@ class FeedItemOut(BaseModel):
     id: str
     occurred_at: datetime
     summary: str
+
+
+# Estimation / BOQ
+class EstimationCreate(BaseModel):
+    name: str
+    contractor_profit_percent: Optional[Decimal] = None
+
+
+class EstimationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    name: str
+    status: str
+    contractor_profit_percent: Optional[Decimal]
+    created_by: str
+    created_at: datetime
+
+
+class CostHeadCreate(BaseModel):
+    name: str
+    calculation_type: str
+    raw_unit: str
+    billing_unit: str
+    conversion_factor: Decimal = Decimal("1")
+    rate_per_unit: Optional[Decimal] = None
+
+
+class CostHeadOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    estimation_id: str
+    name: str
+    calculation_type: str
+    raw_unit: str
+    billing_unit: str
+    conversion_factor: Decimal
+    rate_per_unit: Optional[Decimal]
+    sort_order: int
+
+
+class MeasurementEntryCreate(BaseModel):
+    description: str
+    length: Optional[Decimal] = None
+    width: Optional[Decimal] = None
+    depth: Optional[Decimal] = None
+    nos: Decimal = Decimal("1")
+    is_deduction: bool = False
+
+
+class MeasurementEntryOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    cost_head_id: str
+    description: str
+    length: Optional[Decimal]
+    width: Optional[Decimal]
+    depth: Optional[Decimal]
+    nos: Decimal
+    is_deduction: bool
+
+
+class SteelEntryCreate(BaseModel):
+    description: str
+    bar_dia_mm: Decimal
+    nos: Decimal
+    length_ft: Decimal
+
+
+class SteelEntryOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    cost_head_id: str
+    description: str
+    bar_dia_mm: Decimal
+    nos: Decimal
+    length_ft: Decimal
+
+
+class BOQLineOut(BaseModel):
+    cost_head_id: str
+    name: str
+    billing_unit: str
+    raw_quantity: Decimal
+    billing_quantity: Decimal
+    rate_per_unit: Optional[Decimal]
+    amount: Optional[Decimal]
+
+
+class BOQOut(BaseModel):
+    lines: list[BOQLineOut]
+    subtotal: Decimal
+    contractor_profit_percent: Optional[Decimal]
+    contractor_profit_amount: Decimal
+    grand_total: Decimal
