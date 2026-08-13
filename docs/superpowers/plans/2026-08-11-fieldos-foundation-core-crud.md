@@ -3516,19 +3516,67 @@ Expected: server starts on port 8000 (RAG retriever loading may take a while on 
 Run: `cd frontend && npm run dev`
 Expected: server starts on port 3000.
 
-- [ ] **Step 7: Manual walkthrough**
+- [ ] **Step 7: Seed real Protek Consult data via the API**
 
-1. Visit `http://localhost:3000/login`, enter a phone number, request an OTP (local Supabase logs the OTP to the CLI output instead of sending a real SMS).
-2. Using the returned session, call `POST /companies` (e.g. via `http://localhost:8000/docs`) to create a company, then set `NEXT_PUBLIC_DEMO_COMPANY_ID` in `frontend/.env.local` to that company's id and restart the frontend.
-3. Visit `/projects/new`, create a project — confirm redirect to `/projects/<id>`.
-4. On the project detail page: add a task, change its status, submit a manual DPR entry, confirm the dashboard's "Tasks complete" and "DPR streak" numbers update, and confirm the new DPR entry appears in the Site Feed.
-
-Expected: every step works without console errors.
-
-- [ ] **Step 8: Commit**
+Instead of throwaway placeholder names, seed the company and its three real projects
+(from `resources/`) so the walkthrough exercises the app with data that actually
+matters. Visit `http://localhost:3000/login`, sign in via OTP, then copy the
+session's access token (from the browser's dev tools → Application → Local
+Storage → the Supabase auth entry, or from the `/companies` call's `Authorization`
+header if you're driving this from `http://localhost:8000/docs` instead) and use
+it below.
 
 ```bash
-git commit --allow-empty -m "chore: Plan 1 (foundation + core CRUD) verified end-to-end"
+TOKEN="paste-your-access-token-here"
+
+# Create the company — note the returned "id"
+curl -s -X POST http://localhost:8000/companies \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"name": "Protek Consult"}'
+
+COMPANY_ID="paste-the-id-from-above"
+
+# Narapally — S+5 residential, ~10,097.7 SFT total slab area
+curl -s -X POST http://localhost:8000/projects \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d "{\"company_id\": \"$COMPANY_ID\", \"name\": \"Narapally Residential (S+5)\", \"start_date\": \"2026-01-01\"}"
+
+# Thumukunta — S+4+1 TDR, 2,415.83 SFT/floor
+curl -s -X POST http://localhost:8000/projects \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d "{\"company_id\": \"$COMPANY_ID\", \"name\": \"Thumukunta Residential (S+4+1 TDR)\", \"start_date\": \"2026-01-01\"}"
+
+# Vidyanagar — G+1 duplex, internally "Upperpally Duplex"
+curl -s -X POST http://localhost:8000/projects \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d "{\"company_id\": \"$COMPANY_ID\", \"name\": \"Vidyanagar Duplex (Upperpally)\", \"start_date\": \"2026-01-01\"}"
+```
+
+Expected: three `201` responses, each with a distinct project `id`. Keep the
+Narapally project's `id` for the next step.
+
+- [ ] **Step 8: Manual UI walkthrough on the Narapally project**
+
+1. Set `NEXT_PUBLIC_DEMO_COMPANY_ID` in `frontend/.env.local` to the company id from
+   Step 7 and restart the frontend (`npm run dev`).
+2. Visit `/projects` — confirm all three seeded projects (Narapally, Thumukunta,
+   Vidyanagar) render as cards.
+3. Open the Narapally project (`/projects/<narapally-id>`) and add a task grounded
+   in its real BOQ: title `Brick work - 9" walls, Flat 1 First Floor`.
+   Change its status to `in_progress`, then `done`.
+4. Submit a manual DPR entry: date today, work summary
+   `Completed 9" brick work on Flat 1 & Flat 2, first floor. Shuttering started for typical floor slab.`,
+   manpower count `12`.
+5. Confirm the dashboard's "Tasks complete" (should read `100%` with one done task)
+   and "DPR streak" (`1`) update, and confirm the DPR entry appears in the Site Feed.
+
+Expected: every step works without console errors, and the three real project
+names are visible throughout — not placeholder data.
+
+- [ ] **Step 9: Commit**
+
+```bash
+git commit --allow-empty -m "chore: Plan 1 (foundation + core CRUD) verified end-to-end with real Protek Consult project data"
 ```
 
 ---

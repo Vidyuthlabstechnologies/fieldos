@@ -4,6 +4,9 @@
 advanced_kb/
 *_pages.json
 
+# Real client project/financial data (BOQ estimates, rates) — local only
+resources/
+
 # Python
 __pycache__/
 *.pyc
