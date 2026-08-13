@@ -77,3 +77,39 @@ class TaskOut(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+
+
+# DPR
+class DPREntryCreate(BaseModel):
+    entry_date: date
+    work_summary: str
+    manpower_count: int = 0
+    weather: Optional[str] = None
+
+
+class DPREntryOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    created_by: str
+    entry_date: date
+    work_summary: str
+    manpower_count: int
+    weather: Optional[str]
+    status: str
+    source: str
+    created_at: datetime
+
+
+class DPRPhotoCreate(BaseModel):
+    photo_url: str
+    caption: Optional[str] = None
+
+
+class DPRPhotoOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    dpr_entry_id: str
+    photo_url: str
+    caption: Optional[str]
+    created_at: datetime
