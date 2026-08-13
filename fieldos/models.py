@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fieldos.db import Base
@@ -74,3 +74,43 @@ class Task(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
+
+
+class DPREntry(Base):
+    __tablename__ = "dpr_entries"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
+    project_id: Mapped[str] = mapped_column(String(36), ForeignKey("projects.id"), nullable=False, index=True)
+    created_by: Mapped[str] = mapped_column(String(64), nullable=False)
+    entry_date: Mapped[date] = mapped_column(Date, nullable=False)
+    work_summary: Mapped[str] = mapped_column(Text, nullable=False)
+    manpower_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    weather: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="confirmed")
+    source: Mapped[str] = mapped_column(String(20), nullable=False, default="manual")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class DPRPhoto(Base):
+    __tablename__ = "dpr_photos"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
+    dpr_entry_id: Mapped[str] = mapped_column(String(36), ForeignKey("dpr_entries.id"), nullable=False, index=True)
+    photo_url: Mapped[str] = mapped_column(String(500), nullable=False)
+    caption: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class Issue(Base):
+    __tablename__ = "issues"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
+    project_id: Mapped[str] = mapped_column(String(36), ForeignKey("projects.id"), nullable=False, index=True)
+    dpr_entry_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("dpr_entries.id"), nullable=True
+    )
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    severity: Mapped[str] = mapped_column(String(20), nullable=False, default="medium")
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="open")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
