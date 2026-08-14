@@ -1,17 +1,27 @@
 """Sarvam AI integration for voice-to-DPR (Track B of the automation
 roadmap). This is the one place FieldOS calls out to the internet -- the
-rest of the app is fully offline by design. If SARVAM_API_KEY isn't
-configured, voice-to-DPR simply isn't offered; nothing else depends on it.
+rest of the app is fully offline by design. If no key is configured,
+voice-to-DPR simply isn't offered; nothing else depends on it.
+
+The API key can come from two places, checked in this order:
+1. fieldos.models.AppSetting (key="sarvam_api_key") -- set via the app's
+   own Settings page (fieldos/routers/settings.py). This is how a real,
+   non-technical end user configures it.
+2. The SARVAM_API_KEY environment variable / .env file -- dev convenience,
+   so `pytest`/local runs don't need the DB path.
 """
 
 import json
 
 import httpx
+from sqlalchemy.orm import Session
 
 from fieldos.config import settings
+from fieldos.models import AppSetting
 
 STT_URL = "https://api.sarvam.ai/speech-to-text"
 CHAT_URL = "https://api.sarvam.ai/v1/chat/completions"
+SETTING_KEY = "sarvam_api_key"
 
 STRUCTURE_SYSTEM_PROMPT = """You turn a construction site engineer's spoken \
 daily progress report into structured JSON. Extract only what's actually \
@@ -28,16 +38,17 @@ class SarvamNotConfigured(Exception):
     pass
 
 
-def _require_key() -> str:
-    if not settings.sarvam_api_key:
-        raise SarvamNotConfigured("SARVAM_API_KEY is not set")
-    return settings.sarvam_api_key
+def get_effective_api_key(db: Session) -> str | None:
+    row = db.get(AppSetting, SETTING_KEY)
+    if row and row.value:
+        return row.value
+    return settings.sarvam_api_key or None
 
 
-def transcribe_audio(audio_bytes: bytes, filename: str, language_code: str = "unknown") -> str:
+def transcribe_audio(audio_bytes: bytes, filename: str, api_key: str, language_code: str = "unknown") -> str:
     resp = httpx.post(
         STT_URL,
-        headers={"api-subscription-key": _require_key()},
+        headers={"api-subscription-key": api_key},
         data={"model": "saaras:v3", "language_code": language_code, "with_timestamps": "false"},
         files={"file": (filename, audio_bytes)},
         timeout=120.0,
@@ -46,10 +57,10 @@ def transcribe_audio(audio_bytes: bytes, filename: str, language_code: str = "un
     return resp.json()["transcript"]
 
 
-def structure_dpr_from_transcript(transcript: str) -> dict:
+def structure_dpr_from_transcript(transcript: str, api_key: str) -> dict:
     resp = httpx.post(
         CHAT_URL,
-        headers={"api-subscription-key": _require_key()},
+        headers={"api-subscription-key": api_key},
         json={
             "model": "sarvam-105b",
             "messages": [

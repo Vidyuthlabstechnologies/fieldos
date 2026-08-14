@@ -42,6 +42,18 @@ class Session(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
 
+class AppSetting(Base):
+    """Installation-wide config (currently just the Sarvam API key) --
+    lets a non-technical user configure integrations from the app itself
+    instead of needing to set an environment variable. See fieldos/sarvam.py."""
+
+    __tablename__ = "app_settings"
+
+    key: Mapped[str] = mapped_column(String(100), primary_key=True)
+    value: Mapped[str] = mapped_column(Text, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class Company(Base):
     __tablename__ = "companies"
 

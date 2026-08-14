@@ -1,18 +1,33 @@
 import httpx
-import pytest
 
 from fieldos import sarvam
+from fieldos.models import AppSetting
 
 
-def test_transcribe_audio_raises_when_not_configured(monkeypatch):
+def test_get_effective_api_key_prefers_db_setting_over_env(db_session, monkeypatch):
+    monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "env-key")
+    db_session.add(AppSetting(key=sarvam.SETTING_KEY, value="db-key"))
+    db_session.commit()
+
+    assert sarvam.get_effective_api_key(db_session) == "db-key"
+
+
+def test_get_effective_api_key_falls_back_to_env_when_no_db_setting(db_session, monkeypatch):
+    monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "env-key")
+
+    assert sarvam.get_effective_api_key(db_session) == "env-key"
+
+
+def test_get_effective_api_key_is_none_when_neither_is_set(db_session, monkeypatch):
     monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "")
-    with pytest.raises(sarvam.SarvamNotConfigured):
-        sarvam.transcribe_audio(b"fake audio bytes", "test.wav")
+
+    assert sarvam.get_effective_api_key(db_session) is None
 
 
 def test_structure_dpr_from_transcript_parses_clean_json(monkeypatch):
     def fake_post(url, **kwargs):
         assert url == sarvam.CHAT_URL
+        assert kwargs["headers"]["api-subscription-key"] == "test-key"
         return httpx.Response(
             200,
             json={
@@ -27,10 +42,9 @@ def test_structure_dpr_from_transcript_parses_clean_json(monkeypatch):
             request=httpx.Request("POST", url),
         )
 
-    monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "fake-key")
     monkeypatch.setattr(httpx, "post", fake_post)
 
-    result = sarvam.structure_dpr_from_transcript("we poured column footings today with 12 workers")
+    result = sarvam.structure_dpr_from_transcript("we poured column footings today with 12 workers", "test-key")
 
     assert result == {"work_summary": "Poured column footings", "manpower_count": 12, "weather": "clear"}
 
@@ -47,10 +61,9 @@ def test_structure_dpr_from_transcript_strips_markdown_code_fence(monkeypatch):
             request=httpx.Request("POST", url),
         )
 
-    monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "fake-key")
     monkeypatch.setattr(httpx, "post", fake_post)
 
-    result = sarvam.structure_dpr_from_transcript("some transcript")
+    result = sarvam.structure_dpr_from_transcript("some transcript", "test-key")
 
     assert result["work_summary"] == "Test"
     assert result["manpower_count"] == 5
@@ -64,10 +77,9 @@ def test_structure_dpr_from_transcript_falls_back_on_malformed_json(monkeypatch)
             request=httpx.Request("POST", url),
         )
 
-    monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "fake-key")
     monkeypatch.setattr(httpx, "post", fake_post)
 
-    result = sarvam.structure_dpr_from_transcript("the original transcript text")
+    result = sarvam.structure_dpr_from_transcript("the original transcript text", "test-key")
 
     # Falls back to the raw transcript rather than losing the engineer's report.
     assert result["work_summary"] == "the original transcript text"
@@ -93,10 +105,9 @@ def test_structure_dpr_from_transcript_falls_back_when_content_is_none(monkeypat
             request=httpx.Request("POST", url),
         )
 
-    monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "fake-key")
     monkeypatch.setattr(httpx, "post", fake_post)
 
-    result = sarvam.structure_dpr_from_transcript("the original transcript text")
+    result = sarvam.structure_dpr_from_transcript("the original transcript text", "test-key")
 
     assert result["work_summary"] == "the original transcript text"
     assert result["manpower_count"] == 0

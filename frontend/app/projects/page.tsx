@@ -113,6 +113,13 @@ export default function ProjectsPage() {
           <a href="/projects/new" className="rounded bg-slate-900 px-4 py-2 text-white">
             New project
           </a>
+          <a
+            href="/settings"
+            className="rounded border border-slate-300 px-4 py-2 text-sm"
+            aria-label="Settings"
+          >
+            Settings
+          </a>
         </div>
       </div>
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}

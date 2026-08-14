@@ -90,11 +90,12 @@ def test_voice_draft_returns_503_when_sarvam_not_configured(db_session, monkeypa
 
 
 def test_voice_draft_returns_a_structured_draft_without_saving_anything(db_session, monkeypatch):
+    monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "test-key")
     monkeypatch.setattr(sarvam, "transcribe_audio", lambda *a, **k: "poured column footings with 12 workers")
     monkeypatch.setattr(
         sarvam,
         "structure_dpr_from_transcript",
-        lambda transcript: {"work_summary": "Poured column footings", "manpower_count": 12, "weather": None},
+        lambda transcript, api_key: {"work_summary": "Poured column footings", "manpower_count": 12, "weather": None},
     )
     client = build_client(db_session, user_id="owner-1")
     _, project = _create_company_and_project(client)
@@ -119,6 +120,7 @@ def test_voice_draft_returns_422_when_no_speech_detected(db_session, monkeypatch
     # Real Sarvam behavior: an empty transcript (silence/background noise)
     # sent on to the chat completions endpoint gets rejected with a 400 from
     # Sarvam -- surface a clear, actionable error instead of a bare 502.
+    monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "test-key")
     monkeypatch.setattr(sarvam, "transcribe_audio", lambda *a, **k: "   ")
     client = build_client(db_session, user_id="owner-1")
     _, project = _create_company_and_project(client)
@@ -135,7 +137,9 @@ def test_voice_draft_returns_422_when_no_speech_detected(db_session, monkeypatch
 def test_voice_draft_denies_non_project_member(db_session, monkeypatch):
     monkeypatch.setattr(sarvam, "transcribe_audio", lambda *a, **k: "irrelevant")
     monkeypatch.setattr(
-        sarvam, "structure_dpr_from_transcript", lambda t: {"work_summary": t, "manpower_count": 0, "weather": None}
+        sarvam,
+        "structure_dpr_from_transcript",
+        lambda t, k: {"work_summary": t, "manpower_count": 0, "weather": None},
     )
     owner_client = build_client(db_session, user_id="owner-1")
     _, project = _create_company_and_project(owner_client)

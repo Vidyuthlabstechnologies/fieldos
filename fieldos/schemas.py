@@ -369,3 +369,13 @@ class ProjectExport(BaseModel):
     dpr_entries: list[DPREntryExport] = []
     issues: list[IssueExport] = []
     estimations: list[EstimationExport] = []
+
+
+# Settings -- installation-wide config, currently just the Sarvam key.
+# Never echo the actual key value back; "configured" is all the UI needs.
+class SarvamKeyUpdate(BaseModel):
+    api_key: str = Field(min_length=1)
+
+
+class SarvamStatusOut(BaseModel):
+    configured: bool

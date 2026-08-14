@@ -66,14 +66,18 @@ def create_dpr_voice_draft(
     endpoint like any manually-typed DPR. See fieldos/sarvam.py."""
     require_project_access(db, project_id, current_user.id)
 
+    api_key = sarvam.get_effective_api_key(db)
+    if not api_key:
+        raise HTTPException(
+            status_code=503, detail="Voice-to-DPR isn't configured -- add a Sarvam API key in Settings"
+        )
+
     audio_bytes = audio.file.read()
     try:
-        transcript = sarvam.transcribe_audio(audio_bytes, audio.filename or "recording.webm", language_code)
+        transcript = sarvam.transcribe_audio(audio_bytes, audio.filename or "recording.webm", api_key, language_code)
         if not transcript.strip():
             raise HTTPException(status_code=422, detail="No speech detected in the recording -- try again")
-        structured = sarvam.structure_dpr_from_transcript(transcript)
-    except sarvam.SarvamNotConfigured:
-        raise HTTPException(status_code=503, detail="Voice-to-DPR isn't configured on this install")
+        structured = sarvam.structure_dpr_from_transcript(transcript, api_key)
     except httpx.HTTPError as e:
         raise HTTPException(status_code=502, detail=f"Voice transcription failed: {e}")
 

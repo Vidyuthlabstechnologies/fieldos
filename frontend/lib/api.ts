@@ -271,3 +271,22 @@ export function importProject(companyId: string, data: Record<string, unknown>) 
     body: JSON.stringify(data),
   });
 }
+
+// Settings -- installation-wide config. The key value itself is
+// write-only: the backend never echoes it back, only whether it's set.
+export type SarvamStatus = { configured: boolean };
+
+export function getSarvamStatus() {
+  return apiFetch<SarvamStatus>("/settings/sarvam");
+}
+
+export function setSarvamKey(apiKey: string) {
+  return apiFetch<SarvamStatus>("/settings/sarvam", {
+    method: "PUT",
+    body: JSON.stringify({ api_key: apiKey }),
+  });
+}
+
+export function clearSarvamKey() {
+  return apiFetch<SarvamStatus>("/settings/sarvam", { method: "DELETE" });
+}
