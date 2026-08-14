@@ -1,27 +1,60 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/supabaseClient", () => ({
-  supabase: { auth: { signInWithOtp: vi.fn().mockResolvedValue({ error: null }) } },
+const pushMock = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock }),
+}));
+
+vi.mock("@/lib/auth", () => ({
+  login: vi.fn(),
+  register: vi.fn(),
 }));
 
 import LoginPage from "./page";
-import { supabase } from "@/lib/supabaseClient";
+import { login, register } from "@/lib/auth";
 
 describe("LoginPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("sends an OTP to the entered phone number", async () => {
+  it("logs in with username and password, then redirects to /projects", async () => {
+    (login as any).mockResolvedValue({ token: "t", user: { id: "1", username: "eng1", name: "Eng One" } });
     render(<LoginPage />);
 
-    fireEvent.change(screen.getByLabelText(/phone number/i), {
-      target: { value: "+919876543210" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /send code/i }));
+    fireEvent.change(screen.getByLabelText(/username/i), { target: { value: "eng1" } });
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: "password123" } });
+    fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
 
-    expect(supabase.auth.signInWithOtp).toHaveBeenCalledWith({ phone: "+919876543210" });
-    expect(await screen.findByText(/code sent/i)).toBeInTheDocument();
+    await Promise.resolve();
+    expect(login).toHaveBeenCalledWith("eng1", "password123");
+    expect(pushMock).toHaveBeenCalledWith("/projects");
+  });
+
+  it("switches to register mode and creates an account", async () => {
+    (register as any).mockResolvedValue({ token: "t", user: { id: "1", username: "eng2", name: "Eng Two" } });
+    render(<LoginPage />);
+
+    fireEvent.click(screen.getByRole("button", { name: /create an account/i }));
+    fireEvent.change(screen.getByLabelText(/username/i), { target: { value: "eng2" } });
+    fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: "Eng Two" } });
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: "password123" } });
+    fireEvent.click(screen.getByRole("button", { name: /create account/i }));
+
+    await Promise.resolve();
+    expect(register).toHaveBeenCalledWith("eng2", "Eng Two", "password123");
+    expect(pushMock).toHaveBeenCalledWith("/projects");
+  });
+
+  it("shows an error message when login fails", async () => {
+    (login as any).mockRejectedValue(new Error("Invalid username or password"));
+    render(<LoginPage />);
+
+    fireEvent.change(screen.getByLabelText(/username/i), { target: { value: "eng1" } });
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: "wrong" } });
+    fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
+
+    expect(await screen.findByText(/invalid username or password/i)).toBeInTheDocument();
   });
 });

@@ -1,21 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("./supabaseClient", () => ({
-  supabase: { auth: { getSession: vi.fn() } },
+vi.mock("./auth", () => ({
+  getToken: vi.fn(),
 }));
 
 import { apiFetch } from "./api";
-import { supabase } from "./supabaseClient";
+import { getToken } from "./auth";
 
 describe("apiFetch", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("attaches the Supabase access token as a bearer header", async () => {
-    (supabase.auth.getSession as any).mockResolvedValue({
-      data: { session: { access_token: "test-token" } },
-    });
+  it("attaches the local session token as a bearer header", async () => {
+    (getToken as any).mockReturnValue("test-token");
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ ok: true }),
@@ -28,8 +26,8 @@ describe("apiFetch", () => {
     expect(options.headers.Authorization).toBe("Bearer test-token");
   });
 
-  it("omits the Authorization header when there is no session", async () => {
-    (supabase.auth.getSession as any).mockResolvedValue({ data: { session: null } });
+  it("omits the Authorization header when there is no token", async () => {
+    (getToken as any).mockReturnValue(null);
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -40,7 +38,7 @@ describe("apiFetch", () => {
   });
 
   it("throws when the API responds with a non-2xx status", async () => {
-    (supabase.auth.getSession as any).mockResolvedValue({ data: { session: null } });
+    (getToken as any).mockReturnValue(null);
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({ ok: false, status: 403, text: async () => "forbidden" })

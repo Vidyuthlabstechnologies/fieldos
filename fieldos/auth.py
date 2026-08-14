@@ -1,11 +1,51 @@
+"""Local, fully offline authentication.
+
+Passwords are hashed with bcrypt (SHA-256 pre-hashed first, since bcrypt
+itself silently truncates input past 72 bytes -- pre-hashing means long
+passwords are never quietly weakened). Sessions are opaque random tokens
+stored server-side, not JWTs -- there's no distributed-verification need
+for a single local install, and a DB-backed token is trivial to revoke.
+"""
+
+import hashlib
+import secrets
+from datetime import datetime, timedelta
+
+import bcrypt
 from fastapi import Depends, Header, HTTPException
-from supabase import Client, create_client
+from sqlalchemy.orm import Session as DBSession
 
-from fieldos.config import settings
+from fieldos.db import get_db
+from fieldos.models import Session as SessionModel
+from fieldos.models import User
+
+SESSION_TTL_DAYS = 30
+MIN_PASSWORD_LENGTH = 8
 
 
-def get_supabase_admin() -> Client:
-    return create_client(settings.supabase_url, settings.supabase_service_role_key)
+def _prehash(password: str) -> bytes:
+    return hashlib.sha256(password.encode("utf-8")).digest()
+
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(_prehash(password), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(password: str, password_hash: str) -> bool:
+    return bcrypt.checkpw(_prehash(password), password_hash.encode("utf-8"))
+
+
+def create_session(db: DBSession, user_id: str) -> str:
+    token = secrets.token_urlsafe(32)
+    db.add(
+        SessionModel(
+            token=token,
+            user_id=user_id,
+            expires_at=datetime.utcnow() + timedelta(days=SESSION_TTL_DAYS),
+        )
+    )
+    db.commit()
+    return token
 
 
 class CurrentUser:
@@ -15,19 +55,21 @@ class CurrentUser:
         self.phone = phone
 
 
-def verify_token(token: str, supabase) -> CurrentUser:
-    resp = supabase.auth.get_user(token)
-    if resp is None or resp.user is None:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-    u = resp.user
-    return CurrentUser(id=u.id, email=u.email, phone=u.phone)
+def verify_token(token: str, db: DBSession) -> CurrentUser:
+    session = db.get(SessionModel, token)
+    if session is None or session.expires_at < datetime.utcnow():
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
+    user = db.get(User, session.user_id)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Invalid or expired session")
+    return CurrentUser(id=user.id, email=user.username, phone=None)
 
 
 def get_current_user(
     authorization: str | None = Header(default=None),
-    supabase: Client = Depends(get_supabase_admin),
+    db: DBSession = Depends(get_db),
 ) -> CurrentUser:
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing bearer token")
     token = authorization.removeprefix("Bearer ").strip()
-    return verify_token(token, supabase)
+    return verify_token(token, db)

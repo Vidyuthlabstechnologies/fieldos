@@ -2,7 +2,31 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+
+# Auth
+class RegisterRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=100)
+    name: str = Field(min_length=1, max_length=200)
+    password: str = Field(min_length=8, max_length=200)
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class UserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    username: str
+    name: str
+
+
+class SessionOut(BaseModel):
+    token: str
+    user: UserOut
 
 
 # Companies

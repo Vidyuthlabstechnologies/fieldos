@@ -1,17 +1,16 @@
-import { supabase } from "./supabaseClient";
+import { getToken } from "./auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
-async function authHeader(): Promise<Record<string, string>> {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
+function authHeader(): Record<string, string> {
+  const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = {
     "Content-Type": "application/json",
-    ...(await authHeader()),
+    ...authHeader(),
     ...(options.headers ?? {}),
   };
   const res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
@@ -20,6 +19,16 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     throw new Error(`API error ${res.status}: ${body}`);
   }
   return res.json() as Promise<T>;
+}
+
+export type Company = { id: string; name: string; created_at: string };
+
+export function listMyCompanies() {
+  return apiFetch<Company[]>("/companies/mine");
+}
+
+export function createCompany(name: string) {
+  return apiFetch<Company>("/companies", { method: "POST", body: JSON.stringify({ name }) });
 }
 
 export type Project = {

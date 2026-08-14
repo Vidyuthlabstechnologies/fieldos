@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from fieldos.routers import companies, dashboard, dpr, estimation, issues, projects, tasks
+from fieldos.routers import auth, companies, dashboard, dpr, estimation, issues, projects, tasks
 
 
 def create_fieldos_app() -> FastAPI:
@@ -12,6 +12,7 @@ def create_fieldos_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.include_router(auth.router)
     app.include_router(companies.router)
     app.include_router(projects.router)
     app.include_router(tasks.router)
