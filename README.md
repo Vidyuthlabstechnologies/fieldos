@@ -3,32 +3,23 @@
 Construction site management: projects, tasks, daily progress reports (DPR),
 issues, dashboards, and BOQ/estimation.
 
-## Setup (no Docker required)
+## Setup (fully offline, no Docker, no cloud account required)
 
-FieldOS uses a local SQLite database by default and Supabase Cloud (free tier)
-only for authentication — there's no local Postgres, Docker, or Supabase CLI
-stack to run.
+FieldOS uses a local SQLite database and local username/password accounts.
+Nothing talks to the internet — no Docker, no Supabase, no external service
+of any kind.
 
 ### Backend
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env
-```
-
-Edit `.env`:
-- `DATABASE_URL` — leave as the SQLite default, or point at a Postgres instance
-  (e.g. a Supabase Cloud project's connection string) if you want one.
-- `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` — from a free project at
-  [supabase.com](https://supabase.com) (Project Settings → API). Required for
-  login to work; nothing else needs Supabase.
-
-```bash
 python -m alembic upgrade head
 uvicorn api:app --reload
 ```
 
-API docs at http://localhost:8000/docs.
+API docs at http://localhost:8000/docs. (`.env.example` documents the one
+optional override, `DATABASE_URL`, if you want something other than the
+default SQLite file.)
 
 ### Frontend
 
@@ -36,16 +27,11 @@ API docs at http://localhost:8000/docs.
 cd frontend
 npm install
 cp .env.local.example .env.local
-```
-
-Edit `.env.local` with the same Supabase project's URL and anon key
-(Project Settings → API → `anon` `public` key).
-
-```bash
 npm run dev
 ```
 
-App at http://localhost:3000.
+App at http://localhost:3000. First run: create an account on the login
+page, then create your company when prompted.
 
 ## Project layout
 

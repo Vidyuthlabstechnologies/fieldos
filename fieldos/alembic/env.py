@@ -8,7 +8,13 @@ from fieldos.config import settings
 from fieldos.db import Base
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Respect a URL already set on the Config (e.g. by a programmatic caller
+# like desktop_app.py's run_migrations) -- only fall back to the global
+# settings singleton, which is fixed at process-start, when nothing more
+# specific was provided (this is also what the plain `sqlalchemy.url =`
+# line in alembic.ini resolves to for the CLI).
+if not config.get_main_option("sqlalchemy.url"):
+    config.set_main_option("sqlalchemy.url", settings.database_url)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
