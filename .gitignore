@@ -15,6 +15,10 @@ venv/
 *.log
 *.db
 
+# PyInstaller build output (regenerate with `pyinstaller desktop_app.spec`)
+build/
+dist/
+
 # Node / Next.js (future frontend)
 node_modules/
 .next/

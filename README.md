@@ -33,6 +33,37 @@ npm run dev
 App at http://localhost:3000. First run: create an account on the login
 page, then create your company when prompted.
 
+## Building the desktop app
+
+FieldOS also ships as a standalone offline desktop app (no Docker, no cloud,
+no Python/Node install required on the end user's machine). Two pieces:
+
+1. **Backend** — bundled into a single native executable with PyInstaller:
+
+   ```bash
+   pip install -r requirements-build.txt
+   pyinstaller desktop_app.spec
+   ```
+
+   Produces `dist/FieldOS-backend.exe`. It self-migrates its database into
+   the OS-appropriate app-data directory on first run (see
+   [fieldos/paths.py](fieldos/paths.py)) — no separate install step.
+
+2. **Frontend** — static export, built once:
+
+   ```bash
+   cd frontend && npm run build
+   ```
+
+   Produces `frontend/out/`, a fully static site. The project/estimation
+   detail routes are query-param based (`/project?id=...`, not
+   `/projects/[id]`) rather than `[id]`-style dynamic segments, since static
+   export can't pre-render routes with unbounded runtime IDs.
+
+Both get wrapped into one installable `.exe`/`.msi` by a Tauri shell
+(not yet set up) — Tauri would load `frontend/out` directly and launch
+`FieldOS-backend.exe` as a background sidecar process.
+
 ## Project layout
 
 - `fieldos/` — backend: models, routers, auth, config (`fieldos/app.py` builds
