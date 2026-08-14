@@ -60,15 +60,38 @@ no Python/Node install required on the end user's machine). Two pieces:
    `/projects/[id]`) rather than `[id]`-style dynamic segments, since static
    export can't pre-render routes with unbounded runtime IDs.
 
-Both get wrapped into one installable `.exe`/`.msi` by a Tauri shell
-(not yet set up) — Tauri would load `frontend/out` directly and launch
-`FieldOS-backend.exe` as a background sidecar process.
+3. **Installer** — Tauri wraps both into one `.exe`/`.msi`. It loads
+   `frontend/out` directly and launches the backend as a background sidecar
+   process (`src-tauri/src/lib.rs`); killed automatically when the window
+   closes.
+
+   ```bash
+   npm install                                    # once, installs the Tauri CLI
+   mkdir -p src-tauri/binaries
+   cp dist/FieldOS-backend.exe src-tauri/binaries/FieldOS-backend-x86_64-pc-windows-msvc.exe
+   npx tauri build
+   ```
+
+   Produces `src-tauri/target/release/bundle/nsis/FieldOS_<version>_x64-setup.exe`
+   and the equivalent `.msi`. `tauri build` also runs the frontend build for
+   you (see `beforeBuildCommand` in `src-tauri/tauri.conf.json`), so step 2
+   above is only needed standalone if you want to preview `frontend/out` on
+   its own. The sidecar binary's filename must end with the exact Rust
+   target triple (`rustc --print host-tuple`) or Tauri won't find it.
 
 ## Project layout
 
 - `fieldos/` — backend: models, routers, auth, config (`fieldos/app.py` builds
-  the FastAPI app; `api.py` is the run entrypoint)
+  the FastAPI app; `api.py` is the dev entrypoint, `desktop_app.py` the
+  packaged-app entrypoint)
 - `frontend/` — Next.js app
+- `src-tauri/` — desktop shell (Rust/Tauri); launches the PyInstaller
+  backend as a sidecar and loads `frontend/out`
+- `importers/` — one-off scripts that turn a real client Excel BOQ sheet
+  into a FieldOS project-export JSON, importable via the app's own "Import
+  project" button. See `importers/narapally_boq.py` for the pattern:
+  parse, then reconcile every figure against the sheet's own stated totals
+  before writing anything — refuses to produce output on any mismatch.
 - `tests/` — pytest suite (`pytest tests/`)
 - `resources/`, `advanced_kb*`, `kb_search_api.py` — a separate, optional
   construction-codes search tool (requires chromadb + a local Ollama instance).
