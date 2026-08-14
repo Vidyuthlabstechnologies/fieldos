@@ -16,7 +16,7 @@ export default function NewProjectPage() {
 
   async function handleSubmit(data: { company_id: string; name: string; client_name: string }) {
     const project = await createProject(data);
-    router.push(`/projects/${project.id}`);
+    router.push(`/project?id=${project.id}`);
   }
 
   if (!companyId) {

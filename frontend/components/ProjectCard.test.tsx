@@ -18,6 +18,6 @@ describe("ProjectCard", () => {
 
   it("links to the project detail page", () => {
     render(<ProjectCard project={{ id: "42", name: "X", client_name: null, status: "planning" }} />);
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/projects/42");
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/project?id=42");
   });
 });

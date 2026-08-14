@@ -1,6 +1,7 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { DashboardWidget } from "@/components/DashboardWidget";
 import { DPRForm } from "@/components/DPRForm";
@@ -21,8 +22,7 @@ import {
   type Task,
 } from "@/lib/api";
 
-export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const projectId = use(params).id;
+function ProjectDetail({ projectId }: { projectId: string }) {
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [feed, setFeed] = useState<FeedItem[]>([]);
@@ -86,7 +86,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
       {dashboard && <DashboardWidget dashboard={dashboard} />}
 
       <div className="flex items-center justify-between">
-        <a href={`/projects/${projectId}/estimations`} className="text-sm font-medium text-slate-700 underline">
+        <a href={`/project/estimations?id=${projectId}`} className="text-sm font-medium text-slate-700 underline">
           Estimations (BOQ) →
         </a>
         <button
@@ -125,5 +125,22 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         <SiteFeed items={feed} />
       </section>
     </main>
+  );
+}
+
+function ProjectDetailGate() {
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("id");
+  if (!projectId) {
+    return <main className="mx-auto max-w-4xl p-6">No project selected.</main>;
+  }
+  return <ProjectDetail projectId={projectId} />;
+}
+
+export default function ProjectDetailPage() {
+  return (
+    <Suspense fallback={<main className="mx-auto max-w-4xl p-6">Loading...</main>}>
+      <ProjectDetailGate />
+    </Suspense>
   );
 }

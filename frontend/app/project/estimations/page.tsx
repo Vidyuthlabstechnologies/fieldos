@@ -1,11 +1,11 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { createEstimation, listEstimations, type Estimation } from "@/lib/api";
 
-export default function EstimationsPage({ params }: { params: Promise<{ id: string }> }) {
-  const projectId = use(params).id;
+function EstimationsList({ projectId }: { projectId: string }) {
   const [estimations, setEstimations] = useState<Estimation[]>([]);
   const [newName, setNewName] = useState("");
   const [newProfitPercent, setNewProfitPercent] = useState("");
@@ -61,7 +61,7 @@ export default function EstimationsPage({ params }: { params: Promise<{ id: stri
         {estimations.map((e) => (
           <li key={e.id}>
             <a
-              href={`/projects/${projectId}/estimations/${e.id}`}
+              href={`/project/estimations/detail?id=${projectId}&estimationId=${e.id}`}
               className="block rounded border border-slate-200 p-3 hover:border-slate-400"
             >
               <div className="font-semibold">{e.name}</div>
@@ -71,5 +71,22 @@ export default function EstimationsPage({ params }: { params: Promise<{ id: stri
         ))}
       </ul>
     </main>
+  );
+}
+
+function EstimationsGate() {
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("id");
+  if (!projectId) {
+    return <main className="mx-auto max-w-2xl p-6">No project selected.</main>;
+  }
+  return <EstimationsList projectId={projectId} />;
+}
+
+export default function EstimationsPage() {
+  return (
+    <Suspense fallback={<main className="mx-auto max-w-2xl p-6">Loading...</main>}>
+      <EstimationsGate />
+    </Suspense>
   );
 }

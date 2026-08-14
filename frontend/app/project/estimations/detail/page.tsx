@@ -1,6 +1,7 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { BOQTable } from "@/components/BOQTable";
 import { CostHeadForm } from "@/components/CostHeadForm";
@@ -16,12 +17,7 @@ import {
   type CostHead,
 } from "@/lib/api";
 
-export default function EstimationDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string; estimationId: string }>;
-}) {
-  const { estimationId } = use(params);
+function EstimationDetail({ estimationId }: { estimationId: string }) {
   const [costHeads, setCostHeads] = useState<CostHead[]>([]);
   const [boq, setBoq] = useState<BOQ | null>(null);
 
@@ -82,5 +78,22 @@ export default function EstimationDetailPage({
         {boq && <BOQTable boq={boq} />}
       </section>
     </main>
+  );
+}
+
+function EstimationDetailGate() {
+  const searchParams = useSearchParams();
+  const estimationId = searchParams.get("estimationId");
+  if (!estimationId) {
+    return <main className="mx-auto max-w-4xl p-6">No estimation selected.</main>;
+  }
+  return <EstimationDetail estimationId={estimationId} />;
+}
+
+export default function EstimationDetailPage() {
+  return (
+    <Suspense fallback={<main className="mx-auto max-w-4xl p-6">Loading...</main>}>
+      <EstimationDetailGate />
+    </Suspense>
   );
 }

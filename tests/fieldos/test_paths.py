@@ -2,7 +2,7 @@ from fieldos import paths
 
 
 def test_app_data_dir_creates_and_returns_the_directory(tmp_path, monkeypatch):
-    target = tmp_path / "ProtekConsult" / "FieldOS"
+    target = tmp_path / "Predictera" / "FieldOS"
     monkeypatch.setattr(paths, "user_data_dir", lambda *a, **k: str(target))
 
     result = paths.app_data_dir()

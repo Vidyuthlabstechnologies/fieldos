@@ -11,7 +11,7 @@ from pathlib import Path
 from platformdirs import user_data_dir
 
 APP_NAME = "FieldOS"
-APP_AUTHOR = "ProtekConsult"
+APP_AUTHOR = "Predictera"
 
 
 def app_data_dir() -> Path:
