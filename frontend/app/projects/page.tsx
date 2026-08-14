@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ProjectCard } from "@/components/ProjectCard";
-import { createCompany, listMyCompanies, listProjects, type Company, type Project } from "@/lib/api";
+import { createCompany, importProject, listMyCompanies, listProjects, type Company, type Project } from "@/lib/api";
 
 export default function ProjectsPage() {
   const [company, setCompany] = useState<Company | null | undefined>(undefined); // undefined = loading
@@ -11,6 +11,25 @@ export default function ProjectsPage() {
   const [newCompanyName, setNewCompanyName] = useState("");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleImportFile(file: File) {
+    if (!company) return;
+    setError(null);
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      const imported = await importProject(company.id, data);
+      setProjects((prev) => [imported, ...prev]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to import project");
+    } finally {
+      setImporting(false);
+      if (importInputRef.current) importInputRef.current.value = "";
+    }
+  }
 
   useEffect(() => {
     listMyCompanies()
@@ -72,10 +91,31 @@ export default function ProjectsPage() {
     <main className="mx-auto max-w-3xl p-6">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Projects</h1>
-        <a href="/projects/new" className="rounded bg-slate-900 px-4 py-2 text-white">
-          New project
-        </a>
+        <div className="flex gap-2">
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleImportFile(file);
+            }}
+          />
+          <button
+            onClick={() => importInputRef.current?.click()}
+            disabled={importing}
+            type="button"
+            className="rounded border border-slate-300 px-4 py-2 text-sm disabled:opacity-50"
+          >
+            {importing ? "Importing..." : "Import project"}
+          </button>
+          <a href="/projects/new" className="rounded bg-slate-900 px-4 py-2 text-white">
+            New project
+          </a>
+        </div>
       </div>
+      {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
       <div className="grid gap-3">
         {projects.map((p) => (
           <ProjectCard key={p.id} project={p} />

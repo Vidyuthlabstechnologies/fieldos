@@ -229,3 +229,18 @@ export function createSteelEntry(
 export function getBoq(estimationId: string) {
   return apiFetch<BOQ>(`/estimations/${estimationId}/boq`);
 }
+
+// Project export/import -- moving one project's full data between two
+// separate local installs (e.g. site laptop -> office laptop). The payload
+// shape is opaque here on purpose: it's produced and consumed entirely by
+// the backend, this just passes it through.
+export function exportProject(projectId: string) {
+  return apiFetch<Record<string, unknown>>(`/projects/${projectId}/export`);
+}
+
+export function importProject(companyId: string, data: Record<string, unknown>) {
+  return apiFetch<Project>(`/companies/${companyId}/import`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}

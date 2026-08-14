@@ -266,3 +266,96 @@ class BOQOut(BaseModel):
     contractor_profit_percent: Optional[Decimal]
     contractor_profit_amount: Decimal
     grand_total: Decimal
+
+
+# Project export/import -- for moving one project's full data between two
+# separate local installs (e.g. site laptop -> office laptop). User accounts
+# and company membership are NOT part of this: the receiving machine has its
+# own local accounts, so created_by/assignee_id are reattributed to whoever
+# performs the import rather than carried across.
+EXPORT_FORMAT = "fieldos.project_export.v1"
+
+
+class TaskExport(BaseModel):
+    title: str
+    due_date: Optional[date] = None
+    status: str
+
+
+class DPRPhotoExport(BaseModel):
+    photo_url: str
+    caption: Optional[str] = None
+
+
+class DPREntryExport(BaseModel):
+    local_id: int
+    entry_date: date
+    work_summary: str
+    manpower_count: int
+    weather: Optional[str] = None
+    status: str
+    source: str
+    photos: list[DPRPhotoExport] = []
+
+
+class IssueExport(BaseModel):
+    dpr_entry_local_id: Optional[int] = None
+    description: str
+    severity: str
+    status: str
+    resolved_at: Optional[datetime] = None
+
+
+class MeasurementEntryExport(BaseModel):
+    description: str
+    length: Optional[Decimal] = None
+    width: Optional[Decimal] = None
+    depth: Optional[Decimal] = None
+    nos: Decimal
+    is_deduction: bool
+
+
+class SteelEntryExport(BaseModel):
+    description: str
+    bar_dia_mm: Decimal
+    nos: Decimal
+    length_ft: Decimal
+
+
+class CostHeadExport(BaseModel):
+    name: str
+    calculation_type: str
+    raw_unit: str
+    billing_unit: str
+    conversion_factor: Decimal
+    rate_per_unit: Optional[Decimal] = None
+    sort_order: int
+    measurement_entries: list[MeasurementEntryExport] = []
+    steel_entries: list[SteelEntryExport] = []
+
+
+class EstimationExport(BaseModel):
+    name: str
+    status: str
+    contractor_profit_percent: Optional[Decimal] = None
+    cost_heads: list[CostHeadExport] = []
+
+
+class ProjectExportPayload(BaseModel):
+    name: str
+    client_name: Optional[str] = None
+    location_lat: Optional[float] = None
+    location_lng: Optional[float] = None
+    geofence_radius_m: Optional[int] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    status: str
+
+
+class ProjectExport(BaseModel):
+    format: str = EXPORT_FORMAT
+    project: ProjectExportPayload
+    tasks: list[TaskExport] = []
+    dpr_entries: list[DPREntryExport] = []
+    issues: list[IssueExport] = []
+    estimations: list[EstimationExport] = []
