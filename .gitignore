@@ -21,6 +21,10 @@ node_modules/
 out/
 .env
 .env.local
+*.tsbuildinfo
+
+# Claude Code local tooling/workspace scaffolding (dev launch config, agent worktrees)
+.claude/
 
 # OS
 .DS_Store
