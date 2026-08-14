@@ -7,6 +7,7 @@ import { DashboardWidget } from "@/components/DashboardWidget";
 import { DPRForm } from "@/components/DPRForm";
 import { SiteFeed } from "@/components/SiteFeed";
 import { TaskList } from "@/components/TaskList";
+import { VoiceDPRRecorder } from "@/components/VoiceDPRRecorder";
 import {
   createDprEntry,
   createTask,
@@ -17,6 +18,7 @@ import {
   listTasks,
   updateTaskStatus,
   type Dashboard,
+  type DPRVoiceDraft,
   type FeedItem,
   type Project,
   type Task,
@@ -29,6 +31,7 @@ function ProjectDetail({ projectId }: { projectId: string }) {
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [voiceDraft, setVoiceDraft] = useState<DPRVoiceDraft | null>(null);
 
   async function refresh() {
     const [p, t, f, d] = await Promise.all([
@@ -78,6 +81,7 @@ function ProjectDetail({ projectId }: { projectId: string }) {
 
   async function handleDprSubmit(data: { entry_date: string; work_summary: string; manpower_count: number }) {
     await createDprEntry(projectId, data);
+    setVoiceDraft(null);
     refresh();
   }
 
@@ -117,7 +121,15 @@ function ProjectDetail({ projectId }: { projectId: string }) {
 
       <section>
         <h2 className="mb-2 text-lg font-semibold">Daily Progress Report</h2>
-        <DPRForm onSubmit={handleDprSubmit} />
+        <div className="mb-3">
+          <VoiceDPRRecorder projectId={projectId} onDraft={setVoiceDraft} />
+          {voiceDraft && (
+            <p className="mt-2 text-xs text-slate-500">
+              Transcript: &ldquo;{voiceDraft.transcript}&rdquo; — review the fields below before submitting.
+            </p>
+          )}
+        </div>
+        <DPRForm onSubmit={handleDprSubmit} prefill={voiceDraft ?? undefined} />
       </section>
 
       <section>

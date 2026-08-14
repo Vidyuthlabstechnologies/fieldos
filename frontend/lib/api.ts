@@ -114,6 +114,33 @@ export function createDprEntry(
   });
 }
 
+export type DPRVoiceDraft = {
+  transcript: string;
+  work_summary: string;
+  manpower_count: number;
+  weather: string | null;
+};
+
+// Multipart upload -- doesn't go through apiFetch, which always sets
+// Content-Type: application/json. The browser needs to set its own
+// multipart boundary here.
+export async function createDprVoiceDraft(projectId: string, audioBlob: Blob): Promise<DPRVoiceDraft> {
+  const form = new FormData();
+  form.append("audio", audioBlob, "recording.webm");
+
+  const token = getToken();
+  const res = await fetch(`${API_BASE_URL}/projects/${projectId}/dpr/voice-draft`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: form,
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`API error ${res.status}: ${body}`);
+  }
+  return res.json();
+}
+
 export function listIssues(projectId: string) {
   return apiFetch<Issue[]>(`/projects/${projectId}/issues`);
 }

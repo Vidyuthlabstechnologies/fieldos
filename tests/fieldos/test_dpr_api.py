@@ -1,3 +1,4 @@
+from fieldos import sarvam
 from tests.fieldos.conftest import build_client
 
 
@@ -70,6 +71,79 @@ def test_dpr_denies_non_project_member(db_session):
     response = stranger_client.post(
         f"/projects/{project['id']}/dpr",
         json={"entry_date": "2026-08-11", "work_summary": "Should fail", "manpower_count": 1},
+    )
+
+    assert response.status_code == 403
+
+
+def test_voice_draft_returns_503_when_sarvam_not_configured(db_session, monkeypatch):
+    monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "")
+    client = build_client(db_session, user_id="owner-1")
+    _, project = _create_company_and_project(client)
+
+    response = client.post(
+        f"/projects/{project['id']}/dpr/voice-draft",
+        files={"audio": ("recording.webm", b"fake audio bytes", "audio/webm")},
+    )
+
+    assert response.status_code == 503
+
+
+def test_voice_draft_returns_a_structured_draft_without_saving_anything(db_session, monkeypatch):
+    monkeypatch.setattr(sarvam, "transcribe_audio", lambda *a, **k: "poured column footings with 12 workers")
+    monkeypatch.setattr(
+        sarvam,
+        "structure_dpr_from_transcript",
+        lambda transcript: {"work_summary": "Poured column footings", "manpower_count": 12, "weather": None},
+    )
+    client = build_client(db_session, user_id="owner-1")
+    _, project = _create_company_and_project(client)
+
+    response = client.post(
+        f"/projects/{project['id']}/dpr/voice-draft",
+        files={"audio": ("recording.webm", b"fake audio bytes", "audio/webm")},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["work_summary"] == "Poured column footings"
+    assert body["manpower_count"] == 12
+    assert body["transcript"] == "poured column footings with 12 workers"
+
+    # Nothing was actually saved -- it's a draft.
+    entries = client.get(f"/projects/{project['id']}/dpr").json()
+    assert entries == []
+
+
+def test_voice_draft_returns_422_when_no_speech_detected(db_session, monkeypatch):
+    # Real Sarvam behavior: an empty transcript (silence/background noise)
+    # sent on to the chat completions endpoint gets rejected with a 400 from
+    # Sarvam -- surface a clear, actionable error instead of a bare 502.
+    monkeypatch.setattr(sarvam, "transcribe_audio", lambda *a, **k: "   ")
+    client = build_client(db_session, user_id="owner-1")
+    _, project = _create_company_and_project(client)
+
+    response = client.post(
+        f"/projects/{project['id']}/dpr/voice-draft",
+        files={"audio": ("recording.webm", b"fake audio bytes", "audio/webm")},
+    )
+
+    assert response.status_code == 422
+    assert "no speech" in response.json()["detail"].lower()
+
+
+def test_voice_draft_denies_non_project_member(db_session, monkeypatch):
+    monkeypatch.setattr(sarvam, "transcribe_audio", lambda *a, **k: "irrelevant")
+    monkeypatch.setattr(
+        sarvam, "structure_dpr_from_transcript", lambda t: {"work_summary": t, "manpower_count": 0, "weather": None}
+    )
+    owner_client = build_client(db_session, user_id="owner-1")
+    _, project = _create_company_and_project(owner_client)
+
+    stranger_client = build_client(db_session, user_id="stranger-1")
+    response = stranger_client.post(
+        f"/projects/{project['id']}/dpr/voice-draft",
+        files={"audio": ("recording.webm", b"fake audio bytes", "audio/webm")},
     )
 
     assert response.status_code == 403

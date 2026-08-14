@@ -140,6 +140,16 @@ class DPRPhotoOut(BaseModel):
     created_at: datetime
 
 
+class DPRVoiceDraft(BaseModel):
+    """A draft, not a saved DPREntry -- the engineer reviews/edits this
+    before it becomes a real record. See fieldos/sarvam.py."""
+
+    transcript: str
+    work_summary: str
+    manpower_count: int
+    weather: Optional[str] = None
+
+
 # Issues
 class IssueCreate(BaseModel):
     description: str

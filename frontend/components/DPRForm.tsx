@@ -1,13 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type DPRSubmission = { entry_date: string; work_summary: string; manpower_count: number };
+type DPRPrefill = { work_summary: string; manpower_count: number };
 
-export function DPRForm({ onSubmit }: { onSubmit: (data: DPRSubmission) => void }) {
+export function DPRForm({
+  onSubmit,
+  prefill,
+}: {
+  onSubmit: (data: DPRSubmission) => void;
+  prefill?: DPRPrefill;
+}) {
   const [entryDate, setEntryDate] = useState("");
   const [workSummary, setWorkSummary] = useState("");
   const [manpowerCount, setManpowerCount] = useState("0");
+
+  useEffect(() => {
+    if (prefill) {
+      setWorkSummary(prefill.work_summary);
+      setManpowerCount(String(prefill.manpower_count));
+    }
+  }, [prefill]);
 
   function handleSubmit() {
     onSubmit({
