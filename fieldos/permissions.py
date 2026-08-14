@@ -24,6 +24,20 @@ def require_company_role(db: Session, company_id: str, user_id: str, allowed: se
     return role
 
 
+def require_any_owner_role(db: Session, user_id: str) -> None:
+    """For installation-wide actions (e.g. settings) that aren't scoped to
+    one company_id -- requires owning at least one company on this install,
+    rather than any authenticated user (which would include a freshly
+    self-registered account with zero memberships)."""
+    is_owner_somewhere = (
+        db.query(CompanyMember)
+        .filter(CompanyMember.user_id == user_id, CompanyMember.role == ROLE_OWNER)
+        .first()
+    )
+    if not is_owner_somewhere:
+        raise HTTPException(status_code=403, detail="Must be a company owner to change this setting")
+
+
 def get_project_or_404(db: Session, project_id: str) -> Project:
     project = db.get(Project, project_id)
     if project is None:

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from fieldos.auth import CurrentUser, get_current_user
 from fieldos.db import get_db
 from fieldos.models import AppSetting
+from fieldos.permissions import require_any_owner_role
 from fieldos.sarvam import SETTING_KEY, get_effective_api_key
 from fieldos.schemas import SarvamKeyUpdate, SarvamStatusOut
 
@@ -15,6 +16,7 @@ def get_sarvam_status(
     current_user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # Read-only status check -- no role requirement, unlike the writes below.
     return SarvamStatusOut(configured=bool(get_effective_api_key(db)))
 
 
@@ -24,6 +26,7 @@ def set_sarvam_key(
     current_user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    require_any_owner_role(db, current_user.id)
     row = db.get(AppSetting, SETTING_KEY)
     if row is None:
         row = AppSetting(key=SETTING_KEY, value=body.api_key)
@@ -39,6 +42,7 @@ def clear_sarvam_key(
     current_user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    require_any_owner_role(db, current_user.id)
     row = db.get(AppSetting, SETTING_KEY)
     if row is not None:
         db.delete(row)

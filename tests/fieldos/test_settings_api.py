@@ -1,6 +1,14 @@
 from tests.fieldos.conftest import build_client
 
 
+def _make_owner_client(db_session, user_id="owner-1"):
+    """Writing to /settings/sarvam requires owning at least one company --
+    build a client for a user who actually does."""
+    client = build_client(db_session, user_id=user_id)
+    client.post("/companies", json={"name": "Test Co"})
+    return client
+
+
 def test_sarvam_status_is_not_configured_by_default(db_session, monkeypatch):
     from fieldos import sarvam
 
@@ -17,7 +25,7 @@ def test_set_sarvam_key_marks_it_configured(db_session, monkeypatch):
     from fieldos import sarvam
 
     monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "")
-    client = build_client(db_session, user_id="owner-1")
+    client = _make_owner_client(db_session)
 
     response = client.put("/settings/sarvam", json={"api_key": "sk_real_key_123"})
 
@@ -30,7 +38,7 @@ def test_set_sarvam_key_never_echoes_the_key_value(db_session, monkeypatch):
     from fieldos import sarvam
 
     monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "")
-    client = build_client(db_session, user_id="owner-1")
+    client = _make_owner_client(db_session)
 
     response = client.put("/settings/sarvam", json={"api_key": "sk_super_secret"})
 
@@ -42,7 +50,7 @@ def test_set_sarvam_key_can_be_updated(db_session, monkeypatch):
     from fieldos.models import AppSetting
 
     monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "")
-    client = build_client(db_session, user_id="owner-1")
+    client = _make_owner_client(db_session)
 
     client.put("/settings/sarvam", json={"api_key": "sk_first"})
     client.put("/settings/sarvam", json={"api_key": "sk_second"})
@@ -55,7 +63,7 @@ def test_clear_sarvam_key_removes_the_db_setting_but_env_fallback_still_applies(
     from fieldos import sarvam
 
     monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "env-fallback-key")
-    client = build_client(db_session, user_id="owner-1")
+    client = _make_owner_client(db_session)
     client.put("/settings/sarvam", json={"api_key": "sk_db_key"})
 
     response = client.delete("/settings/sarvam")
@@ -80,3 +88,47 @@ def test_sarvam_endpoints_require_authentication(db_session):
     response = client.get("/settings/sarvam")
 
     assert response.status_code == 401
+
+
+def test_set_sarvam_key_denies_a_user_who_owns_no_company(db_session):
+    # The vulnerability this guards against: a freshly self-registered user
+    # with zero company memberships must not be able to overwrite the one
+    # shared credential every company's voice-to-DPR feature reads from.
+    client = build_client(db_session, user_id="no-company-user")
+
+    response = client.put("/settings/sarvam", json={"api_key": "sk_attacker_key"})
+
+    assert response.status_code == 403
+
+
+def test_clear_sarvam_key_denies_a_user_who_owns_no_company(db_session):
+    client = build_client(db_session, user_id="no-company-user")
+
+    response = client.delete("/settings/sarvam")
+
+    assert response.status_code == 403
+
+
+def test_set_sarvam_key_denies_a_non_owner_company_member(db_session):
+    from fieldos.models import CompanyMember
+
+    owner_client = _make_owner_client(db_session, user_id="owner-1")
+    company_id = owner_client.get("/companies/mine").json()[0]["id"]
+    db_session.add(CompanyMember(company_id=company_id, user_id="site-eng-1", role="site_engineer"))
+    db_session.commit()
+
+    site_engineer_client = build_client(db_session, user_id="site-eng-1")
+    response = site_engineer_client.put("/settings/sarvam", json={"api_key": "sk_attacker_key"})
+
+    assert response.status_code == 403
+
+
+def test_get_sarvam_status_does_not_require_owner_role(db_session, monkeypatch):
+    from fieldos import sarvam
+
+    monkeypatch.setattr(sarvam.settings, "sarvam_api_key", "")
+    client = build_client(db_session, user_id="no-company-user")
+
+    response = client.get("/settings/sarvam")
+
+    assert response.status_code == 200
