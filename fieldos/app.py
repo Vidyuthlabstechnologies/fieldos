@@ -16,14 +16,22 @@ from fieldos.routers import (
 
 
 # The only legitimate callers of this loopback-bound API: the Tauri webview
-# (tauri://localhost on macOS/Linux, https://tauri.localhost on Windows --
-# WebView2 doesn't support custom URI schemes the same way) and the Next.js
-# dev server. A wildcard here would let ANY website open in the user's
-# browser call the unauthenticated /auth/register and /auth/login endpoints
-# cross-origin and read the response (username enumeration, credential
-# stuffing) -- loopback binding alone doesn't stop that without CORS scoping.
+# and the Next.js dev server. A wildcard here would let ANY website open in
+# the user's browser call the unauthenticated /auth/register and
+# /auth/login endpoints cross-origin and read the response (username
+# enumeration, credential stuffing) -- loopback binding alone doesn't stop
+# that without CORS scoping.
+#
+# tauri://localhost is macOS/Linux's custom-protocol origin. Windows/WebView2
+# serves the webview from tauri.localhost instead, and -- verified against
+# Tauri's own default HTTP-headers config, not assumed -- over plain HTTP,
+# not HTTPS (WebView2 had mixed-content issues with https://tauri.localhost
+# talking to a plain http:// loopback backend, so Tauri defaults it to http
+# on Windows: https://v2.tauri.app/security/http-headers/). Getting this
+# scheme wrong silently breaks every request from the real installed app.
 ALLOWED_ORIGINS = [
     "tauri://localhost",
+    "http://tauri.localhost",
     "https://tauri.localhost",
     "http://localhost:3000",
 ]
