@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 import { createEstimation, listEstimations, type Estimation } from "@/lib/api";
 
-export default function EstimationsPage({ params }: { params: { id: string } }) {
-  const projectId = params.id;
+export default function EstimationsPage({ params }: { params: Promise<{ id: string }> }) {
+  const projectId = use(params).id;
   const [estimations, setEstimations] = useState<Estimation[]>([]);
   const [newName, setNewName] = useState("");
   const [newProfitPercent, setNewProfitPercent] = useState("");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 import { DashboardWidget } from "@/components/DashboardWidget";
 import { DPRForm } from "@/components/DPRForm";
@@ -18,8 +18,8 @@ import {
   type Task,
 } from "@/lib/api";
 
-export default function ProjectDetailPage({ params }: { params: { id: string } }) {
-  const projectId = params.id;
+export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const projectId = use(params).id;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 import { BOQTable } from "@/components/BOQTable";
 import { CostHeadForm } from "@/components/CostHeadForm";
@@ -19,9 +19,9 @@ import {
 export default function EstimationDetailPage({
   params,
 }: {
-  params: { id: string; estimationId: string };
+  params: Promise<{ id: string; estimationId: string }>;
 }) {
-  const { estimationId } = params;
+  const { estimationId } = use(params);
   const [costHeads, setCostHeads] = useState<CostHead[]>([]);
   const [boq, setBoq] = useState<BOQ | null>(null);
 
