@@ -4,6 +4,10 @@
 advanced_kb/
 *_pages.json
 
+# Standalone construction-codes RAG tool (kb_search_api.py's dependency) --
+# heavy (chromadb/torch/cross-encoder), unrelated to FieldOS, local-only
+advanced_kb.py
+
 # Real client project/financial data (BOQ estimates, rates) — local only
 resources/
 
