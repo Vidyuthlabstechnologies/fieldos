@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from fieldos.auth import CurrentUser, create_session, get_current_user, hash_password, verify_password
@@ -17,7 +18,17 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
 
     user = User(username=body.username, name=body.name, password_hash=hash_password(body.password))
     db.add(user)
-    db.flush()
+    try:
+        db.flush()
+    except IntegrityError:
+        # Two requests can both pass the existence check above before either
+        # commits (confirmed under real concurrent load: 10 simultaneous
+        # registrations of the same username produced 9 raw 500s here
+        # before this fix). The UNIQUE constraint is the real guard; this
+        # just turns its failure into the same clean 409 the check above
+        # already returns for the non-racing case.
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Username already taken")
     token = create_session(db, user.id)
     return SessionOut(token=token, user=UserOut.model_validate(user))
 

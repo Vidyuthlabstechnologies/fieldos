@@ -205,8 +205,14 @@ class CostHeadCreate(BaseModel):
     calculation_type: str
     raw_unit: str
     billing_unit: str
-    conversion_factor: Decimal = Decimal("1")
-    rate_per_unit: Optional[Decimal] = None
+    # max_digits/decimal_places mirror the Numeric(precision, scale) columns
+    # in fieldos/models.py exactly -- without this, a value the DB layer
+    # would silently truncate/accept (SQLite doesn't enforce NUMERIC
+    # precision) can instead blow up decimal.Decimal.quantize() far
+    # downstream in BOQ calculation with an unhandled InvalidOperation (500).
+    # Reject it here at the API boundary instead, with a clean 422.
+    conversion_factor: Decimal = Field(default=Decimal("1"), max_digits=18, decimal_places=10)
+    rate_per_unit: Optional[Decimal] = Field(default=None, max_digits=14, decimal_places=2)
 
 
 class CostHeadOut(BaseModel):
@@ -224,10 +230,12 @@ class CostHeadOut(BaseModel):
 
 class MeasurementEntryCreate(BaseModel):
     description: str
-    length: Optional[Decimal] = None
-    width: Optional[Decimal] = None
-    depth: Optional[Decimal] = None
-    nos: Decimal = Decimal("1")
+    # Bounds mirror Numeric(14, 6) on MeasurementEntry -- see the comment on
+    # CostHeadCreate.conversion_factor for why this matters.
+    length: Optional[Decimal] = Field(default=None, max_digits=14, decimal_places=6)
+    width: Optional[Decimal] = Field(default=None, max_digits=14, decimal_places=6)
+    depth: Optional[Decimal] = Field(default=None, max_digits=14, decimal_places=6)
+    nos: Decimal = Field(default=Decimal("1"), max_digits=14, decimal_places=6)
     is_deduction: bool = False
 
 
@@ -245,9 +253,10 @@ class MeasurementEntryOut(BaseModel):
 
 class SteelEntryCreate(BaseModel):
     description: str
-    bar_dia_mm: Decimal
-    nos: Decimal
-    length_ft: Decimal
+    # Bounds mirror Numeric(6, 2) / Numeric(14, 6) on SteelEntry.
+    bar_dia_mm: Decimal = Field(max_digits=6, decimal_places=2)
+    nos: Decimal = Field(max_digits=14, decimal_places=6)
+    length_ft: Decimal = Field(max_digits=14, decimal_places=6)
 
 
 class SteelEntryOut(BaseModel):

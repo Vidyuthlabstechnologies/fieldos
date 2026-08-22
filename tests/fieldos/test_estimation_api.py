@@ -121,6 +121,29 @@ def test_steel_entry_rejected_for_non_steel_cost_head(db_session):
     assert response.status_code == 422
 
 
+def test_measurement_entry_rejects_magnitude_beyond_the_db_column(db_session):
+    """Regression test for a real bug found under stress testing: the DB
+    columns are Numeric(14, 6), but SQLite doesn't enforce NUMERIC
+    precision/scale -- an absurd value used to sail through creation and
+    only blow up later, deep in BOQ calculation, as an unhandled
+    decimal.InvalidOperation (500) when quantize() ran out of precision.
+    Now rejected at creation with a clean 422 instead."""
+    client = build_client(db_session, user_id="owner-1")
+    _, project = _create_company_and_project(client)
+    estimation = client.post(f"/projects/{project['id']}/estimations", json={"name": "Est 1"}).json()
+    cost_head = client.post(
+        f"/estimations/{estimation['id']}/cost-heads",
+        json={"name": "Bulk concrete", "calculation_type": "volume", "raw_unit": "cu.m", "billing_unit": "cu.m"},
+    ).json()
+
+    response = client.post(
+        f"/cost-heads/{cost_head['id']}/measurement-entries",
+        json={"description": "absurd", "length": "999999999", "width": "1", "depth": "1", "nos": "1"},
+    )
+
+    assert response.status_code == 422
+
+
 def test_boq_computes_real_narapally_wall_quantity_and_amount(db_session):
     # Grounded in the real NARAPALLY MASONRY ESTIMATION.xlsx BOQ sheet:
     # Wall(9") L=108.25 W=0.75 D=8.85 Nos=1 -> 718.509375 CFT.

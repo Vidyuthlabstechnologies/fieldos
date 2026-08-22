@@ -42,6 +42,38 @@ def test_register_rejects_duplicate_username(db_session):
     assert response.status_code == 409
 
 
+def test_register_race_loser_gets_409_not_500(db_session, monkeypatch):
+    """Regression test for a real bug found under concurrent load: two
+    requests can both pass the existence check before either commits (10
+    simultaneous registrations of the same username produced 1x 201 + 9x
+    raw 500s before this fix -- see fieldos/routers/auth.py's IntegrityError
+    handling). Simulates "lost the race" deterministically, without real
+    threading, by inserting the colliding row between the check and the
+    flush -- the exact interleaving a real race produces."""
+    import fieldos.routers.auth as auth_router
+    from fieldos.auth import hash_password
+    from fieldos.models import User
+
+    client = build_real_auth_client(db_session)
+    real_flush = db_session.flush
+
+    def flush_after_inserting_the_racing_winner(*args, **kwargs):
+        # A concurrent request "wins" and commits first, right before this
+        # request's own flush -- the check-then-insert race window.
+        db_session.add(User(username="race-target", name="Winner", password_hash=hash_password("password123")))
+        db_session.flush = real_flush
+        return real_flush(*args, **kwargs)
+
+    monkeypatch.setattr(db_session, "flush", flush_after_inserting_the_racing_winner)
+
+    response = client.post(
+        "/auth/register", json={"username": "race-target", "name": "Loser", "password": "password123"}
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Username already taken"
+
+
 def test_register_rejects_short_password(db_session):
     client = build_real_auth_client(db_session)
 
