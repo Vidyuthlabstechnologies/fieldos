@@ -2,7 +2,7 @@ from dataclasses import asdict
 from decimal import ROUND_HALF_UP, Decimal
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from fieldos.auth import CurrentUser, get_current_user
 from fieldos.db import get_db
@@ -207,17 +207,18 @@ def get_boq(
         db.query(CostHead)
         .filter(CostHead.estimation_id == estimation_id)
         .order_by(CostHead.sort_order)
+        .options(selectinload(CostHead.measurement_entries), selectinload(CostHead.steel_entries))
         .all()
     )
 
-    cost_heads_with_entries = []
+    cost_heads_with_entries: list[
+        tuple[CostHead, list[MeasurementEntry], list[SteelEntry]]
+    ] = []
     for cost_head in cost_heads:
         if cost_head.calculation_type == CALC_STEEL_WEIGHT:
-            steel_entries = db.query(SteelEntry).filter(SteelEntry.cost_head_id == cost_head.id).all()
-            cost_heads_with_entries.append((cost_head, [], steel_entries))
+            cost_heads_with_entries.append((cost_head, [], list(cost_head.steel_entries)))
         else:
-            entries = db.query(MeasurementEntry).filter(MeasurementEntry.cost_head_id == cost_head.id).all()
-            cost_heads_with_entries.append((cost_head, entries, []))
+            cost_heads_with_entries.append((cost_head, list(cost_head.measurement_entries), []))
 
     result = build_boq(cost_heads_with_entries, contractor_profit_percent=estimation.contractor_profit_percent)
 

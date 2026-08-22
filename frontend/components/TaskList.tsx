@@ -14,7 +14,11 @@ export function TaskList({
       {tasks.map((task) => (
         <li key={task.id} className="flex items-center justify-between rounded border border-slate-200 p-2">
           <span>{task.title}</span>
+          <label className="sr-only" htmlFor={`status-${task.id}`}>
+            Status for {task.title}
+          </label>
           <select
+            id={`status-${task.id}`}
             value={task.status}
             onChange={(e) => onStatusChange(task.id, e.target.value as Task["status"])}
             className="rounded border border-slate-300 p-1 text-sm"

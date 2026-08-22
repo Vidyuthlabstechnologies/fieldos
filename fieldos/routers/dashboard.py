@@ -1,6 +1,7 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from fieldos.auth import CurrentUser, get_current_user
@@ -33,17 +34,21 @@ def get_dashboard(
 ):
     require_project_access(db, project_id, current_user.id)
 
-    tasks = db.query(Task).filter(Task.project_id == project_id).all()
-    total_tasks = len(tasks)
-    done_tasks = len([t for t in tasks if t.status == "done"])
+    total_tasks = db.query(func.count(Task.id)).filter(Task.project_id == project_id).scalar() or 0
+    done_tasks = (
+        db.query(func.count(Task.id))
+        .filter(Task.project_id == project_id, Task.status == "done")
+        .scalar()
+        or 0
+    )
     percent_complete = round((done_tasks / total_tasks) * 100, 1) if total_tasks else 0.0
 
-    entries = (
-        db.query(DPREntry)
+    entry_dates = (
+        db.query(DPREntry.entry_date)
         .filter(DPREntry.project_id == project_id, DPREntry.status == "confirmed")
         .all()
     )
-    dpr_streak = _consecutive_day_streak([e.entry_date for e in entries])
+    dpr_streak = _consecutive_day_streak([e[0] for e in entry_dates])
 
     open_issues = (
         db.query(Issue).filter(Issue.project_id == project_id, Issue.status == "open").count()

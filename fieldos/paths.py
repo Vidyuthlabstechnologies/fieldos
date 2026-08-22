@@ -22,3 +22,9 @@ def app_data_dir() -> Path:
 
 def database_path() -> Path:
     return app_data_dir() / "fieldos.db"
+
+
+def uploads_dir() -> Path:
+    path = app_data_dir() / "uploads"
+    path.mkdir(parents=True, exist_ok=True)
+    return path

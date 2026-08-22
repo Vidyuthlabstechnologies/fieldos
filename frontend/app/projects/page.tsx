@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 import { ProjectCard } from "@/components/ProjectCard";
 import { createCompany, importProject, listMyCompanies, listProjects, type Company, type Project } from "@/lib/api";
@@ -89,9 +90,9 @@ export default function ProjectsPage() {
 
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">Projects</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <input
             ref={importInputRef}
             type="file"
@@ -110,16 +111,16 @@ export default function ProjectsPage() {
           >
             {importing ? "Importing..." : "Import project"}
           </button>
-          <a href="/projects/new" className="rounded bg-slate-900 px-4 py-2 text-white">
+          <Link href="/projects/new" className="rounded bg-slate-900 px-4 py-2 text-white">
             New project
-          </a>
-          <a
+          </Link>
+          <Link
             href="/settings"
             className="rounded border border-slate-300 px-4 py-2 text-sm"
             aria-label="Settings"
           >
             Settings
-          </a>
+          </Link>
         </div>
       </div>
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}

@@ -41,7 +41,7 @@ def build_client(db_session, user_id="test-user-1"):
         yield db_session
 
     def override_get_current_user():
-        return CurrentUser(id=user_id, email=f"{user_id}@example.com", phone=None)
+        return CurrentUser(id=user_id, username=user_id)
 
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_current_user] = override_get_current_user

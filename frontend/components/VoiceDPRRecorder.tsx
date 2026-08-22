@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { createDprVoiceDraft, type DPRVoiceDraft } from "@/lib/api";
 
@@ -14,26 +14,47 @@ export function VoiceDPRRecorder({
   const [state, setState] = useState<"idle" | "recording" | "transcribing" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const unmountedRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      unmountedRef.current = true;
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+      }
+    };
+  }, []);
 
   async function startRecording() {
     setError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
       const recorder = new MediaRecorder(stream);
       chunksRef.current = [];
       recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
       recorder.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        if (unmountedRef.current) return;
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         setState("transcribing");
         try {
           const draft = await createDprVoiceDraft(projectId, blob);
-          onDraft(draft);
-          setState("idle");
+          if (!unmountedRef.current) {
+            onDraft(draft);
+            setState("idle");
+          }
         } catch (err) {
-          setError(err instanceof Error ? err.message : "Transcription failed");
-          setState("error");
+          if (!unmountedRef.current) {
+            setError(err instanceof Error ? err.message : "Transcription failed");
+            setState("error");
+          }
         }
       };
       mediaRecorderRef.current = recorder;

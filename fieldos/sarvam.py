@@ -54,7 +54,11 @@ def transcribe_audio(audio_bytes: bytes, filename: str, api_key: str, language_c
         timeout=120.0,
     )
     resp.raise_for_status()
-    return resp.json()["transcript"]
+    data = resp.json()
+    transcript = data.get("transcript")
+    if not transcript:
+        raise ValueError("Sarvam STT response missing 'transcript' field")
+    return transcript
 
 
 def structure_dpr_from_transcript(transcript: str, api_key: str) -> dict:
@@ -78,7 +82,11 @@ def structure_dpr_from_transcript(transcript: str, api_key: str) -> dict:
         timeout=60.0,
     )
     resp.raise_for_status()
-    content = resp.json()["choices"][0]["message"].get("content")
+    data = resp.json()
+    choices = data.get("choices") or []
+    if not choices:
+        return {"work_summary": transcript, "manpower_count": 0, "weather": None}
+    content = choices[0].get("message", {}).get("content")
     if not content:
         # Truncated before producing an answer, or some other malformed
         # response -- never lose the engineer's report over it.

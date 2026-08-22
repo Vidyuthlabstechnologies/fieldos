@@ -1,13 +1,10 @@
-type Project = {
-  id: string;
-  name: string;
-  client_name?: string | null;
-  status: string;
-};
+import Link from "next/link";
+
+import type { Project } from "@/lib/api";
 
 export function ProjectCard({ project }: { project: Project }) {
   return (
-    <a
+    <Link
       href={`/project?id=${project.id}`}
       className="block rounded-lg border border-slate-200 p-4 hover:border-slate-400"
     >
@@ -16,6 +13,6 @@ export function ProjectCard({ project }: { project: Project }) {
       <span className="mt-2 inline-block rounded bg-slate-100 px-2 py-0.5 text-xs uppercase text-slate-600">
         {project.status}
       </span>
-    </a>
+    </Link>
   );
 }

@@ -1,0 +1,311 @@
+# AGENTS.md - AI Agent Instructions for FieldOS
+
+## Project Context
+
+FieldOS is a fully offline construction site management platform (desktop
++ mobile, no server/cloud for the core product — see `docs/DEPLOYMENT.md`
+before assuming otherwise) with:
+- **Backend**: FastAPI (Python 3.12), SQLAlchemy 2.0, SQLite only. Packaged
+  via PyInstaller as a sidecar process inside a Tauri desktop shell.
+- **Frontend**: Next.js 16 (App Router, static export), React, TypeScript,
+  Tailwind CSS
+- **Mobile**: Flutter, native, fully offline with its own local database —
+  see `fieldos_mobile/` and `docs/MOBILE_GUIDE.md`. An earlier Capacitor
+  wrapper (`frontend/android/`) is deprecated; don't build on it.
+- **Real-time**: WebSocket per-project rooms (desktop app only; the Flutter
+  mobile app has no connection to the backend at all yet)
+- **Voice AI**: Sarvam AI for Indic language voice DPR — the one feature
+  that needs internet, on both desktop and mobile
+
+## Code Style Rules
+
+### Python (Backend)
+- Type hints **required** on all functions
+- SQLAlchemy 2.0: `Mapped`, `mapped_column`
+- Decimal for money/quantities (never float)
+- Pydantic v2 schemas with `ConfigDict(from_attributes=True)`
+- Async/await for I/O (FastAPI native)
+
+### TypeScript (Frontend)
+- Strict mode enabled
+- Functional components + hooks
+- "use client" for interactive pages
+- Tailwind CSS utility-first
+- Mobile-first responsive (`sm:`, `lg:`)
+
+### General
+- No comments that just restate what the code does. But this codebase
+  consistently uses short comments to record the WHY behind a non-obvious
+  decision -- a hidden constraint, a past incident, a security rationale
+  (see `fieldos/app.py`'s CORS allowlist comment, `fieldos/permissions.py`'s
+  `require_any_owner_role` docstring, `importers/narapally_boq.py`'s
+  reconciliation comments). Match that: skip comments that narrate, keep
+  ones that explain why a future reader would otherwise get it wrong.
+- Concise, direct code
+- Follow existing patterns in codebase
+
+## Common Patterns
+
+### Adding a New Backend Router
+
+```python
+# 1. Create fieldos/routers/new_feature.py
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from fieldos.auth import CurrentUser, get_current_user
+from fieldos.db import get_db
+from fieldos.permissions import require_project_access
+from fieldos.schemas import NewFeatureCreate, NewFeatureOut
+
+router = APIRouter(tags=["new_feature"])
+
+@router.post("/projects/{project_id}/new-feature", response_model=NewFeatureOut)
+def create_new_feature(
+    project_id: str,
+    body: NewFeatureCreate,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    require_project_access(db, project_id, current_user.id)
+    # implementation
+```
+
+```python
+# 2. Register in fieldos/app.py
+from fieldos.routers import new_feature
+app.include_router(new_feature.router)
+```
+
+### Adding a New Frontend Page
+
+```tsx
+// app/project/new-page/page.tsx
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Sidebar } from "@/components/Sidebar";
+import { apiFunction } from "@/lib/api";
+
+function NewPage({ projectId }: { projectId: string }) {
+  // State, effects, handlers
+  return (
+    <div className="flex min-h-screen">
+      <Sidebar />
+      <main className="ml-56 flex-1 p-6">
+        {/* Content */}
+      </main>
+    </div>
+  );
+}
+
+function NewPageGate() {
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("id");
+  if (!projectId) return <main>No project selected.</main>;
+  return <NewPage projectId={projectId} />;
+}
+
+export default function NewPageRoute() {
+  return (
+    <Suspense fallback={<main>Loading...</main>}>
+      <NewPageGate />
+    </Suspense>
+  );
+}
+```
+
+```tsx
+// Add to components/Sidebar.tsx
+const PROJECT_LINKS = [
+  // ...
+  { href: "/project/new-page", label: "New Page", icon: "🔧" },
+];
+```
+
+### API Client Pattern
+
+```typescript
+// lib/api.ts
+export type NewFeature = { id: string; name: string; ... };
+
+export function createNewFeature(projectId: string, data: NewFeatureCreate) {
+  return apiFetch<NewFeature>(`/projects/${projectId}/new-feature`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+// For multipart uploads
+export async function uploadNewFeaturePhoto(projectId: string, file: File) {
+  const form = new FormData();
+  form.append("file", file);
+  const token = getToken();
+  const res = await fetch(`${API_BASE_URL}/projects/${projectId}/new-feature/photos`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: form,
+  });
+  if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+  return res.json();
+}
+```
+
+### Real-time WebSocket
+
+```typescript
+// lib/realtime.ts - useProjectWebSocket hook
+const { connected, send } = useProjectWebSocket(projectId, {
+  task_update: (msg) => refreshTasks(),
+  material_update: (msg) => refreshMaterials(),
+  "*": (msg) => console.log("WS:", msg),
+});
+
+// Backend broadcast (in routers)
+await manager.broadcast(project_id, {
+  "type": "task_update",
+  "payload": task_data,
+}, exclude_user=actor_id);
+```
+
+## Database Conventions
+
+### Models
+```python
+class NewModel(Base):
+    __tablename__ = "new_models"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
+    project_id: Mapped[str] = mapped_column(String(36), ForeignKey("projects.id"), index=True)
+    name: Mapped[str] = mapped_column(String(200))
+    amount: Mapped[Decimal] = mapped_column(Numeric(14, 2))  # Money
+    quantity: Mapped[Decimal] = mapped_column(Numeric(14, 3))  # Quantity
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+```
+
+### Schemas
+```python
+class NewModelCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    amount: Decimal
+    quantity: Decimal
+
+class NewModelOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    name: str
+    amount: Decimal
+    quantity: Decimal
+    created_at: datetime
+```
+
+## Testing Requirements
+
+### Backend
+```bash
+# Run all
+pytest
+
+# With coverage
+pytest --cov=fieldos
+```
+
+### Frontend
+```bash
+# Typecheck
+npx tsc --noEmit
+
+# Build
+npm run build
+```
+
+## Documentation Updates
+
+When adding features, update:
+1. `docs/API_REFERENCE.md` - New endpoints
+2. `docs/DATABASE_SCHEMA.md` - New tables/columns
+3. `docs/FRONTEND_ARCHITECTURE.md` - New patterns
+4. `docs/MOBILE_GUIDE.md` - Mobile considerations
+
+## Forbidden Patterns
+
+- ❌ Float for money/quantities
+- ❌ JWT tokens (use sessions)
+- ❌ Global mutable state
+- ❌ Raw SQL (use SQLAlchemy ORM)
+- ❌ `any` type in TypeScript
+- ❌ Missing error handling
+- ❌ Hardcoded URLs (use `API_BASE_URL`)
+
+## Required Checks Before Commit
+
+```bash
+# Backend
+ruff check .
+ruff format .
+mypy fieldos
+pytest
+
+# Frontend
+cd frontend
+npm run lint
+npm run build
+```
+
+## File Structure Reference
+
+```
+fieldos/
+├── fieldos/                 # Backend
+│   ├── routers/            # API endpoints
+│   ├── models.py           # SQLAlchemy models
+│   ├── schemas.py          # Pydantic schemas
+│   ├── auth.py             # Authentication
+│   ├── permissions.py      # RBAC
+│   ├── estimation_calc.py  # BOQ engine
+│   ├── sarvam.py           # Voice AI
+│   └── app.py              # App factory
+├── frontend/               # Frontend
+│   ├── app/                # Next.js App Router
+│   │   └── project/        # Project-scoped pages
+│   ├── components/         # Reusable UI
+│   ├── lib/                # API, auth, pdf, realtime
+│   ├── public/             # PWA assets
+│   └── android/            # Capacitor Android (deprecated -- see frontend/MOBILE.md)
+├── fieldos_mobile/         # Native Flutter mobile app (canonical mobile strategy)
+├── src-tauri/              # Desktop shell (Rust/Tauri) -- packages the installer
+└── docs/                   # Documentation
+```
+
+## Environment Variables
+
+```bash
+# Backend .env (all optional -- sane defaults exist for local/offline use)
+DATABASE_URL=sqlite:///./fieldos_dev.db   # dev default; packaged app uses fieldos/paths.py instead
+SARVAM_API_KEY=sk_xxx                     # optional -- only voice-to-DPR needs this
+STRIPE_SECRET_KEY=sk_live_xxx             # optional -- billing isn't wired to any UI yet
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+
+# Frontend .env.local
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+```
+Note the frontend env var is `NEXT_PUBLIC_API_BASE_URL`, not
+`NEXT_PUBLIC_API_URL` -- every file in `frontend/lib/` reads that exact
+name; a typo'd variant here silently falls back to a wrong default.
+
+## Quick Commands
+
+```bash
+# Backend (from repo root; api.py is the dev entrypoint)
+.venv\Scripts\python.exe -m uvicorn api:app --reload
+
+# Frontend
+cd frontend && npm run dev
+
+# Mobile (Flutter)
+cd fieldos_mobile && flutter run
+
+# Tests
+.venv\Scripts\python.exe -m pytest tests/   # Backend (pytest) -- use the repo's .venv, not a bare `python`
+cd frontend && npm test -- --run            # Frontend (vitest)
+```

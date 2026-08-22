@@ -9,7 +9,7 @@ for a single local install, and a DB-backed token is trivial to revoke.
 
 import hashlib
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import bcrypt
 from fastapi import Depends, Header, HTTPException
@@ -41,7 +41,7 @@ def create_session(db: DBSession, user_id: str) -> str:
         SessionModel(
             token=token,
             user_id=user_id,
-            expires_at=datetime.utcnow() + timedelta(days=SESSION_TTL_DAYS),
+            expires_at=(datetime.now(timezone.utc) + timedelta(days=SESSION_TTL_DAYS)).replace(tzinfo=None),
         )
     )
     db.commit()
@@ -49,20 +49,19 @@ def create_session(db: DBSession, user_id: str) -> str:
 
 
 class CurrentUser:
-    def __init__(self, id: str, email: str | None, phone: str | None):
+    def __init__(self, id: str, username: str):
         self.id = id
-        self.email = email
-        self.phone = phone
+        self.username = username
 
 
 def verify_token(token: str, db: DBSession) -> CurrentUser:
     session = db.get(SessionModel, token)
-    if session is None or session.expires_at < datetime.utcnow():
+    if session is None or session.expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
         raise HTTPException(status_code=401, detail="Invalid or expired session")
     user = db.get(User, session.user_id)
     if user is None:
         raise HTTPException(status_code=401, detail="Invalid or expired session")
-    return CurrentUser(id=user.id, email=user.username, phone=None)
+    return CurrentUser(id=user.id, username=user.username)
 
 
 def get_current_user(

@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -13,8 +13,8 @@ class RegisterRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    username: str
-    password: str
+    username: str = Field(min_length=1, max_length=100)
+    password: str = Field(min_length=1, max_length=200)
 
 
 class UserOut(BaseModel):
@@ -31,7 +31,7 @@ class SessionOut(BaseModel):
 
 # Companies
 class CompanyCreate(BaseModel):
-    name: str
+    name: str = Field(min_length=1, max_length=200)
 
 
 class CompanyOut(BaseModel):
@@ -70,7 +70,7 @@ class ProjectOut(BaseModel):
 
 class ProjectMemberAdd(BaseModel):
     user_id: str
-    role: str
+    role: Literal["owner", "project_manager", "site_engineer"]
 
 
 class ProjectMemberOut(BaseModel):
@@ -89,7 +89,7 @@ class TaskCreate(BaseModel):
 
 
 class TaskStatusUpdate(BaseModel):
-    status: str
+    status: Literal["todo", "in_progress", "done", "blocked"]
 
 
 class TaskOut(BaseModel):
@@ -153,7 +153,7 @@ class DPRVoiceDraft(BaseModel):
 # Issues
 class IssueCreate(BaseModel):
     description: str
-    severity: str = "medium"
+    severity: Literal["low", "medium", "high", "critical"] = "medium"
     dpr_entry_id: Optional[str] = None
 
 
@@ -278,6 +278,102 @@ class BOQOut(BaseModel):
     grand_total: Decimal
 
 
+# Material tracking
+MATERIAL_CATEGORY = Literal[
+    "cement", "sand", "aggregate", "steel", "brick", "timber",
+    "pipe", "electrical", "plumbing", "paint", "other",
+]
+
+
+class MaterialEntryCreate(BaseModel):
+    entry_date: date
+    item_name: str = Field(min_length=1, max_length=200)
+    category: MATERIAL_CATEGORY = "other"
+    quantity: Decimal
+    unit: str = Field(min_length=1, max_length=20)
+    supplier: Optional[str] = None
+    cost: Optional[Decimal] = None
+    notes: Optional[str] = None
+
+
+class MaterialEntryOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    entry_date: date
+    item_name: str
+    category: str
+    quantity: Decimal
+    unit: str
+    supplier: Optional[str]
+    cost: Optional[Decimal]
+    notes: Optional[str]
+    created_by: str
+    created_at: datetime
+    photos: list["MaterialPhotoOut"] = []
+
+
+class MaterialPhotoCreate(BaseModel):
+    photo_url: str
+    caption: Optional[str] = None
+
+
+class MaterialPhotoOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    material_entry_id: str
+    photo_url: str
+    caption: Optional[str]
+    created_at: datetime
+
+
+# Labour / workforce tracking
+WORKER_STATUS = Literal["active", "inactive"]
+ATTENDANCE_STATUS = Literal["present", "absent", "half_day"]
+
+
+class WorkerCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    role: str = Field(min_length=1, max_length=100)
+    phone: Optional[str] = None
+    daily_wage: Optional[Decimal] = None
+
+
+class WorkerOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    name: str
+    role: str
+    phone: Optional[str]
+    daily_wage: Optional[Decimal]
+    status: str
+    created_at: datetime
+
+
+class AttendanceCreate(BaseModel):
+    worker_id: str
+    attendance_date: date
+    status: ATTENDANCE_STATUS = "present"
+    notes: Optional[str] = None
+
+
+class AttendanceOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    worker_id: str
+    attendance_date: date
+    status: str
+    notes: Optional[str]
+    created_at: datetime
+
+
+class AttendanceBulkCreate(BaseModel):
+    """Mark attendance for multiple workers on a single date."""
+    attendance_date: date
+    entries: list[AttendanceCreate]
+
+
 # Project export/import -- for moving one project's full data between two
 # separate local installs (e.g. site laptop -> office laptop). User accounts
 # and company membership are NOT part of this: the receiving machine has its
@@ -379,3 +475,320 @@ class SarvamKeyUpdate(BaseModel):
 
 class SarvamStatusOut(BaseModel):
     configured: bool
+
+
+# Document Management
+DOC_CATEGORY = Literal[
+    "drawing", "specification", "contract", "permit", "report",
+    "photo", "correspondence", "safety", "other",
+]
+
+
+class DocumentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    name: str
+    category: str
+    version: int
+    file_path: str
+    file_size: Optional[int]
+    mime_type: Optional[str]
+    notes: Optional[str]
+    uploaded_by: str
+    created_at: datetime
+
+
+# Procurement
+class VendorCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    contact_person: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    gst_number: Optional[str] = None
+    category: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class VendorOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    company_id: str
+    name: str
+    contact_person: Optional[str]
+    phone: Optional[str]
+    email: Optional[str]
+    address: Optional[str]
+    gst_number: Optional[str]
+    category: Optional[str]
+    notes: Optional[str]
+    created_at: datetime
+
+
+class PurchaseRequisitionCreate(BaseModel):
+    item_name: str = Field(min_length=1, max_length=200)
+    quantity: Decimal
+    unit: str = Field(min_length=1, max_length=20)
+    estimated_cost: Optional[Decimal] = None
+    urgency: Literal["low", "normal", "high", "critical"] = "normal"
+    notes: Optional[str] = None
+
+
+class PurchaseRequisitionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    item_name: str
+    quantity: Decimal
+    unit: str
+    estimated_cost: Optional[Decimal]
+    urgency: str
+    status: str
+    requested_by: str
+    approved_by: Optional[str]
+    approved_at: Optional[datetime]
+    notes: Optional[str]
+    created_at: datetime
+
+
+class RFQCreate(BaseModel):
+    requisition_id: Optional[str] = None
+    title: str = Field(min_length=1, max_length=200)
+    deadline: Optional[date] = None
+    vendor_ids: list[str] = []
+
+
+class RFQOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    requisition_id: Optional[str]
+    title: str
+    deadline: Optional[date]
+    status: str
+    created_by: str
+    created_at: datetime
+
+
+class QuoteCreate(BaseModel):
+    vendor_id: str
+    total_amount: Decimal
+    delivery_days: Optional[int] = None
+    payment_terms: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class QuoteOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    rfq_id: str
+    vendor_id: str
+    total_amount: Decimal
+    delivery_days: Optional[int]
+    payment_terms: Optional[str]
+    notes: Optional[str]
+    status: str
+    created_at: datetime
+
+
+class PurchaseOrderCreate(BaseModel):
+    quote_id: Optional[str] = None
+    vendor_id: str
+    po_number: str = Field(min_length=1, max_length=50)
+    total_amount: Decimal
+    delivery_date: Optional[date] = None
+    notes: Optional[str] = None
+
+
+class PurchaseOrderOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    quote_id: Optional[str]
+    vendor_id: str
+    po_number: str
+    total_amount: Decimal
+    delivery_date: Optional[date]
+    status: str
+    notes: Optional[str]
+    created_by: str
+    created_at: datetime
+
+
+class GRNCreate(BaseModel):
+    received_date: date
+    item_description: str = Field(min_length=1, max_length=300)
+    ordered_qty: Decimal
+    received_qty: Decimal
+    unit: str = Field(min_length=1, max_length=20)
+    condition: Literal["good", "damaged", "partial"] = "good"
+    notes: Optional[str] = None
+
+
+class GRNOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    purchase_order_id: str
+    received_date: date
+    item_description: str
+    ordered_qty: Decimal
+    received_qty: Decimal
+    unit: str
+    condition: str
+    received_by: str
+    notes: Optional[str]
+    created_at: datetime
+
+
+# Equipment & Machinery
+EQUIPMENT_STATUS = Literal["available", "in_use", "maintenance", "breakdown"]
+
+
+class EquipmentCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    equipment_type: str = Field(min_length=1, max_length=100)
+    model: Optional[str] = None
+    registration_number: Optional[str] = None
+    daily_rate: Optional[Decimal] = None
+    notes: Optional[str] = None
+
+
+class EquipmentUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=200)
+    equipment_type: Optional[str] = Field(None, min_length=1, max_length=100)
+    model: Optional[str] = None
+    registration_number: Optional[str] = None
+    status: Optional[EQUIPMENT_STATUS] = None
+    daily_rate: Optional[Decimal] = None
+    notes: Optional[str] = None
+
+
+class EquipmentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    name: str
+    equipment_type: str
+    model: Optional[str]
+    registration_number: Optional[str]
+    status: str
+    daily_rate: Optional[Decimal]
+    notes: Optional[str]
+    created_at: datetime
+
+
+class EquipmentLogCreate(BaseModel):
+    log_date: date
+    log_type: Literal["usage", "maintenance", "repair", "fuel", "inspection"]
+    hours_used: Optional[Decimal] = None
+    description: Optional[str] = None
+    cost: Optional[Decimal] = None
+
+
+class EquipmentLogOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    equipment_id: str
+    log_date: date
+    log_type: str
+    hours_used: Optional[Decimal]
+    description: Optional[str]
+    cost: Optional[Decimal]
+    created_by: str
+    created_at: datetime
+
+
+# Site Inspection / Quality
+class InspectionCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+    inspection_type: Literal["safety", "quality", "environmental", "progress", "fire", "electrical", "other"] = "quality"
+    scheduled_date: Optional[date] = None
+    notes: Optional[str] = None
+
+
+class InspectionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    project_id: str
+    title: str
+    inspection_type: str
+    status: str
+    inspector_id: str
+    scheduled_date: Optional[date]
+    completed_date: Optional[date]
+    overall_result: Optional[str]
+    notes: Optional[str]
+    created_at: datetime
+
+
+class InspectionItemCreate(BaseModel):
+    item_description: str = Field(min_length=1, max_length=300)
+    status: Literal["pending", "pass", "fail", "na"] = "pending"
+    notes: Optional[str] = None
+
+
+class InspectionItemOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    inspection_id: str
+    item_description: str
+    status: str
+    notes: Optional[str]
+    sort_order: int
+
+
+class InspectionPhotoCreate(BaseModel):
+    photo_url: str
+    caption: Optional[str] = None
+
+
+class InspectionPhotoOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    inspection_id: str
+    photo_url: str
+    caption: Optional[str]
+    uploaded_by: str
+    created_at: datetime
+
+
+# Billing / Subscriptions
+class SubscriptionPlanOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    name: str
+    monthly_price_usd: int
+    max_projects: int
+    max_users_per_project: int
+    features: Optional[str]
+    is_active: bool
+
+
+class CompanySubscriptionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    company_id: str
+    plan_id: Optional[str]
+    status: str
+    trial_ends_at: Optional[datetime]
+    current_period_end: Optional[datetime]
+    cancel_at_period_end: bool
+
+
+class BillingEventOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    company_id: str
+    event_type: str
+    amount_usd: Optional[int]
+    currency: str
+    description: Optional[str]
+    event_metadata: Optional[str]
+    created_at: datetime
+
+
+class CreateCheckoutSessionRequest(BaseModel):
+    plan_id: str
+    success_url: str
+    cancel_url: str

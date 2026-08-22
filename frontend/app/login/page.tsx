@@ -14,8 +14,17 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleSubmit() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     setError(null);
+    if (!username.trim() || !password) {
+      setError("Username and password are required");
+      return;
+    }
+    if (mode === "register" && !name.trim()) {
+      setError("Full name is required");
+      return;
+    }
     setSubmitting(true);
     try {
       if (mode === "login") {
@@ -37,46 +46,50 @@ export default function LoginPage() {
         {mode === "login" ? "Sign in to FieldOS" : "Create your FieldOS account"}
       </h1>
 
-      <label className="flex flex-col gap-1 text-sm">
-        Username
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="rounded border border-slate-300 p-2"
-        />
-      </label>
-
-      {mode === "register" && (
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1 text-sm">
-          Full name
+          Username
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            required
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="rounded border border-slate-300 p-2"
           />
         </label>
-      )}
 
-      <label className="flex flex-col gap-1 text-sm">
-        Password
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="rounded border border-slate-300 p-2"
-        />
-      </label>
+        {mode === "register" && (
+          <label className="flex flex-col gap-1 text-sm">
+            Full name
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="rounded border border-slate-300 p-2"
+            />
+          </label>
+        )}
 
-      <button
-        onClick={handleSubmit}
-        disabled={submitting}
-        className="rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
-        type="button"
-      >
-        {mode === "login" ? "Sign in" : "Create account"}
-      </button>
+        <label className="flex flex-col gap-1 text-sm">
+          Password
+          <input
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="rounded border border-slate-300 p-2"
+          />
+        </label>
+
+        <button
+          type="submit"
+          disabled={submitting}
+          className="rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-50"
+        >
+          {submitting ? "Signing in..." : mode === "login" ? "Sign in" : "Create account"}
+        </button>
+      </form>
 
       <button
         onClick={() => {

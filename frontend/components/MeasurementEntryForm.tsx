@@ -14,7 +14,7 @@ type MeasurementEntrySubmission = {
 export function MeasurementEntryForm({
   onSubmit,
 }: {
-  onSubmit: (data: MeasurementEntrySubmission) => void;
+  onSubmit: (data: MeasurementEntrySubmission) => void | Promise<void>;
 }) {
   const [description, setDescription] = useState("");
   const [length, setLength] = useState("");
@@ -22,16 +22,32 @@ export function MeasurementEntryForm({
   const [depth, setDepth] = useState("");
   const [nos, setNos] = useState("1");
   const [isDeduction, setIsDeduction] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit() {
-    onSubmit({ description, length, width, depth, nos, is_deduction: isDeduction });
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!description.trim()) {
+      setError("Description is required");
+      return;
+    }
+    setError(null);
+    setSubmitting(true);
+    try {
+      await onSubmit({ description, length, width, depth, nos, is_deduction: isDeduction });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add entry");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
-    <div className="flex flex-wrap items-end gap-2">
+    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
       <label className="flex flex-col gap-1 text-xs">
         Description
         <input
+          required
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-32 rounded border border-slate-300 p-1.5 text-sm"
@@ -77,9 +93,10 @@ export function MeasurementEntryForm({
         />
         Deduction
       </label>
-      <button onClick={handleSubmit} type="button" className="rounded bg-slate-900 px-3 py-1.5 text-sm text-white">
-        Add entry
+      {error && <p className="text-xs text-red-600">{error}</p>}
+      <button type="submit" disabled={submitting} className="rounded bg-slate-900 px-3 py-1.5 text-sm text-white disabled:opacity-50">
+        {submitting ? "Adding..." : "Add entry"}
       </button>
-    </div>
+    </form>
   );
 }

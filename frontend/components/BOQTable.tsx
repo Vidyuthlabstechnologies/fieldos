@@ -3,7 +3,7 @@ import type { BOQ } from "@/lib/api";
 export function BOQTable({ boq }: { boq: BOQ }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-sm">
+      <table className="w-full border-collapse text-sm" aria-label="Bill of Quantities">
         <thead>
           <tr className="border-b border-slate-300 text-left text-xs uppercase text-slate-500">
             <th className="py-2 pr-2">Cost Head</th>
@@ -19,8 +19,8 @@ export function BOQTable({ boq }: { boq: BOQ }) {
               <td className="py-2 pr-2">
                 {line.billing_quantity} {line.billing_unit}
               </td>
-              <td className="py-2 pr-2">{line.rate_per_unit ?? "—"}</td>
-              <td className="py-2 pr-2 text-right">{line.amount ?? "—"}</td>
+              <td className="py-2 pr-2">{line.rate_per_unit ?? "\u2014"}</td>
+              <td className="py-2 pr-2 text-right">{line.amount ?? "\u2014"}</td>
             </tr>
           ))}
         </tbody>

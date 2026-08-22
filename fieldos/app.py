@@ -3,15 +3,24 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from fieldos.routers import (
     auth,
+    billing,
     companies,
     dashboard,
+    documents,
     dpr,
+    equipment,
     estimation,
+    inspections,
     issues,
+    materials,
     portability,
+    procurement,
     projects,
+    realtime,
     settings,
     tasks,
+    uploads,
+    workers,
 )
 
 
@@ -42,8 +51,8 @@ def create_fieldos_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=ALLOWED_ORIGINS,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PATCH", "DELETE", "PUT"],
+        allow_headers=["Authorization", "Content-Type"],
     )
     app.include_router(auth.router)
     app.include_router(companies.router)
@@ -55,4 +64,14 @@ def create_fieldos_app() -> FastAPI:
     app.include_router(estimation.router)
     app.include_router(portability.router)
     app.include_router(settings.router)
+    app.include_router(materials.router)
+    app.include_router(workers.router)
+    app.include_router(workers._attendance_router)
+    app.include_router(documents.router)
+    app.include_router(procurement.router)
+    app.include_router(equipment.router)
+    app.include_router(inspections.router)
+    app.include_router(realtime.router)
+    app.include_router(uploads.router)
+    app.include_router(billing.router)
     return app

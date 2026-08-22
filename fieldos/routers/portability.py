@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from fieldos.auth import CurrentUser, get_current_user
 from fieldos.db import get_db
@@ -49,9 +49,17 @@ def export_project(
     )
     dpr_local_id_by_real_id = {entry.id: i + 1 for i, entry in enumerate(dpr_entries)}
 
+    dpr_entry_ids = [entry.id for entry in dpr_entries]
+    all_photos = (
+        db.query(DPRPhoto).filter(DPRPhoto.dpr_entry_id.in_(dpr_entry_ids)).all() if dpr_entry_ids else []
+    )
+    photos_by_entry: dict[str, list[DPRPhoto]] = {}
+    for photo in all_photos:
+        photos_by_entry.setdefault(photo.dpr_entry_id, []).append(photo)
+
     dpr_entry_exports = []
     for entry in dpr_entries:
-        photos = db.query(DPRPhoto).filter(DPRPhoto.dpr_entry_id == entry.id).all()
+        entry_photos = photos_by_entry.get(entry.id, [])
         dpr_entry_exports.append(
             DPREntryExport(
                 local_id=dpr_local_id_by_real_id[entry.id],
@@ -61,7 +69,7 @@ def export_project(
                 weather=entry.weather,
                 status=entry.status,
                 source=entry.source,
-                photos=[DPRPhotoExport(photo_url=p.photo_url, caption=p.caption) for p in photos],
+                photos=[DPRPhotoExport(photo_url=p.photo_url, caption=p.caption) for p in entry_photos],
             )
         )
 
@@ -84,14 +92,11 @@ def export_project(
             db.query(CostHead)
             .filter(CostHead.estimation_id == estimation.id)
             .order_by(CostHead.sort_order)
+            .options(selectinload(CostHead.measurement_entries), selectinload(CostHead.steel_entries))
             .all()
         )
         cost_head_exports = []
         for cost_head in cost_heads:
-            measurement_entries = (
-                db.query(MeasurementEntry).filter(MeasurementEntry.cost_head_id == cost_head.id).all()
-            )
-            steel_entries = db.query(SteelEntry).filter(SteelEntry.cost_head_id == cost_head.id).all()
             cost_head_exports.append(
                 CostHeadExport(
                     name=cost_head.name,
@@ -103,20 +108,23 @@ def export_project(
                     sort_order=cost_head.sort_order,
                     measurement_entries=[
                         MeasurementEntryExport(
-                            description=e.description,
-                            length=e.length,
-                            width=e.width,
-                            depth=e.depth,
-                            nos=e.nos,
-                            is_deduction=e.is_deduction,
+                            description=measurement.description,
+                            length=measurement.length,
+                            width=measurement.width,
+                            depth=measurement.depth,
+                            nos=measurement.nos,
+                            is_deduction=measurement.is_deduction,
                         )
-                        for e in measurement_entries
+                        for measurement in cost_head.measurement_entries
                     ],
                     steel_entries=[
                         SteelEntryExport(
-                            description=e.description, bar_dia_mm=e.bar_dia_mm, nos=e.nos, length_ft=e.length_ft
+                            description=steel.description,
+                            bar_dia_mm=steel.bar_dia_mm,
+                            nos=steel.nos,
+                            length_ft=steel.length_ft,
                         )
-                        for e in steel_entries
+                        for steel in cost_head.steel_entries
                     ],
                 )
             )
@@ -225,26 +233,26 @@ def import_project(
             db.add(cost_head_row)
             db.flush()
 
-            for e in cost_head.measurement_entries:
+            for measurement in cost_head.measurement_entries:
                 db.add(
                     MeasurementEntry(
                         cost_head_id=cost_head_row.id,
-                        description=e.description,
-                        length=e.length,
-                        width=e.width,
-                        depth=e.depth,
-                        nos=e.nos,
-                        is_deduction=e.is_deduction,
+                        description=measurement.description,
+                        length=measurement.length,
+                        width=measurement.width,
+                        depth=measurement.depth,
+                        nos=measurement.nos,
+                        is_deduction=measurement.is_deduction,
                     )
                 )
-            for e in cost_head.steel_entries:
+            for steel in cost_head.steel_entries:
                 db.add(
                     SteelEntry(
                         cost_head_id=cost_head_row.id,
-                        description=e.description,
-                        bar_dia_mm=e.bar_dia_mm,
-                        nos=e.nos,
-                        length_ft=e.length_ft,
+                        description=steel.description,
+                        bar_dia_mm=steel.bar_dia_mm,
+                        nos=steel.nos,
+                        length_ft=steel.length_ft,
                     )
                 )
 

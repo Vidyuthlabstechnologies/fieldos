@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -59,7 +59,7 @@ def resolve_issue(
         raise HTTPException(status_code=404, detail="Issue not found")
 
     issue.status = "resolved"
-    issue.resolved_at = datetime.utcnow()
+    issue.resolved_at = datetime.now(timezone.utc).replace(tzinfo=None)
     db.commit()
     db.refresh(issue)
     return issue

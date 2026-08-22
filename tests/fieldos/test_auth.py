@@ -41,7 +41,7 @@ def test_verify_token_returns_current_user_for_valid_session(db_session):
     current_user = verify_token(token, db_session)
 
     assert current_user.id == user.id
-    assert current_user.email == "pm1"
+    assert current_user.username == "pm1"
 
 
 def test_verify_token_raises_401_for_unknown_token(db_session):

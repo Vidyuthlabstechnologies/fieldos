@@ -106,13 +106,18 @@ def cost_head_raw_quantity(
     """Sum of all entries belonging to one cost head, in its raw unit."""
     if cost_head.calculation_type == CALC_STEEL_WEIGHT:
         total = Decimal(0)
-        for e in steel_entries:
-            total += steel_entry_weight_kg(e.bar_dia_mm, e.nos, e.length_ft)
+        for steel in steel_entries:
+            total += steel_entry_weight_kg(steel.bar_dia_mm, steel.nos, steel.length_ft)
         return total
     total = Decimal(0)
-    for e in entries:
+    for measurement in entries:
         total += measurement_entry_quantity(
-            cost_head.calculation_type, e.length, e.width, e.depth, e.nos, e.is_deduction
+            cost_head.calculation_type,
+            measurement.length,
+            measurement.width,
+            measurement.depth,
+            measurement.nos,
+            measurement.is_deduction,
         )
     return total
 
