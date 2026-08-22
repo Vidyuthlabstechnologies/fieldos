@@ -1,0 +1,48 @@
+name: fieldos_mobile
+description: "FieldOS Mobile — offline-first agentic construction platform (Flutter)."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # Local, offline-first SQLite (works on Android, iOS, and desktop for tests)
+  drift: ^2.21.0
+  drift_flutter: ^0.2.0
+  sqlite3_flutter_libs: ^0.5.0
+  path_provider: ^2.1.5
+
+  # Password hashing (pure Dart, no native) + session tokens
+  cryptography: ^2.7.0
+  uuid: ^4.5.1
+
+  # Exact Decimal arithmetic to match the Python estimation engine's precision.
+  decimal: ^3.0.0
+
+  # Optional online voice-to-DPR (Sarvam). App is fully usable offline without it.
+  dio: ^5.8.0
+
+  # Voice capture for the optional voice-to-DPR feature.
+  record: ^6.0.0
+
+  # Filesystem path helpers (databases dir, media dir).
+  path: ^1.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  drift_dev: ^2.21.0
+  build_runner: ^2.4.0
+
+flutter:
+  uses-material-design: true
