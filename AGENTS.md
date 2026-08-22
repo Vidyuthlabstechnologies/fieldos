@@ -274,8 +274,33 @@ fieldos/
 │   └── android/            # Capacitor Android (deprecated -- see frontend/MOBILE.md)
 ├── fieldos_mobile/         # Native Flutter mobile app (canonical mobile strategy)
 ├── src-tauri/              # Desktop shell (Rust/Tauri) -- packages the installer
+├── importers/              # One-off scripts: real client Excel BOQ -> FieldOS project-export JSON
+├── resources/              # Real client source data (gitignored, local-only -- see below)
 └── docs/                   # Documentation
 ```
+
+## Client reference data (`resources/`)
+
+`resources/` holds Protek Consult's actual BOQ/estimation source files for
+three real projects. It is gitignored (`.gitignore`: "Real client
+project/financial data (BOQ estimates, rates) — local only") and must
+never be committed, logged, or quoted with real figures in any file that
+gets committed (including this one) -- describe structure, not numbers.
+
+| Project | Files | Sheets | Imported? |
+|---|---|---|---|
+| Narapally | `NARAPALLY MASONRY ESTIMATION.xlsx`, `NARAPALLY.pdf` | RATE EST, BOQ, SHUTTERING AREA, COMMON AREA BRICK WORK (SFT) | Yes -- `importers/narapally_boq.py` parses the brick-work BOQ (both flats, both wall thicknesses) into a FieldOS project-export JSON, importable via the app's "Import project" button. Reconciles every computed quantity against the sheet's own stated totals; refuses to write output on any mismatch. |
+| Thumukunta | `THUMUKUNTA EST.xlsx`, `THUMUKUNTA.pdf` | SLAB/BEAM/COLUMN REINFORCEMENT, STIRRUPS, CONCRETE ESTIMATION, BRICK WORK, PLASTERING, FLOORING, BOQ | **No importer yet.** A full multi-category structural estimation (RCC + masonry + finishes) -- substantially larger in scope than Narapally. |
+| Vidyanagar | `VIDYANAGAR CONCRETE ESTIMATION.xlsx` (DETAILED, ABSTRACT), `VIDYANAGAR STEEL ESTIMATION.xlsx` (BEAMS, SLABS), `VIDYANAGAR.pdf` | -- | **No importer yet.** Split across two workbooks (concrete and steel are separate files, unlike the other two projects). |
+
+If you're asked to build an importer for Thumukunta or Vidyanagar, follow
+`importers/narapally_boq.py`'s pattern exactly: parse, then reconcile every
+computed figure against the sheet's own stated subtotal/total before
+writing anything -- refuse output on any mismatch rather than silently
+shipping a wrong number to a real client's estimate. Each project's `.pdf`
+is the companion reference document (open it to check, don't assume its
+contents match what this file states, since it wasn't inspected in detail
+when this section was written).
 
 ## Environment Variables
 
