@@ -12,6 +12,7 @@ import 'package:fieldos_mobile/features/documents/documents_screen.dart';
 import 'package:fieldos_mobile/features/workers/workers_screen.dart';
 import 'package:fieldos_mobile/features/estimation/estimation_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
 class ProjectDetailScreen extends ConsumerStatefulWidget {
   const ProjectDetailScreen({super.key, required this.project});
@@ -24,15 +25,52 @@ class ProjectDetailScreen extends ConsumerStatefulWidget {
 class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabs;
+  void Function()? _liveUpdateCallback;
 
   @override
   void initState() {
     super.initState();
     _tabs = TabController(length: 10, vsync: this);
+    _maybeSubscribeToLiveUpdates();
+  }
+
+  /// If cloud sync is on, subscribe to live Realtime updates for this
+  /// project's tasks so a colleague's change on another device shows up
+  /// here without waiting for the next periodic/manual sync. Offline-only
+  /// users (the default) never touch the network here at all.
+  Future<void> _maybeSubscribeToLiveUpdates() async {
+    final service = ref.read(cloudSyncServiceProvider);
+    if (!service.isSignedIn) return;
+    final engine = ref.read(cloudSyncEngineProvider);
+    _liveUpdateCallback = () {
+      if (mounted) ref.invalidate(tasksProvider(widget.project.id));
+    };
+    engine.onTasksChanged = _liveUpdateCallback;
+    try {
+      await engine.subscribeToProjectTasks(widget.project.id);
+    } catch (_) {
+      // A failed live-update subscription shouldn't block viewing the
+      // project -- the periodic/manual sync paths still cover this data,
+      // just without the immediate push. Nothing to surface here that the
+      // user could act on from this screen.
+    }
   }
 
   @override
   void dispose() {
+    // Only clears the callback if it's still ours -- the underlying
+    // SyncEngine is a single app-wide instance (see cloud_sync_providers.dart),
+    // so if the user already navigated to a different project screen before
+    // this one finished disposing, that screen's initState may have already
+    // replaced onTasksChanged with its own callback; clearing unconditionally
+    // here would wipe out the newer, still-active one. Leaving the
+    // subscription itself open (not unsubscribing) keeps this project's data
+    // fresh in the background even after navigating away -- the same "keep
+    // syncing" philosophy as PeriodicSyncTrigger.
+    final engine = ref.read(cloudSyncEngineProvider);
+    if (identical(engine.onTasksChanged, _liveUpdateCallback)) {
+      engine.onTasksChanged = null;
+    }
     _tabs.dispose();
     super.dispose();
   }

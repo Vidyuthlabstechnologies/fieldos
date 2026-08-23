@@ -71,6 +71,13 @@ void main() {
     await deviceClient.auth.signInWithPassword(email: email, password: password);
     final db = AppDatabase.memory();
     final engine = SyncEngine(db: db, client: deviceClient);
+
+    // A UI layer (e.g. ProjectDetailScreen) has no way to know local data
+    // changed underneath it unless SyncEngine tells it -- verify the
+    // onTasksChanged hook actually fires, not just that the row lands.
+    var callbackFired = false;
+    engine.onTasksChanged = () => callbackFired = true;
+
     await engine.subscribeToProjectTasks(projectId);
 
     // Another device: creates a task directly in Postgres, the way
@@ -92,6 +99,7 @@ void main() {
     final matched = local.firstWhere((t) => t.id == taskId);
     expect(matched.title, 'Remote-created via Realtime');
     expect(matched.status, 'todo');
+    expect(callbackFired, isTrue, reason: 'onTasksChanged should fire so a UI layer knows to refresh');
 
     await engine.dispose();
     await deviceClient.dispose();

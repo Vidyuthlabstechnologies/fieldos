@@ -36,6 +36,16 @@ class SyncEngine {
   RealtimeChannel? _tasksChannel;
   RealtimeChannel? _projectsChannel;
 
+  /// Fired after a Realtime event has been upserted into Drift. SyncEngine
+  /// stays plain Dart with no Flutter/Riverpod dependency (see this file's
+  /// docstring -- that's what keeps it testable with real network calls in
+  /// a Dart VM test), so it can't invalidate a Riverpod provider itself --
+  /// this is the hook a UI layer uses to know local data just changed and
+  /// react (e.g. `ref.invalidate(tasksProvider(projectId))`), without this
+  /// class knowing Riverpod exists.
+  void Function()? onTasksChanged;
+  void Function()? onProjectsChanged;
+
   /// Drains the outbox in order. Stops (does not skip past) on the first
   /// failure within a run, to preserve per-record write ordering -- a
   /// later run will retry it. Each entry gets its own failure handling so
@@ -124,6 +134,7 @@ class SyncEngine {
               return; // tasks have no local hard-delete path today; nothing to reconcile yet.
             }
             await db.taskDao.upsertFromRemote(taskFromSupabaseJson(payload.newRecord));
+            onTasksChanged?.call();
           },
         );
     _tasksChannel = channel;
@@ -142,6 +153,7 @@ class SyncEngine {
           callback: (payload) async {
             if (payload.eventType == PostgresChangeEvent.delete) return;
             await db.projectDao.upsertFromRemote(projectFromSupabaseJson(payload.newRecord));
+            onProjectsChanged?.call();
           },
         );
     _projectsChannel = channel;
