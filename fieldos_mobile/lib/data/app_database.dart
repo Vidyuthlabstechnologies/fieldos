@@ -336,9 +336,20 @@ class DprDao extends DatabaseAccessor<AppDatabase> with _$DprDaoMixin {
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(dprEntries).insert(companion.copyWith(id: Value(id)));
-      return (await (select(dprEntries)..where((d) => d.id.equals(id))).getSingle());
+      final row = await (select(dprEntries)..where((d) => d.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'dpr_entries',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(dprEntryToSupabaseJson(row)),
+      );
+      return row;
     });
   }
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertFromRemote(DprEntriesCompanion companion) =>
+      into(dprEntries).insertOnConflictUpdate(companion);
 
   Future<List<DprEntry>> forProject(String projectId) {
     return (select(dprEntries)..where((d) => d.projectId.equals(projectId))
@@ -368,18 +379,39 @@ class IssueDao extends DatabaseAccessor<AppDatabase> with _$IssueDaoMixin {
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(issues).insert(companion.copyWith(id: Value(id)));
-      return (await (select(issues)..where((i) => i.id.equals(id))).getSingle());
+      final row = await (select(issues)..where((i) => i.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'issues',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(issueToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
   Future<List<Issue>> forProject(String projectId) =>
       (select(issues)..where((i) => i.projectId.equals(projectId))).get();
 
-  Future<void> resolve(String id) =>
-      (update(issues)..where((i) => i.id.equals(id))).write(IssuesCompanion(
+  Future<void> resolve(String id) {
+    return transaction(() async {
+      await (update(issues)..where((i) => i.id.equals(id))).write(IssuesCompanion(
         status: const Value('resolved'),
         resolvedAt: Value(DateTime.now()),
       ));
+      final row = await (select(issues)..where((i) => i.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'issues',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(issueToSupabaseJson(row)),
+      );
+    });
+  }
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertFromRemote(IssuesCompanion companion) =>
+      into(issues).insertOnConflictUpdate(companion);
 }
 
 // ---------------------------------------------------------------------------
@@ -795,7 +827,14 @@ class WorkerDao extends DatabaseAccessor<AppDatabase> with _$WorkerDaoMixin {
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(workers).insert(companion.copyWith(id: Value(id)));
-      return (await (select(workers)..where((w) => w.id.equals(id))).getSingle());
+      final row = await (select(workers)..where((w) => w.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'workers',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(workerToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
@@ -807,9 +846,21 @@ class WorkerDao extends DatabaseAccessor<AppDatabase> with _$WorkerDaoMixin {
   }
 
   Future<void> setStatus(String id, String status) {
-    return (update(workers)..where((w) => w.id.equals(id)))
-        .write(WorkersCompanion(status: Value(status)));
+    return transaction(() async {
+      await (update(workers)..where((w) => w.id.equals(id))).write(WorkersCompanion(status: Value(status)));
+      final row = await (select(workers)..where((w) => w.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'workers',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(workerToSupabaseJson(row)),
+      );
+    });
   }
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertFromRemote(WorkersCompanion companion) =>
+      into(workers).insertOnConflictUpdate(companion);
 }
 
 // ---------------------------------------------------------------------------

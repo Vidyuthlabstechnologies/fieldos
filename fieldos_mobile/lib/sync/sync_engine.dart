@@ -80,6 +80,18 @@ class SyncEngine {
     for (final row in taskRows) {
       await db.taskDao.upsertFromRemote(taskFromSupabaseJson(row));
     }
+    final dprRows = await client.from('dpr_entries').select();
+    for (final row in dprRows) {
+      await db.dprDao.upsertFromRemote(dprEntryFromSupabaseJson(row));
+    }
+    final issueRows = await client.from('issues').select();
+    for (final row in issueRows) {
+      await db.issueDao.upsertFromRemote(issueFromSupabaseJson(row));
+    }
+    final workerRows = await client.from('workers').select();
+    for (final row in workerRows) {
+      await db.workerDao.upsertFromRemote(workerFromSupabaseJson(row));
+    }
   }
 
   /// Live updates for one project's tasks -- INSERT/UPDATE/DELETE on the
