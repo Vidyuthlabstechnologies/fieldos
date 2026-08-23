@@ -17,11 +17,15 @@ this one) -- describe structure, not numbers.
 | Project | Files | Imported? |
 |---|---|---|
 | Narapally | `NARAPALLY MASONRY ESTIMATION.xlsx`, `NARAPALLY.pdf` | Yes -- `importers/narapally_boq.py` |
-| Thumukunta | `THUMUKUNTA EST.xlsx`, `THUMUKUNTA.pdf` | No importer yet -- full RCC + masonry + finishes estimation |
+| Thumukunta | `THUMUKUNTA EST.xlsx`, `THUMUKUNTA.pdf` | Partial -- `importers/brick_and_concrete_boq.py` (general, not client-specific) covers brick work + RCC/concrete; reinforcement, plastering, flooring not yet done |
 | Vidyanagar | `VIDYANAGAR CONCRETE ESTIMATION.xlsx`, `VIDYANAGAR STEEL ESTIMATION.xlsx`, `VIDYANAGAR.pdf` | No importer yet -- concrete and steel are separate workbooks |
 
 See AGENTS.md's "Client reference data" section for the sheet-by-sheet
-breakdown. If asked to build an importer for Thumukunta or Vidyanagar,
-follow `importers/narapally_boq.py`'s pattern: parse, then reconcile every
-computed figure against the sheet's own stated total before writing
+breakdown. `importers/brick_and_concrete_boq.py` targets the BRICK WORK /
+CONCRETE ESTIMATION sheet-layout convention generally (any workbook using
+it, not just Thumukunta's file) -- `--project-name` is a required argument,
+no client default. If asked to extend Thumukunta's coverage or build
+Vidyanagar's importer, follow `importers/narapally_boq.py` or
+`importers/brick_and_concrete_boq.py`'s pattern: parse, then reconcile
+every computed figure against the sheet's own stated total before writing
 anything -- refuse output on any mismatch.

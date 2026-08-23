@@ -290,17 +290,27 @@ gets committed (including this one) -- describe structure, not numbers.
 | Project | Files | Sheets | Imported? |
 |---|---|---|---|
 | Narapally | `NARAPALLY MASONRY ESTIMATION.xlsx`, `NARAPALLY.pdf` | RATE EST, BOQ, SHUTTERING AREA, COMMON AREA BRICK WORK (SFT) | Yes -- `importers/narapally_boq.py` parses the brick-work BOQ (both flats, both wall thicknesses) into a FieldOS project-export JSON, importable via the app's "Import project" button. Reconciles every computed quantity against the sheet's own stated totals; refuses to write output on any mismatch. |
-| Thumukunta | `THUMUKUNTA EST.xlsx`, `THUMUKUNTA.pdf` | SLAB/BEAM/COLUMN REINFORCEMENT, STIRRUPS, CONCRETE ESTIMATION, BRICK WORK, PLASTERING, FLOORING, BOQ | **No importer yet.** A full multi-category structural estimation (RCC + masonry + finishes) -- substantially larger in scope than Narapally. |
+| Thumukunta | `THUMUKUNTA EST.xlsx`, `THUMUKUNTA.pdf` | SLAB/BEAM/COLUMN REINFORCEMENT, STIRRUPS, CONCRETE ESTIMATION, BRICK WORK, PLASTERING, FLOORING, BOQ | Partial -- `importers/brick_and_concrete_boq.py` (a general importer for this sheet-layout convention, not Thumukunta-specific) covers BRICK WORK and CONCRETE ESTIMATION (excavation/PCC/RCC/columns/beams/slabs; over a third of Thumukunta's stated cost), reconciled against both each sheet's own per-category totals and the BOQ abstract's independently-stated RCC/brick-work/earth-filling lines. SLAB/BEAM/COLUMN REINFORCEMENT, STIRRUPS (steel_weight), PLASTERING, FLOORING (area) are NOT covered yet -- different sheet layouts, follow the same file's pattern to extend it. |
 | Vidyanagar | `VIDYANAGAR CONCRETE ESTIMATION.xlsx` (DETAILED, ABSTRACT), `VIDYANAGAR STEEL ESTIMATION.xlsx` (BEAMS, SLABS), `VIDYANAGAR.pdf` | -- | **No importer yet.** Split across two workbooks (concrete and steel are separate files, unlike the other two projects). |
 
-If you're asked to build an importer for Thumukunta or Vidyanagar, follow
-`importers/narapally_boq.py`'s pattern exactly: parse, then reconcile every
-computed figure against the sheet's own stated subtotal/total before
-writing anything -- refuse output on any mismatch rather than silently
-shipping a wrong number to a real client's estimate. Each project's `.pdf`
-is the companion reference document (open it to check, don't assume its
-contents match what this file states, since it wasn't inspected in detail
-when this section was written).
+`importers/brick_and_concrete_boq.py` is general-purpose, not tied to one
+client: it targets any workbook with sheets literally named "BRICK WORK"
+and/or "CONCRETE ESTIMATION" laid out per that file's own module docstring
+(single sequential column, TOTAL/DEDUCTIONS markers), and takes
+`--project-name` as a required CLI argument rather than assuming a
+default. Thumukunta's file is just the one real example currently checked
+into `resources/` and golden-tested against
+(`tests/test_brick_concrete_boq_import.py`). If you're asked to extend
+Thumukunta's coverage (reinforcement/stirrups as steel_weight cost heads,
+plastering/flooring as area cost heads) or build Vidyanagar's importer,
+follow `importers/narapally_boq.py` or
+`importers/brick_and_concrete_boq.py`'s pattern exactly: parse, then
+reconcile every computed figure against the sheet's own stated
+subtotal/total before writing anything -- refuse output on any mismatch
+rather than silently shipping a wrong number to a real client's estimate.
+Each project's `.pdf` is the companion reference document (open it to
+check, don't assume its contents match what this file states, since it
+wasn't inspected in detail when this section was written).
 
 ## Environment Variables
 
