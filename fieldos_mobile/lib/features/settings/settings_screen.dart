@@ -132,12 +132,31 @@ class _CloudSyncSectionState extends ConsumerState<_CloudSyncSection> {
   bool _busy = false;
   String? _status;
   bool _statusIsError = false;
+  int _pendingPushes = 0;
+  String? _lastSyncedAt;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshCounters();
+  }
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
     super.dispose();
+  }
+
+  Future<void> _refreshCounters() async {
+    final db = ref.read(appDatabaseProvider);
+    final pending = await db.syncOutboxDao.pendingCount();
+    final lastSynced = await db.settingsDao.get('last_sync_at');
+    if (!mounted) return;
+    setState(() {
+      _pendingPushes = pending;
+      _lastSyncedAt = lastSynced;
+    });
   }
 
   Future<void> _enableSync() async {
@@ -177,6 +196,10 @@ class _CloudSyncSectionState extends ConsumerState<_CloudSyncSection> {
             ? '${result.succeeded} pushed, ${result.failed} failed -- will retry next sync.'
             : 'Synced -- ${result.succeeded} change${result.succeeded == 1 ? '' : 's'} pushed, latest data pulled.';
       });
+      if (result.failed == 0) {
+        await ref.read(appDatabaseProvider).settingsDao.set('last_sync_at', DateTime.now().toIso8601String());
+      }
+      await _refreshCounters();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -233,6 +256,14 @@ class _CloudSyncSectionState extends ConsumerState<_CloudSyncSection> {
                 ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
                 : const Text('Sync now'),
           ),
+        if (signedIn) ...[
+          const SizedBox(height: 12),
+          Text(
+            'Pending changes to push: $_pendingPushes · '
+            'Last synced: ${_lastSyncedAt == null ? 'never' : DateTime.parse(_lastSyncedAt!).toLocal().toString().split('.').first}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
         if (_status != null) ...[
           const SizedBox(height: 12),
           Text(_status!, style: TextStyle(color: _statusIsError ? Colors.red : Colors.green)),

@@ -11,6 +11,7 @@ import 'package:fieldos_mobile/features/inspections/inspections_screen.dart';
 import 'package:fieldos_mobile/features/documents/documents_screen.dart';
 import 'package:fieldos_mobile/features/workers/workers_screen.dart';
 import 'package:fieldos_mobile/features/estimation/estimation_screen.dart';
+import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
@@ -225,12 +226,14 @@ class _DprTab extends ConsumerStatefulWidget {
 }
 
 class _DprDraftResult {
-  const _DprDraftResult(this.confirmed, this.summary, this.manpower, this.weather, this.selectedIssues);
+  const _DprDraftResult(this.confirmed, this.summary, this.manpower, this.weather, this.selectedIssues,
+      [this.photoPaths = const []]);
   final bool confirmed;
   final String summary;
   final int manpower;
   final String? weather;
   final List<String> selectedIssues;
+  final List<String> photoPaths;
 }
 
 class _DprTabState extends ConsumerState<_DprTab> {
@@ -250,6 +253,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
     final manpowerC = TextEditingController(text: initialManpower.toString());
     final weatherC = TextEditingController(text: initialWeather ?? '');
     final selected = <String>{...detectedIssues};
+    final photos = <String>[];
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -265,6 +269,15 @@ class _DprTabState extends ConsumerState<_DprTab> {
                 TextField(controller: manpowerC, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Manpower count')),
                 const SizedBox(height: 8),
                 TextField(controller: weatherC, decoration: const InputDecoration(labelText: 'Weather (optional)')),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.photo_camera),
+                  label: Text(photos.isEmpty ? 'Attach photo evidence' : '${photos.length} photo${photos.length == 1 ? '' : 's'} attached'),
+                  onPressed: () async {
+                    final path = await captureCameraFirst(ctx);
+                    if (path != null) setDialogState(() => photos.add(path));
+                  },
+                ),
                 if (detectedIssues.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   const Text('Agent-detected issues', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -297,17 +310,19 @@ class _DprTabState extends ConsumerState<_DprTab> {
       int.tryParse(manpowerC.text.trim()) ?? 0,
       weatherC.text.trim().isEmpty ? null : weatherC.text.trim(),
       selected.toList(),
+      photos.toList(),
     );
   }
 
-  /// Persist a DPR and any issues the user confirmed from the agent's checklist,
-  /// linking each issue back to the DPR that raised it.
+  /// Persist a DPR, its photo evidence and any issues the user confirmed
+  /// from the agent's checklist, linking each back to the DPR that raised it.
   Future<void> _persistDpr({
     required String summary,
     required int manpower,
     String? weather,
     required String source,
     required List<String> issues,
+    List<String> photoPaths = const [],
   }) async {
     final user = ref.read(sessionProvider).user;
     if (user == null) return;
@@ -330,6 +345,13 @@ class _DprTabState extends ConsumerState<_DprTab> {
             description: iss,
             severity: const Value('medium'),
             status: const Value('open'),
+          ));
+    }
+    for (final path in photoPaths) {
+      await ref.read(appDatabaseProvider).dprDao.addPhoto(DprPhotosCompanion.insert(
+            id: const Uuid().v4(),
+            dprEntryId: dprId,
+            photoPath: path,
           ));
     }
     ref.invalidate(dprProvider(widget.project.id));
@@ -364,6 +386,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
           weather: draft.weather,
           source: 'voice',
           issues: draft.selectedIssues,
+          photoPaths: draft.photoPaths,
         );
       }
     } catch (e) {
@@ -406,6 +429,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
         weather: draft.weather,
         source: 'manual',
         issues: draft.selectedIssues,
+        photoPaths: draft.photoPaths,
       );
     }
   }

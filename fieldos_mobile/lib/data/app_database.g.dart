@@ -7509,10 +7509,10 @@ class $PurchaseRequestsTable extends PurchaseRequests
   late final GeneratedColumn<String> unit = GeneratedColumn<String>(
     'unit',
     aliasedName,
-    true,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 20),
+    false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
+    defaultValue: const Constant(''),
   );
   static const VerificationMeta _estimatedAmountMeta = const VerificationMeta(
     'estimatedAmount',
@@ -7524,6 +7524,22 @@ class $PurchaseRequestsTable extends PurchaseRequests
     true,
     type: DriftSqlType.double,
     requiredDuringInsert: false,
+  );
+  static const VerificationMeta _urgencyMeta = const VerificationMeta(
+    'urgency',
+  );
+  @override
+  late final GeneratedColumn<String> urgency = GeneratedColumn<String>(
+    'urgency',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('normal'),
   );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
@@ -7537,7 +7553,40 @@ class $PurchaseRequestsTable extends PurchaseRequests
     ),
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('draft'),
+    defaultValue: const Constant('pending'),
+  );
+  static const VerificationMeta _approvedByMeta = const VerificationMeta(
+    'approvedBy',
+  );
+  @override
+  late final GeneratedColumn<String> approvedBy = GeneratedColumn<String>(
+    'approved_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _approvedAtMeta = const VerificationMeta(
+    'approvedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> approvedAt = GeneratedColumn<DateTime>(
+    'approved_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -7560,7 +7609,11 @@ class $PurchaseRequestsTable extends PurchaseRequests
     quantity,
     unit,
     estimatedAmount,
+    urgency,
     status,
+    approvedBy,
+    approvedAt,
+    notes,
     createdAt,
   ];
   @override
@@ -7628,10 +7681,34 @@ class $PurchaseRequestsTable extends PurchaseRequests
         ),
       );
     }
+    if (data.containsKey('urgency')) {
+      context.handle(
+        _urgencyMeta,
+        urgency.isAcceptableOrUnknown(data['urgency']!, _urgencyMeta),
+      );
+    }
     if (data.containsKey('status')) {
       context.handle(
         _statusMeta,
         status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('approved_by')) {
+      context.handle(
+        _approvedByMeta,
+        approvedBy.isAcceptableOrUnknown(data['approved_by']!, _approvedByMeta),
+      );
+    }
+    if (data.containsKey('approved_at')) {
+      context.handle(
+        _approvedAtMeta,
+        approvedAt.isAcceptableOrUnknown(data['approved_at']!, _approvedAtMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
     if (data.containsKey('created_at')) {
@@ -7672,15 +7749,31 @@ class $PurchaseRequestsTable extends PurchaseRequests
       unit: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}unit'],
-      ),
+      )!,
       estimatedAmount: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}estimated_amount'],
       ),
+      urgency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}urgency'],
+      )!,
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
+      approvedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}approved_by'],
+      ),
+      approvedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}approved_at'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -7700,9 +7793,13 @@ class PurchaseRequest extends DataClass implements Insertable<PurchaseRequest> {
   final String raisedBy;
   final String materialName;
   final double quantity;
-  final String? unit;
+  final String unit;
   final double? estimatedAmount;
+  final String urgency;
   final String status;
+  final String? approvedBy;
+  final DateTime? approvedAt;
+  final String? notes;
   final DateTime createdAt;
   const PurchaseRequest({
     required this.id,
@@ -7710,9 +7807,13 @@ class PurchaseRequest extends DataClass implements Insertable<PurchaseRequest> {
     required this.raisedBy,
     required this.materialName,
     required this.quantity,
-    this.unit,
+    required this.unit,
     this.estimatedAmount,
+    required this.urgency,
     required this.status,
+    this.approvedBy,
+    this.approvedAt,
+    this.notes,
     required this.createdAt,
   });
   @override
@@ -7723,13 +7824,21 @@ class PurchaseRequest extends DataClass implements Insertable<PurchaseRequest> {
     map['raised_by'] = Variable<String>(raisedBy);
     map['material_name'] = Variable<String>(materialName);
     map['quantity'] = Variable<double>(quantity);
-    if (!nullToAbsent || unit != null) {
-      map['unit'] = Variable<String>(unit);
-    }
+    map['unit'] = Variable<String>(unit);
     if (!nullToAbsent || estimatedAmount != null) {
       map['estimated_amount'] = Variable<double>(estimatedAmount);
     }
+    map['urgency'] = Variable<String>(urgency);
     map['status'] = Variable<String>(status);
+    if (!nullToAbsent || approvedBy != null) {
+      map['approved_by'] = Variable<String>(approvedBy);
+    }
+    if (!nullToAbsent || approvedAt != null) {
+      map['approved_at'] = Variable<DateTime>(approvedAt);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -7741,11 +7850,21 @@ class PurchaseRequest extends DataClass implements Insertable<PurchaseRequest> {
       raisedBy: Value(raisedBy),
       materialName: Value(materialName),
       quantity: Value(quantity),
-      unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
+      unit: Value(unit),
       estimatedAmount: estimatedAmount == null && nullToAbsent
           ? const Value.absent()
           : Value(estimatedAmount),
+      urgency: Value(urgency),
       status: Value(status),
+      approvedBy: approvedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(approvedBy),
+      approvedAt: approvedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(approvedAt),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
       createdAt: Value(createdAt),
     );
   }
@@ -7761,9 +7880,13 @@ class PurchaseRequest extends DataClass implements Insertable<PurchaseRequest> {
       raisedBy: serializer.fromJson<String>(json['raisedBy']),
       materialName: serializer.fromJson<String>(json['materialName']),
       quantity: serializer.fromJson<double>(json['quantity']),
-      unit: serializer.fromJson<String?>(json['unit']),
+      unit: serializer.fromJson<String>(json['unit']),
       estimatedAmount: serializer.fromJson<double?>(json['estimatedAmount']),
+      urgency: serializer.fromJson<String>(json['urgency']),
       status: serializer.fromJson<String>(json['status']),
+      approvedBy: serializer.fromJson<String?>(json['approvedBy']),
+      approvedAt: serializer.fromJson<DateTime?>(json['approvedAt']),
+      notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -7776,9 +7899,13 @@ class PurchaseRequest extends DataClass implements Insertable<PurchaseRequest> {
       'raisedBy': serializer.toJson<String>(raisedBy),
       'materialName': serializer.toJson<String>(materialName),
       'quantity': serializer.toJson<double>(quantity),
-      'unit': serializer.toJson<String?>(unit),
+      'unit': serializer.toJson<String>(unit),
       'estimatedAmount': serializer.toJson<double?>(estimatedAmount),
+      'urgency': serializer.toJson<String>(urgency),
       'status': serializer.toJson<String>(status),
+      'approvedBy': serializer.toJson<String?>(approvedBy),
+      'approvedAt': serializer.toJson<DateTime?>(approvedAt),
+      'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -7789,9 +7916,13 @@ class PurchaseRequest extends DataClass implements Insertable<PurchaseRequest> {
     String? raisedBy,
     String? materialName,
     double? quantity,
-    Value<String?> unit = const Value.absent(),
+    String? unit,
     Value<double?> estimatedAmount = const Value.absent(),
+    String? urgency,
     String? status,
+    Value<String?> approvedBy = const Value.absent(),
+    Value<DateTime?> approvedAt = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
   }) => PurchaseRequest(
     id: id ?? this.id,
@@ -7799,11 +7930,15 @@ class PurchaseRequest extends DataClass implements Insertable<PurchaseRequest> {
     raisedBy: raisedBy ?? this.raisedBy,
     materialName: materialName ?? this.materialName,
     quantity: quantity ?? this.quantity,
-    unit: unit.present ? unit.value : this.unit,
+    unit: unit ?? this.unit,
     estimatedAmount: estimatedAmount.present
         ? estimatedAmount.value
         : this.estimatedAmount,
+    urgency: urgency ?? this.urgency,
     status: status ?? this.status,
+    approvedBy: approvedBy.present ? approvedBy.value : this.approvedBy,
+    approvedAt: approvedAt.present ? approvedAt.value : this.approvedAt,
+    notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
   );
   PurchaseRequest copyWithCompanion(PurchaseRequestsCompanion data) {
@@ -7819,7 +7954,15 @@ class PurchaseRequest extends DataClass implements Insertable<PurchaseRequest> {
       estimatedAmount: data.estimatedAmount.present
           ? data.estimatedAmount.value
           : this.estimatedAmount,
+      urgency: data.urgency.present ? data.urgency.value : this.urgency,
       status: data.status.present ? data.status.value : this.status,
+      approvedBy: data.approvedBy.present
+          ? data.approvedBy.value
+          : this.approvedBy,
+      approvedAt: data.approvedAt.present
+          ? data.approvedAt.value
+          : this.approvedAt,
+      notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -7834,7 +7977,11 @@ class PurchaseRequest extends DataClass implements Insertable<PurchaseRequest> {
           ..write('quantity: $quantity, ')
           ..write('unit: $unit, ')
           ..write('estimatedAmount: $estimatedAmount, ')
+          ..write('urgency: $urgency, ')
           ..write('status: $status, ')
+          ..write('approvedBy: $approvedBy, ')
+          ..write('approvedAt: $approvedAt, ')
+          ..write('notes: $notes, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -7849,7 +7996,11 @@ class PurchaseRequest extends DataClass implements Insertable<PurchaseRequest> {
     quantity,
     unit,
     estimatedAmount,
+    urgency,
     status,
+    approvedBy,
+    approvedAt,
+    notes,
     createdAt,
   );
   @override
@@ -7863,7 +8014,11 @@ class PurchaseRequest extends DataClass implements Insertable<PurchaseRequest> {
           other.quantity == this.quantity &&
           other.unit == this.unit &&
           other.estimatedAmount == this.estimatedAmount &&
+          other.urgency == this.urgency &&
           other.status == this.status &&
+          other.approvedBy == this.approvedBy &&
+          other.approvedAt == this.approvedAt &&
+          other.notes == this.notes &&
           other.createdAt == this.createdAt);
 }
 
@@ -7873,9 +8028,13 @@ class PurchaseRequestsCompanion extends UpdateCompanion<PurchaseRequest> {
   final Value<String> raisedBy;
   final Value<String> materialName;
   final Value<double> quantity;
-  final Value<String?> unit;
+  final Value<String> unit;
   final Value<double?> estimatedAmount;
+  final Value<String> urgency;
   final Value<String> status;
+  final Value<String?> approvedBy;
+  final Value<DateTime?> approvedAt;
+  final Value<String?> notes;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const PurchaseRequestsCompanion({
@@ -7886,7 +8045,11 @@ class PurchaseRequestsCompanion extends UpdateCompanion<PurchaseRequest> {
     this.quantity = const Value.absent(),
     this.unit = const Value.absent(),
     this.estimatedAmount = const Value.absent(),
+    this.urgency = const Value.absent(),
     this.status = const Value.absent(),
+    this.approvedBy = const Value.absent(),
+    this.approvedAt = const Value.absent(),
+    this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -7898,7 +8061,11 @@ class PurchaseRequestsCompanion extends UpdateCompanion<PurchaseRequest> {
     this.quantity = const Value.absent(),
     this.unit = const Value.absent(),
     this.estimatedAmount = const Value.absent(),
+    this.urgency = const Value.absent(),
     this.status = const Value.absent(),
+    this.approvedBy = const Value.absent(),
+    this.approvedAt = const Value.absent(),
+    this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -7913,7 +8080,11 @@ class PurchaseRequestsCompanion extends UpdateCompanion<PurchaseRequest> {
     Expression<double>? quantity,
     Expression<String>? unit,
     Expression<double>? estimatedAmount,
+    Expression<String>? urgency,
     Expression<String>? status,
+    Expression<String>? approvedBy,
+    Expression<DateTime>? approvedAt,
+    Expression<String>? notes,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -7925,7 +8096,11 @@ class PurchaseRequestsCompanion extends UpdateCompanion<PurchaseRequest> {
       if (quantity != null) 'quantity': quantity,
       if (unit != null) 'unit': unit,
       if (estimatedAmount != null) 'estimated_amount': estimatedAmount,
+      if (urgency != null) 'urgency': urgency,
       if (status != null) 'status': status,
+      if (approvedBy != null) 'approved_by': approvedBy,
+      if (approvedAt != null) 'approved_at': approvedAt,
+      if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -7937,9 +8112,13 @@ class PurchaseRequestsCompanion extends UpdateCompanion<PurchaseRequest> {
     Value<String>? raisedBy,
     Value<String>? materialName,
     Value<double>? quantity,
-    Value<String?>? unit,
+    Value<String>? unit,
     Value<double?>? estimatedAmount,
+    Value<String>? urgency,
     Value<String>? status,
+    Value<String?>? approvedBy,
+    Value<DateTime?>? approvedAt,
+    Value<String?>? notes,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
@@ -7951,7 +8130,11 @@ class PurchaseRequestsCompanion extends UpdateCompanion<PurchaseRequest> {
       quantity: quantity ?? this.quantity,
       unit: unit ?? this.unit,
       estimatedAmount: estimatedAmount ?? this.estimatedAmount,
+      urgency: urgency ?? this.urgency,
       status: status ?? this.status,
+      approvedBy: approvedBy ?? this.approvedBy,
+      approvedAt: approvedAt ?? this.approvedAt,
+      notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -7981,8 +8164,20 @@ class PurchaseRequestsCompanion extends UpdateCompanion<PurchaseRequest> {
     if (estimatedAmount.present) {
       map['estimated_amount'] = Variable<double>(estimatedAmount.value);
     }
+    if (urgency.present) {
+      map['urgency'] = Variable<String>(urgency.value);
+    }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
+    }
+    if (approvedBy.present) {
+      map['approved_by'] = Variable<String>(approvedBy.value);
+    }
+    if (approvedAt.present) {
+      map['approved_at'] = Variable<DateTime>(approvedAt.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -8003,7 +8198,11 @@ class PurchaseRequestsCompanion extends UpdateCompanion<PurchaseRequest> {
           ..write('quantity: $quantity, ')
           ..write('unit: $unit, ')
           ..write('estimatedAmount: $estimatedAmount, ')
+          ..write('urgency: $urgency, ')
           ..write('status: $status, ')
+          ..write('approvedBy: $approvedBy, ')
+          ..write('approvedAt: $approvedAt, ')
+          ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -8068,6 +8267,18 @@ class $PurchaseOrdersTable extends PurchaseOrders
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _quoteIdMeta = const VerificationMeta(
+    'quoteId',
+  );
+  @override
+  late final GeneratedColumn<String> quoteId = GeneratedColumn<String>(
+    'quote_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 36),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _raisedByMeta = const VerificationMeta(
     'raisedBy',
   );
@@ -8083,6 +8294,18 @@ class $PurchaseOrdersTable extends PurchaseOrders
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _poNumberMeta = const VerificationMeta(
+    'poNumber',
+  );
+  @override
+  late final GeneratedColumn<String> poNumber = GeneratedColumn<String>(
+    'po_number',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 50),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _totalAmountMeta = const VerificationMeta(
     'totalAmount',
   );
@@ -8092,6 +8315,17 @@ class $PurchaseOrdersTable extends PurchaseOrders
     aliasedName,
     true,
     type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deliveryDateMeta = const VerificationMeta(
+    'deliveryDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deliveryDate = GeneratedColumn<DateTime>(
+    'delivery_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
@@ -8106,7 +8340,17 @@ class $PurchaseOrdersTable extends PurchaseOrders
     ),
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('open'),
+    defaultValue: const Constant('issued'),
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -8126,9 +8370,13 @@ class $PurchaseOrdersTable extends PurchaseOrders
     projectId,
     supplierId,
     requestId,
+    quoteId,
     raisedBy,
+    poNumber,
     totalAmount,
+    deliveryDate,
     status,
+    notes,
     createdAt,
   ];
   @override
@@ -8170,6 +8418,12 @@ class $PurchaseOrdersTable extends PurchaseOrders
         requestId.isAcceptableOrUnknown(data['request_id']!, _requestIdMeta),
       );
     }
+    if (data.containsKey('quote_id')) {
+      context.handle(
+        _quoteIdMeta,
+        quoteId.isAcceptableOrUnknown(data['quote_id']!, _quoteIdMeta),
+      );
+    }
     if (data.containsKey('raised_by')) {
       context.handle(
         _raisedByMeta,
@@ -8177,6 +8431,12 @@ class $PurchaseOrdersTable extends PurchaseOrders
       );
     } else if (isInserting) {
       context.missing(_raisedByMeta);
+    }
+    if (data.containsKey('po_number')) {
+      context.handle(
+        _poNumberMeta,
+        poNumber.isAcceptableOrUnknown(data['po_number']!, _poNumberMeta),
+      );
     }
     if (data.containsKey('total_amount')) {
       context.handle(
@@ -8187,10 +8447,25 @@ class $PurchaseOrdersTable extends PurchaseOrders
         ),
       );
     }
+    if (data.containsKey('delivery_date')) {
+      context.handle(
+        _deliveryDateMeta,
+        deliveryDate.isAcceptableOrUnknown(
+          data['delivery_date']!,
+          _deliveryDateMeta,
+        ),
+      );
+    }
     if (data.containsKey('status')) {
       context.handle(
         _statusMeta,
         status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
     if (data.containsKey('created_at')) {
@@ -8224,18 +8499,34 @@ class $PurchaseOrdersTable extends PurchaseOrders
         DriftSqlType.string,
         data['${effectivePrefix}request_id'],
       ),
+      quoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quote_id'],
+      ),
       raisedBy: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}raised_by'],
       )!,
+      poNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}po_number'],
+      ),
       totalAmount: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}total_amount'],
+      ),
+      deliveryDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}delivery_date'],
       ),
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -8254,18 +8545,26 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
   final String projectId;
   final String supplierId;
   final String? requestId;
+  final String? quoteId;
   final String raisedBy;
+  final String? poNumber;
   final double? totalAmount;
+  final DateTime? deliveryDate;
   final String status;
+  final String? notes;
   final DateTime createdAt;
   const PurchaseOrder({
     required this.id,
     required this.projectId,
     required this.supplierId,
     this.requestId,
+    this.quoteId,
     required this.raisedBy,
+    this.poNumber,
     this.totalAmount,
+    this.deliveryDate,
     required this.status,
+    this.notes,
     required this.createdAt,
   });
   @override
@@ -8277,11 +8576,23 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     if (!nullToAbsent || requestId != null) {
       map['request_id'] = Variable<String>(requestId);
     }
+    if (!nullToAbsent || quoteId != null) {
+      map['quote_id'] = Variable<String>(quoteId);
+    }
     map['raised_by'] = Variable<String>(raisedBy);
+    if (!nullToAbsent || poNumber != null) {
+      map['po_number'] = Variable<String>(poNumber);
+    }
     if (!nullToAbsent || totalAmount != null) {
       map['total_amount'] = Variable<double>(totalAmount);
     }
+    if (!nullToAbsent || deliveryDate != null) {
+      map['delivery_date'] = Variable<DateTime>(deliveryDate);
+    }
     map['status'] = Variable<String>(status);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -8294,11 +8605,23 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
       requestId: requestId == null && nullToAbsent
           ? const Value.absent()
           : Value(requestId),
+      quoteId: quoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quoteId),
       raisedBy: Value(raisedBy),
+      poNumber: poNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(poNumber),
       totalAmount: totalAmount == null && nullToAbsent
           ? const Value.absent()
           : Value(totalAmount),
+      deliveryDate: deliveryDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deliveryDate),
       status: Value(status),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
       createdAt: Value(createdAt),
     );
   }
@@ -8313,9 +8636,13 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
       projectId: serializer.fromJson<String>(json['projectId']),
       supplierId: serializer.fromJson<String>(json['supplierId']),
       requestId: serializer.fromJson<String?>(json['requestId']),
+      quoteId: serializer.fromJson<String?>(json['quoteId']),
       raisedBy: serializer.fromJson<String>(json['raisedBy']),
+      poNumber: serializer.fromJson<String?>(json['poNumber']),
       totalAmount: serializer.fromJson<double?>(json['totalAmount']),
+      deliveryDate: serializer.fromJson<DateTime?>(json['deliveryDate']),
       status: serializer.fromJson<String>(json['status']),
+      notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -8327,9 +8654,13 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
       'projectId': serializer.toJson<String>(projectId),
       'supplierId': serializer.toJson<String>(supplierId),
       'requestId': serializer.toJson<String?>(requestId),
+      'quoteId': serializer.toJson<String?>(quoteId),
       'raisedBy': serializer.toJson<String>(raisedBy),
+      'poNumber': serializer.toJson<String?>(poNumber),
       'totalAmount': serializer.toJson<double?>(totalAmount),
+      'deliveryDate': serializer.toJson<DateTime?>(deliveryDate),
       'status': serializer.toJson<String>(status),
+      'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -8339,18 +8670,26 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     String? projectId,
     String? supplierId,
     Value<String?> requestId = const Value.absent(),
+    Value<String?> quoteId = const Value.absent(),
     String? raisedBy,
+    Value<String?> poNumber = const Value.absent(),
     Value<double?> totalAmount = const Value.absent(),
+    Value<DateTime?> deliveryDate = const Value.absent(),
     String? status,
+    Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
   }) => PurchaseOrder(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
     supplierId: supplierId ?? this.supplierId,
     requestId: requestId.present ? requestId.value : this.requestId,
+    quoteId: quoteId.present ? quoteId.value : this.quoteId,
     raisedBy: raisedBy ?? this.raisedBy,
+    poNumber: poNumber.present ? poNumber.value : this.poNumber,
     totalAmount: totalAmount.present ? totalAmount.value : this.totalAmount,
+    deliveryDate: deliveryDate.present ? deliveryDate.value : this.deliveryDate,
     status: status ?? this.status,
+    notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
   );
   PurchaseOrder copyWithCompanion(PurchaseOrdersCompanion data) {
@@ -8361,11 +8700,17 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
           ? data.supplierId.value
           : this.supplierId,
       requestId: data.requestId.present ? data.requestId.value : this.requestId,
+      quoteId: data.quoteId.present ? data.quoteId.value : this.quoteId,
       raisedBy: data.raisedBy.present ? data.raisedBy.value : this.raisedBy,
+      poNumber: data.poNumber.present ? data.poNumber.value : this.poNumber,
       totalAmount: data.totalAmount.present
           ? data.totalAmount.value
           : this.totalAmount,
+      deliveryDate: data.deliveryDate.present
+          ? data.deliveryDate.value
+          : this.deliveryDate,
       status: data.status.present ? data.status.value : this.status,
+      notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -8377,9 +8722,13 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
           ..write('projectId: $projectId, ')
           ..write('supplierId: $supplierId, ')
           ..write('requestId: $requestId, ')
+          ..write('quoteId: $quoteId, ')
           ..write('raisedBy: $raisedBy, ')
+          ..write('poNumber: $poNumber, ')
           ..write('totalAmount: $totalAmount, ')
+          ..write('deliveryDate: $deliveryDate, ')
           ..write('status: $status, ')
+          ..write('notes: $notes, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -8391,9 +8740,13 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     projectId,
     supplierId,
     requestId,
+    quoteId,
     raisedBy,
+    poNumber,
     totalAmount,
+    deliveryDate,
     status,
+    notes,
     createdAt,
   );
   @override
@@ -8404,9 +8757,13 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
           other.projectId == this.projectId &&
           other.supplierId == this.supplierId &&
           other.requestId == this.requestId &&
+          other.quoteId == this.quoteId &&
           other.raisedBy == this.raisedBy &&
+          other.poNumber == this.poNumber &&
           other.totalAmount == this.totalAmount &&
+          other.deliveryDate == this.deliveryDate &&
           other.status == this.status &&
+          other.notes == this.notes &&
           other.createdAt == this.createdAt);
 }
 
@@ -8415,9 +8772,13 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
   final Value<String> projectId;
   final Value<String> supplierId;
   final Value<String?> requestId;
+  final Value<String?> quoteId;
   final Value<String> raisedBy;
+  final Value<String?> poNumber;
   final Value<double?> totalAmount;
+  final Value<DateTime?> deliveryDate;
   final Value<String> status;
+  final Value<String?> notes;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const PurchaseOrdersCompanion({
@@ -8425,9 +8786,13 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     this.projectId = const Value.absent(),
     this.supplierId = const Value.absent(),
     this.requestId = const Value.absent(),
+    this.quoteId = const Value.absent(),
     this.raisedBy = const Value.absent(),
+    this.poNumber = const Value.absent(),
     this.totalAmount = const Value.absent(),
+    this.deliveryDate = const Value.absent(),
     this.status = const Value.absent(),
+    this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -8436,9 +8801,13 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     required String projectId,
     required String supplierId,
     this.requestId = const Value.absent(),
+    this.quoteId = const Value.absent(),
     required String raisedBy,
+    this.poNumber = const Value.absent(),
     this.totalAmount = const Value.absent(),
+    this.deliveryDate = const Value.absent(),
     this.status = const Value.absent(),
+    this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -8450,9 +8819,13 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     Expression<String>? projectId,
     Expression<String>? supplierId,
     Expression<String>? requestId,
+    Expression<String>? quoteId,
     Expression<String>? raisedBy,
+    Expression<String>? poNumber,
     Expression<double>? totalAmount,
+    Expression<DateTime>? deliveryDate,
     Expression<String>? status,
+    Expression<String>? notes,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -8461,9 +8834,13 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
       if (projectId != null) 'project_id': projectId,
       if (supplierId != null) 'supplier_id': supplierId,
       if (requestId != null) 'request_id': requestId,
+      if (quoteId != null) 'quote_id': quoteId,
       if (raisedBy != null) 'raised_by': raisedBy,
+      if (poNumber != null) 'po_number': poNumber,
       if (totalAmount != null) 'total_amount': totalAmount,
+      if (deliveryDate != null) 'delivery_date': deliveryDate,
       if (status != null) 'status': status,
+      if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -8474,9 +8851,13 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     Value<String>? projectId,
     Value<String>? supplierId,
     Value<String?>? requestId,
+    Value<String?>? quoteId,
     Value<String>? raisedBy,
+    Value<String?>? poNumber,
     Value<double?>? totalAmount,
+    Value<DateTime?>? deliveryDate,
     Value<String>? status,
+    Value<String?>? notes,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
@@ -8485,9 +8866,13 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
       projectId: projectId ?? this.projectId,
       supplierId: supplierId ?? this.supplierId,
       requestId: requestId ?? this.requestId,
+      quoteId: quoteId ?? this.quoteId,
       raisedBy: raisedBy ?? this.raisedBy,
+      poNumber: poNumber ?? this.poNumber,
       totalAmount: totalAmount ?? this.totalAmount,
+      deliveryDate: deliveryDate ?? this.deliveryDate,
       status: status ?? this.status,
+      notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -8508,14 +8893,26 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     if (requestId.present) {
       map['request_id'] = Variable<String>(requestId.value);
     }
+    if (quoteId.present) {
+      map['quote_id'] = Variable<String>(quoteId.value);
+    }
     if (raisedBy.present) {
       map['raised_by'] = Variable<String>(raisedBy.value);
+    }
+    if (poNumber.present) {
+      map['po_number'] = Variable<String>(poNumber.value);
     }
     if (totalAmount.present) {
       map['total_amount'] = Variable<double>(totalAmount.value);
     }
+    if (deliveryDate.present) {
+      map['delivery_date'] = Variable<DateTime>(deliveryDate.value);
+    }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -8533,9 +8930,13 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
           ..write('projectId: $projectId, ')
           ..write('supplierId: $supplierId, ')
           ..write('requestId: $requestId, ')
+          ..write('quoteId: $quoteId, ')
           ..write('raisedBy: $raisedBy, ')
+          ..write('poNumber: $poNumber, ')
           ..write('totalAmount: $totalAmount, ')
+          ..write('deliveryDate: $deliveryDate, ')
           ..write('status: $status, ')
+          ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -20388,9 +20789,13 @@ typedef $$PurchaseRequestsTableCreateCompanionBuilder =
       required String raisedBy,
       required String materialName,
       Value<double> quantity,
-      Value<String?> unit,
+      Value<String> unit,
       Value<double?> estimatedAmount,
+      Value<String> urgency,
       Value<String> status,
+      Value<String?> approvedBy,
+      Value<DateTime?> approvedAt,
+      Value<String?> notes,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -20401,9 +20806,13 @@ typedef $$PurchaseRequestsTableUpdateCompanionBuilder =
       Value<String> raisedBy,
       Value<String> materialName,
       Value<double> quantity,
-      Value<String?> unit,
+      Value<String> unit,
       Value<double?> estimatedAmount,
+      Value<String> urgency,
       Value<String> status,
+      Value<String?> approvedBy,
+      Value<DateTime?> approvedAt,
+      Value<String?> notes,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -20452,8 +20861,28 @@ class $$PurchaseRequestsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get urgency => $composableBuilder(
+    column: $table.urgency,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get status => $composableBuilder(
     column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get approvedBy => $composableBuilder(
+    column: $table.approvedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get approvedAt => $composableBuilder(
+    column: $table.approvedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -20507,8 +20936,28 @@ class $$PurchaseRequestsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get urgency => $composableBuilder(
+    column: $table.urgency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get status => $composableBuilder(
     column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get approvedBy => $composableBuilder(
+    column: $table.approvedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get approvedAt => $composableBuilder(
+    column: $table.approvedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -20552,8 +21001,24 @@ class $$PurchaseRequestsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get urgency =>
+      $composableBuilder(column: $table.urgency, builder: (column) => column);
+
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get approvedBy => $composableBuilder(
+    column: $table.approvedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get approvedAt => $composableBuilder(
+    column: $table.approvedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -20601,9 +21066,13 @@ class $$PurchaseRequestsTableTableManager
                 Value<String> raisedBy = const Value.absent(),
                 Value<String> materialName = const Value.absent(),
                 Value<double> quantity = const Value.absent(),
-                Value<String?> unit = const Value.absent(),
+                Value<String> unit = const Value.absent(),
                 Value<double?> estimatedAmount = const Value.absent(),
+                Value<String> urgency = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String?> approvedBy = const Value.absent(),
+                Value<DateTime?> approvedAt = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PurchaseRequestsCompanion(
@@ -20614,7 +21083,11 @@ class $$PurchaseRequestsTableTableManager
                 quantity: quantity,
                 unit: unit,
                 estimatedAmount: estimatedAmount,
+                urgency: urgency,
                 status: status,
+                approvedBy: approvedBy,
+                approvedAt: approvedAt,
+                notes: notes,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -20625,9 +21098,13 @@ class $$PurchaseRequestsTableTableManager
                 required String raisedBy,
                 required String materialName,
                 Value<double> quantity = const Value.absent(),
-                Value<String?> unit = const Value.absent(),
+                Value<String> unit = const Value.absent(),
                 Value<double?> estimatedAmount = const Value.absent(),
+                Value<String> urgency = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String?> approvedBy = const Value.absent(),
+                Value<DateTime?> approvedAt = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PurchaseRequestsCompanion.insert(
@@ -20638,7 +21115,11 @@ class $$PurchaseRequestsTableTableManager
                 quantity: quantity,
                 unit: unit,
                 estimatedAmount: estimatedAmount,
+                urgency: urgency,
                 status: status,
+                approvedBy: approvedBy,
+                approvedAt: approvedAt,
+                notes: notes,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -20673,9 +21154,13 @@ typedef $$PurchaseOrdersTableCreateCompanionBuilder =
       required String projectId,
       required String supplierId,
       Value<String?> requestId,
+      Value<String?> quoteId,
       required String raisedBy,
+      Value<String?> poNumber,
       Value<double?> totalAmount,
+      Value<DateTime?> deliveryDate,
       Value<String> status,
+      Value<String?> notes,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -20685,9 +21170,13 @@ typedef $$PurchaseOrdersTableUpdateCompanionBuilder =
       Value<String> projectId,
       Value<String> supplierId,
       Value<String?> requestId,
+      Value<String?> quoteId,
       Value<String> raisedBy,
+      Value<String?> poNumber,
       Value<double?> totalAmount,
+      Value<DateTime?> deliveryDate,
       Value<String> status,
+      Value<String?> notes,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -20721,8 +21210,18 @@ class $$PurchaseOrdersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get quoteId => $composableBuilder(
+    column: $table.quoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get raisedBy => $composableBuilder(
     column: $table.raisedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get poNumber => $composableBuilder(
+    column: $table.poNumber,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -20731,8 +21230,18 @@ class $$PurchaseOrdersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<DateTime> get deliveryDate => $composableBuilder(
+    column: $table.deliveryDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get status => $composableBuilder(
     column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -20771,8 +21280,18 @@ class $$PurchaseOrdersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get quoteId => $composableBuilder(
+    column: $table.quoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get raisedBy => $composableBuilder(
     column: $table.raisedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get poNumber => $composableBuilder(
+    column: $table.poNumber,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -20781,8 +21300,18 @@ class $$PurchaseOrdersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get deliveryDate => $composableBuilder(
+    column: $table.deliveryDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get status => $composableBuilder(
     column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -20815,16 +21344,30 @@ class $$PurchaseOrdersTableAnnotationComposer
   GeneratedColumn<String> get requestId =>
       $composableBuilder(column: $table.requestId, builder: (column) => column);
 
+  GeneratedColumn<String> get quoteId =>
+      $composableBuilder(column: $table.quoteId, builder: (column) => column);
+
   GeneratedColumn<String> get raisedBy =>
       $composableBuilder(column: $table.raisedBy, builder: (column) => column);
+
+  GeneratedColumn<String> get poNumber =>
+      $composableBuilder(column: $table.poNumber, builder: (column) => column);
 
   GeneratedColumn<double> get totalAmount => $composableBuilder(
     column: $table.totalAmount,
     builder: (column) => column,
   );
 
+  GeneratedColumn<DateTime> get deliveryDate => $composableBuilder(
+    column: $table.deliveryDate,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -20867,9 +21410,13 @@ class $$PurchaseOrdersTableTableManager
                 Value<String> projectId = const Value.absent(),
                 Value<String> supplierId = const Value.absent(),
                 Value<String?> requestId = const Value.absent(),
+                Value<String?> quoteId = const Value.absent(),
                 Value<String> raisedBy = const Value.absent(),
+                Value<String?> poNumber = const Value.absent(),
                 Value<double?> totalAmount = const Value.absent(),
+                Value<DateTime?> deliveryDate = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PurchaseOrdersCompanion(
@@ -20877,9 +21424,13 @@ class $$PurchaseOrdersTableTableManager
                 projectId: projectId,
                 supplierId: supplierId,
                 requestId: requestId,
+                quoteId: quoteId,
                 raisedBy: raisedBy,
+                poNumber: poNumber,
                 totalAmount: totalAmount,
+                deliveryDate: deliveryDate,
                 status: status,
+                notes: notes,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -20889,9 +21440,13 @@ class $$PurchaseOrdersTableTableManager
                 required String projectId,
                 required String supplierId,
                 Value<String?> requestId = const Value.absent(),
+                Value<String?> quoteId = const Value.absent(),
                 required String raisedBy,
+                Value<String?> poNumber = const Value.absent(),
                 Value<double?> totalAmount = const Value.absent(),
+                Value<DateTime?> deliveryDate = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PurchaseOrdersCompanion.insert(
@@ -20899,9 +21454,13 @@ class $$PurchaseOrdersTableTableManager
                 projectId: projectId,
                 supplierId: supplierId,
                 requestId: requestId,
+                quoteId: quoteId,
                 raisedBy: raisedBy,
+                poNumber: poNumber,
                 totalAmount: totalAmount,
+                deliveryDate: deliveryDate,
                 status: status,
+                notes: notes,
                 createdAt: createdAt,
                 rowid: rowid,
               ),

@@ -82,7 +82,41 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
+
+  // v3 shipped with no MigrationStrategy at all -- the default only creates
+  // missing tables, never adds columns, so any additive change to an
+  // existing table would crash on upgrade. v4 catches up both the suppliers
+  // `vendors`-parity columns and the procurement alignment columns.
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (m, from, to) async {
+          if (from < 4) {
+            await m.addColumn(suppliers, suppliers.contactPerson);
+            await m.addColumn(suppliers, suppliers.address);
+            await m.addColumn(suppliers, suppliers.gstNumber);
+            await m.addColumn(suppliers, suppliers.category);
+            await m.addColumn(suppliers, suppliers.notes);
+            await m.addColumn(purchaseRequests, purchaseRequests.urgency);
+            await m.addColumn(purchaseRequests, purchaseRequests.approvedBy);
+            await m.addColumn(purchaseRequests, purchaseRequests.approvedAt);
+            await m.addColumn(purchaseRequests, purchaseRequests.notes);
+            // unit was nullable; Postgres requires it NOT NULL. Backfill
+            // existing nulls with '' while rebuilding the table non-null.
+            // TableMigration is drift's only supported way to change
+            // nullability on SQLite (needs a table rebuild).
+            // ignore: experimental_member_use
+            await m.alterTable(TableMigration(
+              purchaseRequests,
+              columnTransformer: {purchaseRequests.unit: const Constant('')},
+            ));
+            await m.addColumn(purchaseOrders, purchaseOrders.poNumber);
+            await m.addColumn(purchaseOrders, purchaseOrders.deliveryDate);
+            await m.addColumn(purchaseOrders, purchaseOrders.quoteId);
+            await m.addColumn(purchaseOrders, purchaseOrders.notes);
+          }
+        },
+      );
 
   // --- DAO accessors ------------------------------------------------------
   UserDao get userDao => UserDao(this);
@@ -426,26 +460,75 @@ class EstimationDao extends DatabaseAccessor<AppDatabase> with _$EstimationDaoMi
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(estimations).insert(companion.copyWith(id: Value(id)));
-      return (await (select(estimations)..where((e) => e.id.equals(id))).getSingle());
+      final row = await (select(estimations)..where((e) => e.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'estimations',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(estimationToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
   Future<List<Estimation>> forProject(String projectId) =>
       (select(estimations)..where((e) => e.projectId.equals(projectId))).get();
 
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertFromRemote(EstimationsCompanion companion) =>
+      into(estimations).insertOnConflictUpdate(companion);
+
   Future<CostHead> addCostHead(CostHeadsCompanion companion) {
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(costHeads).insert(companion.copyWith(id: Value(id)));
-      return (await (select(costHeads)..where((c) => c.id.equals(id))).getSingle());
+      final row = await (select(costHeads)..where((c) => c.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'cost_heads',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(costHeadToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
-  Future<void> addMeasurement(MeasurementEntriesCompanion companion) =>
-      into(measurementEntries).insert(companion.copyWith(id: Value(_uuid.v4())));
+  Future<void> upsertFromRemoteCostHead(CostHeadsCompanion companion) =>
+      into(costHeads).insertOnConflictUpdate(companion);
 
-  Future<void> addSteel(SteelEntriesCompanion companion) =>
-      into(steelEntries).insert(companion.copyWith(id: Value(_uuid.v4())));
+  Future<void> addMeasurement(MeasurementEntriesCompanion companion) {
+    return transaction(() async {
+      final id = companion.id.present ? companion.id.value : _uuid.v4();
+      await into(measurementEntries).insert(companion.copyWith(id: Value(id)));
+      final row = await (select(measurementEntries)..where((m) => m.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'measurement_entries',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(measurementEntryToSupabaseJson(row)),
+      );
+    });
+  }
+
+  Future<void> upsertFromRemoteMeasurement(MeasurementEntriesCompanion companion) =>
+      into(measurementEntries).insertOnConflictUpdate(companion);
+
+  Future<void> addSteel(SteelEntriesCompanion companion) {
+    return transaction(() async {
+      final id = companion.id.present ? companion.id.value : _uuid.v4();
+      await into(steelEntries).insert(companion.copyWith(id: Value(id)));
+      final row = await (select(steelEntries)..where((s) => s.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'steel_entries',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(steelEntryToSupabaseJson(row)),
+      );
+    });
+  }
+
+  Future<void> upsertFromRemoteSteel(SteelEntriesCompanion companion) =>
+      into(steelEntries).insertOnConflictUpdate(companion);
 
   Future<List<CostHead>> costHeadsFor(String estimationId) {
     return (select(costHeads)
@@ -531,7 +614,14 @@ class PurchaseDao extends DatabaseAccessor<AppDatabase> with _$PurchaseDaoMixin 
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(purchaseRequests).insert(companion.copyWith(id: Value(id)));
-      return (await (select(purchaseRequests)..where((r) => r.id.equals(id))).getSingle());
+      final row = await (select(purchaseRequests)..where((r) => r.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'purchase_requisitions',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(purchaseRequestToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
@@ -539,7 +629,14 @@ class PurchaseDao extends DatabaseAccessor<AppDatabase> with _$PurchaseDaoMixin 
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(purchaseOrders).insert(companion.copyWith(id: Value(id)));
-      return (await (select(purchaseOrders)..where((o) => o.id.equals(id))).getSingle());
+      final row = await (select(purchaseOrders)..where((o) => o.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'purchase_orders',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(purchaseOrderToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
@@ -550,12 +647,37 @@ class PurchaseDao extends DatabaseAccessor<AppDatabase> with _$PurchaseDaoMixin 
       (select(purchaseOrders)..where((o) => o.projectId.equals(projectId))).get();
 
   Future<void> setRequestStatus(String id, String status) =>
-      (update(purchaseRequests)..where((r) => r.id.equals(id)))
-          .write(PurchaseRequestsCompanion(status: Value(status)));
+      transaction(() async {
+        await (update(purchaseRequests)..where((r) => r.id.equals(id)))
+            .write(PurchaseRequestsCompanion(status: Value(status)));
+        final row = await (select(purchaseRequests)..where((r) => r.id.equals(id))).getSingle();
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'purchase_requisitions',
+          recordId: row.id,
+          operation: 'update',
+          payloadJson: jsonEncode(purchaseRequestToSupabaseJson(row)),
+        );
+      });
 
   Future<void> setOrderStatus(String id, String status) =>
-      (update(purchaseOrders)..where((o) => o.id.equals(id)))
-          .write(PurchaseOrdersCompanion(status: Value(status)));
+      transaction(() async {
+        await (update(purchaseOrders)..where((o) => o.id.equals(id)))
+            .write(PurchaseOrdersCompanion(status: Value(status)));
+        final row = await (select(purchaseOrders)..where((o) => o.id.equals(id))).getSingle();
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'purchase_orders',
+          recordId: row.id,
+          operation: 'update',
+          payloadJson: jsonEncode(purchaseOrderToSupabaseJson(row)),
+        );
+      });
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertFromRemoteRequest(PurchaseRequestsCompanion companion) =>
+      into(purchaseRequests).insertOnConflictUpdate(companion);
+
+  Future<void> upsertFromRemoteOrder(PurchaseOrdersCompanion companion) =>
+      into(purchaseOrders).insertOnConflictUpdate(companion);
 }
 
 @DriftAccessor(tables: [MaterialReceipts])

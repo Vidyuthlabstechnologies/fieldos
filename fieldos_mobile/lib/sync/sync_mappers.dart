@@ -7,32 +7,25 @@
 /// hand, not inferred.
 ///
 /// Project, Task, DprEntry, Issue, Worker, Equipment, Inspection,
-/// Subcontractor, WorkOrder, Approval, and Supplier (-> `vendors`) are
+/// Subcontractor, WorkOrder, Approval, Supplier (-> `vendors`), the
+/// estimation tree (Estimation -> CostHead -> Measurement/SteelEntry), and
+/// the procurement core (PurchaseRequest -> `purchase_requisitions`,
+/// PurchaseOrder -> `purchase_orders`, including status changes) are
 /// covered -- chosen because their Drift columns correspond 1:1 with the
-/// Postgres schema. Not every mobile table does:
+/// Postgres schema. The mobile procurement tables were deliberately brought
+/// into alignment first (status vocabularies now use the remote CHECK
+/// values; see tables.dart) rather than mapped while divergent. Not every
+/// mobile table does correspond:
 ///  - MaterialReceipts has no honest mapping to either synced-shape table:
 ///    desktop's material_entries is a simple consumption log, and Postgres's
 ///    own `grns` requires a purchase_order_id (mobile allows ad-hoc receipts
 ///    with no PO), splits ordered_qty/received_qty where mobile stores one
 ///    quantity plus an amount, and has no home for cost_head_id -- which is
 ///    what feeds mobile's cost-engine actuals.
-///  - The rest of the procurement chain is deliberately unwired because the
-///    mobile model is a collapsed draft of the Postgres one, not 1:1:
-///      * PurchaseRequests -> purchase_requisitions: mobile's default status
-///        'draft' violates the CHECK constraint ('pending','approved',
-///        'rejected','ordered'); unit is nullable locally but NOT NULL in
-///        Postgres; urgency/approved_by/approved_at/notes don't exist
-///        locally; raisedBy is a free local username while requested_by is
-///        an auth.users FK.
-///      * PurchaseOrders -> purchase_orders: same status-CHECK mismatch
-///        ('open' isn't 'issued'|'acknowledged'|'delivered'|'cancelled');
-///        mobile's requestId points at a PurchaseRequest (a requisition)
-///        while quote_id points at quotes -- different entities, not a
-///        rename; po_number/delivery_date/notes have no local columns.
-///      * rfqs and quotes have no mobile tables at all.
-///    Wiring these honestly means aligning the mobile schema and its UI
-///    state machines first (status vocabularies are user-visible), not just
-///    mapping columns.
+///  - rfqs and quotes have no mobile tables at all. A PO's quote_id is
+///    preserved as an opaque uuid column so remote-created linkage isn't
+///    dropped on pull, but creating/quoting RFQs from mobile means building
+///    those features, not mapping existing ones.
 ///  - Documents' filePath is a local on-device path -- syncing it verbatim
 ///    would hand another device a metadata row pointing at a file that
 ///    only exists on the original phone, with no actual file transfer
@@ -181,6 +174,76 @@ Map<String, dynamic> supplierToSupabaseJson(Supplier s) => {
       'notes': s.notes,
     };
 
+Map<String, dynamic> estimationToSupabaseJson(Estimation e) => {
+      'id': e.id,
+      'project_id': e.projectId,
+      'name': e.name,
+      'status': e.status,
+      'contractor_profit_percent': e.contractorProfitPercent,
+      'created_by': e.createdBy,
+    };
+
+Map<String, dynamic> costHeadToSupabaseJson(CostHead c) => {
+      'id': c.id,
+      'estimation_id': c.estimationId,
+      'name': c.name,
+      'calculation_type': c.calculationType,
+      'raw_unit': c.rawUnit,
+      'billing_unit': c.billingUnit,
+      'conversion_factor': c.conversionFactor,
+      'rate_per_unit': c.ratePerUnit,
+      'sort_order': c.sortOrder,
+    };
+
+Map<String, dynamic> measurementEntryToSupabaseJson(MeasurementEntry m) => {
+      'id': m.id,
+      'cost_head_id': m.costHeadId,
+      'description': m.description,
+      'length': m.length,
+      'width': m.width,
+      'depth': m.depth,
+      'nos': m.nos,
+      'is_deduction': m.isDeduction,
+    };
+
+Map<String, dynamic> steelEntryToSupabaseJson(SteelEntry s) => {
+      'id': s.id,
+      'cost_head_id': s.costHeadId,
+      'description': s.description,
+      'bar_dia_mm': s.barDiaMm,
+      'nos': s.nos,
+      'length_ft': s.lengthFt,
+    };
+
+Map<String, dynamic> purchaseRequestToSupabaseJson(PurchaseRequest r) => {
+      'id': r.id,
+      'project_id': r.projectId,
+      'item_name': r.materialName,
+      'quantity': r.quantity,
+      'unit': r.unit,
+      'estimated_cost': r.estimatedAmount,
+      'urgency': r.urgency,
+      'status': r.status,
+      'requested_by': r.raisedBy,
+      'approved_by': r.approvedBy,
+      'approved_at': _timestamp(r.approvedAt),
+      'notes': r.notes,
+    };
+
+Map<String, dynamic> purchaseOrderToSupabaseJson(PurchaseOrder o) => {
+      'id': o.id,
+      'project_id': o.projectId,
+      'vendor_id': o.supplierId,
+      'quote_id': o.quoteId,
+      'requisition_id': o.requestId,
+      'po_number': o.poNumber,
+      'total_amount': o.totalAmount,
+      'delivery_date': _dateOnly(o.deliveryDate),
+      'status': o.status,
+      'notes': o.notes,
+      'created_by': o.raisedBy,
+    };
+
 // --- Reverse direction: a row pulled from Supabase (Realtime or a fetch),
 // as a Postgres-shaped JSON map, into a Drift companion for upserting
 // locally. Used by the pull side of the sync engine.
@@ -304,5 +367,78 @@ SuppliersCompanion supplierFromSupabaseJson(Map<String, dynamic> row) => Supplie
       address: Value(row['address'] as String?),
       gstNumber: Value(row['gst_number'] as String?),
       category: Value(row['category'] as String?),
+      notes: Value(row['notes'] as String?),
+    );
+
+EstimationsCompanion estimationFromSupabaseJson(Map<String, dynamic> row) => EstimationsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      name: row['name'] as String,
+      status: Value(row['status'] as String? ?? 'draft'),
+      contractorProfitPercent: Value((row['contractor_profit_percent'] as num?)?.toDouble()),
+      createdBy: row['created_by'] as String,
+    );
+
+CostHeadsCompanion costHeadFromSupabaseJson(Map<String, dynamic> row) => CostHeadsCompanion.insert(
+      id: row['id'] as String,
+      estimationId: row['estimation_id'] as String,
+      name: row['name'] as String,
+      calculationType: row['calculation_type'] as String,
+      rawUnit: row['raw_unit'] as String,
+      billingUnit: row['billing_unit'] as String,
+      conversionFactor: Value((row['conversion_factor'] as num?)?.toDouble() ?? 1),
+      ratePerUnit: Value((row['rate_per_unit'] as num?)?.toDouble()),
+      sortOrder: Value(row['sort_order'] as int? ?? 0),
+    );
+
+MeasurementEntriesCompanion measurementEntryFromSupabaseJson(Map<String, dynamic> row) =>
+    MeasurementEntriesCompanion.insert(
+      id: row['id'] as String,
+      costHeadId: row['cost_head_id'] as String,
+      description: row['description'] as String,
+      length: Value((row['length'] as num?)?.toDouble()),
+      width: Value((row['width'] as num?)?.toDouble()),
+      depth: Value((row['depth'] as num?)?.toDouble()),
+      nos: Value((row['nos'] as num?)?.toDouble() ?? 1),
+      isDeduction: Value(row['is_deduction'] as bool? ?? false),
+    );
+
+SteelEntriesCompanion steelEntryFromSupabaseJson(Map<String, dynamic> row) => SteelEntriesCompanion.insert(
+      id: row['id'] as String,
+      costHeadId: row['cost_head_id'] as String,
+      description: row['description'] as String,
+      barDiaMm: (row['bar_dia_mm'] as num).toDouble(),
+      nos: (row['nos'] as num).toDouble(),
+      lengthFt: (row['length_ft'] as num).toDouble(),
+    );
+
+PurchaseRequestsCompanion purchaseRequestFromSupabaseJson(Map<String, dynamic> row) =>
+    PurchaseRequestsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      raisedBy: row['requested_by'] as String,
+      materialName: row['item_name'] as String,
+      quantity: Value((row['quantity'] as num?)?.toDouble() ?? 1),
+      unit: Value(row['unit'] as String? ?? ''),
+      estimatedAmount: Value((row['estimated_cost'] as num?)?.toDouble()),
+      urgency: Value(row['urgency'] as String? ?? 'normal'),
+      status: Value(row['status'] as String? ?? 'pending'),
+      approvedBy: Value(row['approved_by'] as String?),
+      approvedAt: Value(row['approved_at'] == null ? null : DateTime.parse(row['approved_at'] as String)),
+      notes: Value(row['notes'] as String?),
+    );
+
+PurchaseOrdersCompanion purchaseOrderFromSupabaseJson(Map<String, dynamic> row) =>
+    PurchaseOrdersCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      supplierId: row['vendor_id'] as String,
+      requestId: Value(row['requisition_id'] as String?),
+      quoteId: Value(row['quote_id'] as String?),
+      raisedBy: row['created_by'] as String,
+      poNumber: Value(row['po_number'] as String?),
+      totalAmount: Value((row['total_amount'] as num?)?.toDouble()),
+      deliveryDate: Value(row['delivery_date'] == null ? null : DateTime.parse(row['delivery_date'] as String)),
+      status: Value(row['status'] as String? ?? 'issued'),
       notes: Value(row['notes'] as String?),
     );

@@ -35,6 +35,7 @@ class SyncEngine {
   final SupabaseClient client;
   RealtimeChannel? _tasksChannel;
   RealtimeChannel? _projectsChannel;
+  RealtimeChannel? _vendorsChannel;
 
   /// Fired after a Realtime event has been upserted into Drift. SyncEngine
   /// stays plain Dart with no Flutter/Riverpod dependency (see this file's
@@ -45,6 +46,7 @@ class SyncEngine {
   /// class knowing Riverpod exists.
   void Function()? onTasksChanged;
   void Function()? onProjectsChanged;
+  void Function()? onVendorsChanged;
 
   /// Drains the outbox in order. Stops (does not skip past) on the first
   /// failure within a run, to preserve per-record write ordering -- a
@@ -126,6 +128,30 @@ class SyncEngine {
     for (final row in vendorRows) {
       await db.supplierDao.upsertFromRemote(supplierFromSupabaseJson(row));
     }
+    final estimationRows = await client.from('estimations').select();
+    for (final row in estimationRows) {
+      await db.estimationDao.upsertFromRemote(estimationFromSupabaseJson(row));
+    }
+    final costHeadRows = await client.from('cost_heads').select();
+    for (final row in costHeadRows) {
+      await db.estimationDao.upsertFromRemoteCostHead(costHeadFromSupabaseJson(row));
+    }
+    final measurementRows = await client.from('measurement_entries').select();
+    for (final row in measurementRows) {
+      await db.estimationDao.upsertFromRemoteMeasurement(measurementEntryFromSupabaseJson(row));
+    }
+    final steelRows = await client.from('steel_entries').select();
+    for (final row in steelRows) {
+      await db.estimationDao.upsertFromRemoteSteel(steelEntryFromSupabaseJson(row));
+    }
+    final requisitionRows = await client.from('purchase_requisitions').select();
+    for (final row in requisitionRows) {
+      await db.purchaseDao.upsertFromRemoteRequest(purchaseRequestFromSupabaseJson(row));
+    }
+    final purchaseOrderRows = await client.from('purchase_orders').select();
+    for (final row in purchaseOrderRows) {
+      await db.purchaseDao.upsertFromRemoteOrder(purchaseOrderFromSupabaseJson(row));
+    }
   }
 
   /// Live updates for one project's tasks -- INSERT/UPDATE/DELETE on the
@@ -176,6 +202,26 @@ class SyncEngine {
     await _awaitJoin(channel, label: 'projects-$companyId');
   }
 
+  /// Live updates for a company's vendor directory (the Suppliers tab is
+  /// company-scoped, like projects). See subscribeToProjectTasks's docstring
+  /// for why this awaits the join.
+  Future<void> subscribeToCompanyVendors(String companyId) async {
+    await _vendorsChannel?.unsubscribe();
+    final channel = client.channel('vendors-$companyId').onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'vendors',
+          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'company_id', value: companyId),
+          callback: (payload) async {
+            if (payload.eventType == PostgresChangeEvent.delete) return;
+            await db.supplierDao.upsertFromRemote(supplierFromSupabaseJson(payload.newRecord));
+            onVendorsChanged?.call();
+          },
+        );
+    _vendorsChannel = channel;
+    await _awaitJoin(channel, label: 'vendors-$companyId');
+  }
+
   Future<void> _awaitJoin(RealtimeChannel channel, {required String label}) {
     final completer = Completer<void>();
     channel.subscribe((status, error) {
@@ -195,5 +241,6 @@ class SyncEngine {
   Future<void> dispose() async {
     if (_tasksChannel != null) await _tasksChannel!.unsubscribe();
     if (_projectsChannel != null) await _projectsChannel!.unsubscribe();
+    if (_vendorsChannel != null) await _vendorsChannel!.unsubscribe();
   }
 }

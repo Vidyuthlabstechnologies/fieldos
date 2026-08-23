@@ -241,16 +241,27 @@ class Suppliers extends Table {
 }
 
 /// RFQ / purchase request raised by site, awaiting approval + ordering.
+/// Column set mirrors supabase purchase_requisitions 1:1 (including the
+/// status vocabulary -- 'pending'/'approved'/'rejected'/'ordered', NOT a
+/// local 'draft') so rows can sync without violating the remote CHECK
+/// constraints. See sync_mappers.dart's docstring for the full story.
 class PurchaseRequests extends Table {
   TextColumn get id => text()();
   TextColumn get projectId => text().withLength(min: 1, max: 36)();
   TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
   TextColumn get materialName => text().withLength(min: 1, max: 200)();
   RealColumn get quantity => real().withDefault(const Constant(1))();
-  TextColumn get unit => text().withLength(max: 20).nullable()();
+  // Postgres has unit NOT NULL -- locally non-null defaulting to '' keeps
+  // every local row pushable instead of failing the remote constraint.
+  TextColumn get unit => text().withDefault(const Constant(''))();
   RealColumn get estimatedAmount => real().nullable()();
+  TextColumn get urgency =>
+      text().withLength(min: 1, max: 10).withDefault(const Constant('normal'))();
   TextColumn get status =>
-      text().withLength(min: 1, max: 20).withDefault(const Constant('draft'))();
+      text().withLength(min: 1, max: 20).withDefault(const Constant('pending'))();
+  TextColumn get approvedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get approvedAt => dateTime().nullable()();
+  TextColumn get notes => text().withLength(max: 500).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
@@ -258,15 +269,25 @@ class PurchaseRequests extends Table {
 }
 
 /// Approved purchase order issued to a supplier (originates from an RFQ).
+/// Mirrors supabase purchase_orders: statuses are the remote CHECK values
+/// ('issued'/'acknowledged'/'delivered'/'cancelled'). requestId/requisitionId
+/// and quoteId carry both possible origins -- Postgres got requisition_id in
+/// a follow-up migration so a mobile-raised PO round-trips its origin link;
+/// quoteId is stored as an opaque uuid (no local quotes table) purely so a
+/// remotely-created PO doesn't lose that linkage on pull.
 class PurchaseOrders extends Table {
   TextColumn get id => text()();
   TextColumn get projectId => text().withLength(min: 1, max: 36)();
   TextColumn get supplierId => text().withLength(min: 1, max: 36)();
   TextColumn get requestId => text().withLength(max: 36).nullable()();
+  TextColumn get quoteId => text().withLength(max: 36).nullable()();
   TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  TextColumn get poNumber => text().withLength(max: 50).nullable()();
   RealColumn get totalAmount => real().nullable()();
+  DateTimeColumn get deliveryDate => dateTime().nullable()();
   TextColumn get status =>
-      text().withLength(min: 1, max: 20).withDefault(const Constant('open'))();
+      text().withLength(min: 1, max: 20).withDefault(const Constant('issued'))();
+  TextColumn get notes => text().withLength(max: 500).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override

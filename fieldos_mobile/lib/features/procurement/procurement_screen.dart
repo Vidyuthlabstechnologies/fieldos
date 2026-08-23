@@ -189,8 +189,8 @@ class _RfqTab extends ConsumerWidget {
                         ListTile(
                           title: Text(r.materialName),
                           subtitle: Text(
-                              'Qty ${r.quantity} ${r.unit ?? ''} · ₹${r.estimatedAmount ?? 0} · ${r.status}'),
-                          trailing: r.status == 'draft'
+                              'Qty ${r.quantity} ${r.unit} · ₹${r.estimatedAmount ?? 0} · ${r.status}'),
+                          trailing: r.status == 'pending'
                               ? FilledButton(
                                   child: const Text('Make PO'),
                                   onPressed: () => _makePo(context, ref, r, suppliers),
@@ -240,7 +240,6 @@ class _RfqTab extends ConsumerWidget {
           quantity: Value(double.tryParse(qty.text) ?? 1),
           unit: Value(unit.text.trim()),
           estimatedAmount: Value(double.tryParse(est.text)),
-          status: const Value('draft'),
         ));
     ref.invalidate(requestsProvider(projectId));
   }
@@ -271,7 +270,6 @@ class _RfqTab extends ConsumerWidget {
           requestId: Value(r.id),
           raisedBy: userId,
           totalAmount: Value(double.tryParse(amount.text)),
-          status: const Value('open'),
         ));
     await db.purchaseDao.setRequestStatus(r.id, 'ordered');
     ref.invalidate(requestsProvider(projectId));
@@ -321,7 +319,7 @@ class _PoTab extends ConsumerWidget {
                         ListTile(
                           title: Text('PO · ₹${o.totalAmount ?? 0}'),
                           subtitle: Text('Supplier ${_supName(suppliers, o.supplierId)} · ${o.status}'),
-                          trailing: o.status == 'open'
+                          trailing: o.status == 'issued'
                               ? FilledButton(
                                   child: const Text('Receive'),
                                   onPressed: () => _receive(context, ref, o, suppliers),
@@ -376,7 +374,7 @@ class _PoTab extends ConsumerWidget {
           receivedBy: userId,
           receivedOn: DateTime.now(),
         ));
-    await db.purchaseDao.setOrderStatus(o.id, 'received');
+    await db.purchaseDao.setOrderStatus(o.id, 'delivered');
     ref.invalidate(ordersProvider(projectId));
     ref.invalidate(receiptsProvider(projectId));
     ref.invalidate(costSummaryProvider(projectId));

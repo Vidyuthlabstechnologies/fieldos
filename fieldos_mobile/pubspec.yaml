@@ -38,8 +38,7 @@ dependencies:
   path: ^1.9.0
 
   # File picker for attaching documents (Storage Access Framework / document picker).
-  # Pinned to this exact beta: file_picker <11 hardcodes compileSdk 34
-  # (breaks once anything needs >=36); 11.x ignores the android.builtInKotlin
+  # Pinned to this exact beta: file_picker <11 hardcodes compileSdk 34  # (breaks once anything needs >=36); 11.x ignores the android.builtInKotlin
   # gradle property and unconditionally skips its own Kotlin plugin under
   # AGP 9+, which conflicts with flutter_plugin_android_lifecycle (still
   # applying the traditional plugin unconditionally) and leaves
@@ -47,6 +46,11 @@ dependencies:
   # actually respects the flag instead of ignoring it. See
   # docs/MOBILE_GUIDE.md.
   file_picker: 12.0.0-beta.7
+
+  # Camera-first photo evidence capture (DPR/inspection proof photos).
+  # Uses the system camera app / Android Photo Picker, so no runtime
+  # permission prompts of our own are needed.
+  image_picker: ^1.1.2
 
   # Cross-employee sync backend (see docs/SUPABASE_SYNC_RESEARCH.md). The
   # plain `supabase` package (not `supabase_flutter`) deliberately -- its

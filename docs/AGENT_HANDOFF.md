@@ -111,21 +111,29 @@ not yet scoped." That's false. A real, tested sync layer exists:
 - **Auth bridge:** `lib/sync/cloud_sync_service.dart` bridges local pbkdf2
   auth to a real Supabase Auth session (sign-in-first, fall back to sign-up).
   Reachable from the app at Settings → Cloud sync (`enable sync` / `sync now`).
-- **Entity coverage — 11 of ~20 syncable tables, all verified against real
+- **Entity coverage — 17 of ~20 syncable tables, all verified against real
   Postgres:** Project, Task, DPR entry, Issue, Worker, Equipment, Inspection,
-  Subcontractor, WorkOrder, Approval, Supplier (→ `vendors`; the local
-  Suppliers table was extended with nullable
-  contact_person/address/gst_number/category/notes columns so every vendors
-  business column round-trips instead of being dropped on pull).
+  Subcontractor, WorkOrder, Approval, Supplier (→ `vendors`; local table
+  extended for full column parity), the estimation tree
+  (Estimation/CostHead/MeasurementEntry/SteelEntry), and the procurement
+  core (PurchaseRequest → `purchase_requisitions`, PurchaseOrder →
+  `purchase_orders` — mobile schemas were aligned to the remote CHECK
+  vocabularies first; see `lib/data/tables.dart`).
 - **Deliberately NOT wired** (see `lib/sync/sync_mappers.dart`'s docstring
   for the full reasoning per table): MaterialReceipts (shape doesn't map to
   desktop's `material_entries`), Documents (would sync a metadata row
   pointing at a file that only exists on one phone — needs Supabase Storage
   upload first, not just a column mapping), LabourAttendance (punch-events
   vs. a daily summary — needs real aggregation, not a mapping).
-- **Realtime is wired into the UI for exactly one thing:** the task list on
-  `ProjectDetailScreen`. Nothing else has a live-update UI hookup yet, even
-  though the engine-level mechanism would support it for every synced table.
+- **Realtime:** engine-level subscriptions exist for project tasks, company
+  projects, and company vendors (`subscribeToCompanyVendors`); the
+  publication now carries `tasks, projects, vendors,
+  purchase_requisitions, purchase_orders`. The only live-update UI hookup
+  is still `ProjectDetailScreen`'s task list — the other subscriptions'
+  `on*Changed` hooks are ready for screens to consume.
+- **Sync visibility exists now:** Settings → Cloud sync shows the pending
+  outbox count and last-synced timestamp (persisted in AppSettings as
+  `last_sync_at`, written after each successful `syncNow()`).
 - **No conflict resolution beyond "pull is server-wins."** Fine today
   because each record has one real-world owner; will need real design work
   the day two people edit the same record offline.
@@ -209,6 +217,13 @@ surface again:
   network-touching screen, consider `integration_test/`
   (`IntegrationTestWidgetsFlutterBinding`, no FakeAsync) instead of
   fighting this again.
+- **Any new Drift column/table needs a migration step, not just a table
+  edit.** `schemaVersion` is 4 and `AppDatabase.migration`'s `onUpgrade`
+  handles v3→v4 (suppliers parity + procurement alignment columns,
+  including a `TableMigration` backfill for the now-NOT-NULL unit).
+  Before that existed, an additive change shipped with no upgrade path —
+  the default drift migrator only creates missing tables, never alters
+  existing ones. Bump the version and add a step for every schema change.
 - **A `supabase db reset` restarts the realtime container, and
   `postgres_changes` tests can fail once immediately afterwards** (channel
   join/event delivery not warm yet). The realtime test passed on immediate
@@ -241,7 +256,7 @@ supabase db reset              # after any migration file change
 cd fieldos_mobile
 flutter analyze                # should be clean except one pre-existing,
                                 # unrelated deprecation warning in labour_screen.dart
-flutter test                   # full suite — 55 tests as of this commit, all real-infra
+flutter test                   # full suite — 57 tests as of this commit, all real-infra
 flutter test test/some_file.dart   # a single file
 ```
 
@@ -258,27 +273,23 @@ In rough priority order (highest-value next work first). Full detail with
 artifact if it's reachable from your session; if not, this list is the
 same content in prose:
 
-1. **More entities into cloud sync** — `vendors` is wired (see entity
-   coverage above). The rest of the procurement chain
-   (requisitions, RFQs, quotes, POs, GRNs) is deliberately NOT mapped yet:
-   the mobile model is a collapsed draft of the Postgres one, so syncing
-   today would corrupt data — mobile statuses ('draft'/'open') violate the
-   Postgres CHECK constraints, unit nullability differs, and mobile's
-   PurchaseOrders.requestId points at a requisition while Postgres's
-   quote_id points at quotes. Wiring these honestly means aligning the
-   mobile schema + UI state machines first; the full per-table reasoning
-   lives in `lib/sync/sync_mappers.dart`'s docstring and should be kept
-   current there. Then: Estimation/CostHeads, Documents (needs Supabase
-   Storage file upload, not just row sync), LabourAttendance (needs
-   punch→daily-summary aggregation). Follow the recipe above, per-table.
-2. **Sync visibility in the UI** — no pending-outbox-count or
-   last-synced-timestamp shown anywhere yet, despite `syncOutboxDao.pendingCount()`
-   already existing. Small, high-value add.
-3. **Realtime wired for more than just tasks** — the mechanism supports
-   any table; only `ProjectDetailScreen`'s task list actually subscribes.
-4. **Photo evidence capture** — DPR/inspections/materials expect photo
-   evidence; today it's a generic file picker, not a camera-first flow.
-   Add `camera` or `image_picker`.
+1. **More entities into cloud sync** — 17 of ~20 wired (see entity
+   coverage). Remaining, each with its blocker: `grns`/MaterialReceipts and
+   `attendance`/LabourAttendance (shape mismatches — see
+   `sync_mappers.dart`'s docstring), Documents (needs Supabase Storage file
+   upload first), `rfqs`/`quotes` (no mobile tables exist — building them
+   is a feature, not a mapping). The procurement core IS synced now:
+   mobile schemas were aligned to the Postgres CHECK vocabularies (v4
+   drift migration) and requisition/PO status changes push through RLS.
+2. **~~Sync visibility in the UI~~ DONE** — Settings → Cloud sync shows
+   pending outbox count + last-synced timestamp.
+3. **Realtime UI hookups beyond the task list** — engine subscriptions
+   exist for projects/vendors too; only `ProjectDetailScreen`'s task list
+   consumes a live-updates callback so far.
+4. **Photo evidence capture** — DPR entries now have camera-first capture
+   (`image_picker`, camera before gallery) via
+   `lib/features/shared/photo_capture.dart`; inspections/materials still
+   use generic pickers. Needs on-device verification of the camera intent.
 5. **Feature-breadth gaps vs. the Kraaft/Onsite competitor research**
    (`docs/MARKET_UX_RESEARCH.md`) — no chat/messaging, no map view (a
    geofence radius check exists for attendance but no map UI), no push
