@@ -10,9 +10,8 @@
 /// app restarts, the `Supabase.instance` singleton) are a UI-layer concern
 /// for whoever wires the Auth screens to this -- not needed here.
 ///
-/// Only Project/Task are wired end to end so far (see
-/// lib/sync/sync_mappers.dart's docstring) -- this proves the mechanism
-/// correctly before mechanically extending it to the rest of the schema.
+/// See lib/sync/sync_mappers.dart's docstring for which tables are wired
+/// end to end so far, and which are deliberately not (yet).
 library;
 
 import 'dart:convert';
@@ -91,6 +90,14 @@ class SyncEngine {
     final workerRows = await client.from('workers').select();
     for (final row in workerRows) {
       await db.workerDao.upsertFromRemote(workerFromSupabaseJson(row));
+    }
+    final equipmentRows = await client.from('equipment').select();
+    for (final row in equipmentRows) {
+      await db.equipmentDao.upsertFromRemote(equipmentFromSupabaseJson(row));
+    }
+    final inspectionRows = await client.from('inspections').select();
+    for (final row in inspectionRows) {
+      await db.inspectionDao.upsertFromRemote(inspectionFromSupabaseJson(row));
     }
   }
 

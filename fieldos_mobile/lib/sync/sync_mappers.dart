@@ -6,13 +6,16 @@
 /// checked against supabase/migrations/20260823000000_initial_schema.sql by
 /// hand, not inferred.
 ///
-/// Project, Task, DprEntry, Issue, and Worker are covered -- chosen because
-/// their Drift columns correspond 1:1 with the Postgres schema. Not every
-/// mobile table does: e.g. MaterialReceipts (procurement-chain shaped --
-/// po_id/supplier_id/cost_head_id) has no honest mapping to material_entries
-/// (the desktop's simple consumption-log shape) -- forcing one would
-/// silently corrupt data, so it's deliberately NOT wired rather than
-/// wired wrong. Extending to the rest of the ~30 tables is a follow-up,
+/// Project, Task, DprEntry, Issue, Worker, Equipment, and Inspection are
+/// covered -- chosen because their Drift columns correspond 1:1 with the
+/// Postgres schema. Not every mobile table does: e.g. MaterialReceipts
+/// (procurement-chain shaped -- po_id/supplier_id/cost_head_id) has no
+/// honest mapping to material_entries (the desktop's simple consumption-log
+/// shape) -- forcing one would silently corrupt data, so it's deliberately
+/// NOT wired rather than wired wrong. EquipmentLogs and InspectionItems
+/// (child/detail rows of Equipment/Inspection) are also not yet wired --
+/// same reasoning as MaterialReceipts's omission, just not yet verified,
+/// not ruled out. Extending to the rest of the ~30 tables is a follow-up,
 /// same pattern, per-table -- verify the shapes actually correspond before
 /// wiring, the way this file's docstring itself demonstrates by omission.
 library;
@@ -77,6 +80,31 @@ Map<String, dynamic> workerToSupabaseJson(Worker w) => {
       'status': w.status,
     };
 
+Map<String, dynamic> equipmentToSupabaseJson(EquipmentData e) => {
+      'id': e.id,
+      'project_id': e.projectId,
+      'name': e.name,
+      'equipment_type': e.equipmentType,
+      'model': e.model,
+      'registration_number': e.registrationNumber,
+      'status': e.status,
+      'daily_rate': e.dailyRate,
+      'notes': e.notes,
+    };
+
+Map<String, dynamic> inspectionToSupabaseJson(Inspection i) => {
+      'id': i.id,
+      'project_id': i.projectId,
+      'title': i.title,
+      'inspection_type': i.inspectionType,
+      'status': i.status,
+      'inspector_id': i.inspectorId,
+      'scheduled_date': _dateOnly(i.scheduledDate),
+      'completed_date': _dateOnly(i.completedDate),
+      'overall_result': i.overallResult,
+      'notes': i.notes,
+    };
+
 // --- Reverse direction: a row pulled from Supabase (Realtime or a fetch),
 // as a Postgres-shaped JSON map, into a Drift companion for upserting
 // locally. Used by the pull side of the sync engine.
@@ -133,4 +161,29 @@ WorkersCompanion workerFromSupabaseJson(Map<String, dynamic> row) => WorkersComp
       phone: Value(row['phone'] as String?),
       dailyWage: Value((row['daily_wage'] as num?)?.toDouble()),
       status: Value(row['status'] as String? ?? 'active'),
+    );
+
+EquipmentCompanion equipmentFromSupabaseJson(Map<String, dynamic> row) => EquipmentCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      name: row['name'] as String,
+      equipmentType: Value(row['equipment_type'] as String?),
+      model: Value(row['model'] as String?),
+      registrationNumber: Value(row['registration_number'] as String?),
+      status: Value(row['status'] as String? ?? 'available'),
+      dailyRate: Value((row['daily_rate'] as num?)?.toDouble()),
+      notes: Value(row['notes'] as String?),
+    );
+
+InspectionsCompanion inspectionFromSupabaseJson(Map<String, dynamic> row) => InspectionsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      title: row['title'] as String,
+      inspectionType: row['inspection_type'] as String,
+      status: Value(row['status'] as String? ?? 'open'),
+      inspectorId: Value(row['inspector_id'] as String?),
+      scheduledDate: Value(row['scheduled_date'] == null ? null : DateTime.parse(row['scheduled_date'] as String)),
+      completedDate: Value(row['completed_date'] == null ? null : DateTime.parse(row['completed_date'] as String)),
+      overallResult: Value(row['overall_result'] as String?),
+      notes: Value(row['notes'] as String?),
     );

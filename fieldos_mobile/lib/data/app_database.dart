@@ -676,7 +676,14 @@ class EquipmentDao extends DatabaseAccessor<AppDatabase> with _$EquipmentDaoMixi
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(equipment).insert(companion.copyWith(id: Value(id)));
-      return (await (select(equipment)..where((e) => e.id.equals(id))).getSingle());
+      final row = await (select(equipment)..where((e) => e.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'equipment',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(equipmentToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
@@ -685,9 +692,22 @@ class EquipmentDao extends DatabaseAccessor<AppDatabase> with _$EquipmentDaoMixi
   }
 
   Future<void> updateStatus(String id, String status) {
-    return (update(equipment)..where((e) => e.id.equals(id)))
-        .write(EquipmentCompanion(status: Value(status)));
+    return transaction(() async {
+      await (update(equipment)..where((e) => e.id.equals(id)))
+          .write(EquipmentCompanion(status: Value(status)));
+      final row = await (select(equipment)..where((e) => e.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'equipment',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(equipmentToSupabaseJson(row)),
+      );
+    });
   }
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertFromRemote(EquipmentCompanion companion) =>
+      into(equipment).insertOnConflictUpdate(companion);
 
   Future<EquipmentLog> addLog(EquipmentLogsCompanion companion) {
     final id = companion.id.present ? companion.id.value : _uuid.v4();
@@ -717,7 +737,14 @@ class InspectionDao extends DatabaseAccessor<AppDatabase> with _$InspectionDaoMi
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(inspections).insert(companion.copyWith(id: Value(id)));
-      return (await (select(inspections)..where((i) => i.id.equals(id))).getSingle());
+      final row = await (select(inspections)..where((i) => i.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'inspections',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(inspectionToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
@@ -726,12 +753,25 @@ class InspectionDao extends DatabaseAccessor<AppDatabase> with _$InspectionDaoMi
   }
 
   Future<void> complete(String id, String overallResult) {
-    return (update(inspections)..where((i) => i.id.equals(id))).write(InspectionsCompanion(
-      status: const Value('completed'),
-      completedDate: Value(DateTime.now()),
-      overallResult: Value(overallResult),
-    ));
+    return transaction(() async {
+      await (update(inspections)..where((i) => i.id.equals(id))).write(InspectionsCompanion(
+        status: const Value('completed'),
+        completedDate: Value(DateTime.now()),
+        overallResult: Value(overallResult),
+      ));
+      final row = await (select(inspections)..where((i) => i.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'inspections',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(inspectionToSupabaseJson(row)),
+      );
+    });
   }
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertFromRemote(InspectionsCompanion companion) =>
+      into(inspections).insertOnConflictUpdate(companion);
 
   Future<InspectionItem> addItem(InspectionItemsCompanion companion) {
     final id = companion.id.present ? companion.id.value : _uuid.v4();
