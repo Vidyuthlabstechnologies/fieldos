@@ -511,6 +511,15 @@ alter table approvals enable row level security;
 -- to any table regardless of how correct the RLS policies below are (this
 -- was caught by actually running rls_verification_test.sql, not assumed).
 -- `anon` gets nothing at all -- every table here requires a real session.
+--
+-- `service_role` needs its own explicit grant too, even though it bypasses
+-- RLS policy evaluation (via Supabase's bypassrls role attribute) -- RLS
+-- and table-level GRANTs are two separate mechanisms, and a newly created
+-- table's default privileges don't extend to service_role automatically.
+-- Caught by sync_engine_test.dart's own setup code (which legitimately
+-- uses the service-role client to seed test companies/users, bypassing RLS
+-- the same way the app's own admin tooling would) failing with "permission
+-- denied for table companies" on the very first insert.
 do $$
 declare
   t text;
@@ -528,6 +537,7 @@ begin
   loop
     execute format('revoke all on table %I from anon, authenticated;', t);
     execute format('grant select, insert, update, delete on table %I to authenticated;', t);
+    execute format('grant all on table %I to service_role;', t);
   end loop;
 end $$;
 

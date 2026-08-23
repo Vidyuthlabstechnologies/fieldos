@@ -15779,6 +15779,524 @@ class WorkersCompanion extends UpdateCompanion<Worker> {
   }
 }
 
+class $SyncOutboxTable extends SyncOutbox
+    with TableInfo<$SyncOutboxTable, SyncOutboxData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncOutboxTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _targetTableMeta = const VerificationMeta(
+    'targetTable',
+  );
+  @override
+  late final GeneratedColumn<String> targetTable = GeneratedColumn<String>(
+    'target_table',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recordIdMeta = const VerificationMeta(
+    'recordId',
+  );
+  @override
+  late final GeneratedColumn<String> recordId = GeneratedColumn<String>(
+    'record_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _operationMeta = const VerificationMeta(
+    'operation',
+  );
+  @override
+  late final GeneratedColumn<String> operation = GeneratedColumn<String>(
+    'operation',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _payloadMeta = const VerificationMeta(
+    'payload',
+  );
+  @override
+  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
+    'payload',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _retryCountMeta = const VerificationMeta(
+    'retryCount',
+  );
+  @override
+  late final GeneratedColumn<int> retryCount = GeneratedColumn<int>(
+    'retry_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastErrorMeta = const VerificationMeta(
+    'lastError',
+  );
+  @override
+  late final GeneratedColumn<String> lastError = GeneratedColumn<String>(
+    'last_error',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    targetTable,
+    recordId,
+    operation,
+    payload,
+    createdAt,
+    retryCount,
+    lastError,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_outbox';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncOutboxData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('target_table')) {
+      context.handle(
+        _targetTableMeta,
+        targetTable.isAcceptableOrUnknown(
+          data['target_table']!,
+          _targetTableMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_targetTableMeta);
+    }
+    if (data.containsKey('record_id')) {
+      context.handle(
+        _recordIdMeta,
+        recordId.isAcceptableOrUnknown(data['record_id']!, _recordIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordIdMeta);
+    }
+    if (data.containsKey('operation')) {
+      context.handle(
+        _operationMeta,
+        operation.isAcceptableOrUnknown(data['operation']!, _operationMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_operationMeta);
+    }
+    if (data.containsKey('payload')) {
+      context.handle(
+        _payloadMeta,
+        payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_payloadMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('retry_count')) {
+      context.handle(
+        _retryCountMeta,
+        retryCount.isAcceptableOrUnknown(data['retry_count']!, _retryCountMeta),
+      );
+    }
+    if (data.containsKey('last_error')) {
+      context.handle(
+        _lastErrorMeta,
+        lastError.isAcceptableOrUnknown(data['last_error']!, _lastErrorMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SyncOutboxData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncOutboxData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      targetTable: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_table'],
+      )!,
+      recordId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}record_id'],
+      )!,
+      operation: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}operation'],
+      )!,
+      payload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      retryCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}retry_count'],
+      )!,
+      lastError: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_error'],
+      ),
+    );
+  }
+
+  @override
+  $SyncOutboxTable createAlias(String alias) {
+    return $SyncOutboxTable(attachedDatabase, alias);
+  }
+}
+
+class SyncOutboxData extends DataClass implements Insertable<SyncOutboxData> {
+  final int id;
+  final String targetTable;
+  final String recordId;
+  final String operation;
+  final String payload;
+  final DateTime createdAt;
+  final int retryCount;
+  final String? lastError;
+  const SyncOutboxData({
+    required this.id,
+    required this.targetTable,
+    required this.recordId,
+    required this.operation,
+    required this.payload,
+    required this.createdAt,
+    required this.retryCount,
+    this.lastError,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['target_table'] = Variable<String>(targetTable);
+    map['record_id'] = Variable<String>(recordId);
+    map['operation'] = Variable<String>(operation);
+    map['payload'] = Variable<String>(payload);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['retry_count'] = Variable<int>(retryCount);
+    if (!nullToAbsent || lastError != null) {
+      map['last_error'] = Variable<String>(lastError);
+    }
+    return map;
+  }
+
+  SyncOutboxCompanion toCompanion(bool nullToAbsent) {
+    return SyncOutboxCompanion(
+      id: Value(id),
+      targetTable: Value(targetTable),
+      recordId: Value(recordId),
+      operation: Value(operation),
+      payload: Value(payload),
+      createdAt: Value(createdAt),
+      retryCount: Value(retryCount),
+      lastError: lastError == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastError),
+    );
+  }
+
+  factory SyncOutboxData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncOutboxData(
+      id: serializer.fromJson<int>(json['id']),
+      targetTable: serializer.fromJson<String>(json['targetTable']),
+      recordId: serializer.fromJson<String>(json['recordId']),
+      operation: serializer.fromJson<String>(json['operation']),
+      payload: serializer.fromJson<String>(json['payload']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      retryCount: serializer.fromJson<int>(json['retryCount']),
+      lastError: serializer.fromJson<String?>(json['lastError']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'targetTable': serializer.toJson<String>(targetTable),
+      'recordId': serializer.toJson<String>(recordId),
+      'operation': serializer.toJson<String>(operation),
+      'payload': serializer.toJson<String>(payload),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'retryCount': serializer.toJson<int>(retryCount),
+      'lastError': serializer.toJson<String?>(lastError),
+    };
+  }
+
+  SyncOutboxData copyWith({
+    int? id,
+    String? targetTable,
+    String? recordId,
+    String? operation,
+    String? payload,
+    DateTime? createdAt,
+    int? retryCount,
+    Value<String?> lastError = const Value.absent(),
+  }) => SyncOutboxData(
+    id: id ?? this.id,
+    targetTable: targetTable ?? this.targetTable,
+    recordId: recordId ?? this.recordId,
+    operation: operation ?? this.operation,
+    payload: payload ?? this.payload,
+    createdAt: createdAt ?? this.createdAt,
+    retryCount: retryCount ?? this.retryCount,
+    lastError: lastError.present ? lastError.value : this.lastError,
+  );
+  SyncOutboxData copyWithCompanion(SyncOutboxCompanion data) {
+    return SyncOutboxData(
+      id: data.id.present ? data.id.value : this.id,
+      targetTable: data.targetTable.present
+          ? data.targetTable.value
+          : this.targetTable,
+      recordId: data.recordId.present ? data.recordId.value : this.recordId,
+      operation: data.operation.present ? data.operation.value : this.operation,
+      payload: data.payload.present ? data.payload.value : this.payload,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      retryCount: data.retryCount.present
+          ? data.retryCount.value
+          : this.retryCount,
+      lastError: data.lastError.present ? data.lastError.value : this.lastError,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncOutboxData(')
+          ..write('id: $id, ')
+          ..write('targetTable: $targetTable, ')
+          ..write('recordId: $recordId, ')
+          ..write('operation: $operation, ')
+          ..write('payload: $payload, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('lastError: $lastError')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    targetTable,
+    recordId,
+    operation,
+    payload,
+    createdAt,
+    retryCount,
+    lastError,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncOutboxData &&
+          other.id == this.id &&
+          other.targetTable == this.targetTable &&
+          other.recordId == this.recordId &&
+          other.operation == this.operation &&
+          other.payload == this.payload &&
+          other.createdAt == this.createdAt &&
+          other.retryCount == this.retryCount &&
+          other.lastError == this.lastError);
+}
+
+class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxData> {
+  final Value<int> id;
+  final Value<String> targetTable;
+  final Value<String> recordId;
+  final Value<String> operation;
+  final Value<String> payload;
+  final Value<DateTime> createdAt;
+  final Value<int> retryCount;
+  final Value<String?> lastError;
+  const SyncOutboxCompanion({
+    this.id = const Value.absent(),
+    this.targetTable = const Value.absent(),
+    this.recordId = const Value.absent(),
+    this.operation = const Value.absent(),
+    this.payload = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.retryCount = const Value.absent(),
+    this.lastError = const Value.absent(),
+  });
+  SyncOutboxCompanion.insert({
+    this.id = const Value.absent(),
+    required String targetTable,
+    required String recordId,
+    required String operation,
+    required String payload,
+    this.createdAt = const Value.absent(),
+    this.retryCount = const Value.absent(),
+    this.lastError = const Value.absent(),
+  }) : targetTable = Value(targetTable),
+       recordId = Value(recordId),
+       operation = Value(operation),
+       payload = Value(payload);
+  static Insertable<SyncOutboxData> custom({
+    Expression<int>? id,
+    Expression<String>? targetTable,
+    Expression<String>? recordId,
+    Expression<String>? operation,
+    Expression<String>? payload,
+    Expression<DateTime>? createdAt,
+    Expression<int>? retryCount,
+    Expression<String>? lastError,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (targetTable != null) 'target_table': targetTable,
+      if (recordId != null) 'record_id': recordId,
+      if (operation != null) 'operation': operation,
+      if (payload != null) 'payload': payload,
+      if (createdAt != null) 'created_at': createdAt,
+      if (retryCount != null) 'retry_count': retryCount,
+      if (lastError != null) 'last_error': lastError,
+    });
+  }
+
+  SyncOutboxCompanion copyWith({
+    Value<int>? id,
+    Value<String>? targetTable,
+    Value<String>? recordId,
+    Value<String>? operation,
+    Value<String>? payload,
+    Value<DateTime>? createdAt,
+    Value<int>? retryCount,
+    Value<String?>? lastError,
+  }) {
+    return SyncOutboxCompanion(
+      id: id ?? this.id,
+      targetTable: targetTable ?? this.targetTable,
+      recordId: recordId ?? this.recordId,
+      operation: operation ?? this.operation,
+      payload: payload ?? this.payload,
+      createdAt: createdAt ?? this.createdAt,
+      retryCount: retryCount ?? this.retryCount,
+      lastError: lastError ?? this.lastError,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (targetTable.present) {
+      map['target_table'] = Variable<String>(targetTable.value);
+    }
+    if (recordId.present) {
+      map['record_id'] = Variable<String>(recordId.value);
+    }
+    if (operation.present) {
+      map['operation'] = Variable<String>(operation.value);
+    }
+    if (payload.present) {
+      map['payload'] = Variable<String>(payload.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (retryCount.present) {
+      map['retry_count'] = Variable<int>(retryCount.value);
+    }
+    if (lastError.present) {
+      map['last_error'] = Variable<String>(lastError.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncOutboxCompanion(')
+          ..write('id: $id, ')
+          ..write('targetTable: $targetTable, ')
+          ..write('recordId: $recordId, ')
+          ..write('operation: $operation, ')
+          ..write('payload: $payload, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('lastError: $lastError')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -15824,6 +16342,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $DocumentsTable documents = $DocumentsTable(this);
   late final $WorkersTable workers = $WorkersTable(this);
+  late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -15860,6 +16379,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     inspectionItems,
     documents,
     workers,
+    syncOutbox,
   ];
 }
 
@@ -23696,6 +24216,261 @@ typedef $$WorkersTableProcessedTableManager =
       Worker,
       PrefetchHooks Function()
     >;
+typedef $$SyncOutboxTableCreateCompanionBuilder =
+    SyncOutboxCompanion Function({
+      Value<int> id,
+      required String targetTable,
+      required String recordId,
+      required String operation,
+      required String payload,
+      Value<DateTime> createdAt,
+      Value<int> retryCount,
+      Value<String?> lastError,
+    });
+typedef $$SyncOutboxTableUpdateCompanionBuilder =
+    SyncOutboxCompanion Function({
+      Value<int> id,
+      Value<String> targetTable,
+      Value<String> recordId,
+      Value<String> operation,
+      Value<String> payload,
+      Value<DateTime> createdAt,
+      Value<int> retryCount,
+      Value<String?> lastError,
+    });
+
+class $$SyncOutboxTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncOutboxTable> {
+  $$SyncOutboxTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetTable => $composableBuilder(
+    column: $table.targetTable,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recordId => $composableBuilder(
+    column: $table.recordId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get operation => $composableBuilder(
+    column: $table.operation,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncOutboxTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncOutboxTable> {
+  $$SyncOutboxTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetTable => $composableBuilder(
+    column: $table.targetTable,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recordId => $composableBuilder(
+    column: $table.recordId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get operation => $composableBuilder(
+    column: $table.operation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncOutboxTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncOutboxTable> {
+  $$SyncOutboxTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get targetTable => $composableBuilder(
+    column: $table.targetTable,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get recordId =>
+      $composableBuilder(column: $table.recordId, builder: (column) => column);
+
+  GeneratedColumn<String> get operation =>
+      $composableBuilder(column: $table.operation, builder: (column) => column);
+
+  GeneratedColumn<String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastError =>
+      $composableBuilder(column: $table.lastError, builder: (column) => column);
+}
+
+class $$SyncOutboxTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncOutboxTable,
+          SyncOutboxData,
+          $$SyncOutboxTableFilterComposer,
+          $$SyncOutboxTableOrderingComposer,
+          $$SyncOutboxTableAnnotationComposer,
+          $$SyncOutboxTableCreateCompanionBuilder,
+          $$SyncOutboxTableUpdateCompanionBuilder,
+          (
+            SyncOutboxData,
+            BaseReferences<_$AppDatabase, $SyncOutboxTable, SyncOutboxData>,
+          ),
+          SyncOutboxData,
+          PrefetchHooks Function()
+        > {
+  $$SyncOutboxTableTableManager(_$AppDatabase db, $SyncOutboxTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncOutboxTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncOutboxTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncOutboxTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> targetTable = const Value.absent(),
+                Value<String> recordId = const Value.absent(),
+                Value<String> operation = const Value.absent(),
+                Value<String> payload = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> retryCount = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
+              }) => SyncOutboxCompanion(
+                id: id,
+                targetTable: targetTable,
+                recordId: recordId,
+                operation: operation,
+                payload: payload,
+                createdAt: createdAt,
+                retryCount: retryCount,
+                lastError: lastError,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String targetTable,
+                required String recordId,
+                required String operation,
+                required String payload,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> retryCount = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
+              }) => SyncOutboxCompanion.insert(
+                id: id,
+                targetTable: targetTable,
+                recordId: recordId,
+                operation: operation,
+                payload: payload,
+                createdAt: createdAt,
+                retryCount: retryCount,
+                lastError: lastError,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncOutboxTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncOutboxTable,
+      SyncOutboxData,
+      $$SyncOutboxTableFilterComposer,
+      $$SyncOutboxTableOrderingComposer,
+      $$SyncOutboxTableAnnotationComposer,
+      $$SyncOutboxTableCreateCompanionBuilder,
+      $$SyncOutboxTableUpdateCompanionBuilder,
+      (
+        SyncOutboxData,
+        BaseReferences<_$AppDatabase, $SyncOutboxTable, SyncOutboxData>,
+      ),
+      SyncOutboxData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -23762,6 +24537,8 @@ class $AppDatabaseManager {
       $$DocumentsTableTableManager(_db, _db.documents);
   $$WorkersTableTableManager get workers =>
       $$WorkersTableTableManager(_db, _db.workers);
+  $$SyncOutboxTableTableManager get syncOutbox =>
+      $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }
 
 mixin _$UserDaoMixin on DatabaseAccessor<AppDatabase> {
@@ -24079,4 +24856,16 @@ class WorkerDaoManager {
   WorkerDaoManager(this._db);
   $$WorkersTableTableManager get workers =>
       $$WorkersTableTableManager(_db.attachedDatabase, _db.workers);
+}
+
+mixin _$SyncOutboxDaoMixin on DatabaseAccessor<AppDatabase> {
+  $SyncOutboxTable get syncOutbox => attachedDatabase.syncOutbox;
+  SyncOutboxDaoManager get managers => SyncOutboxDaoManager(this);
+}
+
+class SyncOutboxDaoManager {
+  final _$SyncOutboxDaoMixin _db;
+  SyncOutboxDaoManager(this._db);
+  $$SyncOutboxTableTableManager get syncOutbox =>
+      $$SyncOutboxTableTableManager(_db.attachedDatabase, _db.syncOutbox);
 }

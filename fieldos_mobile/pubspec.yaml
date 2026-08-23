@@ -48,7 +48,19 @@ dependencies:
   # docs/MOBILE_GUIDE.md.
   file_picker: 12.0.0-beta.7
 
+  # Cross-employee sync backend (see docs/SUPABASE_SYNC_RESEARCH.md). The
+  # plain `supabase` package (not `supabase_flutter`) deliberately -- its
+  # SupabaseClient (PostgREST + Realtime + Auth) has no Flutter/platform
+  # binding dependency, so the sync engine's push/pull logic can be tested
+  # with real network calls in `flutter test`'s fast Dart VM runner against
+  # the local dev instance, not just an emulator-only integration test.
+  supabase: ^2.7.0
+
 dev_dependencies:
+  # Direct dependency: used by test/sync_engine_test.dart to check the local
+  # Supabase stack is reachable before running (already present transitively
+  # via `supabase`, declared explicitly per "depend on what you import").
+  http: ^1.2.0
   flutter_test:
     sdk: flutter
   integration_test:

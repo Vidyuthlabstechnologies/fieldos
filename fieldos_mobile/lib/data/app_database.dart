@@ -4,6 +4,7 @@
 /// Nothing here touches the network.
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -12,6 +13,8 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+
+import 'package:fieldos_mobile/sync/sync_mappers.dart';
 
 import 'tables.dart';
 
@@ -51,6 +54,7 @@ final _uuid = Uuid();
   InspectionItems,
   Documents,
   Workers,
+  SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
@@ -78,7 +82,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   // --- DAO accessors ------------------------------------------------------
   UserDao get userDao => UserDao(this);
@@ -103,6 +107,7 @@ class AppDatabase extends _$AppDatabase {
   InspectionDao get inspectionDao => InspectionDao(this);
   DocumentDao get documentDao => DocumentDao(this);
   WorkerDao get workerDao => WorkerDao(this);
+  SyncOutboxDao get syncOutboxDao => SyncOutboxDao(this);
 }
 
 /// Where DPR photos and other local media are stored, relative to the app's
@@ -242,11 +247,21 @@ class CompanyDao extends DatabaseAccessor<AppDatabase> with _$CompanyDaoMixin {
 class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
   ProjectDao(super.db);
 
+  /// Enqueues an outbox entry in the SAME transaction as the local write
+  /// (the classic "transactional outbox" pattern) -- the two can never
+  /// silently diverge, unlike a caller remembering to enqueue afterward.
   Future<Project> create(ProjectsCompanion companion) {
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(projects).insert(companion.copyWith(id: Value(id)));
-      return (await (select(projects)..where((p) => p.id.equals(id))).getSingle());
+      final row = await (select(projects)..where((p) => p.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'projects',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(projectToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
@@ -255,6 +270,13 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
 
   Future<Project?> byId(String id) =>
       (select(projects)..where((p) => p.id.equals(id))).getSingleOrNull();
+
+  /// Merges a row pulled from Supabase (see lib/sync/) into local storage --
+  /// insert if new, overwrite if the id already exists. Server-wins for
+  /// this reference-data table, matching docs/SUPABASE_SYNC_RESEARCH.md's
+  /// conflict strategy.
+  Future<void> upsertFromRemote(ProjectsCompanion companion) =>
+      into(projects).insertOnConflictUpdate(companion);
 }
 
 // ---------------------------------------------------------------------------
@@ -269,16 +291,37 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(tasks).insert(companion.copyWith(id: Value(id)));
-      return (await (select(tasks)..where((t) => t.id.equals(id))).getSingle());
+      final row = await (select(tasks)..where((t) => t.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'tasks',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(taskToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
   Future<List<Task>> forProject(String projectId) =>
       (select(tasks)..where((t) => t.projectId.equals(projectId))).get();
 
-  Future<void> updateStatus(String id, String status) =>
-      (update(tasks)..where((t) => t.id.equals(id)))
+  Future<void> updateStatus(String id, String status) {
+    return transaction(() async {
+      await (update(tasks)..where((t) => t.id.equals(id)))
           .write(TasksCompanion(status: Value(status), updatedAt: Value(DateTime.now())));
+      final row = await (select(tasks)..where((t) => t.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'tasks',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(taskToSupabaseJson(row)),
+      );
+    });
+  }
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertFromRemote(TasksCompanion companion) =>
+      into(tasks).insertOnConflictUpdate(companion);
 }
 
 // ---------------------------------------------------------------------------
@@ -766,5 +809,65 @@ class WorkerDao extends DatabaseAccessor<AppDatabase> with _$WorkerDaoMixin {
   Future<void> setStatus(String id, String status) {
     return (update(workers)..where((w) => w.id.equals(id)))
         .write(WorkersCompanion(status: Value(status)));
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sync outbox (see docs/SUPABASE_SYNC_RESEARCH.md, lib/sync/sync_engine.dart)
+// ---------------------------------------------------------------------------
+
+/// Above this many failed push attempts, an outbox entry is left in place
+/// (not deleted) but stops being retried automatically -- surfaced via
+/// [parked] for a manual "why didn't this sync" UI later, rather than
+/// retrying a permanently-broken write forever.
+const int syncOutboxMaxRetries = 5;
+
+@DriftAccessor(tables: [SyncOutbox])
+class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMixin {
+  SyncOutboxDao(super.db);
+
+  Future<void> enqueue({
+    required String targetTable,
+    required String recordId,
+    required String operation,
+    required String payloadJson,
+  }) {
+    return into(syncOutbox).insert(SyncOutboxCompanion.insert(
+      targetTable: targetTable,
+      recordId: recordId,
+      operation: operation,
+      payload: payloadJson,
+    ));
+  }
+
+  /// Entries still worth retrying, oldest first (so a stuck head-of-queue
+  /// entry doesn't block ordering forever -- caller stops draining on the
+  /// first failure within a run rather than skipping past it, to preserve
+  /// write ordering per record).
+  Future<List<SyncOutboxData>> pending() {
+    return (select(syncOutbox)
+          ..where((o) => o.retryCount.isSmallerThanValue(syncOutboxMaxRetries))
+          ..orderBy([(o) => OrderingTerm.asc(o.createdAt)]))
+        .get();
+  }
+
+  Future<List<SyncOutboxData>> parked() {
+    return (select(syncOutbox)..where((o) => o.retryCount.isBiggerOrEqualValue(syncOutboxMaxRetries))).get();
+  }
+
+  Future<void> markSynced(int id) => (delete(syncOutbox)..where((o) => o.id.equals(id))).go();
+
+  Future<void> recordFailure(int id, String error) async {
+    final row = await (select(syncOutbox)..where((o) => o.id.equals(id))).getSingleOrNull();
+    if (row == null) return;
+    await (update(syncOutbox)..where((o) => o.id.equals(id))).write(SyncOutboxCompanion(
+      retryCount: Value(row.retryCount + 1),
+      lastError: Value(error),
+    ));
+  }
+
+  Future<int> pendingCount() async {
+    final rows = await pending();
+    return rows.length;
   }
 }

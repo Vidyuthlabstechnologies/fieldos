@@ -485,3 +485,22 @@ class Workers extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+/// Outbound sync queue (see docs/SUPABASE_SYNC_RESEARCH.md and
+/// lib/sync/sync_engine.dart). Every local write that should propagate to
+/// Supabase gets enqueued here; a background push drains it in order and
+/// deletes each row on success. `recordId` and `payload` are stored as text
+/// (payload as JSON) rather than typed per-table, since one outbox handles
+/// every syncable table generically.
+class SyncOutbox extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  // Named targetTable, not tableName: the latter collides with Drift's own
+  // internal table-metadata naming convention (drift_dev warns on it).
+  TextColumn get targetTable => text().withLength(min: 1, max: 64)();
+  TextColumn get recordId => text().withLength(min: 1, max: 36)();
+  TextColumn get operation => text().withLength(min: 1, max: 10)(); // insert | update | delete
+  TextColumn get payload => text()(); // JSON-encoded row snapshot
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  IntColumn get retryCount => integer().withDefault(const Constant(0))();
+  TextColumn get lastError => text().nullable()();
+}
