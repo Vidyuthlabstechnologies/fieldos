@@ -36,20 +36,23 @@ State management is Riverpod; local persistence is `drift` over SQLite via
 `drift_flutter`. `lib/data/app_database.g.dart` is drift's generated code —
 regenerate it after touching `lib/data/tables.dart` (see below), don't hand-edit it.
 
-## ⚠️ Known architectural gap: no backend sync
+## Cross-device sync (mobile only, not connected to the desktop backend)
 
-As of this writing, `fieldos_mobile` talks to **no FastAPI endpoint at all**.
-Auth, projects, DPR, procurement, and approvals are entirely local to the
-device — the only outbound network call anywhere in `lib/` is to the Sarvam
-API for voice transcription (`lib/services/sarvam_service.dart`). It does
-not read or write the same database as the desktop app (`fieldos/` +
-SQLite), and there is currently no mechanism to reconcile the two.
+`fieldos_mobile` still talks to **no FastAPI endpoint at all** — it doesn't
+read or write the desktop app's SQLite database, and there's no mechanism
+to reconcile the two. A company using the desktop app and the mobile app on
+the same project today still has two separate, non-syncing data silos, and
+unifying them is not scoped.
 
-This means: a company using the desktop app and the mobile app today has
-**two separate, non-syncing data silos**. Building a real sync layer (which
-data flows which direction, conflict resolution, auth unification) is a
-distinct, not-yet-scoped project — treat it as a prerequisite before mobile
-and desktop are used side-by-side on the same real project data.
+What *has* been built: cross-device sync **between mobile devices**, via a
+self-hosted-free Supabase backend (Postgres + Auth + Realtime + RLS) —
+see `docs/AGENT_HANDOFF.md`'s "Cloud sync" section for the current entity
+coverage, architecture, and the exact recipe to extend it. Short version:
+a transactional outbox pattern pushes/pulls 10 of ~20 syncable tables
+against real Postgres today, reachable from Settings → Cloud sync, with a
+manual "Sync now", a periodic background trigger, and live Realtime updates
+wired in for the task list. No production Supabase project exists yet —
+everything above is proven against a local Docker dev stack.
 
 A second, smaller consequence of the standalone estimation port: any future
 change to the calculation rules or reconciliation tolerance in

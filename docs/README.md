@@ -6,6 +6,7 @@ Welcome to the FieldOS documentation. This directory contains comprehensive guid
 
 | Document | Description | Audience |
 |----------|-------------|----------|
+| [AGENT_HANDOFF.md](./AGENT_HANDOFF.md) | Current state, absolute rules, known gotchas, prioritized gaps — read this first if you're an AI agent picking up the project | AI agents |
 | [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md) | High-level project description, features, tech stack | All |
 | [DEVELOPMENT.md](./DEVELOPMENT.md) | Setup, workflow, adding features | Developers |
 | [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) | Complete SQL schema with relationships | Backend devs, DBAs |
@@ -60,10 +61,14 @@ Welcome to the FieldOS documentation. This directory contains comprehensive guid
 │      → SQLite (local file, OS app-data directory)                 │
 │                                                                    │
 │  Mobile (fieldos_mobile/, native Flutter):                        │
-│    entirely standalone today -- own local auth, own drift/SQLite  │
-│    database, NO connection to the FastAPI backend above           │
+│    own local auth, own drift/SQLite database, NO connection to    │
+│    the FastAPI backend above -- but DOES sync mobile-to-mobile    │
+│    via a self-hosted-free Supabase backend (Postgres/Auth/        │
+│    Realtime). See docs/AGENT_HANDOFF.md for current state.        │
 │                                                                    │
-│  No server, no PostgreSQL, no Redis, no CDN. See DEPLOYMENT.md.   │
+│  Desktop: no server, no PostgreSQL. Mobile: an optional, free     │
+│  Supabase Postgres instance for cross-device sync. See            │
+│  DEPLOYMENT.md (desktop) and AGENT_HANDOFF.md (mobile sync).      │
 │                                                                    │
 └─────────────────────────────────────────────────────────────────┘
 ```

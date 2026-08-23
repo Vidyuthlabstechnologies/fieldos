@@ -1,0 +1,286 @@
+# Agent Handoff — FieldOS
+
+Read this first if you're a fresh AI agent picking up this project. It's the
+one place that stays current with what's actually true right now, as
+opposed to `docs/*.md`, some of which has drifted (flagged below where
+known). Verify anything load-bearing against the code rather than trusting
+any doc, including this one, at face value — that discipline is what
+produced every real bug caught so far.
+
+**Last verified against:** commit `9c04d8e`, 2026-08-23.
+
+## What this actually is
+
+FieldOS is a construction-site management platform for **Predictera Pvt
+Ltd**, built against **Protek Consult's** real project data. It's a real
+product being built to eventually sell to construction companies in India —
+not a demo or portfolio project. Treat correctness and honesty about
+completion state accordingly; there's a standing user preference (see
+`.claude`/memory if your harness has it) to never round up or fabricate
+progress.
+
+**The stated vision, in the user's own words** (this is the actual product
+target, not the current desktop-only architecture docs/PROJECT_OVERVIEW.md
+describes): a native Android app that covers every construction-site
+workflow, with every employee's phone staying in sync with the rest of the
+company, **at zero ongoing infrastructure cost** — no paid server, no cloud
+instance the user has to pay for.
+
+## Absolute rules — do not violate these
+
+- **`resources/`** (Protek Consult's real BOQ/estimation spreadsheets and
+  PDFs) must never be committed, logged, or have real figures quoted in any
+  file that gets committed. It's gitignored; keep it that way.
+- **`.env`** (real Sarvam API key) must never be committed or echoed.
+- **Never create third-party accounts on the user's behalf** — not a
+  Supabase account, not a Play Console account, not anything. If the next
+  step needs one, say so explicitly and wait for the user to create it and
+  hand you credentials/URLs.
+- **Report honest completion percentage, broken down by pillar, never
+  rounded up** — this was an explicit standing user instruction. See the
+  published "FieldOS Completion Ledger" artifact if you have access to it
+  (link may not survive across sessions/agents — regenerate from the state
+  below if not).
+
+## Repo map
+
+```
+fieldos/              FastAPI backend (desktop-only, SQLite) — see docs/PROJECT_OVERVIEW.md
+frontend/              Next.js frontend (desktop-only, wrapped by Tauri) — legacy Capacitor
+                        Android wrapper also lives here (frontend/android/), deprecated
+src-tauri/              Desktop shell (Rust/Tauri) → ships as a Windows installer
+fieldos_mobile/         Native Flutter mobile app — THE ACTIVE, CANONICAL MOBILE PATH
+supabase/                Postgres schema + RLS policies for cross-device sync (local Docker
+                        dev stack today; no production project exists yet)
+docs/                   Documentation. Some of it (MOBILE_GUIDE.md's sync section
+                        especially) was stale until this handoff's own edits — see below.
+resources/               GITIGNORED. Real client data. Never touch its contents in anything
+                        that gets committed.
+```
+
+**`fieldos_mobile/` is where essentially all current work happens.** The
+desktop app (`fieldos/` + `frontend/` + `src-tauri/`) is feature-complete-ish
+and not where the active vision work is. Don't confuse the two — a lot of
+`docs/*.md` was written when desktop was the only app and hasn't fully
+caught up to mobile being primary.
+
+## fieldos_mobile/ architecture
+
+- **Flutter, Android-only by explicit user decision** ("focus only on
+  android" — iOS is out of scope, not an oversight).
+- State: Riverpod. Local persistence: `drift` over SQLite
+  (`lib/data/app_database.dart`, generated code in
+  `app_database.g.dart` — regenerate after touching `lib/data/tables.dart`
+  via `dart run build_runner build --delete-conflicting-outputs`, don't
+  hand-edit the generated file).
+- Local auth is pbkdf2-based, fully offline, no server round-trip
+  (`lib/auth/`).
+- The BOQ/estimation calc engine exists **twice, deliberately**: a pure-Dart
+  port (`lib/estimation/estimation_calc.dart`) for every UI screen, and the
+  desktop's exact `fieldos/estimation_calc.py` embedded on-device via
+  **Chaquopy** for the one calculation where floating-point drift would
+  matter. See `docs/CHAQUOPY_FEASIBILITY.md` for why the *narrow* Chaquopy
+  scope is a confirmed GO but a full FastAPI-backend-on-device is a
+  confirmed NO-GO (no Chaquopy wheel for `pydantic-core`/`bcrypt`, no iOS
+  path, real APK/latency cost) — don't re-litigate that without new
+  evidence, it was tested, not guessed.
+- Voice-to-DPR via Sarvam is the only feature that needs the network on its
+  own, independent of cloud sync.
+
+## Cloud sync — the actual current state
+
+**This is the part `docs/MOBILE_GUIDE.md` gets wrong as of the version
+before this handoff was written** — it claims "no backend sync exists,
+not yet scoped." That's false. A real, tested sync layer exists:
+
+- **Backend:** Supabase (Postgres + Auth + Realtime + RLS), local Docker dev
+  stack via `supabase start` / `supabase db reset`. **No production Supabase
+  project exists yet** — `lib/sync/sync_config.dart`'s `SyncConfig.production`
+  is empty. Creating one is the user's own action (see Absolute Rules).
+- **Schema + RLS:** `supabase/migrations/20260823000000_initial_schema.sql` —
+  30 tables mirroring `fieldos/models.py`'s numeric precision exactly, RLS
+  enabled on every table with helper functions (`is_company_member`,
+  `has_project_access`, etc.).
+- **Sync mechanism:** a hand-rolled transactional outbox
+  (`lib/sync/sync_engine.dart`, `lib/sync/sync_mappers.dart`,
+  `lib/data/app_database.dart`'s DAOs). Every local write that matters
+  enqueues a `SyncOutbox` row **in the same Drift transaction** as the
+  business write, so the two can never silently diverge. `SyncEngine`
+  drains the outbox (push), fetches everything RLS allows (pull), and
+  subscribes to Realtime `postgres_changes` for live updates.
+- **Auth bridge:** `lib/sync/cloud_sync_service.dart` bridges local pbkdf2
+  auth to a real Supabase Auth session (sign-in-first, fall back to sign-up).
+  Reachable from the app at Settings → Cloud sync (`enable sync` / `sync now`).
+- **Entity coverage — 10 of ~20 syncable tables, all verified against real
+  Postgres:** Project, Task, DPR entry, Issue, Worker, Equipment, Inspection,
+  Subcontractor, WorkOrder, Approval.
+- **Deliberately NOT wired** (see `lib/sync/sync_mappers.dart`'s docstring
+  for the full reasoning per table): MaterialReceipts (shape doesn't map to
+  desktop's `material_entries`), Documents (would sync a metadata row
+  pointing at a file that only exists on one phone — needs Supabase Storage
+  upload first, not just a column mapping), LabourAttendance (punch-events
+  vs. a daily summary — needs real aggregation, not a mapping).
+- **Realtime is wired into the UI for exactly one thing:** the task list on
+  `ProjectDetailScreen`. Nothing else has a live-update UI hookup yet, even
+  though the engine-level mechanism would support it for every synced table.
+- **No conflict resolution beyond "pull is server-wins."** Fine today
+  because each record has one real-world owner; will need real design work
+  the day two people edit the same record offline.
+
+### The exact recipe to sync a new entity
+
+This is now a proven, repeatable pattern — follow it exactly rather than
+inventing a new approach:
+
+1. Confirm the Drift table's columns correspond 1:1 to the Postgres table
+   (check `supabase/migrations/20260823000000_initial_schema.sql` by hand).
+   If they don't correspond cleanly, don't force it — document why not,
+   the way `sync_mappers.dart`'s docstring does for the three deliberate
+   omissions above.
+2. Add `<entity>ToSupabaseJson()` and `<entity>FromSupabaseJson()` functions
+   to `lib/sync/sync_mappers.dart`.
+3. In the entity's DAO (`lib/data/app_database.dart`), wrap every
+   create/update method that should sync in `transaction()`, and after the
+   local write, call
+   `db.syncOutboxDao.enqueue(targetTable:, recordId:, operation:, payloadJson: jsonEncode(...ToSupabaseJson(row)))`
+   in the **same transaction**. Add an `upsertFromRemote(...)` method using
+   `insertOnConflictUpdate`.
+4. Add the pull loop for the new table to `SyncEngine.pullAll()`.
+5. **Check the RLS policies for the table cover `select`, `insert`, AND
+   `update`** (see Known Gotchas below — this exact gap caused a real,
+   silent bug once already). Add whichever's missing.
+6. Write a real-infra test following `test/sync_engine_equipment_inspections_test.dart`'s
+   or `test/sync_engine_subcontractors_test.dart`'s pattern: real
+   `service_role` admin client seeds a company/project, a real user client
+   signs in, push then assert the row landed in real Postgres with the
+   right values (not just "push didn't throw" — assert the actual synced
+   value), then a second test asserts `pullAll()` merges a remotely-created
+   row into local Drift.
+7. `flutter analyze`, run the new test against the real local Supabase
+   stack (`supabase start` first if it's not already running — check with
+   `docker ps`), run the full suite, commit.
+
+## Known gotchas — don't rediscover these
+
+Real bugs found and fixed this build, in case future work touches the same
+surface again:
+
+- **RLS policies must cover select, insert, AND update independently.**
+  `work_orders` had select+insert but no update policy — an outbox push
+  reported success (no exception, Postgrest just matched zero rows under
+  RLS and called that "success") while the actual value never changed in
+  Postgres. Silent, undetectable without a test that asserts the real
+  synced value. Audit all three per table, not just per feature.
+- **`supabase_realtime` publication starts empty on a fresh local stack.**
+  A table has to be explicitly added
+  (`alter publication supabase_realtime add table X;`) or
+  `postgres_changes` subscriptions never fire, regardless of RLS or client
+  correctness. Currently only `tasks, projects` are in it — add more as
+  `SyncEngine` grows more `subscribeTo*` methods.
+- **`service_role` needs explicit table GRANTs too** — RLS bypass via
+  Supabase's `bypassrls` and Postgres `GRANT`/`REVOKE` are separate
+  mechanisms; a new table's default privileges don't extend to
+  `service_role` automatically.
+- **`SET LOCAL` in a raw `psql` script needs an explicit `BEGIN`/`COMMIT`**
+  — psql runs each statement in its own implicit transaction by default,
+  so `set local request.jwt.claims = ...` for RLS testing is a silent no-op
+  outside an explicit transaction block.
+- **`SupabaseClient`'s default `authFlowType` is `pkce`**, which asserts on
+  missing async storage the first time `signUp()` is called. Use
+  `SyncConfig.createClient()` (implicit flow) for any direct
+  email+password auth — see `sync_config.dart`'s docstring for why implicit
+  is correct here, not a workaround.
+- **Flutter `testWidgets` + real network calls is a real minefield**, hit
+  repeatedly building `test/settings_screen_cloud_sync_test.dart` (which
+  was ultimately *not* committed — see that commit's message for the full
+  postmortem): `TestWidgetsFlutterBinding` runs inside a FakeAsync zone
+  where real Timers never fire unless wrapped in `tester.runAsync()`
+  (including a reachability check, not just the interesting call); it also
+  installs a global `HttpOverrides` that fakes all HTTP as 400, which has
+  to be cleared *before* anything constructs an `HttpClient` (i.e. before
+  the first `pumpWidget`, not around the tap that uses it); and a
+  successful sign-up leaves GoTrue's auto-refresh `Timer` running in a way
+  that neither `dispose()` nor `signOut()` reliably cancels before
+  `TestWidgetsFlutterBinding`'s post-test "no pending timer" assertion
+  fires. If you need a real widget-level regression test for a
+  network-touching screen, consider `integration_test/`
+  (`IntegrationTestWidgetsFlutterBinding`, no FakeAsync) instead of
+  fighting this again.
+- **Windows + orphaned `dart.exe`/`flutter_tester.exe` processes.**
+  Stopping a backgrounded `flutter test` command (timeout, manual stop)
+  doesn't always kill its child processes. Check
+  `Get-Process | Where-Object { $_.ProcessName -match 'dart|flutter' }`
+  and force-kill stragglers before starting a new test run, or you'll get
+  confusing hangs with near-zero CPU usage.
+- **The Drift "you've created the database class AppDatabase multiple
+  times" warning in test output is benign** — it fires whenever a test
+  file opens two `AppDatabase.memory()` instances (e.g. simulating two
+  devices), which is intentional in the multi-client sync tests. Don't
+  chase it.
+
+## How to verify anything
+
+Real infrastructure only — this codebase has a hard "no mocks" discipline
+for sync-layer tests, and it's caught bugs a mocked suite would have
+missed. Don't introduce mocks here without a very good reason.
+
+```bash
+# Docker + local Supabase stack (from repo root)
+docker ps                      # confirm Docker's running
+supabase start                 # first time / if stopped
+supabase db reset              # after any migration file change
+
+cd fieldos_mobile
+flutter analyze                # should be clean except one pre-existing,
+                                # unrelated deprecation warning in labour_screen.dart
+flutter test                   # full suite — 53 tests as of this commit, all real-infra
+flutter test test/some_file.dart   # a single file
+```
+
+`test/*_test.dart` files self-skip (return early) if the local Supabase
+stack isn't reachable — check `_localStackReachable()` in any of them for
+the pattern. This means a green run with the stack down isn't proof of
+anything; confirm `docker ps` shows the `supabase_*` containers healthy
+before trusting a passing run.
+
+## Where things actually stand — prioritized gaps
+
+In rough priority order (highest-value next work first). Full detail with
+"how to do it" per item is in the published "FieldOS Completion Ledger"
+artifact if it's reachable from your session; if not, this list is the
+same content in prose:
+
+1. **More entities into cloud sync** — procurement chain (vendors,
+   requisitions, RFQs, quotes, POs, GRNs), Estimation/CostHeads, Documents
+   (needs Supabase Storage file upload, not just row sync), LabourAttendance
+   (needs punch→daily-summary aggregation). Follow the recipe above,
+   per-table.
+2. **Sync visibility in the UI** — no pending-outbox-count or
+   last-synced-timestamp shown anywhere yet, despite `syncOutboxDao.pendingCount()`
+   already existing. Small, high-value add.
+3. **Realtime wired for more than just tasks** — the mechanism supports
+   any table; only `ProjectDetailScreen`'s task list actually subscribes.
+4. **Photo evidence capture** — DPR/inspections/materials expect photo
+   evidence; today it's a generic file picker, not a camera-first flow.
+   Add `camera` or `image_picker`.
+5. **Feature-breadth gaps vs. the Kraaft/Onsite competitor research**
+   (`docs/MARKET_UX_RESEARCH.md`) — no chat/messaging, no map view (a
+   geofence radius check exists for attendance but no map UI), no push
+   notifications. Each is a real, scoped feature, not a quick add.
+6. **A real production Supabase project** — blocked on the user's own
+   account (see Absolute Rules).
+7. **Play Store presence, CI** — no signed release build for distribution,
+   no automated `flutter analyze`/`flutter test` pipeline.
+
+## Stale docs to be aware of
+
+- `docs/MOBILE_GUIDE.md`'s "Known architectural gap: no backend sync"
+  section was corrected alongside this handoff being written — if you're
+  reading a version of that file from before this commit, the sync layer
+  described above already existed and that section was wrong.
+- `docs/README.md`'s architecture diagram still shows mobile as "entirely
+  standalone... NO connection to the FastAPI backend" — that line is about
+  the desktop FastAPI backend specifically (still true, mobile never talks
+  to `fieldos/`) but reads as implying no sync exists at all, which is
+  no longer accurate now that Supabase-based cross-device sync exists.
+  Worth a light edit if you're touching that file anyway.
