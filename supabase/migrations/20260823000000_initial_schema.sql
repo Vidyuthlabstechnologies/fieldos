@@ -772,3 +772,13 @@ create policy "project members can create approvals" on approvals for insert
   to authenticated with check (project_id is null or (select has_project_access(project_id)));
 create policy "project members can decide approvals" on approvals for update
   to authenticated using (project_id is null or (select has_project_access(project_id)));
+
+-- Realtime: the `supabase_realtime` publication that ships with a fresh
+-- local stack exists but starts with zero tables in it -- `postgres_changes`
+-- subscriptions silently never fire for a table until it's added here,
+-- regardless of RLS or client correctness (a genuine, previously-missed gap
+-- caught by test/sync_engine_realtime_test.dart's own real Realtime
+-- websocket test timing out with no event ever arriving). Add tables here
+-- as SyncEngine grows more `subscribeTo*` methods -- currently just the two
+-- it actually subscribes to (subscribeToProjectTasks, subscribeToCompanyProjects).
+alter publication supabase_realtime add table tasks, projects;

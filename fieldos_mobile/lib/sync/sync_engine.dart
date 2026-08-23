@@ -14,6 +14,7 @@
 /// end to end so far, and which are deliberately not (yet).
 library;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:supabase/supabase.dart';
@@ -103,11 +104,17 @@ class SyncEngine {
 
   /// Live updates for one project's tasks -- INSERT/UPDATE/DELETE on the
   /// `tasks` row for this project merge into Drift as they happen.
+  ///
+  /// Waits for the server to actually confirm the channel join before
+  /// returning. `.subscribe()` itself fires the join off in the background
+  /// and returns immediately -- a caller that (like a test creating data
+  /// right after subscribing, or a screen navigating fast) acts before that
+  /// join round-trip completes could otherwise miss the very first events
+  /// with no error at all. A failed join is surfaced as a real exception,
+  /// not silently ignored.
   Future<void> subscribeToProjectTasks(String projectId) async {
     await _tasksChannel?.unsubscribe();
-    _tasksChannel = client
-        .channel('tasks-$projectId')
-        .onPostgresChanges(
+    final channel = client.channel('tasks-$projectId').onPostgresChanges(
           event: PostgresChangeEvent.all,
           schema: 'public',
           table: 'tasks',
@@ -118,16 +125,16 @@ class SyncEngine {
             }
             await db.taskDao.upsertFromRemote(taskFromSupabaseJson(payload.newRecord));
           },
-        )
-        .subscribe();
+        );
+    _tasksChannel = channel;
+    await _awaitJoin(channel, label: 'tasks-$projectId');
   }
 
-  /// Live updates for the projects a user's company creates.
+  /// Live updates for the projects a user's company creates. See
+  /// subscribeToProjectTasks's docstring for why this awaits the join.
   Future<void> subscribeToCompanyProjects(String companyId) async {
     await _projectsChannel?.unsubscribe();
-    _projectsChannel = client
-        .channel('projects-$companyId')
-        .onPostgresChanges(
+    final channel = client.channel('projects-$companyId').onPostgresChanges(
           event: PostgresChangeEvent.all,
           schema: 'public',
           table: 'projects',
@@ -136,8 +143,25 @@ class SyncEngine {
             if (payload.eventType == PostgresChangeEvent.delete) return;
             await db.projectDao.upsertFromRemote(projectFromSupabaseJson(payload.newRecord));
           },
-        )
-        .subscribe();
+        );
+    _projectsChannel = channel;
+    await _awaitJoin(channel, label: 'projects-$companyId');
+  }
+
+  Future<void> _awaitJoin(RealtimeChannel channel, {required String label}) {
+    final completer = Completer<void>();
+    channel.subscribe((status, error) {
+      if (completer.isCompleted) return;
+      switch (status) {
+        case RealtimeSubscribeStatus.subscribed:
+          completer.complete();
+        case RealtimeSubscribeStatus.channelError:
+        case RealtimeSubscribeStatus.timedOut:
+        case RealtimeSubscribeStatus.closed:
+          completer.completeError(StateError('Realtime channel "$label" failed to join: $status ($error)'));
+      }
+    });
+    return completer.future;
   }
 
   Future<void> dispose() async {
