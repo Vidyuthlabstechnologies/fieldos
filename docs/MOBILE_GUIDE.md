@@ -73,6 +73,20 @@ cd fieldos_mobile
 flutter pub get
 ```
 
+Add one line to `android/local.properties` (gitignored, machine-specific, alongside your
+`flutter.sdk` line) before your first Android build:
+
+```properties
+flutter.compileSdkVersion=36
+```
+
+Without this, `flutter_plugin_android_lifecycle` (a transitive dependency of `file_picker`)
+fails the build with an AAR-metadata error demanding compileSdk >=36 — this Flutter SDK's own
+default resolves to 34. This has to live in `local.properties`, not any `build.gradle.kts`
+file: Flutter's plugin loader computes one shared `compileSdk` value for the app *and* every
+plugin subproject (including ones living in the pub cache, outside this repo) from this exact
+property, so overriding only `app/build.gradle.kts`'s own `compileSdk` isn't enough.
+
 ### Running
 
 ```bash

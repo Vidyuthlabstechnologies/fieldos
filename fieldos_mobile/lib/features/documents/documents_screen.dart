@@ -51,13 +51,9 @@ class _DocumentsViewState extends ConsumerState<DocumentsView> {
   }
 
   Future<void> _pickAndUpload(BuildContext context, WidgetRef ref) async {
-    final result = await FilePicker.platform.pickFiles(
-      allowMultiple: false,
-      withData: false,
-    );
-    if (result == null || result.files.isEmpty || !context.mounted) return;
+    final file = await FilePicker.pickFile();
+    if (file == null || !context.mounted) return;
 
-    final file = result.files.first;
     final originalName = file.name;
     final extension = p.extension(originalName).toLowerCase();
     final baseName = p.basenameWithoutExtension(originalName);
