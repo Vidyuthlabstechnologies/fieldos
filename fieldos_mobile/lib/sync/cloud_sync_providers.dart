@@ -11,6 +11,7 @@ import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/providers.dart';
 import 'cloud_sync_service.dart';
+import 'periodic_sync_trigger.dart';
 import 'sync_config.dart';
 import 'sync_engine.dart';
 
@@ -40,4 +41,14 @@ final cloudSyncEngineProvider = Provider<SyncEngine>((ref) {
 
 final cloudSyncServiceProvider = Provider<CloudSyncService>((ref) {
   return CloudSyncService(client: ref.watch(cloudSyncClientProvider), engine: ref.watch(cloudSyncEngineProvider));
+});
+
+/// Not started automatically -- a provider merely builds the object graph.
+/// The Settings screen calls .start() right after a successful
+/// enableSync(), which is the actual "turn background sync on" moment from
+/// a user's point of view.
+final periodicSyncTriggerProvider = Provider<PeriodicSyncTrigger>((ref) {
+  final trigger = PeriodicSyncTrigger(service: ref.watch(cloudSyncServiceProvider));
+  ref.onDispose(trigger.stop);
+  return trigger;
 });

@@ -151,10 +151,12 @@ class _CloudSyncSectionState extends ConsumerState<_CloudSyncSection> {
         case CloudSyncOutcome.signedIn:
           _status = 'Signed in -- this device is now linked to the shared account.';
           _statusIsError = false;
+          ref.read(periodicSyncTriggerProvider).start();
         case CloudSyncOutcome.signedUp:
           _status = 'Account created and signed in -- share this email/password with '
               'colleagues so their devices join the same synced data.';
           _statusIsError = false;
+          ref.read(periodicSyncTriggerProvider).start();
         case CloudSyncOutcome.failed:
           _status = result.error ?? 'Could not enable sync.';
           _statusIsError = true;
@@ -197,9 +199,10 @@ class _CloudSyncSectionState extends ConsumerState<_CloudSyncSection> {
         const SizedBox(height: 8),
         Text(
           signedIn
-              ? 'Cloud sync is on for this device.'
-              : 'Off. Turn this on to share projects, DPRs, issues and workers '
-                  'with the rest of your team across devices.',
+              ? 'On for this device -- syncs automatically in the background, '
+                  'or tap "Sync now" for an immediate push and pull.'
+              : 'Off. Turn this on to share projects, DPRs, issues, workers, '
+                  'equipment and inspections with the rest of your team across devices.',
         ),
         const SizedBox(height: 12),
         if (!signedIn) ...[
