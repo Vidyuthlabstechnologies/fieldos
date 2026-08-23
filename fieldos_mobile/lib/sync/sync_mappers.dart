@@ -6,18 +6,31 @@
 /// checked against supabase/migrations/20260823000000_initial_schema.sql by
 /// hand, not inferred.
 ///
-/// Project, Task, DprEntry, Issue, Worker, Equipment, and Inspection are
-/// covered -- chosen because their Drift columns correspond 1:1 with the
-/// Postgres schema. Not every mobile table does: e.g. MaterialReceipts
-/// (procurement-chain shaped -- po_id/supplier_id/cost_head_id) has no
-/// honest mapping to material_entries (the desktop's simple consumption-log
-/// shape) -- forcing one would silently corrupt data, so it's deliberately
-/// NOT wired rather than wired wrong. EquipmentLogs and InspectionItems
-/// (child/detail rows of Equipment/Inspection) are also not yet wired --
-/// same reasoning as MaterialReceipts's omission, just not yet verified,
-/// not ruled out. Extending to the rest of the ~30 tables is a follow-up,
-/// same pattern, per-table -- verify the shapes actually correspond before
-/// wiring, the way this file's docstring itself demonstrates by omission.
+/// Project, Task, DprEntry, Issue, Worker, Equipment, Inspection,
+/// Subcontractor, WorkOrder, and Approval are covered -- chosen because
+/// their Drift columns correspond 1:1 with the Postgres schema. Not every
+/// mobile table does:
+///  - MaterialReceipts (procurement-chain shaped -- po_id/supplier_id/
+///    cost_head_id) has no honest mapping to material_entries (the
+///    desktop's simple consumption-log shape).
+///  - Documents' filePath is a local on-device path -- syncing it verbatim
+///    would hand another device a metadata row pointing at a file that
+///    only exists on the original phone, with no actual file transfer
+///    (Supabase Storage upload) implemented. Wiring this honestly means
+///    building that upload path first, not just mapping the columns.
+///  - LabourAttendance is a punch-in/punch-out GPS-geofence event log;
+///    Postgres's `attendance` is a daily present/absent/half_day summary
+///    keyed by (worker_id, date). These aren't the same shape at all --
+///    syncing would need a real punches-to-daily-summary aggregation, not
+///    a column mapping.
+/// Forcing any of the above would silently corrupt or mislead, so they're
+/// deliberately NOT wired rather than wired wrong. EquipmentLogs and
+/// InspectionItems (child/detail rows of Equipment/Inspection) are also not
+/// yet wired -- unlike the three above, no shape mismatch is known here,
+/// just not yet verified. Extending to the rest of the ~30 tables is a
+/// follow-up, same pattern, per-table -- verify the shapes actually
+/// correspond before wiring, the way this file's docstring itself
+/// demonstrates by omission.
 library;
 
 import 'package:drift/drift.dart' show Value;
@@ -105,6 +118,36 @@ Map<String, dynamic> inspectionToSupabaseJson(Inspection i) => {
       'notes': i.notes,
     };
 
+Map<String, dynamic> subcontractorToSupabaseJson(Subcontractor s) => {
+      'id': s.id,
+      'company_id': s.companyId,
+      'name': s.name,
+      'contact_phone': s.contactPhone,
+      'trade': s.trade,
+    };
+
+Map<String, dynamic> workOrderToSupabaseJson(WorkOrder w) => {
+      'id': w.id,
+      'project_id': w.projectId,
+      'subcontractor_id': w.subcontractorId,
+      'description': w.description,
+      'agreed_amount': w.agreedAmount,
+      'billed_amount': w.billedAmount,
+      'status': w.status,
+    };
+
+Map<String, dynamic> approvalToSupabaseJson(Approval a) => {
+      'id': a.id,
+      'project_id': a.projectId,
+      'entity_type': a.entityType,
+      'entity_id': a.entityId,
+      'requested_by': a.requestedBy,
+      'status': a.status,
+      'approver_id': a.approverId,
+      'decision_note': a.decisionNote,
+      'decided_at': _timestamp(a.decidedAt),
+    };
+
 // --- Reverse direction: a row pulled from Supabase (Realtime or a fetch),
 // as a Postgres-shaped JSON map, into a Drift companion for upserting
 // locally. Used by the pull side of the sync engine.
@@ -186,4 +229,34 @@ InspectionsCompanion inspectionFromSupabaseJson(Map<String, dynamic> row) => Ins
       completedDate: Value(row['completed_date'] == null ? null : DateTime.parse(row['completed_date'] as String)),
       overallResult: Value(row['overall_result'] as String?),
       notes: Value(row['notes'] as String?),
+    );
+
+SubcontractorsCompanion subcontractorFromSupabaseJson(Map<String, dynamic> row) => SubcontractorsCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      name: row['name'] as String,
+      contactPhone: Value(row['contact_phone'] as String?),
+      trade: Value(row['trade'] as String?),
+    );
+
+WorkOrdersCompanion workOrderFromSupabaseJson(Map<String, dynamic> row) => WorkOrdersCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      subcontractorId: row['subcontractor_id'] as String,
+      description: row['description'] as String,
+      agreedAmount: Value((row['agreed_amount'] as num?)?.toDouble()),
+      billedAmount: Value((row['billed_amount'] as num?)?.toDouble() ?? 0),
+      status: Value(row['status'] as String? ?? 'active'),
+    );
+
+ApprovalsCompanion approvalFromSupabaseJson(Map<String, dynamic> row) => ApprovalsCompanion.insert(
+      id: row['id'] as String,
+      projectId: Value(row['project_id'] as String?),
+      entityType: row['entity_type'] as String,
+      entityId: row['entity_id'] as String,
+      requestedBy: row['requested_by'] as String,
+      status: Value(row['status'] as String? ?? 'pending'),
+      approverId: Value(row['approver_id'] as String?),
+      decisionNote: Value(row['decision_note'] as String?),
+      decidedAt: Value(row['decided_at'] == null ? null : DateTime.parse(row['decided_at'] as String)),
     );

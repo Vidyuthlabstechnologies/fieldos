@@ -765,6 +765,8 @@ create policy "project members can read work orders" on work_orders for select
   to authenticated using ((select has_project_access(project_id)));
 create policy "project members can create work orders" on work_orders for insert
   to authenticated with check ((select has_project_access(project_id)));
+create policy "project members can update work orders" on work_orders for update
+  to authenticated using ((select has_project_access(project_id)));
 
 create policy "project members can read approvals" on approvals for select
   to authenticated using (project_id is null or (select has_project_access(project_id)));

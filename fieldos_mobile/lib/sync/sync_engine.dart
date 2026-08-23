@@ -110,6 +110,18 @@ class SyncEngine {
     for (final row in inspectionRows) {
       await db.inspectionDao.upsertFromRemote(inspectionFromSupabaseJson(row));
     }
+    final subcontractorRows = await client.from('subcontractors').select();
+    for (final row in subcontractorRows) {
+      await db.subcontractorDao.upsertFromRemote(subcontractorFromSupabaseJson(row));
+    }
+    final workOrderRows = await client.from('work_orders').select();
+    for (final row in workOrderRows) {
+      await db.workOrderDao.upsertFromRemoteWorkOrder(workOrderFromSupabaseJson(row));
+    }
+    final approvalRows = await client.from('approvals').select();
+    for (final row in approvalRows) {
+      await db.approvalDao.upsertFromRemote(approvalFromSupabaseJson(row));
+    }
   }
 
   /// Live updates for one project's tasks -- INSERT/UPDATE/DELETE on the
