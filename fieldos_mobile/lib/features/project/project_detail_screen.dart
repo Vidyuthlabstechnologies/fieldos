@@ -6,6 +6,11 @@ import 'package:uuid/uuid.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/labour/labour_screen.dart';
 import 'package:fieldos_mobile/features/procurement/procurement_screen.dart';
+import 'package:fieldos_mobile/features/equipment/equipment_screen.dart';
+import 'package:fieldos_mobile/features/inspections/inspections_screen.dart';
+import 'package:fieldos_mobile/features/documents/documents_screen.dart';
+import 'package:fieldos_mobile/features/workers/workers_screen.dart';
+import 'package:fieldos_mobile/features/estimation/estimation_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 
 class ProjectDetailScreen extends ConsumerStatefulWidget {
@@ -23,7 +28,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 5, vsync: this);
+    _tabs = TabController(length: 10, vsync: this);
   }
 
   @override
@@ -37,13 +42,19 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.project.name),
-        bottom: const TabBar(
-          tabs: [
+        bottom: TabBar(
+          isScrollable: true,
+          tabs: const [
             Tab(text: 'Tasks', icon: Icon(Icons.checklist)),
             Tab(text: 'DPR', icon: Icon(Icons.edit_note)),
             Tab(text: 'Issues', icon: Icon(Icons.report_problem)),
             Tab(text: 'Procure', icon: Icon(Icons.shopping_cart)),
             Tab(text: 'Labour', icon: Icon(Icons.people)),
+            Tab(text: 'Equipment', icon: Icon(Icons.construction)),
+            Tab(text: 'Inspections', icon: Icon(Icons.fact_check)),
+            Tab(text: 'Documents', icon: Icon(Icons.folder)),
+            Tab(text: 'Workers', icon: Icon(Icons.badge)),
+            Tab(text: 'Estimation', icon: Icon(Icons.calculate)),
           ],
         ),
       ),
@@ -69,6 +80,51 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
               return LabourView(
                 projectId: widget.project.id,
                 companyId: widget.project.companyId,
+                userId: userId,
+              );
+            },
+          ),
+          Builder(
+            builder: (context) {
+              final userId = ref.watch(sessionProvider).user?.id ?? '';
+              return EquipmentView(
+                projectId: widget.project.id,
+                userId: userId,
+              );
+            },
+          ),
+          Builder(
+            builder: (context) {
+              final userId = ref.watch(sessionProvider).user?.id ?? '';
+              return InspectionsView(
+                projectId: widget.project.id,
+                userId: userId,
+              );
+            },
+          ),
+          Builder(
+            builder: (context) {
+              final userId = ref.watch(sessionProvider).user?.id ?? '';
+              return DocumentsView(
+                projectId: widget.project.id,
+                userId: userId,
+              );
+            },
+          ),
+          Builder(
+            builder: (context) {
+              final userId = ref.watch(sessionProvider).user?.id ?? '';
+              return WorkersView(
+                projectId: widget.project.id,
+                userId: userId,
+              );
+            },
+          ),
+          Builder(
+            builder: (context) {
+              final userId = ref.watch(sessionProvider).user?.id ?? '';
+              return EstimationView(
+                projectId: widget.project.id,
                 userId: userId,
               );
             },

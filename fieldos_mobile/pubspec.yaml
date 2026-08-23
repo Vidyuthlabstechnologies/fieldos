@@ -37,6 +37,9 @@ dependencies:
   # Filesystem path helpers (databases dir, media dir).
   path: ^1.9.0
 
+  # File picker for attaching documents (Storage Access Framework / document picker).
+  file_picker: ^8.0.0+1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -310,6 +310,9 @@ class LabourAttendance extends Table {
   TextColumn get id => text()();
   TextColumn get projectId => text().withLength(min: 1, max: 36)();
   TextColumn get workerName => text().withLength(min: 1, max: 120)();
+  /// Optional reference to a Workers directory entry. Nullable for backward
+  /// compatibility — free-text workerName still works without a directory link.
+  TextColumn get workerId => text().withLength(max: 36).nullable()();
   TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
   DateTimeColumn get punchIn => dateTime()();
   DateTimeColumn get punchOut => dateTime().nullable()();
@@ -376,6 +379,107 @@ class Approvals extends Table {
   TextColumn get approverId => text().withLength(max: 64).nullable()();
   TextColumn get decisionNote => text().withLength(max: 300).nullable()();
   DateTimeColumn get decidedAt => dateTime().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// --- New feature tables (mirror desktop fieldos/models.py) ---
+
+/// Equipment tracked per project: machinery, tools, vehicles.
+class Equipment extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get name => text().withLength(min: 1, max: 200)();
+  TextColumn get equipmentType => text().withLength(max: 100).nullable()();
+  TextColumn get model => text().withLength(max: 100).nullable()();
+  TextColumn get registrationNumber => text().withLength(max: 100).nullable()();
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('available'))();
+  RealColumn get dailyRate => real().nullable()();
+  TextColumn get notes => text().withLength(max: 500).nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Logs for equipment usage, maintenance, fuel, repairs, inspections.
+class EquipmentLogs extends Table {
+  TextColumn get id => text()();
+  TextColumn get equipmentId => text().withLength(min: 1, max: 36)();
+  DateTimeColumn get logDate => dateTime()();
+  TextColumn get logType => text().withLength(min: 1, max: 20)(); // usage, maintenance, repair, fuel, inspection
+  RealColumn get hoursUsed => real().nullable()();
+  TextColumn get description => text().withLength(max: 500).nullable()();
+  RealColumn get cost => real().nullable()();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Inspections (safety, quality, structural, etc.) with checklist items.
+class Inspections extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get title => text().withLength(min: 1, max: 200)();
+  TextColumn get inspectionType => text().withLength(min: 1, max: 20)(); // safety, quality, structural, mep, environmental, final, other
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('open'))(); // open, in_progress, completed
+  TextColumn get inspectorId => text().withLength(max: 64).nullable()();
+  DateTimeColumn get scheduledDate => dateTime().nullable()();
+  DateTimeColumn get completedDate => dateTime().nullable()();
+  TextColumn get overallResult => text().withLength(max: 20).nullable()(); // pass, fail, partial
+  TextColumn get notes => text().withLength(max: 500).nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Checklist items belonging to an inspection.
+class InspectionItems extends Table {
+  TextColumn get id => text()();
+  TextColumn get inspectionId => text().withLength(min: 1, max: 36)();
+  TextColumn get itemDescription => text().withLength(min: 1, max: 300)();
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('pending'))(); // pending, pass, fail, na
+  TextColumn get notes => text().withLength(max: 300).nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Project documents with versioning (drawings, specs, contracts, permits, etc.).
+class Documents extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get name => text().withLength(min: 1, max: 200)();
+  TextColumn get category => text().withLength(min: 1, max: 20).withDefault(const Constant('other'))(); // drawing, specification, contract, permit, report, photo, correspondence, safety, other
+  IntColumn get version => integer().withDefault(const Constant(1))();
+  /// Local on-device file path (copied into the app's documents dir by
+  /// file_picker), same pattern as DprPhotos.photoPath.
+  TextColumn get filePath => text().withLength(min: 1, max: 500)();
+  IntColumn get fileSize => integer().nullable()();
+  TextColumn get mimeType => text().withLength(max: 100).nullable()();
+  TextColumn get notes => text().withLength(max: 300).nullable()();
+  TextColumn get uploadedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Worker directory per project (name, role, phone, daily wage, active/inactive).
+class Workers extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get name => text().withLength(min: 1, max: 120)();
+  TextColumn get role => text().withLength(max: 100).nullable()();
+  TextColumn get phone => text().withLength(max: 30).nullable()();
+  RealColumn get dailyWage => real().nullable()();
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('active'))(); // active, inactive
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override

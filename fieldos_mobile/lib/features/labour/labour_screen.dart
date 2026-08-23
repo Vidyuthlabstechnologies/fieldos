@@ -92,22 +92,49 @@ class _LabourViewState extends ConsumerState<LabourView> {
     final name = TextEditingController();
     final lat = TextEditingController();
     final lng = TextEditingController();
+    final workers = await ref.read(workersProvider(widget.projectId).future);
+    final activeWorkers = workers.where((w) => w.status == 'active').toList();
+    String? selectedWorkerId;
+    if (!context.mounted) return;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Punch in'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Worker name')),
-            TextField(controller: lat, decoration: const InputDecoration(labelText: 'Latitude (GPS)'), keyboardType: TextInputType.number),
-            TextField(controller: lng, decoration: const InputDecoration(labelText: 'Longitude (GPS)'), keyboardType: TextInputType.number),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Punch in'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (activeWorkers.isNotEmpty) ...[
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Select worker (optional)'),
+                  hint: const Text('— Type name manually —'),
+                  value: selectedWorkerId,
+                  items: [
+                    const DropdownMenuItem<String>(value: '', child: Text('— Type name manually —')),
+                    ...activeWorkers.map((w) => DropdownMenuItem<String>(value: w.id, child: Text(w.name))),
+                  ],
+                  onChanged: (v) {
+                    setDialogState(() {
+                      selectedWorkerId = v?.isEmpty == true ? null : v;
+                      if (v != null && v.isNotEmpty) {
+                        final worker = activeWorkers.firstWhere((w) => w.id == v);
+                        name.text = worker.name;
+                      }
+                    });
+                  },
+                ),
+                const SizedBox(height: 8),
+              ],
+              TextField(controller: name, decoration: const InputDecoration(labelText: 'Worker name')),
+              TextField(controller: lat, decoration: const InputDecoration(labelText: 'Latitude (GPS)'), keyboardType: TextInputType.number),
+              TextField(controller: lng, decoration: const InputDecoration(labelText: 'Longitude (GPS)'), keyboardType: TextInputType.number),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Punch in')),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Punch in')),
-        ],
       ),
     );
     if (ok != true || name.text.trim().isEmpty || !context.mounted) return;
@@ -123,6 +150,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
           id: const Uuid().v4(),
           projectId: widget.projectId,
           workerName: name.text.trim(),
+          workerId: selectedWorkerId != null ? Value(selectedWorkerId!) : const Value.absent(),
           recordedBy: widget.userId,
           punchIn: DateTime.now(),
           lat: Value(latV),

@@ -108,3 +108,33 @@ final geofenceProvider = FutureProvider.autoDispose.family<ProjectGeofence?, Str
 /// Company subcontractor directory.
 final subcontractorsProvider = FutureProvider.autoDispose.family<List<Subcontractor>, String>(
     (ref, companyId) => ref.watch(appDatabaseProvider).subcontractorDao.forCompany(companyId));
+
+/// Equipment per project.
+final equipmentProvider = FutureProvider.autoDispose.family<List<EquipmentData>, String>(
+    (ref, projectId) => ref.watch(appDatabaseProvider).equipmentDao.forProject(projectId));
+final equipmentLogsProvider = FutureProvider.autoDispose.family<List<EquipmentLog>, String>(
+    (ref, equipmentId) => ref.watch(appDatabaseProvider).equipmentDao.logsFor(equipmentId));
+
+/// Inspections per project.
+final inspectionsProvider = FutureProvider.autoDispose.family<List<Inspection>, String>(
+    (ref, projectId) => ref.watch(appDatabaseProvider).inspectionDao.forProject(projectId));
+final inspectionItemsProvider = FutureProvider.autoDispose.family<List<InspectionItem>, String>(
+    (ref, inspectionId) => ref.watch(appDatabaseProvider).inspectionDao.itemsFor(inspectionId));
+
+/// Documents per project.
+final documentsProvider = FutureProvider.autoDispose.family<List<Document>, String>(
+    (ref, projectId) => ref.watch(appDatabaseProvider).documentDao.forProject(projectId));
+
+/// Workers per project.
+final workersProvider = FutureProvider.autoDispose.family<List<Worker>, String>(
+    (ref, projectId) => ref.watch(appDatabaseProvider).workerDao.forProject(projectId));
+
+/// Estimation / BOQ providers (existing EstimationDao, new providers).
+final estimationsProvider = FutureProvider.autoDispose.family<List<Estimation>, String>(
+    (ref, projectId) => ref.watch(appDatabaseProvider).estimationDao.forProject(projectId));
+final costHeadsProvider = FutureProvider.autoDispose.family<List<CostHead>, String>(
+    (ref, estimationId) => ref.watch(appDatabaseProvider).estimationDao.costHeadsFor(estimationId));
+final measurementEntriesProvider = FutureProvider.autoDispose.family<List<MeasurementEntry>, String>(
+    (ref, costHeadId) => ref.watch(appDatabaseProvider).estimationDao.measurements(costHeadId));
+final steelEntriesProvider = FutureProvider.autoDispose.family<List<SteelEntry>, String>(
+    (ref, costHeadId) => ref.watch(appDatabaseProvider).estimationDao.steel(costHeadId));

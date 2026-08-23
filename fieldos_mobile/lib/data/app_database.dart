@@ -45,6 +45,12 @@ final _uuid = Uuid();
   WorkOrders,
   Approvals,
   ProjectGeofences,
+  Equipment,
+  EquipmentLogs,
+  Inspections,
+  InspectionItems,
+  Documents,
+  Workers,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
@@ -72,7 +78,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   // --- DAO accessors ------------------------------------------------------
   UserDao get userDao => UserDao(this);
@@ -93,6 +99,10 @@ class AppDatabase extends _$AppDatabase {
   SubcontractorDao get subcontractorDao => SubcontractorDao(this);
   ExpenseDao get workOrderDao => ExpenseDao(this);
   ApprovalDao get approvalDao => ApprovalDao(this);
+  EquipmentDao get equipmentDao => EquipmentDao(this);
+  InspectionDao get inspectionDao => InspectionDao(this);
+  DocumentDao get documentDao => DocumentDao(this);
+  WorkerDao get workerDao => WorkerDao(this);
 }
 
 /// Where DPR photos and other local media are stored, relative to the app's
@@ -100,6 +110,16 @@ class AppDatabase extends _$AppDatabase {
 Future<Directory> localMediaDirectory() async {
   final docs = await getApplicationDocumentsDirectory();
   final dir = Directory(p.join(docs.path, 'media', 'dpr'));
+  if (!await dir.exists()) {
+    await dir.create(recursive: true);
+  }
+  return dir;
+}
+
+/// Where project documents are stored, relative to the app's documents directory.
+Future<Directory> localDocumentsDirectory() async {
+  final docs = await getApplicationDocumentsDirectory();
+  final dir = Directory(p.join(docs.path, 'media', 'documents'));
   if (!await dir.exists()) {
     await dir.create(recursive: true);
   }
@@ -567,4 +587,184 @@ class ApprovalDao extends DatabaseAccessor<AppDatabase> with _$ApprovalDaoMixin 
         decisionNote: Value(note),
         decidedAt: Value(DateTime.now()),
       ));
+}
+
+// ---------------------------------------------------------------------------
+// Equipment
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [Equipment, EquipmentLogs])
+class EquipmentDao extends DatabaseAccessor<AppDatabase> with _$EquipmentDaoMixin {
+  EquipmentDao(super.db);
+
+  Future<EquipmentData> create(EquipmentCompanion companion) {
+    final id = companion.id.present ? companion.id.value : _uuid.v4();
+    return transaction(() async {
+      await into(equipment).insert(companion.copyWith(id: Value(id)));
+      return (await (select(equipment)..where((e) => e.id.equals(id))).getSingle());
+    });
+  }
+
+  Future<List<EquipmentData>> forProject(String projectId) {
+    return (select(equipment)..where((e) => e.projectId.equals(projectId))).get();
+  }
+
+  Future<void> updateStatus(String id, String status) {
+    return (update(equipment)..where((e) => e.id.equals(id)))
+        .write(EquipmentCompanion(status: Value(status)));
+  }
+
+  Future<EquipmentLog> addLog(EquipmentLogsCompanion companion) {
+    final id = companion.id.present ? companion.id.value : _uuid.v4();
+    return transaction(() async {
+      await into(equipmentLogs).insert(companion.copyWith(id: Value(id)));
+      return (await (select(equipmentLogs)..where((l) => l.id.equals(id))).getSingle());
+    });
+  }
+
+  Future<List<EquipmentLog>> logsFor(String equipmentId) {
+    return (select(equipmentLogs)
+          ..where((l) => l.equipmentId.equals(equipmentId))
+          ..orderBy([(l) => OrderingTerm.desc(l.logDate)]))
+        .get();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Inspections
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [Inspections, InspectionItems])
+class InspectionDao extends DatabaseAccessor<AppDatabase> with _$InspectionDaoMixin {
+  InspectionDao(super.db);
+
+  Future<Inspection> create(InspectionsCompanion companion) {
+    final id = companion.id.present ? companion.id.value : _uuid.v4();
+    return transaction(() async {
+      await into(inspections).insert(companion.copyWith(id: Value(id)));
+      return (await (select(inspections)..where((i) => i.id.equals(id))).getSingle());
+    });
+  }
+
+  Future<List<Inspection>> forProject(String projectId) {
+    return (select(inspections)..where((i) => i.projectId.equals(projectId))).get();
+  }
+
+  Future<void> complete(String id, String overallResult) {
+    return (update(inspections)..where((i) => i.id.equals(id))).write(InspectionsCompanion(
+      status: const Value('completed'),
+      completedDate: Value(DateTime.now()),
+      overallResult: Value(overallResult),
+    ));
+  }
+
+  Future<InspectionItem> addItem(InspectionItemsCompanion companion) {
+    final id = companion.id.present ? companion.id.value : _uuid.v4();
+    // Auto-assign sortOrder if not provided
+    final effectiveCompanion = companion.sortOrder.present
+        ? companion
+        : companion.copyWith(sortOrder: const Value(0)); // We'll update after insert
+    return transaction(() async {
+      // First, get the current count of items for this inspection to set sortOrder
+      int sortOrder = 0;
+      if (!companion.sortOrder.present) {
+        final count = await (select(inspectionItems)
+              ..where((item) => item.inspectionId.equals(companion.inspectionId.value))).get();
+        sortOrder = count.length;
+      }
+      await into(inspectionItems).insert(effectiveCompanion.copyWith(
+        id: Value(id),
+        sortOrder: Value(sortOrder),
+      ));
+      return (await (select(inspectionItems)..where((item) => item.id.equals(id))).getSingle());
+    });
+  }
+
+  Future<List<InspectionItem>> itemsFor(String inspectionId) {
+    return (select(inspectionItems)
+          ..where((item) => item.inspectionId.equals(inspectionId))
+          ..orderBy([(item) => OrderingTerm.asc(item.sortOrder)]))
+        .get();
+  }
+
+  Future<void> updateItemStatus(String id, String status, {String? notes}) {
+    final companion = InspectionItemsCompanion(
+      status: Value(status),
+      notes: notes != null ? Value(notes) : const Value.absent(),
+    );
+    return (update(inspectionItems)..where((item) => item.id.equals(id))).write(companion);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Documents
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [Documents])
+class DocumentDao extends DatabaseAccessor<AppDatabase> with _$DocumentDaoMixin {
+  DocumentDao(super.db);
+
+  /// Mirrors the desktop backend's versioning rule (fieldos/routers/documents.py):
+  /// if a document with this exact `name` already exists for this project, the
+  /// new row's version = (max existing version for that name) + 1; otherwise 1.
+  Future<Document> create(DocumentsCompanion companion) {
+    return transaction(() async {
+      // Look up existing rows for (projectId, name) to compute next version
+      final existing = await (select(documents)
+            ..where((d) => d.projectId.equals(companion.projectId.value) & d.name.equals(companion.name.value))
+            ..orderBy([(d) => OrderingTerm.desc(d.version)]))
+          .get();
+      final nextVersion = existing.isEmpty ? 1 : existing.first.version + 1;
+
+      final id = companion.id.present ? companion.id.value : _uuid.v4();
+      await into(documents).insert(companion.copyWith(
+        id: Value(id),
+        version: Value(nextVersion),
+      ));
+      return (await (select(documents)..where((d) => d.id.equals(id))).getSingle());
+    });
+  }
+
+  Future<List<Document>> forProject(String projectId) {
+    return (select(documents)
+          ..where((d) => d.projectId.equals(projectId))
+          ..orderBy([(d) => OrderingTerm.desc(d.createdAt)]))
+        .get();
+  }
+
+  Future<List<Document>> versionsOf(String projectId, String name) {
+    return (select(documents)
+          ..where((d) => d.projectId.equals(projectId) & d.name.equals(name))
+          ..orderBy([(d) => OrderingTerm.desc(d.version)]))
+        .get();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Workers
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [Workers])
+class WorkerDao extends DatabaseAccessor<AppDatabase> with _$WorkerDaoMixin {
+  WorkerDao(super.db);
+
+  Future<Worker> create(WorkersCompanion companion) {
+    final id = companion.id.present ? companion.id.value : _uuid.v4();
+    return transaction(() async {
+      await into(workers).insert(companion.copyWith(id: Value(id)));
+      return (await (select(workers)..where((w) => w.id.equals(id))).getSingle());
+    });
+  }
+
+  Future<List<Worker>> forProject(String projectId) {
+    return (select(workers)
+          ..where((w) => w.projectId.equals(projectId))
+          ..orderBy([(w) => OrderingTerm.asc(w.name)]))
+        .get();
+  }
+
+  Future<void> setStatus(String id, String status) {
+    return (update(workers)..where((w) => w.id.equals(id)))
+        .write(WorkersCompanion(status: Value(status)));
+  }
 }
