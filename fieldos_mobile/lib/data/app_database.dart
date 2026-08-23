@@ -473,12 +473,23 @@ class SupplierDao extends DatabaseAccessor<AppDatabase> with _$SupplierDaoMixin 
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(suppliers).insert(companion.copyWith(id: Value(id)));
-      return (await (select(suppliers)..where((s) => s.id.equals(id))).getSingle());
+      final row = await (select(suppliers)..where((s) => s.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'vendors',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(supplierToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
   Future<List<Supplier>> forCompany(String companyId) =>
       (select(suppliers)..where((s) => s.companyId.equals(companyId))).get();
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertFromRemote(SuppliersCompanion companion) =>
+      into(suppliers).insertOnConflictUpdate(companion);
 }
 
 @DriftAccessor(tables: [Subcontractors])

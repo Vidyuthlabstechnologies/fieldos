@@ -6815,6 +6815,64 @@ class $SuppliersTable extends Suppliers
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _contactPersonMeta = const VerificationMeta(
+    'contactPerson',
+  );
+  @override
+  late final GeneratedColumn<String> contactPerson = GeneratedColumn<String>(
+    'contact_person',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _addressMeta = const VerificationMeta(
+    'address',
+  );
+  @override
+  late final GeneratedColumn<String> address = GeneratedColumn<String>(
+    'address',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _gstNumberMeta = const VerificationMeta(
+    'gstNumber',
+  );
+  @override
+  late final GeneratedColumn<String> gstNumber = GeneratedColumn<String>(
+    'gst_number',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 50),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -6834,6 +6892,11 @@ class $SuppliersTable extends Suppliers
     name,
     contactPhone,
     email,
+    contactPerson,
+    address,
+    gstNumber,
+    category,
+    notes,
     createdAt,
   ];
   @override
@@ -6884,6 +6947,39 @@ class $SuppliersTable extends Suppliers
         email.isAcceptableOrUnknown(data['email']!, _emailMeta),
       );
     }
+    if (data.containsKey('contact_person')) {
+      context.handle(
+        _contactPersonMeta,
+        contactPerson.isAcceptableOrUnknown(
+          data['contact_person']!,
+          _contactPersonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('address')) {
+      context.handle(
+        _addressMeta,
+        address.isAcceptableOrUnknown(data['address']!, _addressMeta),
+      );
+    }
+    if (data.containsKey('gst_number')) {
+      context.handle(
+        _gstNumberMeta,
+        gstNumber.isAcceptableOrUnknown(data['gst_number']!, _gstNumberMeta),
+      );
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -6919,6 +7015,26 @@ class $SuppliersTable extends Suppliers
         DriftSqlType.string,
         data['${effectivePrefix}email'],
       ),
+      contactPerson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contact_person'],
+      ),
+      address: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}address'],
+      ),
+      gstNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}gst_number'],
+      ),
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -6938,6 +7054,11 @@ class Supplier extends DataClass implements Insertable<Supplier> {
   final String name;
   final String? contactPhone;
   final String? email;
+  final String? contactPerson;
+  final String? address;
+  final String? gstNumber;
+  final String? category;
+  final String? notes;
   final DateTime createdAt;
   const Supplier({
     required this.id,
@@ -6945,6 +7066,11 @@ class Supplier extends DataClass implements Insertable<Supplier> {
     required this.name,
     this.contactPhone,
     this.email,
+    this.contactPerson,
+    this.address,
+    this.gstNumber,
+    this.category,
+    this.notes,
     required this.createdAt,
   });
   @override
@@ -6958,6 +7084,21 @@ class Supplier extends DataClass implements Insertable<Supplier> {
     }
     if (!nullToAbsent || email != null) {
       map['email'] = Variable<String>(email);
+    }
+    if (!nullToAbsent || contactPerson != null) {
+      map['contact_person'] = Variable<String>(contactPerson);
+    }
+    if (!nullToAbsent || address != null) {
+      map['address'] = Variable<String>(address);
+    }
+    if (!nullToAbsent || gstNumber != null) {
+      map['gst_number'] = Variable<String>(gstNumber);
+    }
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<String>(category);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
@@ -6974,6 +7115,21 @@ class Supplier extends DataClass implements Insertable<Supplier> {
       email: email == null && nullToAbsent
           ? const Value.absent()
           : Value(email),
+      contactPerson: contactPerson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contactPerson),
+      address: address == null && nullToAbsent
+          ? const Value.absent()
+          : Value(address),
+      gstNumber: gstNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(gstNumber),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
       createdAt: Value(createdAt),
     );
   }
@@ -6989,6 +7145,11 @@ class Supplier extends DataClass implements Insertable<Supplier> {
       name: serializer.fromJson<String>(json['name']),
       contactPhone: serializer.fromJson<String?>(json['contactPhone']),
       email: serializer.fromJson<String?>(json['email']),
+      contactPerson: serializer.fromJson<String?>(json['contactPerson']),
+      address: serializer.fromJson<String?>(json['address']),
+      gstNumber: serializer.fromJson<String?>(json['gstNumber']),
+      category: serializer.fromJson<String?>(json['category']),
+      notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -7001,6 +7162,11 @@ class Supplier extends DataClass implements Insertable<Supplier> {
       'name': serializer.toJson<String>(name),
       'contactPhone': serializer.toJson<String?>(contactPhone),
       'email': serializer.toJson<String?>(email),
+      'contactPerson': serializer.toJson<String?>(contactPerson),
+      'address': serializer.toJson<String?>(address),
+      'gstNumber': serializer.toJson<String?>(gstNumber),
+      'category': serializer.toJson<String?>(category),
+      'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -7011,6 +7177,11 @@ class Supplier extends DataClass implements Insertable<Supplier> {
     String? name,
     Value<String?> contactPhone = const Value.absent(),
     Value<String?> email = const Value.absent(),
+    Value<String?> contactPerson = const Value.absent(),
+    Value<String?> address = const Value.absent(),
+    Value<String?> gstNumber = const Value.absent(),
+    Value<String?> category = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
   }) => Supplier(
     id: id ?? this.id,
@@ -7018,6 +7189,13 @@ class Supplier extends DataClass implements Insertable<Supplier> {
     name: name ?? this.name,
     contactPhone: contactPhone.present ? contactPhone.value : this.contactPhone,
     email: email.present ? email.value : this.email,
+    contactPerson: contactPerson.present
+        ? contactPerson.value
+        : this.contactPerson,
+    address: address.present ? address.value : this.address,
+    gstNumber: gstNumber.present ? gstNumber.value : this.gstNumber,
+    category: category.present ? category.value : this.category,
+    notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
   );
   Supplier copyWithCompanion(SuppliersCompanion data) {
@@ -7029,6 +7207,13 @@ class Supplier extends DataClass implements Insertable<Supplier> {
           ? data.contactPhone.value
           : this.contactPhone,
       email: data.email.present ? data.email.value : this.email,
+      contactPerson: data.contactPerson.present
+          ? data.contactPerson.value
+          : this.contactPerson,
+      address: data.address.present ? data.address.value : this.address,
+      gstNumber: data.gstNumber.present ? data.gstNumber.value : this.gstNumber,
+      category: data.category.present ? data.category.value : this.category,
+      notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -7041,14 +7226,30 @@ class Supplier extends DataClass implements Insertable<Supplier> {
           ..write('name: $name, ')
           ..write('contactPhone: $contactPhone, ')
           ..write('email: $email, ')
+          ..write('contactPerson: $contactPerson, ')
+          ..write('address: $address, ')
+          ..write('gstNumber: $gstNumber, ')
+          ..write('category: $category, ')
+          ..write('notes: $notes, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, companyId, name, contactPhone, email, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    companyId,
+    name,
+    contactPhone,
+    email,
+    contactPerson,
+    address,
+    gstNumber,
+    category,
+    notes,
+    createdAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -7058,6 +7259,11 @@ class Supplier extends DataClass implements Insertable<Supplier> {
           other.name == this.name &&
           other.contactPhone == this.contactPhone &&
           other.email == this.email &&
+          other.contactPerson == this.contactPerson &&
+          other.address == this.address &&
+          other.gstNumber == this.gstNumber &&
+          other.category == this.category &&
+          other.notes == this.notes &&
           other.createdAt == this.createdAt);
 }
 
@@ -7067,6 +7273,11 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
   final Value<String> name;
   final Value<String?> contactPhone;
   final Value<String?> email;
+  final Value<String?> contactPerson;
+  final Value<String?> address;
+  final Value<String?> gstNumber;
+  final Value<String?> category;
+  final Value<String?> notes;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const SuppliersCompanion({
@@ -7075,6 +7286,11 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     this.name = const Value.absent(),
     this.contactPhone = const Value.absent(),
     this.email = const Value.absent(),
+    this.contactPerson = const Value.absent(),
+    this.address = const Value.absent(),
+    this.gstNumber = const Value.absent(),
+    this.category = const Value.absent(),
+    this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -7084,6 +7300,11 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     required String name,
     this.contactPhone = const Value.absent(),
     this.email = const Value.absent(),
+    this.contactPerson = const Value.absent(),
+    this.address = const Value.absent(),
+    this.gstNumber = const Value.absent(),
+    this.category = const Value.absent(),
+    this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -7095,6 +7316,11 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     Expression<String>? name,
     Expression<String>? contactPhone,
     Expression<String>? email,
+    Expression<String>? contactPerson,
+    Expression<String>? address,
+    Expression<String>? gstNumber,
+    Expression<String>? category,
+    Expression<String>? notes,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -7104,6 +7330,11 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
       if (name != null) 'name': name,
       if (contactPhone != null) 'contact_phone': contactPhone,
       if (email != null) 'email': email,
+      if (contactPerson != null) 'contact_person': contactPerson,
+      if (address != null) 'address': address,
+      if (gstNumber != null) 'gst_number': gstNumber,
+      if (category != null) 'category': category,
+      if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -7115,6 +7346,11 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     Value<String>? name,
     Value<String?>? contactPhone,
     Value<String?>? email,
+    Value<String?>? contactPerson,
+    Value<String?>? address,
+    Value<String?>? gstNumber,
+    Value<String?>? category,
+    Value<String?>? notes,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
@@ -7124,6 +7360,11 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
       name: name ?? this.name,
       contactPhone: contactPhone ?? this.contactPhone,
       email: email ?? this.email,
+      contactPerson: contactPerson ?? this.contactPerson,
+      address: address ?? this.address,
+      gstNumber: gstNumber ?? this.gstNumber,
+      category: category ?? this.category,
+      notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -7147,6 +7388,21 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     if (email.present) {
       map['email'] = Variable<String>(email.value);
     }
+    if (contactPerson.present) {
+      map['contact_person'] = Variable<String>(contactPerson.value);
+    }
+    if (address.present) {
+      map['address'] = Variable<String>(address.value);
+    }
+    if (gstNumber.present) {
+      map['gst_number'] = Variable<String>(gstNumber.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -7164,6 +7420,11 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
           ..write('name: $name, ')
           ..write('contactPhone: $contactPhone, ')
           ..write('email: $email, ')
+          ..write('contactPerson: $contactPerson, ')
+          ..write('address: $address, ')
+          ..write('gstNumber: $gstNumber, ')
+          ..write('category: $category, ')
+          ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -19815,6 +20076,11 @@ typedef $$SuppliersTableCreateCompanionBuilder =
       required String name,
       Value<String?> contactPhone,
       Value<String?> email,
+      Value<String?> contactPerson,
+      Value<String?> address,
+      Value<String?> gstNumber,
+      Value<String?> category,
+      Value<String?> notes,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -19825,6 +20091,11 @@ typedef $$SuppliersTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String?> contactPhone,
       Value<String?> email,
+      Value<String?> contactPerson,
+      Value<String?> address,
+      Value<String?> gstNumber,
+      Value<String?> category,
+      Value<String?> notes,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -19860,6 +20131,31 @@ class $$SuppliersTableFilterComposer
 
   ColumnFilters<String> get email => $composableBuilder(
     column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contactPerson => $composableBuilder(
+    column: $table.contactPerson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get address => $composableBuilder(
+    column: $table.address,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get gstNumber => $composableBuilder(
+    column: $table.gstNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -19903,6 +20199,31 @@ class $$SuppliersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get contactPerson => $composableBuilder(
+    column: $table.contactPerson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get address => $composableBuilder(
+    column: $table.address,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get gstNumber => $composableBuilder(
+    column: $table.gstNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -19934,6 +20255,23 @@ class $$SuppliersTableAnnotationComposer
 
   GeneratedColumn<String> get email =>
       $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get contactPerson => $composableBuilder(
+    column: $table.contactPerson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get address =>
+      $composableBuilder(column: $table.address, builder: (column) => column);
+
+  GeneratedColumn<String> get gstNumber =>
+      $composableBuilder(column: $table.gstNumber, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -19972,6 +20310,11 @@ class $$SuppliersTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String?> contactPhone = const Value.absent(),
                 Value<String?> email = const Value.absent(),
+                Value<String?> contactPerson = const Value.absent(),
+                Value<String?> address = const Value.absent(),
+                Value<String?> gstNumber = const Value.absent(),
+                Value<String?> category = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SuppliersCompanion(
@@ -19980,6 +20323,11 @@ class $$SuppliersTableTableManager
                 name: name,
                 contactPhone: contactPhone,
                 email: email,
+                contactPerson: contactPerson,
+                address: address,
+                gstNumber: gstNumber,
+                category: category,
+                notes: notes,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -19990,6 +20338,11 @@ class $$SuppliersTableTableManager
                 required String name,
                 Value<String?> contactPhone = const Value.absent(),
                 Value<String?> email = const Value.absent(),
+                Value<String?> contactPerson = const Value.absent(),
+                Value<String?> address = const Value.absent(),
+                Value<String?> gstNumber = const Value.absent(),
+                Value<String?> category = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SuppliersCompanion.insert(
@@ -19998,6 +20351,11 @@ class $$SuppliersTableTableManager
                 name: name,
                 contactPhone: contactPhone,
                 email: email,
+                contactPerson: contactPerson,
+                address: address,
+                gstNumber: gstNumber,
+                category: category,
+                notes: notes,
                 createdAt: createdAt,
                 rowid: rowid,
               ),

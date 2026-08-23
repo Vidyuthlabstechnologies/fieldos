@@ -7,12 +7,32 @@
 /// hand, not inferred.
 ///
 /// Project, Task, DprEntry, Issue, Worker, Equipment, Inspection,
-/// Subcontractor, WorkOrder, and Approval are covered -- chosen because
-/// their Drift columns correspond 1:1 with the Postgres schema. Not every
-/// mobile table does:
-///  - MaterialReceipts (procurement-chain shaped -- po_id/supplier_id/
-///    cost_head_id) has no honest mapping to material_entries (the
-///    desktop's simple consumption-log shape).
+/// Subcontractor, WorkOrder, Approval, and Supplier (-> `vendors`) are
+/// covered -- chosen because their Drift columns correspond 1:1 with the
+/// Postgres schema. Not every mobile table does:
+///  - MaterialReceipts has no honest mapping to either synced-shape table:
+///    desktop's material_entries is a simple consumption log, and Postgres's
+///    own `grns` requires a purchase_order_id (mobile allows ad-hoc receipts
+///    with no PO), splits ordered_qty/received_qty where mobile stores one
+///    quantity plus an amount, and has no home for cost_head_id -- which is
+///    what feeds mobile's cost-engine actuals.
+///  - The rest of the procurement chain is deliberately unwired because the
+///    mobile model is a collapsed draft of the Postgres one, not 1:1:
+///      * PurchaseRequests -> purchase_requisitions: mobile's default status
+///        'draft' violates the CHECK constraint ('pending','approved',
+///        'rejected','ordered'); unit is nullable locally but NOT NULL in
+///        Postgres; urgency/approved_by/approved_at/notes don't exist
+///        locally; raisedBy is a free local username while requested_by is
+///        an auth.users FK.
+///      * PurchaseOrders -> purchase_orders: same status-CHECK mismatch
+///        ('open' isn't 'issued'|'acknowledged'|'delivered'|'cancelled');
+///        mobile's requestId points at a PurchaseRequest (a requisition)
+///        while quote_id points at quotes -- different entities, not a
+///        rename; po_number/delivery_date/notes have no local columns.
+///      * rfqs and quotes have no mobile tables at all.
+///    Wiring these honestly means aligning the mobile schema and its UI
+///    state machines first (status vocabularies are user-visible), not just
+///    mapping columns.
 ///  - Documents' filePath is a local on-device path -- syncing it verbatim
 ///    would hand another device a metadata row pointing at a file that
 ///    only exists on the original phone, with no actual file transfer
@@ -26,7 +46,7 @@
 /// Forcing any of the above would silently corrupt or mislead, so they're
 /// deliberately NOT wired rather than wired wrong. EquipmentLogs and
 /// InspectionItems (child/detail rows of Equipment/Inspection) are also not
-/// yet wired -- unlike the three above, no shape mismatch is known here,
+/// yet wired -- unlike the above, no shape mismatch is known here,
 /// just not yet verified. Extending to the rest of the ~30 tables is a
 /// follow-up, same pattern, per-table -- verify the shapes actually
 /// correspond before wiring, the way this file's docstring itself
@@ -148,6 +168,19 @@ Map<String, dynamic> approvalToSupabaseJson(Approval a) => {
       'decided_at': _timestamp(a.decidedAt),
     };
 
+Map<String, dynamic> supplierToSupabaseJson(Supplier s) => {
+      'id': s.id,
+      'company_id': s.companyId,
+      'name': s.name,
+      'contact_person': s.contactPerson,
+      'phone': s.contactPhone,
+      'email': s.email,
+      'address': s.address,
+      'gst_number': s.gstNumber,
+      'category': s.category,
+      'notes': s.notes,
+    };
+
 // --- Reverse direction: a row pulled from Supabase (Realtime or a fetch),
 // as a Postgres-shaped JSON map, into a Drift companion for upserting
 // locally. Used by the pull side of the sync engine.
@@ -259,4 +292,17 @@ ApprovalsCompanion approvalFromSupabaseJson(Map<String, dynamic> row) => Approva
       approverId: Value(row['approver_id'] as String?),
       decisionNote: Value(row['decision_note'] as String?),
       decidedAt: Value(row['decided_at'] == null ? null : DateTime.parse(row['decided_at'] as String)),
+    );
+
+SuppliersCompanion supplierFromSupabaseJson(Map<String, dynamic> row) => SuppliersCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      name: row['name'] as String,
+      contactPerson: Value(row['contact_person'] as String?),
+      contactPhone: Value(row['phone'] as String?),
+      email: Value(row['email'] as String?),
+      address: Value(row['address'] as String?),
+      gstNumber: Value(row['gst_number'] as String?),
+      category: Value(row['category'] as String?),
+      notes: Value(row['notes'] as String?),
     );

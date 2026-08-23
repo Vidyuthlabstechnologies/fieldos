@@ -111,9 +111,12 @@ not yet scoped." That's false. A real, tested sync layer exists:
 - **Auth bridge:** `lib/sync/cloud_sync_service.dart` bridges local pbkdf2
   auth to a real Supabase Auth session (sign-in-first, fall back to sign-up).
   Reachable from the app at Settings → Cloud sync (`enable sync` / `sync now`).
-- **Entity coverage — 10 of ~20 syncable tables, all verified against real
+- **Entity coverage — 11 of ~20 syncable tables, all verified against real
   Postgres:** Project, Task, DPR entry, Issue, Worker, Equipment, Inspection,
-  Subcontractor, WorkOrder, Approval.
+  Subcontractor, WorkOrder, Approval, Supplier (→ `vendors`; the local
+  Suppliers table was extended with nullable
+  contact_person/address/gst_number/category/notes columns so every vendors
+  business column round-trips instead of being dropped on pull).
 - **Deliberately NOT wired** (see `lib/sync/sync_mappers.dart`'s docstring
   for the full reasoning per table): MaterialReceipts (shape doesn't map to
   desktop's `material_entries`), Documents (would sync a metadata row
@@ -206,6 +209,11 @@ surface again:
   network-touching screen, consider `integration_test/`
   (`IntegrationTestWidgetsFlutterBinding`, no FakeAsync) instead of
   fighting this again.
+- **A `supabase db reset` restarts the realtime container, and
+  `postgres_changes` tests can fail once immediately afterwards** (channel
+  join/event delivery not warm yet). The realtime test passed on immediate
+  re-run with no code change. If you reset the DB and then see exactly one
+  realtime-test failure, re-run before diagnosing.
 - **Windows + orphaned `dart.exe`/`flutter_tester.exe` processes.**
   Stopping a backgrounded `flutter test` command (timeout, manual stop)
   doesn't always kill its child processes. Check
@@ -233,7 +241,7 @@ supabase db reset              # after any migration file change
 cd fieldos_mobile
 flutter analyze                # should be clean except one pre-existing,
                                 # unrelated deprecation warning in labour_screen.dart
-flutter test                   # full suite — 53 tests as of this commit, all real-infra
+flutter test                   # full suite — 55 tests as of this commit, all real-infra
 flutter test test/some_file.dart   # a single file
 ```
 
@@ -250,11 +258,19 @@ In rough priority order (highest-value next work first). Full detail with
 artifact if it's reachable from your session; if not, this list is the
 same content in prose:
 
-1. **More entities into cloud sync** — procurement chain (vendors,
-   requisitions, RFQs, quotes, POs, GRNs), Estimation/CostHeads, Documents
-   (needs Supabase Storage file upload, not just row sync), LabourAttendance
-   (needs punch→daily-summary aggregation). Follow the recipe above,
-   per-table.
+1. **More entities into cloud sync** — `vendors` is wired (see entity
+   coverage above). The rest of the procurement chain
+   (requisitions, RFQs, quotes, POs, GRNs) is deliberately NOT mapped yet:
+   the mobile model is a collapsed draft of the Postgres one, so syncing
+   today would corrupt data — mobile statuses ('draft'/'open') violate the
+   Postgres CHECK constraints, unit nullability differs, and mobile's
+   PurchaseOrders.requestId points at a requisition while Postgres's
+   quote_id points at quotes. Wiring these honestly means aligning the
+   mobile schema + UI state machines first; the full per-table reasoning
+   lives in `lib/sync/sync_mappers.dart`'s docstring and should be kept
+   current there. Then: Estimation/CostHeads, Documents (needs Supabase
+   Storage file upload, not just row sync), LabourAttendance (needs
+   punch→daily-summary aggregation). Follow the recipe above, per-table.
 2. **Sync visibility in the UI** — no pending-outbox-count or
    last-synced-timestamp shown anywhere yet, despite `syncOutboxDao.pendingCount()`
    already existing. Small, high-value add.

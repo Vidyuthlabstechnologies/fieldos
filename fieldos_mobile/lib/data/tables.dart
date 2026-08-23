@@ -226,6 +226,14 @@ class Suppliers extends Table {
   TextColumn get name => text().withLength(min: 1, max: 200)();
   TextColumn get contactPhone => text().withLength(max: 30).nullable()();
   TextColumn get email => text().withLength(max: 120).nullable()();
+  // Full parity with supabase `vendors` so the sync mapper never has to drop
+  // business fields in either direction -- these were added when vendors
+  // entered cloud sync (all nullable in Postgres too).
+  TextColumn get contactPerson => text().withLength(max: 200).nullable()();
+  TextColumn get address => text().withLength(max: 500).nullable()();
+  TextColumn get gstNumber => text().withLength(max: 50).nullable()();
+  TextColumn get category => text().withLength(max: 100).nullable()();
+  TextColumn get notes => text().withLength(max: 500).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override

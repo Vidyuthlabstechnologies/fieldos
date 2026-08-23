@@ -122,6 +122,10 @@ class SyncEngine {
     for (final row in approvalRows) {
       await db.approvalDao.upsertFromRemote(approvalFromSupabaseJson(row));
     }
+    final vendorRows = await client.from('vendors').select();
+    for (final row in vendorRows) {
+      await db.supplierDao.upsertFromRemote(supplierFromSupabaseJson(row));
+    }
   }
 
   /// Live updates for one project's tasks -- INSERT/UPDATE/DELETE on the
