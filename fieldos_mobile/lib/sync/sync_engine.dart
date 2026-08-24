@@ -40,9 +40,32 @@ class SyncEngine {
   final AppDatabase db;
   final SupabaseClient client;
   final Future<Directory> Function() _resolveDocumentsDirectory;
+
   RealtimeChannel? _tasksChannel;
   RealtimeChannel? _projectsChannel;
   RealtimeChannel? _vendorsChannel;
+
+  /// Serializes push/pull so overlapping sync paths (periodic tick vs
+  /// manual "Sync now" vs post-write flush) can't drain the same outbox
+  /// entries twice -- the loser used to hit duplicate-id violations and
+  /// mark already-succeeded entries as failed, leaving them to retry
+  /// forever. A simple chained-Future mutex: each call awaits the previous
+  /// one; Dart's single-threaded event loop makes that race-free.
+  Future<void> _syncLock = Future.value();
+
+  Future<T> _synchronized<T>(Future<T> Function() body) {
+    final prev = _syncLock;
+    final completer = Completer<void>();
+    _syncLock = completer.future;
+    return () async {
+      try {
+        await prev;
+        return await body();
+      } finally {
+        completer.complete();
+      }
+    }();
+  }
 
   /// Fired after a Realtime event has been upserted into Drift. SyncEngine
   /// stays plain Dart with no Flutter/Riverpod dependency (see this file's
@@ -59,13 +82,13 @@ class SyncEngine {
   /// failure within a run, to preserve per-record write ordering -- a
   /// later run will retry it. Each entry gets its own failure handling so
   /// one bad row doesn't lose track of how many others succeeded first.
-  Future<SyncPushResult> pushPending() async {
-    final entries = await db.syncOutboxDao.pending();
-    var succeeded = 0;
-    for (final entry in entries) {
-      try {
-        final data = jsonDecode(entry.payload) as Map<String, dynamic>;
-        final table = client.from(entry.targetTable);
+  Future<SyncPushResult> pushPending() => _synchronized(() async {
+        final entries = await db.syncOutboxDao.pending();
+        var succeeded = 0;
+        for (final entry in entries) {
+          try {
+            final data = jsonDecode(entry.payload) as Map<String, dynamic>;
+            final table = client.from(entry.targetTable);
         if (entry.targetTable == 'documents' && entry.operation == 'insert') {
           // The file itself goes to Storage first; only after that upload
           // succeeds does the metadata row land in Postgres, so a visible
@@ -99,13 +122,13 @@ class SyncEngine {
       }
     }
     return SyncPushResult(succeeded: succeeded, failed: 0);
-  }
+  });
 
   /// One-shot pull: fetches every project/task the current session's RLS
   /// allows and merges into local Drift. Useful for an initial sync or a
   /// manual "refresh" -- the Realtime subscriptions below are for ongoing
-  /// live updates after that.
-  Future<void> pullAll() async {
+  /// live updates after that. Serialized with pushPending (see _synchronized).
+  Future<void> pullAll() => _synchronized(() async {
     final projectRows = await client.from('projects').select();
     for (final row in projectRows) {
       await db.projectDao.upsertFromRemote(projectFromSupabaseJson(row));
@@ -187,7 +210,7 @@ class SyncEngine {
       await localFile.writeAsBytes(bytes);
       await db.documentDao.upsertFromRemote(documentFromSupabaseJson(row, localPath: localFile.path));
     }
-  }
+  });
 
   /// Live updates for one project's tasks -- INSERT/UPDATE/DELETE on the
   /// `tasks` row for this project merge into Drift as they happen.

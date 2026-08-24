@@ -15,6 +15,15 @@ import 'package:supabase/supabase.dart';
 const _localAnonKey =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 
+// Supabase's publicly-documented local-dev service_role default, signed
+// with the local stack's demo JWT secret. Grants nothing against any
+// production project (every hosted project has its own secret) and is only
+// usable against `supabase start` on this machine. Tests use it to seed
+// data the same way an admin tool would. Allowlisted in .gitleaks.toml --
+// if gitleaks flags a DIFFERENT jwt here, that IS a real leak.
+const _localServiceRoleKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
+
 class SyncConfig {
   const SyncConfig({required this.url, required this.anonKey});
 
@@ -53,3 +62,8 @@ class SyncConfig {
   /// safe to ship since RLS is what actually protects the data.
   static const production = SyncConfig(url: '', anonKey: '');
 }
+
+/// Test-seeding access to the local service_role default (see its
+/// docstring above). Deliberately NOT reachable through SyncConfig itself
+/// so no client config can ever end up carrying it.
+const localServiceRoleKey = _localServiceRoleKey;

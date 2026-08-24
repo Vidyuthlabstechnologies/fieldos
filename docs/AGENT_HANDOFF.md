@@ -176,6 +176,31 @@ inventing a new approach:
 
 ## Known gotchas — don't rediscover these
 
+- **`SyncEngine.pushPending`/`pullAll` are serialized by `_synchronized` —
+  keep it that way.** Without the lock, an overlapping periodic tick +
+  manual "Sync now" drained the same outbox rows twice; the loser hit
+  duplicate-id violations and marked already-succeeded entries as FAILED
+  (silent retry-forever poisoning). Proven by
+  `test/sync_engine_concurrency_test.dart`, fixed with a chained-Future
+  mutex.
+- **The two estimation engines agree to ~25 significant digits, then
+  diverge — by design.** Python's `Decimal` applies a 28-significant-digit
+  context rounding per operation; Dart's decimal package is exact. The
+  differential suite (`test/estimation_differential_test.dart`, fixtures
+  from `scripts/generate_estimation_fixtures.py`) enforces value equality
+  for single ops and a 1e-9 tolerance for rollups. Don't "fix" either
+  engine toward the other without revisiting that contract; desktop
+  remains canonical at extreme precision (the Chaquopy path exists for it).
+- **Gitleaks runs against git history** (`gitleaks git .`); the only
+  allowlisted token is Supabase's public local-dev default in
+  `lib/sync/sync_config.dart` (see `.gitleaks.toml`). Any other jwt/key
+  finding is real — rotate and remove.
+- **frontend npm audit**: the serialize-javascript RCE chain was killed via
+  an `overrides` entry in frontend/package.json. The remaining 3 moderates
+  all sit inside the deprecated Capacitor CLI (`@capacitor/cli`→xcode→uuid)
+  — accepted risk until that wrapper is deleted, since forcing uuid ≥11
+  risks breaking the legacy build for zero runtime exposure.
+
 Real bugs found and fixed this build, in case future work touches the same
 surface again:
 
@@ -259,7 +284,9 @@ supabase db reset              # after any migration file change
 cd fieldos_mobile
 flutter analyze                # should be clean except one pre-existing,
                                 # unrelated deprecation warning in labour_screen.dart
-flutter test                   # full suite — 59 tests as of this commit, all real-infra
+flutter test                   # full suite — 303 tests as of this commit
+flutter test test/estimation_differential_test.dart   # Dart engine vs Python engine, 241 cases
+flutter test test/sync_security_perf_test.dart        # RLS denials via the app's own client + latency smoke
 flutter test test/some_file.dart   # a single file
 ```
 

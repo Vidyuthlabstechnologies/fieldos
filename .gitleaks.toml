@@ -1,0 +1,20 @@
+# Gitleaks allowlist -- decisions recorded, not secrets ignored.
+#
+# The single JWT pattern below is Supabase's PUBLICLY-DOCUMENTED local-dev
+# default service_role token (signed with the demo secret every local
+# `supabase start` stack uses). It grants access to nothing but the
+# developer's own Docker containers on 127.0.0.1; every hosted Supabase
+# project has its own JWT secret, so this token is inert in production.
+# It lives in exactly one place (lib/sync/sync_config.dart) with a docstring
+# explaining this same reasoning; tests import it from there.
+#
+# Anything ELSE gitleaks flags here -- a different jwt shape, a real
+# sarvam key (sk_...), a stripe key, a production anon key -- is a REAL
+# finding: stop, rotate, remove.
+
+[allowlist]
+  description = "Supabase public local-dev default tokens only"
+  regexTarget = "line"
+  regexes = [
+    '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIi''',
+  ]
