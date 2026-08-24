@@ -12,6 +12,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
 class ProcurementView extends ConsumerStatefulWidget {
   const ProcurementView({
@@ -31,15 +32,39 @@ class ProcurementView extends ConsumerStatefulWidget {
 class _ProcurementViewState extends ConsumerState<ProcurementView>
     with SingleTickerProviderStateMixin {
   late final TabController _tabs;
+  void Function()? _vendorsLiveCallback;
 
   @override
   void initState() {
     super.initState();
     _tabs = TabController(length: 4, vsync: this);
+    _maybeSubscribeToVendorUpdates();
+  }
+
+  /// Same pattern as ProjectDetailScreen's task subscription: if cloud sync
+  /// is on, a colleague adding a vendor refreshes the Suppliers tab live.
+  Future<void> _maybeSubscribeToVendorUpdates() async {
+    final service = ref.read(cloudSyncServiceProvider);
+    if (!service.isSignedIn) return;
+    final engine = ref.read(cloudSyncEngineProvider);
+    _vendorsLiveCallback = () {
+      if (mounted) ref.invalidate(suppliersProvider(widget.companyId));
+    };
+    engine.onVendorsChanged = _vendorsLiveCallback;
+    try {
+      await engine.subscribeToCompanyVendors(widget.companyId);
+    } catch (_) {
+      // Periodic/manual sync still covers this data; a failed live channel
+      // isn't actionable from here.
+    }
   }
 
   @override
   void dispose() {
+    final engine = ref.read(cloudSyncEngineProvider);
+    if (identical(engine.onVendorsChanged, _vendorsLiveCallback)) {
+      engine.onVendorsChanged = null;
+    }
     _tabs.dispose();
     super.dispose();
   }

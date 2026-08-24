@@ -1,0 +1,40 @@
+name: mobile
+
+on:
+  push:
+    branches: [master]
+    paths: ['fieldos_mobile/**', 'supabase/**', '.github/workflows/mobile.yml']
+  pull_request:
+    paths: ['fieldos_mobile/**', 'supabase/**', '.github/workflows/mobile.yml']
+
+jobs:
+  analyze-and-test:
+    # Real-infrastructure discipline: the sync tests self-skip when the
+    # Supabase stack is down, which would make a green run meaningless --
+    # so the stack is started here and the full suite runs against it.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fieldos_mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.9
+          channel: stable
+          cache: true
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase stack (applies migrations + seed)
+        working-directory: .
+        run: supabase start
+
+      - run: flutter pub get
+
+      - run: flutter analyze
+
+      - run: flutter test --reporter compact

@@ -111,14 +111,17 @@ not yet scoped." That's false. A real, tested sync layer exists:
 - **Auth bridge:** `lib/sync/cloud_sync_service.dart` bridges local pbkdf2
   auth to a real Supabase Auth session (sign-in-first, fall back to sign-up).
   Reachable from the app at Settings → Cloud sync (`enable sync` / `sync now`).
-- **Entity coverage — 17 of ~20 syncable tables, all verified against real
-  Postgres:** Project, Task, DPR entry, Issue, Worker, Equipment, Inspection,
-  Subcontractor, WorkOrder, Approval, Supplier (→ `vendors`; local table
-  extended for full column parity), the estimation tree
-  (Estimation/CostHead/MeasurementEntry/SteelEntry), and the procurement
-  core (PurchaseRequest → `purchase_requisitions`, PurchaseOrder →
+- **Entity coverage — 18 of ~20 syncable tables, all verified against real
+  Postgres/Storage:** Project, Task, DPR entry, Issue, Worker, Equipment,
+  Inspection, Subcontractor, WorkOrder, Approval, Supplier (→ `vendors`;
+  local table extended for full column parity), the estimation tree
+  (Estimation/CostHead/MeasurementEntry/SteelEntry), the procurement core
+  (PurchaseRequest → `purchase_requisitions`, PurchaseOrder →
   `purchase_orders` — mobile schemas were aligned to the remote CHECK
-  vocabularies first; see `lib/data/tables.dart`).
+  vocabularies first; see `lib/data/tables.dart`), and Documents — the only
+  entity that moves its FILE through Supabase Storage (private bucket,
+  path `{projectId}/{documentId}`, upload-before-insert so a visible row
+  always has a downloadable object; byte-for-byte round-trip tested).
 - **Deliberately NOT wired** (see `lib/sync/sync_mappers.dart`'s docstring
   for the full reasoning per table): MaterialReceipts (shape doesn't map to
   desktop's `material_entries`), Documents (would sync a metadata row
@@ -126,11 +129,11 @@ not yet scoped." That's false. A real, tested sync layer exists:
   upload first, not just a column mapping), LabourAttendance (punch-events
   vs. a daily summary — needs real aggregation, not a mapping).
 - **Realtime:** engine-level subscriptions exist for project tasks, company
-  projects, and company vendors (`subscribeToCompanyVendors`); the
-  publication now carries `tasks, projects, vendors,
-  purchase_requisitions, purchase_orders`. The only live-update UI hookup
-  is still `ProjectDetailScreen`'s task list — the other subscriptions'
-  `on*Changed` hooks are ready for screens to consume.
+  projects, and company vendors; live-update UI consumers are the
+  `ProjectDetailScreen` task list and `ProcurementView`'s Suppliers tab.
+  The publication carries `tasks, projects, vendors,
+  purchase_requisitions, purchase_orders`. Other synced tables' `on*Changed`
+  hooks are ready for screens to consume.
 - **Sync visibility exists now:** Settings → Cloud sync shows the pending
   outbox count and last-synced timestamp (persisted in AppSettings as
   `last_sync_at`, written after each successful `syncNow()`).
@@ -256,7 +259,7 @@ supabase db reset              # after any migration file change
 cd fieldos_mobile
 flutter analyze                # should be clean except one pre-existing,
                                 # unrelated deprecation warning in labour_screen.dart
-flutter test                   # full suite — 57 tests as of this commit, all real-infra
+flutter test                   # full suite — 59 tests as of this commit, all real-infra
 flutter test test/some_file.dart   # a single file
 ```
 
@@ -273,31 +276,31 @@ In rough priority order (highest-value next work first). Full detail with
 artifact if it's reachable from your session; if not, this list is the
 same content in prose:
 
-1. **More entities into cloud sync** — 17 of ~20 wired (see entity
+1. **More entities into cloud sync** — 18 of ~20 wired (see entity
    coverage). Remaining, each with its blocker: `grns`/MaterialReceipts and
    `attendance`/LabourAttendance (shape mismatches — see
-   `sync_mappers.dart`'s docstring), Documents (needs Supabase Storage file
-   upload first), `rfqs`/`quotes` (no mobile tables exist — building them
-   is a feature, not a mapping). The procurement core IS synced now:
-   mobile schemas were aligned to the Postgres CHECK vocabularies (v4
-   drift migration) and requisition/PO status changes push through RLS.
+   `sync_mappers.dart`'s docstring), `rfqs`/`quotes` (no mobile tables —
+   building them is a feature, not a mapping).
 2. **~~Sync visibility in the UI~~ DONE** — Settings → Cloud sync shows
    pending outbox count + last-synced timestamp.
-3. **Realtime UI hookups beyond the task list** — engine subscriptions
-   exist for projects/vendors too; only `ProjectDetailScreen`'s task list
-   consumes a live-updates callback so far.
-4. **Photo evidence capture** — DPR entries now have camera-first capture
-   (`image_picker`, camera before gallery) via
-   `lib/features/shared/photo_capture.dart`; inspections/materials still
-   use generic pickers. Needs on-device verification of the camera intent.
+3. **Realtime UI hookups beyond the task list** — Suppliers tab is live
+   now; remaining synced tables still refresh via periodic/manual sync.
+4. **Photo evidence capture** — DPR entries have camera-first capture
+   (`image_picker`) via `lib/features/shared/photo_capture.dart`;
+   inspections/materials still use generic pickers. Needs on-device
+   verification of the camera intent.
 5. **Feature-breadth gaps vs. the Kraaft/Onsite competitor research**
    (`docs/MARKET_UX_RESEARCH.md`) — no chat/messaging, no map view (a
    geofence radius check exists for attendance but no map UI), no push
    notifications. Each is a real, scoped feature, not a quick add.
 6. **A real production Supabase project** — blocked on the user's own
-   account (see Absolute Rules).
-7. **Play Store presence, CI** — no signed release build for distribution,
-   no automated `flutter analyze`/`flutter test` pipeline.
+   account; the exact cutover steps are written up in
+   `docs/SUPABASE_PRODUCTION_RUNBOOK.md`, so it's configuration once done.
+7. **Play Store presence** — signed release builds work now (upload key in
+   gitignored `android/app/key.properties`; falls back to debug signing
+   without it). CI runs `flutter analyze` + full real-infra test suite on
+   every push (`.github/workflows/mobile.yml`). Remaining: Play Console
+   listing itself (user account) and first store upload.
 
 ## Stale docs to be aware of
 

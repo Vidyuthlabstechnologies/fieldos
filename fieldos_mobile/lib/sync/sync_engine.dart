@@ -16,6 +16,7 @@ library;
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:supabase/supabase.dart';
 
@@ -29,10 +30,16 @@ class SyncPushResult {
 }
 
 class SyncEngine {
-  SyncEngine({required this.db, required this.client});
+  /// Where downloaded document files are written. Injectable so Dart-VM
+  /// tests can point at a temp dir -- [localDocumentsDirectory] needs
+  /// path_provider's platform channels, which don't exist under
+  /// TestWidgetsFlutterBinding.
+  SyncEngine({required this.db, required this.client, Future<Directory> Function()? resolveDocumentsDirectory})
+      : _resolveDocumentsDirectory = resolveDocumentsDirectory ?? localDocumentsDirectory;
 
   final AppDatabase db;
   final SupabaseClient client;
+  final Future<Directory> Function() _resolveDocumentsDirectory;
   RealtimeChannel? _tasksChannel;
   RealtimeChannel? _projectsChannel;
   RealtimeChannel? _vendorsChannel;
@@ -59,15 +66,30 @@ class SyncEngine {
       try {
         final data = jsonDecode(entry.payload) as Map<String, dynamic>;
         final table = client.from(entry.targetTable);
-        switch (entry.operation) {
-          case 'insert':
-            await table.insert(data);
-          case 'update':
-            await table.update(data).eq('id', entry.recordId);
-          case 'delete':
-            await table.delete().eq('id', entry.recordId);
-          default:
-            throw StateError('Unknown outbox operation: ${entry.operation}');
+        if (entry.targetTable == 'documents' && entry.operation == 'insert') {
+          // The file itself goes to Storage first; only after that upload
+          // succeeds does the metadata row land in Postgres, so a visible
+          // row always has a downloadable object behind it.
+          final localPath = data.remove('_local_file_path') as String?;
+          if (localPath == null) {
+            throw StateError('documents outbox payload missing _local_file_path');
+          }
+          await client.storage
+              .from('documents')
+              .uploadBinary(data['file_path'] as String, File(localPath).readAsBytesSync(),
+                  fileOptions: const FileOptions(upsert: true));
+          await table.insert(data);
+        } else {
+          switch (entry.operation) {
+            case 'insert':
+              await table.insert(data);
+            case 'update':
+              await table.update(data).eq('id', entry.recordId);
+            case 'delete':
+              await table.delete().eq('id', entry.recordId);
+            default:
+              throw StateError('Unknown outbox operation: ${entry.operation}');
+          }
         }
         await db.syncOutboxDao.markSynced(entry.id);
         succeeded++;
@@ -151,6 +173,19 @@ class SyncEngine {
     final purchaseOrderRows = await client.from('purchase_orders').select();
     for (final row in purchaseOrderRows) {
       await db.purchaseDao.upsertFromRemoteOrder(purchaseOrderFromSupabaseJson(row));
+    }
+    final documentRows = await client.from('documents').select();
+    for (final row in documentRows) {
+      final storagePath = row['file_path'] as String;
+      // A visible row must have a downloadable object (push uploads the file
+      // before inserting). A failure here is a real anomaly -- surfacing it
+      // beats silently shipping a metadata row pointing at nothing.
+      final bytes = await client.storage.from('documents').download(storagePath);
+      final docsDir = await _resolveDocumentsDirectory();
+      final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
+      final localFile = File('${docsDir.path}/${row['id']}_$safeName');
+      await localFile.writeAsBytes(bytes);
+      await db.documentDao.upsertFromRemote(documentFromSupabaseJson(row, localPath: localFile.path));
     }
   }
 

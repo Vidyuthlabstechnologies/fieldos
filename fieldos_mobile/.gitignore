@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Release signing material -- never commit (see docs/SUPABASE_PRODUCTION_RUNBOOK.md)
+/android/app/key.properties
+/android/app/*.keystore

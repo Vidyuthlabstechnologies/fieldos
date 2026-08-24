@@ -1022,6 +1022,19 @@ class DocumentDao extends DatabaseAccessor<AppDatabase> with _$DocumentDaoMixin 
         id: Value(id),
         version: Value(nextVersion),
       ));
+      final row = await (select(documents)..where((d) => d.id.equals(id))).getSingle();
+      // The file itself rides through Supabase Storage (see SyncEngine's
+      // documents branch); the outbox payload carries the local path under a
+      // transient key the engine strips before the row reaches Postgres.
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'documents',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode({
+          ...documentToSupabaseJson(row),
+          '_local_file_path': row.filePath,
+        }),
+      );
       return (await (select(documents)..where((d) => d.id.equals(id))).getSingle());
     });
   }
@@ -1039,6 +1052,10 @@ class DocumentDao extends DatabaseAccessor<AppDatabase> with _$DocumentDaoMixin 
           ..orderBy([(d) => OrderingTerm.desc(d.version)]))
         .get();
   }
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertFromRemote(DocumentsCompanion companion) =>
+      into(documents).insertOnConflictUpdate(companion);
 }
 
 // ---------------------------------------------------------------------------

@@ -26,11 +26,6 @@
 ///    preserved as an opaque uuid column so remote-created linkage isn't
 ///    dropped on pull, but creating/quoting RFQs from mobile means building
 ///    those features, not mapping existing ones.
-///  - Documents' filePath is a local on-device path -- syncing it verbatim
-///    would hand another device a metadata row pointing at a file that
-///    only exists on the original phone, with no actual file transfer
-///    (Supabase Storage upload) implemented. Wiring this honestly means
-///    building that upload path first, not just mapping the columns.
 ///  - LabourAttendance is a punch-in/punch-out GPS-geofence event log;
 ///    Postgres's `attendance` is a daily present/absent/half_day summary
 ///    keyed by (worker_id, date). These aren't the same shape at all --
@@ -243,6 +238,42 @@ Map<String, dynamic> purchaseOrderToSupabaseJson(PurchaseOrder o) => {
       'notes': o.notes,
       'created_by': o.raisedBy,
     };
+
+/// Documents sync the file itself through Supabase Storage (bucket
+/// 'documents', object path = {projectId}/{documentId}); Postgres stores
+/// only metadata with `file_path` holding that storage-relative path. The
+/// row's local on-device path travels in the outbox payload under a
+/// `_local_file_path` key, which SyncEngine strips before inserting --
+/// it must never reach Postgres.
+Map<String, dynamic> documentToSupabaseJson(Document d) => {
+      'id': d.id,
+      'project_id': d.projectId,
+      'name': d.name,
+      'category': d.category,
+      'version': d.version,
+      'file_path': '${d.projectId}/${d.id}',
+      'file_size': d.fileSize,
+      'mime_type': d.mimeType,
+      'notes': d.notes,
+      'uploaded_by': d.uploadedBy,
+    };
+
+/// [localPath] is where SyncEngine just downloaded the storage object on
+/// this device; the local row points there instead of at another phone's
+/// filesystem.
+DocumentsCompanion documentFromSupabaseJson(Map<String, dynamic> row, {required String localPath}) =>
+    DocumentsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      name: row['name'] as String,
+      category: Value(row['category'] as String? ?? 'other'),
+      version: Value(row['version'] as int? ?? 1),
+      filePath: localPath,
+      fileSize: Value(row['file_size'] as int?),
+      mimeType: Value(row['mime_type'] as String?),
+      notes: Value(row['notes'] as String?),
+      uploadedBy: row['uploaded_by'] as String,
+    );
 
 // --- Reverse direction: a row pulled from Supabase (Realtime or a fetch),
 // as a Postgres-shaped JSON map, into a Drift companion for upserting
