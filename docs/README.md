@@ -6,7 +6,8 @@ Welcome to the FieldOS documentation. This directory contains comprehensive guid
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [AGENT_HANDOFF.md](./AGENT_HANDOFF.md) | Current state, absolute rules, known gotchas, prioritized gaps — read this first if you're an AI agent picking up the project | AI agents |
+| [AGENT_HANDOFF.md](./AGENT_HANDOFF.md) | Current state, absolute rules, known gotchas, the entity-sync recipe — read this first if you're an AI agent picking up the project | AI agents |
+| [COMPLETION_PLAN.md](./COMPLETION_PLAN.md) | The forward-looking plan on top of the handoff: verified ground truth, what's done/partial/not-started, phases, targets, and a "done" definition | AI agents, project owner |
 | [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md) | High-level project description, features, tech stack | All |
 | [DEVELOPMENT.md](./DEVELOPMENT.md) | Setup, workflow, adding features | Developers |
 | [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) | Complete SQL schema with relationships | Backend devs, DBAs |
