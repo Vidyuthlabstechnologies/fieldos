@@ -44,6 +44,8 @@ class SyncEngine {
   RealtimeChannel? _tasksChannel;
   RealtimeChannel? _projectsChannel;
   RealtimeChannel? _vendorsChannel;
+  RealtimeChannel? _dprEntriesChannel;
+  RealtimeChannel? _issuesChannel;
 
   /// Serializes push/pull so overlapping sync paths (periodic tick vs
   /// manual "Sync now" vs post-write flush) can't drain the same outbox
@@ -77,6 +79,8 @@ class SyncEngine {
   void Function()? onTasksChanged;
   void Function()? onProjectsChanged;
   void Function()? onVendorsChanged;
+  void Function()? onDprEntriesChanged;
+  void Function()? onIssuesChanged;
 
   /// Drains the outbox in order. Stops (does not skip past) on the first
   /// failure within a run, to preserve per-record write ordering -- a
@@ -280,6 +284,44 @@ class SyncEngine {
     await _awaitJoin(channel, label: 'vendors-$companyId');
   }
 
+  /// Live updates for DPR entries in a project. See subscribeToProjectTasks's
+  /// docstring for why this awaits the join.
+  Future<void> subscribeToProjectDprEntries(String projectId) async {
+    await _dprEntriesChannel?.unsubscribe();
+    final channel = client.channel('dpr-entries-$projectId').onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'dpr_entries',
+          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'project_id', value: projectId),
+          callback: (payload) async {
+            if (payload.eventType == PostgresChangeEvent.delete) return;
+            await db.dprDao.upsertDprEntryFromRemote(dprEntryFromSupabaseJson(payload.newRecord));
+            onDprEntriesChanged?.call();
+          },
+        );
+    _dprEntriesChannel = channel;
+    await _awaitJoin(channel, label: 'dpr-entries-$projectId');
+  }
+
+  /// Live updates for issues in a project. See subscribeToProjectTasks's
+  /// docstring for why this awaits the join.
+  Future<void> subscribeToProjectIssues(String projectId) async {
+    await _issuesChannel?.unsubscribe();
+    final channel = client.channel('issues-$projectId').onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'issues',
+          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'project_id', value: projectId),
+          callback: (payload) async {
+            if (payload.eventType == PostgresChangeEvent.delete) return;
+            await db.issueDao.upsertIssueFromRemote(issueFromSupabaseJson(payload.newRecord));
+            onIssuesChanged?.call();
+          },
+        );
+    _issuesChannel = channel;
+    await _awaitJoin(channel, label: 'issues-$projectId');
+  }
+
   Future<void> _awaitJoin(RealtimeChannel channel, {required String label}) {
     final completer = Completer<void>();
     channel.subscribe((status, error) {
@@ -300,5 +342,7 @@ class SyncEngine {
     if (_tasksChannel != null) await _tasksChannel!.unsubscribe();
     if (_projectsChannel != null) await _projectsChannel!.unsubscribe();
     if (_vendorsChannel != null) await _vendorsChannel!.unsubscribe();
+    if (_dprEntriesChannel != null) await _dprEntriesChannel!.unsubscribe();
+    if (_issuesChannel != null) await _issuesChannel!.unsubscribe();
   }
 }

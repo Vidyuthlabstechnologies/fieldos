@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
+import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 
 class ProcurementView extends ConsumerStatefulWidget {
   const ProcurementView({
@@ -366,26 +367,45 @@ class _PoTab extends ConsumerWidget {
     final qty = TextEditingController();
     final unit = TextEditingController();
     final amount = TextEditingController(text: (o.totalAmount ?? '').toString());
+    final photoPath = ValueNotifier<String?>(null);
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Goods receipt (GRN)'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: qty, decoration: const InputDecoration(labelText: 'Qty received'), keyboardType: TextInputType.number),
-            TextField(controller: unit, decoration: const InputDecoration(labelText: 'Unit')),
-            TextField(controller: amount, decoration: const InputDecoration(labelText: 'Invoice amount'), keyboardType: TextInputType.number),
+      builder: (ctx) => StatefulBuilder(
+        builder: (_, setGrnState) => AlertDialog(
+          title: const Text('Goods receipt (GRN)'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: qty, decoration: const InputDecoration(labelText: 'Qty received'), keyboardType: TextInputType.number),
+              TextField(controller: unit, decoration: const InputDecoration(labelText: 'Unit')),
+              TextField(controller: amount, decoration: const InputDecoration(labelText: 'Invoice amount'), keyboardType: TextInputType.number),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.photo_camera),
+                label: Text(photoPath.value == null ? 'Attach delivery photo' : 'Photo attached'),
+                onPressed: () async {
+                  final path = await captureCameraFirst(ctx, prefix: 'grn');
+                  if (path != null) {
+                    photoPath.value = path;
+                    setGrnState(() {});
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Receive')),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Receive')),
-        ],
       ),
     );
     if (ok != true) return;
     final db = ref.read(appDatabaseProvider);
+    
+    // Store photo path in notes field for now (material_receipts table doesn't have a dedicated photo_path column)
+    final notes = photoPath.value != null ? 'Photo: ${photoPath.value}' : null;
+    
     await db.materialDao.createReceipt(MaterialReceiptsCompanion.insert(
           id: const Uuid().v4(),
           projectId: projectId,
@@ -398,6 +418,7 @@ class _PoTab extends ConsumerWidget {
           amount: double.tryParse(amount.text) ?? 0,
           receivedBy: userId,
           receivedOn: DateTime.now(),
+          notes: Value(notes),
         ));
     await db.purchaseDao.setOrderStatus(o.id, 'delivered');
     ref.invalidate(ordersProvider(projectId));
