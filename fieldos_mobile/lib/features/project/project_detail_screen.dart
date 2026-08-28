@@ -27,6 +27,8 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabs;
   void Function()? _liveUpdateCallback;
+  void Function()? _liveDprUpdateCallback;
+  void Function()? _liveIssuesUpdateCallback;
 
   @override
   void initState() {
@@ -43,12 +45,29 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
     final service = ref.read(cloudSyncServiceProvider);
     if (!service.isSignedIn) return;
     final engine = ref.read(cloudSyncEngineProvider);
+    
+    // Tasks realtime
     _liveUpdateCallback = () {
       if (mounted) ref.invalidate(tasksProvider(widget.project.id));
     };
     engine.onTasksChanged = _liveUpdateCallback;
+    
+    // DPR entries realtime
+    _liveDprUpdateCallback = () {
+      if (mounted) ref.invalidate(dprProvider(widget.project.id));
+    };
+    engine.onDprEntriesChanged = _liveDprUpdateCallback;
+    
+    // Issues realtime
+    _liveIssuesUpdateCallback = () {
+      if (mounted) ref.invalidate(issuesProvider(widget.project.id));
+    };
+    engine.onIssuesChanged = _liveIssuesUpdateCallback;
+    
     try {
       await engine.subscribeToProjectTasks(widget.project.id);
+      await engine.subscribeToProjectDprEntries(widget.project.id);
+      await engine.subscribeToProjectIssues(widget.project.id);
     } catch (_) {
       // A failed live-update subscription shouldn't block viewing the
       // project -- the periodic/manual sync paths still cover this data,
@@ -71,6 +90,12 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
     final engine = ref.read(cloudSyncEngineProvider);
     if (identical(engine.onTasksChanged, _liveUpdateCallback)) {
       engine.onTasksChanged = null;
+    }
+    if (identical(engine.onDprEntriesChanged, _liveDprUpdateCallback)) {
+      engine.onDprEntriesChanged = null;
+    }
+    if (identical(engine.onIssuesChanged, _liveIssuesUpdateCallback)) {
+      engine.onIssuesChanged = null;
     }
     _tabs.dispose();
     super.dispose();
@@ -274,7 +299,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
                   icon: const Icon(Icons.photo_camera),
                   label: Text(photos.isEmpty ? 'Attach photo evidence' : '${photos.length} photo${photos.length == 1 ? '' : 's'} attached'),
                   onPressed: () async {
-                    final path = await captureCameraFirst(ctx);
+                    final path = await captureCameraFirst(ctx, prefix: 'dpr');
                     if (path != null) setDialogState(() => photos.add(path));
                   },
                 ),

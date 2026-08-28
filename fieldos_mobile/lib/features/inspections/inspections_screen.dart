@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 
 class InspectionsView extends ConsumerStatefulWidget {
   const InspectionsView({
@@ -226,23 +227,48 @@ Widget _statusBadge(String status) {
 
   Future<void> _addItem(BuildContext context, WidgetRef ref, Function(void Function()) setDialogState) async {
     final description = TextEditingController();
+    final photoPath = ValueNotifier<String?>(null);
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Add checklist item'),
-        content: TextField(controller: description, decoration: const InputDecoration(labelText: 'Description')),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
-        ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (_, setItemState) => AlertDialog(
+          title: const Text('Add checklist item'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: description, decoration: const InputDecoration(labelText: 'Description')),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.photo_camera),
+                label: Text(photoPath.value == null ? 'Attach photo evidence' : 'Photo attached'),
+                onPressed: () async {
+                  final path = await captureCameraFirst(ctx, prefix: 'inspection');
+                  if (path != null) {
+                    photoPath.value = path;
+                    setItemState(() {});
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+          ],
+        ),
       ),
     );
     if (ok != true || description.text.trim().isEmpty || !context.mounted) return;
+    
+    // Store photo path in notes field for now (inspection_items table doesn't have a dedicated photo_path column)
+    final notes = photoPath.value != null ? 'Photo: ${photoPath.value}' : null;
+    
     await ref.read(appDatabaseProvider).inspectionDao.addItem(InspectionItemsCompanion.insert(
           id: const Uuid().v4(),
           inspectionId: inspection.id,
           itemDescription: description.text.trim(),
           status: const Value('pending'),
+          notes: Value(notes),
         ));
     ref.invalidate(inspectionItemsProvider(inspection.id));
     ref.invalidate(inspectionsProvider(projectId));
