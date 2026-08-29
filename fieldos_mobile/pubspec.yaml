@@ -32,7 +32,7 @@ dependencies:
   dio: ^5.8.0
 
   # Voice capture for the optional voice-to-DPR feature.
-  record: ^6.0.0
+  record: ^7.1.1
 
   # Filesystem path helpers (databases dir, media dir).
   path: ^1.9.0
