@@ -1,0 +1,44 @@
+version: 2
+updates:
+  # Mobile (fieldos_mobile/) -- the active development target.
+  - package-ecosystem: "pub"
+    directory: "/fieldos_mobile"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "mobile"]
+
+  # Frontend (desktop app's UI).
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "frontend"]
+    # frontend/android/ is a deprecated Capacitor wrapper (see
+    # frontend/MOBILE.md) -- don't spend Dependabot PRs on it.
+    ignore:
+      - dependency-name: "@capacitor/*"
+
+  # Desktop shell (Tauri CLI, installed via the root package.json).
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels: ["dependencies", "desktop"]
+
+  # Backend (FastAPI).
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "backend"]
+
+  # The Actions workflows themselves.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "ci"]
