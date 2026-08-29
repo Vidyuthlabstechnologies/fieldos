@@ -16,9 +16,9 @@ dependencies:
   flutter_riverpod: ^2.6.1
 
   # Local, offline-first SQLite (works on Android, iOS, and desktop for tests)
-  drift: ^2.21.0
-  drift_flutter: ^0.2.0
-  sqlite3_flutter_libs: ^0.5.0
+  drift: ^2.34.3
+  drift_flutter: ^0.3.1
+  sqlite3_flutter_libs: ^0.6.0+eol
   path_provider: ^2.1.5
 
   # Password hashing (pure Dart, no native) + session tokens
@@ -70,7 +70,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  drift_dev: ^2.21.0
+  drift_dev: ^2.34.0
   build_runner: ^2.4.0
 
 flutter:
