@@ -108,7 +108,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
                 DropdownButtonFormField<String>(
                   decoration: const InputDecoration(labelText: 'Select worker (optional)'),
                   hint: const Text('— Type name manually —'),
-                  value: selectedWorkerId,
+                  initialValue: selectedWorkerId,
                   items: [
                     const DropdownMenuItem<String>(value: '', child: Text('— Type name manually —')),
                     ...activeWorkers.map((w) => DropdownMenuItem<String>(value: w.id, child: Text(w.name))),
