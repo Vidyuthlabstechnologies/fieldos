@@ -310,6 +310,7 @@ class MaterialReceipts extends Table {
   TextColumn get receivedBy => text().withLength(min: 1, max: 64)();
   DateTimeColumn get receivedOn => dateTime()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get notes => text().withLength(max: 500).nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
