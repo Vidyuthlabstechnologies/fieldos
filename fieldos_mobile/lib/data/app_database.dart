@@ -82,15 +82,23 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
   // existing table would crash on upgrade. v4 catches up both the suppliers
-  // `vendors`-parity columns and the procurement alignment columns.
+  // `vendors`-parity columns and the procurement alignment columns. v5 adds
+  // a notes column to MaterialReceipts for GRN photo-evidence paths (see
+  // photo_capture.dart -- stored as text until this table gets sync
+  // consideration; MaterialReceipts stays mobile-only per
+  // docs/MATERIALRECEIPTS_SYNC_ANALYSIS.md, so this is a local-only column,
+  // no Postgres/RLS counterpart needed).
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onUpgrade: (m, from, to) async {
+          if (from < 5) {
+            await m.addColumn(materialReceipts, materialReceipts.notes);
+          }
           if (from < 4) {
             await m.addColumn(suppliers, suppliers.contactPerson);
             await m.addColumn(suppliers, suppliers.address);

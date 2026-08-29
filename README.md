@@ -316,8 +316,21 @@ See [docs/MOBILE_GUIDE.md](docs/MOBILE_GUIDE.md) for the full picture.
   sync (`supabase/migrations/`), plus a local Docker dev stack config.
   No production Supabase project exists yet — see
   `docs/SUPABASE_PRODUCTION_RUNBOOK.md`.
-- `.github/workflows/mobile.yml` — CI: starts a real local Supabase stack,
-  then runs `flutter analyze` + the full mobile test suite on every push.
+- `.github/` — CI/CD: `workflows/mobile.yml` (starts a real local Supabase
+  stack, runs `flutter analyze` + the full mobile test suite),
+  `workflows/backend.yml` (pytest), `workflows/frontend.yml` (`tsc`,
+  vitest, the static export build) all run on every push/PR touching
+  their area. `workflows/release.yml` builds the signed mobile
+  APK/AAB and the desktop installer and drafts a GitHub Release when
+  a `v*` tag is pushed (needs `ANDROID_KEYSTORE_BASE64` +
+  `ANDROID_KEY_ALIAS`/`ANDROID_KEY_PASSWORD`/`ANDROID_STORE_PASSWORD`
+  repo secrets for real signing; builds debug-signed and says so in
+  the release notes otherwise). `dependabot.yml` covers pub/npm/pip/
+  Actions. **Branch protection isn't available on this repo's current
+  plan** (private repo, free tier) — nothing blocks a merge
+  automatically, so a green check on a PR is informational, not
+  enforced; see `.github/pull_request_template.md`'s checklist for
+  the actual gate until that changes.
 - `src-tauri/` — desktop shell (Rust/Tauri); launches the PyInstaller
   backend as a sidecar and loads `frontend/out`.
 - `importers/` — one-off scripts that turn a real client Excel BOQ sheet

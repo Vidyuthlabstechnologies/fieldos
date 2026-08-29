@@ -1,0 +1,140 @@
+name: release
+
+# Push a tag like `v0.2.0` to build both shipped artifacts and attach them
+# to a GitHub Release created from that tag. Each platform is a separate
+# job so one failing doesn't block the other from publishing.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fieldos_mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.9
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # Real upload-key signing only if the four secrets below are set
+      # (Settings -> Secrets and variables -> Actions on the repo). Without
+      # them this still builds -- debug-signed, for pipeline verification
+      # only -- and the release notes say so explicitly rather than quietly
+      # shipping an unsigned artifact as if it were the real thing.
+      - name: Write release keystore from secrets
+        id: keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        if: env.KEYSTORE_BASE64 != ''
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/fieldos-upload.keystore
+          cat > android/app/key.properties <<EOF
+          storeFile=fieldos-upload.keystore
+          storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF
+          echo "signed=true" >> "$GITHUB_OUTPUT"
+
+      - run: flutter build apk --release
+      - run: flutter build appbundle --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mobile-release
+          path: |
+            fieldos_mobile/build/app/outputs/flutter-apk/app-release.apk
+            fieldos_mobile/build/app/outputs/bundle/release/app-release.aab
+
+      - name: Record signing status for the release job
+        run: echo "${{ steps.keystore.outputs.signed == 'true' && 'signed' || 'unsigned (debug key -- verification build only)' }}" > /tmp/mobile-signing-status.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mobile-signing-status
+          path: /tmp/mobile-signing-status.txt
+
+  desktop:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - run: pip install -r requirements-build.txt
+      - run: pyinstaller desktop_app.spec
+
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+
+      - run: npm install
+      - run: mkdir -p src-tauri/binaries
+        shell: bash
+      - run: cp dist/FieldOS-backend.exe src-tauri/binaries/FieldOS-backend-x86_64-pc-windows-msvc.exe
+        shell: bash
+      - run: npx tauri build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-installer
+          path: |
+            src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/msi/*.msi
+
+  publish-release:
+    needs: [mobile, desktop]
+    if: always() && (needs.mobile.result == 'success' || needs.desktop.result == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Build release notes
+        run: |
+          {
+            echo "Automated build from tag ${{ github.ref_name }}."
+            echo
+            if [ -f artifacts/mobile-signing-status/mobile-signing-status.txt ]; then
+              echo "- Mobile APK/AAB: $(cat artifacts/mobile-signing-status/mobile-signing-status.txt)"
+            else
+              echo "- Mobile build: failed, see the mobile job for details"
+            fi
+            if [ -d artifacts/desktop-installer ]; then
+              echo "- Desktop installer: built"
+            else
+              echo "- Desktop build: failed, see the desktop job for details"
+            fi
+          } > /tmp/release-notes.md
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: /tmp/release-notes.md
+          draft: true
+          files: |
+            artifacts/mobile-release/*
+            artifacts/desktop-installer/*

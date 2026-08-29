@@ -9091,6 +9091,16 @@ class $MaterialReceiptsTable extends MaterialReceipts
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -9105,6 +9115,7 @@ class $MaterialReceiptsTable extends MaterialReceipts
     receivedBy,
     receivedOn,
     createdAt,
+    notes,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -9207,6 +9218,12 @@ class $MaterialReceiptsTable extends MaterialReceipts
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
     return context;
   }
 
@@ -9264,6 +9281,10 @@ class $MaterialReceiptsTable extends MaterialReceipts
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
     );
   }
 
@@ -9286,6 +9307,7 @@ class MaterialReceipt extends DataClass implements Insertable<MaterialReceipt> {
   final String receivedBy;
   final DateTime receivedOn;
   final DateTime createdAt;
+  final String? notes;
   const MaterialReceipt({
     required this.id,
     required this.projectId,
@@ -9299,6 +9321,7 @@ class MaterialReceipt extends DataClass implements Insertable<MaterialReceipt> {
     required this.receivedBy,
     required this.receivedOn,
     required this.createdAt,
+    this.notes,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -9323,6 +9346,9 @@ class MaterialReceipt extends DataClass implements Insertable<MaterialReceipt> {
     map['received_by'] = Variable<String>(receivedBy);
     map['received_on'] = Variable<DateTime>(receivedOn);
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
     return map;
   }
 
@@ -9344,6 +9370,9 @@ class MaterialReceipt extends DataClass implements Insertable<MaterialReceipt> {
       receivedBy: Value(receivedBy),
       receivedOn: Value(receivedOn),
       createdAt: Value(createdAt),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
     );
   }
 
@@ -9365,6 +9394,7 @@ class MaterialReceipt extends DataClass implements Insertable<MaterialReceipt> {
       receivedBy: serializer.fromJson<String>(json['receivedBy']),
       receivedOn: serializer.fromJson<DateTime>(json['receivedOn']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      notes: serializer.fromJson<String?>(json['notes']),
     );
   }
   @override
@@ -9383,6 +9413,7 @@ class MaterialReceipt extends DataClass implements Insertable<MaterialReceipt> {
       'receivedBy': serializer.toJson<String>(receivedBy),
       'receivedOn': serializer.toJson<DateTime>(receivedOn),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'notes': serializer.toJson<String?>(notes),
     };
   }
 
@@ -9399,6 +9430,7 @@ class MaterialReceipt extends DataClass implements Insertable<MaterialReceipt> {
     String? receivedBy,
     DateTime? receivedOn,
     DateTime? createdAt,
+    Value<String?> notes = const Value.absent(),
   }) => MaterialReceipt(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -9412,6 +9444,7 @@ class MaterialReceipt extends DataClass implements Insertable<MaterialReceipt> {
     receivedBy: receivedBy ?? this.receivedBy,
     receivedOn: receivedOn ?? this.receivedOn,
     createdAt: createdAt ?? this.createdAt,
+    notes: notes.present ? notes.value : this.notes,
   );
   MaterialReceipt copyWithCompanion(MaterialReceiptsCompanion data) {
     return MaterialReceipt(
@@ -9437,6 +9470,7 @@ class MaterialReceipt extends DataClass implements Insertable<MaterialReceipt> {
           ? data.receivedOn.value
           : this.receivedOn,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      notes: data.notes.present ? data.notes.value : this.notes,
     );
   }
 
@@ -9454,7 +9488,8 @@ class MaterialReceipt extends DataClass implements Insertable<MaterialReceipt> {
           ..write('amount: $amount, ')
           ..write('receivedBy: $receivedBy, ')
           ..write('receivedOn: $receivedOn, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('notes: $notes')
           ..write(')'))
         .toString();
   }
@@ -9473,6 +9508,7 @@ class MaterialReceipt extends DataClass implements Insertable<MaterialReceipt> {
     receivedBy,
     receivedOn,
     createdAt,
+    notes,
   );
   @override
   bool operator ==(Object other) =>
@@ -9489,7 +9525,8 @@ class MaterialReceipt extends DataClass implements Insertable<MaterialReceipt> {
           other.amount == this.amount &&
           other.receivedBy == this.receivedBy &&
           other.receivedOn == this.receivedOn &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.notes == this.notes);
 }
 
 class MaterialReceiptsCompanion extends UpdateCompanion<MaterialReceipt> {
@@ -9505,6 +9542,7 @@ class MaterialReceiptsCompanion extends UpdateCompanion<MaterialReceipt> {
   final Value<String> receivedBy;
   final Value<DateTime> receivedOn;
   final Value<DateTime> createdAt;
+  final Value<String?> notes;
   final Value<int> rowid;
   const MaterialReceiptsCompanion({
     this.id = const Value.absent(),
@@ -9519,6 +9557,7 @@ class MaterialReceiptsCompanion extends UpdateCompanion<MaterialReceipt> {
     this.receivedBy = const Value.absent(),
     this.receivedOn = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MaterialReceiptsCompanion.insert({
@@ -9534,6 +9573,7 @@ class MaterialReceiptsCompanion extends UpdateCompanion<MaterialReceipt> {
     required String receivedBy,
     required DateTime receivedOn,
     this.createdAt = const Value.absent(),
+    this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        projectId = Value(projectId),
@@ -9555,6 +9595,7 @@ class MaterialReceiptsCompanion extends UpdateCompanion<MaterialReceipt> {
     Expression<String>? receivedBy,
     Expression<DateTime>? receivedOn,
     Expression<DateTime>? createdAt,
+    Expression<String>? notes,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -9570,6 +9611,7 @@ class MaterialReceiptsCompanion extends UpdateCompanion<MaterialReceipt> {
       if (receivedBy != null) 'received_by': receivedBy,
       if (receivedOn != null) 'received_on': receivedOn,
       if (createdAt != null) 'created_at': createdAt,
+      if (notes != null) 'notes': notes,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -9587,6 +9629,7 @@ class MaterialReceiptsCompanion extends UpdateCompanion<MaterialReceipt> {
     Value<String>? receivedBy,
     Value<DateTime>? receivedOn,
     Value<DateTime>? createdAt,
+    Value<String?>? notes,
     Value<int>? rowid,
   }) {
     return MaterialReceiptsCompanion(
@@ -9602,6 +9645,7 @@ class MaterialReceiptsCompanion extends UpdateCompanion<MaterialReceipt> {
       receivedBy: receivedBy ?? this.receivedBy,
       receivedOn: receivedOn ?? this.receivedOn,
       createdAt: createdAt ?? this.createdAt,
+      notes: notes ?? this.notes,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -9645,6 +9689,9 @@ class MaterialReceiptsCompanion extends UpdateCompanion<MaterialReceipt> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -9666,6 +9713,7 @@ class MaterialReceiptsCompanion extends UpdateCompanion<MaterialReceipt> {
           ..write('receivedBy: $receivedBy, ')
           ..write('receivedOn: $receivedOn, ')
           ..write('createdAt: $createdAt, ')
+          ..write('notes: $notes, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -21503,6 +21551,7 @@ typedef $$MaterialReceiptsTableCreateCompanionBuilder =
       required String receivedBy,
       required DateTime receivedOn,
       Value<DateTime> createdAt,
+      Value<String?> notes,
       Value<int> rowid,
     });
 typedef $$MaterialReceiptsTableUpdateCompanionBuilder =
@@ -21519,6 +21568,7 @@ typedef $$MaterialReceiptsTableUpdateCompanionBuilder =
       Value<String> receivedBy,
       Value<DateTime> receivedOn,
       Value<DateTime> createdAt,
+      Value<String?> notes,
       Value<int> rowid,
     });
 
@@ -21588,6 +21638,11 @@ class $$MaterialReceiptsTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -21660,6 +21715,11 @@ class $$MaterialReceiptsTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MaterialReceiptsTableAnnotationComposer
@@ -21716,6 +21776,9 @@ class $$MaterialReceiptsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
 }
 
 class $$MaterialReceiptsTableTableManager
@@ -21767,6 +21830,7 @@ class $$MaterialReceiptsTableTableManager
                 Value<String> receivedBy = const Value.absent(),
                 Value<DateTime> receivedOn = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MaterialReceiptsCompanion(
                 id: id,
@@ -21781,6 +21845,7 @@ class $$MaterialReceiptsTableTableManager
                 receivedBy: receivedBy,
                 receivedOn: receivedOn,
                 createdAt: createdAt,
+                notes: notes,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -21797,6 +21862,7 @@ class $$MaterialReceiptsTableTableManager
                 required String receivedBy,
                 required DateTime receivedOn,
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MaterialReceiptsCompanion.insert(
                 id: id,
@@ -21811,6 +21877,7 @@ class $$MaterialReceiptsTableTableManager
                 receivedBy: receivedBy,
                 receivedOn: receivedOn,
                 createdAt: createdAt,
+                notes: notes,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

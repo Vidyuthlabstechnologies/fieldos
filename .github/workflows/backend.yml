@@ -1,0 +1,25 @@
+name: backend
+
+on:
+  push:
+    branches: [master]
+    paths: ['fieldos/**', 'tests/**', 'requirements.txt', 'alembic.ini', '.github/workflows/backend.yml']
+  pull_request:
+    paths: ['fieldos/**', 'tests/**', 'requirements.txt', 'alembic.ini', '.github/workflows/backend.yml']
+
+jobs:
+  test:
+    # Fully offline by design (see README.md) -- SQLite only, no external
+    # services to stand up.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - run: pip install -r requirements.txt
+
+      - run: python -m pytest tests/ -v

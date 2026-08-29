@@ -295,7 +295,7 @@ class SyncEngine {
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'project_id', value: projectId),
           callback: (payload) async {
             if (payload.eventType == PostgresChangeEvent.delete) return;
-            await db.dprDao.upsertDprEntryFromRemote(dprEntryFromSupabaseJson(payload.newRecord));
+            await db.dprDao.upsertFromRemote(dprEntryFromSupabaseJson(payload.newRecord));
             onDprEntriesChanged?.call();
           },
         );
@@ -314,7 +314,7 @@ class SyncEngine {
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'project_id', value: projectId),
           callback: (payload) async {
             if (payload.eventType == PostgresChangeEvent.delete) return;
-            await db.issueDao.upsertIssueFromRemote(issueFromSupabaseJson(payload.newRecord));
+            await db.issueDao.upsertFromRemote(issueFromSupabaseJson(payload.newRecord));
             onIssuesChanged?.call();
           },
         );
