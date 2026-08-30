@@ -136,5 +136,7 @@ jobs:
           body_path: /tmp/release-notes.md
           draft: true
           files: |
-            artifacts/mobile-release/*
-            artifacts/desktop-installer/*
+            artifacts/mobile-release/**/*.apk
+            artifacts/mobile-release/**/*.aab
+            artifacts/desktop-installer/**/*.exe
+            artifacts/desktop-installer/**/*.msi
