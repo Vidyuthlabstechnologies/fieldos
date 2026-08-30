@@ -37,6 +37,9 @@ class AuthService {
     required String name,
     required String password,
   }) async {
+    if (username.isEmpty) throw AuthException('Username is required.');
+    if (name.isEmpty) throw AuthException('Full name is required.');
+    if (password.isEmpty) throw AuthException('Password is required.');
     final existing = await db.userDao.byUsername(username);
     if (existing != null) {
       throw AuthException('That username is already taken.');

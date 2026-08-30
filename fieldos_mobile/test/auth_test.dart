@@ -49,5 +49,31 @@ void main() {
         throwsA(isA<AuthException>()),
       );
     });
+
+    test('register rejects empty fields with a clean AuthException, not a raw DB error', () async {
+      final db = AppDatabase.memory();
+      addTearDown(() async => db.close());
+      final auth = AuthService(db);
+
+      // Each of these must fail validation *before* reaching the database --
+      // an empty username used to slip through to the Drift insert, which
+      // throws an InvalidDataException whose toString() includes the full
+      // row (including the password hash). That must never reach the UI.
+      expect(
+        () => auth.register(username: '', name: 'Carl', password: 'pw'),
+        throwsA(isA<AuthException>()),
+      );
+      expect(
+        () => auth.register(username: 'carl', name: '', password: 'pw'),
+        throwsA(isA<AuthException>()),
+      );
+      expect(
+        () => auth.register(username: 'carl', name: 'Carl', password: ''),
+        throwsA(isA<AuthException>()),
+      );
+
+      // Confirm nothing was actually written to the database by the empty-username attempt.
+      expect(await db.userDao.byUsername(''), isNull);
+    });
   });
 }
