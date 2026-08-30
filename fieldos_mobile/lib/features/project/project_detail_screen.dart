@@ -107,6 +107,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
       appBar: AppBar(
         title: Text(widget.project.name),
         bottom: TabBar(
+          controller: _tabs,
           isScrollable: true,
           tabs: const [
             Tab(text: 'Tasks', icon: Icon(Icons.checklist)),
@@ -203,41 +204,104 @@ class _TasksTab extends ConsumerWidget {
   const _TasksTab({required this.project});
   final Project project;
 
+  Future<void> _addTask(BuildContext context, WidgetRef ref) async {
+    final titleC = TextEditingController();
+    DateTime? dueDate;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('New task'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(controller: titleC, decoration: const InputDecoration(labelText: 'Title')),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.calendar_today),
+                label: Text(dueDate == null ? 'Set due date (optional)' : dueDate!.toString().split(' ').first),
+                onPressed: () async {
+                  final picked = await showDatePicker(
+                    context: ctx,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                    lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+                  );
+                  if (picked != null) setDialogState(() => dueDate = picked);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, titleC.text.trim().isNotEmpty),
+              child: const Text('Create'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed != true) return;
+    await ref.read(appDatabaseProvider).taskDao.create(TasksCompanion.insert(
+          id: Uuid().v4(),
+          projectId: project.id,
+          title: titleC.text.trim(),
+          dueDate: Value(dueDate),
+        ));
+    ref.invalidate(tasksProvider(project.id));
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasks = ref.watch(tasksProvider(project.id));
-    return RefreshIndicator(
-      onRefresh: () async => ref.invalidate(tasksProvider(project.id)),
-      child: tasks.when(
-        data: (items) => ListView.builder(
-          padding: const EdgeInsets.all(12),
-          itemCount: items.length,
-          itemBuilder: (_, i) {
-            final t = items[i];
-            return Card(
-              child: ListTile(
-                title: Text(t.title),
-                subtitle: Text('Status: ${t.status}'
-                    '${t.dueDate != null ? '  •  Due ${t.dueDate!.toLocal().toString().split(' ').first}' : ''}'),
-                trailing: DropdownButton<String>(
-                  value: t.status,
-                  items: const ['todo', 'in_progress', 'done']
-                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                      .toList(),
-                  onChanged: (s) {
-                    if (s != null) {
-                      ref.read(appDatabaseProvider).taskDao.updateStatus(t.id, s);
-                      ref.invalidate(tasksProvider(project.id));
-                    }
-                  },
-                ),
-              ),
-            );
-          },
+    return Stack(
+      children: [
+        RefreshIndicator(
+          onRefresh: () async => ref.invalidate(tasksProvider(project.id)),
+          child: tasks.when(
+            data: (items) => ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: items.length,
+              itemBuilder: (_, i) {
+                final t = items[i];
+                return Card(
+                  child: ListTile(
+                    title: Text(t.title),
+                    subtitle: Text('Status: ${t.status}'
+                        '${t.dueDate != null ? '  •  Due ${t.dueDate!.toLocal().toString().split(' ').first}' : ''}'),
+                    trailing: DropdownButton<String>(
+                      value: t.status,
+                      items: const ['todo', 'in_progress', 'done']
+                          .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                          .toList(),
+                      onChanged: (s) {
+                        if (s != null) {
+                          ref.read(appDatabaseProvider).taskDao.updateStatus(t.id, s);
+                          ref.invalidate(tasksProvider(project.id));
+                        }
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('$e')),
+          ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
-      ),
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: FloatingActionButton.extended(
+            heroTag: 'task_add',
+            icon: const Icon(Icons.add),
+            label: const Text('Add task'),
+            onPressed: () => _addTask(context, ref),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -527,37 +591,100 @@ class _IssuesTab extends ConsumerWidget {
   const _IssuesTab({required this.project});
   final Project project;
 
+  Future<void> _addIssue(BuildContext context, WidgetRef ref) async {
+    final descC = TextEditingController();
+    String severity = 'medium';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('New issue'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: descC,
+                maxLines: 3,
+                decoration: const InputDecoration(labelText: 'Description'),
+              ),
+              const SizedBox(height: 8),
+              DropdownButton<String>(
+                value: severity,
+                items: const ['low', 'medium', 'high']
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .toList(),
+                onChanged: (s) {
+                  if (s != null) setDialogState(() => severity = s);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, descC.text.trim().isNotEmpty),
+              child: const Text('Create'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed != true) return;
+    await ref.read(appDatabaseProvider).issueDao.create(IssuesCompanion.insert(
+          id: Uuid().v4(),
+          projectId: project.id,
+          description: descC.text.trim(),
+          severity: Value(severity),
+        ));
+    ref.invalidate(issuesProvider(project.id));
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final issues = ref.watch(issuesProvider(project.id));
-    return RefreshIndicator(
-      onRefresh: () async => ref.invalidate(issuesProvider(project.id)),
-      child: issues.when(
-        data: (items) => ListView.builder(
-          padding: const EdgeInsets.all(12),
-          itemCount: items.length,
-          itemBuilder: (_, i) {
-            final iss = items[i];
-            return Card(
-              child: ListTile(
-                title: Text(iss.description),
-                subtitle: Text('${iss.severity} • ${iss.status}'),
-                trailing: iss.status != 'resolved'
-                    ? TextButton(
-                        onPressed: () {
-                          ref.read(appDatabaseProvider).issueDao.resolve(iss.id);
-                          ref.invalidate(issuesProvider(project.id));
-                        },
-                        child: const Text('Resolve'),
-                      )
-                    : const Icon(Icons.check_circle, color: Colors.green),
-              ),
-            );
-          },
+    return Stack(
+      children: [
+        RefreshIndicator(
+          onRefresh: () async => ref.invalidate(issuesProvider(project.id)),
+          child: issues.when(
+            data: (items) => ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: items.length,
+              itemBuilder: (_, i) {
+                final iss = items[i];
+                return Card(
+                  child: ListTile(
+                    title: Text(iss.description),
+                    subtitle: Text('${iss.severity} • ${iss.status}'),
+                    trailing: iss.status != 'resolved'
+                        ? TextButton(
+                            onPressed: () {
+                              ref.read(appDatabaseProvider).issueDao.resolve(iss.id);
+                              ref.invalidate(issuesProvider(project.id));
+                            },
+                            child: const Text('Resolve'),
+                          )
+                        : const Icon(Icons.check_circle, color: Colors.green),
+                  ),
+                );
+              },
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('$e')),
+          ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
-      ),
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: FloatingActionButton.extended(
+            heroTag: 'issue_add',
+            icon: const Icon(Icons.add),
+            label: const Text('Add issue'),
+            onPressed: () => _addIssue(context, ref),
+          ),
+        ),
+      ],
     );
   }
 }
