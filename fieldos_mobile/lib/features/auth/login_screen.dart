@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -35,7 +36,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
       // The app shell re-routes based on session state.
     } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      // AuthException carries a message meant for display (bad credentials,
+      // username taken, missing fields). Anything else is unexpected --
+      // showing its raw toString() would leak internals (a Drift exception's
+      // toString() includes the full row, e.g. the password hash).
+      setState(() => _error = e is AuthException ? e.message : 'Something went wrong. Please try again.');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
