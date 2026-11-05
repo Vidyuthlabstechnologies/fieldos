@@ -96,7 +96,7 @@ class _Map extends StatelessWidget {
       children: [
         TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.predictera.fieldos_mobile',
+          userAgentPackageName: 'com.mldynamic.fieldos',
         ),
         CircleLayer(circles: [
           for (final p in placed)
