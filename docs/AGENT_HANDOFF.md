@@ -308,26 +308,30 @@ same content in prose:
    `attendance`/LabourAttendance (shape mismatches — see
    `sync_mappers.dart`'s docstring), `rfqs`/`quotes` (no mobile tables —
    building them is a feature, not a mapping).
-2. **~~Sync visibility in the UI~~ DONE** — Settings → Cloud sync shows
-   pending outbox count + last-synced timestamp.
+2. **~~Sync visibility in the UI~~ DONE** — the "Team & sync" screen
+   (`lib/features/team/team_sync_screen.dart`, open to every role) shows
+   last sync, waiting and failed counts, Sync now and Retry failed.
 3. **Realtime UI hookups beyond the task list** — Suppliers tab is live
    now; remaining synced tables still refresh via periodic/manual sync.
 4. **Photo evidence capture** — DPR entries have camera-first capture
    (`image_picker`) via `lib/features/shared/photo_capture.dart`;
    inspections/materials still use generic pickers. Needs on-device
    verification of the camera intent.
-5. **Feature-breadth gaps vs. the Kraaft/Onsite competitor research**
-   (`docs/MARKET_UX_RESEARCH.md`) — no chat/messaging, no map view (a
-   geofence radius check exists for attendance but no map UI), no push
-   notifications. Each is a real, scoped feature, not a quick add.
+5. **~~Feature-breadth gaps~~ mostly DONE (Nov 2026)** — per-project
+   team chat (`project_messages`, Realtime), a site map (flutter_map + OSM),
+   GPS punch-in, DPR PDF share, and local alerts for colleagues' issues,
+   approvals and messages raised on sync. Not done: true push while the app
+   is closed (needs FCM + a server), Indic-script text inside PDFs.
 6. **A real production Supabase project** — blocked on the user's own
    account; the exact cutover steps are written up in
    `docs/SUPABASE_PRODUCTION_RUNBOOK.md`, so it's configuration once done.
-7. **Play Store presence** — signed release builds work now (upload key in
+7. **Play Store presence** — signed release builds work (upload key in
    gitignored `android/app/key.properties`; falls back to debug signing
-   without it). CI runs `flutter analyze` + full real-infra test suite on
-   every push (`.github/workflows/mobile.yml`). Remaining: Play Console
-   listing itself (user account) and first store upload.
+   without it). CI runs `flutter analyze`, the full real-infra test suite
+   and a debug APK build on every push (`.github/workflows/mobile.yml`).
+   Everything left is on the owner's accounts and is listed step by step
+   in `docs/PLAY_STORE_LAUNCH.md` (listing copy, privacy policy, data
+   safety answers, two-phone smoke test). iOS stays out of scope.
 
 ## Stale docs to be aware of
 

@@ -16489,6 +16489,434 @@ class WorkersCompanion extends UpdateCompanion<Worker> {
   }
 }
 
+class $ProjectMessagesTable extends ProjectMessages
+    with TableInfo<$ProjectMessagesTable, ProjectMessage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProjectMessagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _senderIdMeta = const VerificationMeta(
+    'senderId',
+  );
+  @override
+  late final GeneratedColumn<String> senderId = GeneratedColumn<String>(
+    'sender_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _senderNameMeta = const VerificationMeta(
+    'senderName',
+  );
+  @override
+  late final GeneratedColumn<String> senderName = GeneratedColumn<String>(
+    'sender_name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 120,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 4000,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    senderId,
+    senderName,
+    body,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'project_messages';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProjectMessage> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('sender_id')) {
+      context.handle(
+        _senderIdMeta,
+        senderId.isAcceptableOrUnknown(data['sender_id']!, _senderIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_senderIdMeta);
+    }
+    if (data.containsKey('sender_name')) {
+      context.handle(
+        _senderNameMeta,
+        senderName.isAcceptableOrUnknown(data['sender_name']!, _senderNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_senderNameMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProjectMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProjectMessage(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      senderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sender_id'],
+      )!,
+      senderName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sender_name'],
+      )!,
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ProjectMessagesTable createAlias(String alias) {
+    return $ProjectMessagesTable(attachedDatabase, alias);
+  }
+}
+
+class ProjectMessage extends DataClass implements Insertable<ProjectMessage> {
+  final String id;
+  final String projectId;
+  final String senderId;
+  final String senderName;
+  final String body;
+  final DateTime createdAt;
+  const ProjectMessage({
+    required this.id,
+    required this.projectId,
+    required this.senderId,
+    required this.senderName,
+    required this.body,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['sender_id'] = Variable<String>(senderId);
+    map['sender_name'] = Variable<String>(senderName);
+    map['body'] = Variable<String>(body);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ProjectMessagesCompanion toCompanion(bool nullToAbsent) {
+    return ProjectMessagesCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      senderId: Value(senderId),
+      senderName: Value(senderName),
+      body: Value(body),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ProjectMessage.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProjectMessage(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      senderId: serializer.fromJson<String>(json['senderId']),
+      senderName: serializer.fromJson<String>(json['senderName']),
+      body: serializer.fromJson<String>(json['body']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'senderId': serializer.toJson<String>(senderId),
+      'senderName': serializer.toJson<String>(senderName),
+      'body': serializer.toJson<String>(body),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ProjectMessage copyWith({
+    String? id,
+    String? projectId,
+    String? senderId,
+    String? senderName,
+    String? body,
+    DateTime? createdAt,
+  }) => ProjectMessage(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    senderId: senderId ?? this.senderId,
+    senderName: senderName ?? this.senderName,
+    body: body ?? this.body,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  ProjectMessage copyWithCompanion(ProjectMessagesCompanion data) {
+    return ProjectMessage(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      senderId: data.senderId.present ? data.senderId.value : this.senderId,
+      senderName: data.senderName.present
+          ? data.senderName.value
+          : this.senderName,
+      body: data.body.present ? data.body.value : this.body,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProjectMessage(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('senderId: $senderId, ')
+          ..write('senderName: $senderName, ')
+          ..write('body: $body, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, projectId, senderId, senderName, body, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProjectMessage &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.senderId == this.senderId &&
+          other.senderName == this.senderName &&
+          other.body == this.body &&
+          other.createdAt == this.createdAt);
+}
+
+class ProjectMessagesCompanion extends UpdateCompanion<ProjectMessage> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> senderId;
+  final Value<String> senderName;
+  final Value<String> body;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const ProjectMessagesCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.senderId = const Value.absent(),
+    this.senderName = const Value.absent(),
+    this.body = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ProjectMessagesCompanion.insert({
+    required String id,
+    required String projectId,
+    required String senderId,
+    required String senderName,
+    required String body,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       senderId = Value(senderId),
+       senderName = Value(senderName),
+       body = Value(body);
+  static Insertable<ProjectMessage> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? senderId,
+    Expression<String>? senderName,
+    Expression<String>? body,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (senderId != null) 'sender_id': senderId,
+      if (senderName != null) 'sender_name': senderName,
+      if (body != null) 'body': body,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ProjectMessagesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? senderId,
+    Value<String>? senderName,
+    Value<String>? body,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return ProjectMessagesCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      senderId: senderId ?? this.senderId,
+      senderName: senderName ?? this.senderName,
+      body: body ?? this.body,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (senderId.present) {
+      map['sender_id'] = Variable<String>(senderId.value);
+    }
+    if (senderName.present) {
+      map['sender_name'] = Variable<String>(senderName.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProjectMessagesCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('senderId: $senderId, ')
+          ..write('senderName: $senderName, ')
+          ..write('body: $body, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -17052,6 +17480,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $DocumentsTable documents = $DocumentsTable(this);
   late final $WorkersTable workers = $WorkersTable(this);
+  late final $ProjectMessagesTable projectMessages = $ProjectMessagesTable(
+    this,
+  );
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -17089,6 +17520,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     inspectionItems,
     documents,
     workers,
+    projectMessages,
     syncOutbox,
   ];
 }
@@ -25200,6 +25632,233 @@ typedef $$WorkersTableProcessedTableManager =
       Worker,
       PrefetchHooks Function()
     >;
+typedef $$ProjectMessagesTableCreateCompanionBuilder =
+    ProjectMessagesCompanion Function({
+      required String id,
+      required String projectId,
+      required String senderId,
+      required String senderName,
+      required String body,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$ProjectMessagesTableUpdateCompanionBuilder =
+    ProjectMessagesCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> senderId,
+      Value<String> senderName,
+      Value<String> body,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$ProjectMessagesTableFilterComposer
+    extends Composer<_$AppDatabase, $ProjectMessagesTable> {
+  $$ProjectMessagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get senderId => $composableBuilder(
+    column: $table.senderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get senderName => $composableBuilder(
+    column: $table.senderName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ProjectMessagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProjectMessagesTable> {
+  $$ProjectMessagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get senderId => $composableBuilder(
+    column: $table.senderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get senderName => $composableBuilder(
+    column: $table.senderName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ProjectMessagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProjectMessagesTable> {
+  $$ProjectMessagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get senderId =>
+      $composableBuilder(column: $table.senderId, builder: (column) => column);
+
+  GeneratedColumn<String> get senderName => $composableBuilder(
+    column: $table.senderName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$ProjectMessagesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProjectMessagesTable,
+          ProjectMessage,
+          $$ProjectMessagesTableFilterComposer,
+          $$ProjectMessagesTableOrderingComposer,
+          $$ProjectMessagesTableAnnotationComposer,
+          $$ProjectMessagesTableCreateCompanionBuilder,
+          $$ProjectMessagesTableUpdateCompanionBuilder,
+          (
+            ProjectMessage,
+            BaseReferences<
+              _$AppDatabase,
+              $ProjectMessagesTable,
+              ProjectMessage
+            >,
+          ),
+          ProjectMessage,
+          PrefetchHooks Function()
+        > {
+  $$ProjectMessagesTableTableManager(
+    _$AppDatabase db,
+    $ProjectMessagesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProjectMessagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProjectMessagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ProjectMessagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> senderId = const Value.absent(),
+                Value<String> senderName = const Value.absent(),
+                Value<String> body = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProjectMessagesCompanion(
+                id: id,
+                projectId: projectId,
+                senderId: senderId,
+                senderName: senderName,
+                body: body,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String senderId,
+                required String senderName,
+                required String body,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProjectMessagesCompanion.insert(
+                id: id,
+                projectId: projectId,
+                senderId: senderId,
+                senderName: senderName,
+                body: body,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ProjectMessagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProjectMessagesTable,
+      ProjectMessage,
+      $$ProjectMessagesTableFilterComposer,
+      $$ProjectMessagesTableOrderingComposer,
+      $$ProjectMessagesTableAnnotationComposer,
+      $$ProjectMessagesTableCreateCompanionBuilder,
+      $$ProjectMessagesTableUpdateCompanionBuilder,
+      (
+        ProjectMessage,
+        BaseReferences<_$AppDatabase, $ProjectMessagesTable, ProjectMessage>,
+      ),
+      ProjectMessage,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -25521,6 +26180,8 @@ class $AppDatabaseManager {
       $$DocumentsTableTableManager(_db, _db.documents);
   $$WorkersTableTableManager get workers =>
       $$WorkersTableTableManager(_db, _db.workers);
+  $$ProjectMessagesTableTableManager get projectMessages =>
+      $$ProjectMessagesTableTableManager(_db, _db.projectMessages);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }
@@ -25852,4 +26513,19 @@ class SyncOutboxDaoManager {
   SyncOutboxDaoManager(this._db);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db.attachedDatabase, _db.syncOutbox);
+}
+
+mixin _$MessageDaoMixin on DatabaseAccessor<AppDatabase> {
+  $ProjectMessagesTable get projectMessages => attachedDatabase.projectMessages;
+  MessageDaoManager get managers => MessageDaoManager(this);
+}
+
+class MessageDaoManager {
+  final _$MessageDaoMixin _db;
+  MessageDaoManager(this._db);
+  $$ProjectMessagesTableTableManager get projectMessages =>
+      $$ProjectMessagesTableTableManager(
+        _db.attachedDatabase,
+        _db.projectMessages,
+      );
 }

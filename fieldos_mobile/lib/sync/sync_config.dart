@@ -55,12 +55,26 @@ class SyncConfig {
   /// machine; Android's emulator networking reserves 10.0.2.2 for that.
   static const localAndroidEmulator = SyncConfig(url: 'http://10.0.2.2:54321', anonKey: _localAnonKey);
 
-  /// TODO once a real Supabase project exists: replace with the real
-  /// project URL + anon key (Settings > API in the Supabase dashboard) and
-  /// switch whatever calls SyncConfig.local today to this instead. Never put
-  /// the service_role key in the mobile app -- only the anon key, which is
-  /// safe to ship since RLS is what actually protects the data.
-  static const production = SyncConfig(url: '', anonKey: '');
+  /// The real Supabase project, injected at build time so no source edit
+  /// is needed for a release:
+  ///
+  /// ```
+  /// flutter build appbundle --release \
+  ///   --dart-define=SUPABASE_URL=https://YOUR-REF.supabase.co \
+  ///   --dart-define=SUPABASE_ANON_KEY=YOUR-ANON-KEY
+  /// ```
+  ///
+  /// (.github/workflows/release.yml passes these from repo secrets.) Only
+  /// ever the anon key -- never service_role -- RLS is what protects the
+  /// data. Empty when not provided, which [isConfigured] reports so a
+  /// release build without it hides cloud sync instead of pointing a
+  /// customer's phone at 10.0.2.2.
+  static const production = SyncConfig(
+    url: String.fromEnvironment('SUPABASE_URL'),
+    anonKey: String.fromEnvironment('SUPABASE_ANON_KEY'),
+  );
+
+  bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
 }
 
 /// Test-seeding access to the local service_role default (see its

@@ -31,20 +31,37 @@ Either:
 Verify afterwards: Table Editor shows all ~31 tables; Storage shows the
 private `documents` bucket.
 
-## 3. Create the shared account
+## 3. Accounts: one per person
 
-The app signs every device into ONE shared company account (see
-`lib/sync/cloud_sync_service.dart` — sign-in-first with sign-up fallback).
-Create it once: Authentication → Users → Add user (email + password,
-auto-confirm). Share those credentials with devices that should join the
-company's synced data — same model as the local stack today.
+There is no shared account any more. Each person signs up from the app
+(Team & sync, "Create account") with their own email. Keep "Confirm email"
+on in Authentication -> Providers -> Email; the app tells the person to
+confirm and then sign in.
+
+The owner taps "Put company on the cloud", which calls the
+`ensure_company` RPC: it creates the company row, makes the caller its
+owner, and returns a join code. Everyone else taps "Join with a code",
+which calls `join_company` and adds them as a site engineer. The owner can
+change roles and reset the code from the same screen
+(`set_member_role`, `regenerate_join_code`). All of these are
+security-definer functions granted to `authenticated` only
+(`supabase/migrations/20261105000000_team_onboarding.sql`).
 
 ## 4. Point the app at it
 
-`lib/sync/sync_config.dart`'s `SyncConfig.production` currently has empty
-URL/keys. Fill `url` + `anonKey` from Project Settings → API. **Never commit
-a service_role key anywhere** — only the anon key belongs in the client;
-RLS does the rest.
+The release build reads the project from compile-time defines; nothing is
+hard-coded and no key is ever typed into the app:
+
+```
+flutter build appbundle --release \
+  --dart-define=SUPABASE_URL=https://YOUR-REF.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=YOUR-ANON-KEY
+```
+
+In CI, add repo secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY`;
+`.github/workflows/release.yml` passes them through. Only the **anon** key
+goes in the app; never the `service_role` key. A release build without
+them runs offline-only and hides Team & sync.
 
 ## 5. Ship the release build
 
@@ -58,15 +75,13 @@ Play Console itself is your account/action (see AGENT_HANDOFF gaps #7).
 
 ## 6. First real-device smoke test
 
-Two devices (or one device + one browser via the dashboard): enable cloud
-sync on both with the shared account, create a DPR on device A, watch it
-appear on device B without manual refresh (Realtime tasks/vendors) or after
-"Sync now" (everything else).
+Follow the two-phone smoke test in `docs/PLAY_STORE_LAUNCH.md` section 6:
+each phone signs in with its own email, B joins A's company by code.
 
 ## Known limits to carry forward
 
-- Pull is server-wins; two offline edits of the SAME record still need real
-  conflict design before two people routinely edit concurrently.
+- Pull never overwrites a record with an unsynced local edit; otherwise the
+  last edit to reach the server wins.
 - Voice-to-DPR needs internet (Sarvam) independent of sync.
 - `grns`/MaterialReceipts and LabourAttendance remain deliberately unsynced
   (shape mismatches documented in `lib/sync/sync_mappers.dart`).

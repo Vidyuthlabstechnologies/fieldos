@@ -47,8 +47,18 @@ jobs:
           EOF
           echo "signed=true" >> "$GITHUB_OUTPUT"
 
-      - run: flutter build apk --release
-      - run: flutter build appbundle --release
+      # The production Supabase project (SUPABASE_URL / SUPABASE_ANON_KEY
+      # repo secrets) is baked in at build time -- see
+      # lib/sync/sync_config.dart. Without them the build still succeeds,
+      # but cloud sync is hidden in the app (offline-only build).
+      - name: Build release APK and App Bundle
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          DEFINES="--dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
+          flutter build apk --release $DEFINES
+          flutter build appbundle --release $DEFINES
 
       - uses: actions/upload-artifact@v7
         with:

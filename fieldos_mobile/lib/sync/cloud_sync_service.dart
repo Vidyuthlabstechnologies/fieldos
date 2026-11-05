@@ -1,7 +1,13 @@
 /// Bridges the app's existing local (pbkdf2) auth to a real Supabase Auth
-/// session, and exposes the one action a user/owner actually triggers:
-/// "sync now" (push pending outbox entries, then pull everything RLS
-/// allows). See docs/SUPABASE_SYNC_RESEARCH.md's "clean cutover" plan --
+/// session, gets the device's company onto the server (register it as the
+/// owner, or join a colleague's with a join code -- see
+/// supabase/migrations/20261105000000_team_onboarding.sql), keeps that
+/// session across app restarts, and exposes "sync now" (push pending
+/// outbox entries, then pull everything RLS allows).
+///
+/// Every employee signs in with their OWN email. (An earlier design shared
+/// one company login across phones; it could not tell who wrote a DPR or
+/// sent a message, and every device was effectively the owner.) See docs/SUPABASE_SYNC_RESEARCH.md's "clean cutover" plan --
 /// local pbkdf2 password hashes can't migrate into Supabase Auth (it's
 /// bcrypt-only, Supabase-to-Supabase), so enabling sync means setting a
 /// (possibly new) password against Supabase directly, once. This tries
@@ -11,11 +17,17 @@
 /// account.
 library;
 
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:supabase/supabase.dart';
 
 import 'sync_engine.dart';
 
-enum CloudSyncOutcome { signedIn, signedUp, failed }
+/// `needsEmailConfirmation`: the account was created but the Supabase
+/// project requires a confirmed email before it issues a session (the
+/// hosted default). The user confirms from their inbox, then signs in.
+enum CloudSyncOutcome { signedIn, signedUp, needsEmailConfirmation, failed }
 
 class CloudSyncResult {
   const CloudSyncResult(this.outcome, {this.error});
@@ -23,13 +35,119 @@ class CloudSyncResult {
   final String? error;
 }
 
+/// The server-side view of one company membership.
+class CloudCompany {
+  const CloudCompany({required this.companyId, required this.role, this.name, this.joinCode});
+  final String companyId;
+  final String role;
+  final String? name;
+
+  /// Only returned to owners and project managers.
+  final String? joinCode;
+}
+
+class CloudMember {
+  const CloudMember({required this.userId, required this.email, required this.role});
+  final String userId;
+  final String email;
+  final String role;
+}
+
+/// Where the Supabase session is kept between app launches. The app wires
+/// this to its local settings table; tests can keep it in memory.
+abstract class SessionStore {
+  Future<String?> read();
+  Future<void> write(String? sessionJson);
+}
+
 class CloudSyncService {
-  CloudSyncService({required this.client, required this.engine});
+  CloudSyncService({required this.client, required this.engine, this.sessionStore}) {
+    _authSub = client.auth.onAuthStateChange.listen((state) {
+      // Token refreshes rotate the refresh token; persisting each one is
+      // what lets the next app launch resume without a password prompt.
+      final store = sessionStore;
+      if (store == null) return;
+      final session = state.session;
+      if (state.event == AuthChangeEvent.signedOut) {
+        store.write(null);
+      } else if (session != null) {
+        store.write(jsonEncode(session.toJson()));
+      }
+    });
+  }
 
   final SupabaseClient client;
   final SyncEngine engine;
+  final SessionStore? sessionStore;
+  StreamSubscription<AuthState>? _authSub;
 
   bool get isSignedIn => client.auth.currentSession != null;
+  String? get email => client.auth.currentUser?.email;
+
+  /// Resumes the session saved by a previous launch. Returns false (and
+  /// forgets it) if it can no longer be refreshed, e.g. the user was
+  /// removed or the refresh token expired -- the user then signs in again.
+  /// A network failure keeps the saved session for the next attempt.
+  Future<bool> restoreSession() async {
+    final saved = await sessionStore?.read();
+    if (saved == null) return false;
+    try {
+      await client.auth.recoverSession(saved);
+      return isSignedIn;
+    } on AuthException catch (e) {
+      final offline = e.statusCode == null || e is AuthRetryableFetchException;
+      if (!offline) await sessionStore?.write(null);
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> dispose() async => _authSub?.cancel();
+
+  /// Saved right away on sign-in (the auth-state listener above also saves,
+  /// but asynchronously -- and it is what keeps rotated tokens current).
+  Future<void> _persist() async {
+    final session = client.auth.currentSession;
+    if (session != null) await sessionStore?.write(jsonEncode(session.toJson()));
+  }
+
+  /// Owner's device: registers this device's local company on the server
+  /// under the same id (so every local row's company_id already matches)
+  /// and makes the signed-in user its owner. Idempotent for an existing
+  /// member; fails for anyone else.
+  Future<CloudCompany> registerCompany({required String companyId, required String name}) async {
+    final res = await client.rpc('ensure_company', params: {'p_company_id': companyId, 'p_name': name});
+    final m = Map<String, dynamic>.from(res as Map);
+    return CloudCompany(
+      companyId: m['company_id'] as String,
+      role: m['role'] as String,
+      name: name,
+      joinCode: m['join_code'] as String?,
+    );
+  }
+
+  /// A colleague's device: joins the company behind [code] as a site
+  /// engineer (the owner can promote them from the Team screen).
+  Future<CloudCompany> joinCompany(String code) async {
+    final res = await client.rpc('join_company', params: {'p_code': code});
+    final m = Map<String, dynamic>.from(res as Map);
+    return CloudCompany(companyId: m['company_id'] as String, role: m['role'] as String, name: m['name'] as String?);
+  }
+
+  Future<List<CloudMember>> roster(String companyId) async {
+    final rows = await client.rpc('company_roster', params: {'p_company_id': companyId}) as List;
+    return [
+      for (final r in rows.cast<Map>())
+        CloudMember(userId: r['user_id'] as String, email: r['email'] as String, role: r['role'] as String),
+    ];
+  }
+
+  Future<void> setMemberRole({required String companyId, required String userId, required String role}) =>
+      client.rpc('set_member_role', params: {'p_company_id': companyId, 'p_user_id': userId, 'p_role': role});
+
+  Future<String> regenerateJoinCode(String companyId) async =>
+      await client.rpc('regenerate_join_code', params: {'p_company_id': companyId}) as String;
 
   /// Tries signing in first (the common case: this device or another one
   /// already enabled sync with this email). Falls back to sign-up only on
@@ -40,6 +158,7 @@ class CloudSyncService {
   Future<CloudSyncResult> enableSync({required String email, required String password}) async {
     try {
       await client.auth.signInWithPassword(email: email, password: password);
+      await _persist();
       return const CloudSyncResult(CloudSyncOutcome.signedIn);
     } on AuthApiException catch (e) {
       final looksLikeNoAccountYet = e.code == 'invalid_credentials' || e.statusCode == '400';
@@ -51,14 +170,19 @@ class CloudSyncService {
     }
 
     try {
-      await client.auth.signUp(email: email, password: password);
+      final res = await client.auth.signUp(email: email, password: password);
+      if (res.session == null) return const CloudSyncResult(CloudSyncOutcome.needsEmailConfirmation);
+      await _persist();
       return const CloudSyncResult(CloudSyncOutcome.signedUp);
     } catch (e) {
       return CloudSyncResult(CloudSyncOutcome.failed, error: e.toString());
     }
   }
 
-  Future<void> disableSync() => client.auth.signOut();
+  Future<void> disableSync() async {
+    await client.auth.signOut();
+    await sessionStore?.write(null);
+  }
 
   /// Push everything queued locally, then pull everything RLS allows. Push
   /// goes first deliberately -- this device's own not-yet-synced writes

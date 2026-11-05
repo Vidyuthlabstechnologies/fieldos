@@ -11,7 +11,7 @@ class AppWithMaterial extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'FieldOS Mobile',
+      title: 'FieldOS',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

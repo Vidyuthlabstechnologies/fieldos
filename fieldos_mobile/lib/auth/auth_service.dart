@@ -18,6 +18,21 @@ class Roles {
   static bool canManageSettings(String role) => role == owner;
 
   static bool canWrite(String role) => role != viewer;
+
+  /// The server (Supabase, mirroring the desktop backend) names roles
+  /// owner / project_manager / site_engineer; the app's local vocabulary
+  /// is owner / manager / member.
+  static String fromCloud(String cloudRole) => switch (cloudRole) {
+        'owner' => owner,
+        'project_manager' => manager,
+        _ => member,
+      };
+
+  static String toCloud(String localRole) => switch (localRole) {
+        owner => 'owner',
+        manager => 'project_manager',
+        _ => 'site_engineer',
+      };
 }
 
 class AuthException implements Exception {

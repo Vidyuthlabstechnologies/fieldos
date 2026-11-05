@@ -54,6 +54,7 @@ final _uuid = Uuid();
   InspectionItems,
   Documents,
   Workers,
+  ProjectMessages,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -82,7 +83,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -92,10 +93,14 @@ class AppDatabase extends _$AppDatabase {
   // photo_capture.dart -- stored as text until this table gets sync
   // consideration; MaterialReceipts stays mobile-only per
   // docs/MATERIALRECEIPTS_SYNC_ANALYSIS.md, so this is a local-only column,
-  // no Postgres/RLS counterpart needed).
+  // no Postgres/RLS counterpart needed). v6 adds ProjectMessages (team
+  // chat, synced).
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onUpgrade: (m, from, to) async {
+          if (from < 6) {
+            await m.createTable(projectMessages);
+          }
           if (from < 5) {
             await m.addColumn(materialReceipts, materialReceipts.notes);
           }
@@ -150,6 +155,7 @@ class AppDatabase extends _$AppDatabase {
   DocumentDao get documentDao => DocumentDao(this);
   WorkerDao get workerDao => WorkerDao(this);
   SyncOutboxDao get syncOutboxDao => SyncOutboxDao(this);
+  MessageDao get messageDao => MessageDao(this);
 }
 
 /// Where DPR photos and other local media are stored, relative to the app's
@@ -249,6 +255,13 @@ class CompanyDao extends DatabaseAccessor<AppDatabase> with _$CompanyDaoMixin {
     });
   }
 
+  /// A company that already exists on the server (joined with a code):
+  /// stored under the server's id so pulled projects attach to it.
+  Future<Company> ensureWithId(String id, String name) async {
+    await into(companies).insert(CompaniesCompanion.insert(id: id, name: name), mode: InsertMode.insertOrIgnore);
+    return (select(companies)..where((c) => c.id.equals(id))).getSingle();
+  }
+
   /// All companies a user belongs to.
   Future<List<Company>> forUser(String userId) {
     final q = select(companies).join([
@@ -276,6 +289,16 @@ class CompanyDao extends DatabaseAccessor<AppDatabase> with _$CompanyDaoMixin {
         userId: userId,
         role: role,
       ));
+
+  /// Insert-or-update by (company, user) -- addMember's upsert is keyed on
+  /// the row id, so it throws on the (companyId, userId) unique key when
+  /// the membership already exists.
+  Future<void> upsertMemberRole({required String companyId, required String userId, required String role}) async {
+    final updated = await (update(companyMembers)
+          ..where((m) => m.companyId.equals(companyId) & m.userId.equals(userId)))
+        .write(CompanyMembersCompanion(role: Value(role)));
+    if (updated == 0) await addMember(companyId: companyId, userId: userId, role: role);
+  }
 
   Future<List<CompanyMember>> members(String companyId) =>
       (select(companyMembers)..where((m) => m.companyId.equals(companyId))).get();
@@ -309,6 +332,26 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
 
   Future<List<Project>> forCompany(String companyId) =>
       (select(projects)..where((p) => p.companyId.equals(companyId))).get();
+
+  /// Site location + geofence radius, synced to every phone in the company
+  /// (attendance punch-in validates against it).
+  Future<void> setLocation(String projectId, {required double lat, required double lng, required int radiusM}) {
+    return transaction(() async {
+      await (update(projects)..where((p) => p.id.equals(projectId))).write(ProjectsCompanion(
+        locationLat: Value(lat),
+        locationLng: Value(lng),
+        geofenceRadiusM: Value(radiusM),
+      ));
+      final row = await (select(projects)..where((p) => p.id.equals(projectId))).getSingleOrNull();
+      if (row == null) return;
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'projects',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(projectToSupabaseJson(row)),
+      );
+    });
+  }
 
   Future<Project?> byId(String id) =>
       (select(projects)..where((p) => p.id.equals(id))).getSingleOrNull();
@@ -795,13 +838,36 @@ class GeofenceDao extends DatabaseAccessor<AppDatabase> with _$GeofenceDaoMixin 
   Future<ProjectGeofence?> forProject(String projectId) =>
       (select(projectGeofences)..where((g) => g.projectId.equals(projectId))).getSingleOrNull();
 
-  Future<void> set(String projectId, double lat, double lng, double radiusMeters) =>
-      into(projectGeofences).insertOnConflictUpdate(ProjectGeofencesCompanion(
-        projectId: Value(projectId),
-        centerLat: Value(lat),
-        centerLng: Value(lng),
-        radiusMeters: Value(radiusMeters),
-      ));
+  /// Saves the geofence locally AND on the project row, which is what
+  /// syncs: the local-only table used to mean a geofence set on the owner's
+  /// phone never reached the supervisors' phones that do the punching in.
+  Future<void> set(String projectId, double lat, double lng, double radiusMeters) async {
+    await into(projectGeofences).insertOnConflictUpdate(ProjectGeofencesCompanion(
+      projectId: Value(projectId),
+      centerLat: Value(lat),
+      centerLng: Value(lng),
+      radiusMeters: Value(radiusMeters),
+    ));
+    await db.projectDao.setLocation(projectId, lat: lat, lng: lng, radiusM: radiusMeters.round());
+  }
+
+  /// The project's synced site location when it has one (set on this or a
+  /// colleague's phone -- [set] writes both), else a geofence that only
+  /// exists locally from before site locations synced.
+  Future<ProjectGeofence?> effectiveFor(String projectId) async {
+    final project = await db.projectDao.byId(projectId);
+    final lat = project?.locationLat, lng = project?.locationLng;
+    if (project != null && lat != null && lng != null) {
+      return ProjectGeofence(
+        projectId: projectId,
+        centerLat: lat,
+        centerLng: lng,
+        radiusMeters: (project.geofenceRadiusM ?? 100).toDouble(),
+        updatedAt: project.createdAt,
+      );
+    }
+    return forProject(projectId);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1172,4 +1238,77 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
     final rows = await pending();
     return rows.length;
   }
+
+  /// Rows parked after [syncOutboxMaxRetries] failures, for the sync
+  /// status UI -- these will not be retried automatically.
+  Future<int> parkedCount() async => (await parked()).length;
+
+  static String key(String table, String recordId) => '$table:$recordId';
+
+  /// Every (table, record) this device has written but not yet pushed,
+  /// including parked rows. Pull and Realtime skip these so an unpushed
+  /// local edit is never replaced by an older server copy.
+  Future<Set<String>> dirtyKeys() async {
+    final rows = await select(syncOutbox).get();
+    return {for (final r in rows) key(r.targetTable, r.recordId)};
+  }
+
+  /// Gives parked rows another chance (e.g. after the RLS/membership issue
+  /// that parked them has been fixed by joining the company).
+  Future<void> retryParked() =>
+      (update(syncOutbox)..where((o) => o.retryCount.isBiggerOrEqualValue(syncOutboxMaxRetries)))
+          .write(const SyncOutboxCompanion(retryCount: Value(0)));
+}
+
+// ---------------------------------------------------------------------------
+// Team chat
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [ProjectMessages])
+class MessageDao extends DatabaseAccessor<AppDatabase> with _$MessageDaoMixin {
+  MessageDao(super.db);
+
+  /// Local write + outbox entry in one transaction (see ProjectDao.create).
+  Future<ProjectMessage> send({
+    required String projectId,
+    required String senderId,
+    required String senderName,
+    required String body,
+  }) {
+    final id = _uuid.v4();
+    return transaction(() async {
+      await into(projectMessages).insert(ProjectMessagesCompanion.insert(
+        id: id,
+        projectId: projectId,
+        senderId: senderId,
+        senderName: senderName,
+        body: body,
+        createdAt: Value(DateTime.now().toUtc()),
+      ));
+      final row = await (select(projectMessages)..where((m) => m.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'project_messages',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(projectMessageToSupabaseJson(row)),
+      );
+      return row;
+    });
+  }
+
+  Future<void> upsertFromRemote(ProjectMessagesCompanion companion) =>
+      into(projectMessages).insertOnConflictUpdate(companion);
+
+  /// Oldest first, the order a chat reads in.
+  Stream<List<ProjectMessage>> watchForProject(String projectId) =>
+      (select(projectMessages)
+            ..where((m) => m.projectId.equals(projectId))
+            ..orderBy([(m) => OrderingTerm.asc(m.createdAt)]))
+          .watch();
+
+  Future<List<ProjectMessage>> forProject(String projectId) =>
+      (select(projectMessages)
+            ..where((m) => m.projectId.equals(projectId))
+            ..orderBy([(m) => OrderingTerm.asc(m.createdAt)]))
+          .get();
 }

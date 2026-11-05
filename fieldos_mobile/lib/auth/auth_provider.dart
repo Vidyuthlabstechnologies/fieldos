@@ -94,6 +94,28 @@ class SessionNotifier extends StateNotifier<SessionState> {
     return company;
   }
 
+  /// After joining a company on the cloud: mirror it (and this user's
+  /// server-side role) locally and make it the active company.
+  Future<Company> adoptCloudCompany({required String id, required String name, required String role}) async {
+    final user = state.user;
+    if (user == null) throw StateError('Not authenticated.');
+    final company = await _db.companyDao.ensureWithId(id, name);
+    await _db.companyDao.upsertMemberRole(companyId: id, userId: user.id, role: Roles.fromCloud(role));
+    final companies = await _auth.companiesFor(user.id);
+    await _selectCompany(company, companies);
+    return company;
+  }
+
+  /// Applies a server-side role ([role] in the cloud vocabulary) locally (e.g. after the owner changed it
+  /// on the server and a sync brought it down).
+  Future<void> setLocalRole(String companyId, String role) async {
+    final user = state.user;
+    if (user == null) return;
+    await _db.companyDao.upsertMemberRole(companyId: companyId, userId: user.id, role: Roles.fromCloud(role));
+    final active = state.activeCompany;
+    if (active != null && active.id == companyId) await _selectCompany(active, state.companies);
+  }
+
   Future<void> selectCompany(Company company) => _selectCompany(company, state.companies);
 
   Future<void> _selectCompany(Company company, List<Company> companies) async {

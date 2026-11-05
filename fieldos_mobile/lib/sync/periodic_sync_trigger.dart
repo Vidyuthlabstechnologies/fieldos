@@ -16,7 +16,14 @@ import 'cloud_sync_service.dart';
 import 'sync_engine.dart';
 
 class PeriodicSyncTrigger {
-  PeriodicSyncTrigger({required this.service, this.interval = const Duration(minutes: 5), this.onError});
+  PeriodicSyncTrigger({
+    required this.service,
+    this.interval = const Duration(minutes: 5),
+    this.onError,
+    this.onSuccess,
+  });
+
+  final Future<void> Function(SyncPushResult result)? onSuccess;
 
   final CloudSyncService service;
   final Duration interval;
@@ -57,6 +64,7 @@ class PeriodicSyncTrigger {
     try {
       lastResult = await service.syncNow();
       lastError = null;
+      await onSuccess?.call(lastResult!);
     } catch (e) {
       lastError = e;
       onError?.call(e);

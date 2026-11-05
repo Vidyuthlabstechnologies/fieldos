@@ -5,13 +5,45 @@ import 'package:fieldos_mobile/features/auth/login_screen.dart';
 import 'package:fieldos_mobile/features/company/company_setup_screen.dart';
 import 'package:fieldos_mobile/features/home/home_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 
-/// Root widget: routes to the right screen based on session state.
-class App extends ConsumerWidget {
+/// Root widget: routes to the right screen based on session state, and
+/// keeps cloud sync running for a linked company (on login/launch, company
+/// switch, and every return to the foreground).
+class App extends ConsumerStatefulWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(cloudSyncBootstrapProvider).onResume().catchError((_) {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(sessionProvider, (prev, next) {
+      if (next.activeCompany != null && next.activeCompany?.id != prev?.activeCompany?.id) {
+        ref.read(cloudSyncBootstrapProvider).ensureRunning().catchError((_) {});
+      }
+    });
     final session = ref.watch(sessionProvider);
     if (!session.isAuthenticated) return const LoginScreen();
     if (session.needsCompany) return const CompanySetupScreen();

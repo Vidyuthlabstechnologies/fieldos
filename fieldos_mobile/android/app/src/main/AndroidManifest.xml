@@ -1,8 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Cloud sync (Supabase) and voice-to-DPR (Sarvam). The debug/profile
+         manifests already declare this, which hid its absence here: without
+         it every release build -- i.e. the Play Store build -- fails all
+         network calls, so sync and voice DPR silently never work. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Voice-to-DPR: microphone capture for site reports. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- GPS punch-in for labour attendance (geofence check). Foreground
+         only: the location is read once, at the moment of punching in/out. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- On-device alerts for new approvals, issues and team messages that
+         arrive through sync (Android 13+ needs this at runtime). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
-        android:label="fieldos_mobile"
+        android:label="FieldOS"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

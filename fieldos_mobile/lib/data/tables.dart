@@ -516,6 +516,21 @@ class Workers extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+/// Per-project team chat. Append-only, like its Postgres counterpart
+/// (supabase/migrations/20261105010000_project_messages.sql): a sent
+/// message is a site record, so there is no edit or delete path.
+class ProjectMessages extends Table {
+  TextColumn get id => text().withLength(min: 1, max: 36)();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get senderId => text().withLength(min: 1, max: 36)();
+  TextColumn get senderName => text().withLength(min: 1, max: 120)();
+  TextColumn get body => text().withLength(min: 1, max: 4000)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 /// Outbound sync queue (see docs/SUPABASE_SYNC_RESEARCH.md and
 /// lib/sync/sync_engine.dart). Every local write that should propagate to
 /// Supabase gets enqueued here; a background push drains it in order and

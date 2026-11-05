@@ -473,3 +473,21 @@ PurchaseOrdersCompanion purchaseOrderFromSupabaseJson(Map<String, dynamic> row) 
       status: Value(row['status'] as String? ?? 'issued'),
       notes: Value(row['notes'] as String?),
     );
+
+Map<String, dynamic> projectMessageToSupabaseJson(ProjectMessage m) => {
+      'id': m.id,
+      'project_id': m.projectId,
+      'sender_id': m.senderId,
+      'sender_name': m.senderName,
+      'body': m.body,
+      'created_at': _timestamp(m.createdAt.toUtc()),
+    };
+
+ProjectMessagesCompanion projectMessageFromSupabaseJson(Map<String, dynamic> row) => ProjectMessagesCompanion(
+      id: Value(row['id'] as String),
+      projectId: Value(row['project_id'] as String),
+      senderId: Value(row['sender_id'] as String),
+      senderName: Value(row['sender_name'] as String),
+      body: Value(row['body'] as String),
+      createdAt: Value(DateTime.parse(row['created_at'] as String)),
+    );
