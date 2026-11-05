@@ -5,8 +5,9 @@ the environment. For each one it says set / missing and, when set, whether
 it is the right *kind* of value: the Supabase anon key and not the
 service_role key, RevenueCat's public SDK keys and not a secret API key, a
 keystore that opens with the given alias and passwords. If the Supabase
-project is reachable it also reports what is deployed there (the tables
-the last migrations create, email sign-up and confirmation settings).
+project is reachable it also reports what is deployed there: every table
+that supabase/migrations/ creates, grouped by migration file, plus the
+email sign-up and confirmation settings.
 
 Secret values are never printed: only names, verdicts and short notes.
 
@@ -215,8 +216,9 @@ def _get(url: str, headers: dict[str, str], timeout: int = 15) -> tuple[int, obj
         return code, None
 
 
-def cloud_checks(url: str, anon_key: str) -> list[Result]:
+def cloud_checks(url: str, anon_key: str, migrations_dir: str | None = None) -> list[Result]:
     """What the production project itself says, using only the anon key."""
+    migrations_dir = migrations_dir or MIGRATIONS_DIR
     base = url.strip().rstrip("/")
     headers = {"apikey": anon_key, "Authorization": f"Bearer {anon_key}"}
     out: list[Result] = []
@@ -235,17 +237,52 @@ def cloud_checks(url: str, anon_key: str) -> list[Result]:
                       "off (people can sign in straight away)" if autoconfirm
                       else "required: the built-in mailer sends only a few emails an hour; "
                            "turn it off for launch or set up custom SMTP (section 1, step 1)"))
-    # A table the migrations create answers 404 only when it is not there;
-    # anything else (200, or 401/403 from RLS and grants) means it exists.
-    for table, migration in (("companies", "initial_schema"), ("project_messages", "project_messages"),
-                             ("bug_reports", "bug_reports")):
-        code, body = _get(f"{base}/rest/v1/{table}?select=id&limit=1", headers)
-        if code == 404:
-            out.append(Result(f"Table {table}", FAIL, f"not deployed ({migration} migration): run the supabase-deploy workflow"))
-        elif table == "bug_reports" and code == 200:
-            out.append(Result(f"Table {table}", FAIL, "anyone can READ bug reports; the migration only grants insert"))
+    # Every table the repo's migrations create, one row per migration file.
+    # A table answers 404 only when it is not there; anything else (200, or
+    # 401/403 from RLS and grants) means it exists.
+    for migration, tables in tables_from_migrations(migrations_dir).items():
+        missing = []
+        for table in tables:
+            code, _ = _get(f"{base}/rest/v1/{table}?select=*&limit=1", headers)
+            if code == 404:
+                missing.append(table)
+            elif table in ANON_WRITE_ONLY and code == 200:
+                out.append(Result(f"Table {table}", FAIL,
+                                  "anyone can READ it; the migration only grants insert to anon"))
+        if missing:
+            out.append(Result(f"Migration {migration}", FAIL,
+                              f"not deployed: {', '.join(missing)}. Run the supabase-deploy workflow"))
         else:
-            out.append(Result(f"Table {table}", OK, "deployed"))
+            n = len(tables)
+            out.append(Result(f"Migration {migration}", OK, f"{n} table{'s' if n != 1 else ''} deployed"))
+    return out
+
+
+# Tables that anon may insert into but must never read back (bug_reports
+# holds other people's device details and free text).
+ANON_WRITE_ONLY = {"bug_reports"}
+
+MIGRATIONS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                              "supabase", "migrations")
+_CREATE_TABLE = re.compile(
+    r"^\s*create\s+table\s+(?:if\s+not\s+exists\s+)?(?:(?:public|\"public\")\.)?\"?([a-z_][a-z0-9_]*)\"?",
+    re.IGNORECASE | re.MULTILINE)
+
+
+def tables_from_migrations(migrations_dir: str = MIGRATIONS_DIR) -> dict[str, list[str]]:
+    """{migration name: [tables it creates]} for migrations that create any,
+    in filename (= apply) order. So a migration merged later, like the one
+    adding the five site_* tables, is checked without editing this script."""
+    out: dict[str, list[str]] = {}
+    for path in sorted(os.listdir(migrations_dir)) if os.path.isdir(migrations_dir) else []:
+        if not path.endswith(".sql"):
+            continue
+        with open(os.path.join(migrations_dir, path), encoding="utf-8") as f:
+            tables = _CREATE_TABLE.findall(f.read())
+        if tables:
+            # 20261105040000_bug_reports.sql -> bug_reports
+            name = re.sub(r"^\d+_", "", path[:-4])
+            out[name] = [t.lower() for t in tables]
     return out
 
 

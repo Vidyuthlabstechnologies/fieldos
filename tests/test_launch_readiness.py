@@ -149,3 +149,48 @@ def test_report_is_appended_to_the_actions_step_summary(monkeypatch, tmp_path):
     assert lr.main(["--offline"]) == 0
     text = summary.read_text()
     assert text.startswith("# Launch readiness") and "SUPABASE_URL" in text and "## Next" in text
+
+
+def test_tables_are_read_from_every_migration_file(tmp_path):
+    (tmp_path / "20260101000000_first.sql").write_text(
+        'CREATE TABLE companies (id uuid);\ncreate table if not exists public."Quoted_Name" (id int);\n'
+        'create table public.projects(\n  id uuid\n);\n-- create table commented_out (x int);\n')
+    (tmp_path / "20260102000000_policies_only.sql").write_text("alter table companies enable row level security;\n")
+    (tmp_path / "20260103000000_site_records.sql").write_text(
+        "create table if not exists site_attendance (id uuid);\ncreate table if not exists site_expenses (id uuid);\n")
+    (tmp_path / "notes.txt").write_text("create table ignored (x int);")
+    assert lr.tables_from_migrations(str(tmp_path)) == {
+        "first": ["companies", "quoted_name", "projects"],
+        "site_records": ["site_attendance", "site_expenses"],
+    }
+    assert lr.tables_from_migrations(str(tmp_path / "missing")) == {}
+
+
+def test_the_repo_migrations_parse():
+    found = lr.tables_from_migrations()
+    assert "companies" in found["initial_schema"]
+    assert found["project_messages"] == ["project_messages"]
+    assert found["bug_reports"] == ["bug_reports"]
+
+
+def test_cloud_checks_report_one_row_per_migration(monkeypatch, tmp_path):
+    (tmp_path / "20260101000000_initial_schema.sql").write_text("create table companies (id uuid);\ncreate table projects (id uuid);\n")
+    (tmp_path / "20260102000000_bug_reports.sql").write_text("create table if not exists bug_reports (id uuid);\n")
+    (tmp_path / "20260103000000_site_records.sql").write_text(
+        "create table if not exists site_attendance (id uuid);\ncreate table if not exists site_expenses (id uuid);\n")
+    deployed = {"companies": 401, "projects": 200, "bug_reports": 200, "site_attendance": 404, "site_expenses": 404}
+
+    def fake_get(url, headers, timeout=15):
+        if url.endswith("/auth/v1/settings"):
+            return 200, {"external": {"email": True}, "disable_signup": False, "mailer_autoconfirm": True}
+        table = url.rsplit("/rest/v1/", 1)[1].split("?")[0]
+        return deployed[table], None
+
+    monkeypatch.setattr(lr, "_get", fake_get)
+    rows = {r.name: r for r in lr.cloud_checks(URL, "sb_publishable_x", str(tmp_path))}
+    assert rows["Migration initial_schema"].status == lr.OK and "2 tables" in rows["Migration initial_schema"].note
+    assert rows["Migration bug_reports"].status == lr.OK
+    assert rows["Table bug_reports"].status == lr.FAIL and "READ" in rows["Table bug_reports"].note
+    assert rows["Migration site_records"].status == lr.FAIL
+    assert "site_attendance, site_expenses" in rows["Migration site_records"].note
+    assert rows["Confirm email"].status == lr.OK
