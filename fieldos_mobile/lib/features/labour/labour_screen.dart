@@ -12,6 +12,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/labour/wage_sheet_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
 
@@ -49,10 +50,35 @@ class _LabourViewState extends ConsumerState<LabourView> {
       children: [
         _GeofenceCard(projectId: widget.projectId),
         const SizedBox(height: 8),
-        FilledButton.icon(
-          icon: const Icon(Icons.login),
-          label: const Text('Punch in'),
-          onPressed: () => _punchIn(context, ref, geofence),
+        Row(children: [
+          Expanded(
+            child: FilledButton.icon(
+              icon: const Icon(Icons.login),
+              label: const Text('Punch in'),
+              onPressed: () => _punchIn(context, ref, geofence),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: FilledButton.tonalIcon(
+              icon: const Icon(Icons.groups),
+              label: const Text('Mark many'),
+              onPressed: () => _punchInMany(context, ref, geofence),
+            ),
+          ),
+        ]),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.payments),
+          label: const Text('Wage sheet'),
+          onPressed: () async {
+            final project = await ref.read(appDatabaseProvider).projectDao.byId(widget.projectId);
+            if (!context.mounted) return;
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => WageSheetScreen(
+                  projectId: widget.projectId, projectName: project?.name ?? 'Site', userId: widget.userId),
+            ));
+          },
         ),
         const SizedBox(height: 12),
         attendance.when(
@@ -157,6 +183,79 @@ class _LabourViewState extends ConsumerState<LabourView> {
           lng: Value(lngV),
           withinGeofence: Value(within),
         ));
+    ref.invalidate(attendanceProvider(widget.projectId));
+  }
+
+  /// Morning roll call: tick everyone who turned up and punch them all in
+  /// with one GPS reading, instead of one dialog per labourer.
+  Future<void> _punchInMany(BuildContext context, WidgetRef ref, AsyncValue<ProjectGeofence?> geofence) async {
+    final workers = (await ref.read(workersProvider(widget.projectId).future)).where((w) => w.status == 'active').toList();
+    final attendance = await ref.read(attendanceProvider(widget.projectId).future);
+    final alreadyIn = {for (final a in attendance) if (a.punchOut == null && a.workerId != null) a.workerId!};
+    final candidates = workers.where((w) => !alreadyIn.contains(w.id)).toList();
+    if (!context.mounted) return;
+    if (candidates.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(workers.isEmpty
+              ? 'Add your labourers in the Workers tab first.'
+              : 'Everyone in the Workers list is already punched in.')));
+      return;
+    }
+    final picked = <String>{...candidates.map((w) => w.id)};
+    final lat = TextEditingController();
+    final lng = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => AlertDialog(
+          title: Text('Punch in ${picked.length} of ${candidates.length}'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView(shrinkWrap: true, children: [
+              Row(children: [
+                TextButton(onPressed: () => set(() => picked.addAll(candidates.map((w) => w.id))), child: const Text('All')),
+                TextButton(onPressed: () => set(picked.clear), child: const Text('None')),
+              ]),
+              for (final w in candidates)
+                CheckboxListTile(
+                  dense: true,
+                  value: picked.contains(w.id),
+                  title: Text(w.name),
+                  subtitle: w.role == null ? null : Text(w.role!),
+                  onChanged: (v) => set(() => v == true ? picked.add(w.id) : picked.remove(w.id)),
+                ),
+              GpsFields(lat: lat, lng: lng),
+            ]),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Punch in')),
+          ],
+        ),
+      ),
+    );
+    if (ok != true || picked.isEmpty || !context.mounted) return;
+    final latV = double.tryParse(lat.text);
+    final lngV = double.tryParse(lng.text);
+    final g = geofence.valueOrNull;
+    final within = (g != null && latV != null && lngV != null)
+        ? haversineMeters(latV, lngV, g.centerLat, g.centerLng) <= g.radiusMeters
+        : null;
+    final now = DateTime.now();
+    final dao = ref.read(appDatabaseProvider).attendanceDao;
+    for (final w in candidates.where((w) => picked.contains(w.id))) {
+      await dao.punchIn(LabourAttendanceCompanion.insert(
+        id: const Uuid().v4(),
+        projectId: widget.projectId,
+        workerName: w.name,
+        workerId: Value(w.id),
+        recordedBy: widget.userId,
+        punchIn: now,
+        lat: Value(latV),
+        lng: Value(lngV),
+        withinGeofence: Value(within),
+      ));
+    }
     ref.invalidate(attendanceProvider(widget.projectId));
   }
 

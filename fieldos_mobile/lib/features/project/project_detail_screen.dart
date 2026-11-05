@@ -14,6 +14,7 @@ import 'package:fieldos_mobile/features/documents/documents_screen.dart';
 import 'package:fieldos_mobile/features/workers/workers_screen.dart';
 import 'package:fieldos_mobile/features/estimation/estimation_screen.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
+import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
@@ -35,7 +36,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 11, vsync: this);
+    _tabs = TabController(length: 12, vsync: this);
     _maybeSubscribeToLiveUpdates();
   }
 
@@ -118,6 +119,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
             Tab(text: 'Chat', icon: Icon(Icons.forum)),
             Tab(text: 'Procure', icon: Icon(Icons.shopping_cart)),
             Tab(text: 'Labour', icon: Icon(Icons.people)),
+            Tab(text: 'Money', icon: Icon(Icons.currency_rupee)),
             Tab(text: 'Equipment', icon: Icon(Icons.construction)),
             Tab(text: 'Inspections', icon: Icon(Icons.fact_check)),
             Tab(text: 'Documents', icon: Icon(Icons.folder)),
@@ -152,6 +154,12 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
                 userId: userId,
               );
             },
+          ),
+          Builder(
+            builder: (context) => MoneyView(
+              projectId: widget.project.id,
+              userId: ref.watch(sessionProvider).user?.id ?? '',
+            ),
           ),
           Builder(
             builder: (context) {
@@ -367,7 +375,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
                   icon: const Icon(Icons.photo_camera),
                   label: Text(photos.isEmpty ? 'Attach photo evidence' : '${photos.length} photo${photos.length == 1 ? '' : 's'} attached'),
                   onPressed: () async {
-                    final path = await captureCameraFirst(ctx, prefix: 'dpr');
+                    final path = await captureCameraFirst(ctx, prefix: 'dpr', place: widget.project.name);
                     if (path != null) setDialogState(() => photos.add(path));
                   },
                 ),

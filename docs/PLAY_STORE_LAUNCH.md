@@ -79,7 +79,7 @@ Android and iOS launcher icons). Still needed: 4–8 phone screenshots
 |---|---|---|
 | `INTERNET` | Team sync (Supabase), voice-to-DPR (Sarvam), map tiles | Never (normal permission) |
 | `RECORD_AUDIO` | Voice DPR | When the user taps Voice DPR |
-| `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | GPS punch-in/out and setting a site location; foreground only, one reading per action | First punch-in or site placement |
+| `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | GPS punch-in/out, setting a site location, and the date/time/GPS stamp on site photos; foreground only, one reading per action | First punch-in, site placement or camera photo |
 | `POST_NOTIFICATIONS` | Alerts for colleagues' new issues, approval requests and messages | After the user links a company to the cloud |
 | Camera / photos | Through the system camera and photo picker; no camera permission is declared | — |
 
@@ -96,8 +96,10 @@ No background location, no SMS/call log, no contacts.
 > members of your company can see them. Only members of your company can
 > read your company's data.
 >
-> **Location:** read only when you punch a worker in or out or set a site
-> location, and saved with that record. Never tracked in the background.
+> **Location:** read only when you punch a worker in or out, set a site
+> location, or take a site photo with the in-app camera (the date, time
+> and position are printed on the photo), and saved with that record.
+> Never tracked in the background.
 >
 > **Voice:** when you use voice DPR, the recording is sent to Sarvam AI
 > (sarvam.ai) to be transcribed, and is not kept by FieldOS afterwards.
@@ -137,7 +139,7 @@ No background location, no SMS/call log, no contacts.
 | Encrypted in transit? | Yes (HTTPS). |
 | Can users request deletion? | Yes: in the app (Team & sync → Delete my cloud account) and by email (see policy). For "Delete account URL", use the published privacy policy page; its "Deleting data" section explains both routes. |
 | Personal info → Email address, Name | Collected, required for Team & sync, purpose: App functionality, Account management. |
-| Location → Precise location | Collected, optional, purpose: App functionality (attendance geofence). |
+| Location → Precise location | Collected, optional, purpose: App functionality (attendance geofence, photo location stamp). |
 | Audio → Voice recordings | Collected, optional, processed ephemerally for transcription, purpose: App functionality. |
 | Photos | Collected, optional, purpose: App functionality (site evidence). |
 | Files and docs | Collected, optional, purpose: App functionality (project documents). |

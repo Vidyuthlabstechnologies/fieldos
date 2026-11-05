@@ -11,6 +11,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/procurement/stock_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
@@ -38,7 +39,7 @@ class _ProcurementViewState extends ConsumerState<ProcurementView>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 4, vsync: this);
+    _tabs = TabController(length: 5, vsync: this);
     _maybeSubscribeToVendorUpdates();
   }
 
@@ -81,6 +82,7 @@ class _ProcurementViewState extends ConsumerState<ProcurementView>
               Tab(text: 'RFQ'),
               Tab(text: 'PO'),
               Tab(text: 'GRN'),
+              Tab(text: 'Stock'),
             ],
           ),
           Expanded(
@@ -102,6 +104,7 @@ class _ProcurementViewState extends ConsumerState<ProcurementView>
                   projectId: widget.projectId,
                   userId: widget.userId,
                 ),
+                StockView(projectId: widget.projectId, userId: widget.userId),
               ],
             ),
           ),
@@ -423,6 +426,7 @@ class _PoTab extends ConsumerWidget {
     await db.purchaseDao.setOrderStatus(o.id, 'delivered');
     ref.invalidate(ordersProvider(projectId));
     ref.invalidate(receiptsProvider(projectId));
+    ref.invalidate(siteStockProvider(projectId));
     ref.invalidate(costSummaryProvider(projectId));
   }
 }

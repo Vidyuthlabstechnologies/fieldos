@@ -42,6 +42,8 @@ final _uuid = Uuid();
   PurchaseRequests,
   PurchaseOrders,
   MaterialReceipts,
+  MaterialUsage,
+  PaymentsReceived,
   SiteExpenses,
   LabourAttendance,
   Subcontractors,
@@ -83,7 +85,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -94,7 +96,9 @@ class AppDatabase extends _$AppDatabase {
   // consideration; MaterialReceipts stays mobile-only per
   // docs/MATERIALRECEIPTS_SYNC_ANALYSIS.md, so this is a local-only column,
   // no Postgres/RLS counterpart needed). v6 adds ProjectMessages (team
-  // chat, synced).
+  // chat, synced). v7 syncs attendance, expenses and receipts through their
+  // own site_* cloud tables (receipts are no longer local-only), and adds
+  // MaterialUsage, PaymentsReceived and SiteExpenses.workerId.
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onUpgrade: (m, from, to) async {
@@ -128,8 +132,37 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(purchaseOrders, purchaseOrders.quoteId);
             await m.addColumn(purchaseOrders, purchaseOrders.notes);
           }
+          // Last, so every older step above has already shaped the tables it reads.
+          if (from < 7) {
+            // v7: site attendance, expenses and material receipts start
+            // syncing (their own site_* cloud tables), plus material usage
+            // and payments received. Rows written before the upgrade are
+            // queued once so the cloud gets the site's history too.
+            await m.createTable(materialUsage);
+            await m.createTable(paymentsReceived);
+            await m.addColumn(siteExpenses, siteExpenses.workerId);
+            await _queueExistingSiteRecords();
+          }
         },
       );
+
+  Future<void> _queueExistingSiteRecords() async {
+    for (final a in await select(labourAttendance).get()) {
+      await syncOutboxDao.enqueue(
+          targetTable: 'site_attendance', recordId: a.id, operation: 'insert',
+          payloadJson: jsonEncode(attendanceToSupabaseJson(a)));
+    }
+    for (final e in await select(siteExpenses).get()) {
+      await syncOutboxDao.enqueue(
+          targetTable: 'site_expenses', recordId: e.id, operation: 'insert',
+          payloadJson: jsonEncode(siteExpenseToSupabaseJson(e)));
+    }
+    for (final r in await select(materialReceipts).get()) {
+      await syncOutboxDao.enqueue(
+          targetTable: 'site_material_receipts', recordId: r.id, operation: 'insert',
+          payloadJson: jsonEncode(materialReceiptToSupabaseJson(r)));
+    }
+  }
 
   // --- DAO accessors ------------------------------------------------------
   UserDao get userDao => UserDao(this);
@@ -156,6 +189,7 @@ class AppDatabase extends _$AppDatabase {
   WorkerDao get workerDao => WorkerDao(this);
   SyncOutboxDao get syncOutboxDao => SyncOutboxDao(this);
   MessageDao get messageDao => MessageDao(this);
+  PaymentDao get paymentDao => PaymentDao(this);
 }
 
 /// Where DPR photos and other local media are stored, relative to the app's
@@ -731,7 +765,7 @@ class PurchaseDao extends DatabaseAccessor<AppDatabase> with _$PurchaseDaoMixin 
       into(purchaseOrders).insertOnConflictUpdate(companion);
 }
 
-@DriftAccessor(tables: [MaterialReceipts])
+@DriftAccessor(tables: [MaterialReceipts, MaterialUsage])
 class MaterialDao extends DatabaseAccessor<AppDatabase> with _$MaterialDaoMixin {
   MaterialDao(super.db);
 
@@ -739,12 +773,67 @@ class MaterialDao extends DatabaseAccessor<AppDatabase> with _$MaterialDaoMixin 
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(materialReceipts).insert(companion.copyWith(id: Value(id)));
-      return (await (select(materialReceipts)..where((m) => m.id.equals(id))).getSingle());
+      final row = await (select(materialReceipts)..where((m) => m.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'site_material_receipts',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(materialReceiptToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
   Future<List<MaterialReceipt>> forProject(String projectId) =>
       (select(materialReceipts)..where((m) => m.projectId.equals(projectId))).get();
+
+  Future<MaterialUsageData> recordUsage(MaterialUsageCompanion companion) {
+    final id = companion.id.present ? companion.id.value : _uuid.v4();
+    return transaction(() async {
+      await into(materialUsage).insert(companion.copyWith(id: Value(id)));
+      final row = await (select(materialUsage)..where((m) => m.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'site_material_usage',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(materialUsageToSupabaseJson(row)),
+      );
+      return row;
+    });
+  }
+
+  Future<List<MaterialUsageData>> usageForProject(String projectId) =>
+      (select(materialUsage)..where((m) => m.projectId.equals(projectId))).get();
+
+  Future<void> upsertReceiptFromRemote(MaterialReceiptsCompanion c) => into(materialReceipts).insertOnConflictUpdate(c);
+  Future<void> upsertUsageFromRemote(MaterialUsageCompanion c) => into(materialUsage).insertOnConflictUpdate(c);
+}
+
+@DriftAccessor(tables: [PaymentsReceived])
+class PaymentDao extends DatabaseAccessor<AppDatabase> with _$PaymentDaoMixin {
+  PaymentDao(super.db);
+
+  Future<PaymentsReceivedData> create(PaymentsReceivedCompanion companion) {
+    final id = companion.id.present ? companion.id.value : _uuid.v4();
+    return transaction(() async {
+      await into(paymentsReceived).insert(companion.copyWith(id: Value(id)));
+      final row = await (select(paymentsReceived)..where((p) => p.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'site_payments_received',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(paymentReceivedToSupabaseJson(row)),
+      );
+      return row;
+    });
+  }
+
+  Future<List<PaymentsReceivedData>> forProject(String projectId) => (select(paymentsReceived)
+        ..where((p) => p.projectId.equals(projectId))
+        ..orderBy([(p) => OrderingTerm.desc(p.receivedOn)]))
+      .get();
+
+  Future<void> upsertFromRemote(PaymentsReceivedCompanion c) => into(paymentsReceived).insertOnConflictUpdate(c);
 }
 
 // ---------------------------------------------------------------------------
@@ -759,12 +848,21 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(siteExpenses).insert(companion.copyWith(id: Value(id)));
-      return (await (select(siteExpenses)..where((e) => e.id.equals(id))).getSingle());
+      final row = await (select(siteExpenses)..where((e) => e.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'site_expenses',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(siteExpenseToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
   Future<List<SiteExpense>> forProject(String projectId) =>
       (select(siteExpenses)..where((e) => e.projectId.equals(projectId))).get();
+
+  Future<void> upsertFromRemote(SiteExpensesCompanion c) => into(siteExpenses).insertOnConflictUpdate(c);
 
   Future<WorkOrder> createWorkOrder(WorkOrdersCompanion companion) {
     final id = companion.id.present ? companion.id.value : _uuid.v4();
@@ -815,17 +913,34 @@ class AttendanceDao extends DatabaseAccessor<AppDatabase> with _$AttendanceDaoMi
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(labourAttendance).insert(companion.copyWith(id: Value(id)));
-      return (await (select(labourAttendance)..where((a) => a.id.equals(id))).getSingle());
+      final row = await (select(labourAttendance)..where((a) => a.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'site_attendance',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(attendanceToSupabaseJson(row)),
+      );
+      return row;
     });
   }
 
-  Future<void> punchOut(String id, {double? lat, double? lng, bool? withinGeofence}) =>
-      (update(labourAttendance)..where((a) => a.id.equals(id))).write(LabourAttendanceCompanion(
-        punchOut: Value(DateTime.now()),
-        lat: lat == null ? const Value.absent() : Value(lat),
-        lng: lng == null ? const Value.absent() : Value(lng),
-        withinGeofence: withinGeofence == null ? const Value.absent() : Value(withinGeofence),
-      ));
+  Future<void> punchOut(String id, {double? lat, double? lng, bool? withinGeofence}) => transaction(() async {
+        await (update(labourAttendance)..where((a) => a.id.equals(id))).write(LabourAttendanceCompanion(
+          punchOut: Value(DateTime.now()),
+          lat: lat == null ? const Value.absent() : Value(lat),
+          lng: lng == null ? const Value.absent() : Value(lng),
+          withinGeofence: withinGeofence == null ? const Value.absent() : Value(withinGeofence),
+        ));
+        final row = await (select(labourAttendance)..where((a) => a.id.equals(id))).getSingle();
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'site_attendance',
+          recordId: row.id,
+          operation: 'update',
+          payloadJson: jsonEncode(attendanceToSupabaseJson(row)),
+        );
+      });
+
+  Future<void> upsertFromRemote(LabourAttendanceCompanion c) => into(labourAttendance).insertOnConflictUpdate(c);
 
   Future<List<LabourAttendanceData>> forProject(String projectId) =>
       (select(labourAttendance)..where((a) => a.projectId.equals(projectId))).get();

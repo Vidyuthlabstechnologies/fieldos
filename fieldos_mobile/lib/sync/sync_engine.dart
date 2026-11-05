@@ -104,7 +104,7 @@ class SyncEngine {
 
   static const userIdColumns = {
     'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
-    'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id',
+    'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by',
   };
 
   Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>
@@ -213,6 +213,12 @@ class SyncEngine {
         (r) => db.purchaseDao.upsertFromRemoteRequest(purchaseRequestFromSupabaseJson(r)));
     await pull('purchase_orders', (r) => db.purchaseDao.upsertFromRemoteOrder(purchaseOrderFromSupabaseJson(r)));
     await pull('project_messages', (r) => db.messageDao.upsertFromRemote(projectMessageFromSupabaseJson(r)));
+    await pull('site_attendance', (r) => db.attendanceDao.upsertFromRemote(attendanceFromSupabaseJson(r)));
+    await pull('site_expenses', (r) => db.expenseDao.upsertFromRemote(siteExpenseFromSupabaseJson(r)));
+    await pull('site_material_receipts',
+        (r) => db.materialDao.upsertReceiptFromRemote(materialReceiptFromSupabaseJson(r)));
+    await pull('site_material_usage', (r) => db.materialDao.upsertUsageFromRemote(materialUsageFromSupabaseJson(r)));
+    await pull('site_payments_received', (r) => db.paymentDao.upsertFromRemote(paymentReceivedFromSupabaseJson(r)));
     await pull('documents', (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
