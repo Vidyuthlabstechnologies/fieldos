@@ -9,6 +9,7 @@ Everything needed to publish `fieldos_mobile/` on Google Play. Items marked
 | # | Step | Who |
 |---|---|---|
 | 1 | Create the production Supabase project (free plan is fine), then add repo secrets `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD`, and run the **supabase-deploy** workflow from the Actions tab; it applies every migration. In **Authentication → Sign In / Providers → Email**, turn "Confirm email" off for launch: Supabase's built-in mailer sends only a few emails an hour, and company data is already gated by the join code. Turn it back on once custom SMTP is set up. | **(you)** |
+| 1b | **Setting secrets:** on a personal GitHub repo only the repository owner's account can add or see Actions secrets; a collaborator with write access gets a 403, so these steps cannot be delegated. `tools/set_launch_secrets.sh` sets all of them from one local file (`launch-secrets.env`, gitignored; copy `launch-secrets.env.example`). Then anyone can run the **launch-readiness** workflow from the Actions tab: it shows which secrets are set, whether each is the right kind of key (anon and not service_role, RevenueCat public and not secret, keystore opens with the alias and passwords), and what the Supabase project has deployed. It never prints a value. | **(you)** set, anyone checks |
 | 2 | The release workflow bakes `SUPABASE_URL` and `SUPABASE_ANON_KEY` into the build; without them the app ships offline-only and hides Team & sync. | automatic |
 | 3 | Create the upload keystore on your own computer (Android Studio → Build → Generate Signed App Bundle → Create new, or `keytool`), and add the four signing secrets (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ANDROID_STORE_PASSWORD`). Keep the keystore and passwords offline. With Play App Signing (the default for new apps) this is only the upload key, and Play support can reset it if lost. | **(you)** |
 | 4 | The application id is `com.mldynamic.fieldos` (chosen by the owner, `android/app/build.gradle.kts`). It can never change after the first upload. The Kotlin `namespace` stays `com.predictera.fieldos_mobile`; that is internal and never shown. | done |
@@ -200,7 +201,8 @@ To turn it on (owner):
    - Create the entitlement `pro` and attach the store products.
    - Make the default offering contain them.
 4. Add the repo secrets `REVENUECAT_ANDROID_KEY` and `REVENUECAT_IOS_KEY`:
-   the public SDK keys, from RevenueCat → API keys.
+   the public SDK keys, from RevenueCat → API keys (`goog_…` and `appl_…`;
+   the launch-readiness workflow rejects a secret `sk_…` key).
 5. Build a new release. Test with a Play licence tester account, which is
    never charged (test trials last minutes, not days).
 
@@ -234,3 +236,25 @@ repo with no activity for 60 days; re-enable it from the Actions tab.
 - Deleting an account leaves the document files of deleted companies in
   Storage until they are cleared from the Supabase dashboard.
 - The desktop (Windows) app does not sync with the phones.
+
+## 9. If something goes wrong
+
+Start with the **launch-readiness** workflow (Actions tab → Run workflow);
+its summary table says what is missing or wrong without showing any value.
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `supabase-deploy` fails at "Check the secrets are set" | The secrets are not on the repo. Collaborators cannot add them. | The owner runs `tools/set_launch_secrets.sh`, or adds them in Settings → Secrets and variables → Actions. |
+| `gh secret set` says 403 / "Resource not accessible" | Signed in to `gh` as a collaborator, not the owner. | `gh auth login` as the repository owner and run the script again. |
+| `supabase link` fails with "Unauthorized" or "Access token not provided" | `SUPABASE_ACCESS_TOKEN` is wrong, expired, or from a Supabase account that cannot see this project. | Make a new token at supabase.com/dashboard/account/tokens while signed in as the project's owner; update the secret. |
+| `supabase link` / `db push` fails with "password authentication failed" | `SUPABASE_DB_PASSWORD` is not the project's database password. | Supabase → Project Settings → Database → Reset database password, then update the secret. |
+| `db push` says a table or policy "already exists" | Migrations were pasted into the SQL editor by hand before the workflow ran, so the project has the objects but no record of the migration. | In a checkout with the CLI: `supabase link`, then `supabase migration repair --status applied <version>` for each hand-applied file (the version is the leading timestamp), then run the workflow again. |
+| launch-readiness shows ❌ on `SUPABASE_ANON_KEY` ("service_role") | The service key was pasted instead of the anon / publishable key. | Copy the **anon** (or `sb_publishable_…`) key from Project Settings → API. The service key in an APK lets anyone read every company's data. |
+| launch-readiness shows "Table … not deployed" | supabase-deploy has not run (or failed) since that migration was added. | Run supabase-deploy; it skips what is already applied. |
+| Sign-up works but the confirmation email never arrives | Built-in Supabase mailer: a few emails an hour, shared by every project. | Turn "Confirm email" off for launch (section 1, step 1); launch-readiness shows "Confirm email: required" while it is on. Or set up custom SMTP under Authentication → Emails. |
+| `bug-reports` fails at "File new reports as issues" | `SUPABASE_ACCESS_TOKEN` cannot read this project's API keys (wrong account), or `SUPABASE_URL` is for another project. | Same token fix as above. "no new bug reports" in the log is success. |
+| Release build hides Team & sync | It was built before `SUPABASE_URL` / `SUPABASE_ANON_KEY` were set. | Set them, then run the **release** workflow again (or push a new tag). |
+| Release build has no paywall | Built before the RevenueCat secrets were set, or `REVENUECAT_ANDROID_KEY` is empty. | Set the key (section 7, step 4), rebuild, re-upload to internal testing. |
+| Paywall says "Could not reach the store" or shows no prices | The build on the phone was not installed from Google Play (internal testing), the Google account is not a licence tester, or the products are not in RevenueCat's **default** offering. | Install from the internal-testing link, add the tester under Play Console → Setup → Licence testing, and check RevenueCat → Offerings. |
+| Trial unlocks, but the app locks again straight after | The `pro` entitlement is not attached to the product that was bought. | RevenueCat → Entitlements → `pro` → attach every store product. |
+| `launch-readiness` is red | Only ever because a secret that *is* set is the wrong kind of value (❌ rows). Missing secrets never fail it. | Fix the ❌ rows; the Note column says what was expected. |

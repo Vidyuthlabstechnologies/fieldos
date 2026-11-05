@@ -16,7 +16,13 @@ stack — production is configuration, not new engineering.
 
 Either:
 
-- **CLI (preferred, keeps migrations canonical):**
+- **GitHub Actions (no tools to install):** add the repo secrets
+  `SUPABASE_URL`, `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD`
+  (`tools/set_launch_secrets.sh` does all of them from one file; owner only),
+  then run the **supabase-deploy** workflow from the Actions tab. The
+  **launch-readiness** workflow afterwards confirms the tables are there.
+
+- **CLI (keeps migrations canonical):**
   ```bash
   supabase link --project-ref <project-ref>
   supabase db push
@@ -34,9 +40,12 @@ private `documents` bucket.
 ## 3. Accounts: one per person
 
 There is no shared account any more. Each person signs up from the app
-(Team & sync, "Create account") with their own email. Keep "Confirm email"
-on in Authentication -> Providers -> Email; the app tells the person to
-confirm and then sign in.
+(Team & sync, "Create account") with their own email. For launch, turn
+"Confirm email" **off** in Authentication -> Providers -> Email (see
+`docs/PLAY_STORE_LAUNCH.md` section 1): Supabase's built-in mailer sends
+only a few emails an hour, and company data is already gated by the join
+code. Turn it back on once custom SMTP is configured; the app then tells
+the person to confirm and sign in.
 
 The owner taps "Put company on the cloud", which calls the
 `ensure_company` RPC: it creates the company row, makes the caller its

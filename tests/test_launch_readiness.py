@@ -1,0 +1,151 @@
+"""tools/launch_readiness.py decides, from a secret's shape alone, whether it
+is the right kind of key. A wrong verdict here either blocks a good launch
+or lets the service_role key ship inside the APK, so each rule gets a test.
+"""
+
+import base64
+import importlib.util
+import json
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+# tools/ is not a package; load the script by path (registered in sys.modules
+# first, which @dataclass needs to resolve its annotations).
+_SPEC = importlib.util.spec_from_file_location(
+    "launch_readiness", Path(__file__).parent.parent / "tools" / "launch_readiness.py")
+lr = importlib.util.module_from_spec(_SPEC)
+sys.modules["launch_readiness"] = lr
+_SPEC.loader.exec_module(lr)
+
+URL = "https://abcdefghijklmnopqrst.supabase.co"
+
+
+def jwt(payload: dict) -> str:
+    def part(obj):
+        return base64.urlsafe_b64encode(json.dumps(obj).encode()).decode().rstrip("=")
+    return f"{part({'alg': 'HS256', 'typ': 'JWT'})}.{part(payload)}.signature"
+
+
+def test_supabase_url_must_be_the_bare_project_url():
+    assert lr.check_supabase_url("").status == lr.MISSING
+    assert lr.check_supabase_url(URL).status == lr.OK
+    assert lr.check_supabase_url(URL + "/").status == lr.OK
+    assert lr.check_supabase_url(URL + "/rest/v1").status == lr.FAIL
+    assert lr.check_supabase_url("http://abcdefghijklmnopqrst.supabase.co").status == lr.FAIL
+    assert lr.check_supabase_url("https://supabase.com/dashboard/project/abc").status == lr.FAIL
+
+
+def test_anon_key_accepts_anon_jwt_and_publishable_key():
+    assert lr.check_anon_key(jwt({"role": "anon", "ref": "abcdefghijklmnopqrst"}), URL).status == lr.OK
+    assert lr.check_anon_key(jwt({"role": "anon"}), URL).status == lr.OK
+    assert lr.check_anon_key("sb_publishable_abc123", URL).status == lr.OK
+
+
+def test_anon_key_rejects_keys_that_must_never_ship_in_the_app():
+    r = lr.check_anon_key(jwt({"role": "service_role", "ref": "abcdefghijklmnopqrst"}), URL)
+    assert r.status == lr.FAIL and "service_role" in r.note
+    assert lr.check_anon_key("sb_secret_abc123", URL).status == lr.FAIL
+
+
+def test_anon_key_for_another_project_fails():
+    r = lr.check_anon_key(jwt({"role": "anon", "ref": "zzzzzzzzzzzzzzzzzzzz"}), URL)
+    assert r.status == lr.FAIL and "different" in r.note
+
+
+def test_anon_key_that_is_not_a_key_only_warns():
+    assert lr.check_anon_key("", URL).status == lr.MISSING
+    assert lr.check_anon_key("hello", URL).status == lr.WARN
+    assert lr.check_anon_key("a.b.c", URL).status == lr.WARN  # three parts but not base64 JSON
+
+
+def test_access_token_shape():
+    assert lr.check_access_token("").status == lr.MISSING
+    assert lr.check_access_token("sbp_" + "0" * 40).status == lr.OK
+    assert lr.check_access_token(jwt({"role": "anon"})).status == lr.WARN
+
+
+def test_revenuecat_keys_must_be_the_public_sdk_key_for_that_store():
+    assert lr.check_revenuecat_key("REVENUECAT_ANDROID_KEY", "goog_abc").status == lr.OK
+    assert lr.check_revenuecat_key("REVENUECAT_IOS_KEY", "appl_abc").status == lr.OK
+    assert lr.check_revenuecat_key("REVENUECAT_ANDROID_KEY", "sk_abc").status == lr.FAIL
+    assert lr.check_revenuecat_key("REVENUECAT_IOS_KEY", "sk_abc").status == lr.FAIL
+    # Swapped keys would make one store's app talk to the other's product list.
+    assert lr.check_revenuecat_key("REVENUECAT_ANDROID_KEY", "appl_abc").status == lr.FAIL
+    assert lr.check_revenuecat_key("REVENUECAT_IOS_KEY", "goog_abc").status == lr.FAIL
+    assert lr.check_revenuecat_key("REVENUECAT_ANDROID_KEY", "test_abc").status == lr.WARN
+    assert lr.check_revenuecat_key("REVENUECAT_ANDROID_KEY", "").status == lr.MISSING
+
+
+def test_signing_secrets_are_all_or_nothing():
+    assert [r.status for r in lr.check_keystore("", "", "", "")] == [lr.MISSING] * 4
+    half = lr.check_keystore("QUJD", "upload", "", "")
+    assert [r.status for r in half] == [lr.OK, lr.OK, lr.FAIL, lr.FAIL]
+
+
+def test_keystore_base64_must_decode():
+    r = lr.check_keystore("not base64!!", "upload", "kp", "sp")
+    assert r[0].status == lr.FAIL and "base64" in r[0].note
+
+
+KEYTOOL = shutil.which("keytool")
+
+
+@pytest.fixture(scope="module")
+def keystore_b64(tmp_path_factory):
+    if KEYTOOL is None:
+        pytest.skip("keytool (a JDK) is not installed here")
+    path = tmp_path_factory.mktemp("ks") / "upload.keystore"
+    subprocess.run([
+        KEYTOOL, "-genkeypair", "-keystore", str(path), "-storetype", "PKCS12", "-storepass", "store-pw",
+        "-alias", "upload", "-keypass", "store-pw", "-keyalg", "RSA", "-keysize", "2048", "-validity", "1",
+        "-dname", "CN=test",
+    ], check=True, capture_output=True)
+    return base64.b64encode(path.read_bytes()).decode()
+
+
+def test_real_keystore_opens_with_the_right_alias_and_passwords(keystore_b64):
+    results = lr.check_keystore(keystore_b64, "upload", "store-pw", "store-pw")
+    assert [r.status for r in results] == [lr.OK] * 4, results
+
+
+def test_real_keystore_wrong_store_password_fails(keystore_b64):
+    results = {r.name: r.status for r in lr.check_keystore(keystore_b64, "upload", "store-pw", "nope-nope")}
+    assert results["ANDROID_STORE_PASSWORD"] == lr.FAIL
+
+
+def test_real_keystore_unknown_alias_fails(keystore_b64):
+    results = {r.name: r.status for r in lr.check_keystore(keystore_b64, "release", "store-pw", "store-pw")}
+    assert results["ANDROID_KEY_ALIAS"] == lr.FAIL
+    assert results["ANDROID_STORE_PASSWORD"] == lr.OK
+
+
+def test_report_never_contains_a_secret_value_and_fails_only_on_wrong_values(monkeypatch, capsys):
+    service_key = jwt({"role": "service_role", "ref": "abcdefghijklmnopqrst"})
+    monkeypatch.setenv("SUPABASE_URL", URL)
+    monkeypatch.setenv("SUPABASE_ANON_KEY", service_key)
+    monkeypatch.setenv("REVENUECAT_ANDROID_KEY", "goog_very_distinctive_value")
+    for name in ("SUPABASE_ACCESS_TOKEN", "SUPABASE_DB_PASSWORD", "REVENUECAT_IOS_KEY", *lr.KEYSTORE_SECRETS):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
+
+    assert lr.main(["--offline"]) == 1
+    out = capsys.readouterr().out
+    assert service_key not in out and "very_distinctive" not in out
+    assert "service_role" in out and "⬜" in out
+
+    monkeypatch.setenv("SUPABASE_ANON_KEY", jwt({"role": "anon", "ref": "abcdefghijklmnopqrst"}))
+    assert lr.main(["--offline"]) == 0, "missing secrets are reported, not failed"
+
+
+def test_report_is_appended_to_the_actions_step_summary(monkeypatch, tmp_path):
+    summary = tmp_path / "summary.md"
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
+    for name in [n for names in lr.GROUPS.values() for n in names]:
+        monkeypatch.delenv(name, raising=False)
+    assert lr.main(["--offline"]) == 0
+    text = summary.read_text()
+    assert text.startswith("# Launch readiness") and "SUPABASE_URL" in text and "## Next" in text
