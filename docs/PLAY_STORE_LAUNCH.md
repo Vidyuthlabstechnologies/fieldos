@@ -105,6 +105,18 @@ No background location, no SMS/call log, no contacts.
 > **Maps:** map tiles are loaded from OpenStreetMap; your device's IP
 > address is visible to their servers as for any web request.
 >
+> **Payments:** the FieldOS subscription is bought through Google Play or
+> the Apple App Store, which handle your card or UPI details; FieldOS
+> never sees them. RevenueCat (revenuecat.com) receives the purchase
+> record from the store so the app can check your subscription.
+>
+> **Bug reports:** if you use "Report a bug", we receive what you type,
+> the email you give (optional), the app version, your phone's operating
+> system version and the app's last few error messages. No project data,
+> photos or contacts are included. Reports are stored in our cloud
+> database and copied to our private issue tracker on GitHub so we can
+> fix the problem.
+>
 > We do not sell data, show ads, or use analytics or tracking SDKs.
 >
 > **Deleting data:** in the app, open Team & sync and tap "Delete my cloud
@@ -130,7 +142,10 @@ No background location, no SMS/call log, no contacts.
 | Photos | Collected, optional, purpose: App functionality (site evidence). |
 | Files and docs | Collected, optional, purpose: App functionality (project documents). |
 | Messages → Other in-app messages | Collected (team chat), purpose: App functionality. |
-| App activity, device IDs, financial info, contacts | Not collected. |
+| Financial info → Purchase history | Collected (subscription, via Google Play and RevenueCat), purpose: App functionality. |
+| App info and performance → Crash logs, Diagnostics | Collected only when the user sends a bug report, optional, purpose: App functionality (fixing bugs). |
+| Personal info → Email address | Also collected, optional, when a user adds it to a bug report so we can reply. |
+| App activity, device IDs, contacts | Not collected. |
 
 **Content rating:** questionnaire answers are all "No" (utility app, no
 user-generated content shared publicly; team chat is private to the
@@ -153,7 +168,58 @@ company). Expected rating: Everyone / 3+.
 6. Kill and reopen both apps: neither asks for the cloud password again.
 7. On A, share a DPR as PDF to WhatsApp and check photos and issues show.
 
-## 7. Known limits to state honestly in support replies
+## 7. Subscription: 3-day free trial, then paid
+
+There is no free plan. Every person who uses the app subscribes for
+themselves (owner, engineers, supervisors), starting with a 3-day free
+trial. Past the login screen the app shows a paywall until the store says
+the person has an active subscription or trial.
+
+- The trial is an offer on the store subscription, so Google and Apple
+  decide who is eligible (once per Google/Apple account) and charge
+  automatically when it ends. Reinstalling the app can't reset it.
+- Offline: a phone that was paid up keeps working for 3 days past its
+  last known paid-up date, then needs the internet once to check.
+- Restore on the paywall finds a subscription already on the phone's
+  Google Play or Apple account (new phone, reinstall).
+- A build without the RevenueCat keys has no paywall at all. The release
+  workflow passes them from repo secrets, so set them before a store build.
+
+To turn it on (owner):
+
+1. **Play Console** → Monetize → Subscriptions → create `fieldos_pro`.
+   Add a monthly base plan (and yearly if wanted) and set the price.
+   On the base plan, add an **offer** → *Free trial*, 3 days, eligibility
+   "New customer acquisition". This needs a payments profile on the Play
+   Console account.
+2. **App Store Connect** (when publishing on iPhone): a subscription with
+   the same id, with an introductory offer: Free, 3 days.
+3. **RevenueCat** (free up to USD 2,500 a month in revenue): create a
+   project, add the Android app (`com.mldynamic.fieldos`, with a Play
+   service account JSON) and the iOS app.
+   - Create the entitlement `pro` and attach the store products.
+   - Make the default offering contain them.
+4. Add the repo secrets `REVENUECAT_ANDROID_KEY` and `REVENUECAT_IOS_KEY`:
+   the public SDK keys, from RevenueCat → API keys.
+5. Build a new release. Test with a Play licence tester account, which is
+   never charged (test trials last minutes, not days).
+
+Known limit: the check runs in the app. The cloud does not yet refuse
+someone who never paid but uses a modified copy of the app.
+
+## 7b. Bug reports
+
+"Report a bug" is in the home menu and on the paywall. A report goes to
+the `bug_reports` table (anyone can add one; nobody can read them back
+through the app). Offline, it waits on the phone and is sent later.
+
+The **bug-reports** workflow runs every 15 minutes and turns each new
+report into a GitHub issue labelled `bug-report`, then marks it filed. It
+uses the existing `SUPABASE_URL` and `SUPABASE_ACCESS_TOKEN` secrets and
+does nothing until they're set. GitHub can pause scheduled workflows in a
+repo with no activity for 60 days; re-enable it from the Actions tab.
+
+## 8. Known limits to state honestly in support replies
 
 - Alerts arrive when the app syncs (on open, on return to the app, and
   every 5 minutes while open), not instantly while the app is closed. True

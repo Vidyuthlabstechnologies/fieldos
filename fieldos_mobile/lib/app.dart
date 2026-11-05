@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/features/auth/login_screen.dart';
 import 'package:fieldos_mobile/features/company/company_setup_screen.dart';
 import 'package:fieldos_mobile/features/home/home_screen.dart';
+import 'package:fieldos_mobile/features/subscription/subscription_gate.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
 /// Root widget: routes to the right screen based on session state, and
 /// keeps cloud sync running for a linked company (on login/launch, company
@@ -22,6 +24,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    ref.read(bugReportServiceProvider).flush().catchError((_) => 0);
   }
 
   @override
@@ -34,6 +37,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       ref.read(cloudSyncBootstrapProvider).onResume().catchError((_) {});
+      ref.read(bugReportServiceProvider).flush().catchError((_) => 0);
     }
   }
 
@@ -46,7 +50,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     });
     final session = ref.watch(sessionProvider);
     if (!session.isAuthenticated) return const LoginScreen();
-    if (session.needsCompany) return const CompanySetupScreen();
-    return const HomeScreen();
+    // Everyone needs a subscription (the 3-day store trial counts) past login.
+    return SubscriptionGate(child: session.needsCompany ? const CompanySetupScreen() : const HomeScreen());
   }
 }
