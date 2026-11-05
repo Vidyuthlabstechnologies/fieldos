@@ -10,10 +10,12 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:purchases_flutter/purchases_flutter.dart' show Package;
 import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/services/billing_service.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_service.dart';
@@ -36,6 +38,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
   bool? _linked;
   CloudCompany? _cloudCompany;
   List<CloudMember>? _roster;
+  PlanStatus? _plan;
   int _pending = 0;
   int _parked = 0;
   String? _lastSyncedAt;
@@ -81,10 +84,12 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     final last = await db.settingsDao.get('last_sync_at');
     CloudCompany? cloud;
     List<CloudMember>? roster;
+    PlanStatus? plan;
     if (linked && service.isSignedIn) {
       try {
         cloud = await service.registerCompany(companyId: company.id, name: company.name);
         roster = await service.roster(company.id);
+        plan = await service.companyPlan(company.id);
         await ref.read(sessionProvider.notifier).setLocalRole(company.id, cloud.role);
       } catch (_) {
         // Offline: keep showing local status; the team list needs a connection.
@@ -95,6 +100,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       _linked = linked;
       _cloudCompany = cloud;
       _roster = roster;
+      _plan = plan;
       _pending = pending;
       _parked = parked;
       _lastSyncedAt = (last == null || last.isEmpty) ? null : last;
@@ -217,6 +223,64 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       _say('Your cloud account is deleted. This phone keeps working offline.');
       await _refresh();
     });
+  }
+
+  /// Opens the store options for the Team plan. The plan only changes once
+  /// the server hears from the store (via RevenueCat), so after a purchase
+  /// this polls the server for a few seconds rather than trusting the phone.
+  Future<void> _upgrade(String companyId) async {
+    final billing = ref.read(billingServiceProvider);
+    List<Package> packages = const [];
+    await _run(() async => packages = await billing.teamPackages(companyId));
+    if (!mounted || _messageIsError) return;
+    if (packages.isEmpty) {
+      _say('The Team plan is not available in the store yet.', error: true);
+      return;
+    }
+    final chosen = await showModalBottomSheet<Package>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const ListTile(
+            title: Text('FieldOS Team', style: TextStyle(fontWeight: FontWeight.w600)),
+            subtitle: Text('Unlimited people on the cloud for your whole company. Cancel any time in the store.'),
+          ),
+          for (final p in packages)
+            ListTile(
+              leading: const Icon(Icons.workspace_premium),
+              title: Text(p.storeProduct.title),
+              trailing: Text(p.storeProduct.priceString, style: const TextStyle(fontWeight: FontWeight.w600)),
+              onTap: () => Navigator.pop(ctx, p),
+            ),
+        ]),
+      ),
+    );
+    if (chosen == null) return;
+    await _run(() async {
+      final bought = await billing.buy(companyId, chosen);
+      if (!bought) return;
+      _say('Payment done. Switching your company to Team…');
+      await _waitForPaidPlan(companyId);
+    });
+  }
+
+  Future<void> _restore(String companyId) => _run(() async {
+        await ref.read(billingServiceProvider).restore(companyId);
+        await _waitForPaidPlan(companyId);
+      });
+
+  Future<void> _waitForPaidPlan(String companyId) async {
+    final service = ref.read(cloudSyncServiceProvider);
+    for (var i = 0; i < 10; i++) {
+      final plan = await service.companyPlan(companyId);
+      if (plan.isPaid) {
+        if (mounted) setState(() => _plan = plan);
+        _say('Your company is on the Team plan.');
+        return;
+      }
+      await Future<void>.delayed(const Duration(seconds: 2));
+    }
+    _say('The store has your payment. The plan will show as Team within a few minutes.');
   }
 
   Future<void> _resetCode(String companyId) => _run(() async {
@@ -389,9 +453,30 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     final cloud = _cloudCompany;
     final isOwner = cloud?.role == 'owner';
     final code = cloud?.joinCode;
+    final plan = _plan;
+    final billing = ref.read(billingServiceProvider);
     return [
       const Text('Team', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
       const SizedBox(height: 8),
+      if (plan != null)
+        Card(
+          child: ListTile(
+            leading: Icon(plan.isPaid ? Icons.workspace_premium : Icons.groups,
+                color: plan.isPaid ? Colors.amber.shade800 : null),
+            title: Text(plan.describe()),
+            subtitle: plan.isPaid
+                ? null
+                : Text(plan.isFull
+                    ? 'Your team is full. Upgrade to Team to add more people.'
+                    : 'Upgrade to Team for unlimited people.'),
+            trailing: (!isOwner || plan.isPaid || !billing.available)
+                ? null
+                : Wrap(children: [
+                    TextButton(onPressed: _busy ? null : () => _restore(companyId), child: const Text('Restore')),
+                    FilledButton(onPressed: _busy ? null : () => _upgrade(companyId), child: const Text('Upgrade')),
+                  ]),
+          ),
+        ),
       if (code != null)
         Card(
           child: ListTile(

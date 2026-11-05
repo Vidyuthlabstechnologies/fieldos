@@ -86,3 +86,13 @@ jobs:
       - run: flutter pub get
 
       - run: flutter build ios --release --no-codesign
+
+  webhook-test:
+    # The RevenueCat webhook's event -> plan mapping (Deno edge function).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno test supabase/functions/revenuecat-webhook/plan_test.ts

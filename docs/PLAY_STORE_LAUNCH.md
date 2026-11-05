@@ -105,6 +105,11 @@ No background location, no SMS/call log, no contacts.
 > **Maps:** map tiles are loaded from OpenStreetMap; your device's IP
 > address is visible to their servers as for any web request.
 >
+> **Payments:** the Team plan is bought through Google Play or the Apple
+> App Store, which handle your card or UPI details; FieldOS never sees
+> them. RevenueCat (revenuecat.com) receives the purchase record from the
+> store so we can switch your company to the Team plan.
+>
 > We do not sell data, show ads, or use analytics or tracking SDKs.
 >
 > **Deleting data:** in the app, open Team & sync and tap "Delete my cloud
@@ -130,7 +135,8 @@ No background location, no SMS/call log, no contacts.
 | Photos | Collected, optional, purpose: App functionality (site evidence). |
 | Files and docs | Collected, optional, purpose: App functionality (project documents). |
 | Messages → Other in-app messages | Collected (team chat), purpose: App functionality. |
-| App activity, device IDs, financial info, contacts | Not collected. |
+| Financial info → Purchase history | Collected (Team plan subscription, via Google Play and RevenueCat), purpose: App functionality. |
+| App activity, device IDs, contacts | Not collected. |
 
 **Content rating:** questionnaire answers are all "No" (utility app, no
 user-generated content shared publicly; team chat is private to the
@@ -153,7 +159,40 @@ company). Expected rating: Everyone / 3+.
 6. Kill and reopen both apps: neither asks for the cloud password again.
 7. On A, share a DPR as PDF to WhatsApp and check photos and issues show.
 
-## 7. Known limits to state honestly in support replies
+## 7. Paid plan (Team)
+
+Free: everything on the phone, and up to 3 people on the cloud per
+company. Team: unlimited people. The cap is enforced by the server
+(`join_company`), and only the server can change a company's plan.
+
+How a purchase flows: the owner taps Upgrade in Team & sync, then the
+Google Play or App Store sheet appears. RevenueCat validates the receipt
+and calls `supabase/functions/revenuecat-webhook`, which sets
+`companies.plan` to `team` until the expiry date. The app reads the plan
+back with `company_plan`. Restore re-sends an existing subscription.
+
+To turn it on (owner):
+
+1. **Play Console** → Monetize → Subscriptions → create `fieldos_team`
+   with a monthly base plan (and yearly if wanted), and set the price.
+   This needs a merchant (payments) profile on the Play Console account.
+2. **App Store Connect** (when publishing on iPhone): same product id.
+3. **RevenueCat** (free up to USD 2,500 a month in revenue): create a
+   project, add the Android app (`com.mldynamic.fieldos`, with a Play
+   service account JSON) and the iOS app.
+   - Create the entitlement `team` and attach both store products.
+   - Make the default offering contain them.
+4. Add these repo secrets:
+   - `REVENUECAT_ANDROID_KEY` and `REVENUECAT_IOS_KEY`: the public SDK
+     keys, from RevenueCat → API keys.
+   - `REVENUECAT_WEBHOOK_SECRET`: any long random text.
+5. Run **supabase-deploy** again. It deploys the webhook and prints its
+   URL. In RevenueCat → Integrations → Webhooks, paste that URL and set
+   the Authorization header to the same secret.
+6. Build a new release. Test with a Play licence tester account, which is
+   never charged.
+
+## 8. Known limits to state honestly in support replies
 
 - Alerts arrive when the app syncs (on open, on return to the app, and
   every 5 minutes while open), not instantly while the app is closed. True

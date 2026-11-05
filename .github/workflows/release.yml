@@ -60,8 +60,12 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          # RevenueCat PUBLIC SDK keys for the Team plan; without them the
+          # Upgrade button is hidden.
+          REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
+          REVENUECAT_IOS_KEY: ${{ secrets.REVENUECAT_IOS_KEY }}
         run: |
-          DEFINES="--dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
+          DEFINES="--dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY --dart-define=REVENUECAT_ANDROID_KEY=$REVENUECAT_ANDROID_KEY --dart-define=REVENUECAT_IOS_KEY=$REVENUECAT_IOS_KEY"
           flutter build apk --release $DEFINES
           flutter build appbundle --release $DEFINES
 

@@ -11,6 +11,7 @@ import 'package:fieldos_mobile/auth/auth_provider.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/dashboard/project_cost_summary.dart';
+import 'package:fieldos_mobile/services/billing_service.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
 import 'package:fieldos_mobile/services/sarvam_service.dart';
 import 'package:fieldos_mobile/services/settings_service.dart';
@@ -51,6 +52,8 @@ final agentRegistryProvider = Provider<AgentRegistry>(
 );
 
 final locationServiceProvider = Provider<LocationService>((ref) => LocationService());
+
+final billingServiceProvider = Provider<BillingService>((ref) => BillingService());
 
 final sessionProvider = StateNotifierProvider<SessionNotifier, SessionState>(
   (ref) => SessionNotifier(ref.watch(authServiceProvider), ref.watch(appDatabaseProvider)),
