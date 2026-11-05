@@ -8,9 +8,9 @@ Everything needed to publish `fieldos_mobile/` on Google Play. Items marked
 
 | # | Step | Who |
 |---|---|---|
-| 1 | Create the production Supabase project and run `supabase db push` (`docs/SUPABASE_PRODUCTION_RUNBOOK.md`). In **Authentication → Providers → Email**, keep "Confirm email" on; the app handles the confirmation step. | **(you)** |
-| 2 | Add repo secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY` (Settings → Secrets and variables → Actions). The release workflow bakes them into the build; without them the app ships offline-only and hides Team & sync. | **(you)** |
-| 3 | Add the four signing secrets (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ANDROID_STORE_PASSWORD`). Back up the keystore and passwords offline: losing them after the first upload means a new app listing. | **(you)** |
+| 1 | Create the production Supabase project (free plan is fine), then add repo secrets `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD`, and run the **supabase-deploy** workflow from the Actions tab; it applies every migration. In **Authentication → Sign In / Providers → Email**, turn "Confirm email" off for launch: Supabase's built-in mailer sends only a few emails an hour, and company data is already gated by the join code. Turn it back on once custom SMTP is set up. | **(you)** |
+| 2 | The release workflow bakes `SUPABASE_URL` and `SUPABASE_ANON_KEY` into the build; without them the app ships offline-only and hides Team & sync. | automatic |
+| 3 | Create the upload keystore on your own computer (Android Studio → Build → Generate Signed App Bundle → Create new, or `keytool`), and add the four signing secrets (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ANDROID_STORE_PASSWORD`). Keep the keystore and passwords offline. With Play App Signing (the default for new apps) this is only the upload key, and Play support can reset it if lost. | **(you)** |
 | 4 | Decide the application id **before** the first upload; it can never change afterwards. Today it is `com.predictera.fieldos_mobile` (`android/app/build.gradle.kts`). `com.predictera.fieldos` reads cleaner on the store page. | **(you)** decide |
 | 5 | Publish the privacy policy (section 4) at a public URL, e.g. GitHub Pages or the Predictera website. Play requires the URL. | **(you)** |
 | 6 | Create the Play Console developer account (one-time USD 25, organisation account for Predictera Pvt Ltd; needs a D-U-N-S number). | **(you)** |
