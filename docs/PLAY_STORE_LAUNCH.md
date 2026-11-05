@@ -12,8 +12,8 @@ Everything needed to publish `fieldos_mobile/` on Google Play. Items marked
 | 2 | The release workflow bakes `SUPABASE_URL` and `SUPABASE_ANON_KEY` into the build; without them the app ships offline-only and hides Team & sync. | automatic |
 | 3 | Create the upload keystore on your own computer (Android Studio → Build → Generate Signed App Bundle → Create new, or `keytool`), and add the four signing secrets (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ANDROID_STORE_PASSWORD`). Keep the keystore and passwords offline. With Play App Signing (the default for new apps) this is only the upload key, and Play support can reset it if lost. | **(you)** |
 | 4 | The application id is `com.mldynamic.fieldos` (chosen by the owner, `android/app/build.gradle.kts`). It can never change after the first upload. The Kotlin `namespace` stays `com.predictera.fieldos_mobile`; that is internal and never shown. | done |
-| 5 | Publish the privacy policy (section 4) at a public URL, e.g. GitHub Pages or the Predictera website. Play requires the URL. | **(you)** |
-| 6 | Create the Play Console developer account (one-time USD 25, organisation account for Predictera Pvt Ltd; needs a D-U-N-S number). | **(you)** |
+| 5 | Publish the privacy policy (section 4) at a public URL, e.g. a published Google Doc or the company website. Play requires the URL. | **(you)** |
+| 6 | Play Console developer account for ML Dynamic Solutions Private Limited. | done |
 | 7 | Tag a release: `git tag v1.1.0 && git push origin v1.1.0`. The workflow builds the signed `.aab` and drafts a GitHub Release with it. | either |
 | 8 | Upload the `.aab` to an **internal testing** track first, install on 2+ real phones, run the smoke test in section 6, then promote to closed testing and production. New personal accounts must run a closed test with 12+ testers for 14 days before production; organisation accounts are exempt. | **(you)** |
 
@@ -87,7 +87,7 @@ No background location, no SMS/call log, no contacts.
 
 ## 4. Privacy policy (publish this text)
 
-> **FieldOS privacy policy** — Predictera Pvt Ltd. Last updated: (date of publishing).
+> **FieldOS privacy policy** — ML Dynamic Solutions Private Limited. Last updated: (date of publishing).
 >
 > FieldOS stores the projects, reports, photos, attendance and other site
 > records you create on your phone. If you sign in to Team & sync, those
@@ -112,7 +112,7 @@ No background location, no SMS/call log, no contacts.
 > emailing (support email). Data on the phone is removed by uninstalling the
 > app.
 >
-> Contact: (support email), Predictera Pvt Ltd, (address).
+> Contact: (support email), ML Dynamic Solutions Private Limited, (address).
 
 ## 5. Data safety form answers
 
