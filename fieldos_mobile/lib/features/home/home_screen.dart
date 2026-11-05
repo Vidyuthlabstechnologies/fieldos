@@ -9,7 +9,10 @@ import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
 import 'package:fieldos_mobile/features/subcontractor/subcontractor_screen.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/features/settings/settings_screen.dart';
+import 'package:fieldos_mobile/features/map/site_map_screen.dart';
+import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -65,23 +68,35 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
+            icon: const Icon(Icons.groups),
+            tooltip: 'Team & sync',
             onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              MaterialPageRoute(builder: (_) => const TeamSyncScreen()),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Log out',
-            onPressed: () => ref.read(sessionProvider.notifier).logout(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.engineering),
-            tooltip: 'Subcontractors',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => SubcontractorsScreen(companyId: company.id)),
-            ),
+          PopupMenuButton<String>(
+            onSelected: (v) {
+              switch (v) {
+                case 'map':
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => SiteMapScreen(companyId: company.id)));
+                case 'subcontractors':
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => SubcontractorsScreen(companyId: company.id)),
+                  );
+                case 'settings':
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
+                case 'logout':
+                  ref.read(cloudSyncBootstrapProvider).stop();
+                  ref.read(sessionProvider.notifier).logout();
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'map', child: ListTile(leading: Icon(Icons.map), title: Text('Site map'))),
+              PopupMenuItem(
+                  value: 'subcontractors', child: ListTile(leading: Icon(Icons.engineering), title: Text('Subcontractors'))),
+              PopupMenuItem(value: 'settings', child: ListTile(leading: Icon(Icons.settings), title: Text('Settings'))),
+              PopupMenuItem(value: 'logout', child: ListTile(leading: Icon(Icons.logout), title: Text('Log out'))),
+            ],
           ),
         ],
       ),

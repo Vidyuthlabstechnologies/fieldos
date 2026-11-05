@@ -4,8 +4,10 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/chat/project_chat_view.dart';
 import 'package:fieldos_mobile/features/labour/labour_screen.dart';
 import 'package:fieldos_mobile/features/procurement/procurement_screen.dart';
+import 'package:fieldos_mobile/features/reports/dpr_report.dart';
 import 'package:fieldos_mobile/features/equipment/equipment_screen.dart';
 import 'package:fieldos_mobile/features/inspections/inspections_screen.dart';
 import 'package:fieldos_mobile/features/documents/documents_screen.dart';
@@ -33,7 +35,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 10, vsync: this);
+    _tabs = TabController(length: 11, vsync: this);
     _maybeSubscribeToLiveUpdates();
   }
 
@@ -113,6 +115,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
             Tab(text: 'Tasks', icon: Icon(Icons.checklist)),
             Tab(text: 'DPR', icon: Icon(Icons.edit_note)),
             Tab(text: 'Issues', icon: Icon(Icons.report_problem)),
+            Tab(text: 'Chat', icon: Icon(Icons.forum)),
             Tab(text: 'Procure', icon: Icon(Icons.shopping_cart)),
             Tab(text: 'Labour', icon: Icon(Icons.people)),
             Tab(text: 'Equipment', icon: Icon(Icons.construction)),
@@ -129,6 +132,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
           _TasksTab(project: widget.project),
           _DprTab(project: widget.project),
           _IssuesTab(project: widget.project),
+          ProjectChatView(projectId: widget.project.id),
           Builder(
             builder: (context) {
               final userId = ref.watch(sessionProvider).user?.id ?? '';
@@ -541,6 +545,21 @@ class _DprTabState extends ConsumerState<_DprTab> {
                     title: Text(d.workSummary),
                     subtitle: Text('${d.entryDate.toLocal().toString().split(' ').first}  •  '
                         '${d.manpowerCount} workers  •  ${d.weather ?? '—'}  •  ${d.source}'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.share),
+                      tooltip: 'Share as PDF',
+                      onPressed: () => shareDprReport(
+                        db: ref.read(appDatabaseProvider),
+                        companyName: ref.read(sessionProvider).activeCompany?.name ?? '',
+                        project: widget.project,
+                        dpr: d,
+                      ).catchError((Object e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(SnackBar(content: Text('Could not share the report: $e')));
+                        }
+                      }),
+                    ),
                   ),
                 );
               },

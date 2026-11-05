@@ -3,9 +3,14 @@ name: release
 # Push a tag like `v0.2.0` to build both shipped artifacts and attach them
 # to a GitHub Release created from that tag. Each platform is a separate
 # job so one failing doesn't block the other from publishing.
+#
+# Or run it from the Actions tab ("Run workflow"): it then releases the
+# version in fieldos_mobile/pubspec.yaml as tag v<version>, created on the
+# commit it runs from. No git or command line needed.
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -47,8 +52,18 @@ jobs:
           EOF
           echo "signed=true" >> "$GITHUB_OUTPUT"
 
-      - run: flutter build apk --release
-      - run: flutter build appbundle --release
+      # The production Supabase project (SUPABASE_URL / SUPABASE_ANON_KEY
+      # repo secrets) is baked in at build time -- see
+      # lib/sync/sync_config.dart. Without them the build still succeeds,
+      # but cloud sync is hidden in the app (offline-only build).
+      - name: Build release APK and App Bundle
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          DEFINES="--dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
+          flutter build apk --release $DEFINES
+          flutter build appbundle --release $DEFINES
 
       - uses: actions/upload-artifact@v7
         with:
@@ -109,6 +124,20 @@ jobs:
     if: always() && (needs.mobile.result == 'success' || needs.desktop.result == 'success')
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: fieldos_mobile/pubspec.yaml
+
+      - name: Work out the tag
+        id: tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "name=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            v=$(sed -n 's/^version: \([0-9.]*\).*/\1/p' fieldos_mobile/pubspec.yaml)
+            echo "name=v$v" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
@@ -116,7 +145,7 @@ jobs:
       - name: Build release notes
         run: |
           {
-            echo "Automated build from tag ${{ github.ref_name }}."
+            echo "Automated build of ${{ steps.tag.outputs.name }}."
             echo
             if [ -f artifacts/mobile-signing-status/mobile-signing-status.txt ]; then
               echo "- Mobile APK/AAB: $(cat artifacts/mobile-signing-status/mobile-signing-status.txt)"
@@ -132,7 +161,9 @@ jobs:
 
       - uses: softprops/action-gh-release@v3
         with:
-          name: ${{ github.ref_name }}
+          name: ${{ steps.tag.outputs.name }}
+          tag_name: ${{ steps.tag.outputs.name }}
+          target_commitish: ${{ github.sha }}
           body_path: /tmp/release-notes.md
           draft: true
           files: |

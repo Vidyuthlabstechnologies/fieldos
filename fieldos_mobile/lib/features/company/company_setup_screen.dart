@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 
 /// Shown right after the first registration, when the user has no company yet.
@@ -55,6 +56,15 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
                   child: _busy
                       ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Create company'),
+                ),
+                const SizedBox(height: 24),
+                const Text('Joining your employer\'s company instead?', textAlign: TextAlign.center),
+                TextButton.icon(
+                  icon: const Icon(Icons.group_add),
+                  label: const Text('Join with a code'),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const TeamSyncScreen()),
+                  ),
                 ),
               ],
             ),

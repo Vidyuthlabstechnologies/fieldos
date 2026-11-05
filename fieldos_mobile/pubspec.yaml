@@ -2,7 +2,7 @@ name: fieldos_mobile
 description: "FieldOS Mobile — offline-first agentic construction platform (Flutter)."
 publish_to: 'none'
 
-version: 1.0.1+2
+version: 1.2.0+4
 
 environment:
   sdk: ^3.12.2
@@ -59,6 +59,25 @@ dependencies:
   # with real network calls in `flutter test`'s fast Dart VM runner against
   # the local dev instance, not just an emulator-only integration test.
   supabase: ^2.7.0
+
+  # On-device alerts for a colleague's new issue / approval request / chat
+  # message arriving through sync. Local notifications, not FCM push: no
+  # Firebase project, no server, zero running cost (they fire when the app's
+  # background sync runs, not instantly while the app is killed).
+  flutter_local_notifications: ^22.3.3
+
+  # GPS fix for attendance punch-in, checked against the project geofence.
+  geolocator: ^14.1.2
+
+  # DPR report as a PDF, shared to WhatsApp/email through the Android share
+  # sheet -- how site reports actually travel in Indian construction today.
+  pdf: ^3.13.1
+  share_plus: ^13.3.1
+
+  # Site map: OpenStreetMap tiles, no API key or billing (Google Maps would
+  # add a paid key to a zero-running-cost product).
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
 
 dev_dependencies:
   # Direct dependency: used by test/sync_engine_test.dart to check the local

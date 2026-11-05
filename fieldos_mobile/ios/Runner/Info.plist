@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Fieldos Mobile</string>
+	<string>FieldOS</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -26,6 +26,12 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>FieldOS reads your location once when you punch a worker in or out, or set a site's location, to check the site geofence.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>FieldOS uses the camera to take site photos for daily reports, inspections and goods receipts.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>FieldOS lets you attach existing site photos to reports.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>FieldOS uses the microphone to capture spoken daily progress reports for voice-to-DPR.</string>
 	<key>UIApplicationSceneManifest</key>

@@ -11,6 +11,7 @@ import 'package:fieldos_mobile/auth/auth_provider.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/dashboard/project_cost_summary.dart';
+import 'package:fieldos_mobile/services/location_service.dart';
 import 'package:fieldos_mobile/services/sarvam_service.dart';
 import 'package:fieldos_mobile/services/settings_service.dart';
 import 'package:fieldos_mobile/services/voice_service.dart';
@@ -48,6 +49,8 @@ final agentRegistryProvider = Provider<AgentRegistry>(
     ref.watch(costControlAgentProvider),
   ]),
 );
+
+final locationServiceProvider = Provider<LocationService>((ref) => LocationService());
 
 final sessionProvider = StateNotifierProvider<SessionNotifier, SessionState>(
   (ref) => SessionNotifier(ref.watch(authServiceProvider), ref.watch(appDatabaseProvider)),
@@ -103,7 +106,7 @@ final receiptsProvider = FutureProvider.autoDispose.family<List<MaterialReceipt>
 final attendanceProvider = FutureProvider.autoDispose.family<List<LabourAttendanceData>, String>(
     (ref, projectId) => ref.watch(appDatabaseProvider).attendanceDao.forProject(projectId));
 final geofenceProvider = FutureProvider.autoDispose.family<ProjectGeofence?, String>(
-    (ref, projectId) => ref.watch(appDatabaseProvider).geofenceDao.forProject(projectId));
+    (ref, projectId) => ref.watch(appDatabaseProvider).geofenceDao.effectiveFor(projectId));
 
 /// Company subcontractor directory.
 final subcontractorsProvider = FutureProvider.autoDispose.family<List<Subcontractor>, String>(

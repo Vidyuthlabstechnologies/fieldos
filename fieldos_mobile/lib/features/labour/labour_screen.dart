@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/services/location_service.dart';
 
 /// Great-circle distance in metres between two coordinates.
 double haversineMeters(double lat1, double lng1, double lat2, double lng2) {
@@ -126,8 +127,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
                 const SizedBox(height: 8),
               ],
               TextField(controller: name, decoration: const InputDecoration(labelText: 'Worker name')),
-              TextField(controller: lat, decoration: const InputDecoration(labelText: 'Latitude (GPS)'), keyboardType: TextInputType.number),
-              TextField(controller: lng, decoration: const InputDecoration(labelText: 'Longitude (GPS)'), keyboardType: TextInputType.number),
+              GpsFields(lat: lat, lng: lng),
             ],
           ),
           actions: [
@@ -170,8 +170,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: lat, decoration: const InputDecoration(labelText: 'Latitude (GPS)'), keyboardType: TextInputType.number),
-            TextField(controller: lng, decoration: const InputDecoration(labelText: 'Longitude (GPS)'), keyboardType: TextInputType.number),
+            GpsFields(lat: lat, lng: lng),
           ],
         ),
         actions: [
@@ -237,8 +236,8 @@ class _GeofenceCard extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: lat, decoration: const InputDecoration(labelText: 'Center latitude'), keyboardType: TextInputType.number),
-            TextField(controller: lng, decoration: const InputDecoration(labelText: 'Center longitude'), keyboardType: TextInputType.number),
+            const Text('Stand at the centre of the site.'),
+            GpsFields(lat: lat, lng: lng),
             TextField(controller: radius, decoration: const InputDecoration(labelText: 'Radius (m)'), keyboardType: TextInputType.number),
           ],
         ),
@@ -254,5 +253,77 @@ class _GeofenceCard extends ConsumerWidget {
     if (latV == null || lngV == null) return;
     await ref.read(appDatabaseProvider).geofenceDao.set(projectId, latV, lngV, double.tryParse(radius.text) ?? 100);
     ref.invalidate(geofenceProvider(projectId));
+  }
+}
+
+
+/// Latitude/longitude fields filled automatically from the phone's GPS as
+/// soon as the dialog opens (they used to be typed by hand, which made the
+/// geofence check trivially fakeable and slow to use). Still editable, and
+/// a manual value is kept if GPS is unavailable.
+class GpsFields extends ConsumerStatefulWidget {
+  const GpsFields({super.key, required this.lat, required this.lng});
+  final TextEditingController lat;
+  final TextEditingController lng;
+
+  @override
+  ConsumerState<GpsFields> createState() => _GpsFieldsState();
+}
+
+class _GpsFieldsState extends ConsumerState<GpsFields> {
+  String _status = 'Getting your location…';
+  bool _locating = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _locate();
+  }
+
+  Future<void> _locate() async {
+    setState(() {
+      _locating = true;
+      _status = 'Getting your location…';
+    });
+    try {
+      final fix = await ref.read(locationServiceProvider).currentFix();
+      widget.lat.text = fix.lat.toStringAsFixed(6);
+      widget.lng.text = fix.lng.toStringAsFixed(6);
+      if (mounted) setState(() => _status = 'GPS fix, accurate to about ${fix.accuracyM.round()} m');
+    } catch (e) {
+      if (mounted) setState(() => _status = e is LocationUnavailable ? e.message : 'Could not get a GPS fix.');
+    } finally {
+      if (mounted) setState(() => _locating = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            if (_locating)
+              const SizedBox(height: 14, width: 14, child: CircularProgressIndicator(strokeWidth: 2))
+            else
+              const Icon(Icons.my_location, size: 16),
+            const SizedBox(width: 8),
+            Expanded(child: Text(_status, style: Theme.of(context).textTheme.bodySmall)),
+            if (!_locating) TextButton(onPressed: _locate, child: const Text('Retry')),
+          ],
+        ),
+        TextField(
+          controller: widget.lat,
+          decoration: const InputDecoration(labelText: 'Latitude'),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+        ),
+        TextField(
+          controller: widget.lng,
+          decoration: const InputDecoration(labelText: 'Longitude'),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+        ),
+      ],
+    );
   }
 }

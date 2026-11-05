@@ -18,6 +18,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:drift/drift.dart' show Variable;
 import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -46,6 +47,7 @@ class SyncEngine {
   RealtimeChannel? _vendorsChannel;
   RealtimeChannel? _dprEntriesChannel;
   RealtimeChannel? _issuesChannel;
+  RealtimeChannel? _messagesChannel;
 
   /// Serializes push/pull so overlapping sync paths (periodic tick vs
   /// manual "Sync now" vs post-write flush) can't drain the same outbox
@@ -81,6 +83,44 @@ class SyncEngine {
   void Function()? onVendorsChanged;
   void Function()? onDprEntriesChanged;
   void Function()? onIssuesChanged;
+  void Function()? onMessagesChanged;
+
+  /// Fired (before the local upsert) for a row in [notifiableTables] that
+  /// this device had never seen -- a colleague's new issue, approval
+  /// request or chat message. The app layer decides whether it deserves an
+  /// on-device notification (e.g. not on the very first full pull).
+  void Function(String table, Map<String, dynamic> row)? onRemoteRowCreated;
+
+  /// The local (pbkdf2) account id this device's rows were written with.
+  ///
+  /// Every `*_by` / `*_id` user column in Postgres references
+  /// `auth.users(id)`, but locally those columns hold the local account's
+  /// own id -- a different UUID. Pushing them unchanged violated the
+  /// foreign key on the very first DPR/issue/approval a real user synced.
+  /// Push rewrites local -> Supabase user id; pull rewrites it back, so the
+  /// device's "my DPRs" filters keep matching its own rows. Colleagues'
+  /// ids pass through untouched (they have no local account to map to).
+  String? localUserId;
+
+  static const userIdColumns = {
+    'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
+    'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id',
+  };
+
+  Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>
+      _swapUserIds(data, from: localUserId, to: client.auth.currentUser?.id);
+
+  Map<String, dynamic> _toLocalIds(Map<String, dynamic> row) =>
+      _swapUserIds(row, from: client.auth.currentUser?.id, to: localUserId);
+
+  static Map<String, dynamic> _swapUserIds(Map<String, dynamic> row, {String? from, String? to}) {
+    if (from == null || to == null || from == to) return row;
+    final out = Map<String, dynamic>.of(row);
+    for (final column in userIdColumns) {
+      if (out[column] == from) out[column] = to;
+    }
+    return out;
+  }
 
   /// Drains the outbox in order. Stops (does not skip past) on the first
   /// failure within a run, to preserve per-record write ordering -- a
@@ -91,7 +131,7 @@ class SyncEngine {
         var succeeded = 0;
         for (final entry in entries) {
           try {
-            final data = jsonDecode(entry.payload) as Map<String, dynamic>;
+            final data = _toRemoteIds(jsonDecode(entry.payload) as Map<String, dynamic>);
             final table = client.from(entry.targetTable);
         if (entry.targetTable == 'documents' && entry.operation == 'insert') {
           // The file itself goes to Storage first; only after that upload
@@ -128,93 +168,96 @@ class SyncEngine {
     return SyncPushResult(succeeded: succeeded, failed: 0);
   });
 
-  /// One-shot pull: fetches every project/task the current session's RLS
-  /// allows and merges into local Drift. Useful for an initial sync or a
-  /// manual "refresh" -- the Realtime subscriptions below are for ongoing
-  /// live updates after that. Serialized with pushPending (see _synchronized).
+  /// One-shot pull: fetches every row the current session's RLS allows and
+  /// merges into local Drift. Useful for an initial sync or a manual
+  /// "refresh" -- the Realtime subscriptions below are for ongoing live
+  /// updates after that. Serialized with pushPending (see _synchronized).
+  ///
+  /// Two guarantees on top of a plain server-wins merge:
+  ///  - A row this device has edited but not yet pushed (still in the
+  ///    outbox, pending or parked after failures) is never overwritten. A
+  ///    failed push used to be followed straight away by this pull, which
+  ///    replaced the unsynced local edit with the older server copy --
+  ///    silent data loss on any flaky connection.
+  ///  - Every table is paged ([pullPageSize] rows per request). PostgREST
+  ///    caps an unpaged select at 1,000 rows by default, so a company's
+  ///    1,001st DPR or task simply never reached a second phone.
   Future<void> pullAll() => _synchronized(() async {
-    final projectRows = await client.from('projects').select();
-    for (final row in projectRows) {
-      await db.projectDao.upsertFromRemote(projectFromSupabaseJson(row));
+    final dirty = await db.syncOutboxDao.dirtyKeys();
+
+    Future<void> pull(String table, Future<void> Function(Map<String, dynamic> row) upsert) async {
+      for (final row in await _fetchAll(table)) {
+        if (dirty.contains(SyncOutboxDao.key(table, row['id'] as String))) continue;
+        await _notifyIfNew(table, row);
+        await upsert(row);
+      }
     }
-    final taskRows = await client.from('tasks').select();
-    for (final row in taskRows) {
-      await db.taskDao.upsertFromRemote(taskFromSupabaseJson(row));
-    }
-    final dprRows = await client.from('dpr_entries').select();
-    for (final row in dprRows) {
-      await db.dprDao.upsertFromRemote(dprEntryFromSupabaseJson(row));
-    }
-    final issueRows = await client.from('issues').select();
-    for (final row in issueRows) {
-      await db.issueDao.upsertFromRemote(issueFromSupabaseJson(row));
-    }
-    final workerRows = await client.from('workers').select();
-    for (final row in workerRows) {
-      await db.workerDao.upsertFromRemote(workerFromSupabaseJson(row));
-    }
-    final equipmentRows = await client.from('equipment').select();
-    for (final row in equipmentRows) {
-      await db.equipmentDao.upsertFromRemote(equipmentFromSupabaseJson(row));
-    }
-    final inspectionRows = await client.from('inspections').select();
-    for (final row in inspectionRows) {
-      await db.inspectionDao.upsertFromRemote(inspectionFromSupabaseJson(row));
-    }
-    final subcontractorRows = await client.from('subcontractors').select();
-    for (final row in subcontractorRows) {
-      await db.subcontractorDao.upsertFromRemote(subcontractorFromSupabaseJson(row));
-    }
-    final workOrderRows = await client.from('work_orders').select();
-    for (final row in workOrderRows) {
-      await db.workOrderDao.upsertFromRemoteWorkOrder(workOrderFromSupabaseJson(row));
-    }
-    final approvalRows = await client.from('approvals').select();
-    for (final row in approvalRows) {
-      await db.approvalDao.upsertFromRemote(approvalFromSupabaseJson(row));
-    }
-    final vendorRows = await client.from('vendors').select();
-    for (final row in vendorRows) {
-      await db.supplierDao.upsertFromRemote(supplierFromSupabaseJson(row));
-    }
-    final estimationRows = await client.from('estimations').select();
-    for (final row in estimationRows) {
-      await db.estimationDao.upsertFromRemote(estimationFromSupabaseJson(row));
-    }
-    final costHeadRows = await client.from('cost_heads').select();
-    for (final row in costHeadRows) {
-      await db.estimationDao.upsertFromRemoteCostHead(costHeadFromSupabaseJson(row));
-    }
-    final measurementRows = await client.from('measurement_entries').select();
-    for (final row in measurementRows) {
-      await db.estimationDao.upsertFromRemoteMeasurement(measurementEntryFromSupabaseJson(row));
-    }
-    final steelRows = await client.from('steel_entries').select();
-    for (final row in steelRows) {
-      await db.estimationDao.upsertFromRemoteSteel(steelEntryFromSupabaseJson(row));
-    }
-    final requisitionRows = await client.from('purchase_requisitions').select();
-    for (final row in requisitionRows) {
-      await db.purchaseDao.upsertFromRemoteRequest(purchaseRequestFromSupabaseJson(row));
-    }
-    final purchaseOrderRows = await client.from('purchase_orders').select();
-    for (final row in purchaseOrderRows) {
-      await db.purchaseDao.upsertFromRemoteOrder(purchaseOrderFromSupabaseJson(row));
-    }
-    final documentRows = await client.from('documents').select();
-    for (final row in documentRows) {
-      final storagePath = row['file_path'] as String;
-      // A visible row must have a downloadable object (push uploads the file
-      // before inserting). A failure here is a real anomaly -- surfacing it
-      // beats silently shipping a metadata row pointing at nothing.
-      final bytes = await client.storage.from('documents').download(storagePath);
+
+    await pull('projects', (r) => db.projectDao.upsertFromRemote(projectFromSupabaseJson(r)));
+    await pull('tasks', (r) => db.taskDao.upsertFromRemote(taskFromSupabaseJson(r)));
+    await pull('dpr_entries', (r) => db.dprDao.upsertFromRemote(dprEntryFromSupabaseJson(r)));
+    await pull('issues', (r) => db.issueDao.upsertFromRemote(issueFromSupabaseJson(r)));
+    await pull('workers', (r) => db.workerDao.upsertFromRemote(workerFromSupabaseJson(r)));
+    await pull('equipment', (r) => db.equipmentDao.upsertFromRemote(equipmentFromSupabaseJson(r)));
+    await pull('inspections', (r) => db.inspectionDao.upsertFromRemote(inspectionFromSupabaseJson(r)));
+    await pull('subcontractors', (r) => db.subcontractorDao.upsertFromRemote(subcontractorFromSupabaseJson(r)));
+    await pull('work_orders', (r) => db.workOrderDao.upsertFromRemoteWorkOrder(workOrderFromSupabaseJson(r)));
+    await pull('approvals', (r) => db.approvalDao.upsertFromRemote(approvalFromSupabaseJson(r)));
+    await pull('vendors', (r) => db.supplierDao.upsertFromRemote(supplierFromSupabaseJson(r)));
+    await pull('estimations', (r) => db.estimationDao.upsertFromRemote(estimationFromSupabaseJson(r)));
+    await pull('cost_heads', (r) => db.estimationDao.upsertFromRemoteCostHead(costHeadFromSupabaseJson(r)));
+    await pull('measurement_entries',
+        (r) => db.estimationDao.upsertFromRemoteMeasurement(measurementEntryFromSupabaseJson(r)));
+    await pull('steel_entries', (r) => db.estimationDao.upsertFromRemoteSteel(steelEntryFromSupabaseJson(r)));
+    await pull('purchase_requisitions',
+        (r) => db.purchaseDao.upsertFromRemoteRequest(purchaseRequestFromSupabaseJson(r)));
+    await pull('purchase_orders', (r) => db.purchaseDao.upsertFromRemoteOrder(purchaseOrderFromSupabaseJson(r)));
+    await pull('project_messages', (r) => db.messageDao.upsertFromRemote(projectMessageFromSupabaseJson(r)));
+    await pull('documents', (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
       final localFile = File('${docsDir.path}/${row['id']}_$safeName');
-      await localFile.writeAsBytes(bytes);
+      // Document rows are immutable once uploaded (same id = same bytes), so
+      // a file already on disk is not downloaded again on every pull -- that
+      // re-fetched every attachment every 5 minutes over mobile data.
+      if (!localFile.existsSync()) {
+        // A visible row must have a downloadable object (push uploads the
+        // file before inserting). A failure here is a real anomaly --
+        // surfacing it beats silently shipping a row pointing at nothing.
+        final bytes = await client.storage.from('documents').download(row['file_path'] as String);
+        await localFile.writeAsBytes(bytes);
+      }
       await db.documentDao.upsertFromRemote(documentFromSupabaseJson(row, localPath: localFile.path));
-    }
+    });
   });
+
+  /// Rows per PostgREST request when pulling. Below the server's default
+  /// 1,000-row cap so a full page is never mistaken for the last one.
+  static const pullPageSize = 500;
+
+  Future<List<Map<String, dynamic>>> _fetchAll(String table) async {
+    final out = <Map<String, dynamic>>[];
+    var from = 0;
+    while (true) {
+      final rows = await client.from(table).select().order('id').range(from, from + pullPageSize - 1);
+      out.addAll(rows.map(_toLocalIds));
+      if (rows.length < pullPageSize) break;
+      from += pullPageSize;
+    }
+    return out;
+  }
+
+  /// Tables whose arrival from a colleague is worth an on-device alert.
+  static const notifiableTables = {'issues', 'approvals', 'project_messages'};
+
+  Future<void> _notifyIfNew(String table, Map<String, dynamic> row) async {
+    final callback = onRemoteRowCreated;
+    if (callback == null || !notifiableTables.contains(table)) return;
+    final exists = await db
+        .customSelect('SELECT 1 FROM $table WHERE id = ?', variables: [Variable<String>(row['id'] as String)])
+        .getSingleOrNull();
+    if (exists == null) callback(table, row);
+  }
 
   /// Live updates for one project's tasks -- INSERT/UPDATE/DELETE on the
   /// `tasks` row for this project merge into Drift as they happen.
@@ -237,7 +280,9 @@ class SyncEngine {
             if (payload.eventType == PostgresChangeEvent.delete) {
               return; // tasks have no local hard-delete path today; nothing to reconcile yet.
             }
-            await db.taskDao.upsertFromRemote(taskFromSupabaseJson(payload.newRecord));
+            final row = _toLocalIds(payload.newRecord);
+            if (!await _acceptRealtime('tasks', row)) return;
+            await db.taskDao.upsertFromRemote(taskFromSupabaseJson(row));
             onTasksChanged?.call();
           },
         );
@@ -256,7 +301,9 @@ class SyncEngine {
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'company_id', value: companyId),
           callback: (payload) async {
             if (payload.eventType == PostgresChangeEvent.delete) return;
-            await db.projectDao.upsertFromRemote(projectFromSupabaseJson(payload.newRecord));
+            final row = _toLocalIds(payload.newRecord);
+            if (!await _acceptRealtime('projects', row)) return;
+            await db.projectDao.upsertFromRemote(projectFromSupabaseJson(row));
             onProjectsChanged?.call();
           },
         );
@@ -276,7 +323,9 @@ class SyncEngine {
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'company_id', value: companyId),
           callback: (payload) async {
             if (payload.eventType == PostgresChangeEvent.delete) return;
-            await db.supplierDao.upsertFromRemote(supplierFromSupabaseJson(payload.newRecord));
+            final row = _toLocalIds(payload.newRecord);
+            if (!await _acceptRealtime('vendors', row)) return;
+            await db.supplierDao.upsertFromRemote(supplierFromSupabaseJson(row));
             onVendorsChanged?.call();
           },
         );
@@ -295,7 +344,9 @@ class SyncEngine {
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'project_id', value: projectId),
           callback: (payload) async {
             if (payload.eventType == PostgresChangeEvent.delete) return;
-            await db.dprDao.upsertFromRemote(dprEntryFromSupabaseJson(payload.newRecord));
+            final row = _toLocalIds(payload.newRecord);
+            if (!await _acceptRealtime('dpr_entries', row)) return;
+            await db.dprDao.upsertFromRemote(dprEntryFromSupabaseJson(row));
             onDprEntriesChanged?.call();
           },
         );
@@ -314,12 +365,48 @@ class SyncEngine {
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'project_id', value: projectId),
           callback: (payload) async {
             if (payload.eventType == PostgresChangeEvent.delete) return;
-            await db.issueDao.upsertFromRemote(issueFromSupabaseJson(payload.newRecord));
+            final row = _toLocalIds(payload.newRecord);
+            if (!await _acceptRealtime('issues', row)) return;
+            await db.issueDao.upsertFromRemote(issueFromSupabaseJson(row));
             onIssuesChanged?.call();
           },
         );
     _issuesChannel = channel;
     await _awaitJoin(channel, label: 'issues-$projectId');
+  }
+
+  /// Same two rules as [pullAll] for a single live row: never clobber an
+  /// unpushed local edit; report a colleague's brand-new notifiable row.
+  Future<bool> _acceptRealtime(String table, Map<String, dynamic> row) async {
+    final dirty = await db.syncOutboxDao.dirtyKeys();
+    if (dirty.contains(SyncOutboxDao.key(table, row['id'] as String))) return false;
+    await _notifyIfNew(table, row);
+    return true;
+  }
+
+  /// Live team chat for one project. See subscribeToProjectTasks's
+  /// docstring for why this awaits the join.
+  Future<void> subscribeToProjectMessages(String projectId) async {
+    await _messagesChannel?.unsubscribe();
+    final channel = client.channel('messages-$projectId').onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'project_messages',
+          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'project_id', value: projectId),
+          callback: (payload) async {
+            final row = _toLocalIds(payload.newRecord);
+            if (!await _acceptRealtime('project_messages', row)) return;
+            await db.messageDao.upsertFromRemote(projectMessageFromSupabaseJson(row));
+            onMessagesChanged?.call();
+          },
+        );
+    _messagesChannel = channel;
+    await _awaitJoin(channel, label: 'messages-$projectId');
+  }
+
+  Future<void> unsubscribeFromProjectMessages() async {
+    await _messagesChannel?.unsubscribe();
+    _messagesChannel = null;
   }
 
   Future<void> _awaitJoin(RealtimeChannel channel, {required String label}) {
@@ -344,5 +431,6 @@ class SyncEngine {
     if (_vendorsChannel != null) await _vendorsChannel!.unsubscribe();
     if (_dprEntriesChannel != null) await _dprEntriesChannel!.unsubscribe();
     if (_issuesChannel != null) await _issuesChannel!.unsubscribe();
+    if (_messagesChannel != null) await _messagesChannel!.unsubscribe();
   }
 }
