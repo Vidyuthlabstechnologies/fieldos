@@ -179,6 +179,26 @@ class CloudSyncService {
     }
   }
 
+  /// Deletes this person's cloud account (Google Play requires an in-app
+  /// way to do this). Companies where they are the only member are deleted
+  /// with all their records; shared companies keep their records and get a
+  /// new owner if needed (see the delete_my_account migration). Signs out
+  /// afterwards. Data on this phone is untouched.
+  Future<AccountDeletion> deleteAccount() async {
+    final res = Map<String, dynamic>.from(await client.rpc('delete_my_account') as Map);
+    try {
+      await client.auth.signOut(scope: SignOutScope.local);
+    } catch (_) {
+      // The session's user is already gone server-side; local sign-out is
+      // all that matters.
+    }
+    await sessionStore?.write(null);
+    return AccountDeletion(
+      companiesDeleted: res['companies_deleted'] as int,
+      companiesLeft: res['companies_left'] as int,
+    );
+  }
+
   Future<void> disableSync() async {
     await client.auth.signOut();
     await sessionStore?.write(null);
@@ -197,4 +217,10 @@ class CloudSyncService {
     await engine.pullAll();
     return pushResult;
   }
+}
+
+class AccountDeletion {
+  const AccountDeletion({required this.companiesDeleted, required this.companiesLeft});
+  final int companiesDeleted;
+  final int companiesLeft;
 }

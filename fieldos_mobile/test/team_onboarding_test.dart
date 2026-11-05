@@ -317,4 +317,92 @@ void main() {
     await client2.dispose();
     await db.close();
   });
+
+  test('deleting an account removes a solo company and the login', () async {
+    if (!stackUp) return;
+    final solo = await _Phone.signUp('solo');
+    final email = solo.service.email!;
+    final company = await solo.db.companyDao.create('One-man Builders');
+    await solo.service.registerCompany(companyId: company.id, name: company.name);
+    final project = await solo.db.projectDao.create(ProjectsCompanion.insert(
+      id: _uuid.v4(),
+      companyId: company.id,
+      name: 'Solo site',
+      status: const Value('active'),
+    ));
+    await solo.db.dprDao.create(DprEntriesCompanion.insert(
+      id: _uuid.v4(),
+      projectId: project.id,
+      createdBy: solo.localUserId,
+      entryDate: DateTime.utc(2026, 11, 5),
+      workSummary: 'Footing excavation',
+    ));
+    expect((await solo.engine.pushPending()).failed, 0);
+
+    final result = await solo.service.deleteAccount();
+    expect(result.companiesDeleted, 1);
+    expect(result.companiesLeft, 0);
+    expect(solo.service.isSignedIn, isFalse);
+    expect(solo.store.value, isNull);
+
+    final admin = SupabaseClient(SyncConfig.local.url, localServiceRoleKey);
+    expect(await admin.from('companies').select().eq('id', company.id), isEmpty);
+    expect(await admin.from('projects').select().eq('id', project.id), isEmpty);
+    await expectLater(
+      solo.client.auth.signInWithPassword(email: email, password: 'test-password-123!'),
+      throwsA(isA<AuthException>()),
+    );
+    await admin.dispose();
+    await solo.close();
+  });
+
+  test('deleting an owner account in a shared company hands over ownership and keeps the records', () async {
+    if (!stackUp) return;
+    final owner = await _Phone.signUp('leaving-owner');
+    final engineer = await _Phone.signUp('staying');
+    final email = owner.service.email!;
+    final company = await owner.db.companyDao.create('Shared Constructions');
+    final cloud = await owner.service.registerCompany(companyId: company.id, name: company.name);
+    await engineer.service.joinCompany(cloud.joinCode!);
+    final project = await owner.db.projectDao.create(ProjectsCompanion.insert(
+      id: _uuid.v4(),
+      companyId: company.id,
+      name: 'Shared site',
+      status: const Value('active'),
+    ));
+    final dpr = await owner.db.dprDao.create(DprEntriesCompanion.insert(
+      id: _uuid.v4(),
+      projectId: project.id,
+      createdBy: owner.localUserId,
+      entryDate: DateTime.utc(2026, 11, 5),
+      workSummary: 'Brickwork, ground floor',
+    ));
+    await owner.db.messageDao.send(
+      projectId: project.id,
+      senderId: owner.localUserId,
+      senderName: 'Owner Name',
+      body: 'Handing over',
+    );
+    expect((await owner.engine.pushPending()).failed, 0);
+
+    final result = await owner.service.deleteAccount();
+    expect(result.companiesDeleted, 0);
+    expect(result.companiesLeft, 1);
+
+    final roster = await engineer.service.roster(company.id);
+    expect(roster.single.userId, engineer.remoteUserId);
+    expect(roster.single.role, 'owner', reason: 'the team is never left without an owner');
+
+    await engineer.engine.pullAll();
+    expect((await engineer.db.dprDao.byId(dpr.id))?.workSummary, 'Brickwork, ground floor');
+    final messages = await engineer.db.messageDao.forProject(project.id);
+    expect(messages.single.senderName, 'Former member');
+
+    await expectLater(
+      owner.client.auth.signInWithPassword(email: email, password: 'test-password-123!'),
+      throwsA(isA<AuthException>()),
+    );
+    await owner.close();
+    await engineer.close();
+  });
 }

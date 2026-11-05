@@ -65,3 +65,24 @@ jobs:
       - run: flutter pub get
 
       - run: flutter build apk --debug
+
+  ios-build:
+    # Same idea as android-build, for the iPhone app. No Apple signing in
+    # CI yet (that needs the owner's Apple Developer account), so this
+    # checks that everything compiles and links, which is what breaks.
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: fieldos_mobile
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.9
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter build ios --release --no-codesign

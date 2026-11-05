@@ -187,6 +187,38 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         await _refresh();
       });
 
+  Future<void> _deleteAccount() async {
+    final email = ref.read(cloudSyncServiceProvider).email ?? 'this account';
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete your cloud account?'),
+        content: Text(
+          'This permanently deletes $email from FieldOS cloud.\n\n'
+          'Companies where you are the only member are deleted from the cloud with all their records. '
+          'Companies with other members keep their records, and ownership passes to another member.\n\n'
+          'Data on this phone is not deleted. Uninstall the app to remove it.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete account'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await _run(() async {
+      ref.read(cloudSyncBootstrapProvider).stop();
+      await ref.read(cloudSyncServiceProvider).deleteAccount();
+      await ref.read(cloudLinksProvider).clear();
+      _say('Your cloud account is deleted. This phone keeps working offline.');
+      await _refresh();
+    });
+  }
+
   Future<void> _resetCode(String companyId) => _run(() async {
         await ref.read(cloudSyncServiceProvider).regenerateJoinCode(companyId);
         _say('New join code created. The old code no longer works.');
@@ -235,6 +267,18 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       } else {
         children.add(const Center(child: CircularProgressIndicator()));
       }
+      children.addAll([
+        const SizedBox(height: 32),
+        const Divider(),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: _busy ? null : _deleteAccount,
+            icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+            label: Text('Delete my cloud account', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          ),
+        ),
+      ]);
     }
     if (_message != null) {
       children.addAll([

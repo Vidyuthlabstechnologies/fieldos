@@ -64,7 +64,11 @@ class NotificationService {
   Future<void> init() async {
     if (_ready) return;
     await _plugin.initialize(
-      settings: const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
+      settings: const InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        // iOS asks for alert/badge/sound permission on initialise.
+        iOS: DarwinInitializationSettings(),
+      ),
     );
     await _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
@@ -78,7 +82,7 @@ class NotificationService {
       id: _nextId++,
       title: title,
       body: body,
-      notificationDetails: const NotificationDetails(android: _channel),
+      notificationDetails: const NotificationDetails(android: _channel, iOS: DarwinNotificationDetails()),
     );
   }
 }

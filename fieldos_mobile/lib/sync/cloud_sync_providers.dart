@@ -19,8 +19,9 @@ import 'sync_engine.dart';
 
 /// Picks the right local-stack URL for where the app is actually running --
 /// an Android emulator's 127.0.0.1 is itself, not the host machine (see
-/// sync_config.dart). This app targets Android only, so Platform.isAndroid
-/// is a safe check here (no web build to guard against). A real device on
+/// sync_config.dart). The app ships on Android and iOS (no web build), so
+/// Platform.isAndroid is a safe check here; the iOS simulator shares the
+/// host's 127.0.0.1. A real device on
 /// the same Wi-Fi as the dev machine needs the host's LAN IP instead, which
 /// isn't knowable here -- that's a manual override for whoever's testing on
 /// physical hardware, same as any other local-dev-server setup.

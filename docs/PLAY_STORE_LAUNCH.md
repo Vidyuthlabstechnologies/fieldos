@@ -107,10 +107,13 @@ No background location, no SMS/call log, no contacts.
 >
 > We do not sell data, show ads, or use analytics or tracking SDKs.
 >
-> **Deleting data:** a company owner can ask for the company's cloud data to
-> be deleted, and any user can ask for their account to be deleted, by
-> emailing (support email). Data on the phone is removed by uninstalling the
-> app.
+> **Deleting data:** in the app, open Team & sync and tap "Delete my cloud
+> account". Companies where you are the only member are deleted with all
+> their records. In companies with other members, the records you added
+> stay with that company, your name is removed from its team chat, and
+> ownership passes to another member. You can also ask for deletion by
+> emailing (support email). Data on the phone is removed by uninstalling
+> the app.
 >
 > Contact: (support email), ML Dynamic Solutions Private Limited, (address).
 
@@ -120,7 +123,7 @@ No background location, no SMS/call log, no contacts.
 |---|---|
 | Does the app collect or share user data? | Collects: yes. Shares: no (Supabase and Sarvam are service providers processing on our behalf). |
 | Encrypted in transit? | Yes (HTTPS). |
-| Can users request deletion? | Yes, by email (see policy). |
+| Can users request deletion? | Yes: in the app (Team & sync → Delete my cloud account) and by email (see policy). For "Delete account URL", use the published privacy policy page; its "Deleting data" section explains both routes. |
 | Personal info → Email address, Name | Collected, required for Team & sync, purpose: App functionality, Account management. |
 | Location → Precise location | Collected, optional, purpose: App functionality (attendance geofence). |
 | Audio → Voice recordings | Collected, optional, processed ephemerally for transcription, purpose: App functionality. |
@@ -159,4 +162,9 @@ company). Expected rating: Everyone / 3+.
   sync wins. An unsynced edit on a phone is never overwritten by a pull.
 - PDF reports print Latin script only; a DPR written in an Indic script is
   carried in full in the share message instead.
-- Android only. The desktop (Windows) app does not sync with the phones.
+- The iPhone build compiles in CI (`ios-build`), but publishing it needs an
+  Apple Developer account (USD 99/year) and signing set up on a Mac or in
+  CI; it has not been run on a real iPhone yet.
+- Deleting an account leaves the document files of deleted companies in
+  Storage until they are cleared from the Supabase dashboard.
+- The desktop (Windows) app does not sync with the phones.
