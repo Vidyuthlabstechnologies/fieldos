@@ -60,8 +60,8 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          # RevenueCat PUBLIC SDK keys for the Team plan; without them the
-          # Upgrade button is hidden.
+          # RevenueCat PUBLIC SDK keys for the subscription. Without them the
+          # build has no paywall at all, so set them before a store release.
           REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
           REVENUECAT_IOS_KEY: ${{ secrets.REVENUECAT_IOS_KEY }}
         run: |

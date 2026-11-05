@@ -8,6 +8,7 @@ import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
 import 'package:fieldos_mobile/features/subcontractor/subcontractor_screen.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
+import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
 import 'package:fieldos_mobile/features/settings/settings_screen.dart';
 import 'package:fieldos_mobile/features/map/site_map_screen.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
@@ -85,17 +86,26 @@ class HomeScreen extends ConsumerWidget {
                   );
                 case 'settings':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
+                case 'subscription':
+                  _showSubscription(context, ref);
+                case 'bug':
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BugReportScreen()));
                 case 'logout':
                   ref.read(cloudSyncBootstrapProvider).stop();
                   ref.read(sessionProvider.notifier).logout();
               }
             },
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'map', child: ListTile(leading: Icon(Icons.map), title: Text('Site map'))),
-              PopupMenuItem(
+            itemBuilder: (_) => [
+              if (ref.read(billingServiceProvider).setUp)
+                const PopupMenuItem(
+                    value: 'subscription',
+                    child: ListTile(leading: Icon(Icons.workspace_premium), title: Text('My subscription'))),
+              const PopupMenuItem(value: 'map', child: ListTile(leading: Icon(Icons.map), title: Text('Site map'))),
+              const PopupMenuItem(
                   value: 'subcontractors', child: ListTile(leading: Icon(Icons.engineering), title: Text('Subcontractors'))),
-              PopupMenuItem(value: 'settings', child: ListTile(leading: Icon(Icons.settings), title: Text('Settings'))),
-              PopupMenuItem(value: 'logout', child: ListTile(leading: Icon(Icons.logout), title: Text('Log out'))),
+              const PopupMenuItem(value: 'settings', child: ListTile(leading: Icon(Icons.settings), title: Text('Settings'))),
+              const PopupMenuItem(value: 'bug', child: ListTile(leading: Icon(Icons.bug_report), title: Text('Report a bug'))),
+              const PopupMenuItem(value: 'logout', child: ListTile(leading: Icon(Icons.logout), title: Text('Log out'))),
             ],
           ),
         ],
@@ -192,4 +202,20 @@ class HomeScreen extends ConsumerWidget {
         ));
     ref.invalidate(projectsProvider(companyId));
   }
+}
+
+Future<void> _showSubscription(BuildContext context, WidgetRef ref) async {
+  final state = await ref.read(billingServiceProvider).current();
+  if (!context.mounted) return;
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('My subscription'),
+      content: Text(
+        '${state?.describe() ?? 'Could not reach the store right now.'}\n\n'
+        'To cancel or change your plan, open Google Play (or the App Store on iPhone), then Subscriptions.',
+      ),
+      actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('OK'))],
+    ),
+  );
 }

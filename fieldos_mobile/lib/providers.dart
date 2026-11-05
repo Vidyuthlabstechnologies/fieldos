@@ -53,7 +53,7 @@ final agentRegistryProvider = Provider<AgentRegistry>(
 
 final locationServiceProvider = Provider<LocationService>((ref) => LocationService());
 
-final billingServiceProvider = Provider<BillingService>((ref) => BillingService());
+final billingServiceProvider = Provider<BillingService>((ref) => BillingService(ref.watch(appDatabaseProvider)));
 
 final sessionProvider = StateNotifierProvider<SessionNotifier, SessionState>(
   (ref) => SessionNotifier(ref.watch(authServiceProvider), ref.watch(appDatabaseProvider)),

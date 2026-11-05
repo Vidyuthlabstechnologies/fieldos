@@ -79,6 +79,7 @@ dependencies:
   flutter_map: ^8.3.2
   latlong2: ^0.10.1
   purchases_flutter: ^11.0.1
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   # Direct dependency: used by test/sync_engine_test.dart to check the local

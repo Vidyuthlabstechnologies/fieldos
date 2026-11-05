@@ -23,7 +23,6 @@ import 'dart:convert';
 import 'package:supabase/supabase.dart';
 
 import 'sync_engine.dart';
-import 'plan_status.dart';
 
 /// `needsEmailConfirmation`: the account was created but the Supabase
 /// project requires a confirmed email before it issues a session (the
@@ -146,12 +145,6 @@ class CloudSyncService {
 
   Future<void> setMemberRole({required String companyId, required String userId, required String role}) =>
       client.rpc('set_member_role', params: {'p_company_id': companyId, 'p_user_id': userId, 'p_role': role});
-
-  /// The company's plan and member count, from the server (the only place
-  /// a plan is decided; see the company_plans migration).
-  Future<PlanStatus> companyPlan(String companyId) async => PlanStatus.fromJson(
-        Map<String, dynamic>.from(await client.rpc('company_plan', params: {'p_company_id': companyId}) as Map),
-      );
 
   Future<String> regenerateJoinCode(String companyId) async =>
       await client.rpc('regenerate_join_code', params: {'p_company_id': companyId}) as String;

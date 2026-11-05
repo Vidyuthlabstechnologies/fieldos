@@ -12,6 +12,7 @@ import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/services/bug_report_service.dart';
 import 'cloud_sync_service.dart';
 import 'periodic_sync_trigger.dart';
 import 'sync_config.dart';
@@ -117,4 +118,13 @@ final periodicSyncTriggerProvider = Provider<PeriodicSyncTrigger>((ref) {
   );
   ref.onDispose(trigger.stop);
   return trigger;
+});
+
+/// In-app bug reports go to the same cloud project. With no cloud in this
+/// build (offline release) reports wait on the phone until one is.
+final bugReportServiceProvider = Provider<BugReportService>((ref) {
+  return BugReportService(
+    db: ref.watch(appDatabaseProvider),
+    client: ref.watch(cloudSyncAvailableProvider) ? ref.watch(cloudSyncClientProvider) : null,
+  );
 });
