@@ -68,10 +68,10 @@ phones that spend half the day without a network.
 
 **Category:** Business. **Tags:** Construction, Project management, Productivity.
 
-**Graphics to prepare:** 512×512 icon (the current launcher icon is the
-Flutter default and must be replaced), 1024×500 feature graphic, and 4–8
-phone screenshots (suggested: voice DPR, DPR PDF, project tabs, team chat,
-site map, BOQ).
+**Graphics:** the 512×512 icon and the 1024×500 feature graphic are in
+`docs/store/` (drawn by `tools/make_icons.py`, which also writes the
+Android and iOS launcher icons). Still needed: 4–8 phone screenshots
+(suggested: voice DPR, DPR PDF, project tabs, team chat, site map, BOQ).
 
 ## 3. Permissions and why (for review notes)
 
