@@ -9,6 +9,9 @@
 library;
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
+
+import 'package:fieldos_mobile/features/reminders/reminders.dart';
 
 /// What to show for one newly-arrived row, or null to stay quiet. Kept a
 /// pure function so the rules (skip my own rows, which tables alert) are
@@ -85,4 +88,51 @@ class NotificationService {
       notificationDetails: const NotificationDetails(android: _channel, iOS: DarwinNotificationDetails()),
     );
   }
+
+  static const _reminderChannel = AndroidNotificationDetails(
+    'reminders',
+    'Reminders',
+    channelDescription: "Today's site report and the tasks due today",
+    importance: Importance.defaultImportance,
+    priority: Priority.defaultPriority,
+  );
+
+  /// Cancels the reminders planned before and schedules [plan] instead.
+  /// Inexact on Android (within a few minutes), so no exact-alarm
+  /// permission is needed.
+  Future<void> replaceScheduled(List<PlannedReminder> plan) async {
+    if (!_ready && plan.isEmpty) return;
+    final pending = await _plugin.pendingNotificationRequests();
+    for (final p in pending) {
+      if (p.id >= reminderIdBase && p.id < reminderIdBase + reminderIdCount) await _plugin.cancel(id: p.id);
+    }
+    if (!_ready) return;
+    final location = deviceLocation(DateTime.now().timeZoneOffset);
+    for (final r in plan) {
+      await _plugin.zonedSchedule(
+        id: r.id,
+        title: r.title,
+        body: r.body,
+        scheduledDate: tz.TZDateTime.from(r.at, location),
+        notificationDetails: const NotificationDetails(android: _reminderChannel, iOS: DarwinNotificationDetails()),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    }
+  }
+}
+
+/// A time zone for the phone's current offset. Its name reaches Android's
+/// ZoneId and iOS's TimeZone, so it must be a real id: India's own, or a
+/// fixed GMT offset elsewhere.
+tz.Location deviceLocation(Duration offset) {
+  final minutes = offset.inMinutes;
+  final String name;
+  if (minutes == 330) {
+    name = 'Asia/Kolkata';
+  } else {
+    final sign = minutes < 0 ? '-' : '+';
+    final m = minutes.abs();
+    name = 'GMT$sign${(m ~/ 60).toString().padLeft(2, '0')}:${(m % 60).toString().padLeft(2, '0')}';
+  }
+  return tz.Location(name, const [], const [], [tz.TimeZone(offset, isDst: false, abbreviation: name)]);
 }

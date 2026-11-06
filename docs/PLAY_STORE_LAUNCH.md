@@ -81,7 +81,8 @@ Android and iOS launcher icons). Still needed: 4–8 phone screenshots
 | `INTERNET` | Team sync (Supabase), subscriptions (RevenueCat), map tiles, the one-time translation language pack (Google ML Kit), and the voice-report fallback (Sarvam) | Never (normal permission) |
 | `RECORD_AUDIO` | Voice reports: the phone's own speech recognition listens while the engineer speaks. Only on phones that can't recognise the chosen language is a recording made, for the Sarvam fallback | When the user taps Speak report |
 | `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | GPS punch-in/out, setting a site location, and the date/time/GPS stamp on site photos; foreground only, one reading per action | First punch-in, site placement or camera photo |
-| `POST_NOTIFICATIONS` | Alerts for colleagues' new issues, approval requests and messages | After the user links a company to the cloud |
+| `POST_NOTIFICATIONS` | Alerts for colleagues' new issues, approval requests and messages, and the reminders for today's report and tasks due | When the first reminder is planned (a running site exists), or after the user links a company to the cloud |
+| `RECEIVE_BOOT_COMPLETED` | Puts the scheduled reminders back after the phone restarts (inexact timing, so no exact-alarm permission) | Never (normal permission) |
 | Camera / photos | Through the system camera and photo picker; no camera permission is declared | — |
 
 No background location, no SMS/call log, no contacts. On iPhone the app
