@@ -93,7 +93,7 @@ No background location, no SMS/call log, no contacts.
 > FieldOS stores the projects, reports, photos, attendance and other site
 > records you create on your phone. If you sign in to Team & sync, those
 > records, your email address, and the name you entered are also stored on
-> our cloud database (Supabase, region: (your Supabase region)) so the
+> our cloud database (Supabase, region: Mumbai, India) so the
 > members of your company can see them. Only members of your company can
 > read your company's data.
 >
@@ -127,10 +127,10 @@ No background location, no SMS/call log, no contacts.
 > their records. In companies with other members, the records you added
 > stay with that company, your name is removed from its team chat, and
 > ownership passes to another member. You can also ask for deletion by
-> emailing (support email). Data on the phone is removed by uninstalling
+> emailing info@mldynamic.com. Data on the phone is removed by uninstalling
 > the app.
 >
-> Contact: (support email), ML Dynamic Solutions Private Limited, (address).
+> Contact: info@mldynamic.com, ML Dynamic Solutions Private Limited, 606, 6th Floor, Gowra Fountainhead, Patrika Nagar, Madhapur, Hi-Tech City, Hyderabad, Telangana 500081, India.
 
 ## 5. Data safety form answers
 
