@@ -27,12 +27,21 @@ import 'sync_engine.dart';
 /// `needsEmailConfirmation`: the account was created but the Supabase
 /// project requires a confirmed email before it issues a session (the
 /// hosted default). The user confirms from their inbox, then signs in.
-enum CloudSyncOutcome { signedIn, signedUp, needsEmailConfirmation, failed }
+///
+/// `wrongPassword`: the email already has an account and the password did
+/// not match it.
+enum CloudSyncOutcome { signedIn, signedUp, needsEmailConfirmation, wrongPassword, failed }
 
 class CloudSyncResult {
-  const CloudSyncResult(this.outcome, {this.error});
+  const CloudSyncResult(this.outcome, {this.cause, this.stack});
   final CloudSyncOutcome outcome;
-  final String? error;
+
+  /// Why it failed. Screens show it through `friendlyError`, never raw.
+  final Object? cause;
+  final StackTrace? stack;
+
+  /// The failure as text, for logs and test output.
+  String? get error => cause?.toString();
 }
 
 /// The server-side view of one company membership.
@@ -129,9 +138,25 @@ class CloudSyncService {
 
   /// A colleague's device: joins the company behind [code] as a site
   /// engineer (the owner can promote them from the Team screen).
+  ///
+  /// A wrong code comes back as `{"error": ...}` rather than a database
+  /// error, so the server can count it (see join_attempts in
+  /// supabase/migrations/20261106000000_join_limits_and_approvals.sql).
+  /// Both are thrown as the PostgrestException an older server raised, so
+  /// friendlyError has one sentence for each.
   Future<CloudCompany> joinCompany(String code) async {
     final res = await client.rpc('join_company', params: {'p_code': code});
     final m = Map<String, dynamic>.from(res as Map);
+    switch (m['error']) {
+      case null:
+        break;
+      case 'too_many_attempts':
+        throw const PostgrestException(message: 'too many join attempts', code: 'P0001');
+      case 'invalid_join_code':
+        throw const PostgrestException(message: 'invalid join code', code: 'P0002');
+      case final Object other:
+        throw PostgrestException(message: '$other');
+    }
     return CloudCompany(companyId: m['company_id'] as String, role: m['role'] as String, name: m['name'] as String?);
   }
 
@@ -145,6 +170,11 @@ class CloudSyncService {
 
   Future<void> setMemberRole({required String companyId, required String userId, required String role}) =>
       client.rpc('set_member_role', params: {'p_company_id': companyId, 'p_user_id': userId, 'p_role': role});
+
+  /// Owner only: takes someone who has left off the company. Their phone
+  /// keeps what it already has, but gets nothing new and can send nothing.
+  Future<void> removeMember({required String companyId, required String userId}) =>
+      client.rpc('remove_member', params: {'p_company_id': companyId, 'p_user_id': userId});
 
   Future<String> regenerateJoinCode(String companyId) async =>
       await client.rpc('regenerate_join_code', params: {'p_company_id': companyId}) as String;
@@ -160,23 +190,61 @@ class CloudSyncService {
       await client.auth.signInWithPassword(email: email, password: password);
       await _persist();
       return const CloudSyncResult(CloudSyncOutcome.signedIn);
-    } on AuthApiException catch (e) {
+    } on AuthApiException catch (e, st) {
       final looksLikeNoAccountYet = e.code == 'invalid_credentials' || e.statusCode == '400';
-      if (!looksLikeNoAccountYet) {
-        return CloudSyncResult(CloudSyncOutcome.failed, error: e.message);
-      }
-    } catch (e) {
-      return CloudSyncResult(CloudSyncOutcome.failed, error: e.toString());
+      if (!looksLikeNoAccountYet) return CloudSyncResult(CloudSyncOutcome.failed, cause: e, stack: st);
+    } catch (e, st) {
+      return CloudSyncResult(CloudSyncOutcome.failed, cause: e, stack: st);
     }
 
     try {
       final res = await client.auth.signUp(email: email, password: password);
-      if (res.session == null) return const CloudSyncResult(CloudSyncOutcome.needsEmailConfirmation);
+      if (res.session == null) {
+        // With email confirmation on (the hosted default), an email that
+        // already has a confirmed account gets a stand-in user with no
+        // identities, and no email is sent: the password was wrong.
+        // Telling the person to check their inbox would leave them waiting.
+        if (res.user?.identities?.isEmpty ?? false) return const CloudSyncResult(CloudSyncOutcome.wrongPassword);
+        return const CloudSyncResult(CloudSyncOutcome.needsEmailConfirmation);
+      }
       await _persist();
       return const CloudSyncResult(CloudSyncOutcome.signedUp);
-    } catch (e) {
-      return CloudSyncResult(CloudSyncOutcome.failed, error: e.toString());
+    } on AuthApiException catch (e, st) {
+      // With confirmation off, the server says so outright.
+      if (e.code == 'user_already_exists' || e.code == 'email_exists' || e.message == 'User already registered') {
+        return const CloudSyncResult(CloudSyncOutcome.wrongPassword);
+      }
+      return CloudSyncResult(CloudSyncOutcome.failed, cause: e, stack: st);
+    } catch (e, st) {
+      return CloudSyncResult(CloudSyncOutcome.failed, cause: e, stack: st);
     }
+  }
+
+  /// Finishes a sign-up that [enableSync] reported as
+  /// [CloudSyncOutcome.needsEmailConfirmation], with the code from the
+  /// confirmation email (supabase/templates/confirmation.html). Throws the
+  /// server's error when the code is wrong or old.
+  Future<void> confirmSignUp({required String email, required String code}) async {
+    await client.auth.verifyOTP(email: email, token: code.trim(), type: OtpType.signup);
+    await _persist();
+  }
+
+  /// Sends the confirmation email again.
+  Future<void> resendSignUpCode(String email) async {
+    await client.auth.resend(email: email, type: OtpType.signup);
+  }
+
+  /// Emails a code that lets this person choose a new cloud password
+  /// ([resetPassword]; supabase/templates/recovery.html). Says nothing
+  /// about whether the email has an account, like the server.
+  Future<void> sendPasswordResetCode(String email) => client.auth.resetPasswordForEmail(email);
+
+  /// Signs in with the code from [sendPasswordResetCode] and sets
+  /// [newPassword]. Throws the server's error when the code is wrong or old.
+  Future<void> resetPassword({required String email, required String code, required String newPassword}) async {
+    await client.auth.verifyOTP(email: email, token: code.trim(), type: OtpType.recovery);
+    await client.auth.updateUser(UserAttributes(password: newPassword));
+    await _persist();
   }
 
   /// Deletes this person's cloud account (Google Play requires an in-app

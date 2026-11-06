@@ -32,6 +32,20 @@ void main() {
     expect(dayCredit(8, hasOpenPunch: true), 1);
   });
 
+  test('a punch closed days later counts like a forgotten punch-out, not as days of overtime', () {
+    final sheet = buildWageSheet(
+      workers: [_worker('r', 'Ramesh', 800)],
+      punches: [_punch('r', 'Ramesh', DateTime(2026, 11, 2, 9), 50)], // punched out two days late
+      expenses: const [],
+      from: DateTime(2026, 11, 2),
+      to: DateTime(2026, 11, 9),
+    );
+    final r = sheet.lines.single;
+    expect(r.days, 0.5);
+    expect(r.overtimeHours, 0);
+    expect(r.missingPunchOuts, 1);
+  });
+
   test('weekStart is the Monday', () {
     expect(weekStart(DateTime(2026, 11, 5, 15)), DateTime(2026, 11, 2)); // Thu -> Mon
     expect(weekStart(DateTime(2026, 11, 8)), DateTime(2026, 11, 2)); // Sun -> Mon

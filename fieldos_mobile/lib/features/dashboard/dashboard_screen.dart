@@ -7,6 +7,9 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -21,36 +24,49 @@ class DashboardScreen extends ConsumerWidget {
     final projectsAsync = ref.watch(projectsProvider(companyId));
 
     return Scaffold(
-      appBar: AppBar(title: Text('$companyName · Dashboard')),
-      body: projectsAsync.when(
-        data: (projects) => projects.isEmpty
-            ? const Center(child: Text('No projects yet.'))
-            : ListView.builder(
-                padding: const EdgeInsets.all(12),
-                itemCount: projects.length,
-                itemBuilder: (context, i) {
-                  final p = projects[i];
-                  return _ProjectHealthCard(projectId: p.id, projectName: p.name);
-                },
-              ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+      appBar: AppBar(title: const Text('Dashboard')),
+      body: RefreshIndicator(
+        onRefresh: () => ref.refresh(projectsProvider(companyId).future),
+        child: projectsAsync.when(
+          data: (projects) => projects.isEmpty
+              ? const EmptyState(
+                  icon: Icons.insights_outlined,
+                  title: 'No projects yet',
+                  message: 'Each site shows here with its budget, spending, open issues and daily reports.',
+                )
+              : ListView(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+                      child: Text(companyName, style: Theme.of(context).textTheme.titleLarge),
+                    ),
+                    for (final p in projects) _ProjectHealthCard(projectId: p.id, companyId: companyId),
+                  ],
+                ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, st) =>
+              ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(projectsProvider(companyId))),
+        ),
       ),
     );
   }
 }
 
 class _ProjectHealthCard extends ConsumerWidget {
-  const _ProjectHealthCard({required this.projectId, required this.projectName});
+  const _ProjectHealthCard({required this.projectId, required this.companyId});
   final String projectId;
-  final String projectName;
+  final String companyId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final summaryAsync = ref.watch(costSummaryProvider(projectId));
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () async {
           final project = await ref.read(appDatabaseProvider).projectDao.byId(projectId);
@@ -68,112 +84,132 @@ class _ProjectHealthCard extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Expanded(child: Text(s.projectName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
-                    _StatusChip(status: s.status),
+                    Expanded(
+                        child: Text(s.projectName,
+                            maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium)),
+                    const SizedBox(width: 8),
+                    StatusPill(_statusLabel(s.status), tone: _statusTone(s.status)),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _Metric(label: 'Budget', value: s.budget),
-                    _Metric(label: 'Actual', value: s.actual),
-                    _Metric(label: 'Variance', value: s.variance),
+                    _Metric(label: 'Budget', value: s.status == 'no_budget' ? 'Not set' : rupees(s.budget)),
+                    _Metric(label: 'Spent', value: rupees(s.actual)),
+                    if (s.status != 'no_budget')
+                      _Metric(
+                        label: s.variance < 0 ? 'Over by' : 'Left',
+                        value: rupees(s.variance.abs()),
+                        warn: s.variance < 0,
+                      ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Chip(label: Text('${s.openIssues} open issues')),
-                    const SizedBox(width: 8),
-                    Chip(label: Text('${s.dprCount} DPRs')),
-                  ],
+                if (s.status == 'no_budget') ...[
+                  const SizedBox(height: 8),
+                  Text('Add a priced BOQ under Estimation to compare spending with a budget.',
+                      style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+                ],
+                const SizedBox(height: 10),
+                Text(
+                  [
+                    s.openIssues == 1 ? '1 open issue' : '${s.openIssues} open issues',
+                    s.dprCount == 1 ? '1 daily report' : '${s.dprCount} daily reports',
+                  ].join(' · '),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 ),
                 if (s.alerts.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  ...s.alerts.map((a) => Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• ', style: TextStyle(color: Colors.redAccent)),
-                            Expanded(child: Text(a, style: const TextStyle(fontSize: 12, color: Colors.redAccent))),
-                          ],
-                        ),
-                      )),
+                  for (final a in s.alerts.take(3))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.warning_amber_rounded, size: 16, color: theme.colorScheme.error),
+                          const SizedBox(width: 6),
+                          Expanded(child: Text(a, style: theme.textTheme.bodySmall)),
+                        ],
+                      ),
+                    ),
+                  if (s.alerts.length > 3)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4, left: 22),
+                      child: Text('and ${s.alerts.length - 3} more',
+                          style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+                    ),
                 ],
-                if (s.status == 'over') ...[
+                if (s.status == 'over' && Roles.canWrite(ref.watch(sessionProvider).role ?? Roles.viewer)) ...[
                   const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: FilledButton.icon(
-                      icon: const Icon(Icons.approval, size: 16),
-                      label: const Text('Raise approval'),
-                      onPressed: () async {
-                        final user = ref.read(sessionProvider).user;
-                        if (user == null) return;
-                        await raiseBudgetOverrunApproval(
-                          ref.read(appDatabaseProvider),
-                          s.projectId,
-                          s.variance,
-                        );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Budget-overrun approval raised.')),
-                          );
-                        }
-                      },
+                    child: FilledButton.tonalIcon(
+                      icon: const Icon(Icons.approval_outlined, size: 18),
+                      label: const Text('Ask for approval'),
+                      onPressed: () => _raise(context, ref, s.projectId, s.variance),
                     ),
                   ),
                 ],
               ],
             ),
             loading: () => const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
-            error: (e, _) => Text('Error: $e'),
+            error: (e, st) => Text(friendlyError(e, st)),
           ),
         ),
       ),
     );
   }
+
+  Future<void> _raise(BuildContext context, WidgetRef ref, String projectId, double variance) async {
+    final db = ref.read(appDatabaseProvider);
+    final user = ref.read(sessionProvider).user;
+    if (user == null) return;
+    if (await hasPendingBudgetApproval(db, projectId)) {
+      if (context.mounted) showSnack(context, 'This site is already waiting for approval.');
+      return;
+    }
+    await raiseBudgetOverrunApproval(db, projectId, variance, requestedBy: user.id);
+    ref.invalidate(pendingApprovalsProvider(companyId));
+    if (context.mounted) showSnack(context, 'Sent to Approvals for the owner or a project manager');
+  }
 }
+
+String _statusLabel(String status) => switch (status) {
+      'over' => 'Over budget',
+      'at_risk' => 'Close to budget',
+      'no_budget' => 'No budget yet',
+      _ => 'On track',
+    };
+
+PillTone _statusTone(String status) => switch (status) {
+      'over' => PillTone.danger,
+      'at_risk' => PillTone.warn,
+      'no_budget' => PillTone.neutral,
+      _ => PillTone.ok,
+    };
 
 class _Metric extends StatelessWidget {
-  const _Metric({required this.label, required this.value});
+  const _Metric({required this.label, required this.value, this.warn = false});
   final String label;
-  final double value;
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            Text('₹${value.abs().toStringAsFixed(0)}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-          ],
-        ),
-      );
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status});
-  final String status;
+  final String value;
+  final bool warn;
 
   @override
   Widget build(BuildContext context) {
-    final color = switch (status) {
-      'over' => Colors.red,
-      'at_risk' => Colors.orange,
-      _ => Colors.green,
-    };
-    final label = switch (status) {
-      'over' => 'OVER BUDGET',
-      'at_risk' => 'AT RISK',
-      _ => 'ON TRACK',
-    };
-    return Chip(
-      label: Text(label, style: const TextStyle(color: Colors.white, fontSize: 11)),
-      backgroundColor: color,
-      padding: EdgeInsets.zero,
-      visualDensity: VisualDensity.compact,
+    final theme = Theme.of(context);
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          const SizedBox(height: 2),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(value,
+                style: theme.textTheme.titleSmall?.copyWith(color: warn ? theme.colorScheme.error : null)),
+          ),
+        ],
+      ),
     );
   }
 }

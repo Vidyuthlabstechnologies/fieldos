@@ -1,0 +1,16 @@
+<!-- FieldOS "Confirm signup" email. The app asks for this code
+     (Team & sync, after creating a cloud account), so the email carries
+     the code rather than a link: a link would open the project's Site URL,
+     which is not the app. Hosted project: paste this into Authentication >
+     Email Templates > Confirm signup, subject "Your FieldOS code". -->
+<div style="font-family: Inter, Arial, sans-serif; max-width: 480px; margin: 0 auto; color: #13233A;">
+  <div style="background: #112A4A; color: #ffffff; padding: 20px 24px; border-radius: 12px 12px 0 0;">
+    <span style="font-size: 20px; font-weight: 700;">Field<span style="color: #F5A524;">OS</span></span>
+  </div>
+  <div style="border: 1px solid #DDE3EB; border-top: none; padding: 24px; border-radius: 0 0 12px 12px;">
+    <p style="margin: 0 0 12px;">Here is the code to finish creating your FieldOS cloud account for {{ .Email }}:</p>
+    <p style="font-size: 32px; font-weight: 700; letter-spacing: 6px; margin: 16px 0; color: #112A4A;">{{ .Token }}</p>
+    <p style="margin: 0 0 12px;">Type it in the app, on the Team &amp; sync screen. It works for one hour.</p>
+    <p style="margin: 0; color: #5B6B80; font-size: 13px;">If you did not ask for this, you can ignore this email. Questions: info@mldynamic.com</p>
+  </div>
+</div>

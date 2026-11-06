@@ -78,77 +78,56 @@ Android and iOS launcher icons). Still needed: 4–8 phone screenshots
 
 | Permission | Used for | When asked |
 |---|---|---|
-| `INTERNET` | Team sync (Supabase), voice-to-DPR (Sarvam), map tiles | Never (normal permission) |
-| `RECORD_AUDIO` | Voice DPR | When the user taps Voice DPR |
+| `INTERNET` | Team sync (Supabase), subscriptions (RevenueCat), map tiles, the one-time translation language pack (Google ML Kit), and the voice-report fallback (Sarvam) | Never (normal permission) |
+| `RECORD_AUDIO` | Voice reports: the phone's own speech recognition listens while the engineer speaks. Only on phones that can't recognise the chosen language is a recording made, for the Sarvam fallback | When the user taps Speak report |
 | `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | GPS punch-in/out, setting a site location, and the date/time/GPS stamp on site photos; foreground only, one reading per action | First punch-in, site placement or camera photo |
 | `POST_NOTIFICATIONS` | Alerts for colleagues' new issues, approval requests and messages | After the user links a company to the cloud |
 | Camera / photos | Through the system camera and photo picker; no camera permission is declared | — |
 
-No background location, no SMS/call log, no contacts.
+No background location, no SMS/call log, no contacts. On iPhone the app
+also asks for Speech Recognition the first time someone speaks a report.
 
-## 4. Privacy policy (publish this text)
+## 4. Privacy policy and terms (publish these files)
 
-> **FieldOS privacy policy** — ML Dynamic Solutions Private Limited. Last updated: (date of publishing).
->
-> FieldOS stores the projects, reports, photos, attendance and other site
-> records you create on your phone. If you sign in to Team & sync, those
-> records, your email address, and the name you entered are also stored on
-> our cloud database (Supabase, region: (your Supabase region)) so the
-> members of your company can see them. Only members of your company can
-> read your company's data.
->
-> **Location:** read only when you punch a worker in or out, set a site
-> location, or take a site photo with the in-app camera (the date, time
-> and position are printed on the photo), and saved with that record.
-> Never tracked in the background.
->
-> **Voice:** when you use voice DPR, the recording is sent to Sarvam AI
-> (sarvam.ai) to be transcribed, and is not kept by FieldOS afterwards.
->
-> **Maps:** map tiles are loaded from OpenStreetMap; your device's IP
-> address is visible to their servers as for any web request.
->
-> **Payments:** the FieldOS subscription is bought through Google Play or
-> the Apple App Store, which handle your card or UPI details; FieldOS
-> never sees them. RevenueCat (revenuecat.com) receives the purchase
-> record from the store so the app can check your subscription.
->
-> **Bug reports:** if you use "Report a bug", we receive what you type,
-> the email you give (optional), the app version, your phone's operating
-> system version and the app's last few error messages. No project data,
-> photos or contacts are included. Reports are stored in our cloud
-> database and copied to our private issue tracker on GitHub so we can
-> fix the problem.
->
-> We do not sell data, show ads, or use analytics or tracking SDKs.
->
-> **Deleting data:** in the app, open Team & sync and tap "Delete my cloud
-> account". Companies where you are the only member are deleted with all
-> their records. In companies with other members, the records you added
-> stay with that company, your name is removed from its team chat, and
-> ownership passes to another member. You can also ask for deletion by
-> emailing (support email). Data on the phone is removed by uninstalling
-> the app.
->
-> Contact: (support email), ML Dynamic Solutions Private Limited, (address).
+Publish `docs/store/privacy-policy.html` and `docs/store/terms-of-use.html`
+as they are (any static host works, for example GitHub Pages or an S3
+bucket). The app carries the same text in
+`fieldos_mobile/lib/features/legal/legal_texts.dart`, so people can read it
+offline and before signing in; keep the three in step when one changes.
+
+Once they are online, add the two addresses as repository variables
+(Settings → Secrets and variables → Actions → Variables):
+`PRIVACY_POLICY_URL` and `TERMS_URL`. The release workflow builds them in
+and the app opens the published pages; without them it shows its own
+copy. Put the privacy policy address in Play Console (App content →
+Privacy policy) and, for iPhone, in App Store Connect.
+
+The terms are a first draft written for a monthly subscription with a
+3-day trial under Indian law. Have someone with legal training read them
+before launch.
 
 ## 5. Data safety form answers
 
 | Question | Answer |
 |---|---|
-| Does the app collect or share user data? | Collects: yes. Shares: no (Supabase and Sarvam are service providers processing on our behalf). |
+| Does the app collect or share user data? | Collects: yes. Shares: no (Supabase, RevenueCat and Sarvam are service providers processing on our behalf; Google ML Kit's data stays with Google and is not passed to third parties). |
 | Encrypted in transit? | Yes (HTTPS). |
 | Can users request deletion? | Yes: in the app (Team & sync → Delete my cloud account) and by email (see policy). For "Delete account URL", use the published privacy policy page; its "Deleting data" section explains both routes. |
 | Personal info → Email address, Name | Collected, required for Team & sync, purpose: App functionality, Account management. |
 | Location → Precise location | Collected, optional, purpose: App functionality (attendance geofence, photo location stamp). |
-| Audio → Voice recordings | Collected, optional, processed ephemerally for transcription, purpose: App functionality. |
+| Audio → Voice or sound recordings | Collected, optional, processed ephemerally, purpose: App functionality. Only the Sarvam fallback sends a recording, and only on phones that can't recognise the chosen language. The phone's own speech recognition is a system service of Google or Apple, not part of the app. |
 | Photos | Collected, optional, purpose: App functionality (site evidence). |
 | Files and docs | Collected, optional, purpose: App functionality (project documents). |
 | Messages → Other in-app messages | Collected (team chat), purpose: App functionality. |
-| Financial info → Purchase history | Collected (subscription, via Google Play and RevenueCat), purpose: App functionality. |
-| App info and performance → Crash logs, Diagnostics | Collected only when the user sends a bug report, optional, purpose: App functionality (fixing bugs). |
+| Financial info → Purchase history | Collected (subscription, via Google Play and RevenueCat), required, not ephemeral, purposes: App functionality, Analytics (RevenueCat's own guidance). |
+| App info and performance → Crash logs, Diagnostics | Collected. Bug reports: only when the user sends one, purpose: App functionality. Google ML Kit (translation) sends diagnostics such as phone model, system and app version, languages, latency and error codes, purpose: Analytics. |
+| Device or other IDs | Collected by Google ML Kit (a per-installation identifier through Firebase Installations), purpose: Analytics. Not an advertising ID. |
 | Personal info → Email address | Also collected, optional, when a user adds it to a bug report so we can reply. |
-| App activity, device IDs, contacts | Not collected. |
+| App activity, advertising ID, contacts | Not collected. |
+
+Sources for the SDK rows: [ML Kit data disclosure](https://developers.google.com/ml-kit/android-data-disclosure)
+and [RevenueCat: Google Play's Data Safety](https://www.revenuecat.com/docs/platform-resources/google-platform-resources/google-plays-data-safety).
+Check both again before submitting, since SDK updates can change them.
 
 **Content rating:** questionnaire answers are all "No" (utility app, no
 user-generated content shared publicly; team chat is private to the

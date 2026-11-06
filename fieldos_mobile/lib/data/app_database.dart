@@ -224,10 +224,23 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
   Future<User?> byUsername(String username) =>
       (select(users)..where((u) => u.username.equals(username))).getSingleOrNull();
 
+  /// "Ravi" and "ravi" are the same person: the first account whose name
+  /// matches ignoring capitals.
+  Future<User?> byUsernameIgnoringCase(String username) async {
+    final rows = await (select(users)..where((u) => u.username.lower().equals(username.toLowerCase()))).get();
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  /// Whether anyone has made an account on this phone yet.
+  Future<bool> any() async => (await (select(users)..limit(1)).get()).isNotEmpty;
+
   Future<User?> byId(String id) =>
       (select(users)..where((u) => u.id.equals(id))).getSingleOrNull();
 
   Future<void> create(UsersCompanion user) => into(users).insert(user);
+
+  Future<void> setPasswordHash(String userId, String hash) =>
+      (update(users)..where((u) => u.id.equals(userId))).write(UsersCompanion(passwordHash: Value(hash)));
 }
 
 // ---------------------------------------------------------------------------
@@ -246,6 +259,9 @@ class SessionDao extends DatabaseAccessor<AppDatabase> with _$SessionDaoMixin {
 
   Future<void> deleteByToken(String token) =>
       (delete(sessions)..where((s) => s.token.equals(token))).go();
+
+  Future<void> setExpiry(String token, DateTime expiresAt) =>
+      (update(sessions)..where((s) => s.token.equals(token))).write(SessionsCompanion(expiresAt: Value(expiresAt)));
 
   Future<void> deleteExpired() =>
       (delete(sessions)..where((s) => s.expiresAt.isSmallerThanValue(DateTime.now()))).go();
@@ -376,6 +392,25 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
         locationLng: Value(lng),
         geofenceRadiusM: Value(radiusM),
       ));
+      final row = await (select(projects)..where((p) => p.id.equals(projectId))).getSingleOrNull();
+      if (row == null) return;
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'projects',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(projectToSupabaseJson(row)),
+      );
+    });
+  }
+
+  /// Moves a project to another stage (planning, active, on_hold or
+  /// completed, the values the cloud accepts), synced like any edit.
+  Future<void> setStatus(String projectId, String status) {
+    if (!const {'planning', 'active', 'on_hold', 'completed'}.contains(status)) {
+      throw ArgumentError.value(status, 'status');
+    }
+    return transaction(() async {
+      await (update(projects)..where((p) => p.id.equals(projectId))).write(ProjectsCompanion(status: Value(status)));
       final row = await (select(projects)..where((p) => p.id.equals(projectId))).getSingleOrNull();
       if (row == null) return;
       await db.syncOutboxDao.enqueue(
@@ -924,9 +959,12 @@ class AttendanceDao extends DatabaseAccessor<AppDatabase> with _$AttendanceDaoMi
     });
   }
 
-  Future<void> punchOut(String id, {double? lat, double? lng, bool? withinGeofence}) => transaction(() async {
+  /// Closes a punch now, or at [at] for one left open on an earlier day
+  /// (closing that "now" would count days as hours on site).
+  Future<void> punchOut(String id, {double? lat, double? lng, bool? withinGeofence, DateTime? at}) =>
+      transaction(() async {
         await (update(labourAttendance)..where((a) => a.id.equals(id))).write(LabourAttendanceCompanion(
-          punchOut: Value(DateTime.now()),
+          punchOut: Value(at ?? DateTime.now()),
           lat: lat == null ? const Value.absent() : Value(lat),
           lng: lng == null ? const Value.absent() : Value(lng),
           withinGeofence: withinGeofence == null ? const Value.absent() : Value(withinGeofence),
@@ -942,8 +980,11 @@ class AttendanceDao extends DatabaseAccessor<AppDatabase> with _$AttendanceDaoMi
 
   Future<void> upsertFromRemote(LabourAttendanceCompanion c) => into(labourAttendance).insertOnConflictUpdate(c);
 
-  Future<List<LabourAttendanceData>> forProject(String projectId) =>
-      (select(labourAttendance)..where((a) => a.projectId.equals(projectId))).get();
+  /// Newest punch first.
+  Future<List<LabourAttendanceData>> forProject(String projectId) => (select(labourAttendance)
+        ..where((a) => a.projectId.equals(projectId))
+        ..orderBy([(a) => OrderingTerm.desc(a.punchIn)]))
+      .get();
 }
 
 @DriftAccessor(tables: [ProjectGeofences])
@@ -1016,12 +1057,26 @@ class ApprovalDao extends DatabaseAccessor<AppDatabase> with _$ApprovalDaoMixin 
     return q.get();
   }
 
+  /// Records the decision. What was asked (the request's own note, such as
+  /// "Spending is ₹25,000 over the BOQ budget.") stays, and a reason, if
+  /// one is given, goes after it; it used to replace the request text, so
+  /// a decided approval no longer said what it had been about.
   Future<void> decide(String id, bool approved, String approverId, String? note) {
     return transaction(() async {
+      final before = await (select(approvals)..where((a) => a.id.equals(id))).getSingle();
+      final reason = note?.trim() ?? '';
+      final asked = before.decisionNote?.trim() ?? '';
+      final joined = reason.isEmpty
+          ? before.decisionNote
+          : asked.isEmpty
+              ? reason
+              : '$asked\nReason: $reason';
+      // The column holds 300 characters.
+      final text = joined != null && joined.length > 300 ? joined.substring(0, 300) : joined;
       await (update(approvals)..where((a) => a.id.equals(id))).write(ApprovalsCompanion(
         status: Value(approved ? 'approved' : 'rejected'),
         approverId: Value(approverId),
-        decisionNote: Value(note),
+        decisionNote: Value(text),
         decidedAt: Value(DateTime.now()),
       ));
       final row = await (select(approvals)..where((a) => a.id.equals(id))).getSingle();
@@ -1088,9 +1143,20 @@ class EquipmentDao extends DatabaseAccessor<AppDatabase> with _$EquipmentDaoMixi
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(equipmentLogs).insert(companion.copyWith(id: Value(id)));
-      return (await (select(equipmentLogs)..where((l) => l.id.equals(id))).getSingle());
+      final row = await (select(equipmentLogs)..where((l) => l.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'equipment_logs',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(equipmentLogToSupabaseJson(row)),
+      );
+      return row;
     });
   }
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertLogFromRemote(EquipmentLogsCompanion companion) =>
+      into(equipmentLogs).insertOnConflictUpdate(companion);
 
   Future<List<EquipmentLog>> logsFor(String equipmentId) {
     return (select(equipmentLogs)
@@ -1166,9 +1232,20 @@ class InspectionDao extends DatabaseAccessor<AppDatabase> with _$InspectionDaoMi
         id: Value(id),
         sortOrder: Value(sortOrder),
       ));
-      return (await (select(inspectionItems)..where((item) => item.id.equals(id))).getSingle());
+      final row = await (select(inspectionItems)..where((item) => item.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'inspection_items',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(inspectionItemToSupabaseJson(row)),
+      );
+      return row;
     });
   }
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertItemFromRemote(InspectionItemsCompanion companion) =>
+      into(inspectionItems).insertOnConflictUpdate(companion);
 
   Future<List<InspectionItem>> itemsFor(String inspectionId) {
     return (select(inspectionItems)
@@ -1177,12 +1254,23 @@ class InspectionDao extends DatabaseAccessor<AppDatabase> with _$InspectionDaoMi
         .get();
   }
 
+  /// A ticked checklist item, sent to the team like every other change (it
+  /// used to stay on the phone that ticked it).
   Future<void> updateItemStatus(String id, String status, {String? notes}) {
     final companion = InspectionItemsCompanion(
       status: Value(status),
       notes: notes != null ? Value(notes) : const Value.absent(),
     );
-    return (update(inspectionItems)..where((item) => item.id.equals(id))).write(companion);
+    return transaction(() async {
+      await (update(inspectionItems)..where((item) => item.id.equals(id))).write(companion);
+      final row = await (select(inspectionItems)..where((item) => item.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'inspection_items',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(inspectionItemToSupabaseJson(row)),
+      );
+    });
   }
 }
 

@@ -3,7 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/brand.dart';
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/project/dpr_draft_screen.dart';
+import 'package:fieldos_mobile/features/project/new_project_sheet.dart';
+import 'package:fieldos_mobile/features/project/project_status.dart';
+import 'package:fieldos_mobile/features/project/voice_report_sheet.dart';
 import 'package:fieldos_mobile/features/chat/project_chat_view.dart';
 import 'package:fieldos_mobile/features/labour/labour_screen.dart';
 import 'package:fieldos_mobile/features/procurement/procurement_screen.dart';
@@ -13,7 +20,6 @@ import 'package:fieldos_mobile/features/inspections/inspections_screen.dart';
 import 'package:fieldos_mobile/features/documents/documents_screen.dart';
 import 'package:fieldos_mobile/features/workers/workers_screen.dart';
 import 'package:fieldos_mobile/features/estimation/estimation_screen.dart';
-import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
@@ -29,6 +35,7 @@ class ProjectDetailScreen extends ConsumerStatefulWidget {
 class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabs;
+  late String _status = widget.project.status;
   void Function()? _liveUpdateCallback;
   void Function()? _liveDprUpdateCallback;
   void Function()? _liveIssuesUpdateCallback;
@@ -104,14 +111,55 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
     super.dispose();
   }
 
+  Future<void> _changeStage() async {
+    final next = await showProjectStatusSheet(context, current: _status);
+    if (next == null || !mounted) return;
+    try {
+      await ref.read(appDatabaseProvider).projectDao.setStatus(widget.project.id, next);
+      if (!mounted) return;
+      setState(() => _status = next);
+      ref.invalidate(projectsProvider(widget.project.companyId));
+      showSnack(context, '${widget.project.name}: ${projectStatusLabel(next).toLowerCase()}');
+    } catch (e, st) {
+      if (mounted) showSnack(context, friendlyError(e, st), error: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.project.name),
+        actions: [
+          PopupMenuButton<String>(
+            tooltip: 'More',
+            onSelected: (v) {
+              if (v == 'stage') _changeStage();
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'stage',
+                child: ListTile(
+                  leading: const Icon(Icons.flag_outlined),
+                  title: const Text('Project stage'),
+                  subtitle: Text(projectStatusLabel(_status)),
+                ),
+              ),
+            ],
+          ),
+        ],
         bottom: TabBar(
           controller: _tabs,
           isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          // These tabs sit on the navy bar, so they set their own colours
+          // rather than the theme's on-page ones.
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Brand.amber,
+          indicatorWeight: 3,
+          indicatorSize: TabBarIndicatorSize.tab,
+          dividerColor: Colors.transparent,
           tabs: const [
             Tab(text: 'Tasks', icon: Icon(Icons.checklist)),
             Tab(text: 'DPR', icon: Icon(Icons.edit_note)),
@@ -216,6 +264,8 @@ class _TasksTab extends ConsumerWidget {
   const _TasksTab({required this.project});
   final Project project;
 
+  static const _statusLabels = {'todo': 'To do', 'in_progress': 'In progress', 'done': 'Done'};
+
   Future<void> _addTask(BuildContext context, WidgetRef ref) async {
     final titleC = TextEditingController();
     DateTime? dueDate;
@@ -228,11 +278,16 @@ class _TasksTab extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(controller: titleC, decoration: const InputDecoration(labelText: 'Title')),
-              const SizedBox(height: 8),
+              TextField(
+                controller: titleC,
+                autofocus: true,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(labelText: 'What needs doing?'),
+              ),
+              const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.calendar_today),
-                label: Text(dueDate == null ? 'Set due date (optional)' : dueDate!.toString().split(' ').first),
+                label: Text(dueDate == null ? 'Due date (optional)' : 'Due ${fmtDate(dueDate!)}'),
                 onPressed: () async {
                   final picked = await showDatePicker(
                     context: ctx,
@@ -249,7 +304,7 @@ class _TasksTab extends ConsumerWidget {
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, titleC.text.trim().isNotEmpty),
-              child: const Text('Create'),
+              child: const Text('Add task'),
             ),
           ],
         ),
@@ -257,7 +312,7 @@ class _TasksTab extends ConsumerWidget {
     );
     if (confirmed != true) return;
     await ref.read(appDatabaseProvider).taskDao.create(TasksCompanion.insert(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           projectId: project.id,
           title: titleC.text.trim(),
           dueDate: Value(dueDate),
@@ -268,39 +323,72 @@ class _TasksTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasks = ref.watch(tasksProvider(project.id));
+    final today = DateTime.now();
+    final startOfToday = DateTime(today.year, today.month, today.day);
     return Stack(
       children: [
         RefreshIndicator(
           onRefresh: () async => ref.invalidate(tasksProvider(project.id)),
           child: tasks.when(
-            data: (items) => ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: items.length,
-              itemBuilder: (_, i) {
-                final t = items[i];
-                return Card(
-                  child: ListTile(
-                    title: Text(t.title),
-                    subtitle: Text('Status: ${t.status}'
-                        '${t.dueDate != null ? '  •  Due ${t.dueDate!.toLocal().toString().split(' ').first}' : ''}'),
-                    trailing: DropdownButton<String>(
-                      value: t.status,
-                      items: const ['todo', 'in_progress', 'done']
-                          .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                          .toList(),
-                      onChanged: (s) {
-                        if (s != null) {
-                          ref.read(appDatabaseProvider).taskDao.updateStatus(t.id, s);
-                          ref.invalidate(tasksProvider(project.id));
-                        }
-                      },
-                    ),
-                  ),
+            data: (items) {
+              if (items.isEmpty) {
+                return EmptyState(
+                  icon: Icons.checklist,
+                  title: 'No tasks yet',
+                  message: 'Add the jobs for this site so everyone knows what is next and what is late.',
+                  actionLabel: 'Add a task',
+                  onAction: () => _addTask(context, ref),
                 );
-              },
-            ),
+              }
+              // Open work first, soonest due first; done at the bottom.
+              final sorted = [...items]..sort((a, b) {
+                  final ad = a.status == 'done' ? 1 : 0, bd = b.status == 'done' ? 1 : 0;
+                  if (ad != bd) return ad - bd;
+                  final ax = a.dueDate ?? DateTime(9999), bx = b.dueDate ?? DateTime(9999);
+                  return ax.compareTo(bx);
+                });
+              return ListView.builder(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
+                itemCount: sorted.length,
+                itemBuilder: (_, i) {
+                  final t = sorted[i];
+                  final overdue = t.status != 'done' && t.dueDate != null && t.dueDate!.isBefore(startOfToday);
+                  return Card(
+                    child: ListTile(
+                      title: Text(
+                        t.title,
+                        style: t.status == 'done'
+                            ? TextStyle(decoration: TextDecoration.lineThrough, color: Theme.of(context).colorScheme.onSurfaceVariant)
+                            : null,
+                      ),
+                      subtitle: t.dueDate == null
+                          ? null
+                          : Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Row(children: [
+                                Text('Due ${fmtDate(t.dueDate!, short: true)}'),
+                                if (overdue) ...[const SizedBox(width: 8), const StatusPill('Late', tone: PillTone.danger)],
+                              ]),
+                            ),
+                      trailing: DropdownButton<String>(
+                        value: _statusLabels.containsKey(t.status) ? t.status : 'todo',
+                        underline: const SizedBox.shrink(),
+                        items: [
+                          for (final e in _statusLabels.entries) DropdownMenuItem(value: e.key, child: Text(e.value)),
+                        ],
+                        onChanged: (s) async {
+                          if (s == null) return;
+                          await ref.read(appDatabaseProvider).taskDao.updateStatus(t.id, s);
+                          ref.invalidate(tasksProvider(project.id));
+                        },
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, st) => ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(tasksProvider(project.id))),
           ),
         ),
         Positioned(
@@ -326,285 +414,207 @@ class _DprTab extends ConsumerStatefulWidget {
   ConsumerState<_DprTab> createState() => _DprTabState();
 }
 
-class _DprDraftResult {
-  const _DprDraftResult(this.confirmed, this.summary, this.manpower, this.weather, this.selectedIssues,
-      [this.photoPaths = const []]);
-  final bool confirmed;
-  final String summary;
-  final int manpower;
-  final String? weather;
-  final List<String> selectedIssues;
-  final List<String> photoPaths;
-}
-
 class _DprTabState extends ConsumerState<_DprTab> {
-  bool _voicing = false;
-  String? _voiceError;
+  /// Speak the report: the phone listens, then the draft screen checks it.
+  Future<void> _speak() async {
+    final report = await showVoiceReportSheet(context);
+    if (report == null || !mounted) return;
+    final draft = await openDprDraft(
+      context,
+      project: widget.project,
+      text: report.text,
+      spokenIn: report.typeInstead ? null : report.language,
+      viaSarvam: report.viaSarvam,
+    );
+    if (draft != null) await _persist(draft, source: report.typeInstead ? 'manual' : 'voice');
+  }
 
-  /// Agentic DPR draft dialog: editable fields plus any issues the agent
-  /// flagged from the narrative, presented as a checklist the user confirms.
-  Future<_DprDraftResult> _showDraftDialog({
-    required String title,
-    required String initialSummary,
-    int initialManpower = 0,
-    String? initialWeather,
-    List<String> detectedIssues = const [],
-  }) async {
-    final summaryC = TextEditingController(text: initialSummary);
-    final manpowerC = TextEditingController(text: initialManpower.toString());
-    final weatherC = TextEditingController(text: initialWeather ?? '');
-    final selected = <String>{...detectedIssues};
-    final photos = <String>[];
-    final confirmed = await showDialog<bool>(
+  Future<void> _type() async {
+    final draft = await openDprDraft(context, project: widget.project);
+    if (draft != null) await _persist(draft, source: 'manual');
+  }
+
+  /// Saves the DPR, its photos and the problems the person kept, each
+  /// issue linked back to the report that raised it.
+  Future<void> _persist(DprDraftResult draft, {required String source}) async {
+    final user = ref.read(sessionProvider).user;
+    if (user == null) return;
+    final db = ref.read(appDatabaseProvider);
+    try {
+      final dprId = const Uuid().v4();
+      final dpr = await db.dprDao.create(DprEntriesCompanion.insert(
+        id: dprId,
+        projectId: widget.project.id,
+        createdBy: user.id,
+        entryDate: draft.date,
+        workSummary: draft.summary,
+        manpowerCount: Value(draft.manpower),
+        weather: Value(draft.weather),
+        source: Value(source),
+      ));
+      for (final iss in draft.issues) {
+        await db.issueDao.create(IssuesCompanion.insert(
+          id: const Uuid().v4(),
+          projectId: widget.project.id,
+          dprEntryId: Value(dprId),
+          description: iss,
+          severity: const Value('medium'),
+          status: const Value('open'),
+        ));
+      }
+      for (final path in draft.photoPaths) {
+        await db.dprDao.addPhoto(DprPhotosCompanion.insert(id: const Uuid().v4(), dprEntryId: dprId, photoPath: path));
+      }
+      ref.invalidate(dprProvider(widget.project.id));
+      ref.invalidate(issuesProvider(widget.project.id));
+      if (!mounted) return;
+      final raised = draft.issues.length;
+      showSnack(
+        context,
+        raised == 0 ? 'Report saved.' : 'Report saved, and $raised problem${raised == 1 ? '' : 's'} raised as issues.',
+        action: SnackBarAction(label: 'Share', onPressed: () => _share(dpr)),
+      );
+    } catch (e, st) {
+      if (mounted) showSnack(context, friendlyError(e, st), error: true);
+    }
+  }
+
+  Future<void> _share(DprEntry d) async {
+    showSnack(context, 'Preparing the report…');
+    try {
+      await shareDprReport(
+        db: ref.read(appDatabaseProvider),
+        companyName: ref.read(sessionProvider).activeCompany?.name ?? '',
+        project: widget.project,
+        dpr: d,
+      );
+    } catch (e, st) {
+      if (mounted) showSnack(context, 'Could not share the report. ${friendlyError(e, st)}', error: true);
+    }
+  }
+
+  void _showDetails(DprEntry d, int issueCount) {
+    showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(controller: summaryC, maxLines: 4, decoration: const InputDecoration(labelText: 'Work summary')),
-                const SizedBox(height: 8),
-                TextField(controller: manpowerC, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Manpower count')),
-                const SizedBox(height: 8),
-                TextField(controller: weatherC, decoration: const InputDecoration(labelText: 'Weather (optional)')),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.photo_camera),
-                  label: Text(photos.isEmpty ? 'Attach photo evidence' : '${photos.length} photo${photos.length == 1 ? '' : 's'} attached'),
-                  onPressed: () async {
-                    final path = await captureCameraFirst(ctx, prefix: 'dpr', place: widget.project.name);
-                    if (path != null) setDialogState(() => photos.add(path));
-                  },
-                ),
-                if (detectedIssues.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  const Text('Agent-detected issues', style: TextStyle(fontWeight: FontWeight.w600)),
-                  ...detectedIssues.map((iss) => CheckboxListTile(
-                        value: selected.contains(iss),
-                        title: Text(iss),
-                        controlAffinity: ListTileControlAffinity.leading,
-                        contentPadding: EdgeInsets.zero,
-                        onChanged: (v) => setDialogState(
-                          () => v == true ? selected.add(iss) : selected.remove(iss),
-                        ),
-                      )),
-                ],
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, summaryC.text.trim().isNotEmpty),
-              child: const Text('Save'),
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        maxChildSize: 0.95,
+        builder: (ctx, scroll) => ListView(
+          controller: scroll,
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          children: [
+            Text('${fmtDay(d.entryDate)} · ${fmtDate(d.entryDate)}', style: Theme.of(ctx).textTheme.titleLarge),
+            const SizedBox(height: 8),
+            _DprFacts(dpr: d, issueCount: issueCount),
+            const SizedBox(height: 16),
+            SelectableText(d.workSummary, style: Theme.of(ctx).textTheme.bodyLarge?.copyWith(height: 1.45)),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _share(d);
+              },
+              icon: const Icon(Icons.ios_share),
+              label: const Text('Share as PDF'),
             ),
           ],
         ),
       ),
     );
-    return _DprDraftResult(
-      confirmed == true,
-      summaryC.text.trim(),
-      int.tryParse(manpowerC.text.trim()) ?? 0,
-      weatherC.text.trim().isEmpty ? null : weatherC.text.trim(),
-      selected.toList(),
-      photos.toList(),
-    );
-  }
-
-  /// Persist a DPR, its photo evidence and any issues the user confirmed
-  /// from the agent's checklist, linking each back to the DPR that raised it.
-  Future<void> _persistDpr({
-    required String summary,
-    required int manpower,
-    String? weather,
-    required String source,
-    required List<String> issues,
-    List<String> photoPaths = const [],
-  }) async {
-    final user = ref.read(sessionProvider).user;
-    if (user == null) return;
-    final dprId = Uuid().v4();
-    await ref.read(appDatabaseProvider).dprDao.create(DprEntriesCompanion.insert(
-          id: dprId,
-          projectId: widget.project.id,
-          createdBy: user.id,
-          entryDate: DateTime.now(),
-          workSummary: summary,
-          manpowerCount: Value(manpower),
-          weather: Value(weather),
-          source: Value(source),
-        ));
-    for (final iss in issues) {
-      await ref.read(appDatabaseProvider).issueDao.create(IssuesCompanion.insert(
-            id: Uuid().v4(),
-            projectId: widget.project.id,
-            dprEntryId: Value(dprId),
-            description: iss,
-            severity: const Value('medium'),
-            status: const Value('open'),
-          ));
-    }
-    for (final path in photoPaths) {
-      await ref.read(appDatabaseProvider).dprDao.addPhoto(DprPhotosCompanion.insert(
-            id: const Uuid().v4(),
-            dprEntryId: dprId,
-            photoPath: path,
-          ));
-    }
-    ref.invalidate(dprProvider(widget.project.id));
-    ref.invalidate(issuesProvider(widget.project.id));
-  }
-
-  Future<void> _recordAndDraft() async {
-    setState(() => _voicing = true);
-    try {
-      final voice = ref.read(voiceServiceProvider);
-      final bytes = await voice.record();
-      final agent = ref.read(voiceDprAgentProvider);
-      final result = await agent.run({'audioBytes': bytes, 'filename': 'dpr_voice.m4a'});
-      if (!result.ok) {
-        setState(() => _voiceError = result.message);
-        return;
-      }
-      final data = result.data;
-      final detected = (data['detected_issues'] as List?)?.cast<String>() ?? const <String>[];
-      if (!mounted) return;
-      final draft = await _showDraftDialog(
-        title: 'Voice DPR draft',
-        initialSummary: (data['work_summary'] as String?) ?? '',
-        initialManpower: (data['manpower_count'] as int?) ?? 0,
-        initialWeather: data['weather'] as String?,
-        detectedIssues: detected,
-      );
-      if (draft.confirmed) {
-        await _persistDpr(
-          summary: draft.summary,
-          manpower: draft.manpower,
-          weather: draft.weather,
-          source: 'voice',
-          issues: draft.selectedIssues,
-          photoPaths: draft.photoPaths,
-        );
-      }
-    } catch (e) {
-      setState(() => _voiceError = 'Voice capture failed: ${e.toString()}');
-    } finally {
-      if (mounted) setState(() => _voicing = false);
-    }
-  }
-
-  Future<void> _addManually() async {
-    final summaryC = TextEditingController();
-    final entered = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('New DPR entry'),
-        content: TextField(controller: summaryC, maxLines: 4, decoration: const InputDecoration(labelText: 'Work summary')),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, summaryC.text.trim().isNotEmpty),
-            child: const Text('Next'),
-          ),
-        ],
-      ),
-    );
-    if (entered != true) return;
-    final detected = ((await ref.read(dprIntakeAgentProvider).run({'transcript': summaryC.text.trim()}))
-            .data['detected_issues'] as List?)
-            ?.cast<String>() ??
-        const <String>[];
-    final draft = await _showDraftDialog(
-      title: 'New DPR entry',
-      initialSummary: summaryC.text.trim(),
-      detectedIssues: detected,
-    );
-    if (draft.confirmed) {
-      await _persistDpr(
-        summary: draft.summary,
-        manpower: draft.manpower,
-        weather: draft.weather,
-        source: 'manual',
-        issues: draft.selectedIssues,
-        photoPaths: draft.photoPaths,
-      );
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final dpr = ref.watch(dprProvider(widget.project.id));
+    final issues = ref.watch(issuesProvider(widget.project.id)).valueOrNull ?? const <Issue>[];
     return Stack(
       children: [
         RefreshIndicator(
           onRefresh: () async => ref.invalidate(dprProvider(widget.project.id)),
           child: dpr.when(
-            data: (items) => ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: items.length,
-              itemBuilder: (_, i) {
-                final d = items[i];
-                return Card(
-                  child: ListTile(
-                    title: Text(d.workSummary),
-                    subtitle: Text('${d.entryDate.toLocal().toString().split(' ').first}  •  '
-                        '${d.manpowerCount} workers  •  ${d.weather ?? '—'}  •  ${d.source}'),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.share),
-                      tooltip: 'Share as PDF',
-                      onPressed: () => shareDprReport(
-                        db: ref.read(appDatabaseProvider),
-                        companyName: ref.read(sessionProvider).activeCompany?.name ?? '',
-                        project: widget.project,
-                        dpr: d,
-                      ).catchError((Object e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(SnackBar(content: Text('Could not share the report: $e')));
-                        }
-                      }),
-                    ),
-                  ),
+            data: (items) {
+              if (items.isEmpty) {
+                return EmptyState(
+                  icon: Icons.mic_none,
+                  title: 'No daily reports yet',
+                  message: 'Speak today\'s progress in your own language. FieldOS fills in the headcount, '
+                      'the weather and any problems for you, even without internet.',
+                  actionLabel: 'Speak a report',
+                  onAction: _speak,
                 );
-              },
-            ),
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 168),
+                itemCount: items.length,
+                itemBuilder: (_, i) {
+                  final d = items[i];
+                  final issueCount = issues.where((x) => x.dprEntryId == d.id).length;
+                  return Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () => _showDetails(d, issueCount),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 4, 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              Expanded(
+                                child: Text(
+                                  '${fmtDay(d.entryDate)} · ${fmtDate(d.entryDate, short: true)}',
+                                  style: Theme.of(context).textTheme.titleSmall,
+                                ),
+                              ),
+                              if (d.source == 'voice')
+                                Tooltip(
+                                  message: 'Spoken report',
+                                  child: Icon(Icons.mic_none, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                ),
+                              IconButton(
+                                icon: const Icon(Icons.ios_share),
+                                tooltip: 'Share as PDF',
+                                onPressed: () => _share(d),
+                              ),
+                            ]),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: Text(d.workSummary, maxLines: 3, overflow: TextOverflow.ellipsis),
+                            ),
+                            const SizedBox(height: 10),
+                            _DprFacts(dpr: d, issueCount: issueCount),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, st) => ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(dprProvider(widget.project.id))),
           ),
         ),
-        if (_voiceError != null)
-          Positioned(
-            bottom: 144,
-            left: 16,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: Colors.red.shade100, borderRadius: BorderRadius.circular(8)),
-              child: Text(_voiceError!, style: const TextStyle(color: Colors.red)),
-            ),
-          ),
         Positioned(
           bottom: 16,
           right: 16,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              FloatingActionButton.extended(
-                heroTag: 'dpr_manual',
-                icon: const Icon(Icons.edit_note),
-                label: const Text('Add entry'),
-                onPressed: _addManually,
+              FloatingActionButton.small(
+                heroTag: 'dpr_type',
+                tooltip: 'Type a report',
+                onPressed: _type,
+                child: const Icon(Icons.keyboard_alt_outlined),
               ),
               const SizedBox(height: 12),
               FloatingActionButton.extended(
                 heroTag: 'dpr_voice',
-                icon: _voicing ? const CircularProgressIndicator() : const Icon(Icons.mic),
-                label: Text(_voicing ? 'Listening…' : 'Voice DPR'),
-                onPressed: _voicing ? null : _recordAndDraft,
+                icon: const Icon(Icons.mic),
+                label: const Text('Speak report'),
+                onPressed: _speak,
               ),
             ],
           ),
@@ -614,9 +624,31 @@ class _DprTabState extends ConsumerState<_DprTab> {
   }
 }
 
+/// People, weather and issues of a report, as small labels.
+class _DprFacts extends StatelessWidget {
+  const _DprFacts({required this.dpr, required this.issueCount});
+  final DprEntry dpr;
+  final int issueCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        StatusPill(dpr.manpowerCount > 0 ? '${dpr.manpowerCount} people' : 'Headcount not given'),
+        if (dpr.weather != null && dpr.weather!.isNotEmpty) StatusPill(dpr.weather!),
+        if (issueCount > 0) StatusPill('$issueCount issue${issueCount == 1 ? '' : 's'}', tone: PillTone.warn),
+      ],
+    );
+  }
+}
+
 class _IssuesTab extends ConsumerWidget {
   const _IssuesTab({required this.project});
   final Project project;
+
+  static const _severityTone = {'high': PillTone.danger, 'medium': PillTone.warn, 'low': PillTone.neutral};
 
   Future<void> _addIssue(BuildContext context, WidgetRef ref) async {
     final descC = TextEditingController();
@@ -633,17 +665,21 @@ class _IssuesTab extends ConsumerWidget {
               TextField(
                 controller: descC,
                 maxLines: 3,
-                decoration: const InputDecoration(labelText: 'Description'),
+                autofocus: true,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(labelText: 'What is the problem?'),
               ),
+              const SizedBox(height: 16),
+              const Text('How serious?'),
               const SizedBox(height: 8),
-              DropdownButton<String>(
-                value: severity,
-                items: const ['low', 'medium', 'high']
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                    .toList(),
-                onChanged: (s) {
-                  if (s != null) setDialogState(() => severity = s);
-                },
+              SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(value: 'low', label: Text('Low')),
+                  ButtonSegment(value: 'medium', label: Text('Medium')),
+                  ButtonSegment(value: 'high', label: Text('High')),
+                ],
+                selected: {severity},
+                onSelectionChanged: (s) => setDialogState(() => severity = s.first),
               ),
             ],
           ),
@@ -651,7 +687,7 @@ class _IssuesTab extends ConsumerWidget {
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, descC.text.trim().isNotEmpty),
-              child: const Text('Create'),
+              child: const Text('Raise issue'),
             ),
           ],
         ),
@@ -659,7 +695,7 @@ class _IssuesTab extends ConsumerWidget {
     );
     if (confirmed != true) return;
     await ref.read(appDatabaseProvider).issueDao.create(IssuesCompanion.insert(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           projectId: project.id,
           description: descC.text.trim(),
           severity: Value(severity),
@@ -675,30 +711,62 @@ class _IssuesTab extends ConsumerWidget {
         RefreshIndicator(
           onRefresh: () async => ref.invalidate(issuesProvider(project.id)),
           child: issues.when(
-            data: (items) => ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: items.length,
-              itemBuilder: (_, i) {
-                final iss = items[i];
-                return Card(
-                  child: ListTile(
-                    title: Text(iss.description),
-                    subtitle: Text('${iss.severity} • ${iss.status}'),
-                    trailing: iss.status != 'resolved'
-                        ? TextButton(
-                            onPressed: () {
-                              ref.read(appDatabaseProvider).issueDao.resolve(iss.id);
-                              ref.invalidate(issuesProvider(project.id));
-                            },
-                            child: const Text('Resolve'),
-                          )
-                        : const Icon(Icons.check_circle, color: Colors.green),
-                  ),
+            data: (items) {
+              if (items.isEmpty) {
+                return EmptyState(
+                  icon: Icons.verified_outlined,
+                  title: 'No issues',
+                  message: 'Problems you raise, or that FieldOS finds in your daily reports, appear here until they are fixed.',
+                  actionLabel: 'Raise an issue',
+                  onAction: () => _addIssue(context, ref),
                 );
-              },
-            ),
+              }
+              final sorted = [...items]..sort((a, b) {
+                  final ar = a.status == 'resolved' ? 1 : 0, br = b.status == 'resolved' ? 1 : 0;
+                  if (ar != br) return ar - br;
+                  return b.createdAt.compareTo(a.createdAt);
+                });
+              return ListView.builder(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
+                itemCount: sorted.length,
+                itemBuilder: (_, i) {
+                  final iss = sorted[i];
+                  final resolved = iss.status == 'resolved';
+                  return Card(
+                    child: ListTile(
+                      title: Text(iss.description),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Wrap(spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                          StatusPill(
+                            '${iss.severity[0].toUpperCase()}${iss.severity.substring(1)}',
+                            tone: _severityTone[iss.severity] ?? PillTone.neutral,
+                          ),
+                          if (iss.dprEntryId != null) const StatusPill('From a daily report'),
+                          Text(
+                            resolved && iss.resolvedAt != null
+                                ? 'Fixed ${fmtDate(iss.resolvedAt!, short: true)}'
+                                : 'Raised ${fmtDate(iss.createdAt, short: true)}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ]),
+                      ),
+                      trailing: resolved
+                          ? const Icon(Icons.check_circle, color: Brand.ok)
+                          : TextButton(
+                              onPressed: () async {
+                                await ref.read(appDatabaseProvider).issueDao.resolve(iss.id);
+                                ref.invalidate(issuesProvider(project.id));
+                              },
+                              child: const Text('Mark fixed'),
+                            ),
+                    ),
+                  );
+                },
+              );
+            },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, st) => ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(issuesProvider(project.id))),
           ),
         ),
         Positioned(
@@ -707,7 +775,7 @@ class _IssuesTab extends ConsumerWidget {
           child: FloatingActionButton.extended(
             heroTag: 'issue_add',
             icon: const Icon(Icons.add),
-            label: const Text('Add issue'),
+            label: const Text('Raise issue'),
             onPressed: () => _addIssue(context, ref),
           ),
         ),

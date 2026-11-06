@@ -10,6 +10,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/procurement/stock_view.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -151,7 +153,7 @@ class _SuppliersTab extends ConsumerWidget {
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, st) => ErrorState(error: e, stack: st),
           ),
         ),
       ],
@@ -217,8 +219,11 @@ class _RfqTab extends ConsumerWidget {
                       for (final r in rows)
                         ListTile(
                           title: Text(r.materialName),
-                          subtitle: Text(
-                              'Qty ${r.quantity} ${r.unit} · ₹${r.estimatedAmount ?? 0} · ${r.status}'),
+                          subtitle: Text([
+                            '${fmtQty(r.quantity)} ${r.unit}',
+                            if (r.estimatedAmount != null) 'about ${rupees(r.estimatedAmount!)}',
+                            _statusLabel(r.status),
+                          ].join(' · ')),
                           trailing: r.status == 'pending'
                               ? FilledButton(
                                   child: const Text('Make PO'),
@@ -229,7 +234,7 @@ class _RfqTab extends ConsumerWidget {
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, st) => ErrorState(error: e, stack: st),
           ),
         ),
       ],
@@ -346,8 +351,8 @@ class _PoTab extends ConsumerWidget {
                     children: [
                       for (final o in rows)
                         ListTile(
-                          title: Text('PO · ₹${o.totalAmount ?? 0}'),
-                          subtitle: Text('Supplier ${_supName(suppliers, o.supplierId)} · ${o.status}'),
+                          title: Text(o.totalAmount == null ? 'Purchase order' : 'Purchase order · ${rupees(o.totalAmount!)}'),
+                          subtitle: Text('${_supName(suppliers, o.supplierId)} · ${_statusLabel(o.status)}'),
                           trailing: o.status == 'issued'
                               ? FilledButton(
                                   child: const Text('Receive'),
@@ -358,7 +363,7 @@ class _PoTab extends ConsumerWidget {
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, st) => ErrorState(error: e, stack: st),
           ),
         ),
       ],
@@ -431,11 +436,25 @@ class _PoTab extends ConsumerWidget {
   }
 }
 
-String _supName(AsyncValue<List<Supplier>> suppliers, String id) =>
-    suppliers.valueOrNull?.firstWhere((s) => s.id == id, orElse: () => Supplier(
-            id: id, companyId: '', name: id, createdAt: DateTime.now()))
-        .name ??
-    id;
+String _supName(AsyncValue<List<Supplier>> suppliers, String id) {
+  for (final s in suppliers.valueOrNull ?? const <Supplier>[]) {
+    if (s.id == id) return s.name;
+  }
+  return 'Supplier not on this phone';
+}
+
+/// Request and order stages in plain words.
+String _statusLabel(String status) => switch (status) {
+      'pending' => 'Waiting for a PO',
+      'approved' => 'Approved',
+      'rejected' => 'Rejected',
+      'ordered' => 'Ordered',
+      'issued' => 'Sent to supplier',
+      'acknowledged' => 'Supplier confirmed',
+      'delivered' => 'Delivered',
+      'cancelled' => 'Cancelled',
+      _ => status.isEmpty ? status : '${status[0].toUpperCase()}${status.substring(1).replaceAll('_', ' ')}',
+    };
 
 // --- GRN ------------------------------------------------------------------
 
@@ -456,12 +475,16 @@ class _GrnTab extends ConsumerWidget {
                   ListTile(
                     leading: const Icon(Icons.inventory),
                     title: Text(m.materialName),
-                    subtitle: Text('Qty ${m.quantity} ${m.unit ?? ''} · ₹${m.amount} · ${m.receivedOn.toLocal().toString().split(' ').first}'),
+                    subtitle: Text([
+                      '${fmtQty(m.quantity)} ${m.unit ?? ''}'.trim(),
+                      rupees(m.amount),
+                      'received ${fmtDate(m.receivedOn, short: true)}',
+                    ].join(' · ')),
                   ),
               ],
             ),
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
+      error: (e, st) => ErrorState(error: e, stack: st),
     );
   }
 }

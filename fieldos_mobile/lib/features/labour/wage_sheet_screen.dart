@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -114,7 +116,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                                   Text(rupees(l.balanceDue),
                                       style: TextStyle(
                                           fontWeight: FontWeight.w700,
-                                          color: l.balanceDue < 0 ? Colors.orange.shade800 : null)),
+                                          color: l.balanceDue < 0 ? toneColor(context, PillTone.warn) : null)),
                                   Text(l.balanceDue < 0 ? 'advance' : 'due', style: const TextStyle(fontSize: 11)),
                                 ],
                               ),

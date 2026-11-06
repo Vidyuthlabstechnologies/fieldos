@@ -1,10 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Cloud sync (Supabase) and voice-to-DPR (Sarvam). The debug/profile
+    <!-- Cloud sync (Supabase), subscriptions, and the optional Sarvam voice
+         fallback. The debug/profile
          manifests already declare this, which hid its absence here: without
          it every release build (the Play Store build) fails all
          network calls, so sync and voice DPR silently never work. -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- Voice-to-DPR: microphone capture for site reports. -->
+    <!-- Voice reports: the phone's speech recognition listens to the
+         engineer (and, only on phones that can't recognise the language,
+         a recording is made for the Sarvam fallback). -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <!-- GPS punch-in for labour attendance (geofence check). Foreground
          only: the location is read once, at the moment of punching in/out. -->
@@ -54,6 +57,22 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Android 11+ hides other apps unless asked for: without this the
+             phone's speech recognizer (Google's) looks absent and voice
+             reports can't listen. -->
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
+        </intent>
+        <!-- Opening the privacy policy and the Play subscriptions page in a
+             browser, and writing to support. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SENDTO"/>
+            <data android:scheme="mailto"/>
         </intent>
     </queries>
 </manifest>

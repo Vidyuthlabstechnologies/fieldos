@@ -7,6 +7,7 @@ Pure Pillow, no assets: an amber hard hat on deep navy. Re-run after
 changing the colours or shapes below; it overwrites the generated files.
 """
 
+import re
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -20,6 +21,8 @@ ROOT = Path(__file__).resolve().parent.parent
 MOBILE = ROOT / "fieldos_mobile"
 RES = MOBILE / "android/app/src/main/res"
 IOS = MOBILE / "ios/Runner/Assets.xcassets/AppIcon.appiconset"
+IOS_LAUNCH = MOBILE / "ios/Runner/Assets.xcassets/LaunchImage.imageset"
+SPLASH_FONT = MOBILE / "assets/fonts/Inter-Bold.otf"
 STORE = ROOT / "docs/store"
 FONT_BOLD = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
 FONT_MEDIUM = "/usr/share/fonts/opentype/inter/Inter-Medium.otf"
@@ -99,6 +102,86 @@ def ios():
         full_icon(px).convert("RGB").save(f)
 
 
+def splash_logo(f: float) -> Image.Image:
+    """The hat over the wordmark, laid out exactly like the app's first
+    Flutter frame (BrandSplash in lib/core/brand.dart: a 132 mark, a 12 gap,
+    then "FieldOS" at 30 with a 1.1 line height), so nothing jumps when the
+    app takes over from the native splash. f is pixels per dp."""
+    w_dp, mark_dp, gap_dp, line_dp, font_dp = 160, 132, 12, 33, 30
+    img = Image.new("RGBA", (round(w_dp * f), round((mark_dp + gap_dp + line_dp) * f)), (0, 0, 0, 0))
+    mark = hard_hat(round(mark_dp * f), 0.72)
+    img.alpha_composite(mark, (round((w_dp - mark_dp) / 2 * f), 0))
+    font = ImageFont.truetype(str(SPLASH_FONT), round(font_dp * f))
+    d = ImageDraw.Draw(img)
+    word = [(c, WHITE) for c in "Field"] + [(c, AMBER) for c in "OS"]
+    spacing = -0.5 * f  # the wordmark's letter spacing
+    width = sum(font.getlength(c) for c, _ in word) + spacing * (len(word) - 1)
+    x = (img.width - width) / 2
+    # Inter's ascent share of a 1.1 line: 1.1 * 0.96875 / (0.96875 + 0.2412)
+    baseline = (mark_dp + gap_dp + line_dp * 0.8807) * f
+    for c, colour in word:
+        d.text((x, baseline), c, font=font, fill=colour, anchor="ls")
+        x += font.getlength(c) + spacing
+    return img
+
+
+def splash():
+    """Native launch screens: navy with the hat and wordmark, shown until
+    Flutter draws its first frame. Android 12+ draws its own splash from the
+    launcher icon; values-v31 only sets its background to the same navy."""
+    navy_hex = f"#{NAVY[0]:02X}{NAVY[1]:02X}{NAVY[2]:02X}"
+    for density, f in {"mdpi": 1, "hdpi": 1.5, "xhdpi": 2, "xxhdpi": 3, "xxxhdpi": 4}.items():
+        out = RES / f"drawable-{density}"
+        out.mkdir(parents=True, exist_ok=True)
+        splash_logo(f).save(out / "splash_logo.png", optimize=True)
+    (RES / "values/splash.xml").write_text(
+        '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n'
+        f'    <color name="splash_background">{navy_hex}</color>\n'
+        "</resources>\n"
+    )
+    layers = (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        "<!-- Written by tools/make_icons.py. The launch screen up to Android 11:\n"
+        "     navy with the hat and wordmark, like the app's first frame. -->\n"
+        '<layer-list xmlns:android="http://schemas.android.com/apk/res/android">\n'
+        '    <item android:drawable="@color/splash_background" />\n'
+        "    <item>\n"
+        '        <bitmap android:gravity="center" android:src="@drawable/splash_logo" />\n'
+        "    </item>\n"
+        "</layer-list>\n"
+    )
+    for folder in ("drawable", "drawable-v21"):
+        (RES / folder / "launch_background.xml").write_text(layers)
+    for folder, parent in (("values-v31", "Theme.Light.NoTitleBar"), ("values-night-v31", "Theme.Black.NoTitleBar")):
+        (RES / folder).mkdir(exist_ok=True)
+        (RES / folder / "styles.xml").write_text(
+            '<?xml version="1.0" encoding="utf-8"?>\n'
+            "<!-- Written by tools/make_icons.py. Android 12+ shows its own splash\n"
+            "     (the launcher icon, centred); this makes its background navy. -->\n"
+            "<resources>\n"
+            f'    <style name="LaunchTheme" parent="@android:style/{parent}">\n'
+            '        <item name="android:windowBackground">@drawable/launch_background</item>\n'
+            '        <item name="android:windowSplashScreenBackground">@color/splash_background</item>\n'
+            "    </style>\n"
+            "</resources>\n"
+        )
+    for f in (1, 2, 3):
+        suffix = "" if f == 1 else f"@{f}x"
+        splash_logo(f).save(IOS_LAUNCH / f"LaunchImage{suffix}.png", optimize=True)
+    board = IOS_LAUNCH.parent.parent / "Base.lproj/LaunchScreen.storyboard"
+    text = board.read_text()
+    r, g, b = (round(c / 255, 4) for c in NAVY)
+    text = re.sub(
+        r'<color key="backgroundColor" red="[0-9.]+" green="[0-9.]+" blue="[0-9.]+" alpha="1"',
+        f'<color key="backgroundColor" red="{r}" green="{g}" blue="{b}" alpha="1"',
+        text,
+    )
+    logo = splash_logo(1)
+    text = re.sub(r'<image name="LaunchImage" width="\d+" height="\d+"/>',
+                  f'<image name="LaunchImage" width="{logo.width}" height="{logo.height}"/>', text)
+    board.write_text(text)
+
+
 def store():
     STORE.mkdir(parents=True, exist_ok=True)
     full_icon(512).convert("RGB").save(STORE / "play-icon-512.png")
@@ -115,5 +198,6 @@ def store():
 if __name__ == "__main__":
     android()
     ios()
+    splash()
     store()
     print("icons written")

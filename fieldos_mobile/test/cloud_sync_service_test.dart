@@ -105,7 +105,10 @@ void main() {
       // an attempted signup -- and that signup must itself fail cleanly
       // (email already registered) rather than silently signing the
       // attacker in. Either way, the net result must be: not signed in.
-      expect(result.outcome, CloudSyncOutcome.failed);
+      // The local stack confirms emails automatically, so the sign-up
+      // attempt is refused as "user already exists": reported as a wrong
+      // password, never as a sign-in.
+      expect(result.outcome, CloudSyncOutcome.wrongPassword);
       expect(attackerClient.auth.currentSession, isNull);
 
       await attackerClient.dispose();

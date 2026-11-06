@@ -9,6 +9,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 
@@ -43,7 +45,7 @@ class _DocumentsViewState extends ConsumerState<DocumentsView> {
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, st) => ErrorState(error: e, stack: st),
           ),
         ),
       ],
@@ -192,11 +194,7 @@ class _DocumentTile extends ConsumerWidget {
     return Icon(icon);
   }
 
-  Widget _versionBadge(int version) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-        child: Text('v$version', style: const TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w600)),
-      );
+  Widget _versionBadge(int version) => StatusPill('v$version');
 
   String _formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
@@ -222,7 +220,7 @@ class _DocumentTile extends ConsumerWidget {
                       ListTile(
                         dense: true,
                         title: Text('v${v.version}'),
-                        subtitle: Text(v.createdAt.toLocal().toString().split(' ').first),
+                        subtitle: Text(fmtDateTime(v.createdAt)),
                         trailing: Text(_formatFileSize(v.fileSize ?? 0)),
                       ),
                   ],

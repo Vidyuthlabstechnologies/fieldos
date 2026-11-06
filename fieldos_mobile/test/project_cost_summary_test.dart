@@ -66,6 +66,27 @@ void main() {
     expect(summary.dprCount, 0);
   });
 
+  test('a new project with no priced BOQ is "no budget", not over budget', () async {
+    final db = AppDatabase.memory();
+    final project = await db.projectDao.create(ProjectsCompanion.insert(
+      id: _uuid.v4(),
+      companyId: 'c1',
+      name: 'Fresh site',
+    ));
+    await db.expenseDao.create(SiteExpensesCompanion.insert(
+      id: _uuid.v4(),
+      projectId: project.id,
+      category: 'materials',
+      amount: 1200,
+      incurredOn: '2026-11-01',
+      recordedBy: 'u1',
+    ));
+    final summary = await ProjectCostSummary.forProject(db, project);
+    expect(summary.status, 'no_budget');
+    expect(summary.actual, 1200);
+    expect(summary.alerts, isEmpty);
+  });
+
   test('overrun flips the dashboard status to over', () async {
     final db = AppDatabase.memory();
     final project = await db.projectDao.create(ProjectsCompanion.insert(

@@ -12,6 +12,10 @@ const halfDayHours = 3.5;
 /// Hours beyond this in one day are shown as overtime (not paid automatically).
 const overtimeAfterHours = 8.0;
 
+/// A punch closed more than this long after it opened was not a shift: it
+/// is a punch-out forgotten and done later, so it counts like an open one.
+const longestShiftHours = 16.0;
+
 /// How one day of punches counts towards pay. A punch that was never
 /// closed counts as half a day and is flagged, so a forgotten punch-out
 /// neither loses the worker a day nor silently pays a full one.
@@ -98,10 +102,12 @@ WageSheet buildWageSheet({
       var hours = 0.0;
       var open = false;
       for (final p in day.value) {
-        if (p.punchOut == null) {
+        final out = p.punchOut;
+        final h = out == null ? null : out.difference(p.punchIn).inMinutes / 60.0;
+        if (h == null || h < 0 || h > longestShiftHours) {
           open = true;
         } else {
-          hours += p.punchOut!.difference(p.punchIn).inMinutes / 60.0;
+          hours += h;
         }
       }
       final credit = dayCredit(hours, hasOpenPunch: open);

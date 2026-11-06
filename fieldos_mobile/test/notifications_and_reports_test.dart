@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -48,7 +50,7 @@ void main() {
     final project = Project(
       id: 'p1',
       companyId: 'c1',
-      name: 'Narapally Block A',
+      name: 'Green Valley Block A',
       clientName: 'Client Ltd',
       status: 'active',
       createdAt: DateTime.utc(2026, 1, 1),
@@ -89,8 +91,84 @@ void main() {
 
     test('local-script detection', () {
       expect(needsLocalScript('Slab work done — 24 workers'), isFalse);
+      expect(needsLocalScript('“Curing” started… ₹500 paid'), isFalse, reason: 'punctuation and ₹ are swapped, not pictured');
       expect(needsLocalScript('స్లాబ్ పని'), isTrue);
       expect(needsLocalScript('स्लैब का काम'), isTrue);
+    });
+
+    test('Telugu company, summary and issue are drawn as pictures, English stays text', () async {
+      final painted = <String>[];
+      Future<TextPicture?> fake(String text,
+          {required double fontSize, required bool bold, required int argb, required double maxWidth}) async {
+        painted.add(text);
+        // A 1x1 transparent PNG.
+        return TextPicture(
+            Uint8List.fromList(base64Decode(
+                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=')),
+            100,
+            14);
+      }
+
+      final bytes = await buildDprPdf(
+        companyName: 'శ్రీ సాయి కన్స్ట్రక్షన్స్',
+        project: project,
+        dpr: dpr('రెండవ అంతస్తు స్లాబ్ పని పూర్తయింది'),
+        issues: [
+          Issue(
+            id: 'i1',
+            projectId: 'p1',
+            description: 'స్టీల్ తక్కువ వచ్చింది',
+            severity: 'high',
+            status: 'open',
+            createdAt: DateTime.utc(2026, 11, 5),
+          ),
+        ],
+        paintText: fake,
+      );
+      expect(String.fromCharCodes(bytes.take(5)), '%PDF-');
+      expect(painted, containsAll(['శ్రీ సాయి కన్స్ట్రక్షన్స్', 'రెండవ అంతస్తు స్లాబ్ పని పూర్తయింది', 'స్టీల్ తక్కువ వచ్చింది']));
+      expect(painted.where((t) => t.contains('Green Valley')), isEmpty);
+    });
+
+    test('a long local-language summary is split so no picture is taller than a page', () async {
+      final lengths = <int>[];
+      final long = [for (var i = 1; i <= 60; i++) 'బ్లాక్ $i లో స్లాబ్ పని పూర్తయింది.'].join(' ');
+      await buildDprPdf(
+        companyName: 'Co',
+        project: project,
+        dpr: dpr(long),
+        paintText: (text, {required fontSize, required bold, required argb, required maxWidth}) async {
+          lengths.add(text.length);
+          return null; // falls back to the note
+        },
+      );
+      expect(lengths.length, greaterThan(2));
+      expect(lengths.every((l) => l <= 501), isTrue);
+    });
+
+    test('the phone text engine really produces a picture', () async {
+      final p = await paintWithPhoneFonts('స్లాబ్ పని', fontSize: 11, bold: false, argb: 0xFF13233A, maxWidth: 300);
+      expect(p, isNotNull);
+      expect(p!.png.sublist(1, 4), 'PNG'.codeUnits);
+      expect(p.width, greaterThan(0));
+      expect(p.width, lessThanOrEqualTo(300));
+    });
+
+    test('the share message has the date in words and no "0 workers"', () {
+      final text = dprShareText(project, DprEntry(
+        id: 'd2',
+        projectId: 'p1',
+        createdBy: 'u1',
+        entryDate: DateTime(2026, 11, 5, 18),
+        workSummary: 'Brickwork on the 3rd floor',
+        manpowerCount: 0,
+        status: 'confirmed',
+        source: 'manual',
+        createdAt: DateTime(2026, 11, 5),
+      ));
+      expect(text, startsWith('Daily progress report · Green Valley Block A · 5 Nov 2026'));
+      expect(text, isNot(contains('0 workers')));
+      expect(text, endsWith('Brickwork on the 3rd floor'));
     });
 
     test('does not crash on an Indic-language summary', () async {

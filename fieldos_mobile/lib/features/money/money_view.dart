@@ -10,6 +10,8 @@ import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' hide Column;
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 
@@ -27,34 +29,11 @@ final expensesProvider = FutureProvider.autoDispose.family<List<SiteExpense>, St
 final paymentsReceivedProvider = FutureProvider.autoDispose.family<List<PaymentsReceivedData>, String>(
     (ref, projectId) => ref.watch(appDatabaseProvider).paymentDao.forProject(projectId));
 
-/// Indian grouping: 12,34,567.
-String rupees(double v) {
-  final neg = v < 0;
-  final whole = v.abs().round().toString();
-  String grouped;
-  if (whole.length <= 3) {
-    grouped = whole;
-  } else {
-    final last3 = whole.substring(whole.length - 3);
-    var rest = whole.substring(0, whole.length - 3);
-    final parts = <String>[];
-    while (rest.length > 2) {
-      parts.insert(0, rest.substring(rest.length - 2));
-      rest = rest.substring(0, rest.length - 2);
-    }
-    if (rest.isNotEmpty) parts.insert(0, rest);
-    grouped = '${parts.join(',')},$last3';
-  }
-  return '${neg ? '-' : ''}₹$grouped';
-}
-
 String isoDay(DateTime d) =>
     '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-String shortDay(DateTime d) {
-  final l = d.toLocal();
-  return '${l.day.toString().padLeft(2, '0')}/${l.month.toString().padLeft(2, '0')}/${l.year}';
-}
+/// "6 Nov 2026", like every other date in the app.
+String shortDay(DateTime d) => fmtDate(d);
 
 bool canSeeMoneyIn(String? role) => role == Roles.owner || role == Roles.manager;
 
@@ -86,11 +65,11 @@ class MoneyView extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  if (showIn) _Figure('Received', rupees(inTotal), Colors.green.shade700),
-                  _Figure('Spent', rupees(spent), Colors.red.shade700),
+                  if (showIn) _Figure('Received', rupees(inTotal), toneColor(context, PillTone.ok)),
+                  _Figure('Spent', rupees(spent), toneColor(context, PillTone.danger)),
                   if (showIn)
                     _Figure('Balance', rupees(inTotal - spent),
-                        inTotal - spent < 0 ? Colors.red.shade700 : Theme.of(context).colorScheme.primary),
+                        inTotal - spent < 0 ? toneColor(context, PillTone.danger) : Theme.of(context).colorScheme.primary),
                 ],
               ),
             ),
@@ -107,7 +86,10 @@ class MoneyView extends ConsumerWidget {
                 tile: (e) => ListTile(
                   leading: CircleAvatar(child: Icon(_iconFor(e.category), size: 20)),
                   title: Text('${e.category}${e.workerId != null ? ' · ${workerName[e.workerId] ?? 'worker'}' : ''}'),
-                  subtitle: Text([e.incurredOn, if (e.note != null && e.note!.isNotEmpty) e.note!].join(' · ')),
+                  subtitle: Text([
+                    shortDay(DateTime.tryParse(e.incurredOn) ?? e.createdAt),
+                    if (e.note != null && e.note!.isNotEmpty) e.note!,
+                  ].join(' · ')),
                   trailing: Text(rupees(e.amount), style: const TextStyle(fontWeight: FontWeight.w600)),
                 ),
                 onAdd: () => addExpense(context, ref, projectId: projectId, userId: userId),
@@ -123,7 +105,7 @@ class MoneyView extends ConsumerWidget {
                     subtitle: Text([shortDay(p.receivedOn), paymentModes[p.mode] ?? p.mode, if (p.note != null) p.note!]
                         .join(' · ')),
                     trailing: Text(rupees(p.amount),
-                        style: TextStyle(fontWeight: FontWeight.w600, color: Colors.green.shade700)),
+                        style: TextStyle(fontWeight: FontWeight.w600, color: toneColor(context, PillTone.ok))),
                   ),
                   onAdd: () => _addReceived(context, ref),
                   addLabel: 'Add payment received',
@@ -146,7 +128,7 @@ class MoneyView extends ConsumerWidget {
             ? Center(child: Padding(padding: const EdgeInsets.all(24), child: Text(empty, textAlign: TextAlign.center)))
             : ListView(padding: const EdgeInsets.only(bottom: 80), children: [for (final r in list) tile(r)]),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, st) => ErrorState(error: e, stack: st),
       ),
       Positioned(
         right: 16,

@@ -15,6 +15,7 @@ import 'package:fieldos_mobile/services/billing_service.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
 import 'package:fieldos_mobile/services/sarvam_service.dart';
 import 'package:fieldos_mobile/services/settings_service.dart';
+import 'package:fieldos_mobile/services/translation_service.dart';
 import 'package:fieldos_mobile/services/voice_service.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
@@ -30,7 +31,11 @@ final settingsServiceProvider =
 
 final sarvamServiceProvider = Provider<SarvamService>((ref) => SarvamService());
 
-final voiceServiceProvider = Provider<VoiceService>((ref) => VoiceService());
+/// A recorder for the Sarvam fallback; each voice sheet makes its own and
+/// disposes it.
+final voiceServiceFactoryProvider = Provider<VoiceService Function()>((ref) => VoiceService.new);
+
+final translationServiceProvider = Provider<TranslationService>((ref) => TranslationService());
 
 final voiceDprAgentProvider = Provider<VoiceDprAgent>(
   (ref) => VoiceDprAgent(
@@ -89,10 +94,16 @@ final costSummaryProvider =
   return ProjectCostSummary.forProject(db, project);
 });
 
-/// Company-wide pending approvals (the multi-level approvals queue).
+/// Pending approvals for one company's projects, oldest first (the Home
+/// badge and the Approvals screen). Another company's approvals on the
+/// same phone stay out of it.
 final pendingApprovalsProvider =
-    FutureProvider.autoDispose<List<Approval>>((ref) {
-  return ref.watch(appDatabaseProvider).approvalDao.pendingFor(null);
+    FutureProvider.autoDispose.family<List<Approval>, String>((ref, companyId) async {
+  final db = ref.watch(appDatabaseProvider);
+  final ids = {for (final p in await db.projectDao.forCompany(companyId)) p.id};
+  final pending = await db.approvalDao.pendingFor(null);
+  return [for (final a in pending) if (ids.contains(a.projectId)) a]
+    ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 });
 
 /// Procurement lists (the RFQ -> PO -> GRN chain).

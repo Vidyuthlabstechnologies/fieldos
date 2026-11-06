@@ -1,4 +1,5 @@
-/// Installation-wide settings, including the optional Sarvam API key.
+/// Installation-wide settings: the language voice reports are spoken in,
+/// and the optional Sarvam API key.
 ///
 /// The key is write-only from the UI's perspective: it can be set, but the
 /// value is never echoed back (mirrors the desktop Settings behaviour). Only
@@ -8,6 +9,7 @@ library;
 import 'package:fieldos_mobile/data/app_database.dart';
 
 const sarvamApiKeySetting = 'sarvam_api_key';
+const voiceLanguageSetting = 'voice_language';
 
 class SettingsService {
   SettingsService(this.db);
@@ -24,4 +26,12 @@ class SettingsService {
       db.settingsDao.set(sarvamApiKeySetting, key.trim());
 
   Future<void> clearSarvamApiKey() => db.settingsDao.set(sarvamApiKeySetting, '');
+
+  /// The language voice reports were last spoken in ('hi-IN'), if any.
+  Future<String?> getVoiceLanguage() async {
+    final v = await db.settingsDao.get(voiceLanguageSetting);
+    return v == null || v.isEmpty ? null : v;
+  }
+
+  Future<void> setVoiceLanguage(String code) => db.settingsDao.set(voiceLanguageSetting, code);
 }

@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/estimation/estimation_calc.dart';
@@ -47,7 +49,7 @@ class _EstimationViewState extends ConsumerState<EstimationView> {
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, st) => ErrorState(error: e, stack: st),
           ),
         ),
       ],
@@ -173,7 +175,7 @@ class _CostHeadsScreenState extends ConsumerState<CostHeadsScreen> {
                       ],
                     ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('$e')),
+              error: (e, st) => ErrorState(error: e, stack: st),
             ),
           ),
         ],
@@ -254,7 +256,7 @@ class _CostHeadTile extends ConsumerWidget {
     return Card(
       child: ListTile(
         title: Text(costHead.name),
-        subtitle: Text('${costHead.calculationType} · ${costHead.rawUnit} -> ${costHead.billingUnit} (×${costHead.conversionFactor})${costHead.ratePerUnit != null ? '  •  ₹${costHead.ratePerUnit}/unit' : ''}'),
+        subtitle: Text('${costHead.calculationType} · ${costHead.rawUnit} -> ${costHead.billingUnit} (×${costHead.conversionFactor})${costHead.ratePerUnit != null ? '  •  ${rupees(costHead.ratePerUnit!, paise: true)}/${costHead.billingUnit}' : ''}'),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
@@ -318,7 +320,7 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
                               ],
                             ),
                       loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (e, _) => Center(child: Text('$e')),
+                      error: (e, st) => ErrorState(error: e, stack: st),
                     )
                 : ref.watch(measurementEntriesProvider(widget.costHead.id)).when(
                       data: (rows) => rows.isEmpty
@@ -334,7 +336,7 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
                               ],
                             ),
                       loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (e, _) => Center(child: Text('$e')),
+                      error: (e, st) => ErrorState(error: e, stack: st),
                     ),
           ),
           _TotalSection(
@@ -472,7 +474,8 @@ class _MeasurementEntryTile extends ConsumerWidget {
         ].join('  ·  ')),
         trailing: Text(
           '${qty.toStringAsFixed(3)} ${entry.isDeduction ? '-' : '+'}',
-          style: TextStyle(color: entry.isDeduction ? Colors.red : Colors.green, fontWeight: FontWeight.w600),
+          style: TextStyle(
+              color: toneColor(context, entry.isDeduction ? PillTone.danger : PillTone.ok), fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -565,19 +568,20 @@ class _TotalSection extends ConsumerWidget {
                 Text('Billing quantity: ${billingQty.toStringAsFixed(3)} ${costHead.billingUnit}',
                     style: const TextStyle(fontWeight: FontWeight.w600)),
                 if (amount != null)
-                  Text('Amount: ₹${amount.toStringAsFixed(2)}',
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.green))
+                  Text('Amount: ${rupees(amount.toDouble(), paise: true)}',
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: toneColor(context, PillTone.ok)))
                 else
-                  const Text('Amount: — (no rate set)', style: TextStyle(color: Colors.grey)),
+                  Text('Amount: not priced yet (add a rate to this item)',
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
               ],
             ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, st) => ErrorState(error: e, stack: st),
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
+      error: (e, st) => ErrorState(error: e, stack: st),
     );
   }
 }

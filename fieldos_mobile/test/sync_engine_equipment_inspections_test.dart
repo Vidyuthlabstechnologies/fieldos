@@ -157,4 +157,85 @@ void main() {
     await userClient.dispose();
     await adminClient.dispose();
   });
+
+  test('equipment logs and checklist ticks reach another phone', () async {
+    if (!stackUp) return;
+
+    final adminClient = SupabaseClient(SyncConfig.local.url, _serviceRoleKey);
+    final email = 'sync-equip-children-${_uuid.v4()}@test.local';
+    final password = 'test-password-123!';
+    final signUp = await adminClient.auth.admin.createUser(
+      AdminUserAttributes(email: email, password: password, emailConfirm: true),
+    );
+    final userId = signUp.user!.id;
+    final companyId = _uuid.v4();
+    final projectId = _uuid.v4();
+    await adminClient.from('companies').insert({'id': companyId, 'name': 'Checklist Co'});
+    await adminClient.from('company_members').insert({'company_id': companyId, 'user_id': userId, 'role': 'owner'});
+    await adminClient.from('projects').insert({'id': projectId, 'company_id': companyId, 'name': 'P', 'status': 'active'});
+
+    final siteClient = SupabaseClient(SyncConfig.local.url, SyncConfig.local.anonKey);
+    await siteClient.auth.signInWithPassword(email: email, password: password);
+    final site = AppDatabase.memory();
+    final siteEngine = SyncEngine(db: site, client: siteClient);
+
+    final crane = await site.equipmentDao.create(EquipmentCompanion.insert(
+      id: _uuid.v4(),
+      projectId: projectId,
+      name: 'Tower Crane #2',
+    ));
+    await site.equipmentDao.addLog(EquipmentLogsCompanion.insert(
+      id: _uuid.v4(),
+      equipmentId: crane.id,
+      logDate: DateTime(2026, 11, 6),
+      logType: 'fuel',
+      hoursUsed: const Value(7.5),
+      cost: const Value(4200.0),
+      description: const Value('Diesel, 45 litres'),
+      createdBy: userId,
+    ));
+    final walk = await site.inspectionDao.create(InspectionsCompanion.insert(
+      id: _uuid.v4(),
+      projectId: projectId,
+      title: 'Scaffold check',
+      inspectionType: 'safety',
+    ));
+    final guardrail = await site.inspectionDao.addItem(InspectionItemsCompanion.insert(
+      id: _uuid.v4(),
+      inspectionId: walk.id,
+      itemDescription: 'Guard rails fixed on every lift',
+    ));
+    await site.inspectionDao.addItem(InspectionItemsCompanion.insert(
+      id: _uuid.v4(),
+      inspectionId: walk.id,
+      itemDescription: 'Toe boards in place',
+      notes: const Value('Photo: /data/user/0/com.mldynamic.fieldos/app_flutter/inspection_1.jpg'),
+    ));
+    await site.inspectionDao.updateItemStatus(guardrail.id, 'pass');
+    final pushed = await siteEngine.pushPending();
+    expect(pushed.failed, 0);
+    expect(pushed.succeeded, 6, reason: 'equipment, log, inspection, two items, one tick');
+
+    // The office phone, signed in as the same account, gets all of it.
+    final officeClient = SupabaseClient(SyncConfig.local.url, SyncConfig.local.anonKey);
+    await officeClient.auth.signInWithPassword(email: email, password: password);
+    final office = AppDatabase.memory();
+    await SyncEngine(db: office, client: officeClient).pullAll();
+
+    final logs = await office.equipmentDao.logsFor(crane.id);
+    expect(logs.single.logType, 'fuel');
+    expect(logs.single.hoursUsed, 7.5);
+    expect(logs.single.cost, 4200.0);
+    expect(logs.single.logDate, DateTime(2026, 11, 6));
+    final items = await office.inspectionDao.itemsFor(walk.id);
+    expect(items.map((i) => i.itemDescription), ['Guard rails fixed on every lift', 'Toe boards in place']);
+    expect(items.first.status, 'pass');
+    expect(items.last.status, 'pending');
+
+    await site.close();
+    await office.close();
+    await siteClient.dispose();
+    await officeClient.dispose();
+    await adminClient.dispose();
+  });
 }

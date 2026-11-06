@@ -1,9 +1,10 @@
-import 'dart:ui' show PlatformDispatcher;
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/app.dart';
+import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/services/bug_report_service.dart';
 
 void main() {
@@ -17,6 +18,10 @@ void main() {
     RecentErrors.record(error, stack);
     return false;
   };
+  // The brand font's licence, listed with the packages' licences.
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks(const ['Inter (font)'], await rootBundle.loadString('assets/fonts/OFL.txt'));
+  });
   runApp(const ProviderScope(child: AppWithMaterial()));
 }
 
@@ -28,11 +33,8 @@ class AppWithMaterial extends StatelessWidget {
     return MaterialApp(
       title: 'FieldOS',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF1B5E20),
-        scaffoldBackgroundColor: const Color(0xFFF6F7F6),
-      ),
+      theme: buildFieldOsTheme(Brightness.light),
+      darkTheme: buildFieldOsTheme(Brightness.dark),
       home: const App(),
     );
   }

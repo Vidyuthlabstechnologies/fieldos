@@ -26,7 +26,9 @@ class ProjectCostSummary {
   final double budget;
   final double actual;
   final double variance;
-  final String status; // 'ok' | 'at_risk' | 'over'
+  /// 'ok' | 'at_risk' | 'over' | 'no_budget' (no priced BOQ yet, so
+  /// there is nothing to be over).
+  final String status;
   final int openIssues;
   final int dprCount;
   final List<String> alerts;
@@ -56,16 +58,18 @@ class ProjectCostSummary {
     final open = issues.where((i) => i.status != 'resolved').length;
     final dprs = await db.dprDao.forProject(project.id);
 
+    final budget = d['project_budget'] as double;
+    final noBudget = budget <= 0;
     return ProjectCostSummary(
       projectId: project.id,
       projectName: project.name,
-      budget: d['project_budget'] as double,
+      budget: budget,
       actual: d['project_actual'] as double,
       variance: d['project_variance'] as double,
-      status: d['project_status'] as String,
+      status: noBudget ? 'no_budget' : d['project_status'] as String,
       openIssues: open,
       dprCount: dprs.length,
-      alerts: List<String>.from(d['alerts'] as List),
+      alerts: noBudget ? const [] : List<String>.from(d['alerts'] as List),
     );
   }
 }

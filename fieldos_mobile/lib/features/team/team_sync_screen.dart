@@ -13,6 +13,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/core/brand.dart';
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
@@ -25,10 +28,17 @@ class TeamSyncScreen extends ConsumerStatefulWidget {
   ConsumerState<TeamSyncScreen> createState() => _TeamSyncScreenState();
 }
 
+/// The step after sign-in that needs the code we emailed.
+enum _EmailCodeStep { confirmSignUp, resetPassword }
+
 class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _code = TextEditingController();
+  final _emailCode = TextEditingController();
+  final _newPassword = TextEditingController();
+  _EmailCodeStep? _codeStep;
+  String _codeEmail = '';
   bool _busy = false;
   String? _message;
   bool _messageIsError = false;
@@ -51,6 +61,8 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     _email.dispose();
     _password.dispose();
     _code.dispose();
+    _emailCode.dispose();
+    _newPassword.dispose();
     super.dispose();
   }
 
@@ -60,14 +72,6 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       _message = text;
       _messageIsError = error;
     });
-  }
-
-  /// Supabase/PostgREST errors carry the RPC's own message ("invalid join
-  /// code"); show that rather than a stack-trace-looking toString.
-  String _readable(Object e) {
-    final s = e.toString();
-    final m = RegExp(r'message: ([^,)]+)').firstMatch(s);
-    return m?.group(1) ?? s;
   }
 
   Future<void> _refresh() async {
@@ -108,8 +112,10 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     });
     try {
       await body();
-    } catch (e) {
-      _say(_readable(e), error: true);
+    } catch (e, st) {
+      // Supabase errors carry the server's own short message ("invalid join
+      // code"); anything unexpected becomes a plain sentence.
+      _say(friendlyError(e, st), error: true);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -128,13 +134,88 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           case CloudSyncOutcome.signedUp:
             _say('Account created for $email.');
           case CloudSyncOutcome.needsEmailConfirmation:
-            _say('Check $email for a confirmation link, then sign in here.');
+            _startCodeStep(_EmailCodeStep.confirmSignUp, email);
+            _say('We sent a code to $email. Type it below to finish creating your account.');
+            _password.clear();
+            return;
+          case CloudSyncOutcome.wrongPassword:
+            _say('$email already has an account, and that password is not right for it. Try again, or tap '
+                '"Forgot password?" to choose a new one.', error: true);
+            return;
           case CloudSyncOutcome.failed:
-            _say(result.error ?? 'Could not sign in.', error: true);
+            final cause = result.cause;
+            _say(cause == null ? 'Could not sign in. Try again.' : friendlyError(cause, result.stack), error: true);
+            return;
         }
         _password.clear();
-        await ref.read(cloudSyncBootstrapProvider).ensureRunning();
-        await _refresh();
+        await _afterSignIn();
+      });
+
+  Future<void> _afterSignIn() async {
+    await ref.read(cloudSyncBootstrapProvider).ensureRunning();
+    await _refresh();
+  }
+
+  void _startCodeStep(_EmailCodeStep step, String email) => setState(() {
+        _codeStep = step;
+        _codeEmail = email;
+        _emailCode.clear();
+        _newPassword.clear();
+      });
+
+  void _leaveCodeStep() => setState(() {
+        _codeStep = null;
+        _message = null;
+        _emailCode.clear();
+        _newPassword.clear();
+      });
+
+  Future<void> _forgotPassword() => _run(() async {
+        final email = _email.text.trim();
+        if (!email.contains('@')) {
+          _say('Type your email above first, then tap "Forgot password?" again.', error: true);
+          return;
+        }
+        await ref.read(cloudSyncServiceProvider).sendPasswordResetCode(email);
+        _startCodeStep(_EmailCodeStep.resetPassword, email);
+        _say('If $email has an account, a code is on its way. Type it below with your new password.');
+      });
+
+  Future<void> _resendCode() => _run(() async {
+        final service = ref.read(cloudSyncServiceProvider);
+        if (_codeStep == _EmailCodeStep.resetPassword) {
+          await service.sendPasswordResetCode(_codeEmail);
+        } else {
+          await service.resendSignUpCode(_codeEmail);
+        }
+        _emailCode.clear();
+        _say('A new code is on its way to $_codeEmail. Codes stop working after an hour.');
+      });
+
+  Future<void> _submitCode() => _run(() async {
+        final code = _emailCode.text.replaceAll(RegExp(r'\s'), '');
+        if (!RegExp(r'^\d{6,10}$').hasMatch(code)) {
+          _say('Type the code from the email: it is 6 digits.', error: true);
+          return;
+        }
+        final service = ref.read(cloudSyncServiceProvider);
+        if (_codeStep == _EmailCodeStep.resetPassword) {
+          if (_newPassword.text.length < 6) {
+            _say('Choose a new password of at least 6 characters.', error: true);
+            return;
+          }
+          await service.resetPassword(email: _codeEmail, code: code, newPassword: _newPassword.text);
+          _say('New password saved. Signed in as $_codeEmail.');
+        } else {
+          await service.confirmSignUp(email: _codeEmail, code: code);
+          _say('Account created for $_codeEmail.');
+        }
+        setState(() {
+          _codeStep = null;
+          _emailCode.clear();
+          _newPassword.clear();
+        });
+        await _afterSignIn();
       });
 
   Future<void> _afterLinked(String companyId) async {
@@ -165,7 +246,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
             .adoptCloudCompany(id: cloud.companyId, name: cloud.name ?? 'Company', role: cloud.role);
         await _afterLinked(cloud.companyId);
         _code.clear();
-        _say('Joined ${cloud.name}. Projects will appear after the first sync.');
+        _say('Joined ${cloud.name ?? 'your company'}. Projects will appear after the first sync.');
         await _refresh();
       });
 
@@ -202,7 +283,10 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Theme.of(ctx).colorScheme.onError,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Delete account'),
           ),
@@ -230,6 +314,36 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         await _refresh();
       });
 
+  Future<void> _removeMember(String companyId, CloudMember m) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove from the team?'),
+        content: Text(
+          '${m.email} will stop getting this company\'s projects and cannot send anything new. '
+          'Work they already recorded stays.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Theme.of(ctx).colorScheme.onError,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await _run(() async {
+      await ref.read(cloudSyncServiceProvider).removeMember(companyId: companyId, userId: m.userId);
+      _say('${m.email} is no longer on the team.');
+      await _refresh();
+    });
+  }
+
   static const _roleLabels = {
     'owner': 'Owner',
     'project_manager': 'Project manager',
@@ -249,10 +363,10 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         'Team sync is not set up in this build of FieldOS. Everything still works offline on this phone.',
       ));
     } else if (!service.isSignedIn) {
-      children.addAll(_signInSection());
+      children.addAll(_codeStep == null ? _signInSection() : _codeSection(_codeStep!));
     } else {
       children.add(Row(children: [
-        const Icon(Icons.verified_user, size: 18, color: Colors.green),
+        const Icon(Icons.verified_user, size: 18, color: Brand.ok),
         const SizedBox(width: 8),
         Expanded(child: Text('Signed in as ${service.email ?? ''}')),
         TextButton(onPressed: _busy ? null : _signOut, child: const Text('Sign out')),
@@ -283,7 +397,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     if (_message != null) {
       children.addAll([
         const SizedBox(height: 16),
-        Text(_message!, style: TextStyle(color: _messageIsError ? Colors.red.shade700 : Colors.green.shade800)),
+        FormMessage(_message!, error: _messageIsError),
       ]);
     }
 
@@ -297,32 +411,93 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
   }
 
   List<Widget> _signInSection() => [
-        const Text('Sign in to share projects, DPRs, issues and chat with your team.',
-            style: TextStyle(fontSize: 16)),
+        Text('Sign in to share projects, daily reports, issues and chat with your team.',
+            style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        const Text('Use your own email. A new email creates an account automatically.',
-            style: TextStyle(color: Colors.black54)),
+        Text('Use your own email. A new email creates an account automatically.',
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         const SizedBox(height: 16),
         TextField(
           controller: _email,
-          decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+          decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.alternate_email)),
           keyboardType: TextInputType.emailAddress,
+          autofillHints: const [AutofillHints.email],
+          textInputAction: TextInputAction.next,
           autocorrect: false,
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _password,
-          decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
+          decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock_outline)),
           obscureText: true,
+          autofillHints: const [AutofillHints.password],
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _busy ? null : _signIn(),
           autocorrect: false,
         ),
-        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(onPressed: _busy ? null : _forgotPassword, child: const Text('Forgot password?')),
+        ),
         FilledButton(onPressed: _busy ? null : _signIn, child: _busyOr('Sign in')),
       ];
 
+  List<Widget> _codeSection(_EmailCodeStep step) {
+    final reset = step == _EmailCodeStep.resetPassword;
+    final muted = TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant);
+    return [
+      Text(reset ? 'Choose a new password' : 'Check your email', style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 8),
+      Text(
+        reset
+            ? 'Type the code we emailed to $_codeEmail, and the new password for your cloud account.'
+            : 'Type the code we emailed to $_codeEmail. It can take a minute to arrive; look in spam too.',
+        style: muted,
+      ),
+      const SizedBox(height: 16),
+      TextField(
+        key: const Key('email-code'),
+        controller: _emailCode,
+        decoration: const InputDecoration(labelText: 'Code from the email', prefixIcon: Icon(Icons.pin_outlined)),
+        keyboardType: TextInputType.number,
+        autofillHints: const [AutofillHints.oneTimeCode],
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
+        textInputAction: reset ? TextInputAction.next : TextInputAction.done,
+        onSubmitted: reset ? null : (_) => _busy ? null : _submitCode(),
+        autocorrect: false,
+        enableSuggestions: false,
+      ),
+      if (reset) ...[
+        const SizedBox(height: 8),
+        TextField(
+          key: const Key('new-cloud-password'),
+          controller: _newPassword,
+          decoration: const InputDecoration(labelText: 'New password', prefixIcon: Icon(Icons.lock_outline)),
+          obscureText: true,
+          autofillHints: const [AutofillHints.newPassword],
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _busy ? null : _submitCode(),
+          autocorrect: false,
+        ),
+      ],
+      const SizedBox(height: 12),
+      FilledButton(
+        onPressed: _busy ? null : _submitCode,
+        child: _busyOr(reset ? 'Save new password' : 'Confirm email'),
+      ),
+      const SizedBox(height: 4),
+      Wrap(spacing: 8, children: [
+        TextButton(onPressed: _busy ? null : _resendCode, child: const Text('Send a new code')),
+        TextButton(onPressed: _busy ? null : _leaveCodeStep, child: const Text('Back to sign in')),
+      ]),
+      if (!reset)
+        Text('Got a link instead of a code? Open it, then come back and sign in.', style: muted),
+    ];
+  }
+
   List<Widget> _linkSection(String? companyName, {required bool canRegister}) => [
         if (canRegister) ...[
-          Text('Put $companyName on the cloud', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          Text('Put $companyName on the cloud', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 4),
           const Text('You become the owner. Your team joins with a code you share from here.'),
           const SizedBox(height: 8),
@@ -335,15 +510,18 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           const Divider(),
           const SizedBox(height: 8),
         ],
-        const Text('Join your company', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        Text('Join your company', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
         const Text('Ask the owner for the join code shown on their Team & sync screen.'),
         const SizedBox(height: 8),
         TextField(
           controller: _code,
-          decoration: const InputDecoration(labelText: 'Join code', border: OutlineInputBorder()),
+          decoration: const InputDecoration(labelText: 'Join code', prefixIcon: Icon(Icons.key_outlined)),
           textCapitalization: TextCapitalization.characters,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _busy ? null : _joinCompany(),
           autocorrect: false,
+          enableSuggestions: false,
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
@@ -354,18 +532,17 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       ];
 
   List<Widget> _syncSection() {
-    final last = _lastSyncedAt == null
-        ? 'never'
-        : DateTime.parse(_lastSyncedAt!).toLocal().toString().split('.').first.substring(0, 16);
+    final lastAt = _lastSyncedAt == null ? null : DateTime.tryParse(_lastSyncedAt!);
+    final last = lastAt == null ? 'never' : fmtDateTime(lastAt);
     return [
-      const Text('Sync', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+      Text('Sync', style: Theme.of(context).textTheme.titleMedium),
       const SizedBox(height: 4),
       const Text('Runs automatically when the app opens and every few minutes while it is open.'),
       const SizedBox(height: 8),
       Text('Last synced: $last · Waiting to send: $_pending', style: Theme.of(context).textTheme.bodySmall),
       if (_parked > 0)
         Text('$_parked change${_parked == 1 ? '' : 's'} could not be sent after several tries.',
-            style: TextStyle(color: Colors.red.shade700)),
+            style: TextStyle(color: Theme.of(context).colorScheme.error)),
       const SizedBox(height: 8),
       Row(children: [
         FilledButton.icon(onPressed: _busy ? null : _syncNow, icon: const Icon(Icons.sync), label: _busyOr('Sync now')),
@@ -390,7 +567,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     final isOwner = cloud?.role == 'owner';
     final code = cloud?.joinCode;
     return [
-      const Text('Team', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+      Text('Team', style: Theme.of(context).textTheme.titleMedium),
       const SizedBox(height: 8),
       if (code != null)
         Card(
@@ -420,25 +597,33 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           ),
         ),
       if (_roster == null)
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          child: Text('Connect to the internet to see your team.', style: TextStyle(color: Colors.black54)),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text('Connect to the internet to see your team.',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         )
       else
         for (final m in _roster!)
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.person),
-            title: Text(m.email),
+            title: Text(m.email, maxLines: 1, overflow: TextOverflow.ellipsis),
             trailing: isOwner && m.role != 'owner'
-                ? DropdownButton<String>(
-                    value: m.role,
-                    items: [
-                      for (final r in ['project_manager', 'site_engineer'])
-                        DropdownMenuItem(value: r, child: Text(_roleLabels[r]!)),
-                    ],
-                    onChanged: _busy ? null : (r) => r == null ? null : _changeRole(companyId, m, r),
-                  )
+                ? Row(mainAxisSize: MainAxisSize.min, children: [
+                    DropdownButton<String>(
+                      value: m.role,
+                      items: [
+                        for (final r in ['project_manager', 'site_engineer'])
+                          DropdownMenuItem(value: r, child: Text(_roleLabels[r]!)),
+                      ],
+                      onChanged: _busy ? null : (r) => r == null ? null : _changeRole(companyId, m, r),
+                    ),
+                    IconButton(
+                      tooltip: 'Remove from the team',
+                      icon: const Icon(Icons.person_remove_outlined),
+                      onPressed: _busy ? null : () => _removeMember(companyId, m),
+                    ),
+                  ])
                 : Text(_roleLabels[m.role] ?? m.role),
           ),
     ];

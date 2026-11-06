@@ -9,6 +9,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -25,7 +26,7 @@ class SiteMapScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Site map')),
       body: projects.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, st) => ErrorState(error: e, stack: st),
         data: (all) {
           final placed = all.where((p) => p.locationLat != null && p.locationLng != null).toList();
           final unplaced = all.where((p) => p.locationLat == null || p.locationLng == null).toList();

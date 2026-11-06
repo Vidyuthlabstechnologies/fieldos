@@ -44,8 +44,28 @@ There is no shared account any more. Each person signs up from the app
 "Confirm email" **off** in Authentication -> Providers -> Email (see
 `docs/PLAY_STORE_LAUNCH.md` section 1): Supabase's built-in mailer sends
 only a few emails an hour, and company data is already gated by the join
-code. Turn it back on once custom SMTP is configured; the app then tells
-the person to confirm and sign in.
+code. Turn it back on once custom SMTP is configured; the app then asks
+for the code from the confirmation email.
+
+**Emails carry codes, not links.** The app's "Forgot password?" (and the
+sign-up confirmation, when it is on) asks the person to type the 6-digit
+code from the email. Supabase's default emails send a link to the Site URL
+instead, which is not the app. So:
+
+1. Authentication -> Email Templates -> **Reset password**: subject "Your
+   FieldOS password reset code", body = `supabase/templates/recovery.html`.
+2. Same page, **Confirm signup**: subject "Your FieldOS code", body =
+   `supabase/templates/confirmation.html`.
+3. Authentication -> SMTP Settings: set up a real sender (for example
+   Amazon SES or Resend, from `noreply@` a domain you own). Supabase's
+   built-in mailer only delivers to the project's own team members, so
+   without this nobody else gets a reset code.
+4. Authentication -> URL Configuration: set the Site URL to the company
+   website (it is only used by links, which these templates no longer
+   have).
+
+The local stack (`supabase start`) already uses both templates
+(`supabase/config.toml`).
 
 The owner taps "Put company on the cloud", which calls the
 `ensure_company` RPC: it creates the company row, makes the caller its
