@@ -16,6 +16,7 @@ class SubscriptionState {
     this.expiresAt,
     this.willRenew = false,
     this.billingIssue = false,
+    this.complimentary = false,
   });
 
   static const none = SubscriptionState(active: false);
@@ -29,9 +30,17 @@ class SubscriptionState {
   /// cancelled). The person keeps access during the store's grace period.
   final bool billingIssue;
 
+  /// Given free by the FieldOS team (an access code, or free time granted
+  /// in RevenueCat), not bought: there is nothing to manage or cancel in
+  /// the store.
+  final bool complimentary;
+
   String describe() {
     if (!active) return 'No active subscription';
     final date = expiresAt == null ? null : fmtDate(expiresAt!);
+    if (complimentary) {
+      return date == null ? 'Free access from the FieldOS team' : 'Free access from the FieldOS team until $date';
+    }
     if (billingIssue) {
       return 'Payment problem: update your payment method in the store${date == null ? '' : ' before $date'}';
     }

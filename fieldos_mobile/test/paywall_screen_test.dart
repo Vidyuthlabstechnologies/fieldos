@@ -5,6 +5,7 @@ import 'package:purchases_flutter/purchases_flutter.dart' show PurchasesErrorCod
 
 import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/subscription/my_subscription_sheet.dart';
 import 'package:fieldos_mobile/features/subscription/paywall_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/billing_service.dart';
@@ -20,6 +21,8 @@ class FakeBilling extends BillingService {
   SubscriptionState restored = SubscriptionState.none;
   SubscriptionState? live = SubscriptionState.none;
   final bought = <String>[];
+  bool codes = true;
+  final redeemed = <String>[];
 
   @override
   bool get setUp => true;
@@ -40,6 +43,16 @@ class FakeBilling extends BillingService {
   Future<SubscriptionState> restore() async => restored;
   @override
   Future<SubscriptionState?> current({bool fresh = false}) async => live;
+  @override
+  bool get acceptsAccessCodes => codes;
+  @override
+  Future<SubscriptionState> redeemAccessCode(String typed) async {
+    redeemed.add(typed);
+    if (accessCodeCustomerId(typed) == 'access_K7Q2M9XR4TBZ') {
+      return SubscriptionState(active: true, complimentary: true, expiresAt: DateTime(2027, 11, 6));
+    }
+    throw BillingException('That code is not valid or has ended. Check it and try again, or ask whoever gave it to you.');
+  }
 }
 
 void main() {
@@ -51,12 +64,13 @@ void main() {
     List<PlanOffer> offers = const [monthly],
     Size size = const Size(412, 915),
     Brightness brightness = Brightness.light,
+    bool codes = true,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final db = AppDatabase.memory();
-    final billing = FakeBilling(db, offers: offers);
+    final billing = FakeBilling(db, offers: offers)..codes = codes;
     final unlocked = <String>[];
     final container = ProviderContainer(overrides: [
       appDatabaseProvider.overrideWithValue(db),
@@ -136,5 +150,92 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('No FieldOS subscription was found on this Google Play account'), findsOneWidget);
     expect(unlocked, isEmpty);
+  });
+
+  Future<void> openMenu(WidgetTester tester) async {
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('an access code from the FieldOS team opens the app; a wrong one says so and keeps the dialog',
+      (tester) async {
+    final (billing, unlocked) = await pump(tester, size: const Size(320, 568));
+    await openMenu(tester);
+    await tester.tap(find.text('Enter access code'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('such as app reviewers'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('access-code')), 'ZZZZ-ZZZZ-ZZZZ');
+    await tester.tap(find.text('Unlock'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('not valid or has ended'), findsOneWidget);
+    expect(unlocked, isEmpty);
+
+    await tester.enterText(find.byKey(const Key('access-code')), 'k7q2-m9xr-4tbz');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(billing.redeemed, ['ZZZZ-ZZZZ-ZZZZ', 'k7q2-m9xr-4tbz']);
+    expect(find.text('Enter access code'), findsNothing, reason: 'the dialog closed');
+    expect(unlocked, ['yes']);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('cancelling the access code leaves the paywall as it was', (tester) async {
+    final (billing, unlocked) = await pump(tester);
+    await openMenu(tester);
+    await tester.tap(find.text('Enter access code'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(billing.redeemed, isEmpty);
+    expect(unlocked, isEmpty);
+    expect(find.text('Start 3-day free trial'), findsOneWidget);
+  });
+
+  testWidgets('no access code where the store does not take them (iPhone)', (tester) async {
+    await pump(tester, codes: false);
+    await openMenu(tester);
+    expect(find.text('Email support'), findsOneWidget);
+    expect(find.text('Enter access code'), findsNothing);
+  });
+
+  testWidgets('My subscription: free access from the team has nothing to manage, cancel or restore', (tester) async {
+    tester.view.physicalSize = const Size(412, 915);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final db = AppDatabase.memory();
+    final billing = FakeBilling(db, offers: const [monthly])
+      ..live = SubscriptionState(active: true, complimentary: true, expiresAt: DateTime(2027, 11, 6));
+    final container = ProviderContainer(overrides: [
+      appDatabaseProvider.overrideWithValue(db),
+      billingServiceProvider.overrideWithValue(billing),
+    ]);
+    addTearDown(() async {
+      container.dispose();
+      await db.close();
+    });
+    Future<void> showSheet() async {
+      await tester.pumpWidget(UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: buildFieldOsTheme(Brightness.light),
+          home: const Scaffold(body: MySubscriptionSheet()),
+        ),
+      ));
+      await tester.pumpAndSettle();
+    }
+
+    await showSheet();
+    expect(find.text('Free access from the FieldOS team until 6 Nov 2027'), findsOneWidget);
+    expect(find.textContaining('nothing to pay or cancel'), findsOneWidget);
+    expect(find.text('Manage or cancel'), findsNothing);
+    expect(find.text('Restore purchase'), findsNothing);
+
+    billing.live = SubscriptionState(active: true, expiresAt: DateTime(2026, 12, 6), willRenew: true);
+    await tester.pumpWidget(const SizedBox());
+    await showSheet();
+    expect(find.text('Subscribed, renews on 6 Dec 2026'), findsOneWidget);
+    expect(find.text('Manage or cancel'), findsOneWidget);
+    expect(find.text('Restore purchase'), findsOneWidget);
   });
 }

@@ -124,24 +124,35 @@ class _MySubscriptionSheetState extends ConsumerState<MySubscriptionSheet> {
               FormMessage(_message!, error: _messageIsError),
             ],
             const SizedBox(height: 20),
-            FilledButton.icon(
-              onPressed: _busy ? null : _manage,
-              icon: const Icon(Icons.open_in_new),
-              label: Text(s?.billingIssue ?? false ? 'Update payment method' : 'Manage or cancel'),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: _busy ? null : _restore,
-              child: _busy
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Restore purchase'),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'To cancel, open ${_billing.cancelPath}. You keep FieldOS Pro until the end of the period you have '
-              'paid for, and your records stay on this phone.',
-              style: muted,
-            ),
+            // Free access from the team: there is no store purchase to
+            // manage, and Restore would swap the access for this phone's
+            // own store account.
+            if (s?.complimentary ?? false)
+              Text(
+                'The FieldOS team gave you this access, so there is nothing to pay or cancel. When it ends, FieldOS '
+                'asks you to choose a plan, and your records stay on this phone.',
+                style: muted,
+              )
+            else ...[
+              FilledButton.icon(
+                onPressed: _busy ? null : _manage,
+                icon: const Icon(Icons.open_in_new),
+                label: Text(s?.billingIssue ?? false ? 'Update payment method' : 'Manage or cancel'),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: _busy ? null : _restore,
+                child: _busy
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Text('Restore purchase'),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'To cancel, open ${_billing.cancelPath}. You keep FieldOS Pro until the end of the period you have '
+                'paid for, and your records stay on this phone.',
+                style: muted,
+              ),
+            ],
           ],
         ),
       ),
