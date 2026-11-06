@@ -95,5 +95,36 @@ void main() {
       expect(rows.first['github_issue'], isNull);
       await admin.from('bug_reports').delete().like('message', '$marker%');
     });
+
+    test('one account sends at most 10 reports an hour; the next waits on the phone', () async {
+      if (!stackUp) {
+        markTestSkipped('local Supabase stack not running');
+        return;
+      }
+      final admin = SupabaseClient(SyncConfig.local.url, localServiceRoleKey);
+      addTearDown(admin.dispose);
+      final email = 'bugs-${const Uuid().v4()}@test.local';
+      final created = await admin.auth.admin
+          .createUser(AdminUserAttributes(email: email, password: 'test-password-123!', emailConfirm: true));
+      addTearDown(() => admin.auth.admin.deleteUser(created.user!.id));
+      final marker = 'bug-limit-${const Uuid().v4()}';
+      addTearDown(() => admin.from('bug_reports').delete().like('message', '$marker%'));
+      final user = SyncConfig.local.createClient();
+      addTearDown(user.dispose);
+      await user.auth.signInWithPassword(email: email, password: 'test-password-123!');
+      final db = AppDatabase.memory();
+      addTearDown(db.close);
+      final service = BugReportService(db: db, client: user);
+
+      for (var i = 0; i < 10; i++) {
+        expect(await service.submit(_report('$marker report $i')), BugReportOutcome.sent);
+      }
+      expect(await service.submit(_report('$marker one too many')), BugReportOutcome.queued);
+      expect(await service.pendingCount(), 1, reason: 'kept on the phone for a later try, not lost');
+      await expectLater(
+        user.from('bug_reports').insert({'message': '$marker straight to the table'}),
+        throwsA(isA<PostgrestException>().having((e) => e.message, 'message', 'too many bug reports')),
+      );
+    });
   });
 }

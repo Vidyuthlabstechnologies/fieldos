@@ -138,9 +138,25 @@ class CloudSyncService {
 
   /// A colleague's device: joins the company behind [code] as a site
   /// engineer (the owner can promote them from the Team screen).
+  ///
+  /// A wrong code comes back as `{"error": ...}` rather than a database
+  /// error, so the server can count it (see join_attempts in
+  /// supabase/migrations/20261106000000_join_limits_and_approvals.sql).
+  /// Both are thrown as the PostgrestException an older server raised, so
+  /// friendlyError has one sentence for each.
   Future<CloudCompany> joinCompany(String code) async {
     final res = await client.rpc('join_company', params: {'p_code': code});
     final m = Map<String, dynamic>.from(res as Map);
+    switch (m['error']) {
+      case null:
+        break;
+      case 'too_many_attempts':
+        throw const PostgrestException(message: 'too many join attempts', code: 'P0001');
+      case 'invalid_join_code':
+        throw const PostgrestException(message: 'invalid join code', code: 'P0002');
+      case final Object other:
+        throw PostgrestException(message: '$other');
+    }
     return CloudCompany(companyId: m['company_id'] as String, role: m['role'] as String, name: m['name'] as String?);
   }
 
@@ -154,6 +170,11 @@ class CloudSyncService {
 
   Future<void> setMemberRole({required String companyId, required String userId, required String role}) =>
       client.rpc('set_member_role', params: {'p_company_id': companyId, 'p_user_id': userId, 'p_role': role});
+
+  /// Owner only: takes someone who has left off the company. Their phone
+  /// keeps what it already has, but gets nothing new and can send nothing.
+  Future<void> removeMember({required String companyId, required String userId}) =>
+      client.rpc('remove_member', params: {'p_company_id': companyId, 'p_user_id': userId});
 
   Future<String> regenerateJoinCode(String companyId) async =>
       await client.rpc('regenerate_join_code', params: {'p_company_id': companyId}) as String;

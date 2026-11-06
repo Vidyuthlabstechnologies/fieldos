@@ -90,6 +90,10 @@ String? _cloudServerMessage(sb.PostgrestException e) {
       return 'You are the owner, so your own role stays the same.';
     case 'only the company owner can reset the join code':
       return 'Only the company owner can make a new join code.';
+    case 'only the company owner can remove people':
+      return 'Only the company owner can remove people from the team.';
+    case 'the owner cannot be removed':
+      return 'The company owner cannot be removed from the team.';
   }
   switch (e.code) {
     case 'PGRST301' || 'PGRST302' || 'PGRST303' || '28000':

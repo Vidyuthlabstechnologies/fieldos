@@ -140,15 +140,18 @@ String approvalLabel(String type) => switch (type) {
       _ => '${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}',
     };
 
-/// Raise a budget-overrun approval for a project (called from the dashboard
-/// when a site tips into "over" budget).
-Future<void> raiseBudgetOverrunApproval(AppDatabase db, String projectId, double variance) async {
+/// Raise a budget-overrun approval for a project (the dashboard's "Ask for
+/// approval" on a site that is over budget). [requestedBy] is the person
+/// asking: the cloud only accepts a request raised by the signed-in user,
+/// and its requested_by column holds a user id.
+Future<void> raiseBudgetOverrunApproval(AppDatabase db, String projectId, double variance,
+    {required String requestedBy}) async {
   await db.approvalDao.create(ApprovalsCompanion.insert(
     id: const Uuid().v4(),
     projectId: Value(projectId),
     entityType: 'budget_overrun',
     entityId: projectId,
-    requestedBy: 'cost_engine',
+    requestedBy: requestedBy,
     status: const Value('pending'),
     decisionNote: Value('Spending is ${rupees(variance.abs())} over the BOQ budget.'),
   ));

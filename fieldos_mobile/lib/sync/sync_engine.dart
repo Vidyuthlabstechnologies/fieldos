@@ -199,7 +199,9 @@ class SyncEngine {
     await pull('issues', (r) => db.issueDao.upsertFromRemote(issueFromSupabaseJson(r)));
     await pull('workers', (r) => db.workerDao.upsertFromRemote(workerFromSupabaseJson(r)));
     await pull('equipment', (r) => db.equipmentDao.upsertFromRemote(equipmentFromSupabaseJson(r)));
+    await pull('equipment_logs', (r) => db.equipmentDao.upsertLogFromRemote(equipmentLogFromSupabaseJson(r)));
     await pull('inspections', (r) => db.inspectionDao.upsertFromRemote(inspectionFromSupabaseJson(r)));
+    await pull('inspection_items', (r) => db.inspectionDao.upsertItemFromRemote(inspectionItemFromSupabaseJson(r)));
     await pull('subcontractors', (r) => db.subcontractorDao.upsertFromRemote(subcontractorFromSupabaseJson(r)));
     await pull('work_orders', (r) => db.workOrderDao.upsertFromRemoteWorkOrder(workOrderFromSupabaseJson(r)));
     await pull('approvals', (r) => db.approvalDao.upsertFromRemote(approvalFromSupabaseJson(r)));

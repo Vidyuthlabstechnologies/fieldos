@@ -12,11 +12,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 
 class EquipmentView extends ConsumerStatefulWidget {
-  const EquipmentView({
-    super.key,
-    required this.projectId,
-    required this.userId,
-  });
+  const EquipmentView({super.key, required this.projectId, required this.userId});
   final String projectId;
   final String userId;
 
@@ -38,11 +34,7 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
                 : ListView(
                     children: [
                       for (final e in rows)
-                        _EquipmentTile(
-                          equipment: e,
-                          projectId: widget.projectId,
-                          userId: widget.userId,
-                        ),
+                        _EquipmentTile(equipment: e, projectId: widget.projectId, userId: widget.userId),
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -63,17 +55,34 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Add equipment'),
+        scrollable: true,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Name')),
-            TextField(controller: equipmentType, decoration: const InputDecoration(labelText: 'Type')),
-            TextField(controller: model, decoration: const InputDecoration(labelText: 'Model')),
-            TextField(controller: registrationNumber, decoration: const InputDecoration(labelText: 'Registration No.')),
+            TextField(
+              controller: name,
+              autofocus: true,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(labelText: 'Name', hintText: 'e.g. JCB 3DX'),
+            ),
+            TextField(
+              controller: equipmentType,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(labelText: 'Type (optional)', hintText: 'e.g. Excavator'),
+            ),
+            TextField(
+              controller: model,
+              decoration: const InputDecoration(labelText: 'Model (optional)'),
+            ),
+            TextField(
+              controller: registrationNumber,
+              textCapitalization: TextCapitalization.characters,
+              decoration: const InputDecoration(labelText: 'Registration number (optional)'),
+            ),
             TextField(
               controller: dailyRate,
-              decoration: const InputDecoration(labelText: 'Daily rate'),
-              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Daily rate (optional)', prefixText: '₹ '),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
           ],
         ),
@@ -84,37 +93,38 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
       ),
     );
     if (ok != true || name.text.trim().isEmpty || !context.mounted) return;
-    await ref.read(appDatabaseProvider).equipmentDao.create(EquipmentCompanion.insert(
-          id: const Uuid().v4(),
-          projectId: widget.projectId,
-          name: name.text.trim(),
-          equipmentType: Value(equipmentType.text.trim()),
-          model: Value(model.text.trim()),
-          registrationNumber: Value(registrationNumber.text.trim()),
-          dailyRate: Value(double.tryParse(dailyRate.text)),
-          status: const Value('available'),
-        ));
+    await ref
+        .read(appDatabaseProvider)
+        .equipmentDao
+        .create(
+          EquipmentCompanion.insert(
+            id: const Uuid().v4(),
+            projectId: widget.projectId,
+            name: name.text.trim(),
+            equipmentType: Value(_orNull(equipmentType.text)),
+            model: Value(_orNull(model.text)),
+            registrationNumber: Value(_orNull(registrationNumber.text)),
+            dailyRate: Value(_amount(dailyRate.text)),
+            status: const Value('available'),
+          ),
+        );
     ref.invalidate(equipmentProvider(widget.projectId));
   }
 }
 
 Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd) => Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleSmall),
-          IconButton(icon: const Icon(Icons.add), tooltip: 'Add', onPressed: onAdd),
-        ],
-      ),
-    );
+  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(title, style: Theme.of(context).textTheme.titleSmall),
+      IconButton(icon: const Icon(Icons.add), tooltip: 'Add', onPressed: onAdd),
+    ],
+  ),
+);
 
 class _EquipmentTile extends ConsumerWidget {
-  const _EquipmentTile({
-    required this.equipment,
-    required this.projectId,
-    required this.userId,
-  });
+  const _EquipmentTile({required this.equipment, required this.projectId, required this.userId});
   final EquipmentData equipment;
   final String projectId;
   final String userId;
@@ -124,11 +134,13 @@ class _EquipmentTile extends ConsumerWidget {
     return Card(
       child: ListTile(
         title: Text(equipment.name),
-        subtitle: Text([
-          equipment.equipmentType ?? '',
-          equipment.model ?? '',
-          equipment.registrationNumber ?? '',
-        ].where((e) => e.isNotEmpty).join(' · ')),
+        subtitle: Text(
+          [
+            equipment.equipmentType ?? '',
+            equipment.model ?? '',
+            equipment.registrationNumber ?? '',
+          ].where((e) => e.isNotEmpty).join(' · '),
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -147,115 +159,165 @@ class _EquipmentTile extends ConsumerWidget {
                 PopupMenuItem(value: 'breakdown', child: Text('Breakdown')),
               ],
             ),
-            IconButton(
-              icon: const Icon(Icons.list_alt),
-              tooltip: 'View logs',
-              onPressed: () => _showLogs(context, ref),
-            ),
+            IconButton(icon: const Icon(Icons.list_alt), tooltip: 'View logs', onPressed: () => _showLogs(context)),
           ],
         ),
-        onTap: () => _showLogs(context, ref),
+        onTap: () => _showLogs(context),
       ),
     );
   }
 
   Widget _statusBadge(String status) => switch (status) {
-        'available' => const StatusPill('Available', tone: PillTone.ok),
-        'in_use' => const StatusPill('In use'),
-        'maintenance' => const StatusPill('In maintenance', tone: PillTone.warn),
-        'breakdown' => const StatusPill('Broken down', tone: PillTone.danger),
-        _ => StatusPill(status.replaceAll('_', ' ')),
-      };
+    'available' => const StatusPill('Available', tone: PillTone.ok),
+    'in_use' => const StatusPill('In use'),
+    'maintenance' => const StatusPill('In maintenance', tone: PillTone.warn),
+    'breakdown' => const StatusPill('Broken down', tone: PillTone.danger),
+    _ => StatusPill(status.replaceAll('_', ' ')),
+  };
 
-  Future<void> _showLogs(BuildContext context, WidgetRef ref) async {
-    final logs = await ref.read(equipmentLogsProvider(equipment.id).future);
-    if (!context.mounted) return;
-    await showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Logs — ${equipment.name}'),
-        content: SizedBox(
-          width: 400,
-          child: logs.isEmpty
-              ? const Text('No logs yet.')
-              : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (final l in logs)
-                      ListTile(
-                        dense: true,
-                        title: Text('${fmtDate(l.logDate, short: true)} · ${l.logType.replaceAll('_', ' ')}'),
-                        subtitle: Text([
-                          l.hoursUsed != null ? '${l.hoursUsed} hrs' : '',
-                          l.cost != null ? rupees(l.cost!) : '',
-                          l.description ?? '',
-                        ].where((e) => e.isNotEmpty).join(' · ')),
-                      ),
-                  ],
-                ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Close')),
-          FilledButton(
-            onPressed: () => _addLog(context, ref),
-            child: const Text('Add log'),
+  Future<void> _showLogs(BuildContext context) => showDialog<void>(
+    context: context,
+    // Watches the logs, so one just added shows at once (the list used
+    // to be read once, when the dialog opened).
+    builder: (ctx) => Consumer(
+      builder: (ctx, ref, _) {
+        final logs = ref.watch(equipmentLogsProvider(equipment.id));
+        return AlertDialog(
+          title: Text(equipment.name),
+          scrollable: true,
+          content: SizedBox(
+            width: 400,
+            child: logs.when(
+              data: (rows) => rows.isEmpty
+                  ? const Text('No logs yet. Add hours worked, fuel, repairs or servicing.')
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (final l in rows)
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            title: Text('${fmtDate(l.logDate, short: true)} · ${_logTypeLabel(l.logType)}'),
+                            subtitle: Text(
+                              [
+                                if (l.hoursUsed != null) '${fmtQty(l.hoursUsed!)} h',
+                                if (l.cost != null) rupees(l.cost!, paise: true),
+                                if ((l.description ?? '').isNotEmpty) l.description!,
+                              ].join(' · '),
+                            ),
+                          ),
+                      ],
+                    ),
+              loading: () => const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, st) => Text(friendlyError(e, st)),
+            ),
           ),
-        ],
-      ),
-    );
-  }
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Close')),
+            FilledButton(onPressed: () => _addLog(ctx, ref), child: const Text('Add log')),
+          ],
+        );
+      },
+    ),
+  );
 
   Future<void> _addLog(BuildContext context, WidgetRef ref) async {
     final logType = TextEditingController(text: 'usage');
     final hoursUsed = TextEditingController();
     final description = TextEditingController();
     final cost = TextEditingController();
+    String? hoursError;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Add equipment log'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            DropdownButtonFormField<String>(
-              initialValue: 'usage',
-              decoration: const InputDecoration(labelText: 'Log type'),
-              items: const ['usage', 'maintenance', 'repair', 'fuel', 'inspection']
-                  .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                  .toList(),
-              onChanged: (v) => logType.text = v ?? 'usage',
-            ),
-            TextField(
-              controller: hoursUsed,
-              decoration: const InputDecoration(labelText: 'Hours used'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(controller: description, decoration: const InputDecoration(labelText: 'Description')),
-            TextField(
-              controller: cost,
-              decoration: const InputDecoration(labelText: 'Cost'),
-              keyboardType: TextInputType.number,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Add equipment log'),
+          scrollable: true,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                initialValue: 'usage',
+                decoration: const InputDecoration(labelText: 'What happened'),
+                items: [for (final t in _logTypes) DropdownMenuItem(value: t, child: Text(_logTypeLabel(t)))],
+                onChanged: (v) => logType.text = v ?? 'usage',
+              ),
+              TextField(
+                controller: hoursUsed,
+                decoration: InputDecoration(labelText: 'Hours (optional)', errorText: hoursError),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              ),
+              TextField(
+                controller: description,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: const InputDecoration(labelText: 'Note (optional)'),
+              ),
+              TextField(
+                controller: cost,
+                decoration: const InputDecoration(labelText: 'Cost (optional)', prefixText: '₹ '),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+            FilledButton(
+              onPressed: () {
+                // The cloud keeps hours below 10,000 (a meter reading, at most).
+                final h = _amount(hoursUsed.text);
+                final bad = hoursUsed.text.trim().isNotEmpty && (h == null || h >= 10000);
+                if (bad) {
+                  setDialogState(() => hoursError = 'Enter hours as a number below 10,000');
+                  return;
+                }
+                Navigator.of(ctx).pop(true);
+              },
+              child: const Text('Save'),
             ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
-        ],
       ),
     );
     if (ok != true || !context.mounted) return;
-    await ref.read(appDatabaseProvider).equipmentDao.addLog(EquipmentLogsCompanion.insert(
-          id: const Uuid().v4(),
-          equipmentId: equipment.id,
-          logDate: DateTime.now(),
-          logType: logType.text,
-          hoursUsed: Value(double.tryParse(hoursUsed.text)),
-          description: Value(description.text.trim()),
-          cost: Value(double.tryParse(cost.text)),
-          createdBy: userId,
-        ));
+    await ref
+        .read(appDatabaseProvider)
+        .equipmentDao
+        .addLog(
+          EquipmentLogsCompanion.insert(
+            id: const Uuid().v4(),
+            equipmentId: equipment.id,
+            logDate: DateTime.now(),
+            logType: logType.text,
+            hoursUsed: Value(_amount(hoursUsed.text)),
+            description: Value(_orNull(description.text)),
+            cost: Value(_amount(cost.text)),
+            createdBy: userId,
+          ),
+        );
     ref.invalidate(equipmentLogsProvider(equipment.id));
     ref.invalidate(equipmentProvider(projectId));
   }
+}
+
+const _logTypes = ['usage', 'fuel', 'maintenance', 'repair', 'inspection'];
+
+String _logTypeLabel(String t) => switch (t) {
+  'usage' => 'Worked',
+  'fuel' => 'Fuel',
+  'maintenance' => 'Servicing',
+  'repair' => 'Repair',
+  'inspection' => 'Inspection',
+  _ => t.replaceAll('_', ' '),
+};
+
+String? _orNull(String text) => text.trim().isEmpty ? null : text.trim();
+
+/// A typed amount, tolerating "1,500" and a stray "₹"; null when blank,
+/// unreadable or negative.
+double? _amount(String text) {
+  final v = double.tryParse(text.replaceAll(RegExp(r'[₹,\s]'), ''));
+  return v == null || v < 0 || v.isNaN || v.isInfinite ? null : v;
 }

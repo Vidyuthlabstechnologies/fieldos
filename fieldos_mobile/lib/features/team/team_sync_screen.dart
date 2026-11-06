@@ -283,7 +283,10 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Theme.of(ctx).colorScheme.onError,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Delete account'),
           ),
@@ -310,6 +313,36 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         await ref.read(cloudSyncServiceProvider).setMemberRole(companyId: companyId, userId: m.userId, role: role);
         await _refresh();
       });
+
+  Future<void> _removeMember(String companyId, CloudMember m) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove from the team?'),
+        content: Text(
+          '${m.email} will stop getting this company\'s projects and cannot send anything new. '
+          'Work they already recorded stays.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Theme.of(ctx).colorScheme.onError,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await _run(() async {
+      await ref.read(cloudSyncServiceProvider).removeMember(companyId: companyId, userId: m.userId);
+      _say('${m.email} is no longer on the team.');
+      await _refresh();
+    });
+  }
 
   static const _roleLabels = {
     'owner': 'Owner',
@@ -574,16 +607,23 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.person),
-            title: Text(m.email),
+            title: Text(m.email, maxLines: 1, overflow: TextOverflow.ellipsis),
             trailing: isOwner && m.role != 'owner'
-                ? DropdownButton<String>(
-                    value: m.role,
-                    items: [
-                      for (final r in ['project_manager', 'site_engineer'])
-                        DropdownMenuItem(value: r, child: Text(_roleLabels[r]!)),
-                    ],
-                    onChanged: _busy ? null : (r) => r == null ? null : _changeRole(companyId, m, r),
-                  )
+                ? Row(mainAxisSize: MainAxisSize.min, children: [
+                    DropdownButton<String>(
+                      value: m.role,
+                      items: [
+                        for (final r in ['project_manager', 'site_engineer'])
+                          DropdownMenuItem(value: r, child: Text(_roleLabels[r]!)),
+                      ],
+                      onChanged: _busy ? null : (r) => r == null ? null : _changeRole(companyId, m, r),
+                    ),
+                    IconButton(
+                      tooltip: 'Remove from the team',
+                      icon: const Icon(Icons.person_remove_outlined),
+                      onPressed: _busy ? null : () => _removeMember(companyId, m),
+                    ),
+                  ])
                 : Text(_roleLabels[m.role] ?? m.role),
           ),
     ];

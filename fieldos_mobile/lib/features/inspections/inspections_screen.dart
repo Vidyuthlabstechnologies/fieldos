@@ -1,6 +1,8 @@
 /// Inspections with checklist items (safety, quality, structural, MEP, etc.).
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -13,11 +15,7 @@ import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 
 class InspectionsView extends ConsumerStatefulWidget {
-  const InspectionsView({
-    super.key,
-    required this.projectId,
-    required this.userId,
-  });
+  const InspectionsView({super.key, required this.projectId, required this.userId});
   final String projectId;
   final String userId;
 
@@ -39,11 +37,7 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
                 : ListView(
                     children: [
                       for (final i in rows)
-                        _InspectionTile(
-                          inspection: i,
-                          projectId: widget.projectId,
-                          userId: widget.userId,
-                        ),
+                        _InspectionTile(inspection: i, projectId: widget.projectId, userId: widget.userId),
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -63,22 +57,18 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Add inspection'),
+        scrollable: true,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
+            TextField(
+              controller: title,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
             DropdownButtonFormField<String>(
               initialValue: 'safety',
               decoration: const InputDecoration(labelText: 'Type'),
-              items: const [
-                'safety',
-                'quality',
-                'structural',
-                'mep',
-                'environmental',
-                'final',
-                'other'
-              ].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+              items: [for (final t in _inspectionTypes) DropdownMenuItem(value: t, child: Text(_typeLabel(t)))],
               onChanged: (v) => inspectionType.text = v ?? 'safety',
             ),
             TextField(
@@ -107,35 +97,36 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
       ),
     );
     if (ok != true || title.text.trim().isEmpty || !context.mounted) return;
-    await ref.read(appDatabaseProvider).inspectionDao.create(InspectionsCompanion.insert(
-          id: const Uuid().v4(),
-          projectId: widget.projectId,
-          title: title.text.trim(),
-          inspectionType: inspectionType.text,
-          scheduledDate: scheduledOn == null ? const Value.absent() : Value(scheduledOn!),
-          status: const Value('open'),
-        ));
+    await ref
+        .read(appDatabaseProvider)
+        .inspectionDao
+        .create(
+          InspectionsCompanion.insert(
+            id: const Uuid().v4(),
+            projectId: widget.projectId,
+            title: title.text.trim(),
+            inspectionType: inspectionType.text,
+            scheduledDate: scheduledOn == null ? const Value.absent() : Value(scheduledOn!),
+            status: const Value('open'),
+          ),
+        );
     ref.invalidate(inspectionsProvider(widget.projectId));
   }
 }
 
 Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd) => Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleSmall),
-          IconButton(icon: const Icon(Icons.add), tooltip: 'Add', onPressed: onAdd),
-        ],
-      ),
-    );
+  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(title, style: Theme.of(context).textTheme.titleSmall),
+      IconButton(icon: const Icon(Icons.add), tooltip: 'Add', onPressed: onAdd),
+    ],
+  ),
+);
 
 class _InspectionTile extends ConsumerWidget {
-  const _InspectionTile({
-    required this.inspection,
-    required this.projectId,
-    required this.userId,
-  });
+  const _InspectionTile({required this.inspection, required this.projectId, required this.userId});
   final Inspection inspection;
   final String projectId;
   final String userId;
@@ -145,107 +136,105 @@ class _InspectionTile extends ConsumerWidget {
     return Card(
       child: ListTile(
         title: Text(inspection.title),
-        subtitle: Text([
-          _typeLabel(inspection.inspectionType),
-          if (inspection.scheduledDate != null) 'due ${fmtDate(inspection.scheduledDate!, short: true)}',
-        ].join(' · ')),
+        subtitle: Text(
+          [
+            _typeLabel(inspection.inspectionType),
+            if (inspection.completedDate != null)
+              'done ${fmtDate(inspection.completedDate!, short: true)}'
+            else if (inspection.scheduledDate != null)
+              'due ${fmtDate(inspection.scheduledDate!, short: true)}',
+          ].join(' · '),
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _statusBadge(inspection.status),
+            _statusBadge(inspection),
             const SizedBox(width: 8),
             IconButton(
               icon: const Icon(Icons.checklist),
               tooltip: 'Checklist',
-              onPressed: () => _showChecklist(context, ref),
+              onPressed: () => _showChecklist(context),
             ),
           ],
         ),
-        onTap: () => _showChecklist(context, ref),
+        onTap: () => _showChecklist(context),
       ),
     );
   }
 
-String _typeLabel(String type) => switch (type) {
-        'mep' => 'MEP',
-        '' => 'Inspection',
-        _ => '${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}',
-      };
-
-Widget _statusBadge(String status) => switch (status) {
-        'open' => const StatusPill('Open'),
-        'in_progress' => const StatusPill('In progress', tone: PillTone.warn),
-        'completed' => const StatusPill('Done', tone: PillTone.ok),
-        _ => StatusPill(status.replaceAll('_', ' ')),
-      };
-
-  Future<void> _showChecklist(BuildContext context, WidgetRef ref) async {
-    final items = await ref.read(inspectionItemsProvider(inspection.id).future);
-    if (!context.mounted) return;
-    await showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: Text('Checklist — ${inspection.title}'),
+  Future<void> _showChecklist(BuildContext context) => showDialog<void>(
+    context: context,
+    // Watches the items, so a status picked here or an item just added
+    // shows at once. The list used to be read once when the dialog
+    // opened, so a changed status snapped back to the old one.
+    builder: (ctx) => Consumer(
+      builder: (ctx, ref, _) {
+        final items = ref.watch(inspectionItemsProvider(inspection.id));
+        return AlertDialog(
+          title: Text(inspection.title),
+          scrollable: true,
           content: SizedBox(
             width: 400,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (items.isEmpty)
-                  const Text('No checklist items yet.')
-                else
-                  ...items.map((item) => _ChecklistItemTile(
-                        item: item,
-                        onChanged: (newStatus) async {
-                          await ref.read(appDatabaseProvider).inspectionDao.updateItemStatus(item.id, newStatus);
-                          ref.invalidate(inspectionItemsProvider(inspection.id));
-                          ref.invalidate(inspectionsProvider(projectId));
-                          setDialogState(() {});
-                        },
-                      )),
-              ],
+            child: items.when(
+              data: (rows) => rows.isEmpty
+                  ? const Text('Nothing on the checklist yet. Add each thing to check, with a photo if it helps.')
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (final item in rows)
+                          _ChecklistItemTile(
+                            item: item,
+                            onChanged: (status) async {
+                              await ref.read(appDatabaseProvider).inspectionDao.updateItemStatus(item.id, status);
+                              ref.invalidate(inspectionItemsProvider(inspection.id));
+                            },
+                          ),
+                      ],
+                    ),
+              loading: () => const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, st) => Text(friendlyError(e, st)),
             ),
           ),
           actions: [
             TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Close')),
-            FilledButton(
-              onPressed: () => _addItem(context, ref, setDialogState),
-              child: const Text('Add item'),
-            ),
+            OutlinedButton(onPressed: () => _addItem(ctx, ref), child: const Text('Add item')),
             if (inspection.status != 'completed')
-              FilledButton.tonal(
-                onPressed: () => _completeInspection(context, ref),
-                child: const Text('Complete inspection'),
-              ),
+              FilledButton(onPressed: () => _completeInspection(ctx, ref), child: const Text('Complete')),
           ],
-        ),
-      ),
-    );
-  }
+        );
+      },
+    ),
+  );
 
-  Future<void> _addItem(BuildContext context, WidgetRef ref, Function(void Function()) setDialogState) async {
+  Future<void> _addItem(BuildContext context, WidgetRef ref) async {
     final description = TextEditingController();
-    final photoPath = ValueNotifier<String?>(null);
+    String? photoPath;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (_, setItemState) => AlertDialog(
           title: const Text('Add checklist item'),
+          scrollable: true,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: description, decoration: const InputDecoration(labelText: 'Description')),
+              TextField(
+                controller: description,
+                autofocus: true,
+                textCapitalization: TextCapitalization.sentences,
+                maxLength: 300,
+                decoration: const InputDecoration(labelText: 'What to check', counterText: ''),
+              ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
-                icon: const Icon(Icons.photo_camera),
-                label: Text(photoPath.value == null ? 'Attach photo evidence' : 'Photo attached'),
+                icon: Icon(photoPath == null ? Icons.photo_camera_outlined : Icons.check_circle_outline),
+                label: Text(photoPath == null ? 'Add a photo' : 'Photo added'),
                 onPressed: () async {
                   final path = await captureCameraFirst(ctx, prefix: 'inspection');
-                  if (path != null) {
-                    photoPath.value = path;
-                    setItemState(() {});
-                  }
+                  if (path != null) setItemState(() => photoPath = path);
                 },
               ),
             ],
@@ -257,36 +246,38 @@ Widget _statusBadge(String status) => switch (status) {
         ),
       ),
     );
-    if (ok != true || description.text.trim().isEmpty || !context.mounted) return;
-    
-    // Store photo path in notes field for now (inspection_items table doesn't have a dedicated photo_path column)
-    final notes = photoPath.value != null ? 'Photo: ${photoPath.value}' : null;
-    
-    await ref.read(appDatabaseProvider).inspectionDao.addItem(InspectionItemsCompanion.insert(
-          id: const Uuid().v4(),
-          inspectionId: inspection.id,
-          itemDescription: description.text.trim(),
-          status: const Value('pending'),
-          notes: Value(notes),
-        ));
+    final text = description.text.trim();
+    description.dispose();
+    if (ok != true || text.isEmpty || !context.mounted) return;
+
+    // The item has no photo column, so the photo's path goes in its notes
+    // (see splitInspectionNotes).
+    await ref
+        .read(appDatabaseProvider)
+        .inspectionDao
+        .addItem(
+          InspectionItemsCompanion.insert(
+            id: const Uuid().v4(),
+            inspectionId: inspection.id,
+            itemDescription: text,
+            status: const Value('pending'),
+            notes: Value(photoPath == null ? null : '$_photoPrefix$photoPath'),
+          ),
+        );
     ref.invalidate(inspectionItemsProvider(inspection.id));
-    ref.invalidate(inspectionsProvider(projectId));
-    setDialogState(() {});
   }
 
   Future<void> _completeInspection(BuildContext context, WidgetRef ref) async {
-    final overallResult = TextEditingController(text: 'pass');
+    var result = 'pass';
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Complete inspection'),
         content: DropdownButtonFormField<String>(
-          initialValue: 'pass',
+          initialValue: result,
           decoration: const InputDecoration(labelText: 'Overall result'),
-          items: const ['pass', 'fail', 'partial']
-              .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-              .toList(),
-          onChanged: (v) => overallResult.text = v ?? 'pass',
+          items: [for (final e in _results.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
+          onChanged: (v) => result = v ?? 'pass',
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
@@ -295,36 +286,114 @@ Widget _statusBadge(String status) => switch (status) {
       ),
     );
     if (ok != true || !context.mounted) return;
-    await ref.read(appDatabaseProvider).inspectionDao.complete(inspection.id, overallResult.text);
+    await ref.read(appDatabaseProvider).inspectionDao.complete(inspection.id, result);
     ref.invalidate(inspectionsProvider(projectId));
-    ref.invalidate(inspectionItemsProvider(inspection.id));
     if (context.mounted) Navigator.of(context).pop();
   }
 }
 
-class _ChecklistItemTile extends ConsumerWidget {
-  const _ChecklistItemTile({
-    required this.item,
-    required this.onChanged,
-  });
+const _inspectionTypes = ['safety', 'quality', 'structural', 'mep', 'environmental', 'final', 'other'];
+
+String _typeLabel(String type) => switch (type) {
+  'mep' => 'MEP',
+  '' => 'Inspection',
+  _ => '${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}',
+};
+
+/// An inspection's overall result, in words.
+const _results = {'pass': 'Passed', 'fail': 'Failed', 'partial': 'Partly passed'};
+
+Widget _statusBadge(Inspection i) => switch (i.status) {
+  'completed' => switch (i.overallResult) {
+    'pass' => const StatusPill('Passed', tone: PillTone.ok),
+    'fail' => const StatusPill('Failed', tone: PillTone.danger),
+    'partial' => const StatusPill('Partly passed', tone: PillTone.warn),
+    _ => const StatusPill('Done', tone: PillTone.ok),
+  },
+  'open' => const StatusPill('Open'),
+  'in_progress' => const StatusPill('In progress', tone: PillTone.warn),
+  final other => StatusPill(other.replaceAll('_', ' ')),
+};
+
+/// A checklist item's status, in words.
+const _itemStatuses = {'pending': 'Not checked', 'pass': 'Pass', 'fail': 'Fail', 'na': 'Not needed'};
+
+const _photoPrefix = 'Photo: ';
+
+/// A checklist item's notes hold its photo's path on the phone that took it
+/// as `Photo: /the/path`. Splits that from any other note, so the path
+/// itself is never shown as text.
+({String? photoPath, String? text}) splitInspectionNotes(String? notes) {
+  final lines = (notes ?? '').split('\n');
+  String? photoPath;
+  final rest = <String>[];
+  for (final line in lines) {
+    if (photoPath == null && line.startsWith(_photoPrefix) && line.length > _photoPrefix.length) {
+      photoPath = line.substring(_photoPrefix.length).trim();
+    } else if (line.trim().isNotEmpty) {
+      rest.add(line.trim());
+    }
+  }
+  return (photoPath: photoPath, text: rest.isEmpty ? null : rest.join('\n'));
+}
+
+class _ChecklistItemTile extends StatelessWidget {
+  const _ChecklistItemTile({required this.item, required this.onChanged});
   final InspectionItem item;
-  final Function(String) onChanged;
+  final ValueChanged<String> onChanged;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final (:photoPath, :text) = splitInspectionNotes(item.notes);
+    final photo = photoPath == null ? null : File(photoPath);
+    final onThisPhone = photo != null && photo.existsSync();
+    final details = [if (photoPath != null && !onThisPhone) 'Photo is on the phone that took it', ?text];
     return ListTile(
+      contentPadding: EdgeInsets.zero,
       dense: true,
+      leading: onThisPhone ? _PhotoThumb(photo) : null,
       title: Text(item.itemDescription),
-      subtitle: item.notes != null && item.notes!.isNotEmpty ? Text(item.notes!) : null,
+      subtitle: details.isEmpty ? null : Text(details.join('\n')),
       trailing: DropdownButton<String>(
-        value: item.status,
-        items: const ['pending', 'pass', 'fail', 'na']
-            .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-            .toList(),
+        value: _itemStatuses.containsKey(item.status) ? item.status : null,
+        hint: Text(item.status),
+        items: [for (final e in _itemStatuses.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
         onChanged: (s) {
-          if (s != null) onChanged(s);
+          if (s != null && s != item.status) onChanged(s);
         },
       ),
     );
   }
+}
+
+class _PhotoThumb extends StatelessWidget {
+  const _PhotoThumb(this.file);
+  final File file;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: 'Open photo',
+    child: InkWell(
+      borderRadius: BorderRadius.circular(6),
+      onTap: () => showDialog<void>(
+        context: context,
+        builder: (ctx) => Dialog(
+          clipBehavior: Clip.antiAlias,
+          child: InteractiveViewer(child: Image.file(file)),
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: Image.file(
+          file,
+          width: 44,
+          height: 44,
+          fit: BoxFit.cover,
+          cacheWidth: 132,
+          errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined),
+        ),
+      ),
+    ),
+  );
 }

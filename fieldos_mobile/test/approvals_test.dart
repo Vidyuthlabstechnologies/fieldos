@@ -9,7 +9,7 @@ final _uuid = Uuid();
 void main() {
   test('budget overrun raises a pending approval, then can be decided', () async {
     final db = AppDatabase.memory();
-    await raiseBudgetOverrunApproval(db, 'p1', -650.0);
+    await raiseBudgetOverrunApproval(db, 'p1', -650.0, requestedBy: 'u1');
 
     var pending = await db.approvalDao.pendingFor(null);
     expect(pending.length, 1);

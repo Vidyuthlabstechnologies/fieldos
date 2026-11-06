@@ -111,10 +111,10 @@ void main() {
     testWidgets('an approval names its project, and the owner can approve it', (tester) async {
       final (container, db, companyId) = await setUpCompany(tester);
       await tester.runAsync(() async {
-        await raiseBudgetOverrunApproval(db, 'p1', -25000);
+        await raiseBudgetOverrunApproval(db, 'p1', -25000, requestedBy: 'u1');
         // Another company's approval on the same phone stays out of the list.
         await db.projectDao.create(ProjectsCompanion.insert(id: 'other', companyId: 'someone-else', name: 'Not ours'));
-        await raiseBudgetOverrunApproval(db, 'other', -1);
+        await raiseBudgetOverrunApproval(db, 'other', -1, requestedBy: 'u1');
       });
       await pumpApp(tester, container, ApprovalsScreen(companyId: companyId));
       expect(find.text('Site over budget'), findsOneWidget);
@@ -135,7 +135,7 @@ void main() {
     testWidgets('a site engineer sees what is waiting but cannot decide it', (tester) async {
       final (container, db, companyId) = await setUpCompany(tester);
       await tester.runAsync(() async {
-        await raiseBudgetOverrunApproval(db, 'p1', -100);
+        await raiseBudgetOverrunApproval(db, 'p1', -100, requestedBy: 'u1');
         await container.read(sessionProvider.notifier).setLocalRole(companyId, 'site_engineer');
       });
       await pumpApp(tester, container, ApprovalsScreen(companyId: companyId));

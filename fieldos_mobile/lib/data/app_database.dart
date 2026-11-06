@@ -1057,12 +1057,26 @@ class ApprovalDao extends DatabaseAccessor<AppDatabase> with _$ApprovalDaoMixin 
     return q.get();
   }
 
+  /// Records the decision. What was asked (the request's own note, such as
+  /// "Spending is ₹25,000 over the BOQ budget.") stays, and a reason, if
+  /// one is given, goes after it; it used to replace the request text, so
+  /// a decided approval no longer said what it had been about.
   Future<void> decide(String id, bool approved, String approverId, String? note) {
     return transaction(() async {
+      final before = await (select(approvals)..where((a) => a.id.equals(id))).getSingle();
+      final reason = note?.trim() ?? '';
+      final asked = before.decisionNote?.trim() ?? '';
+      final joined = reason.isEmpty
+          ? before.decisionNote
+          : asked.isEmpty
+              ? reason
+              : '$asked\nReason: $reason';
+      // The column holds 300 characters.
+      final text = joined != null && joined.length > 300 ? joined.substring(0, 300) : joined;
       await (update(approvals)..where((a) => a.id.equals(id))).write(ApprovalsCompanion(
         status: Value(approved ? 'approved' : 'rejected'),
         approverId: Value(approverId),
-        decisionNote: Value(note),
+        decisionNote: Value(text),
         decidedAt: Value(DateTime.now()),
       ));
       final row = await (select(approvals)..where((a) => a.id.equals(id))).getSingle();
@@ -1129,9 +1143,20 @@ class EquipmentDao extends DatabaseAccessor<AppDatabase> with _$EquipmentDaoMixi
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
       await into(equipmentLogs).insert(companion.copyWith(id: Value(id)));
-      return (await (select(equipmentLogs)..where((l) => l.id.equals(id))).getSingle());
+      final row = await (select(equipmentLogs)..where((l) => l.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'equipment_logs',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(equipmentLogToSupabaseJson(row)),
+      );
+      return row;
     });
   }
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertLogFromRemote(EquipmentLogsCompanion companion) =>
+      into(equipmentLogs).insertOnConflictUpdate(companion);
 
   Future<List<EquipmentLog>> logsFor(String equipmentId) {
     return (select(equipmentLogs)
@@ -1207,9 +1232,20 @@ class InspectionDao extends DatabaseAccessor<AppDatabase> with _$InspectionDaoMi
         id: Value(id),
         sortOrder: Value(sortOrder),
       ));
-      return (await (select(inspectionItems)..where((item) => item.id.equals(id))).getSingle());
+      final row = await (select(inspectionItems)..where((item) => item.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'inspection_items',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(inspectionItemToSupabaseJson(row)),
+      );
+      return row;
     });
   }
+
+  /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
+  Future<void> upsertItemFromRemote(InspectionItemsCompanion companion) =>
+      into(inspectionItems).insertOnConflictUpdate(companion);
 
   Future<List<InspectionItem>> itemsFor(String inspectionId) {
     return (select(inspectionItems)
@@ -1218,12 +1254,23 @@ class InspectionDao extends DatabaseAccessor<AppDatabase> with _$InspectionDaoMi
         .get();
   }
 
+  /// A ticked checklist item, sent to the team like every other change (it
+  /// used to stay on the phone that ticked it).
   Future<void> updateItemStatus(String id, String status, {String? notes}) {
     final companion = InspectionItemsCompanion(
       status: Value(status),
       notes: notes != null ? Value(notes) : const Value.absent(),
     );
-    return (update(inspectionItems)..where((item) => item.id.equals(id))).write(companion);
+    return transaction(() async {
+      await (update(inspectionItems)..where((item) => item.id.equals(id))).write(companion);
+      final row = await (select(inspectionItems)..where((item) => item.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'inspection_items',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(inspectionItemToSupabaseJson(row)),
+      );
+    });
   }
 }
 

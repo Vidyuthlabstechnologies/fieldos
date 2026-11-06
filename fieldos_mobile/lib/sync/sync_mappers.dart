@@ -35,11 +35,12 @@
 /// deliberately NOT wired to those tables. Since schema v7 the phone's own
 /// shapes sync instead, to phone-shaped cloud tables (site_attendance,
 /// site_material_receipts, plus site_expenses, site_material_usage and
-/// site_payments_received): see the section at the end of this file. EquipmentLogs and
-/// InspectionItems (child/detail rows of Equipment/Inspection) are also not
-/// yet wired -- unlike the above, no shape mismatch is known here,
-/// just not yet verified. Extending to the rest of the ~30 tables is a
-/// follow-up, same pattern, per-table -- verify the shapes actually
+/// site_payments_received): see the section at the end of this file.
+/// EquipmentLogs and InspectionItems (child rows of Equipment/Inspection)
+/// sync too, checked column by column against the initial schema
+/// (equipment_logs.log_type and inspection_items.status use the same
+/// vocabularies as the phone). Extending to the rest of the ~30 tables is
+/// a follow-up, same pattern, per-table -- verify the shapes actually
 /// correspond before wiring, the way this file's docstring itself
 /// demonstrates by omission.
 library;
@@ -127,6 +128,26 @@ Map<String, dynamic> inspectionToSupabaseJson(Inspection i) => {
       'completed_date': _dateOnly(i.completedDate),
       'overall_result': i.overallResult,
       'notes': i.notes,
+    };
+
+Map<String, dynamic> equipmentLogToSupabaseJson(EquipmentLog l) => {
+      'id': l.id,
+      'equipment_id': l.equipmentId,
+      'log_date': _dateOnly(l.logDate),
+      'log_type': l.logType,
+      'hours_used': l.hoursUsed,
+      'description': l.description,
+      'cost': l.cost,
+      'created_by': l.createdBy,
+    };
+
+Map<String, dynamic> inspectionItemToSupabaseJson(InspectionItem i) => {
+      'id': i.id,
+      'inspection_id': i.inspectionId,
+      'item_description': i.itemDescription,
+      'status': i.status,
+      'notes': i.notes,
+      'sort_order': i.sortOrder,
     };
 
 Map<String, dynamic> subcontractorToSupabaseJson(Subcontractor s) => {
@@ -359,6 +380,27 @@ InspectionsCompanion inspectionFromSupabaseJson(Map<String, dynamic> row) => Ins
       completedDate: Value(row['completed_date'] == null ? null : DateTime.parse(row['completed_date'] as String)),
       overallResult: Value(row['overall_result'] as String?),
       notes: Value(row['notes'] as String?),
+    );
+
+EquipmentLogsCompanion equipmentLogFromSupabaseJson(Map<String, dynamic> row) => EquipmentLogsCompanion.insert(
+      id: row['id'] as String,
+      equipmentId: row['equipment_id'] as String,
+      logDate: DateTime.parse(row['log_date'] as String),
+      logType: row['log_type'] as String,
+      hoursUsed: Value((row['hours_used'] as num?)?.toDouble()),
+      description: Value(row['description'] as String?),
+      cost: Value((row['cost'] as num?)?.toDouble()),
+      createdBy: row['created_by'] as String,
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(DateTime.parse(row['created_at'] as String)),
+    );
+
+InspectionItemsCompanion inspectionItemFromSupabaseJson(Map<String, dynamic> row) => InspectionItemsCompanion.insert(
+      id: row['id'] as String,
+      inspectionId: row['inspection_id'] as String,
+      itemDescription: row['item_description'] as String,
+      status: Value(row['status'] as String? ?? 'pending'),
+      notes: Value(row['notes'] as String?),
+      sortOrder: Value((row['sort_order'] as num?)?.toInt() ?? 0),
     );
 
 SubcontractorsCompanion subcontractorFromSupabaseJson(Map<String, dynamic> row) => SubcontractorsCompanion.insert(

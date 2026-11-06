@@ -161,11 +161,13 @@ class _ProjectHealthCard extends ConsumerWidget {
 
   Future<void> _raise(BuildContext context, WidgetRef ref, String projectId, double variance) async {
     final db = ref.read(appDatabaseProvider);
+    final user = ref.read(sessionProvider).user;
+    if (user == null) return;
     if (await hasPendingBudgetApproval(db, projectId)) {
       if (context.mounted) showSnack(context, 'This site is already waiting for approval.');
       return;
     }
-    await raiseBudgetOverrunApproval(db, projectId, variance);
+    await raiseBudgetOverrunApproval(db, projectId, variance, requestedBy: user.id);
     ref.invalidate(pendingApprovalsProvider(companyId));
     if (context.mounted) showSnack(context, 'Sent to Approvals for the owner or a project manager');
   }
