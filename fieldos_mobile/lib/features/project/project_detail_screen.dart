@@ -480,6 +480,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
   }
 
   Future<void> _share(DprEntry d) async {
+    showSnack(context, 'Preparing the report…');
     try {
       await shareDprReport(
         db: ref.read(appDatabaseProvider),
