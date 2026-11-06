@@ -108,5 +108,20 @@ void main() {
       expect(await auth.login('Suresh', 'oldpass'), isNotEmpty);
       expect(await auth.login('suresh', 'oldpass'), isNotEmpty);
     });
+
+    test('a company needs a name, which is tidied before saving', () async {
+      final db = AppDatabase.memory();
+      addTearDown(() async => db.close());
+      final auth = AuthService(db);
+      final u = await auth.register(username: 'owner', name: 'Owner', password: '123456');
+      expect(
+        () => auth.createCompany(userId: u.id, name: '   '),
+        throwsA(isA<AuthException>().having((e) => e.message, 'message', 'Enter your company name.')),
+      );
+      expect(() => auth.createCompany(userId: u.id, name: 'x' * 81), throwsA(isA<AuthException>()));
+      final c = await auth.createCompany(userId: u.id, name: '  Sri   Sai Constructions ');
+      expect(c.name, 'Sri Sai Constructions');
+      expect(await auth.roleInCompany(userId: u.id, companyId: c.id), Roles.owner);
+    });
   });
 }

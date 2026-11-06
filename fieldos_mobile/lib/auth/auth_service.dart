@@ -115,12 +115,21 @@ class AuthService {
     return db.userDao.byId(session.userId);
   }
 
-  /// Create a company and make [userId] its owner.
+  /// Longest company name the app accepts.
+  static const maxCompanyNameLength = 80;
+
+  /// Create a company and make [userId] its owner. Throws [AuthException]
+  /// with a message for the screen when the name is unusable.
   Future<Company> createCompany({
     required String userId,
     required String name,
   }) async {
-    final company = await db.companyDao.create(name);
+    final cleaned = name.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (cleaned.isEmpty) throw AuthException('Enter your company name.');
+    if (cleaned.length > maxCompanyNameLength) {
+      throw AuthException('Use at most $maxCompanyNameLength characters for the company name.');
+    }
+    final company = await db.companyDao.create(cleaned);
     await db.companyDao.addMember(
       companyId: company.id,
       userId: userId,

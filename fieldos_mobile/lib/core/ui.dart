@@ -199,3 +199,27 @@ class SectionHeader extends StatelessWidget {
     );
   }
 }
+
+/// The result of a form, under its fields: red with a warning sign for a
+/// problem, green with a tick when something worked.
+class FormMessage extends StatelessWidget {
+  const FormMessage(this.message, {super.key, this.error = true});
+
+  final String message;
+  final bool error;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
+    final color = error ? theme.colorScheme.error : (dark ? const Color(0xFF8FD9B0) : Brand.ok);
+    return Semantics(
+      liveRegion: true,
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Icon(error ? Icons.error_outline : Icons.check_circle_outline, size: 20, color: color),
+        const SizedBox(width: 8),
+        Expanded(child: Text(message, style: theme.textTheme.bodyMedium?.copyWith(color: color))),
+      ]),
+    );
+  }
+}

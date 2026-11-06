@@ -13,6 +13,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/core/brand.dart';
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
@@ -62,14 +65,6 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     });
   }
 
-  /// Supabase/PostgREST errors carry the RPC's own message ("invalid join
-  /// code"); show that rather than a stack-trace-looking toString.
-  String _readable(Object e) {
-    final s = e.toString();
-    final m = RegExp(r'message: ([^,)]+)').firstMatch(s);
-    return m?.group(1) ?? s;
-  }
-
   Future<void> _refresh() async {
     final service = ref.read(cloudSyncServiceProvider);
     final db = ref.read(appDatabaseProvider);
@@ -108,8 +103,10 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     });
     try {
       await body();
-    } catch (e) {
-      _say(_readable(e), error: true);
+    } catch (e, st) {
+      // Supabase errors carry the server's own short message ("invalid join
+      // code"); anything unexpected becomes a plain sentence.
+      _say(friendlyError(e, st), error: true);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -165,7 +162,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
             .adoptCloudCompany(id: cloud.companyId, name: cloud.name ?? 'Company', role: cloud.role);
         await _afterLinked(cloud.companyId);
         _code.clear();
-        _say('Joined ${cloud.name}. Projects will appear after the first sync.');
+        _say('Joined ${cloud.name ?? 'your company'}. Projects will appear after the first sync.');
         await _refresh();
       });
 
@@ -252,7 +249,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       children.addAll(_signInSection());
     } else {
       children.add(Row(children: [
-        const Icon(Icons.verified_user, size: 18, color: Colors.green),
+        const Icon(Icons.verified_user, size: 18, color: Brand.ok),
         const SizedBox(width: 8),
         Expanded(child: Text('Signed in as ${service.email ?? ''}')),
         TextButton(onPressed: _busy ? null : _signOut, child: const Text('Sign out')),
@@ -283,7 +280,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     if (_message != null) {
       children.addAll([
         const SizedBox(height: 16),
-        Text(_message!, style: TextStyle(color: _messageIsError ? Colors.red.shade700 : Colors.green.shade800)),
+        FormMessage(_message!, error: _messageIsError),
       ]);
     }
 
@@ -297,23 +294,28 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
   }
 
   List<Widget> _signInSection() => [
-        const Text('Sign in to share projects, DPRs, issues and chat with your team.',
-            style: TextStyle(fontSize: 16)),
+        Text('Sign in to share projects, daily reports, issues and chat with your team.',
+            style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        const Text('Use your own email. A new email creates an account automatically.',
-            style: TextStyle(color: Colors.black54)),
+        Text('Use your own email. A new email creates an account automatically.',
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         const SizedBox(height: 16),
         TextField(
           controller: _email,
-          decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+          decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.alternate_email)),
           keyboardType: TextInputType.emailAddress,
+          autofillHints: const [AutofillHints.email],
+          textInputAction: TextInputAction.next,
           autocorrect: false,
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _password,
-          decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
+          decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock_outline)),
           obscureText: true,
+          autofillHints: const [AutofillHints.password],
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _busy ? null : _signIn(),
           autocorrect: false,
         ),
         const SizedBox(height: 12),
@@ -322,7 +324,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
 
   List<Widget> _linkSection(String? companyName, {required bool canRegister}) => [
         if (canRegister) ...[
-          Text('Put $companyName on the cloud', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          Text('Put $companyName on the cloud', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 4),
           const Text('You become the owner. Your team joins with a code you share from here.'),
           const SizedBox(height: 8),
@@ -335,15 +337,18 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           const Divider(),
           const SizedBox(height: 8),
         ],
-        const Text('Join your company', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        Text('Join your company', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
         const Text('Ask the owner for the join code shown on their Team & sync screen.'),
         const SizedBox(height: 8),
         TextField(
           controller: _code,
-          decoration: const InputDecoration(labelText: 'Join code', border: OutlineInputBorder()),
+          decoration: const InputDecoration(labelText: 'Join code', prefixIcon: Icon(Icons.key_outlined)),
           textCapitalization: TextCapitalization.characters,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _busy ? null : _joinCompany(),
           autocorrect: false,
+          enableSuggestions: false,
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
@@ -354,18 +359,17 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       ];
 
   List<Widget> _syncSection() {
-    final last = _lastSyncedAt == null
-        ? 'never'
-        : DateTime.parse(_lastSyncedAt!).toLocal().toString().split('.').first.substring(0, 16);
+    final lastAt = _lastSyncedAt == null ? null : DateTime.tryParse(_lastSyncedAt!);
+    final last = lastAt == null ? 'never' : fmtDateTime(lastAt);
     return [
-      const Text('Sync', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+      Text('Sync', style: Theme.of(context).textTheme.titleMedium),
       const SizedBox(height: 4),
       const Text('Runs automatically when the app opens and every few minutes while it is open.'),
       const SizedBox(height: 8),
       Text('Last synced: $last · Waiting to send: $_pending', style: Theme.of(context).textTheme.bodySmall),
       if (_parked > 0)
         Text('$_parked change${_parked == 1 ? '' : 's'} could not be sent after several tries.',
-            style: TextStyle(color: Colors.red.shade700)),
+            style: TextStyle(color: Theme.of(context).colorScheme.error)),
       const SizedBox(height: 8),
       Row(children: [
         FilledButton.icon(onPressed: _busy ? null : _syncNow, icon: const Icon(Icons.sync), label: _busyOr('Sync now')),
@@ -390,7 +394,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     final isOwner = cloud?.role == 'owner';
     final code = cloud?.joinCode;
     return [
-      const Text('Team', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+      Text('Team', style: Theme.of(context).textTheme.titleMedium),
       const SizedBox(height: 8),
       if (code != null)
         Card(
@@ -420,9 +424,10 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           ),
         ),
       if (_roster == null)
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          child: Text('Connect to the internet to see your team.', style: TextStyle(color: Colors.black54)),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text('Connect to the internet to see your team.',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         )
       else
         for (final m in _roster!)
