@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -25,6 +27,7 @@ import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
+import 'package:fieldos_mobile/features/reminders/reminders.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/sync/sync_engine.dart';
 
@@ -332,6 +335,8 @@ class _DprTabState extends ConsumerState<_DprTab> {
       }
       ref.invalidate(dprProvider(widget.project.id));
       ref.invalidate(issuesProvider(widget.project.id));
+      // Today's report is in: tonight's reminder may no longer be needed.
+      unawaited(ref.read(reminderSchedulerProvider).refresh());
       if (!mounted) return;
       final raised = draft.issues.length;
       showSnack(

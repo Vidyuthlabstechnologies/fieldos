@@ -5,6 +5,7 @@ import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/features/auth/login_screen.dart';
 import 'package:fieldos_mobile/features/company/company_setup_screen.dart';
 import 'package:fieldos_mobile/features/home/home_screen.dart';
+import 'package:fieldos_mobile/features/reminders/reminders.dart';
 import 'package:fieldos_mobile/features/subscription/subscription_gate.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
@@ -26,6 +27,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     ref.read(bugReportServiceProvider).flush().catchError((_) => 0);
+    Future.microtask(() => ref.read(reminderSchedulerProvider).refresh());
   }
 
   @override
@@ -39,6 +41,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       ref.read(cloudSyncBootstrapProvider).onResume().catchError((_) {});
       ref.read(bugReportServiceProvider).flush().catchError((_) => 0);
+      ref.read(reminderSchedulerProvider).refresh();
     }
   }
 
@@ -48,6 +51,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       if (next.activeCompany != null && next.activeCompany?.id != prev?.activeCompany?.id) {
         ref.read(cloudSyncBootstrapProvider).ensureRunning().catchError((_) {});
       }
+      if (next.activeCompany?.id != prev?.activeCompany?.id) ref.read(reminderSchedulerProvider).refresh();
     });
     final session = ref.watch(sessionProvider);
     if (session.restoring) return const BrandSplash();

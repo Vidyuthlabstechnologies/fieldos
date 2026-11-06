@@ -80,6 +80,8 @@ dependencies:
   # Firebase project, no server, zero running cost (they fire when the app's
   # background sync runs, not instantly while the app is killed).
   flutter_local_notifications: ^22.3.3
+  # Reminders are scheduled in the phone's time zone.
+  timezone: ^0.11.2
 
   # GPS fix for attendance punch-in, checked against the project geofence.
   geolocator: ^14.1.2

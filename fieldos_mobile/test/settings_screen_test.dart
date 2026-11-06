@@ -55,12 +55,14 @@ void main() {
 
   testWidgets('an owner can set the Sarvam fallback key', (tester) async {
     await pump(tester, owner: true);
+    await tester.scrollUntilVisible(find.text('Sarvam fallback key'), 200);
     expect(find.text('Sarvam fallback key'), findsOneWidget);
     expect(find.textContaining('free and offline'), findsOneWidget);
   });
 
   testWidgets('the voice language can be chosen here', (tester) async {
     final container = await pump(tester, owner: false);
+    await tester.scrollUntilVisible(find.text('Language'), 200);
     await tester.tap(find.text('Language'));
     await tester.pumpAndSettle();
     await tester.tap(find.textContaining('Telugu'));

@@ -18,6 +18,7 @@ import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/speech_service.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 import 'package:fieldos_mobile/core/text_size.dart';
+import 'package:fieldos_mobile/features/reminders/reminders.dart';
 import 'package:fieldos_mobile/features/security/app_lock.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/l10n/language_picker.dart';
@@ -38,6 +39,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void initState() {
     super.initState();
     _load();
+    _loadReminders();
   }
 
   Future<void> _load() async {
@@ -142,6 +144,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (mounted) showSnack(context, on ? 'App lock is on' : 'App lock is off');
   }
 
+  ReminderSettings _reminders = const ReminderSettings();
+
+  static TimeOfDay _reportTime(ReminderSettings r) => TimeOfDay(hour: r.reportMinutes ~/ 60, minute: r.reportMinutes % 60);
+
+  Future<void> _loadReminders() async {
+    final r = await ref.read(reminderSchedulerProvider).settings();
+    if (mounted) setState(() => _reminders = r);
+  }
+
+  Future<void> _saveReminders(ReminderSettings r) async {
+    setState(() => _reminders = r);
+    await ref.read(reminderSchedulerProvider).save(r);
+  }
+
+  Future<void> _pickReminderTime() async {
+    final picked = await showTimePicker(context: context, initialTime: _reportTime(_reminders));
+    if (picked == null) return;
+    await _saveReminders(_reminders.copyWith(reportMinutes: picked.hour * 60 + picked.minute));
+  }
+
   Future<void> _changePassword() async {
     final changed = await showDialog<bool>(context: context, builder: (_) => const _ChangePasswordDialog());
     if ((changed ?? false) && mounted) showSnack(context, 'Password changed');
@@ -236,6 +258,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             subtitle: Text(tr(_textSizeLabel(ref.watch(textSizeProvider)))),
             trailing: const Icon(Icons.chevron_right),
             onTap: _pickTextSize,
+          ),
+          const SectionHeader('Reminders', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
+          SwitchListTile(
+            secondary: const Icon(Icons.edit_notifications_outlined),
+            title: Text(tr("Today's report reminder")),
+            subtitle: Text(trf('Every evening at {time}, unless every running site already has one',
+                {'time': MaterialLocalizations.of(context).formatTimeOfDay(_reportTime(_reminders))})),
+            value: _reminders.reportOn,
+            onChanged: (v) => _saveReminders(_reminders.copyWith(reportOn: v)),
+          ),
+          if (_reminders.reportOn)
+            ListTile(
+              leading: const SizedBox(width: 24),
+              title: Text(tr('Change the time')),
+              trailing: const Icon(Icons.schedule),
+              onTap: _pickReminderTime,
+            ),
+          SwitchListTile(
+            secondary: const Icon(Icons.event_available_outlined),
+            title: Text(tr('Tasks due today')),
+            subtitle: Text(tr('At 8 am on the day a task is due')),
+            value: _reminders.tasksOn,
+            onChanged: (v) => _saveReminders(_reminders.copyWith(tasksOn: v)),
           ),
           const SectionHeader('Security', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           SwitchListTile(
