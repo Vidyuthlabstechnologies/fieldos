@@ -37,3 +37,6 @@ out/
 # OS
 .DS_Store
 Thumbs.db
+
+# Launch secrets for tools/set_launch_secrets.sh (real keys and passwords)
+launch-secrets.env
