@@ -64,8 +64,12 @@ jobs:
           # build has no paywall at all, so set them before a store release.
           REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
           REVENUECAT_IOS_KEY: ${{ secrets.REVENUECAT_IOS_KEY }}
+          # Published privacy policy and terms pages (repository variables,
+          # not secrets). Without them the app shows the copy it carries.
+          PRIVACY_POLICY_URL: ${{ vars.PRIVACY_POLICY_URL }}
+          TERMS_URL: ${{ vars.TERMS_URL }}
         run: |
-          DEFINES="--dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY --dart-define=REVENUECAT_ANDROID_KEY=$REVENUECAT_ANDROID_KEY --dart-define=REVENUECAT_IOS_KEY=$REVENUECAT_IOS_KEY"
+          DEFINES="--dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY --dart-define=REVENUECAT_ANDROID_KEY=$REVENUECAT_ANDROID_KEY --dart-define=REVENUECAT_IOS_KEY=$REVENUECAT_IOS_KEY --dart-define=PRIVACY_POLICY_URL=$PRIVACY_POLICY_URL --dart-define=TERMS_URL=$TERMS_URL"
           flutter build apk --release $DEFINES
           flutter build appbundle --release $DEFINES
 

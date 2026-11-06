@@ -1,6 +1,7 @@
 /// The privacy policy and terms of use the app carries, so they can be read
-/// offline and before any account exists. Keep the privacy policy in step
-/// with docs/store/privacy-policy.html (the published copy).
+/// offline and before any account exists. Keep both in step with
+/// docs/store/privacy-policy.html and docs/store/terms-of-use.html (the
+/// published copies).
 library;
 
 class LegalSection {
@@ -41,8 +42,10 @@ const privacyPolicy = LegalDocument(
           "Only if your phone can't recognise the language you chose, and your company owner has added a Sarvam key, "
           'FieldOS records your report and sends the recording to Sarvam AI (sarvam.ai) to be turned into text. '
           'FieldOS does not keep the recording afterwards.\n\n'
-          'Translating a report to English happens on the phone (Google ML Kit). The language pack is downloaded from '
-          'Google once; the text of your report is not sent anywhere.',
+          'Translating a report to English happens on the phone, using Google ML Kit. The language pack is downloaded '
+          'from Google once, and the text of your report is never sent. ML Kit does send Google diagnostic details so '
+          'that Google can maintain it: the phone model and system version, the app version, an identifier for this '
+          'installation, the languages chosen, and how long translation took.',
     ),
     LegalSection(
       'Maps',
@@ -61,7 +64,8 @@ const privacyPolicy = LegalDocument(
           "your phone's operating system version and the app's last few error messages. No project data, photos or "
           'contacts are included. Reports are stored in our cloud database and copied to our private issue tracker on '
           'GitHub so that we can fix the problem.\n\n'
-          'We do not sell data, show ads, or use analytics or tracking SDKs.',
+          'Apart from what this policy describes, nothing about how you use FieldOS leaves your phone. We do not sell '
+          'data or show ads.',
     ),
     LegalSection(
       'Deleting data',
