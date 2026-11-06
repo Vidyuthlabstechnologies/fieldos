@@ -17,6 +17,8 @@ import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/speech_service.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
+import 'package:fieldos_mobile/core/text_size.dart';
+import 'package:fieldos_mobile/features/security/app_lock.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/l10n/language_picker.dart';
 
@@ -99,6 +101,45 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (picked == null || picked == current) return;
     await ref.read(settingsServiceProvider).setVoiceLanguage(picked);
     if (mounted) setState(() => _voiceLanguage = picked);
+  }
+
+  static String _textSizeLabel(String size) => switch (size) {
+        'large' => 'Large',
+        'larger' => 'Larger',
+        _ => 'Normal',
+      };
+
+  Future<void> _pickTextSize() async {
+    final current = ref.read(textSizeProvider);
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          for (final size in textSizes.keys)
+            ListTile(
+              title: Text(tr(_textSizeLabel(size)), textScaler: TextScaler.linear(textSizes[size]!)),
+              trailing: size == current ? const Icon(Icons.check) : null,
+              onTap: () => Navigator.of(ctx).pop(size),
+            ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+    if (picked != null) await ref.read(textSizeProvider.notifier).choose(picked);
+  }
+
+  Future<void> _toggleLock(bool on) async {
+    final lock = ref.read(appLockProvider);
+    if (on) {
+      final pin = await askNewPin(context);
+      if (pin == null) return;
+      await lock.setPin(pin);
+    } else {
+      await lock.turnOff();
+    }
+    ref.invalidate(appLockOnProvider);
+    if (mounted) showSnack(context, on ? 'App lock is on' : 'App lock is off');
   }
 
   Future<void> _changePassword() async {
@@ -188,6 +229,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             subtitle: Text(ref.watch(languageProvider).nativeName),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => showLanguagePicker(context, ref),
+          ),
+          ListTile(
+            leading: const Icon(Icons.format_size),
+            title: Text(tr('Text size')),
+            subtitle: Text(tr(_textSizeLabel(ref.watch(textSizeProvider)))),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _pickTextSize,
+          ),
+          const SectionHeader('Security', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
+          SwitchListTile(
+            secondary: const Icon(Icons.lock_outline),
+            title: Text(tr('App lock')),
+            subtitle: Text(tr('Ask for a 4-digit PIN when FieldOS opens or comes back after a minute')),
+            value: ref.watch(appLockOnProvider).valueOrNull ?? false,
+            onChanged: _toggleLock,
           ),
           const SectionHeader('Voice reports', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           ListTile(

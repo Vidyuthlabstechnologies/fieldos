@@ -43,7 +43,8 @@ void main() {
     expect(container.read(sessionProvider).role, Roles.member);
     expect(find.text('Meena Rao'), findsOneWidget);
     expect(find.text('Site engineer · Sri Sai Constructions'), findsOneWidget);
-    for (final label in ['Change password', 'Language', 'Report a bug', 'Email support']) {
+    for (final label in ['Change password', 'App lock', 'Language', 'Report a bug', 'Email support']) {
+      await tester.scrollUntilVisible(find.text(label), 200);
       expect(find.text(label), findsOneWidget, reason: label);
     }
     expect(find.text('Sarvam fallback key'), findsNothing);

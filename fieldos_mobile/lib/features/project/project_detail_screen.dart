@@ -24,19 +24,22 @@ import 'package:fieldos_mobile/features/estimation/estimation_screen.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
+import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/sync/sync_engine.dart';
 
 class ProjectDetailScreen extends ConsumerStatefulWidget {
-  const ProjectDetailScreen({super.key, required this.project});
+  const ProjectDetailScreen({super.key, required this.project, this.initialTab = 0});
   final Project project;
+
+  /// The tab to open on (0 tasks, 1 reports, 2 issues, 10 workers...).
+  final int initialTab;
 
   @override
   ConsumerState<ProjectDetailScreen> createState() => _ProjectDetailScreenState();
 }
 
-class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
-    with SingleTickerProviderStateMixin {
+class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with SingleTickerProviderStateMixin {
   late final TabController _tabs;
   late String _status = widget.project.status;
   void Function()? _liveUpdateCallback;
@@ -50,7 +53,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 12, vsync: this);
+    _tabs = TabController(length: 12, vsync: this, initialIndex: widget.initialTab.clamp(0, 11));
     _maybeSubscribeToLiveUpdates();
   }
 
@@ -69,19 +72,19 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
       if (mounted) ref.invalidate(tasksProvider(widget.project.id));
     };
     engine.onTasksChanged = _liveUpdateCallback;
-    
+
     // DPR entries realtime
     _liveDprUpdateCallback = () {
       if (mounted) ref.invalidate(dprProvider(widget.project.id));
     };
     engine.onDprEntriesChanged = _liveDprUpdateCallback;
-    
+
     // Issues realtime
     _liveIssuesUpdateCallback = () {
       if (mounted) ref.invalidate(issuesProvider(widget.project.id));
     };
     engine.onIssuesChanged = _liveIssuesUpdateCallback;
-    
+
     try {
       await engine.subscribeToProjectTasks(widget.project.id);
       await engine.subscribeToProjectDprEntries(widget.project.id);
@@ -180,84 +183,76 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabs,
+      body: Column(
         children: [
-          TasksTab(project: widget.project),
-          _DprTab(project: widget.project),
-          _IssuesTab(project: widget.project),
-          ProjectChatView(projectId: widget.project.id),
-          Builder(
-            builder: (context) {
-              final userId = ref.watch(sessionProvider).user?.id ?? '';
-              return ProcurementView(
-                projectId: widget.project.id,
-                companyId: widget.project.companyId,
-                userId: userId,
-              );
-            },
-          ),
-          Builder(
-            builder: (context) {
-              final userId = ref.watch(sessionProvider).user?.id ?? '';
-              return LabourView(
-                projectId: widget.project.id,
-                companyId: widget.project.companyId,
-                userId: userId,
-              );
-            },
-          ),
-          Builder(
-            builder: (context) => MoneyView(
-              project: widget.project,
-              projectId: widget.project.id,
-              userId: ref.watch(sessionProvider).user?.id ?? '',
+          SampleProjectBanner(project: widget.project),
+          Expanded(
+            child: TabBarView(
+              controller: _tabs,
+              children: [
+                TasksTab(project: widget.project),
+                _DprTab(project: widget.project),
+                _IssuesTab(project: widget.project),
+                ProjectChatView(projectId: widget.project.id),
+                Builder(
+                  builder: (context) {
+                    final userId = ref.watch(sessionProvider).user?.id ?? '';
+                    return ProcurementView(
+                      projectId: widget.project.id,
+                      companyId: widget.project.companyId,
+                      userId: userId,
+                    );
+                  },
+                ),
+                Builder(
+                  builder: (context) {
+                    final userId = ref.watch(sessionProvider).user?.id ?? '';
+                    return LabourView(
+                      projectId: widget.project.id,
+                      companyId: widget.project.companyId,
+                      userId: userId,
+                    );
+                  },
+                ),
+                Builder(
+                  builder: (context) => MoneyView(
+                    project: widget.project,
+                    projectId: widget.project.id,
+                    userId: ref.watch(sessionProvider).user?.id ?? '',
+                  ),
+                ),
+                Builder(
+                  builder: (context) {
+                    final userId = ref.watch(sessionProvider).user?.id ?? '';
+                    return EquipmentView(projectId: widget.project.id, userId: userId);
+                  },
+                ),
+                Builder(
+                  builder: (context) {
+                    final userId = ref.watch(sessionProvider).user?.id ?? '';
+                    return InspectionsView(projectId: widget.project.id, userId: userId);
+                  },
+                ),
+                Builder(
+                  builder: (context) {
+                    final userId = ref.watch(sessionProvider).user?.id ?? '';
+                    return DocumentsView(projectId: widget.project.id, userId: userId);
+                  },
+                ),
+                Builder(
+                  builder: (context) {
+                    final userId = ref.watch(sessionProvider).user?.id ?? '';
+                    return WorkersView(projectId: widget.project.id, userId: userId);
+                  },
+                ),
+                Builder(
+                  builder: (context) {
+                    final userId = ref.watch(sessionProvider).user?.id ?? '';
+                    return EstimationView(projectId: widget.project.id, userId: userId);
+                  },
+                ),
+              ],
             ),
-          ),
-          Builder(
-            builder: (context) {
-              final userId = ref.watch(sessionProvider).user?.id ?? '';
-              return EquipmentView(
-                projectId: widget.project.id,
-                userId: userId,
-              );
-            },
-          ),
-          Builder(
-            builder: (context) {
-              final userId = ref.watch(sessionProvider).user?.id ?? '';
-              return InspectionsView(
-                projectId: widget.project.id,
-                userId: userId,
-              );
-            },
-          ),
-          Builder(
-            builder: (context) {
-              final userId = ref.watch(sessionProvider).user?.id ?? '';
-              return DocumentsView(
-                projectId: widget.project.id,
-                userId: userId,
-              );
-            },
-          ),
-          Builder(
-            builder: (context) {
-              final userId = ref.watch(sessionProvider).user?.id ?? '';
-              return WorkersView(
-                projectId: widget.project.id,
-                userId: userId,
-              );
-            },
-          ),
-          Builder(
-            builder: (context) {
-              final userId = ref.watch(sessionProvider).user?.id ?? '';
-              return EstimationView(
-                projectId: widget.project.id,
-                userId: userId,
-              );
-            },
           ),
         ],
       ),
@@ -301,25 +296,29 @@ class _DprTabState extends ConsumerState<_DprTab> {
     final db = ref.read(appDatabaseProvider);
     try {
       final dprId = const Uuid().v4();
-      final dpr = await db.dprDao.create(DprEntriesCompanion.insert(
-        id: dprId,
-        projectId: widget.project.id,
-        createdBy: user.id,
-        entryDate: draft.date,
-        workSummary: draft.summary,
-        manpowerCount: Value(draft.manpower),
-        weather: Value(draft.weather),
-        source: Value(source),
-      ));
-      for (final iss in draft.issues) {
-        await db.issueDao.create(IssuesCompanion.insert(
-          id: const Uuid().v4(),
+      final dpr = await db.dprDao.create(
+        DprEntriesCompanion.insert(
+          id: dprId,
           projectId: widget.project.id,
-          dprEntryId: Value(dprId),
-          description: iss,
-          severity: const Value('medium'),
-          status: const Value('open'),
-        ));
+          createdBy: user.id,
+          entryDate: draft.date,
+          workSummary: draft.summary,
+          manpowerCount: Value(draft.manpower),
+          weather: Value(draft.weather),
+          source: Value(source),
+        ),
+      );
+      for (final iss in draft.issues) {
+        await db.issueDao.create(
+          IssuesCompanion.insert(
+            id: const Uuid().v4(),
+            projectId: widget.project.id,
+            dprEntryId: Value(dprId),
+            description: iss,
+            severity: const Value('medium'),
+            status: const Value('open'),
+          ),
+        );
       }
       for (final path in draft.photoPaths) {
         await db.dprDao.addPhoto(DprPhotosCompanion.insert(id: const Uuid().v4(), dprEntryId: dprId, photoPath: path));
@@ -406,8 +405,10 @@ class _DprTabState extends ConsumerState<_DprTab> {
                 return EmptyState(
                   icon: Icons.mic_none,
                   title: tr('No daily reports yet'),
-                  message: tr('Speak today\'s progress in your own language. FieldOS fills in the headcount, '
-                      'the weather and any problems for you, even without internet.'),
+                  message: tr(
+                    'Speak today\'s progress in your own language. FieldOS fills in the headcount, '
+                    'the weather and any problems for you, even without internet.',
+                  ),
                   actionLabel: tr('Speak a report'),
                   onAction: _speak,
                 );
@@ -427,24 +428,30 @@ class _DprTabState extends ConsumerState<_DprTab> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(children: [
-                              Expanded(
-                                child: Text(
-                                  '${fmtDay(d.entryDate)} · ${fmtDate(d.entryDate, short: true)}',
-                                  style: Theme.of(context).textTheme.titleSmall,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    '${fmtDay(d.entryDate)} · ${fmtDate(d.entryDate, short: true)}',
+                                    style: Theme.of(context).textTheme.titleSmall,
+                                  ),
                                 ),
-                              ),
-                              if (d.source == 'voice')
-                                Tooltip(
-                                  message: tr('Spoken report'),
-                                  child: Icon(Icons.mic_none, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                if (d.source == 'voice')
+                                  Tooltip(
+                                    message: tr('Spoken report'),
+                                    child: Icon(
+                                      Icons.mic_none,
+                                      size: 18,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                IconButton(
+                                  icon: const Icon(Icons.ios_share),
+                                  tooltip: tr('Share as PDF'),
+                                  onPressed: () => _share(d),
                                 ),
-                              IconButton(
-                                icon: const Icon(Icons.ios_share),
-                                tooltip: tr('Share as PDF'),
-                                onPressed: () => _share(d),
-                              ),
-                            ]),
+                              ],
+                            ),
                             Padding(
                               padding: const EdgeInsets.only(right: 12),
                               child: Text(d.workSummary, maxLines: 3, overflow: TextOverflow.ellipsis),
@@ -460,7 +467,8 @@ class _DprTabState extends ConsumerState<_DprTab> {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, st) => ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(dprProvider(widget.project.id))),
+            error: (e, st) =>
+                ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(dprProvider(widget.project.id))),
           ),
         ),
         Positioned(
@@ -560,12 +568,17 @@ class _IssuesTab extends ConsumerWidget {
       ),
     );
     if (confirmed != true) return;
-    await ref.read(appDatabaseProvider).issueDao.create(IssuesCompanion.insert(
-          id: const Uuid().v4(),
-          projectId: project.id,
-          description: descC.text.trim(),
-          severity: Value(severity),
-        ));
+    await ref
+        .read(appDatabaseProvider)
+        .issueDao
+        .create(
+          IssuesCompanion.insert(
+            id: const Uuid().v4(),
+            projectId: project.id,
+            description: descC.text.trim(),
+            severity: Value(severity),
+          ),
+        );
     ref.invalidate(issuesProvider(project.id));
   }
 
@@ -582,12 +595,15 @@ class _IssuesTab extends ConsumerWidget {
                 return EmptyState(
                   icon: Icons.verified_outlined,
                   title: tr('No issues'),
-                  message: tr('Problems you raise, or that FieldOS finds in your daily reports, appear here until they are fixed.'),
+                  message: tr(
+                    'Problems you raise, or that FieldOS finds in your daily reports, appear here until they are fixed.',
+                  ),
                   actionLabel: tr('Raise an issue'),
                   onAction: () => _addIssue(context, ref),
                 );
               }
-              final sorted = [...items]..sort((a, b) {
+              final sorted = [...items]
+                ..sort((a, b) {
                   final ar = a.status == 'resolved' ? 1 : 0, br = b.status == 'resolved' ? 1 : 0;
                   if (ar != br) return ar - br;
                   return b.createdAt.compareTo(a.createdAt);
@@ -603,19 +619,24 @@ class _IssuesTab extends ConsumerWidget {
                       title: Text(iss.description),
                       subtitle: Padding(
                         padding: const EdgeInsets.only(top: 6),
-                        child: Wrap(spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-                          StatusPill(
-                            '${iss.severity[0].toUpperCase()}${iss.severity.substring(1)}',
-                            tone: _severityTone[iss.severity] ?? PillTone.neutral,
-                          ),
-                          if (iss.dprEntryId != null) const StatusPill('From a daily report'),
-                          Text(
-                            resolved && iss.resolvedAt != null
-                                ? 'Fixed ${fmtDate(iss.resolvedAt!, short: true)}'
-                                : 'Raised ${fmtDate(iss.createdAt, short: true)}',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ]),
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            StatusPill(
+                              '${iss.severity[0].toUpperCase()}${iss.severity.substring(1)}',
+                              tone: _severityTone[iss.severity] ?? PillTone.neutral,
+                            ),
+                            if (iss.dprEntryId != null) const StatusPill('From a daily report'),
+                            Text(
+                              resolved && iss.resolvedAt != null
+                                  ? 'Fixed ${fmtDate(iss.resolvedAt!, short: true)}'
+                                  : 'Raised ${fmtDate(iss.createdAt, short: true)}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
                       ),
                       trailing: resolved
                           ? const Icon(Icons.check_circle, color: Brand.ok)
@@ -632,7 +653,8 @@ class _IssuesTab extends ConsumerWidget {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, st) => ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(issuesProvider(project.id))),
+            error: (e, st) =>
+                ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(issuesProvider(project.id))),
           ),
         ),
         Positioned(
