@@ -18903,7 +18903,16 @@ class $$UsersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$UsersTable, User>(table),
+                  BaseReferences<_$AppDatabase, $UsersTable, User>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -19078,7 +19087,16 @@ class $$SessionsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SessionsTable, Session>(table),
+                  BaseReferences<_$AppDatabase, $SessionsTable, Session>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -19237,7 +19255,16 @@ class $$AppSettingsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$AppSettingsTable, AppSetting>(table),
+                  BaseReferences<_$AppDatabase, $AppSettingsTable, AppSetting>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -19396,7 +19423,16 @@ class $$CompaniesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$CompaniesTable, Company>(table),
+                  BaseReferences<_$AppDatabase, $CompaniesTable, Company>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -19595,7 +19631,16 @@ class $$CompanyMembersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$CompanyMembersTable, CompanyMember>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $CompanyMembersTable,
+                    CompanyMember
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -19914,7 +19959,16 @@ class $$ProjectsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ProjectsTable, Project>(table),
+                  BaseReferences<_$AppDatabase, $ProjectsTable, Project>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -20113,7 +20167,16 @@ class $$ProjectMembersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ProjectMembersTable, ProjectMember>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ProjectMembersTable,
+                    ProjectMember
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -20368,7 +20431,16 @@ class $$TasksTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$TasksTable, Task>(table),
+                  BaseReferences<_$AppDatabase, $TasksTable, Task>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -20661,7 +20733,16 @@ class $$DprEntriesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$DprEntriesTable, DprEntry>(table),
+                  BaseReferences<_$AppDatabase, $DprEntriesTable, DprEntry>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -20857,7 +20938,16 @@ class $$DprPhotosTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$DprPhotosTable, DprPhoto>(table),
+                  BaseReferences<_$AppDatabase, $DprPhotosTable, DprPhoto>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -21114,7 +21204,16 @@ class $$IssuesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$IssuesTable, Issue>(table),
+                  BaseReferences<_$AppDatabase, $IssuesTable, Issue>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -21351,7 +21450,16 @@ class $$EstimationsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$EstimationsTable, Estimation>(table),
+                  BaseReferences<_$AppDatabase, $EstimationsTable, Estimation>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -21634,7 +21742,16 @@ class $$CostHeadsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$CostHeadsTable, CostHead>(table),
+                  BaseReferences<_$AppDatabase, $CostHeadsTable, CostHead>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -21903,7 +22020,18 @@ class $$MeasurementEntriesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$MeasurementEntriesTable, MeasurementEntry>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MeasurementEntriesTable,
+                    MeasurementEntry
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -22130,7 +22258,16 @@ class $$SteelEntriesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SteelEntriesTable, SteelEntry>(table),
+                  BaseReferences<_$AppDatabase, $SteelEntriesTable, SteelEntry>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -22445,7 +22582,16 @@ class $$SuppliersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SuppliersTable, Supplier>(table),
+                  BaseReferences<_$AppDatabase, $SuppliersTable, Supplier>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -22808,7 +22954,16 @@ class $$PurchaseRequestsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$PurchaseRequestsTable, PurchaseRequest>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PurchaseRequestsTable,
+                    PurchaseRequest
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -23149,7 +23304,16 @@ class $$PurchaseOrdersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$PurchaseOrdersTable, PurchaseOrder>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PurchaseOrdersTable,
+                    PurchaseOrder
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -23517,7 +23681,16 @@ class $$MaterialReceiptsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$MaterialReceiptsTable, MaterialReceipt>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MaterialReceiptsTable,
+                    MaterialReceipt
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -23801,7 +23974,16 @@ class $$MaterialUsageTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$MaterialUsageTable, MaterialUsageData>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MaterialUsageTable,
+                    MaterialUsageData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -24087,7 +24269,18 @@ class $$PaymentsReceivedTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$PaymentsReceivedTable, PaymentsReceivedData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PaymentsReceivedTable,
+                    PaymentsReceivedData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -24392,7 +24585,16 @@ class $$SiteExpensesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SiteExpensesTable, SiteExpense>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SiteExpensesTable,
+                    SiteExpense
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -24718,7 +24920,18 @@ class $$LabourAttendanceTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$LabourAttendanceTable, LabourAttendanceData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $LabourAttendanceTable,
+                    LabourAttendanceData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -24945,7 +25158,16 @@ class $$SubcontractorsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SubcontractorsTable, Subcontractor>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SubcontractorsTable,
+                    Subcontractor
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -25210,7 +25432,16 @@ class $$WorkOrdersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$WorkOrdersTable, WorkOrder>(table),
+                  BaseReferences<_$AppDatabase, $WorkOrdersTable, WorkOrder>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -25507,7 +25738,16 @@ class $$ApprovalsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ApprovalsTable, Approval>(table),
+                  BaseReferences<_$AppDatabase, $ApprovalsTable, Approval>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -25712,7 +25952,16 @@ class $$ProjectGeofencesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ProjectGeofencesTable, ProjectGeofence>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ProjectGeofencesTable,
+                    ProjectGeofence
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -26011,7 +26260,16 @@ class $$EquipmentTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$EquipmentTable, EquipmentData>(table),
+                  BaseReferences<_$AppDatabase, $EquipmentTable, EquipmentData>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -26291,7 +26549,16 @@ class $$EquipmentLogsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$EquipmentLogsTable, EquipmentLog>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $EquipmentLogsTable,
+                    EquipmentLog
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -26615,7 +26882,16 @@ class $$InspectionsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$InspectionsTable, Inspection>(table),
+                  BaseReferences<_$AppDatabase, $InspectionsTable, Inspection>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -26844,7 +27120,16 @@ class $$InspectionItemsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$InspectionItemsTable, InspectionItem>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $InspectionItemsTable,
+                    InspectionItem
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -27157,7 +27442,16 @@ class $$DocumentsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$DocumentsTable, Document>(table),
+                  BaseReferences<_$AppDatabase, $DocumentsTable, Document>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -27408,7 +27702,16 @@ class $$WorkersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$WorkersTable, Worker>(table),
+                  BaseReferences<_$AppDatabase, $WorkersTable, Worker>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -27632,7 +27935,16 @@ class $$ProjectMessagesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ProjectMessagesTable, ProjectMessage>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ProjectMessagesTable,
+                    ProjectMessage
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -27887,7 +28199,16 @@ class $$SyncOutboxTableTableManager
                 lastError: lastError,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SyncOutboxTable, SyncOutboxData>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SyncOutboxTable,
+                    SyncOutboxData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),

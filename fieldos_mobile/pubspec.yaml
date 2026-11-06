@@ -29,7 +29,7 @@ dependencies:
   decimal: ^3.0.0
 
   # Optional online voice-to-DPR (Sarvam). App is fully usable offline without it.
-  dio: ^5.8.0
+  dio: ^5.11.1
 
   # Voice capture for the optional voice-to-DPR feature.
   record: ^7.1.1
@@ -93,8 +93,8 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  drift_dev: ^2.34.0
-  build_runner: ^2.4.0
+  drift_dev: ^2.35.0
+  build_runner: ^2.16.1
 
 flutter:
   uses-material-design: true
