@@ -10,6 +10,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:fieldos_mobile/features/tasks/team_roster.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
@@ -90,6 +92,8 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       try {
         cloud = await service.registerCompany(companyId: company.id, name: company.name);
         roster = await service.roster(company.id);
+        await saveRoster(db, company.id, roster, myUserId: service.userId);
+        ref.invalidate(teamRosterProvider(company.id));
         await ref.read(sessionProvider.notifier).setLocalRole(company.id, cloud.role);
       } catch (_) {
         // Offline: keep showing local status; the team list needs a connection.

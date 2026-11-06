@@ -12,6 +12,7 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
@@ -377,13 +378,7 @@ class _PhotoThumb extends StatelessWidget {
     label: tr('Open photo'),
     child: InkWell(
       borderRadius: BorderRadius.circular(6),
-      onTap: () => showDialog<void>(
-        context: context,
-        builder: (ctx) => Dialog(
-          clipBehavior: Clip.antiAlias,
-          child: InteractiveViewer(child: Image.file(file)),
-        ),
-      ),
+      onTap: () => showPhotoViewer(context, [file.path]),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: Image.file(

@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
 import 'package:fieldos_mobile/features/project/dpr_draft_screen.dart';
 import 'package:fieldos_mobile/features/project/new_project_sheet.dart';
 import 'package:fieldos_mobile/features/project/project_status.dart';
@@ -381,6 +382,17 @@ class _DprTabState extends ConsumerState<_DprTab> {
             _DprFacts(dpr: d, issueCount: issueCount),
             const SizedBox(height: 16),
             SelectableText(d.workSummary, style: Theme.of(ctx).textTheme.bodyLarge?.copyWith(height: 1.45)),
+            FutureBuilder<List<DprPhoto>>(
+              future: ref.read(appDatabaseProvider).dprDao.photosFor(d.id),
+              builder: (ctx, snap) {
+                final paths = photosOnThisPhone((snap.data ?? const <DprPhoto>[]).map((p) => p.photoPath));
+                if (paths.isEmpty) return const SizedBox.shrink();
+                return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const SectionHeader('Photos'),
+                  PhotoStrip(paths: paths, shareText: '${widget.project.name} · ${fmtDate(d.entryDate)}'),
+                ]);
+              },
+            ),
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: () {
