@@ -8,6 +8,8 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/project/dpr_draft_screen.dart';
+import 'package:fieldos_mobile/features/project/new_project_sheet.dart';
+import 'package:fieldos_mobile/features/project/project_status.dart';
 import 'package:fieldos_mobile/features/project/voice_report_sheet.dart';
 import 'package:fieldos_mobile/features/chat/project_chat_view.dart';
 import 'package:fieldos_mobile/features/labour/labour_screen.dart';
@@ -33,6 +35,7 @@ class ProjectDetailScreen extends ConsumerStatefulWidget {
 class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabs;
+  late String _status = widget.project.status;
   void Function()? _liveUpdateCallback;
   void Function()? _liveDprUpdateCallback;
   void Function()? _liveIssuesUpdateCallback;
@@ -108,11 +111,43 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
     super.dispose();
   }
 
+  Future<void> _changeStage() async {
+    final next = await showProjectStatusSheet(context, current: _status);
+    if (next == null || !mounted) return;
+    try {
+      await ref.read(appDatabaseProvider).projectDao.setStatus(widget.project.id, next);
+      if (!mounted) return;
+      setState(() => _status = next);
+      ref.invalidate(projectsProvider(widget.project.companyId));
+      showSnack(context, '${widget.project.name}: ${projectStatusLabel(next).toLowerCase()}');
+    } catch (e, st) {
+      if (mounted) showSnack(context, friendlyError(e, st), error: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.project.name),
+        actions: [
+          PopupMenuButton<String>(
+            tooltip: 'More',
+            onSelected: (v) {
+              if (v == 'stage') _changeStage();
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'stage',
+                child: ListTile(
+                  leading: const Icon(Icons.flag_outlined),
+                  title: const Text('Project stage'),
+                  subtitle: Text(projectStatusLabel(_status)),
+                ),
+              ),
+            ],
+          ),
+        ],
         bottom: TabBar(
           controller: _tabs,
           isScrollable: true,

@@ -397,6 +397,25 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
     });
   }
 
+  /// Moves a project to another stage (planning, active, on_hold or
+  /// completed, the values the cloud accepts), synced like any edit.
+  Future<void> setStatus(String projectId, String status) {
+    if (!const {'planning', 'active', 'on_hold', 'completed'}.contains(status)) {
+      throw ArgumentError.value(status, 'status');
+    }
+    return transaction(() async {
+      await (update(projects)..where((p) => p.id.equals(projectId))).write(ProjectsCompanion(status: Value(status)));
+      final row = await (select(projects)..where((p) => p.id.equals(projectId))).getSingleOrNull();
+      if (row == null) return;
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'projects',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(projectToSupabaseJson(row)),
+      );
+    });
+  }
+
   Future<Project?> byId(String id) =>
       (select(projects)..where((p) => p.id.equals(id))).getSingleOrNull();
 
