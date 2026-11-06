@@ -7,6 +7,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 /// Weekly wage sheet (Monday to Sunday) from GPS punches, with a Pay button
 /// per worker and a WhatsApp-ready summary to share with the contractor or
@@ -60,11 +61,11 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
         final sheet = snap.data;
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Wage sheet'),
+            title: Text(tr('Wage sheet')),
             actions: [
               if (sheet != null)
                 IconButton(
-                  tooltip: 'Share on WhatsApp',
+                  tooltip: tr('Share on WhatsApp'),
                   icon: const Icon(Icons.share),
                   onPressed: () => SharePlus.instance.share(ShareParams(text: _shareText(sheet))),
                 ),
@@ -74,12 +75,12 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               IconButton(
                   icon: const Icon(Icons.chevron_left),
-                  tooltip: 'Previous week',
+                  tooltip: tr('Previous week'),
                   onPressed: () => setState(() => _from = _from.subtract(const Duration(days: 7)))),
               Text(_range(), style: const TextStyle(fontWeight: FontWeight.w600)),
               IconButton(
                   icon: const Icon(Icons.chevron_right),
-                  tooltip: 'Next week',
+                  tooltip: tr('Next week'),
                   onPressed: _to.isAfter(DateTime.now())
                       ? null
                       : () => setState(() => _from = _from.add(const Duration(days: 7)))),
@@ -97,7 +98,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
               child: sheet == null
                   ? const Center(child: CircularProgressIndicator())
                   : sheet.lines.isEmpty
-                      ? const Center(child: Text('No workers or punches yet.'))
+                      ? Center(child: Text(tr('No workers or punches yet.')))
                       : ListView(children: [
                           for (final l in sheet.lines)
                             ListTile(
@@ -135,10 +136,9 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                             ),
                         ]),
             ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(12),
-              child: Text(
-                'A day counts as full at 7 hours on site and half at 3.5 hours. Tap a worker to pay wages or an advance.',
+              child: Text(tr('A day counts as full at 7 hours on site and half at 3.5 hours. Tap a worker to pay wages or an advance.'),
                 style: TextStyle(fontSize: 12),
                 textAlign: TextAlign.center,
               ),

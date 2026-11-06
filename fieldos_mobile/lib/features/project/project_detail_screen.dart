@@ -24,6 +24,8 @@ import 'package:fieldos_mobile/features/estimation/estimation_screen.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/sync/sync_engine.dart';
 
 class ProjectDetailScreen extends ConsumerStatefulWidget {
   const ProjectDetailScreen({super.key, required this.project});
@@ -41,6 +43,10 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
   void Function()? _liveDprUpdateCallback;
   void Function()? _liveIssuesUpdateCallback;
 
+  /// The sync engine this screen hooked its callbacks onto, kept so
+  /// [dispose] can unhook them without `ref` (which is gone by then).
+  SyncEngine? _liveEngine;
+
   @override
   void initState() {
     super.initState();
@@ -56,7 +62,8 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
     final service = ref.read(cloudSyncServiceProvider);
     if (!service.isSignedIn) return;
     final engine = ref.read(cloudSyncEngineProvider);
-    
+    _liveEngine = engine;
+
     // Tasks realtime
     _liveUpdateCallback = () {
       if (mounted) ref.invalidate(tasksProvider(widget.project.id));
@@ -98,15 +105,11 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
     // subscription itself open (not unsubscribing) keeps this project's data
     // fresh in the background even after navigating away -- the same "keep
     // syncing" philosophy as PeriodicSyncTrigger.
-    final engine = ref.read(cloudSyncEngineProvider);
-    if (identical(engine.onTasksChanged, _liveUpdateCallback)) {
-      engine.onTasksChanged = null;
-    }
-    if (identical(engine.onDprEntriesChanged, _liveDprUpdateCallback)) {
-      engine.onDprEntriesChanged = null;
-    }
-    if (identical(engine.onIssuesChanged, _liveIssuesUpdateCallback)) {
-      engine.onIssuesChanged = null;
+    final engine = _liveEngine;
+    if (engine != null) {
+      if (identical(engine.onTasksChanged, _liveUpdateCallback)) engine.onTasksChanged = null;
+      if (identical(engine.onDprEntriesChanged, _liveDprUpdateCallback)) engine.onDprEntriesChanged = null;
+      if (identical(engine.onIssuesChanged, _liveIssuesUpdateCallback)) engine.onIssuesChanged = null;
     }
     _tabs.dispose();
     super.dispose();
@@ -133,7 +136,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
         title: Text(widget.project.name),
         actions: [
           PopupMenuButton<String>(
-            tooltip: 'More',
+            tooltip: tr('More'),
             onSelected: (v) {
               if (v == 'stage') _changeStage();
             },
@@ -142,7 +145,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
                 value: 'stage',
                 child: ListTile(
                   leading: const Icon(Icons.flag_outlined),
-                  title: const Text('Project stage'),
+                  title: Text(tr('Project stage')),
                   subtitle: Text(projectStatusLabel(_status)),
                 ),
               ),
@@ -161,19 +164,19 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
           indicatorWeight: 3,
           indicatorSize: TabBarIndicatorSize.tab,
           dividerColor: Colors.transparent,
-          tabs: const [
-            Tab(text: 'Tasks', icon: Icon(Icons.checklist)),
-            Tab(text: 'DPR', icon: Icon(Icons.edit_note)),
-            Tab(text: 'Issues', icon: Icon(Icons.report_problem)),
-            Tab(text: 'Chat', icon: Icon(Icons.forum)),
-            Tab(text: 'Procure', icon: Icon(Icons.shopping_cart)),
-            Tab(text: 'Labour', icon: Icon(Icons.people)),
-            Tab(text: 'Money', icon: Icon(Icons.currency_rupee)),
-            Tab(text: 'Equipment', icon: Icon(Icons.construction)),
-            Tab(text: 'Inspections', icon: Icon(Icons.fact_check)),
-            Tab(text: 'Documents', icon: Icon(Icons.folder)),
-            Tab(text: 'Workers', icon: Icon(Icons.badge)),
-            Tab(text: 'Estimation', icon: Icon(Icons.calculate)),
+          tabs: [
+            Tab(text: tr('Tasks'), icon: Icon(Icons.checklist)),
+            Tab(text: tr('DPR'), icon: Icon(Icons.edit_note)),
+            Tab(text: tr('Issues'), icon: Icon(Icons.report_problem)),
+            Tab(text: tr('Chat'), icon: Icon(Icons.forum)),
+            Tab(text: tr('Procure'), icon: Icon(Icons.shopping_cart)),
+            Tab(text: tr('Labour'), icon: Icon(Icons.people)),
+            Tab(text: tr('Money'), icon: Icon(Icons.currency_rupee)),
+            Tab(text: tr('Equipment'), icon: Icon(Icons.construction)),
+            Tab(text: tr('Inspections'), icon: Icon(Icons.fact_check)),
+            Tab(text: tr('Documents'), icon: Icon(Icons.folder)),
+            Tab(text: tr('Workers'), icon: Icon(Icons.badge)),
+            Tab(text: tr('Estimation'), icon: Icon(Icons.calculate)),
           ],
         ),
       ),
@@ -335,7 +338,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
       showSnack(
         context,
         raised == 0 ? 'Report saved.' : 'Report saved, and $raised problem${raised == 1 ? '' : 's'} raised as issues.',
-        action: SnackBarAction(label: 'Share', onPressed: () => _share(dpr)),
+        action: SnackBarAction(label: tr('Share'), onPressed: () => _share(dpr)),
       );
     } catch (e, st) {
       if (mounted) showSnack(context, friendlyError(e, st), error: true);
@@ -381,7 +384,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
                 _share(d);
               },
               icon: const Icon(Icons.ios_share),
-              label: const Text('Share as PDF'),
+              label: Text(tr('Share as PDF')),
             ),
           ],
         ),
@@ -402,10 +405,10 @@ class _DprTabState extends ConsumerState<_DprTab> {
               if (items.isEmpty) {
                 return EmptyState(
                   icon: Icons.mic_none,
-                  title: 'No daily reports yet',
-                  message: 'Speak today\'s progress in your own language. FieldOS fills in the headcount, '
-                      'the weather and any problems for you, even without internet.',
-                  actionLabel: 'Speak a report',
+                  title: tr('No daily reports yet'),
+                  message: tr('Speak today\'s progress in your own language. FieldOS fills in the headcount, '
+                      'the weather and any problems for you, even without internet.'),
+                  actionLabel: tr('Speak a report'),
                   onAction: _speak,
                 );
               }
@@ -433,12 +436,12 @@ class _DprTabState extends ConsumerState<_DprTab> {
                               ),
                               if (d.source == 'voice')
                                 Tooltip(
-                                  message: 'Spoken report',
+                                  message: tr('Spoken report'),
                                   child: Icon(Icons.mic_none, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
                                 ),
                               IconButton(
                                 icon: const Icon(Icons.ios_share),
-                                tooltip: 'Share as PDF',
+                                tooltip: tr('Share as PDF'),
                                 onPressed: () => _share(d),
                               ),
                             ]),
@@ -468,7 +471,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
             children: [
               FloatingActionButton.small(
                 heroTag: 'dpr_type',
-                tooltip: 'Type a report',
+                tooltip: tr('Type a report'),
                 onPressed: _type,
                 child: const Icon(Icons.keyboard_alt_outlined),
               ),
@@ -476,7 +479,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
               FloatingActionButton.extended(
                 heroTag: 'dpr_voice',
                 icon: const Icon(Icons.mic),
-                label: const Text('Speak report'),
+                label: Text(tr('Speak report')),
                 onPressed: _speak,
               ),
             ],
@@ -520,7 +523,7 @@ class _IssuesTab extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('New issue'),
+          title: Text(tr('New issue')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -530,16 +533,16 @@ class _IssuesTab extends ConsumerWidget {
                 maxLines: 3,
                 autofocus: true,
                 textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(labelText: 'What is the problem?'),
+                decoration: InputDecoration(labelText: tr('What is the problem?')),
               ),
               const SizedBox(height: 16),
-              const Text('How serious?'),
+              Text(tr('How serious?')),
               const SizedBox(height: 8),
               SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(value: 'low', label: Text('Low')),
-                  ButtonSegment(value: 'medium', label: Text('Medium')),
-                  ButtonSegment(value: 'high', label: Text('High')),
+                segments: [
+                  ButtonSegment(value: 'low', label: Text(tr('Low'))),
+                  ButtonSegment(value: 'medium', label: Text(tr('Medium'))),
+                  ButtonSegment(value: 'high', label: Text(tr('High'))),
                 ],
                 selected: {severity},
                 onSelectionChanged: (s) => setDialogState(() => severity = s.first),
@@ -547,10 +550,10 @@ class _IssuesTab extends ConsumerWidget {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, descC.text.trim().isNotEmpty),
-              child: const Text('Raise issue'),
+              child: Text(tr('Raise issue')),
             ),
           ],
         ),
@@ -578,9 +581,9 @@ class _IssuesTab extends ConsumerWidget {
               if (items.isEmpty) {
                 return EmptyState(
                   icon: Icons.verified_outlined,
-                  title: 'No issues',
-                  message: 'Problems you raise, or that FieldOS finds in your daily reports, appear here until they are fixed.',
-                  actionLabel: 'Raise an issue',
+                  title: tr('No issues'),
+                  message: tr('Problems you raise, or that FieldOS finds in your daily reports, appear here until they are fixed.'),
+                  actionLabel: tr('Raise an issue'),
                   onAction: () => _addIssue(context, ref),
                 );
               }
@@ -621,7 +624,7 @@ class _IssuesTab extends ConsumerWidget {
                                 await ref.read(appDatabaseProvider).issueDao.resolve(iss.id);
                                 ref.invalidate(issuesProvider(project.id));
                               },
-                              child: const Text('Mark fixed'),
+                              child: Text(tr('Mark fixed')),
                             ),
                     ),
                   );
@@ -638,7 +641,7 @@ class _IssuesTab extends ConsumerWidget {
           child: FloatingActionButton.extended(
             heroTag: 'issue_add',
             icon: const Icon(Icons.add),
-            label: const Text('Raise issue'),
+            label: Text(tr('Raise issue')),
             onPressed: () => _addIssue(context, ref),
           ),
         ),

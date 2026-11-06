@@ -18,6 +18,7 @@ import 'package:fieldos_mobile/features/labour/attendance_list.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 /// Great-circle distance in metres between two coordinates.
 double haversineMeters(double lat1, double lng1, double lat2, double lng2) {
@@ -57,7 +58,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
           Expanded(
             child: FilledButton.icon(
               icon: const Icon(Icons.login),
-              label: const Text('Punch in'),
+              label: Text(tr('Punch in')),
               onPressed: () => _punchIn(context, ref, geofence),
             ),
           ),
@@ -65,7 +66,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
           Expanded(
             child: FilledButton.tonalIcon(
               icon: const Icon(Icons.groups),
-              label: const Text('Mark many'),
+              label: Text(tr('Mark many')),
               onPressed: () => _punchInMany(context, ref, geofence),
             ),
           ),
@@ -73,7 +74,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
         const SizedBox(height: 8),
         OutlinedButton.icon(
           icon: const Icon(Icons.payments),
-          label: const Text('Wage sheet'),
+          label: Text(tr('Wage sheet')),
           onPressed: () async {
             final project = await ref.read(appDatabaseProvider).projectDao.byId(widget.projectId);
             if (!context.mounted) return;
@@ -86,10 +87,10 @@ class _LabourViewState extends ConsumerState<LabourView> {
         const SizedBox(height: 12),
         attendance.when(
           data: (rows) => rows.isEmpty
-              ? const EmptyState(
+              ? EmptyState(
                   icon: Icons.how_to_reg_outlined,
-                  title: 'No attendance yet',
-                  message: 'Punch workers in when they reach the site. The wage sheet counts their days from this.',
+                  title: tr('No attendance yet'),
+                  message: tr('Punch workers in when they reach the site. The wage sheet counts their days from this.'),
                   compact: true,
                 )
               : AttendanceList(
@@ -116,17 +117,17 @@ class _LabourViewState extends ConsumerState<LabourView> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Punch in'),
+          title: Text(tr('Punch in')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (activeWorkers.isNotEmpty) ...[
                 DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Select worker (optional)'),
-                  hint: const Text('— Type name manually —'),
+                  decoration: InputDecoration(labelText: tr('Select worker (optional)')),
+                  hint: Text(tr('— Type name manually —')),
                   initialValue: selectedWorkerId,
                   items: [
-                    const DropdownMenuItem<String>(value: '', child: Text('— Type name manually —')),
+                    DropdownMenuItem<String>(value: '', child: Text(tr('— Type name manually —'))),
                     ...activeWorkers.map((w) => DropdownMenuItem<String>(value: w.id, child: Text(w.name))),
                   ],
                   onChanged: (v) {
@@ -141,13 +142,13 @@ class _LabourViewState extends ConsumerState<LabourView> {
                 ),
                 const SizedBox(height: 8),
               ],
-              TextField(controller: name, decoration: const InputDecoration(labelText: 'Worker name')),
+              TextField(controller: name, decoration: InputDecoration(labelText: tr('Worker name'))),
               GpsFields(lat: lat, lng: lng),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Punch in')),
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Punch in'))),
           ],
         ),
       ),
@@ -192,8 +193,8 @@ class _LabourViewState extends ConsumerState<LabourView> {
       showSnack(
           context,
           workers.isEmpty
-              ? 'Add your labourers in the Workers tab first.'
-              : 'Everyone in the Workers list is already punched in today.');
+              ? tr('Add your labourers in the Workers tab first.')
+              : tr('Everyone in the Workers list is already punched in today.'));
       return;
     }
     final picked = <String>{...candidates.map((w) => w.id)};
@@ -208,8 +209,8 @@ class _LabourViewState extends ConsumerState<LabourView> {
             width: double.maxFinite,
             child: ListView(shrinkWrap: true, children: [
               Row(children: [
-                TextButton(onPressed: () => set(() => picked.addAll(candidates.map((w) => w.id))), child: const Text('All')),
-                TextButton(onPressed: () => set(picked.clear), child: const Text('None')),
+                TextButton(onPressed: () => set(() => picked.addAll(candidates.map((w) => w.id))), child: Text(tr('All'))),
+                TextButton(onPressed: () => set(picked.clear), child: Text(tr('None'))),
               ]),
               for (final w in candidates)
                 CheckboxListTile(
@@ -223,8 +224,8 @@ class _LabourViewState extends ConsumerState<LabourView> {
             ]),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Punch in')),
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Punch in'))),
           ],
         ),
       ),
@@ -280,7 +281,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Punch out'),
+        title: Text(tr('Punch out')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -288,8 +289,8 @@ class _LabourViewState extends ConsumerState<LabourView> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Punch out')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Punch out'))),
         ],
       ),
     );
@@ -328,12 +329,12 @@ class _GeofenceCard extends ConsumerWidget {
                 data: (g) => Text(g == null
                     ? 'No site area set, so punches are not checked. Set it while standing at the site.'
                     : 'Site area: within ${g.radiusMeters.round()} m of the point you set. Punches outside it are marked.'),
-                loading: () => const Text('Checking the site area…'),
+                loading: () => Text(tr('Checking the site area…')),
                 error: (e, st) => Text(friendlyError(e, st)),
               ),
             ),
             TextButton(
-              child: Text(set ? 'Change' : 'Set site area'),
+              child: Text(set ? tr('Change') : tr('Set site area')),
               onPressed: () => _configure(context, ref),
             ),
           ],
@@ -349,21 +350,21 @@ class _GeofenceCard extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Site area'),
+        title: Text(tr('Site area')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Stand in the middle of the site. Punches within the radius count as on site.'),
+            Text(tr('Stand in the middle of the site. Punches within the radius count as on site.')),
             GpsFields(lat: lat, lng: lng),
             TextField(
                 controller: radius,
-                decoration: const InputDecoration(labelText: 'Radius in metres', helperText: '100 m suits most sites'),
+                decoration: InputDecoration(labelText: tr('Radius in metres'), helperText: tr('100 m suits most sites')),
                 keyboardType: TextInputType.number),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
         ],
       ),
     );
@@ -439,17 +440,17 @@ class _GpsFieldsState extends ConsumerState<GpsFields> {
               const Icon(Icons.my_location, size: 16),
             const SizedBox(width: 8),
             Expanded(child: Text(_status, style: Theme.of(context).textTheme.bodySmall)),
-            if (!_locating) TextButton(onPressed: _locate, child: const Text('Retry')),
+            if (!_locating) TextButton(onPressed: _locate, child: Text(tr('Retry'))),
           ],
         ),
         TextField(
           controller: widget.lat,
-          decoration: const InputDecoration(labelText: 'Latitude'),
+          decoration: InputDecoration(labelText: tr('Latitude')),
           keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
         ),
         TextField(
           controller: widget.lng,
-          decoration: const InputDecoration(labelText: 'Longitude'),
+          decoration: InputDecoration(labelText: tr('Longitude')),
           keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
         ),
       ],

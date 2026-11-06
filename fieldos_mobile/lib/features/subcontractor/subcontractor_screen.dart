@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class SubcontractorsScreen extends ConsumerWidget {
   const SubcontractorsScreen({super.key, required this.companyId});
@@ -19,10 +20,10 @@ class SubcontractorsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final subs = ref.watch(subcontractorsProvider(companyId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Subcontractors')),
+      appBar: AppBar(title: Text(tr('Subcontractors'))),
       body: subs.when(
         data: (rows) => rows.isEmpty
-            ? const Center(child: Text('No subcontractors yet.'))
+            ? Center(child: Text(tr('No subcontractors yet.')))
             : ListView.builder(
                 padding: const EdgeInsets.all(12),
                 itemCount: rows.length,
@@ -56,18 +57,18 @@ class SubcontractorsScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add subcontractor'),
+        title: Text(tr('Add subcontractor')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Name')),
-            TextField(controller: phone, decoration: const InputDecoration(labelText: 'Contact phone')),
-            TextField(controller: trade, decoration: const InputDecoration(labelText: 'Trade')),
+            TextField(controller: name, decoration: InputDecoration(labelText: tr('Name'))),
+            TextField(controller: phone, decoration: InputDecoration(labelText: tr('Contact phone'))),
+            TextField(controller: trade, decoration: InputDecoration(labelText: tr('Trade'))),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
         ],
       ),
     );

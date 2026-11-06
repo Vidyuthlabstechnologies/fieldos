@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class AttendanceList extends StatefulWidget {
   const AttendanceList({
@@ -65,7 +66,7 @@ class _AttendanceListState extends State<AttendanceList> {
       children: [
         if (forgotten.isNotEmpty) ...[
           _DayHeader(
-            title: 'Not punched out',
+            title: tr('Not punched out'),
             detail: 'Set when they left. Until then each counts as half a day.',
             warn: true,
           ),
@@ -74,13 +75,13 @@ class _AttendanceListState extends State<AttendanceList> {
               punch: a,
               now: now,
               showDate: true,
-              action: TextButton(onPressed: () => widget.onSetOutTime(a), child: const Text('Set time out')),
+              action: TextButton(onPressed: () => widget.onSetOutTime(a), child: Text(tr('Set time out'))),
             ),
         ],
         if (shown.isEmpty && forgotten.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: Icons.event_available_outlined,
-            title: 'Nobody punched in this week',
+            title: tr('Nobody punched in this week'),
             compact: true,
           ),
         for (final day in shown) ...[
@@ -90,7 +91,7 @@ class _AttendanceListState extends State<AttendanceList> {
               punch: a,
               now: now,
               action: a.punchOut == null
-                  ? TextButton(onPressed: () => widget.onPunchOut(a), child: const Text('Punch out'))
+                  ? TextButton(onPressed: () => widget.onPunchOut(a), child: Text(tr('Punch out')))
                   : null,
             ),
         ],

@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class DocumentsView extends ConsumerStatefulWidget {
   const DocumentsView({
@@ -37,7 +38,7 @@ class _DocumentsViewState extends ConsumerState<DocumentsView> {
         Expanded(
           child: documentsList.when(
             data: (rows) => rows.isEmpty
-                ? const Center(child: Text('No documents yet.'))
+                ? Center(child: Text(tr('No documents yet.')))
                 : ListView(
                     children: [
                       for (final d in rows)
@@ -77,14 +78,14 @@ class _DocumentsViewState extends ConsumerState<DocumentsView> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Save document'),
+        title: Text(tr('Save document')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: nameController, decoration: const InputDecoration(labelText: 'Document name')),
+            TextField(controller: nameController, decoration: InputDecoration(labelText: tr('Document name'))),
             DropdownButtonFormField<String>(
               initialValue: 'other',
-              decoration: const InputDecoration(labelText: 'Category'),
+              decoration: InputDecoration(labelText: tr('Category')),
               items: const [
                 'drawing',
                 'specification',
@@ -101,8 +102,8 @@ class _DocumentsViewState extends ConsumerState<DocumentsView> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
         ],
       ),
     );
@@ -212,7 +213,7 @@ class _DocumentTile extends ConsumerWidget {
         content: SizedBox(
           width: 400,
           child: versions.isEmpty
-              ? const Text('No versions.')
+              ? Text(tr('No versions.'))
               : Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -226,7 +227,7 @@ class _DocumentTile extends ConsumerWidget {
                   ],
                 ),
         ),
-        actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Close'))],
+        actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(tr('Close')))],
       ),
     );
   }

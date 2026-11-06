@@ -7,6 +7,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/project/project_status.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 /// Asks for a new project's name, client and stage, saves it, and returns
 /// it (null if the person closed the sheet).
@@ -85,7 +86,7 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('New project', style: theme.textTheme.titleLarge),
+            Text(tr('New project'), style: theme.textTheme.titleLarge),
             const SizedBox(height: 4),
             Text(
               "One project for each site. Its daily reports, labour, materials, money and photos stay together.",
@@ -98,9 +99,9 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
               textCapitalization: TextCapitalization.words,
               textInputAction: TextInputAction.next,
               onSubmitted: (_) => _clientFocus.requestFocus(),
-              decoration: const InputDecoration(
-                labelText: 'Project name',
-                hintText: 'For example Green Valley Villas, Block A',
+              decoration: InputDecoration(
+                labelText: tr('Project name'),
+                hintText: tr('For example Green Valley Villas, Block A'),
                 prefixIcon: Icon(Icons.apartment_outlined),
               ),
             ),
@@ -111,13 +112,13 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
               textCapitalization: TextCapitalization.words,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _busy ? null : _create(),
-              decoration: const InputDecoration(
-                labelText: 'Client (optional)',
+              decoration: InputDecoration(
+                labelText: tr('Client (optional)'),
                 prefixIcon: Icon(Icons.handshake_outlined),
               ),
             ),
             const SizedBox(height: 16),
-            Text('Stage', style: theme.textTheme.titleSmall),
+            Text(tr('Stage'), style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             SegmentedButton<String>(
               segments: [
@@ -139,7 +140,7 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
               onPressed: _busy ? null : _create,
               child: _busy
                   ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Create project'),
+                  : Text(tr('Create project')),
             ),
           ],
         ),
@@ -163,7 +164,7 @@ Future<String?> showProjectStatusSheet(BuildContext context, {required String cu
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-              child: Text('Project stage', style: theme.textTheme.titleLarge),
+              child: Text(tr('Project stage'), style: theme.textTheme.titleLarge),
             ),
             RadioGroup<String>(
               groupValue: current,

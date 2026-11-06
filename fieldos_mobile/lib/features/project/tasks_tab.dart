@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/project/task_plan.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 const taskStatusLabels = {'todo': 'To do', 'in_progress': 'In progress', 'done': 'Done'};
 
@@ -76,9 +77,9 @@ class _TasksTabState extends ConsumerState<TasksTab> {
               if (items.isEmpty) {
                 return EmptyState(
                   icon: Icons.checklist,
-                  title: 'No tasks yet',
-                  message: 'Add the jobs for this site so everyone knows what is next and what is late.',
-                  actionLabel: 'Add a task',
+                  title: tr('No tasks yet'),
+                  message: tr('Add the jobs for this site so everyone knows what is next and what is late.'),
+                  actionLabel: tr('Add a task'),
                   onAction: _add,
                 );
               }
@@ -96,9 +97,9 @@ class _TasksTabState extends ConsumerState<TasksTab> {
                   const SizedBox(height: 8),
                   SegmentedButton<TaskView>(
                     segments: [
-                      const ButtonSegment(value: TaskView.all, label: Text('All')),
+                      ButtonSegment(value: TaskView.all, label: Text(tr('All'))),
                       ButtonSegment(value: TaskView.late, label: Text(lateCount > 0 ? 'Late ($lateCount)' : 'Late')),
-                      const ButtonSegment(value: TaskView.next14, label: Text('Next 14 days')),
+                      ButtonSegment(value: TaskView.next14, label: Text(tr('Next 14 days'))),
                     ],
                     selected: {_view},
                     showSelectedIcon: false,
@@ -112,7 +113,7 @@ class _TasksTabState extends ConsumerState<TasksTab> {
                         switch (_view) {
                           TaskView.late => 'Nothing is late. Tasks show here when they pass their due date, '
                               'or when their pace means they will finish after it.',
-                          TaskView.next14 => 'Nothing starts or falls due in the next 14 days.',
+                          TaskView.next14 => tr('Nothing starts or falls due in the next 14 days.'),
                           TaskView.all => '',
                         },
                         textAlign: TextAlign.center,
@@ -133,7 +134,7 @@ class _TasksTabState extends ConsumerState<TasksTab> {
           child: FloatingActionButton.extended(
             heroTag: 'task_add',
             icon: const Icon(Icons.add),
-            label: const Text('Add task'),
+            label: Text(tr('Add task')),
             onPressed: _add,
           ),
         ),
@@ -335,17 +336,17 @@ class _TaskSheetState extends State<_TaskSheet> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text(_editing ? 'Task' : 'New task', style: theme.textTheme.titleLarge),
+            Text(_editing ? tr('Task') : tr('New task'), style: theme.textTheme.titleLarge),
             const SizedBox(height: 12),
             TextField(
               controller: _title,
               autofocus: !_editing,
               maxLength: 200,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'What needs doing?'),
+              decoration: InputDecoration(labelText: tr('What needs doing?')),
             ),
             const SizedBox(height: 4),
-            Text('Priority', style: theme.textTheme.labelLarge),
+            Text(tr('Priority'), style: theme.textTheme.labelLarge),
             const SizedBox(height: 6),
             SegmentedButton<String>(
               segments: [for (final e in taskPriorities.entries) ButtonSegment(value: e.key, label: Text(e.value))],
@@ -380,7 +381,7 @@ class _TaskSheetState extends State<_TaskSheet> {
             if (_editing) ...[
               const SizedBox(height: 16),
               Row(children: [
-                Text('Progress', style: theme.textTheme.labelLarge),
+                Text(tr('Progress'), style: theme.textTheme.labelLarge),
                 const Spacer(),
                 Text('${_progress.round()}%', style: theme.textTheme.titleMedium),
               ]),
@@ -391,7 +392,7 @@ class _TaskSheetState extends State<_TaskSheet> {
                 label: '${_progress.round()}%',
                 onChanged: (v) => setState(() => _progress = v),
               ),
-              Text('Status', style: theme.textTheme.labelLarge),
+              Text(tr('Status'), style: theme.textTheme.labelLarge),
               const SizedBox(height: 6),
               SegmentedButton<String>(
                 segments: [for (final e in taskStatusLabels.entries) ButtonSegment(value: e.key, label: Text(e.value))],
@@ -406,12 +407,12 @@ class _TaskSheetState extends State<_TaskSheet> {
             ],
             if (_error != null) ...[const SizedBox(height: 12), FormMessage(_error!)],
             const SizedBox(height: 20),
-            FilledButton(onPressed: _save, child: Text(_editing ? 'Save' : 'Add task')),
+            FilledButton(onPressed: _save, child: Text(_editing ? tr('Save') : tr('Add task'))),
             if (_editing) ...[
               const SizedBox(height: 8),
               TextButton.icon(
                 icon: const Icon(Icons.copy_outlined),
-                label: const Text('Duplicate this task'),
+                label: Text(tr('Duplicate this task')),
                 onPressed: () => Navigator.pop(context, const TasksCompanion(id: Value(duplicateMarker))),
               ),
             ],

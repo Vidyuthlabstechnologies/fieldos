@@ -20,6 +20,7 @@ import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_service.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class TeamSyncScreen extends ConsumerStatefulWidget {
   const TeamSyncScreen({super.key});
@@ -273,7 +274,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete your cloud account?'),
+        title: Text(tr('Delete your cloud account?')),
         content: Text(
           'This permanently deletes $email from FieldOS cloud.\n\n'
           'Companies where you are the only member are deleted from the cloud with all their records. '
@@ -281,14 +282,14 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           'Data on this phone is not deleted. Uninstall the app to remove it.',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(ctx).colorScheme.error,
               foregroundColor: Theme.of(ctx).colorScheme.onError,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete account'),
+            child: Text(tr('Delete account')),
           ),
         ],
       ),
@@ -318,20 +319,20 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Remove from the team?'),
+        title: Text(tr('Remove from the team?')),
         content: Text(
           '${m.email} will stop getting this company\'s projects and cannot send anything new. '
           'Work they already recorded stays.',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(ctx).colorScheme.error,
               foregroundColor: Theme.of(ctx).colorScheme.onError,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Remove'),
+            child: Text(tr('Remove')),
           ),
         ],
       ),
@@ -359,8 +360,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
 
     final children = <Widget>[];
     if (!available) {
-      children.add(const Text(
-        'Team sync is not set up in this build of FieldOS. Everything still works offline on this phone.',
+      children.add(Text(tr('Team sync is not set up in this build of FieldOS. Everything still works offline on this phone.'),
       ));
     } else if (!service.isSignedIn) {
       children.addAll(_codeStep == null ? _signInSection() : _codeSection(_codeStep!));
@@ -369,7 +369,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         const Icon(Icons.verified_user, size: 18, color: Brand.ok),
         const SizedBox(width: 8),
         Expanded(child: Text('Signed in as ${service.email ?? ''}')),
-        TextButton(onPressed: _busy ? null : _signOut, child: const Text('Sign out')),
+        TextButton(onPressed: _busy ? null : _signOut, child: Text(tr('Sign out'))),
       ]));
       children.add(const SizedBox(height: 16));
       if (company == null || _linked == false) {
@@ -389,7 +389,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           child: TextButton.icon(
             onPressed: _busy ? null : _deleteAccount,
             icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
-            label: Text('Delete my cloud account', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            label: Text(tr('Delete my cloud account'), style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ),
       ]);
@@ -402,7 +402,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Team & sync')),
+      appBar: AppBar(title: Text(tr('Team & sync'))),
       body: RefreshIndicator(
         onRefresh: _refresh,
         child: ListView(padding: const EdgeInsets.all(16), children: children),
@@ -411,15 +411,15 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
   }
 
   List<Widget> _signInSection() => [
-        Text('Sign in to share projects, daily reports, issues and chat with your team.',
+        Text(tr('Sign in to share projects, daily reports, issues and chat with your team.'),
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        Text('Use your own email. A new email creates an account automatically.',
+        Text(tr('Use your own email. A new email creates an account automatically.'),
             style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         const SizedBox(height: 16),
         TextField(
           controller: _email,
-          decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.alternate_email)),
+          decoration: InputDecoration(labelText: tr('Email'), prefixIcon: Icon(Icons.alternate_email)),
           keyboardType: TextInputType.emailAddress,
           autofillHints: const [AutofillHints.email],
           textInputAction: TextInputAction.next,
@@ -428,7 +428,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         const SizedBox(height: 8),
         TextField(
           controller: _password,
-          decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock_outline)),
+          decoration: InputDecoration(labelText: tr('Password'), prefixIcon: Icon(Icons.lock_outline)),
           obscureText: true,
           autofillHints: const [AutofillHints.password],
           textInputAction: TextInputAction.done,
@@ -437,7 +437,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         ),
         Align(
           alignment: Alignment.centerRight,
-          child: TextButton(onPressed: _busy ? null : _forgotPassword, child: const Text('Forgot password?')),
+          child: TextButton(onPressed: _busy ? null : _forgotPassword, child: Text(tr('Forgot password?'))),
         ),
         FilledButton(onPressed: _busy ? null : _signIn, child: _busyOr('Sign in')),
       ];
@@ -446,7 +446,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     final reset = step == _EmailCodeStep.resetPassword;
     final muted = TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant);
     return [
-      Text(reset ? 'Choose a new password' : 'Check your email', style: Theme.of(context).textTheme.titleMedium),
+      Text(reset ? tr('Choose a new password') : tr('Check your email'), style: Theme.of(context).textTheme.titleMedium),
       const SizedBox(height: 8),
       Text(
         reset
@@ -458,7 +458,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       TextField(
         key: const Key('email-code'),
         controller: _emailCode,
-        decoration: const InputDecoration(labelText: 'Code from the email', prefixIcon: Icon(Icons.pin_outlined)),
+        decoration: InputDecoration(labelText: tr('Code from the email'), prefixIcon: Icon(Icons.pin_outlined)),
         keyboardType: TextInputType.number,
         autofillHints: const [AutofillHints.oneTimeCode],
         inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
@@ -472,7 +472,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         TextField(
           key: const Key('new-cloud-password'),
           controller: _newPassword,
-          decoration: const InputDecoration(labelText: 'New password', prefixIcon: Icon(Icons.lock_outline)),
+          decoration: InputDecoration(labelText: tr('New password'), prefixIcon: Icon(Icons.lock_outline)),
           obscureText: true,
           autofillHints: const [AutofillHints.newPassword],
           textInputAction: TextInputAction.done,
@@ -483,15 +483,15 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       const SizedBox(height: 12),
       FilledButton(
         onPressed: _busy ? null : _submitCode,
-        child: _busyOr(reset ? 'Save new password' : 'Confirm email'),
+        child: _busyOr(reset ? tr('Save new password') : tr('Confirm email')),
       ),
       const SizedBox(height: 4),
       Wrap(spacing: 8, children: [
-        TextButton(onPressed: _busy ? null : _resendCode, child: const Text('Send a new code')),
-        TextButton(onPressed: _busy ? null : _leaveCodeStep, child: const Text('Back to sign in')),
+        TextButton(onPressed: _busy ? null : _resendCode, child: Text(tr('Send a new code'))),
+        TextButton(onPressed: _busy ? null : _leaveCodeStep, child: Text(tr('Back to sign in'))),
       ]),
       if (!reset)
-        Text('Got a link instead of a code? Open it, then come back and sign in.', style: muted),
+        Text(tr('Got a link instead of a code? Open it, then come back and sign in.'), style: muted),
     ];
   }
 
@@ -499,7 +499,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         if (canRegister) ...[
           Text('Put $companyName on the cloud', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 4),
-          const Text('You become the owner. Your team joins with a code you share from here.'),
+          Text(tr('You become the owner. Your team joins with a code you share from here.')),
           const SizedBox(height: 8),
           FilledButton.icon(
             onPressed: _busy ? null : _registerCompany,
@@ -510,13 +510,13 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           const Divider(),
           const SizedBox(height: 8),
         ],
-        Text('Join your company', style: Theme.of(context).textTheme.titleMedium),
+        Text(tr('Join your company'), style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
-        const Text('Ask the owner for the join code shown on their Team & sync screen.'),
+        Text(tr('Ask the owner for the join code shown on their Team & sync screen.')),
         const SizedBox(height: 8),
         TextField(
           controller: _code,
-          decoration: const InputDecoration(labelText: 'Join code', prefixIcon: Icon(Icons.key_outlined)),
+          decoration: InputDecoration(labelText: tr('Join code'), prefixIcon: Icon(Icons.key_outlined)),
           textCapitalization: TextCapitalization.characters,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _busy ? null : _joinCompany(),
@@ -535,9 +535,9 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     final lastAt = _lastSyncedAt == null ? null : DateTime.tryParse(_lastSyncedAt!);
     final last = lastAt == null ? 'never' : fmtDateTime(lastAt);
     return [
-      Text('Sync', style: Theme.of(context).textTheme.titleMedium),
+      Text(tr('Sync'), style: Theme.of(context).textTheme.titleMedium),
       const SizedBox(height: 4),
-      const Text('Runs automatically when the app opens and every few minutes while it is open.'),
+      Text(tr('Runs automatically when the app opens and every few minutes while it is open.')),
       const SizedBox(height: 8),
       Text('Last synced: $last · Waiting to send: $_pending', style: Theme.of(context).textTheme.bodySmall),
       if (_parked > 0)
@@ -555,7 +555,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
                       await ref.read(appDatabaseProvider).syncOutboxDao.retryParked();
                       await _syncNow();
                     }),
-            child: const Text('Retry failed'),
+            child: Text(tr('Retry failed')),
           ),
         ],
       ]),
@@ -567,21 +567,21 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     final isOwner = cloud?.role == 'owner';
     final code = cloud?.joinCode;
     return [
-      Text('Team', style: Theme.of(context).textTheme.titleMedium),
+      Text(tr('Team'), style: Theme.of(context).textTheme.titleMedium),
       const SizedBox(height: 8),
       if (code != null)
         Card(
           child: ListTile(
-            title: const Text('Join code'),
+            title: Text(tr('Join code')),
             subtitle: SelectableText(code, style: const TextStyle(fontSize: 20, letterSpacing: 2, fontWeight: FontWeight.w600)),
             trailing: Wrap(children: [
               IconButton(
-                tooltip: 'Copy',
+                tooltip: tr('Copy'),
                 icon: const Icon(Icons.copy),
                 onPressed: () => Clipboard.setData(ClipboardData(text: code)),
               ),
               IconButton(
-                tooltip: 'Share',
+                tooltip: tr('Share'),
                 icon: const Icon(Icons.share),
                 onPressed: () => SharePlus.instance.share(ShareParams(
                   text: 'Join our company on FieldOS: open the app, go to Team & sync, sign in and enter join code $code',
@@ -589,7 +589,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
               ),
               if (isOwner)
                 IconButton(
-                  tooltip: 'Make a new code',
+                  tooltip: tr('Make a new code'),
                   icon: const Icon(Icons.refresh),
                   onPressed: _busy ? null : () => _resetCode(companyId),
                 ),
@@ -599,7 +599,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       if (_roster == null)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Text('Connect to the internet to see your team.',
+          child: Text(tr('Connect to the internet to see your team.'),
               style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         )
       else
@@ -619,7 +619,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
                       onChanged: _busy ? null : (r) => r == null ? null : _changeRole(companyId, m, r),
                     ),
                     IconButton(
-                      tooltip: 'Remove from the team',
+                      tooltip: tr('Remove from the team'),
                       icon: const Icon(Icons.person_remove_outlined),
                       onPressed: _busy ? null : () => _removeMember(companyId, m),
                     ),

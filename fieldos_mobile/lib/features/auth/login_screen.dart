@@ -9,6 +9,8 @@ import 'package:fieldos_mobile/core/branded_page.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/l10n/language_picker.dart';
 
 /// Sign in or create an account. On a phone where nobody has an account
 /// yet it opens on "Create account", since there is nothing to log in to.
@@ -86,11 +88,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Forgot your password?'),
-        content: const Text(
-          'FieldOS accounts live on this phone, so there is no reset email. If you turned on Team & sync, your '
+        title: Text(tr('Forgot your password?')),
+        content: Text(tr('FieldOS accounts live on this phone, so there is no reset email. If you turned on Team & sync, your '
           "company's records are safe in the cloud: create a new account on this phone, then sign in to Team & sync "
-          'with your email to get them back. If you are stuck, write to us and we will help.',
+          'with your email to get them back. If you are stuck, write to us and we will help.'),
         ),
         actions: [
           TextButton(
@@ -98,9 +99,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Navigator.pop(ctx);
               emailSupport(subject: 'FieldOS: forgot password');
             },
-            child: const Text('Email support'),
+            child: Text(tr('Email support')),
           ),
-          FilledButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
+          FilledButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('OK'))),
         ],
       ),
     );
@@ -117,9 +118,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         BrandMark(size: compact ? 64 : 88, onDark: true),
         const SizedBox(height: 6),
         Wordmark(fontSize: compact ? 28 : 34, onDark: true),
-        const SizedBox(height: 8),
-        Text(
-          'Daily reports, labour, materials and money for your sites. In your language, even offline.',
+        const LanguageChooserRow(color: Colors.white),
+        Text(tr('Daily reports, labour, materials and money for your sites. In your language, even offline.'),
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.8)),
         ),
@@ -128,12 +128,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(_registering ? 'Create your account' : 'Welcome back', style: theme.textTheme.headlineSmall),
+            Text(_registering ? tr('Create your account') : tr('Welcome back'), style: theme.textTheme.headlineSmall),
             const SizedBox(height: 4),
             Text(
               _registering
-                  ? 'Takes a minute. Works offline; your records stay on this phone unless you turn on Team & sync.'
-                  : 'Log in to carry on where you left off.',
+                  ? tr('Takes a minute. Works offline; your records stay on this phone unless you turn on Team & sync.')
+                  : tr('Log in to carry on where you left off.'),
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 20),
@@ -144,7 +144,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.name],
                 onSubmitted: (_) => _usernameFocus.requestFocus(),
-                decoration: const InputDecoration(labelText: 'Your name', prefixIcon: Icon(Icons.badge_outlined)),
+                decoration: InputDecoration(labelText: tr('Your name'), prefixIcon: Icon(Icons.badge_outlined)),
               ),
               const SizedBox(height: 12),
             ],
@@ -157,7 +157,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               autofillHints: [_registering ? AutofillHints.newUsername : AutofillHints.username],
               onSubmitted: (_) => _passwordFocus.requestFocus(),
               decoration: InputDecoration(
-                labelText: 'Username',
+                labelText: tr('Username'),
                 prefixIcon: const Icon(Icons.person_outline),
                 helperText: _registering ? 'For example ravi, or your phone number' : null,
                 helperMaxLines: 2,
@@ -172,11 +172,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               autofillHints: [_registering ? AutofillHints.newPassword : AutofillHints.password],
               onSubmitted: (_) => _busy ? null : _submit(),
               decoration: InputDecoration(
-                labelText: 'Password',
+                labelText: tr('Password'),
                 prefixIcon: const Icon(Icons.lock_outline),
                 helperText: _registering ? 'At least ${AuthService.minPasswordLength} characters' : null,
                 suffixIcon: IconButton(
-                  tooltip: _showPassword ? 'Hide password' : 'Show password',
+                  tooltip: _showPassword ? tr('Hide password') : tr('Show password'),
                   icon: Icon(_showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined),
                   onPressed: () => setState(() => _showPassword = !_showPassword),
                 ),
@@ -185,7 +185,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             if (!_registering)
               Align(
                 alignment: Alignment.centerRight,
-                child: TextButton(onPressed: _forgotPassword, child: const Text('Forgot password?')),
+                child: TextButton(onPressed: _forgotPassword, child: Text(tr('Forgot password?'))),
               ),
             if (_error != null) ...[
               const SizedBox(height: 8),
@@ -196,31 +196,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               onPressed: _busy ? null : _submit,
               child: _busy
                   ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(_registering ? 'Create account' : 'Log in'),
+                  : Text(_registering ? tr('Create account') : tr('Log in')),
             ),
             const SizedBox(height: 8),
             TextButton(
               onPressed: _busy ? null : _switchMode,
-              child: Text(_registering ? 'Already have an account? Log in' : 'New to FieldOS? Create an account'),
+              child: Text(_registering ? tr('Already have an account? Log in') : tr('New to FieldOS? Create an account')),
             ),
             const SizedBox(height: 16),
             Text.rich(
               TextSpan(
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 children: [
-                  const TextSpan(text: 'By continuing you agree to the '),
+                  TextSpan(text: tr('By continuing you agree to the ')),
                   TextSpan(
-                    text: 'Terms of use',
+                    text: tr('Terms of use'),
                     style: linkStyle,
                     recognizer: _termsTap,
                   ),
-                  const TextSpan(text: ' and the '),
+                  TextSpan(text: tr(' and the ')),
                   TextSpan(
-                    text: 'Privacy policy',
+                    text: tr('Privacy policy'),
                     style: linkStyle,
                     recognizer: _privacyTap,
                   ),
-                  const TextSpan(text: '.'),
+                  TextSpan(text: tr('.')),
                 ],
               ),
               textAlign: TextAlign.center,

@@ -18,6 +18,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/shared/photo_stamp.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 /// Capture a photo with camera-first UI. The [prefix] parameter is used
 /// for organizing photos by type (e.g., 'dpr_', 'inspection_', 'grn_').
@@ -33,12 +34,12 @@ Future<String?> captureCameraFirst(BuildContext context, {String prefix = 'photo
         children: [
           ListTile(
             leading: const Icon(Icons.photo_camera),
-            title: const Text('Take photo'),
+            title: Text(tr('Take photo')),
             onTap: () => Navigator.pop(ctx, ImageSource.camera),
           ),
           ListTile(
             leading: const Icon(Icons.photo),
-            title: const Text('Choose from gallery'),
+            title: Text(tr('Choose from gallery')),
             onTap: () => Navigator.pop(ctx, ImageSource.gallery),
           ),
         ],

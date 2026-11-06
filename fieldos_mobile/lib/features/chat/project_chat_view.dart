@@ -14,6 +14,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 final projectMessagesProvider = StreamProvider.autoDispose.family<List<ProjectMessage>, String>(
   (ref, projectId) => ref.watch(appDatabaseProvider).messageDao.watchForProject(projectId),
@@ -90,7 +91,7 @@ class _ProjectChatViewState extends ConsumerState<ProjectChatView> {
       children: [
         if (!signedIn)
           MaterialBanner(
-            content: const Text('Messages stay on this phone until you sign in under Team & sync.'),
+            content: Text(tr('Messages stay on this phone until you sign in under Team & sync.')),
             actions: [const SizedBox.shrink()],
           )
         else if (!_live)
@@ -99,7 +100,7 @@ class _ProjectChatViewState extends ConsumerState<ProjectChatView> {
           child: messages.when(
             data: (list) {
               if (list.isEmpty) {
-                return const Center(child: Text('No messages yet. Say what is happening on site.'));
+                return Center(child: Text(tr('No messages yet. Say what is happening on site.')));
               }
               _scrollToEnd();
               return ListView.builder(
@@ -125,11 +126,11 @@ class _ProjectChatViewState extends ConsumerState<ProjectChatView> {
                     minLines: 1,
                     maxLines: 4,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: const InputDecoration(hintText: 'Message the team', border: OutlineInputBorder()),
+                    decoration: InputDecoration(hintText: tr('Message the team'), border: OutlineInputBorder()),
                   ),
                 ),
                 const SizedBox(width: 8),
-                IconButton.filled(onPressed: _send, icon: const Icon(Icons.send), tooltip: 'Send'),
+                IconButton.filled(onPressed: _send, icon: const Icon(Icons.send), tooltip: tr('Send')),
               ],
             ),
           ),

@@ -8,6 +8,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 /// Shown right after the first registration, when the user has no company
 /// yet: create one (and own it), or join an employer's with its code.
@@ -62,8 +63,7 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
           style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white),
         ),
         const SizedBox(height: 6),
-        Text(
-          'One more step before your first project.',
+        Text(tr('One more step before your first project.'),
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.8)),
         ),
@@ -71,9 +71,9 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
       sheet: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Set up your company', style: theme.textTheme.headlineSmall),
+          Text(tr('Set up your company'), style: theme.textTheme.headlineSmall),
           const SizedBox(height: 4),
-          Text('Your projects, team, labour and reports are kept under your company, and you are its owner.',
+          Text(tr('Your projects, team, labour and reports are kept under your company, and you are its owner.'),
               style: muted),
           const SizedBox(height: 20),
           TextField(
@@ -83,10 +83,10 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
             autofillHints: const [AutofillHints.organizationName],
             maxLength: AuthService.maxCompanyNameLength,
             onSubmitted: (_) => _busy ? null : _create(),
-            decoration: const InputDecoration(
-              labelText: 'Company name',
+            decoration: InputDecoration(
+              labelText: tr('Company name'),
               prefixIcon: Icon(Icons.apartment_outlined),
-              helperText: 'For example Sri Sai Constructions',
+              helperText: tr('For example Sri Sai Constructions'),
               helperMaxLines: 2,
               counterText: '',
             ),
@@ -100,7 +100,7 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
             onPressed: _busy ? null : _create,
             child: _busy
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Create company'),
+                : Text(tr('Create company')),
           ),
           if (cloud) ...[
             const SizedBox(height: 28),
@@ -108,18 +108,18 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
               const Expanded(child: Divider()),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text('or', style: muted),
+                child: Text(tr('or'), style: muted),
               ),
               const Expanded(child: Divider()),
             ]),
             const SizedBox(height: 20),
             Text("Working for someone else's company?", style: theme.textTheme.titleSmall),
             const SizedBox(height: 4),
-            Text('Ask the owner for the join code. You will see their projects once you join.', style: muted),
+            Text(tr('Ask the owner for the join code. You will see their projects once you join.'), style: muted),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               icon: const Icon(Icons.group_add_outlined),
-              label: const Text('Join with a code'),
+              label: Text(tr('Join with a code')),
               onPressed: _busy
                   ? null
                   : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeamSyncScreen())),

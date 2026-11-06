@@ -10,6 +10,7 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class EquipmentView extends ConsumerStatefulWidget {
   const EquipmentView({super.key, required this.projectId, required this.userId});
@@ -30,7 +31,7 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
         Expanded(
           child: equipmentList.when(
             data: (rows) => rows.isEmpty
-                ? const Center(child: Text('No equipment yet.'))
+                ? Center(child: Text(tr('No equipment yet.')))
                 : ListView(
                     children: [
                       for (final e in rows)
@@ -54,7 +55,7 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add equipment'),
+        title: Text(tr('Add equipment')),
         scrollable: true,
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -63,32 +64,32 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
               controller: name,
               autofocus: true,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Name', hintText: 'e.g. JCB 3DX'),
+              decoration: InputDecoration(labelText: tr('Name'), hintText: tr('e.g. JCB 3DX')),
             ),
             TextField(
               controller: equipmentType,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Type (optional)', hintText: 'e.g. Excavator'),
+              decoration: InputDecoration(labelText: tr('Type (optional)'), hintText: tr('e.g. Excavator')),
             ),
             TextField(
               controller: model,
-              decoration: const InputDecoration(labelText: 'Model (optional)'),
+              decoration: InputDecoration(labelText: tr('Model (optional)')),
             ),
             TextField(
               controller: registrationNumber,
               textCapitalization: TextCapitalization.characters,
-              decoration: const InputDecoration(labelText: 'Registration number (optional)'),
+              decoration: InputDecoration(labelText: tr('Registration number (optional)')),
             ),
             TextField(
               controller: dailyRate,
-              decoration: const InputDecoration(labelText: 'Daily rate (optional)', prefixText: '₹ '),
+              decoration: InputDecoration(labelText: tr('Daily rate (optional)'), prefixText: '₹ '),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
         ],
       ),
     );
@@ -118,7 +119,7 @@ Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd) =>
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
       Text(title, style: Theme.of(context).textTheme.titleSmall),
-      IconButton(icon: const Icon(Icons.add), tooltip: 'Add', onPressed: onAdd),
+      IconButton(icon: const Icon(Icons.add), tooltip: tr('Add'), onPressed: onAdd),
     ],
   ),
 );
@@ -152,14 +153,14 @@ class _EquipmentTile extends ConsumerWidget {
                 await ref.read(appDatabaseProvider).equipmentDao.updateStatus(equipment.id, s);
                 ref.invalidate(equipmentProvider(projectId));
               },
-              itemBuilder: (ctx) => const [
-                PopupMenuItem(value: 'available', child: Text('Available')),
-                PopupMenuItem(value: 'in_use', child: Text('In use')),
-                PopupMenuItem(value: 'maintenance', child: Text('Maintenance')),
-                PopupMenuItem(value: 'breakdown', child: Text('Breakdown')),
+              itemBuilder: (ctx) => [
+                PopupMenuItem(value: 'available', child: Text(tr('Available'))),
+                PopupMenuItem(value: 'in_use', child: Text(tr('In use'))),
+                PopupMenuItem(value: 'maintenance', child: Text(tr('Maintenance'))),
+                PopupMenuItem(value: 'breakdown', child: Text(tr('Breakdown'))),
               ],
             ),
-            IconButton(icon: const Icon(Icons.list_alt), tooltip: 'View logs', onPressed: () => _showLogs(context)),
+            IconButton(icon: const Icon(Icons.list_alt), tooltip: tr('View logs'), onPressed: () => _showLogs(context)),
           ],
         ),
         onTap: () => _showLogs(context),
@@ -189,7 +190,7 @@ class _EquipmentTile extends ConsumerWidget {
             width: 400,
             child: logs.when(
               data: (rows) => rows.isEmpty
-                  ? const Text('No logs yet. Add hours worked, fuel, repairs or servicing.')
+                  ? Text(tr('No logs yet. Add hours worked, fuel, repairs or servicing.'))
                   : Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -216,8 +217,8 @@ class _EquipmentTile extends ConsumerWidget {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Close')),
-            FilledButton(onPressed: () => _addLog(ctx, ref), child: const Text('Add log')),
+            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(tr('Close'))),
+            FilledButton(onPressed: () => _addLog(ctx, ref), child: Text(tr('Add log'))),
           ],
         );
       },
@@ -234,36 +235,36 @@ class _EquipmentTile extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Add equipment log'),
+          title: Text(tr('Add equipment log')),
           scrollable: true,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
                 initialValue: 'usage',
-                decoration: const InputDecoration(labelText: 'What happened'),
+                decoration: InputDecoration(labelText: tr('What happened')),
                 items: [for (final t in _logTypes) DropdownMenuItem(value: t, child: Text(_logTypeLabel(t)))],
                 onChanged: (v) => logType.text = v ?? 'usage',
               ),
               TextField(
                 controller: hoursUsed,
-                decoration: InputDecoration(labelText: 'Hours (optional)', errorText: hoursError),
+                decoration: InputDecoration(labelText: tr('Hours (optional)'), errorText: hoursError),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
               ),
               TextField(
                 controller: description,
                 textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(labelText: 'Note (optional)'),
+                decoration: InputDecoration(labelText: tr('Note (optional)')),
               ),
               TextField(
                 controller: cost,
-                decoration: const InputDecoration(labelText: 'Cost (optional)', prefixText: '₹ '),
+                decoration: InputDecoration(labelText: tr('Cost (optional)'), prefixText: '₹ '),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
               ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
             FilledButton(
               onPressed: () {
                 // The cloud keeps hours below 10,000 (a meter reading, at most).
@@ -275,7 +276,7 @@ class _EquipmentTile extends ConsumerWidget {
                 }
                 Navigator.of(ctx).pop(true);
               },
-              child: const Text('Save'),
+              child: Text(tr('Save')),
             ),
           ],
         ),
@@ -305,11 +306,11 @@ class _EquipmentTile extends ConsumerWidget {
 const _logTypes = ['usage', 'fuel', 'maintenance', 'repair', 'inspection'];
 
 String _logTypeLabel(String t) => switch (t) {
-  'usage' => 'Worked',
-  'fuel' => 'Fuel',
-  'maintenance' => 'Servicing',
-  'repair' => 'Repair',
-  'inspection' => 'Inspection',
+  'usage' => tr('Worked'),
+  'fuel' => tr('Fuel'),
+  'maintenance' => tr('Servicing'),
+  'repair' => tr('Repair'),
+  'inspection' => tr('Inspection'),
   _ => t.replaceAll('_', ' '),
 };
 

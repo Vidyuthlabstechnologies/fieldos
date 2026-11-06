@@ -15,6 +15,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/money/bills_view.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 const expenseCategories = ['Material', 'Labour', 'Transport', 'Equipment hire', 'Food & tea', 'Fuel', 'Other'];
 const paymentModes = {'cash': 'Cash', 'upi': 'UPI', 'bank': 'Bank transfer', 'cheque': 'Cheque'};
@@ -80,9 +81,9 @@ class MoneyView extends ConsumerWidget {
             ),
           ),
           TabBar(tabs: [
-            const Tab(text: 'Spent'),
-            if (showIn) const Tab(text: 'Received'),
-            if (showBills) const Tab(text: 'Bills'),
+            Tab(text: tr('Spent')),
+            if (showIn) Tab(text: tr('Received')),
+            if (showBills) Tab(text: tr('Bills')),
           ]),
           Expanded(
             child: TabBarView(children: [
@@ -166,30 +167,30 @@ class MoneyView extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, set) => AlertDialog(
-          title: const Text('Payment received'),
+          title: Text(tr('Payment received')),
           content: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               TextField(
                   controller: party,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(labelText: 'From (client name)')),
+                  decoration: InputDecoration(labelText: tr('From (client name)'))),
               TextField(
                   controller: amount,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Amount (₹)')),
+                  decoration: InputDecoration(labelText: tr('Amount (₹)'))),
               DropdownButtonFormField<String>(
                 initialValue: mode,
-                decoration: const InputDecoration(labelText: 'Paid by'),
+                decoration: InputDecoration(labelText: tr('Paid by')),
                 items: [for (final m in paymentModes.entries) DropdownMenuItem(value: m.key, child: Text(m.value))],
                 onChanged: (v) => set(() => mode = v ?? mode),
               ),
               _DateRow(value: on, onChanged: (d) => set(() => on = d)),
-              TextField(controller: note, decoration: const InputDecoration(labelText: 'Note (e.g. RA bill 3)')),
+              TextField(controller: note, decoration: InputDecoration(labelText: tr('Note (e.g. RA bill 3)'))),
             ]),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Save'))),
           ],
         ),
       ),
@@ -230,7 +231,7 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, set) => AlertDialog(
-        title: Text(workerId != null ? 'Pay worker' : 'Add expense'),
+        title: Text(workerId != null ? tr('Pay worker') : tr('Add expense')),
         content: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Wrap(spacing: 6, runSpacing: 4, children: [
@@ -241,25 +242,25 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
               controller: amount,
               autofocus: true,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Amount (₹)'),
+              decoration: InputDecoration(labelText: tr('Amount (₹)')),
             ),
             if (cat == 'Labour' && workers.isNotEmpty)
               DropdownButtonFormField<String?>(
                 initialValue: worker,
-                decoration: const InputDecoration(labelText: 'Paid to (for wages or an advance)'),
+                decoration: InputDecoration(labelText: tr('Paid to (for wages or an advance)')),
                 items: [
-                  const DropdownMenuItem<String?>(value: null, child: Text('Not one worker')),
+                  DropdownMenuItem<String?>(value: null, child: Text(tr('Not one worker'))),
                   for (final w in workers) DropdownMenuItem<String?>(value: w.id, child: Text(w.name)),
                 ],
                 onChanged: (v) => set(() => worker = v),
               ),
             _DateRow(value: on, onChanged: (d) => set(() => on = d)),
-            TextField(controller: noteC, decoration: const InputDecoration(labelText: 'Note (optional)')),
+            TextField(controller: noteC, decoration: InputDecoration(labelText: tr('Note (optional)'))),
           ]),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Save'))),
         ],
       ),
     ),
@@ -295,7 +296,7 @@ class _DateRow extends StatelessWidget {
                 context: context, initialDate: value, firstDate: DateTime(2020), lastDate: DateTime.now());
             if (d != null) onChanged(d);
           },
-          child: const Text('Change'),
+          child: Text(tr('Change')),
         ),
       ]);
 }

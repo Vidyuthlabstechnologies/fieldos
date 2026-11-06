@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class ApprovalsScreen extends ConsumerWidget {
   const ApprovalsScreen({super.key, required this.companyId});
@@ -26,15 +27,15 @@ class ApprovalsScreen extends ConsumerWidget {
     final canDecide = Roles.canApprove(ref.watch(sessionProvider).role);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Approvals')),
+      appBar: AppBar(title: Text(tr('Approvals'))),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(pendingApprovalsProvider(companyId).future),
         child: pending.when(
           data: (items) => items.isEmpty
-              ? const EmptyState(
+              ? EmptyState(
                   icon: Icons.task_alt,
-                  title: 'Nothing waiting',
-                  message: 'When a site goes over its budget, or a purchase needs a yes, it waits here.',
+                  title: tr('Nothing waiting'),
+                  message: tr('When a site goes over its budget, or a purchase needs a yes, it waits here.'),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(12),
@@ -70,9 +71,9 @@ class ApprovalsScreen extends ConsumerWidget {
                             ],
                             if (canDecide)
                               Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                                TextButton(onPressed: () => _reject(context, ref, a), child: const Text('Reject')),
+                                TextButton(onPressed: () => _reject(context, ref, a), child: Text(tr('Reject'))),
                                 const SizedBox(width: 4),
-                                FilledButton(onPressed: () => _decide(context, ref, a, true, null), child: const Text('Approve')),
+                                FilledButton(onPressed: () => _decide(context, ref, a, true, null), child: Text(tr('Approve'))),
                               ]),
                           ],
                         ),
@@ -93,17 +94,17 @@ class ApprovalsScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reject this?'),
+        title: Text(tr('Reject this?')),
         content: TextField(
           controller: reason,
           autofocus: true,
           maxLength: 200,
           textCapitalization: TextCapitalization.sentences,
-          decoration: const InputDecoration(labelText: 'Reason (optional)', counterText: ''),
+          decoration: InputDecoration(labelText: tr('Reason (optional)'), counterText: ''),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Reject')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Reject'))),
         ],
       ),
     );
@@ -120,7 +121,7 @@ class ApprovalsScreen extends ConsumerWidget {
     try {
       await ref.read(appDatabaseProvider).approvalDao.decide(a.id, approve, user.id, note);
       ref.invalidate(pendingApprovalsProvider(companyId));
-      if (context.mounted) showSnack(context, approve ? 'Approved' : 'Rejected');
+      if (context.mounted) showSnack(context, approve ? tr('Approved') : tr('Rejected'));
     } catch (e, st) {
       if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
     }
@@ -134,9 +135,9 @@ String _when(DateTime t) {
 }
 
 String approvalLabel(String type) => switch (type) {
-      'budget_overrun' => 'Site over budget',
-      'purchase_order' => 'Purchase order',
-      'material_receipt' => 'Material received',
+      'budget_overrun' => tr('Site over budget'),
+      'purchase_order' => tr('Purchase order'),
+      'material_receipt' => tr('Material received'),
       _ => '${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}',
     };
 

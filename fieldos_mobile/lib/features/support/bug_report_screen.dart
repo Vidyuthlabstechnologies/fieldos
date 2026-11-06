@@ -6,6 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:fieldos_mobile/services/bug_report_service.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 /// "Report a bug": a short description, an optional email for a reply, and
 /// the app version, phone type and last few errors attached automatically.
@@ -41,7 +42,7 @@ class _BugReportScreenState extends ConsumerState<BugReportScreen> {
     final text = _message.text.trim();
     if (text.length < 5) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Please describe what went wrong in a few words.')));
+          .showSnackBar(SnackBar(content: Text(tr('Please describe what went wrong in a few words.'))));
       return;
     }
     setState(() => _sending = true);
@@ -57,8 +58,8 @@ class _BugReportScreenState extends ConsumerState<BugReportScreen> {
     setState(() => _sending = false);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(outcome == BugReportOutcome.sent
-          ? 'Thank you. Your report was sent to the FieldOS team.'
-          : 'No internet right now. Your report is saved and will be sent automatically.'),
+          ? tr('Thank you. Your report was sent to the FieldOS team.')
+          : tr('No internet right now. Your report is saved and will be sent automatically.')),
     ));
     Navigator.of(context).pop();
   }
@@ -66,19 +67,19 @@ class _BugReportScreenState extends ConsumerState<BugReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Report a bug')),
+      appBar: AppBar(title: Text(tr('Report a bug'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Tell us what happened and what you expected. We read every report.'),
+          Text(tr('Tell us what happened and what you expected. We read every report.')),
           const SizedBox(height: 16),
           TextField(
             key: const Key('bug-message'),
             controller: _message,
             maxLines: 6,
             maxLength: 5000,
-            decoration: const InputDecoration(
-              labelText: 'What went wrong?',
+            decoration: InputDecoration(
+              labelText: tr('What went wrong?'),
               border: OutlineInputBorder(),
             ),
           ),
@@ -87,15 +88,14 @@ class _BugReportScreenState extends ConsumerState<BugReportScreen> {
             key: const Key('bug-email'),
             controller: _email,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              labelText: 'Your email (optional, so we can reply)',
+            decoration: InputDecoration(
+              labelText: tr('Your email (optional, so we can reply)'),
               border: OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'The app version, phone type and the last few error messages are attached to help us fix it. '
-            'No project data, photos or contacts are sent.',
+          Text(tr('The app version, phone type and the last few error messages are attached to help us fix it. '
+            'No project data, photos or contacts are sent.'),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 16),
@@ -105,7 +105,7 @@ class _BugReportScreenState extends ConsumerState<BugReportScreen> {
             icon: _sending
                 ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                 : const Icon(Icons.send),
-            label: const Text('Send report'),
+            label: Text(tr('Send report')),
           ),
         ],
       ),

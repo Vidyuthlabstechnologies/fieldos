@@ -19,6 +19,7 @@ import 'package:fieldos_mobile/features/procurement/stock_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class ProcurementView extends ConsumerStatefulWidget {
   const ProcurementView({
@@ -81,12 +82,12 @@ class _ProcurementViewState extends ConsumerState<ProcurementView>
           TabBar(
             controller: _tabs,
             isScrollable: true,
-            tabs: const [
-              Tab(text: 'Suppliers'),
-              Tab(text: 'RFQ'),
-              Tab(text: 'PO'),
-              Tab(text: 'GRN'),
-              Tab(text: 'Stock'),
+            tabs: [
+              Tab(text: tr('Suppliers')),
+              Tab(text: tr('RFQ')),
+              Tab(text: tr('PO')),
+              Tab(text: tr('GRN')),
+              Tab(text: tr('Stock')),
             ],
           ),
           Expanded(
@@ -122,7 +123,7 @@ Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd) =>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title, style: Theme.of(context).textTheme.titleSmall),
-          IconButton(icon: const Icon(Icons.add), tooltip: 'Add', onPressed: onAdd),
+          IconButton(icon: const Icon(Icons.add), tooltip: tr('Add'), onPressed: onAdd),
         ],
       ),
     );
@@ -142,7 +143,7 @@ class _SuppliersTab extends ConsumerWidget {
         Expanded(
           child: suppliers.when(
             data: (rows) => rows.isEmpty
-                ? const Center(child: Text('No suppliers yet.'))
+                ? Center(child: Text(tr('No suppliers yet.')))
                 : ListView(
                     children: [
                       for (final s in rows)
@@ -169,18 +170,18 @@ class _SuppliersTab extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add supplier'),
+        title: Text(tr('Add supplier')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Name')),
-            TextField(controller: phone, decoration: const InputDecoration(labelText: 'Phone')),
-            TextField(controller: email, decoration: const InputDecoration(labelText: 'Email')),
+            TextField(controller: name, decoration: InputDecoration(labelText: tr('Name'))),
+            TextField(controller: phone, decoration: InputDecoration(labelText: tr('Phone'))),
+            TextField(controller: email, decoration: InputDecoration(labelText: tr('Email'))),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
         ],
       ),
     );
@@ -215,7 +216,7 @@ class _RfqTab extends ConsumerWidget {
         Expanded(
           child: requests.when(
             data: (rows) => rows.isEmpty
-                ? const Center(child: Text('No RFQs yet.'))
+                ? Center(child: Text(tr('No RFQs yet.')))
                 : ListView(
                     children: [
                       for (final r in rows)
@@ -228,7 +229,7 @@ class _RfqTab extends ConsumerWidget {
                           ].join(' · ')),
                           trailing: r.status == 'pending'
                               ? FilledButton(
-                                  child: const Text('Make PO'),
+                                  child: Text(tr('Make PO')),
                                   onPressed: () => _makePo(context, ref, r, suppliers),
                                 )
                               : null,
@@ -251,19 +252,19 @@ class _RfqTab extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Raise RFQ'),
+        title: Text(tr('Raise RFQ')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Material')),
-            TextField(controller: qty, decoration: const InputDecoration(labelText: 'Qty'), keyboardType: TextInputType.number),
-            TextField(controller: unit, decoration: const InputDecoration(labelText: 'Unit')),
-            TextField(controller: est, decoration: const InputDecoration(labelText: 'Est. amount'), keyboardType: TextInputType.number),
+            TextField(controller: name, decoration: InputDecoration(labelText: tr('Material'))),
+            TextField(controller: qty, decoration: InputDecoration(labelText: tr('Qty')), keyboardType: TextInputType.number),
+            TextField(controller: unit, decoration: InputDecoration(labelText: tr('Unit'))),
+            TextField(controller: est, decoration: InputDecoration(labelText: tr('Est. amount')), keyboardType: TextInputType.number),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
         ],
       ),
     );
@@ -288,12 +289,12 @@ class _RfqTab extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Create PO'),
+        title: Text(tr('Create PO')),
         content: TextField(
-            controller: amount, decoration: const InputDecoration(labelText: 'PO amount'), keyboardType: TextInputType.number),
+            controller: amount, decoration: InputDecoration(labelText: tr('PO amount')), keyboardType: TextInputType.number),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Create')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Create'))),
         ],
       ),
     );
@@ -315,13 +316,13 @@ class _RfqTab extends ConsumerWidget {
   Future<String?> _pickSupplier(BuildContext context, AsyncValue<List<Supplier>> suppliers) async {
     final rows = suppliers.valueOrNull ?? [];
     if (rows.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Add a supplier first.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Add a supplier first.'))));
       return null;
     }
     return showDialog<String>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: const Text('Pick supplier'),
+        title: Text(tr('Pick supplier')),
         children: [
           for (final s in rows)
             SimpleDialogOption(onPressed: () => Navigator.of(ctx).pop(s.id), child: Text(s.name)),
@@ -348,7 +349,7 @@ class _PoTab extends ConsumerWidget {
         Expanded(
           child: orders.when(
             data: (rows) => rows.isEmpty
-                ? const Center(child: Text('No purchase orders yet.'))
+                ? Center(child: Text(tr('No purchase orders yet.')))
                 : ListView(
                     children: [
                       for (final o in rows)
@@ -357,13 +358,13 @@ class _PoTab extends ConsumerWidget {
                           subtitle: Text('${_supName(suppliers, o.supplierId)} · ${_statusLabel(o.status)}'),
                           trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                             IconButton(
-                              tooltip: 'Send to supplier',
+                              tooltip: tr('Send to supplier'),
                               icon: const Icon(Icons.share_outlined),
                               onPressed: () => _sharePo(ref, o, suppliers),
                             ),
                             if (o.status == 'issued')
                               FilledButton(
-                                child: const Text('Receive'),
+                                child: Text(tr('Receive')),
                                 onPressed: () => _receive(context, ref, o, suppliers),
                               ),
                           ]),
@@ -401,17 +402,17 @@ class _PoTab extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (_, setGrnState) => AlertDialog(
-          title: const Text('Goods receipt (GRN)'),
+          title: Text(tr('Goods receipt (GRN)')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: qty, decoration: const InputDecoration(labelText: 'Qty received'), keyboardType: TextInputType.number),
-              TextField(controller: unit, decoration: const InputDecoration(labelText: 'Unit')),
-              TextField(controller: amount, decoration: const InputDecoration(labelText: 'Invoice amount'), keyboardType: TextInputType.number),
+              TextField(controller: qty, decoration: InputDecoration(labelText: tr('Qty received')), keyboardType: TextInputType.number),
+              TextField(controller: unit, decoration: InputDecoration(labelText: tr('Unit'))),
+              TextField(controller: amount, decoration: InputDecoration(labelText: tr('Invoice amount')), keyboardType: TextInputType.number),
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.photo_camera),
-                label: Text(photoPath.value == null ? 'Attach delivery photo' : 'Photo attached'),
+                label: Text(photoPath.value == null ? tr('Attach delivery photo') : tr('Photo attached')),
                 onPressed: () async {
                   final path = await captureCameraFirst(ctx, prefix: 'grn');
                   if (path != null) {
@@ -423,8 +424,8 @@ class _PoTab extends ConsumerWidget {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Receive')),
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Receive'))),
           ],
         ),
       ),
@@ -466,14 +467,14 @@ String _supName(AsyncValue<List<Supplier>> suppliers, String id) {
 
 /// Request and order stages in plain words.
 String _statusLabel(String status) => switch (status) {
-      'pending' => 'Waiting for a PO',
-      'approved' => 'Approved',
-      'rejected' => 'Rejected',
-      'ordered' => 'Ordered',
-      'issued' => 'Sent to supplier',
-      'acknowledged' => 'Supplier confirmed',
-      'delivered' => 'Delivered',
-      'cancelled' => 'Cancelled',
+      'pending' => tr('Waiting for a PO'),
+      'approved' => tr('Approved'),
+      'rejected' => tr('Rejected'),
+      'ordered' => tr('Ordered'),
+      'issued' => tr('Sent to supplier'),
+      'acknowledged' => tr('Supplier confirmed'),
+      'delivered' => tr('Delivered'),
+      'cancelled' => tr('Cancelled'),
       _ => status.isEmpty ? status : '${status[0].toUpperCase()}${status.substring(1).replaceAll('_', ' ')}',
     };
 
@@ -489,7 +490,7 @@ class _GrnTab extends ConsumerWidget {
     final receipts = ref.watch(receiptsProvider(projectId));
     return receipts.when(
       data: (rows) => rows.isEmpty
-          ? const Center(child: Text('No goods receipts yet.'))
+          ? Center(child: Text(tr('No goods receipts yet.')))
           : ListView(
               children: [
                 for (final m in rows)
