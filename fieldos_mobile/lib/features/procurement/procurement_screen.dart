@@ -8,11 +8,13 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
+import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/procurement/po_share.dart';
 import 'package:fieldos_mobile/features/procurement/stock_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
@@ -353,12 +355,18 @@ class _PoTab extends ConsumerWidget {
                         ListTile(
                           title: Text(o.totalAmount == null ? 'Purchase order' : 'Purchase order · ${rupees(o.totalAmount!)}'),
                           subtitle: Text('${_supName(suppliers, o.supplierId)} · ${_statusLabel(o.status)}'),
-                          trailing: o.status == 'issued'
-                              ? FilledButton(
-                                  child: const Text('Receive'),
-                                  onPressed: () => _receive(context, ref, o, suppliers),
-                                )
-                              : null,
+                          trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                            IconButton(
+                              tooltip: 'Send to supplier',
+                              icon: const Icon(Icons.share_outlined),
+                              onPressed: () => _sharePo(ref, o, suppliers),
+                            ),
+                            if (o.status == 'issued')
+                              FilledButton(
+                                child: const Text('Receive'),
+                                onPressed: () => _receive(context, ref, o, suppliers),
+                              ),
+                          ]),
                         ),
                     ],
                   ),
@@ -368,6 +376,19 @@ class _PoTab extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _sharePo(WidgetRef ref, PurchaseOrder o, AsyncValue<List<Supplier>> suppliers) async {
+    final requests = ref.read(requestsProvider(projectId)).valueOrNull ?? const <PurchaseRequest>[];
+    final projects = ref.read(projectsProvider(companyId)).valueOrNull ?? const <Project>[];
+    final text = poShareText(
+      order: o,
+      companyName: ref.read(sessionProvider).activeCompany?.name ?? '',
+      projectName: projects.where((p) => p.id == projectId).firstOrNull?.name,
+      supplierName: (suppliers.valueOrNull ?? const <Supplier>[]).where((s) => s.id == o.supplierId).firstOrNull?.name,
+      request: requests.where((r) => r.id == o.requestId).firstOrNull,
+    );
+    await SharePlus.instance.share(ShareParams(text: text));
   }
 
   Future<void> _receive(BuildContext context, WidgetRef ref, PurchaseOrder o,

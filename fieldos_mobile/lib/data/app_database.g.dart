@@ -11018,6 +11018,1072 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
   }
 }
 
+class $ClientBillsTable extends ClientBills
+    with TableInfo<$ClientBillsTable, ClientBill> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ClientBillsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _billNumberMeta = const VerificationMeta(
+    'billNumber',
+  );
+  @override
+  late final GeneratedColumn<String> billNumber = GeneratedColumn<String>(
+    'bill_number',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 30,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _billDateMeta = const VerificationMeta(
+    'billDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> billDate = GeneratedColumn<DateTime>(
+    'bill_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _clientNameMeta = const VerificationMeta(
+    'clientName',
+  );
+  @override
+  late final GeneratedColumn<String> clientName = GeneratedColumn<String>(
+    'client_name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 200,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _clientGstinMeta = const VerificationMeta(
+    'clientGstin',
+  );
+  @override
+  late final GeneratedColumn<String> clientGstin = GeneratedColumn<String>(
+    'client_gstin',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 15),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sacMeta = const VerificationMeta('sac');
+  @override
+  late final GeneratedColumn<String> sac = GeneratedColumn<String>(
+    'sac',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('995411'),
+  );
+  static const VerificationMeta _linesJsonMeta = const VerificationMeta(
+    'linesJson',
+  );
+  @override
+  late final GeneratedColumn<String> linesJson = GeneratedColumn<String>(
+    'lines_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _gstRateMeta = const VerificationMeta(
+    'gstRate',
+  );
+  @override
+  late final GeneratedColumn<double> gstRate = GeneratedColumn<double>(
+    'gst_rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(18),
+  );
+  static const VerificationMeta _interStateMeta = const VerificationMeta(
+    'interState',
+  );
+  @override
+  late final GeneratedColumn<bool> interState = GeneratedColumn<bool>(
+    'inter_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("inter_state" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _retentionPctMeta = const VerificationMeta(
+    'retentionPct',
+  );
+  @override
+  late final GeneratedColumn<double> retentionPct = GeneratedColumn<double>(
+    'retention_pct',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _tdsPctMeta = const VerificationMeta('tdsPct');
+  @override
+  late final GeneratedColumn<double> tdsPct = GeneratedColumn<double>(
+    'tds_pct',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _grossMeta = const VerificationMeta('gross');
+  @override
+  late final GeneratedColumn<double> gross = GeneratedColumn<double>(
+    'gross',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _netPayableMeta = const VerificationMeta(
+    'netPayable',
+  );
+  @override
+  late final GeneratedColumn<double> netPayable = GeneratedColumn<double>(
+    'net_payable',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('issued'),
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _recordedByMeta = const VerificationMeta(
+    'recordedBy',
+  );
+  @override
+  late final GeneratedColumn<String> recordedBy = GeneratedColumn<String>(
+    'recorded_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    kind,
+    billNumber,
+    billDate,
+    clientName,
+    clientGstin,
+    sac,
+    linesJson,
+    gstRate,
+    interState,
+    retentionPct,
+    tdsPct,
+    gross,
+    netPayable,
+    status,
+    notes,
+    recordedBy,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'client_bills';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ClientBill> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('bill_number')) {
+      context.handle(
+        _billNumberMeta,
+        billNumber.isAcceptableOrUnknown(data['bill_number']!, _billNumberMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_billNumberMeta);
+    }
+    if (data.containsKey('bill_date')) {
+      context.handle(
+        _billDateMeta,
+        billDate.isAcceptableOrUnknown(data['bill_date']!, _billDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_billDateMeta);
+    }
+    if (data.containsKey('client_name')) {
+      context.handle(
+        _clientNameMeta,
+        clientName.isAcceptableOrUnknown(data['client_name']!, _clientNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_clientNameMeta);
+    }
+    if (data.containsKey('client_gstin')) {
+      context.handle(
+        _clientGstinMeta,
+        clientGstin.isAcceptableOrUnknown(
+          data['client_gstin']!,
+          _clientGstinMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sac')) {
+      context.handle(
+        _sacMeta,
+        sac.isAcceptableOrUnknown(data['sac']!, _sacMeta),
+      );
+    }
+    if (data.containsKey('lines_json')) {
+      context.handle(
+        _linesJsonMeta,
+        linesJson.isAcceptableOrUnknown(data['lines_json']!, _linesJsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_linesJsonMeta);
+    }
+    if (data.containsKey('gst_rate')) {
+      context.handle(
+        _gstRateMeta,
+        gstRate.isAcceptableOrUnknown(data['gst_rate']!, _gstRateMeta),
+      );
+    }
+    if (data.containsKey('inter_state')) {
+      context.handle(
+        _interStateMeta,
+        interState.isAcceptableOrUnknown(data['inter_state']!, _interStateMeta),
+      );
+    }
+    if (data.containsKey('retention_pct')) {
+      context.handle(
+        _retentionPctMeta,
+        retentionPct.isAcceptableOrUnknown(
+          data['retention_pct']!,
+          _retentionPctMeta,
+        ),
+      );
+    }
+    if (data.containsKey('tds_pct')) {
+      context.handle(
+        _tdsPctMeta,
+        tdsPct.isAcceptableOrUnknown(data['tds_pct']!, _tdsPctMeta),
+      );
+    }
+    if (data.containsKey('gross')) {
+      context.handle(
+        _grossMeta,
+        gross.isAcceptableOrUnknown(data['gross']!, _grossMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_grossMeta);
+    }
+    if (data.containsKey('net_payable')) {
+      context.handle(
+        _netPayableMeta,
+        netPayable.isAcceptableOrUnknown(data['net_payable']!, _netPayableMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_netPayableMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('recorded_by')) {
+      context.handle(
+        _recordedByMeta,
+        recordedBy.isAcceptableOrUnknown(data['recorded_by']!, _recordedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordedByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ClientBill map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ClientBill(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      billNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bill_number'],
+      )!,
+      billDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}bill_date'],
+      )!,
+      clientName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_name'],
+      )!,
+      clientGstin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_gstin'],
+      ),
+      sac: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sac'],
+      )!,
+      linesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lines_json'],
+      )!,
+      gstRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gst_rate'],
+      )!,
+      interState: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}inter_state'],
+      )!,
+      retentionPct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}retention_pct'],
+      )!,
+      tdsPct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}tds_pct'],
+      )!,
+      gross: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gross'],
+      )!,
+      netPayable: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}net_payable'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      recordedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recorded_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ClientBillsTable createAlias(String alias) {
+    return $ClientBillsTable(attachedDatabase, alias);
+  }
+}
+
+class ClientBill extends DataClass implements Insertable<ClientBill> {
+  final String id;
+  final String projectId;
+  final String kind;
+  final String billNumber;
+  final DateTime billDate;
+  final String clientName;
+  final String? clientGstin;
+  final String sac;
+  final String linesJson;
+  final double gstRate;
+  final bool interState;
+  final double retentionPct;
+  final double tdsPct;
+  final double gross;
+  final double netPayable;
+  final String status;
+  final String? notes;
+  final String recordedBy;
+  final DateTime createdAt;
+  const ClientBill({
+    required this.id,
+    required this.projectId,
+    required this.kind,
+    required this.billNumber,
+    required this.billDate,
+    required this.clientName,
+    this.clientGstin,
+    required this.sac,
+    required this.linesJson,
+    required this.gstRate,
+    required this.interState,
+    required this.retentionPct,
+    required this.tdsPct,
+    required this.gross,
+    required this.netPayable,
+    required this.status,
+    this.notes,
+    required this.recordedBy,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['kind'] = Variable<String>(kind);
+    map['bill_number'] = Variable<String>(billNumber);
+    map['bill_date'] = Variable<DateTime>(billDate);
+    map['client_name'] = Variable<String>(clientName);
+    if (!nullToAbsent || clientGstin != null) {
+      map['client_gstin'] = Variable<String>(clientGstin);
+    }
+    map['sac'] = Variable<String>(sac);
+    map['lines_json'] = Variable<String>(linesJson);
+    map['gst_rate'] = Variable<double>(gstRate);
+    map['inter_state'] = Variable<bool>(interState);
+    map['retention_pct'] = Variable<double>(retentionPct);
+    map['tds_pct'] = Variable<double>(tdsPct);
+    map['gross'] = Variable<double>(gross);
+    map['net_payable'] = Variable<double>(netPayable);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['recorded_by'] = Variable<String>(recordedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ClientBillsCompanion toCompanion(bool nullToAbsent) {
+    return ClientBillsCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      kind: Value(kind),
+      billNumber: Value(billNumber),
+      billDate: Value(billDate),
+      clientName: Value(clientName),
+      clientGstin: clientGstin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(clientGstin),
+      sac: Value(sac),
+      linesJson: Value(linesJson),
+      gstRate: Value(gstRate),
+      interState: Value(interState),
+      retentionPct: Value(retentionPct),
+      tdsPct: Value(tdsPct),
+      gross: Value(gross),
+      netPayable: Value(netPayable),
+      status: Value(status),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      recordedBy: Value(recordedBy),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ClientBill.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ClientBill(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      billNumber: serializer.fromJson<String>(json['billNumber']),
+      billDate: serializer.fromJson<DateTime>(json['billDate']),
+      clientName: serializer.fromJson<String>(json['clientName']),
+      clientGstin: serializer.fromJson<String?>(json['clientGstin']),
+      sac: serializer.fromJson<String>(json['sac']),
+      linesJson: serializer.fromJson<String>(json['linesJson']),
+      gstRate: serializer.fromJson<double>(json['gstRate']),
+      interState: serializer.fromJson<bool>(json['interState']),
+      retentionPct: serializer.fromJson<double>(json['retentionPct']),
+      tdsPct: serializer.fromJson<double>(json['tdsPct']),
+      gross: serializer.fromJson<double>(json['gross']),
+      netPayable: serializer.fromJson<double>(json['netPayable']),
+      status: serializer.fromJson<String>(json['status']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      recordedBy: serializer.fromJson<String>(json['recordedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'kind': serializer.toJson<String>(kind),
+      'billNumber': serializer.toJson<String>(billNumber),
+      'billDate': serializer.toJson<DateTime>(billDate),
+      'clientName': serializer.toJson<String>(clientName),
+      'clientGstin': serializer.toJson<String?>(clientGstin),
+      'sac': serializer.toJson<String>(sac),
+      'linesJson': serializer.toJson<String>(linesJson),
+      'gstRate': serializer.toJson<double>(gstRate),
+      'interState': serializer.toJson<bool>(interState),
+      'retentionPct': serializer.toJson<double>(retentionPct),
+      'tdsPct': serializer.toJson<double>(tdsPct),
+      'gross': serializer.toJson<double>(gross),
+      'netPayable': serializer.toJson<double>(netPayable),
+      'status': serializer.toJson<String>(status),
+      'notes': serializer.toJson<String?>(notes),
+      'recordedBy': serializer.toJson<String>(recordedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ClientBill copyWith({
+    String? id,
+    String? projectId,
+    String? kind,
+    String? billNumber,
+    DateTime? billDate,
+    String? clientName,
+    Value<String?> clientGstin = const Value.absent(),
+    String? sac,
+    String? linesJson,
+    double? gstRate,
+    bool? interState,
+    double? retentionPct,
+    double? tdsPct,
+    double? gross,
+    double? netPayable,
+    String? status,
+    Value<String?> notes = const Value.absent(),
+    String? recordedBy,
+    DateTime? createdAt,
+  }) => ClientBill(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    kind: kind ?? this.kind,
+    billNumber: billNumber ?? this.billNumber,
+    billDate: billDate ?? this.billDate,
+    clientName: clientName ?? this.clientName,
+    clientGstin: clientGstin.present ? clientGstin.value : this.clientGstin,
+    sac: sac ?? this.sac,
+    linesJson: linesJson ?? this.linesJson,
+    gstRate: gstRate ?? this.gstRate,
+    interState: interState ?? this.interState,
+    retentionPct: retentionPct ?? this.retentionPct,
+    tdsPct: tdsPct ?? this.tdsPct,
+    gross: gross ?? this.gross,
+    netPayable: netPayable ?? this.netPayable,
+    status: status ?? this.status,
+    notes: notes.present ? notes.value : this.notes,
+    recordedBy: recordedBy ?? this.recordedBy,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  ClientBill copyWithCompanion(ClientBillsCompanion data) {
+    return ClientBill(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      billNumber: data.billNumber.present
+          ? data.billNumber.value
+          : this.billNumber,
+      billDate: data.billDate.present ? data.billDate.value : this.billDate,
+      clientName: data.clientName.present
+          ? data.clientName.value
+          : this.clientName,
+      clientGstin: data.clientGstin.present
+          ? data.clientGstin.value
+          : this.clientGstin,
+      sac: data.sac.present ? data.sac.value : this.sac,
+      linesJson: data.linesJson.present ? data.linesJson.value : this.linesJson,
+      gstRate: data.gstRate.present ? data.gstRate.value : this.gstRate,
+      interState: data.interState.present
+          ? data.interState.value
+          : this.interState,
+      retentionPct: data.retentionPct.present
+          ? data.retentionPct.value
+          : this.retentionPct,
+      tdsPct: data.tdsPct.present ? data.tdsPct.value : this.tdsPct,
+      gross: data.gross.present ? data.gross.value : this.gross,
+      netPayable: data.netPayable.present
+          ? data.netPayable.value
+          : this.netPayable,
+      status: data.status.present ? data.status.value : this.status,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      recordedBy: data.recordedBy.present
+          ? data.recordedBy.value
+          : this.recordedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClientBill(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('kind: $kind, ')
+          ..write('billNumber: $billNumber, ')
+          ..write('billDate: $billDate, ')
+          ..write('clientName: $clientName, ')
+          ..write('clientGstin: $clientGstin, ')
+          ..write('sac: $sac, ')
+          ..write('linesJson: $linesJson, ')
+          ..write('gstRate: $gstRate, ')
+          ..write('interState: $interState, ')
+          ..write('retentionPct: $retentionPct, ')
+          ..write('tdsPct: $tdsPct, ')
+          ..write('gross: $gross, ')
+          ..write('netPayable: $netPayable, ')
+          ..write('status: $status, ')
+          ..write('notes: $notes, ')
+          ..write('recordedBy: $recordedBy, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    kind,
+    billNumber,
+    billDate,
+    clientName,
+    clientGstin,
+    sac,
+    linesJson,
+    gstRate,
+    interState,
+    retentionPct,
+    tdsPct,
+    gross,
+    netPayable,
+    status,
+    notes,
+    recordedBy,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ClientBill &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.kind == this.kind &&
+          other.billNumber == this.billNumber &&
+          other.billDate == this.billDate &&
+          other.clientName == this.clientName &&
+          other.clientGstin == this.clientGstin &&
+          other.sac == this.sac &&
+          other.linesJson == this.linesJson &&
+          other.gstRate == this.gstRate &&
+          other.interState == this.interState &&
+          other.retentionPct == this.retentionPct &&
+          other.tdsPct == this.tdsPct &&
+          other.gross == this.gross &&
+          other.netPayable == this.netPayable &&
+          other.status == this.status &&
+          other.notes == this.notes &&
+          other.recordedBy == this.recordedBy &&
+          other.createdAt == this.createdAt);
+}
+
+class ClientBillsCompanion extends UpdateCompanion<ClientBill> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> kind;
+  final Value<String> billNumber;
+  final Value<DateTime> billDate;
+  final Value<String> clientName;
+  final Value<String?> clientGstin;
+  final Value<String> sac;
+  final Value<String> linesJson;
+  final Value<double> gstRate;
+  final Value<bool> interState;
+  final Value<double> retentionPct;
+  final Value<double> tdsPct;
+  final Value<double> gross;
+  final Value<double> netPayable;
+  final Value<String> status;
+  final Value<String?> notes;
+  final Value<String> recordedBy;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const ClientBillsCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.billNumber = const Value.absent(),
+    this.billDate = const Value.absent(),
+    this.clientName = const Value.absent(),
+    this.clientGstin = const Value.absent(),
+    this.sac = const Value.absent(),
+    this.linesJson = const Value.absent(),
+    this.gstRate = const Value.absent(),
+    this.interState = const Value.absent(),
+    this.retentionPct = const Value.absent(),
+    this.tdsPct = const Value.absent(),
+    this.gross = const Value.absent(),
+    this.netPayable = const Value.absent(),
+    this.status = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.recordedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ClientBillsCompanion.insert({
+    required String id,
+    required String projectId,
+    required String kind,
+    required String billNumber,
+    required DateTime billDate,
+    required String clientName,
+    this.clientGstin = const Value.absent(),
+    this.sac = const Value.absent(),
+    required String linesJson,
+    this.gstRate = const Value.absent(),
+    this.interState = const Value.absent(),
+    this.retentionPct = const Value.absent(),
+    this.tdsPct = const Value.absent(),
+    required double gross,
+    required double netPayable,
+    this.status = const Value.absent(),
+    this.notes = const Value.absent(),
+    required String recordedBy,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       kind = Value(kind),
+       billNumber = Value(billNumber),
+       billDate = Value(billDate),
+       clientName = Value(clientName),
+       linesJson = Value(linesJson),
+       gross = Value(gross),
+       netPayable = Value(netPayable),
+       recordedBy = Value(recordedBy);
+  static Insertable<ClientBill> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? kind,
+    Expression<String>? billNumber,
+    Expression<DateTime>? billDate,
+    Expression<String>? clientName,
+    Expression<String>? clientGstin,
+    Expression<String>? sac,
+    Expression<String>? linesJson,
+    Expression<double>? gstRate,
+    Expression<bool>? interState,
+    Expression<double>? retentionPct,
+    Expression<double>? tdsPct,
+    Expression<double>? gross,
+    Expression<double>? netPayable,
+    Expression<String>? status,
+    Expression<String>? notes,
+    Expression<String>? recordedBy,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (kind != null) 'kind': kind,
+      if (billNumber != null) 'bill_number': billNumber,
+      if (billDate != null) 'bill_date': billDate,
+      if (clientName != null) 'client_name': clientName,
+      if (clientGstin != null) 'client_gstin': clientGstin,
+      if (sac != null) 'sac': sac,
+      if (linesJson != null) 'lines_json': linesJson,
+      if (gstRate != null) 'gst_rate': gstRate,
+      if (interState != null) 'inter_state': interState,
+      if (retentionPct != null) 'retention_pct': retentionPct,
+      if (tdsPct != null) 'tds_pct': tdsPct,
+      if (gross != null) 'gross': gross,
+      if (netPayable != null) 'net_payable': netPayable,
+      if (status != null) 'status': status,
+      if (notes != null) 'notes': notes,
+      if (recordedBy != null) 'recorded_by': recordedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ClientBillsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? kind,
+    Value<String>? billNumber,
+    Value<DateTime>? billDate,
+    Value<String>? clientName,
+    Value<String?>? clientGstin,
+    Value<String>? sac,
+    Value<String>? linesJson,
+    Value<double>? gstRate,
+    Value<bool>? interState,
+    Value<double>? retentionPct,
+    Value<double>? tdsPct,
+    Value<double>? gross,
+    Value<double>? netPayable,
+    Value<String>? status,
+    Value<String?>? notes,
+    Value<String>? recordedBy,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return ClientBillsCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      kind: kind ?? this.kind,
+      billNumber: billNumber ?? this.billNumber,
+      billDate: billDate ?? this.billDate,
+      clientName: clientName ?? this.clientName,
+      clientGstin: clientGstin ?? this.clientGstin,
+      sac: sac ?? this.sac,
+      linesJson: linesJson ?? this.linesJson,
+      gstRate: gstRate ?? this.gstRate,
+      interState: interState ?? this.interState,
+      retentionPct: retentionPct ?? this.retentionPct,
+      tdsPct: tdsPct ?? this.tdsPct,
+      gross: gross ?? this.gross,
+      netPayable: netPayable ?? this.netPayable,
+      status: status ?? this.status,
+      notes: notes ?? this.notes,
+      recordedBy: recordedBy ?? this.recordedBy,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (billNumber.present) {
+      map['bill_number'] = Variable<String>(billNumber.value);
+    }
+    if (billDate.present) {
+      map['bill_date'] = Variable<DateTime>(billDate.value);
+    }
+    if (clientName.present) {
+      map['client_name'] = Variable<String>(clientName.value);
+    }
+    if (clientGstin.present) {
+      map['client_gstin'] = Variable<String>(clientGstin.value);
+    }
+    if (sac.present) {
+      map['sac'] = Variable<String>(sac.value);
+    }
+    if (linesJson.present) {
+      map['lines_json'] = Variable<String>(linesJson.value);
+    }
+    if (gstRate.present) {
+      map['gst_rate'] = Variable<double>(gstRate.value);
+    }
+    if (interState.present) {
+      map['inter_state'] = Variable<bool>(interState.value);
+    }
+    if (retentionPct.present) {
+      map['retention_pct'] = Variable<double>(retentionPct.value);
+    }
+    if (tdsPct.present) {
+      map['tds_pct'] = Variable<double>(tdsPct.value);
+    }
+    if (gross.present) {
+      map['gross'] = Variable<double>(gross.value);
+    }
+    if (netPayable.present) {
+      map['net_payable'] = Variable<double>(netPayable.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (recordedBy.present) {
+      map['recorded_by'] = Variable<String>(recordedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClientBillsCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('kind: $kind, ')
+          ..write('billNumber: $billNumber, ')
+          ..write('billDate: $billDate, ')
+          ..write('clientName: $clientName, ')
+          ..write('clientGstin: $clientGstin, ')
+          ..write('sac: $sac, ')
+          ..write('linesJson: $linesJson, ')
+          ..write('gstRate: $gstRate, ')
+          ..write('interState: $interState, ')
+          ..write('retentionPct: $retentionPct, ')
+          ..write('tdsPct: $tdsPct, ')
+          ..write('gross: $gross, ')
+          ..write('netPayable: $netPayable, ')
+          ..write('status: $status, ')
+          ..write('notes: $notes, ')
+          ..write('recordedBy: $recordedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SiteExpensesTable extends SiteExpenses
     with TableInfo<$SiteExpensesTable, SiteExpense> {
   @override
@@ -18817,6 +19883,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PaymentsReceivedTable paymentsReceived = $PaymentsReceivedTable(
     this,
   );
+  late final $ClientBillsTable clientBills = $ClientBillsTable(this);
   late final $SiteExpensesTable siteExpenses = $SiteExpensesTable(this);
   late final $LabourAttendanceTable labourAttendance = $LabourAttendanceTable(
     this,
@@ -18865,6 +19932,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     materialReceipts,
     materialUsage,
     paymentsReceived,
+    clientBills,
     siteExpenses,
     labourAttendance,
     subcontractors,
@@ -24518,6 +25586,495 @@ typedef $$PaymentsReceivedTableProcessedTableManager =
       PaymentsReceivedData,
       PrefetchHooks Function()
     >;
+typedef $$ClientBillsTableCreateCompanionBuilder =
+    ClientBillsCompanion Function({
+      required String id,
+      required String projectId,
+      required String kind,
+      required String billNumber,
+      required DateTime billDate,
+      required String clientName,
+      Value<String?> clientGstin,
+      Value<String> sac,
+      required String linesJson,
+      Value<double> gstRate,
+      Value<bool> interState,
+      Value<double> retentionPct,
+      Value<double> tdsPct,
+      required double gross,
+      required double netPayable,
+      Value<String> status,
+      Value<String?> notes,
+      required String recordedBy,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$ClientBillsTableUpdateCompanionBuilder =
+    ClientBillsCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> kind,
+      Value<String> billNumber,
+      Value<DateTime> billDate,
+      Value<String> clientName,
+      Value<String?> clientGstin,
+      Value<String> sac,
+      Value<String> linesJson,
+      Value<double> gstRate,
+      Value<bool> interState,
+      Value<double> retentionPct,
+      Value<double> tdsPct,
+      Value<double> gross,
+      Value<double> netPayable,
+      Value<String> status,
+      Value<String?> notes,
+      Value<String> recordedBy,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$ClientBillsTableFilterComposer
+    extends Composer<_$AppDatabase, $ClientBillsTable> {
+  $$ClientBillsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get billNumber => $composableBuilder(
+    column: $table.billNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get billDate => $composableBuilder(
+    column: $table.billDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get clientName => $composableBuilder(
+    column: $table.clientName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get clientGstin => $composableBuilder(
+    column: $table.clientGstin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sac => $composableBuilder(
+    column: $table.sac,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linesJson => $composableBuilder(
+    column: $table.linesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get gstRate => $composableBuilder(
+    column: $table.gstRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get interState => $composableBuilder(
+    column: $table.interState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get retentionPct => $composableBuilder(
+    column: $table.retentionPct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get tdsPct => $composableBuilder(
+    column: $table.tdsPct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get gross => $composableBuilder(
+    column: $table.gross,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get netPayable => $composableBuilder(
+    column: $table.netPayable,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ClientBillsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ClientBillsTable> {
+  $$ClientBillsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get billNumber => $composableBuilder(
+    column: $table.billNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get billDate => $composableBuilder(
+    column: $table.billDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get clientName => $composableBuilder(
+    column: $table.clientName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get clientGstin => $composableBuilder(
+    column: $table.clientGstin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sac => $composableBuilder(
+    column: $table.sac,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get linesJson => $composableBuilder(
+    column: $table.linesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get gstRate => $composableBuilder(
+    column: $table.gstRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get interState => $composableBuilder(
+    column: $table.interState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get retentionPct => $composableBuilder(
+    column: $table.retentionPct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get tdsPct => $composableBuilder(
+    column: $table.tdsPct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get gross => $composableBuilder(
+    column: $table.gross,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get netPayable => $composableBuilder(
+    column: $table.netPayable,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ClientBillsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ClientBillsTable> {
+  $$ClientBillsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get billNumber => $composableBuilder(
+    column: $table.billNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get billDate =>
+      $composableBuilder(column: $table.billDate, builder: (column) => column);
+
+  GeneratedColumn<String> get clientName => $composableBuilder(
+    column: $table.clientName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get clientGstin => $composableBuilder(
+    column: $table.clientGstin,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sac =>
+      $composableBuilder(column: $table.sac, builder: (column) => column);
+
+  GeneratedColumn<String> get linesJson =>
+      $composableBuilder(column: $table.linesJson, builder: (column) => column);
+
+  GeneratedColumn<double> get gstRate =>
+      $composableBuilder(column: $table.gstRate, builder: (column) => column);
+
+  GeneratedColumn<bool> get interState => $composableBuilder(
+    column: $table.interState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get retentionPct => $composableBuilder(
+    column: $table.retentionPct,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get tdsPct =>
+      $composableBuilder(column: $table.tdsPct, builder: (column) => column);
+
+  GeneratedColumn<double> get gross =>
+      $composableBuilder(column: $table.gross, builder: (column) => column);
+
+  GeneratedColumn<double> get netPayable => $composableBuilder(
+    column: $table.netPayable,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$ClientBillsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ClientBillsTable,
+          ClientBill,
+          $$ClientBillsTableFilterComposer,
+          $$ClientBillsTableOrderingComposer,
+          $$ClientBillsTableAnnotationComposer,
+          $$ClientBillsTableCreateCompanionBuilder,
+          $$ClientBillsTableUpdateCompanionBuilder,
+          (
+            ClientBill,
+            BaseReferences<_$AppDatabase, $ClientBillsTable, ClientBill>,
+          ),
+          ClientBill,
+          PrefetchHooks Function()
+        > {
+  $$ClientBillsTableTableManager(_$AppDatabase db, $ClientBillsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ClientBillsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ClientBillsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ClientBillsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> billNumber = const Value.absent(),
+                Value<DateTime> billDate = const Value.absent(),
+                Value<String> clientName = const Value.absent(),
+                Value<String?> clientGstin = const Value.absent(),
+                Value<String> sac = const Value.absent(),
+                Value<String> linesJson = const Value.absent(),
+                Value<double> gstRate = const Value.absent(),
+                Value<bool> interState = const Value.absent(),
+                Value<double> retentionPct = const Value.absent(),
+                Value<double> tdsPct = const Value.absent(),
+                Value<double> gross = const Value.absent(),
+                Value<double> netPayable = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<String> recordedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ClientBillsCompanion(
+                id: id,
+                projectId: projectId,
+                kind: kind,
+                billNumber: billNumber,
+                billDate: billDate,
+                clientName: clientName,
+                clientGstin: clientGstin,
+                sac: sac,
+                linesJson: linesJson,
+                gstRate: gstRate,
+                interState: interState,
+                retentionPct: retentionPct,
+                tdsPct: tdsPct,
+                gross: gross,
+                netPayable: netPayable,
+                status: status,
+                notes: notes,
+                recordedBy: recordedBy,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String kind,
+                required String billNumber,
+                required DateTime billDate,
+                required String clientName,
+                Value<String?> clientGstin = const Value.absent(),
+                Value<String> sac = const Value.absent(),
+                required String linesJson,
+                Value<double> gstRate = const Value.absent(),
+                Value<bool> interState = const Value.absent(),
+                Value<double> retentionPct = const Value.absent(),
+                Value<double> tdsPct = const Value.absent(),
+                required double gross,
+                required double netPayable,
+                Value<String> status = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                required String recordedBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ClientBillsCompanion.insert(
+                id: id,
+                projectId: projectId,
+                kind: kind,
+                billNumber: billNumber,
+                billDate: billDate,
+                clientName: clientName,
+                clientGstin: clientGstin,
+                sac: sac,
+                linesJson: linesJson,
+                gstRate: gstRate,
+                interState: interState,
+                retentionPct: retentionPct,
+                tdsPct: tdsPct,
+                gross: gross,
+                netPayable: netPayable,
+                status: status,
+                notes: notes,
+                recordedBy: recordedBy,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ClientBillsTable, ClientBill>(table),
+                  BaseReferences<_$AppDatabase, $ClientBillsTable, ClientBill>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ClientBillsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ClientBillsTable,
+      ClientBill,
+      $$ClientBillsTableFilterComposer,
+      $$ClientBillsTableOrderingComposer,
+      $$ClientBillsTableAnnotationComposer,
+      $$ClientBillsTableCreateCompanionBuilder,
+      $$ClientBillsTableUpdateCompanionBuilder,
+      (
+        ClientBill,
+        BaseReferences<_$AppDatabase, $ClientBillsTable, ClientBill>,
+      ),
+      ClientBill,
+      PrefetchHooks Function()
+    >;
 typedef $$SiteExpensesTableCreateCompanionBuilder =
     SiteExpensesCompanion Function({
       required String id,
@@ -28488,6 +30045,8 @@ class $AppDatabaseManager {
       $$MaterialUsageTableTableManager(_db, _db.materialUsage);
   $$PaymentsReceivedTableTableManager get paymentsReceived =>
       $$PaymentsReceivedTableTableManager(_db, _db.paymentsReceived);
+  $$ClientBillsTableTableManager get clientBills =>
+      $$ClientBillsTableTableManager(_db, _db.clientBills);
   $$SiteExpensesTableTableManager get siteExpenses =>
       $$SiteExpensesTableTableManager(_db, _db.siteExpenses);
   $$LabourAttendanceTableTableManager get labourAttendance =>
@@ -28739,6 +30298,18 @@ class PaymentDaoManager {
         _db.attachedDatabase,
         _db.paymentsReceived,
       );
+}
+
+mixin _$BillDaoMixin on DatabaseAccessor<AppDatabase> {
+  $ClientBillsTable get clientBills => attachedDatabase.clientBills;
+  BillDaoManager get managers => BillDaoManager(this);
+}
+
+class BillDaoManager {
+  final _$BillDaoMixin _db;
+  BillDaoManager(this._db);
+  $$ClientBillsTableTableManager get clientBills =>
+      $$ClientBillsTableTableManager(_db.attachedDatabase, _db.clientBills);
 }
 
 mixin _$ExpenseDaoMixin on DatabaseAccessor<AppDatabase> {

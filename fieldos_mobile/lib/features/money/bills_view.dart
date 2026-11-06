@@ -1,0 +1,593 @@
+/// Bills to the client, for owners and project managers: the project's
+/// profit and loss at the top, the list of RA bills and tax invoices, and
+/// the screen that makes a new one.
+library;
+
+import 'dart:convert';
+
+import 'package:drift/drift.dart' hide Column;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
+
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/money/bill_pdf.dart';
+import 'package:fieldos_mobile/features/money/billing_calc.dart';
+import 'package:fieldos_mobile/features/money/money_view.dart';
+import 'package:fieldos_mobile/providers.dart';
+
+final billsProvider = FutureProvider.autoDispose.family<List<ClientBill>, String>(
+    (ref, projectId) => ref.watch(appDatabaseProvider).billDao.forProject(projectId));
+
+String _profileKey(String companyId) => 'billing_profile:$companyId';
+
+final billingProfileProvider = FutureProvider.autoDispose.family<BillingProfile, String>((ref, companyId) async {
+  final raw = await ref.watch(appDatabaseProvider).settingsDao.get(_profileKey(companyId));
+  if (raw == null || raw.isEmpty) return const BillingProfile();
+  final j = jsonDecode(raw) as Map<String, dynamic>;
+  return BillingProfile(
+    gstin: j['gstin'] as String? ?? '',
+    address: j['address'] as String? ?? '',
+    upiId: j['upi'] as String? ?? '',
+  );
+});
+
+Future<void> saveBillingProfile(AppDatabase db, String companyId, BillingProfile p) => db.settingsDao.set(
+      _profileKey(companyId),
+      jsonEncode({'gstin': p.gstin.trim().toUpperCase(), 'address': p.address.trim(), 'upi': p.upiId.trim()}),
+    );
+
+/// Previous quantities for [bill]: what earlier RA bills of the project
+/// (by date, then creation) billed for each item.
+Map<String, double> previousFor(ClientBill bill, List<ClientBill> all) {
+  final earlier = all.where((b) =>
+      b.kind == 'ra' &&
+      b.id != bill.id &&
+      (b.billDate.isBefore(bill.billDate) || (b.billDate == bill.billDate && b.createdAt.isBefore(bill.createdAt))));
+  return previousQuantities(earlier.map((b) => decodeLines(b.linesJson)));
+}
+
+ProjectPnl pnlFrom({required List<ClientBill> bills, required double received, required double spent}) => ProjectPnl(
+      billed: bills.fold<double>(0, (s, b) => s + b.gross),
+      received: received,
+      spent: spent,
+      owed: bills.where((b) => b.status != 'paid').fold<double>(0, (s, b) => s + b.netPayable),
+    );
+
+class BillsView extends ConsumerWidget {
+  const BillsView({super.key, required this.project, required this.userId});
+  final Project project;
+  final String userId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bills = ref.watch(billsProvider(project.id));
+    final received =
+        ref.watch(paymentsReceivedProvider(project.id)).valueOrNull?.fold<double>(0, (s, p) => s + p.amount) ?? 0;
+    final spent = ref.watch(costSummaryProvider(project.id)).valueOrNull?.actual ?? 0;
+    return Stack(children: [
+      bills.when(
+        data: (list) {
+          final pnl = pnlFrom(bills: list, received: received, spent: spent);
+          return ListView(padding: const EdgeInsets.fromLTRB(12, 8, 12, 96), children: [
+            _PnlCard(pnl: pnl),
+            if (list.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'Make running bills of measured work, or GST tax invoices, and send them as PDF. '
+                  'Previous and to-date quantities are worked out for you.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            for (final b in list)
+              Card(
+                child: ListTile(
+                  leading: CircleAvatar(child: Icon(b.kind == 'ra' ? Icons.request_quote_outlined : Icons.receipt_outlined)),
+                  title: Text('${b.billNumber} · ${rupees(b.netPayable)}'),
+                  subtitle: Text('${billKinds[b.kind]} · ${fmtDate(b.billDate)} · ${b.clientName}'),
+                  trailing: StatusPill(b.status == 'paid' ? 'Paid' : 'Due', tone: b.status == 'paid' ? PillTone.ok : PillTone.warn),
+                  onTap: () => _openBill(context, ref, b, list),
+                ),
+              ),
+          ]);
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, st) => ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(billsProvider(project.id))),
+      ),
+      Positioned(
+        right: 16,
+        bottom: 16,
+        child: FloatingActionButton.extended(
+          heroTag: 'new_bill',
+          icon: const Icon(Icons.add),
+          label: const Text('New bill'),
+          onPressed: () async {
+            final saved = await Navigator.of(context).push<bool>(
+              MaterialPageRoute(builder: (_) => NewBillScreen(project: project, userId: userId)),
+            );
+            if (saved == true) ref.invalidate(billsProvider(project.id));
+          },
+        ),
+      ),
+    ]);
+  }
+
+  Future<void> _openBill(BuildContext context, WidgetRef ref, ClientBill b, List<ClientBill> all) async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(
+            title: Text('${billKinds[b.kind]} ${b.billNumber}'),
+            subtitle: Text('${rupees(b.netPayable, paise: true)} payable · ${rupeesInWords(b.netPayable)}'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.ios_share),
+            title: const Text('Share PDF'),
+            onTap: () => Navigator.pop(ctx, 'share'),
+          ),
+          ListTile(
+            leading: Icon(b.status == 'paid' ? Icons.undo : Icons.check_circle_outline),
+            title: Text(b.status == 'paid' ? 'Mark as not paid' : 'Mark as paid'),
+            onTap: () => Navigator.pop(ctx, 'paid'),
+          ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+    if (!context.mounted) return;
+    switch (action) {
+      case 'share':
+        try {
+          await shareBill(
+            bill: b,
+            companyName: ref.read(sessionProvider).activeCompany?.name ?? '',
+            project: project,
+            profile: await ref.read(billingProfileProvider(project.companyId).future),
+            previousQty: previousFor(b, all),
+          );
+        } catch (e, st) {
+          if (context.mounted) showSnack(context, 'Could not share the bill. ${friendlyError(e, st)}', error: true);
+        }
+      case 'paid':
+        await ref.read(appDatabaseProvider).billDao.setStatus(b.id, b.status == 'paid' ? 'issued' : 'paid');
+        ref.invalidate(billsProvider(project.id));
+    }
+  }
+}
+
+class _PnlCard extends StatelessWidget {
+  const _PnlCard({required this.pnl});
+  final ProjectPnl pnl;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    Widget fig(String label, String value, {Color? color}) => Expanded(
+          child: Column(children: [
+            Text(value, style: theme.textTheme.titleMedium?.copyWith(color: color, fontWeight: FontWeight.w600)),
+            Text(label, style: theme.textTheme.bodySmall),
+          ]),
+        );
+    final pct = pnl.marginPct;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('Profit and loss', style: theme.textTheme.titleSmall),
+          const SizedBox(height: 10),
+          Row(children: [
+            fig('Billed', rupees(pnl.billed)),
+            fig('Spent', rupees(pnl.spent), color: toneColor(context, PillTone.danger)),
+            fig('Margin', rupees(pnl.margin),
+                color: pnl.margin < 0 ? toneColor(context, PillTone.danger) : toneColor(context, PillTone.ok)),
+          ]),
+          const SizedBox(height: 8),
+          Text(
+            [
+              if (pct != null) 'Margin ${pct.toStringAsFixed(1)}% of billed work',
+              'Client owes ${rupees(pnl.owed)} on unpaid bills',
+              'Received ${rupees(pnl.received)}',
+            ].join(' · '),
+            style: theme.textTheme.bodySmall,
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+class NewBillScreen extends ConsumerStatefulWidget {
+  const NewBillScreen({super.key, required this.project, required this.userId});
+  final Project project;
+  final String userId;
+
+  @override
+  ConsumerState<NewBillScreen> createState() => _NewBillScreenState();
+}
+
+class _NewBillScreenState extends ConsumerState<NewBillScreen> {
+  String _kind = 'ra';
+  DateTime _date = DateTime.now();
+  late final _client = TextEditingController(text: widget.project.clientName ?? '');
+  final _clientGstin = TextEditingController();
+  final _number = TextEditingController();
+  final _retention = TextEditingController(text: '5');
+  final _tds = TextEditingController(text: '0');
+  final _notes = TextEditingController();
+  double _gstRate = 18;
+  bool _interState = false;
+  bool _interStateTouched = false;
+  bool _numberTouched = false;
+  final _lines = <BillLine>[];
+  String? _error;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _clientGstin.addListener(_gstinChanged);
+  }
+
+  @override
+  void dispose() {
+    for (final c in [_client, _clientGstin, _number, _retention, _tds, _notes]) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  void _gstinChanged() {
+    if (_interStateTouched) return;
+    final ours = ref.read(billingProfileProvider(widget.project.companyId)).valueOrNull?.gstin;
+    final inter = isInterState(ours, _clientGstin.text);
+    if (inter != _interState) setState(() => _interState = inter);
+  }
+
+  double _pct(TextEditingController c) => (double.tryParse(c.text.trim()) ?? 0).clamp(0, 100).toDouble();
+
+  Map<String, double> _previous(List<ClientBill> bills) => previousQuantities(
+      bills.where((b) => b.kind == 'ra' && !b.billDate.isAfter(_date)).map((b) => decodeLines(b.linesJson)));
+
+  Future<void> _editLine({int? index, Map<String, double> previous = const {}}) async {
+    final existing = index == null ? null : _lines[index];
+    final desc = TextEditingController(text: existing?.description ?? '');
+    final unit = TextEditingController(text: existing?.unit ?? '');
+    final rate = TextEditingController(text: existing == null ? '' : fmtQty(existing.rate));
+    final qty = TextEditingController(text: existing == null ? '' : fmtQty(existing.qty));
+    final result = await showDialog<BillLine>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(index == null ? 'Add item' : 'Edit item'),
+        content: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            TextField(
+              controller: desc,
+              autofocus: index == null,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(labelText: 'Item (e.g. Brickwork in CM 1:6)'),
+            ),
+            TextField(controller: unit, decoration: const InputDecoration(labelText: 'Unit (cum, sqm, rft, nos)')),
+            TextField(
+              controller: rate,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+              decoration: const InputDecoration(labelText: 'Rate (₹ per unit)'),
+            ),
+            TextField(
+              controller: qty,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+              decoration: InputDecoration(labelText: _kind == 'ra' ? 'Quantity this bill' : 'Quantity'),
+            ),
+          ]),
+        ),
+        actions: [
+          if (index != null)
+            TextButton(
+              onPressed: () {
+                setState(() => _lines.removeAt(index));
+                Navigator.pop(ctx);
+              },
+              child: const Text('Remove'),
+            ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              final d = desc.text.trim();
+              final r = double.tryParse(rate.text.trim());
+              final q = double.tryParse(qty.text.trim());
+              if (d.isEmpty || r == null || q == null || r < 0 || q < 0) return;
+              Navigator.pop(ctx, BillLine(description: d, unit: unit.text.trim(), rate: r, qty: q));
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (result == null) return;
+    setState(() {
+      if (index == null) {
+        _lines.add(result);
+      } else {
+        _lines[index] = result;
+      }
+    });
+  }
+
+  void _copyItems(List<ClientBill> bills) {
+    final last = bills.where((b) => b.kind == _kind).firstOrNull;
+    if (last == null) return;
+    setState(() {
+      _lines
+        ..clear()
+        ..addAll([
+          for (final l in decodeLines(last.linesJson)) BillLine(description: l.description, unit: l.unit, rate: l.rate, qty: 0),
+        ]);
+      _client.text = last.clientName;
+      _clientGstin.text = last.clientGstin ?? '';
+      _gstRate = last.gstRate;
+      _retention.text = fmtQty(last.retentionPct);
+      _tds.text = fmtQty(last.tdsPct);
+    });
+  }
+
+  Future<void> _save(List<ClientBill> bills) async {
+    final client = _client.text.trim();
+    final gstin = _clientGstin.text.trim().toUpperCase();
+    final number = _number.text.trim().isEmpty ? nextBillNumber(bills.map((b) => b.billNumber), _kind) : _number.text.trim();
+    final lines = _lines.where((l) => l.qty > 0).toList();
+    String? error;
+    if (client.isEmpty) error = 'Who is the bill for? Add the client name.';
+    if (gstin.isNotEmpty && !isValidGstin(gstin)) error = 'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.';
+    if (lines.isEmpty) error = 'Add at least one item with a quantity.';
+    if (bills.any((b) => b.billNumber.toLowerCase() == number.toLowerCase())) error = 'Bill $number already exists.';
+    if (error != null) {
+      setState(() => _error = error);
+      return;
+    }
+    setState(() => _saving = true);
+    final totals = billTotals(lines,
+        gstRate: _gstRate, interState: _interState, retentionPct: _pct(_retention), tdsPct: _pct(_tds));
+    await ref.read(appDatabaseProvider).billDao.create(ClientBillsCompanion.insert(
+          id: const Uuid().v4(),
+          projectId: widget.project.id,
+          kind: _kind,
+          billNumber: number.length > 30 ? number.substring(0, 30) : number,
+          billDate: DateTime(_date.year, _date.month, _date.day),
+          clientName: client.length > 200 ? client.substring(0, 200) : client,
+          clientGstin: Value(gstin.isEmpty ? null : gstin),
+          linesJson: encodeLines(lines),
+          gstRate: Value(_gstRate),
+          interState: Value(_interState),
+          retentionPct: Value(_pct(_retention)),
+          tdsPct: Value(_pct(_tds)),
+          gross: totals.gross,
+          netPayable: totals.netPayable,
+          notes: Value(_notes.text.trim().isEmpty ? null : _notes.text.trim()),
+          recordedBy: widget.userId,
+        ));
+    if (mounted) Navigator.pop(context, true);
+  }
+
+  Future<void> _editProfile(BillingProfile current) async {
+    final gstin = TextEditingController(text: current.gstin);
+    final address = TextEditingController(text: current.address);
+    final upi = TextEditingController(text: current.upiId);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Your details on bills'),
+        content: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            TextField(
+              controller: gstin,
+              textCapitalization: TextCapitalization.characters,
+              maxLength: 15,
+              decoration: const InputDecoration(labelText: 'Your GSTIN'),
+            ),
+            TextField(controller: address, maxLines: 3, decoration: const InputDecoration(labelText: 'Address')),
+            TextField(controller: upi, decoration: const InputDecoration(labelText: 'UPI id for payments (optional)')),
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final g = gstin.text.trim().toUpperCase();
+    if (g.isNotEmpty && !isValidGstin(g)) {
+      if (mounted) showSnack(context, 'That GSTIN doesn\'t look right, so it wasn\'t saved.', error: true);
+      return;
+    }
+    await saveBillingProfile(ref.read(appDatabaseProvider), widget.project.companyId,
+        BillingProfile(gstin: g, address: address.text, upiId: upi.text));
+    ref.invalidate(billingProfileProvider(widget.project.companyId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bills = ref.watch(billsProvider(widget.project.id)).valueOrNull ?? const <ClientBill>[];
+    final profile = ref.watch(billingProfileProvider(widget.project.companyId)).valueOrNull ?? const BillingProfile();
+    final previous = _previous(bills);
+    final totals = billTotals(_lines,
+        gstRate: _gstRate, interState: _interState, retentionPct: _pct(_retention), tdsPct: _pct(_tds));
+    final suggested = nextBillNumber(bills.map((b) => b.billNumber), _kind);
+    if (!_numberTouched && _number.text != suggested) _number.text = suggested;
+    final hasEarlier = bills.any((b) => b.kind == _kind);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('New bill')),
+      body: SafeArea(
+        child: ListView(padding: const EdgeInsets.fromLTRB(16, 12, 16, 32), children: [
+          SegmentedButton<String>(
+            segments: [for (final e in billKinds.entries) ButtonSegment(value: e.key, label: Text(e.value))],
+            selected: {_kind},
+            showSelectedIcon: false,
+            onSelectionChanged: (s) => setState(() {
+              _kind = s.first;
+              _numberTouched = false;
+            }),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.business_outlined),
+              title: const Text('Your details on bills'),
+              subtitle: Text(profile.gstin.isEmpty ? 'Add your GSTIN, address and UPI id' : 'GSTIN ${profile.gstin}'),
+              trailing: const Icon(Icons.edit_outlined),
+              onTap: () => _editProfile(profile),
+            ),
+          ),
+          Row(children: [
+            Expanded(
+              child: TextField(
+                controller: _number,
+                onChanged: (_) => _numberTouched = true,
+                decoration: const InputDecoration(labelText: 'Bill number'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.event_outlined),
+                label: Text(fmtDate(_date)),
+                onPressed: () async {
+                  final d = await showDatePicker(
+                    context: context,
+                    initialDate: _date,
+                    firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
+                    lastDate: DateTime.now().add(const Duration(days: 30)),
+                  );
+                  if (d != null) setState(() => _date = d);
+                },
+              ),
+            ),
+          ]),
+          TextField(
+            controller: _client,
+            textCapitalization: TextCapitalization.words,
+            decoration: const InputDecoration(labelText: 'Client name'),
+          ),
+          TextField(
+            controller: _clientGstin,
+            textCapitalization: TextCapitalization.characters,
+            maxLength: 15,
+            decoration: const InputDecoration(labelText: 'Client GSTIN (optional)', counterText: ''),
+          ),
+          const SizedBox(height: 12),
+          Text('GST', style: theme.textTheme.labelLarge),
+          const SizedBox(height: 6),
+          SegmentedButton<double>(
+            segments: const [
+              ButtonSegment(value: 0, label: Text('None')),
+              ButtonSegment(value: 5, label: Text('5%')),
+              ButtonSegment(value: 12, label: Text('12%')),
+              ButtonSegment(value: 18, label: Text('18%')),
+            ],
+            selected: {_gstRate},
+            showSelectedIcon: false,
+            onSelectionChanged: (s) => setState(() => _gstRate = s.first),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Client is in another state (IGST)'),
+            subtitle: const Text('Inside the state, GST splits into CGST and SGST'),
+            value: _interState,
+            onChanged: (v) => setState(() {
+              _interState = v;
+              _interStateTouched = true;
+            }),
+          ),
+          Row(children: [
+            Expanded(
+              child: TextField(
+                controller: _retention,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                onChanged: (_) => setState(() {}),
+                decoration: const InputDecoration(labelText: 'Retention %', helperText: 'Held back by the client'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: _tds,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                onChanged: (_) => setState(() {}),
+                decoration: const InputDecoration(labelText: 'TDS %', helperText: 'Usually 1% or 2%'),
+              ),
+            ),
+          ]),
+          SectionHeader(_kind == 'ra' ? 'Work measured this bill' : 'Items'),
+          if (_lines.isEmpty && hasEarlier)
+            OutlinedButton.icon(
+              icon: const Icon(Icons.content_copy_outlined),
+              label: const Text('Copy items from the last bill'),
+              onPressed: () => _copyItems(bills),
+            ),
+          for (final (i, l) in _lines.indexed)
+            Card(
+              child: ListTile(
+                title: Text(l.description),
+                subtitle: Text(_kind == 'ra'
+                    ? 'Previous ${fmtQty(previous[l.itemKey] ?? 0)} + this bill ${fmtQty(l.qty)} = '
+                        '${fmtQty((previous[l.itemKey] ?? 0) + l.qty)} ${l.unit} @ ${rupees(l.rate, paise: true)}'
+                    : '${fmtQty(l.qty)} ${l.unit} @ ${rupees(l.rate, paise: true)}'),
+                trailing: Text(rupees(l.amount)),
+                onTap: () => _editLine(index: i, previous: previous),
+              ),
+            ),
+          TextButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('Add item'),
+            onPressed: () => _editLine(previous: previous),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(children: [
+                _row('Value of work', rupees(totals.gross, paise: true)),
+                if (_interState)
+                  _row('IGST ${fmtQty(_gstRate)}%', rupees(totals.igst, paise: true))
+                else if (_gstRate > 0) ...[
+                  _row('CGST ${fmtQty(_gstRate / 2)}%', rupees(totals.cgst, paise: true)),
+                  _row('SGST ${fmtQty(_gstRate / 2)}%', rupees(totals.sgst, paise: true)),
+                ],
+                if (totals.retention > 0) _row('Less retention', '- ${rupees(totals.retention, paise: true)}'),
+                if (totals.tds > 0) _row('Less TDS', '- ${rupees(totals.tds, paise: true)}'),
+                const Divider(),
+                _row('Payable', rupees(totals.netPayable, paise: true), bold: true),
+                const SizedBox(height: 4),
+                Text(rupeesInWords(totals.netPayable), style: theme.textTheme.bodySmall),
+              ]),
+            ),
+          ),
+          TextField(controller: _notes, maxLength: 500, decoration: const InputDecoration(labelText: 'Notes (optional)')),
+          if (_error != null) ...[const SizedBox(height: 8), FormMessage(_error!)],
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: _saving ? null : () => _save(bills),
+            child: Text(_saving ? 'Saving…' : 'Save bill'),
+          ),
+        ]),
+      ),
+    );
+  }
+
+  Widget _row(String label, String value, {bool bold = false}) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(children: [
+          Expanded(child: Text(label, style: bold ? const TextStyle(fontWeight: FontWeight.w600) : null)),
+          Text(value, style: bold ? const TextStyle(fontWeight: FontWeight.w600) : null),
+        ]),
+      );
+}

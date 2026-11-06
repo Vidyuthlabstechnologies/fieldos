@@ -19,6 +19,7 @@ import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/project/site_day.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/speech_service.dart';
@@ -283,6 +284,25 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                   ),
                 ]),
               ),
+            _FromSiteRecords(
+              projectId: widget.project.id,
+              day: _date,
+              summaryEmpty: _summary.text.trim().isEmpty,
+              onUseLast: (text) {
+                _summary.text = text;
+                _read();
+              },
+              onUseWorkers: (n) => setState(() {
+                _manpower.text = '$n';
+                _manpowerTouched = true;
+              }),
+              onAddLine: (line) {
+                final cur = _summary.text.trimRight();
+                _summary.text = cur.isEmpty ? line : '$cur\n$line';
+                _read();
+              },
+              summaryText: _summary.text,
+            ),
             TextField(
               controller: _summary,
               minLines: 4,
@@ -493,5 +513,65 @@ class _TaskProgressSection extends ConsumerWidget {
           );
         }),
     ]);
+  }
+}
+
+
+/// Suggestions from the site's own records for the report's day: start
+/// from the last report, the headcount from attendance, and the material
+/// that arrived. Each is one tap, and nothing is filled in without it.
+class _FromSiteRecords extends ConsumerWidget {
+  const _FromSiteRecords({
+    required this.projectId,
+    required this.day,
+    required this.summaryEmpty,
+    required this.summaryText,
+    required this.onUseLast,
+    required this.onUseWorkers,
+    required this.onAddLine,
+  });
+
+  final String projectId;
+  final DateTime day;
+  final bool summaryEmpty;
+  final String summaryText;
+  final void Function(String text) onUseLast;
+  final void Function(int workers) onUseWorkers;
+  final void Function(String line) onAddLine;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final last = summaryEmpty
+        ? ref.watch(dprProvider(projectId)).maybeWhen(data: (l) => lastReportBefore(l, day), orElse: () => null)
+        : null;
+    final workers =
+        ref.watch(attendanceProvider(projectId)).maybeWhen(data: (l) => workersOnDay(l, day), orElse: () => 0);
+    final materials = materialsLine(
+        ref.watch(receiptsProvider(projectId)).maybeWhen(data: (l) => materialsOnDay(l, day), orElse: () => const []));
+    final showMaterials = materials.isNotEmpty && !summaryText.contains(materials);
+    if (last == null && workers == 0 && !showMaterials) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Wrap(spacing: 8, runSpacing: 4, children: [
+        if (last != null)
+          ActionChip(
+            avatar: const Icon(Icons.content_copy_outlined, size: 18),
+            label: Text('Copy last report (${fmtDay(last.entryDate)})'),
+            onPressed: () => onUseLast(last.workSummary),
+          ),
+        if (workers > 0)
+          ActionChip(
+            avatar: const Icon(Icons.groups_outlined, size: 18),
+            label: Text(workers == 1 ? '1 worker punched in' : '$workers workers punched in'),
+            onPressed: () => onUseWorkers(workers),
+          ),
+        if (showMaterials)
+          ActionChip(
+            avatar: const Icon(Icons.local_shipping_outlined, size: 18),
+            label: const Text('Add material received'),
+            onPressed: () => onAddLine(materials),
+          ),
+      ]),
+    );
   }
 }

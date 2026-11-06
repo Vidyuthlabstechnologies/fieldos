@@ -381,6 +381,35 @@ class PaymentsReceived extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+/// A bill to the client: a running account (RA) bill of work measured, or
+/// a GST tax invoice. Lines are kept as JSON (description, unit, rate,
+/// quantity); [gross] and [netPayable] are stored so lists and totals need
+/// no recalculation.
+class ClientBills extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get kind => text().withLength(min: 1, max: 20)(); // ra | tax_invoice
+  TextColumn get billNumber => text().withLength(min: 1, max: 30)();
+  DateTimeColumn get billDate => dateTime()();
+  TextColumn get clientName => text().withLength(min: 1, max: 200)();
+  TextColumn get clientGstin => text().withLength(max: 15).nullable()();
+  TextColumn get sac => text().withLength(max: 10).withDefault(const Constant('995411'))();
+  TextColumn get linesJson => text()();
+  RealColumn get gstRate => real().withDefault(const Constant(18))();
+  BoolColumn get interState => boolean().withDefault(const Constant(false))();
+  RealColumn get retentionPct => real().withDefault(const Constant(0))();
+  RealColumn get tdsPct => real().withDefault(const Constant(0))();
+  RealColumn get gross => real()();
+  RealColumn get netPayable => real()();
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('issued'))(); // issued | paid
+  TextColumn get notes => text().withLength(max: 500).nullable()();
+  TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 /// GPS-based attendance. `punchIn`/`punchOut` timestamps plus the captured
 /// coordinates let the cost engine compute attendance vs geofence and labour
 /// productivity, not just a headcount.
