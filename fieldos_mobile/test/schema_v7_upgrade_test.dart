@@ -29,6 +29,10 @@ void main() {
     await db.customStatement('DROP TABLE material_usage');
     await db.customStatement('DROP TABLE payments_received');
     await db.customStatement('ALTER TABLE site_expenses DROP COLUMN worker_id');
+    // v8's task planning columns weren't there yet either.
+    for (final c in ['progress', 'priority', 'start_date']) {
+      await db.customStatement('ALTER TABLE tasks DROP COLUMN $c');
+    }
     await db.customStatement('PRAGMA user_version = 6');
     await db.close();
 

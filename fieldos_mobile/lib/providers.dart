@@ -74,6 +74,11 @@ final tasksProvider = FutureProvider.autoDispose.family<List<Task>, String>((ref
   return ref.watch(appDatabaseProvider).taskDao.forProject(projectId);
 });
 
+/// Open tasks across the company's projects, for the late counts on home.
+final openTasksProvider = FutureProvider.autoDispose.family<List<Task>, String>((ref, companyId) {
+  return ref.watch(appDatabaseProvider).taskDao.openForCompany(companyId);
+});
+
 final dprProvider = FutureProvider.autoDispose.family<List<DprEntry>, String>((ref, projectId) {
   return ref.watch(appDatabaseProvider).dprDao.forProject(projectId);
 });

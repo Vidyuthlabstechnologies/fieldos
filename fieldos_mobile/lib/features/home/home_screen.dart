@@ -10,6 +10,7 @@ import 'package:fieldos_mobile/features/map/site_map_screen.dart';
 import 'package:fieldos_mobile/features/project/new_project_sheet.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/features/project/project_status.dart';
+import 'package:fieldos_mobile/features/project/task_plan.dart';
 import 'package:fieldos_mobile/features/settings/settings_screen.dart';
 import 'package:fieldos_mobile/features/subcontractor/subcontractor_screen.dart';
 import 'package:fieldos_mobile/features/subscription/my_subscription_sheet.dart';
@@ -230,13 +231,17 @@ class _ProjectList extends StatelessWidget {
   }
 }
 
-class _ProjectCard extends StatelessWidget {
+class _ProjectCard extends ConsumerWidget {
   const _ProjectCard({required this.project});
 
   final Project project;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lateTasks = ref.watch(openTasksProvider(project.companyId)).maybeWhen(
+          data: (tasks) => lateCountByProject(tasks, DateTime.now())[project.id] ?? 0,
+          orElse: () => 0,
+        );
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final client = project.clientName?.trim() ?? '';
@@ -245,8 +250,10 @@ class _ProjectCard extends StatelessWidget {
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => ProjectDetailScreen(project: project))),
+        onTap: () async {
+          await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen(project: project)));
+          ref.invalidate(openTasksProvider(project.companyId));
+        },
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -276,6 +283,7 @@ class _ProjectCard extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         StatusPill(projectStatusLabel(project.status), tone: projectStatusTone(project.status)),
+                        if (lateTasks > 0) StatusPill(lateTasks == 1 ? '1 task late' : '$lateTasks tasks late', tone: PillTone.danger),
                         if (onMap)
                           Row(mainAxisSize: MainAxisSize.min, children: [
                             Icon(Icons.place_outlined, size: 15, color: scheme.onSurfaceVariant),
