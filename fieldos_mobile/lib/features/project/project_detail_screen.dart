@@ -10,6 +10,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/project/dpr_draft_screen.dart';
 import 'package:fieldos_mobile/features/project/new_project_sheet.dart';
 import 'package:fieldos_mobile/features/project/project_status.dart';
+import 'package:fieldos_mobile/features/project/tasks_tab.dart';
 import 'package:fieldos_mobile/features/project/voice_report_sheet.dart';
 import 'package:fieldos_mobile/features/chat/project_chat_view.dart';
 import 'package:fieldos_mobile/features/labour/labour_screen.dart';
@@ -179,7 +180,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
       body: TabBarView(
         controller: _tabs,
         children: [
-          _TasksTab(project: widget.project),
+          TasksTab(project: widget.project),
           _DprTab(project: widget.project),
           _IssuesTab(project: widget.project),
           ProjectChatView(projectId: widget.project.id),
@@ -260,152 +261,6 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
   }
 }
 
-class _TasksTab extends ConsumerWidget {
-  const _TasksTab({required this.project});
-  final Project project;
-
-  static const _statusLabels = {'todo': 'To do', 'in_progress': 'In progress', 'done': 'Done'};
-
-  Future<void> _addTask(BuildContext context, WidgetRef ref) async {
-    final titleC = TextEditingController();
-    DateTime? dueDate;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('New task'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: titleC,
-                autofocus: true,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(labelText: 'What needs doing?'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.calendar_today),
-                label: Text(dueDate == null ? 'Due date (optional)' : 'Due ${fmtDate(dueDate!)}'),
-                onPressed: () async {
-                  final picked = await showDatePicker(
-                    context: ctx,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                    lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-                  );
-                  if (picked != null) setDialogState(() => dueDate = picked);
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, titleC.text.trim().isNotEmpty),
-              child: const Text('Add task'),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (confirmed != true) return;
-    await ref.read(appDatabaseProvider).taskDao.create(TasksCompanion.insert(
-          id: const Uuid().v4(),
-          projectId: project.id,
-          title: titleC.text.trim(),
-          dueDate: Value(dueDate),
-        ));
-    ref.invalidate(tasksProvider(project.id));
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tasks = ref.watch(tasksProvider(project.id));
-    final today = DateTime.now();
-    final startOfToday = DateTime(today.year, today.month, today.day);
-    return Stack(
-      children: [
-        RefreshIndicator(
-          onRefresh: () async => ref.invalidate(tasksProvider(project.id)),
-          child: tasks.when(
-            data: (items) {
-              if (items.isEmpty) {
-                return EmptyState(
-                  icon: Icons.checklist,
-                  title: 'No tasks yet',
-                  message: 'Add the jobs for this site so everyone knows what is next and what is late.',
-                  actionLabel: 'Add a task',
-                  onAction: () => _addTask(context, ref),
-                );
-              }
-              // Open work first, soonest due first; done at the bottom.
-              final sorted = [...items]..sort((a, b) {
-                  final ad = a.status == 'done' ? 1 : 0, bd = b.status == 'done' ? 1 : 0;
-                  if (ad != bd) return ad - bd;
-                  final ax = a.dueDate ?? DateTime(9999), bx = b.dueDate ?? DateTime(9999);
-                  return ax.compareTo(bx);
-                });
-              return ListView.builder(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
-                itemCount: sorted.length,
-                itemBuilder: (_, i) {
-                  final t = sorted[i];
-                  final overdue = t.status != 'done' && t.dueDate != null && t.dueDate!.isBefore(startOfToday);
-                  return Card(
-                    child: ListTile(
-                      title: Text(
-                        t.title,
-                        style: t.status == 'done'
-                            ? TextStyle(decoration: TextDecoration.lineThrough, color: Theme.of(context).colorScheme.onSurfaceVariant)
-                            : null,
-                      ),
-                      subtitle: t.dueDate == null
-                          ? null
-                          : Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Row(children: [
-                                Text('Due ${fmtDate(t.dueDate!, short: true)}'),
-                                if (overdue) ...[const SizedBox(width: 8), const StatusPill('Late', tone: PillTone.danger)],
-                              ]),
-                            ),
-                      trailing: DropdownButton<String>(
-                        value: _statusLabels.containsKey(t.status) ? t.status : 'todo',
-                        underline: const SizedBox.shrink(),
-                        items: [
-                          for (final e in _statusLabels.entries) DropdownMenuItem(value: e.key, child: Text(e.value)),
-                        ],
-                        onChanged: (s) async {
-                          if (s == null) return;
-                          await ref.read(appDatabaseProvider).taskDao.updateStatus(t.id, s);
-                          ref.invalidate(tasksProvider(project.id));
-                        },
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, st) => ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(tasksProvider(project.id))),
-          ),
-        ),
-        Positioned(
-          bottom: 16,
-          right: 16,
-          child: FloatingActionButton.extended(
-            heroTag: 'task_add',
-            icon: const Icon(Icons.add),
-            label: const Text('Add task'),
-            onPressed: () => _addTask(context, ref),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _DprTab extends ConsumerStatefulWidget {
   const _DprTab({required this.project});
   final Project project;
@@ -464,6 +319,13 @@ class _DprTabState extends ConsumerState<_DprTab> {
       }
       for (final path in draft.photoPaths) {
         await db.dprDao.addPhoto(DprPhotosCompanion.insert(id: const Uuid().v4(), dprEntryId: dprId, photoPath: path));
+      }
+      for (final e in draft.taskProgress.entries) {
+        await db.taskDao.setProgress(e.key, e.value);
+      }
+      if (draft.taskProgress.isNotEmpty) {
+        ref.invalidate(tasksProvider(widget.project.id));
+        ref.invalidate(openTasksProvider(widget.project.companyId));
       }
       ref.invalidate(dprProvider(widget.project.id));
       ref.invalidate(issuesProvider(widget.project.id));

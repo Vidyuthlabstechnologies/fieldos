@@ -2755,6 +2755,45 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _progressMeta = const VerificationMeta(
+    'progress',
+  );
+  @override
+  late final GeneratedColumn<int> progress = GeneratedColumn<int>(
+    'progress',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _priorityMeta = const VerificationMeta(
+    'priority',
+  );
+  @override
+  late final GeneratedColumn<String> priority = GeneratedColumn<String>(
+    'priority',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('normal'),
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startDate = GeneratedColumn<DateTime>(
+    'start_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2765,6 +2804,9 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     status,
     createdAt,
     updatedAt,
+    progress,
+    priority,
+    startDate,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2829,6 +2871,24 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('progress')) {
+      context.handle(
+        _progressMeta,
+        progress.isAcceptableOrUnknown(data['progress']!, _progressMeta),
+      );
+    }
+    if (data.containsKey('priority')) {
+      context.handle(
+        _priorityMeta,
+        priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta),
+      );
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    }
     return context;
   }
 
@@ -2870,6 +2930,18 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      progress: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}progress'],
+      )!,
+      priority: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}priority'],
+      )!,
+      startDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}start_date'],
+      ),
     );
   }
 
@@ -2888,6 +2960,17 @@ class Task extends DataClass implements Insertable<Task> {
   final String status;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// How much of the task is done, 0-100. Moved forward from the daily
+  /// report, or by hand on the task.
+  final int progress;
+
+  /// 'high', 'normal' or 'low'. High ones sort to the top of the list.
+  final String priority;
+
+  /// When work is planned to start. With [progress] it gives the forecast
+  /// finish, which the delay view compares against [dueDate].
+  final DateTime? startDate;
   const Task({
     required this.id,
     required this.projectId,
@@ -2897,6 +2980,9 @@ class Task extends DataClass implements Insertable<Task> {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    required this.progress,
+    required this.priority,
+    this.startDate,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2913,6 +2999,11 @@ class Task extends DataClass implements Insertable<Task> {
     map['status'] = Variable<String>(status);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['progress'] = Variable<int>(progress);
+    map['priority'] = Variable<String>(priority);
+    if (!nullToAbsent || startDate != null) {
+      map['start_date'] = Variable<DateTime>(startDate);
+    }
     return map;
   }
 
@@ -2930,6 +3021,11 @@ class Task extends DataClass implements Insertable<Task> {
       status: Value(status),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      progress: Value(progress),
+      priority: Value(priority),
+      startDate: startDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startDate),
     );
   }
 
@@ -2947,6 +3043,9 @@ class Task extends DataClass implements Insertable<Task> {
       status: serializer.fromJson<String>(json['status']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      progress: serializer.fromJson<int>(json['progress']),
+      priority: serializer.fromJson<String>(json['priority']),
+      startDate: serializer.fromJson<DateTime?>(json['startDate']),
     );
   }
   @override
@@ -2961,6 +3060,9 @@ class Task extends DataClass implements Insertable<Task> {
       'status': serializer.toJson<String>(status),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'progress': serializer.toJson<int>(progress),
+      'priority': serializer.toJson<String>(priority),
+      'startDate': serializer.toJson<DateTime?>(startDate),
     };
   }
 
@@ -2973,6 +3075,9 @@ class Task extends DataClass implements Insertable<Task> {
     String? status,
     DateTime? createdAt,
     DateTime? updatedAt,
+    int? progress,
+    String? priority,
+    Value<DateTime?> startDate = const Value.absent(),
   }) => Task(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -2982,6 +3087,9 @@ class Task extends DataClass implements Insertable<Task> {
     status: status ?? this.status,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    progress: progress ?? this.progress,
+    priority: priority ?? this.priority,
+    startDate: startDate.present ? startDate.value : this.startDate,
   );
   Task copyWithCompanion(TasksCompanion data) {
     return Task(
@@ -2995,6 +3103,9 @@ class Task extends DataClass implements Insertable<Task> {
       status: data.status.present ? data.status.value : this.status,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      progress: data.progress.present ? data.progress.value : this.progress,
+      priority: data.priority.present ? data.priority.value : this.priority,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
     );
   }
 
@@ -3008,7 +3119,10 @@ class Task extends DataClass implements Insertable<Task> {
           ..write('dueDate: $dueDate, ')
           ..write('status: $status, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('progress: $progress, ')
+          ..write('priority: $priority, ')
+          ..write('startDate: $startDate')
           ..write(')'))
         .toString();
   }
@@ -3023,6 +3137,9 @@ class Task extends DataClass implements Insertable<Task> {
     status,
     createdAt,
     updatedAt,
+    progress,
+    priority,
+    startDate,
   );
   @override
   bool operator ==(Object other) =>
@@ -3035,7 +3152,10 @@ class Task extends DataClass implements Insertable<Task> {
           other.dueDate == this.dueDate &&
           other.status == this.status &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.progress == this.progress &&
+          other.priority == this.priority &&
+          other.startDate == this.startDate);
 }
 
 class TasksCompanion extends UpdateCompanion<Task> {
@@ -3047,6 +3167,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
   final Value<String> status;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<int> progress;
+  final Value<String> priority;
+  final Value<DateTime?> startDate;
   final Value<int> rowid;
   const TasksCompanion({
     this.id = const Value.absent(),
@@ -3057,6 +3180,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.status = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.progress = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.startDate = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TasksCompanion.insert({
@@ -3068,6 +3194,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.status = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.progress = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.startDate = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        projectId = Value(projectId),
@@ -3081,6 +3210,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Expression<String>? status,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<int>? progress,
+    Expression<String>? priority,
+    Expression<DateTime>? startDate,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3092,6 +3224,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
       if (status != null) 'status': status,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (progress != null) 'progress': progress,
+      if (priority != null) 'priority': priority,
+      if (startDate != null) 'start_date': startDate,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3105,6 +3240,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Value<String>? status,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
+    Value<int>? progress,
+    Value<String>? priority,
+    Value<DateTime?>? startDate,
     Value<int>? rowid,
   }) {
     return TasksCompanion(
@@ -3116,6 +3254,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      progress: progress ?? this.progress,
+      priority: priority ?? this.priority,
+      startDate: startDate ?? this.startDate,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3147,6 +3288,15 @@ class TasksCompanion extends UpdateCompanion<Task> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (progress.present) {
+      map['progress'] = Variable<int>(progress.value);
+    }
+    if (priority.present) {
+      map['priority'] = Variable<String>(priority.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<DateTime>(startDate.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3164,6 +3314,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
           ..write('status: $status, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('progress: $progress, ')
+          ..write('priority: $priority, ')
+          ..write('startDate: $startDate, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -18903,7 +19056,16 @@ class $$UsersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$UsersTable, User>(table),
+                  BaseReferences<_$AppDatabase, $UsersTable, User>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -19078,7 +19240,16 @@ class $$SessionsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SessionsTable, Session>(table),
+                  BaseReferences<_$AppDatabase, $SessionsTable, Session>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -19237,7 +19408,16 @@ class $$AppSettingsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$AppSettingsTable, AppSetting>(table),
+                  BaseReferences<_$AppDatabase, $AppSettingsTable, AppSetting>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -19396,7 +19576,16 @@ class $$CompaniesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$CompaniesTable, Company>(table),
+                  BaseReferences<_$AppDatabase, $CompaniesTable, Company>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -19595,7 +19784,16 @@ class $$CompanyMembersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$CompanyMembersTable, CompanyMember>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $CompanyMembersTable,
+                    CompanyMember
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -19914,7 +20112,16 @@ class $$ProjectsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ProjectsTable, Project>(table),
+                  BaseReferences<_$AppDatabase, $ProjectsTable, Project>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -20113,7 +20320,16 @@ class $$ProjectMembersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ProjectMembersTable, ProjectMember>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ProjectMembersTable,
+                    ProjectMember
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -20147,6 +20363,9 @@ typedef $$TasksTableCreateCompanionBuilder =
       Value<String> status,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<int> progress,
+      Value<String> priority,
+      Value<DateTime?> startDate,
       Value<int> rowid,
     });
 typedef $$TasksTableUpdateCompanionBuilder =
@@ -20159,6 +20378,9 @@ typedef $$TasksTableUpdateCompanionBuilder =
       Value<String> status,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<int> progress,
+      Value<String> priority,
+      Value<DateTime?> startDate,
       Value<int> rowid,
     });
 
@@ -20207,6 +20429,21 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get progress => $composableBuilder(
+    column: $table.progress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startDate => $composableBuilder(
+    column: $table.startDate,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -20259,6 +20496,21 @@ class $$TasksTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get progress => $composableBuilder(
+    column: $table.progress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TasksTableAnnotationComposer
@@ -20295,6 +20547,15 @@ class $$TasksTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get progress =>
+      $composableBuilder(column: $table.progress, builder: (column) => column);
+
+  GeneratedColumn<String> get priority =>
+      $composableBuilder(column: $table.priority, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
 }
 
 class $$TasksTableTableManager
@@ -20333,6 +20594,9 @@ class $$TasksTableTableManager
                 Value<String> status = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> progress = const Value.absent(),
+                Value<String> priority = const Value.absent(),
+                Value<DateTime?> startDate = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TasksCompanion(
                 id: id,
@@ -20343,6 +20607,9 @@ class $$TasksTableTableManager
                 status: status,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                progress: progress,
+                priority: priority,
+                startDate: startDate,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -20355,6 +20622,9 @@ class $$TasksTableTableManager
                 Value<String> status = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> progress = const Value.absent(),
+                Value<String> priority = const Value.absent(),
+                Value<DateTime?> startDate = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TasksCompanion.insert(
                 id: id,
@@ -20365,10 +20635,22 @@ class $$TasksTableTableManager
                 status: status,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                progress: progress,
+                priority: priority,
+                startDate: startDate,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$TasksTable, Task>(table),
+                  BaseReferences<_$AppDatabase, $TasksTable, Task>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -20661,7 +20943,16 @@ class $$DprEntriesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$DprEntriesTable, DprEntry>(table),
+                  BaseReferences<_$AppDatabase, $DprEntriesTable, DprEntry>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -20857,7 +21148,16 @@ class $$DprPhotosTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$DprPhotosTable, DprPhoto>(table),
+                  BaseReferences<_$AppDatabase, $DprPhotosTable, DprPhoto>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -21114,7 +21414,16 @@ class $$IssuesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$IssuesTable, Issue>(table),
+                  BaseReferences<_$AppDatabase, $IssuesTable, Issue>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -21351,7 +21660,16 @@ class $$EstimationsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$EstimationsTable, Estimation>(table),
+                  BaseReferences<_$AppDatabase, $EstimationsTable, Estimation>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -21634,7 +21952,16 @@ class $$CostHeadsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$CostHeadsTable, CostHead>(table),
+                  BaseReferences<_$AppDatabase, $CostHeadsTable, CostHead>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -21903,7 +22230,18 @@ class $$MeasurementEntriesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$MeasurementEntriesTable, MeasurementEntry>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MeasurementEntriesTable,
+                    MeasurementEntry
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -22130,7 +22468,16 @@ class $$SteelEntriesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SteelEntriesTable, SteelEntry>(table),
+                  BaseReferences<_$AppDatabase, $SteelEntriesTable, SteelEntry>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -22445,7 +22792,16 @@ class $$SuppliersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SuppliersTable, Supplier>(table),
+                  BaseReferences<_$AppDatabase, $SuppliersTable, Supplier>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -22808,7 +23164,16 @@ class $$PurchaseRequestsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$PurchaseRequestsTable, PurchaseRequest>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PurchaseRequestsTable,
+                    PurchaseRequest
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -23149,7 +23514,16 @@ class $$PurchaseOrdersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$PurchaseOrdersTable, PurchaseOrder>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PurchaseOrdersTable,
+                    PurchaseOrder
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -23517,7 +23891,16 @@ class $$MaterialReceiptsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$MaterialReceiptsTable, MaterialReceipt>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MaterialReceiptsTable,
+                    MaterialReceipt
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -23801,7 +24184,16 @@ class $$MaterialUsageTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$MaterialUsageTable, MaterialUsageData>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MaterialUsageTable,
+                    MaterialUsageData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -24087,7 +24479,18 @@ class $$PaymentsReceivedTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$PaymentsReceivedTable, PaymentsReceivedData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PaymentsReceivedTable,
+                    PaymentsReceivedData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -24392,7 +24795,16 @@ class $$SiteExpensesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SiteExpensesTable, SiteExpense>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SiteExpensesTable,
+                    SiteExpense
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -24718,7 +25130,18 @@ class $$LabourAttendanceTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$LabourAttendanceTable, LabourAttendanceData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $LabourAttendanceTable,
+                    LabourAttendanceData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -24945,7 +25368,16 @@ class $$SubcontractorsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SubcontractorsTable, Subcontractor>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SubcontractorsTable,
+                    Subcontractor
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -25210,7 +25642,16 @@ class $$WorkOrdersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$WorkOrdersTable, WorkOrder>(table),
+                  BaseReferences<_$AppDatabase, $WorkOrdersTable, WorkOrder>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -25507,7 +25948,16 @@ class $$ApprovalsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ApprovalsTable, Approval>(table),
+                  BaseReferences<_$AppDatabase, $ApprovalsTable, Approval>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -25712,7 +26162,16 @@ class $$ProjectGeofencesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ProjectGeofencesTable, ProjectGeofence>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ProjectGeofencesTable,
+                    ProjectGeofence
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -26011,7 +26470,16 @@ class $$EquipmentTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$EquipmentTable, EquipmentData>(table),
+                  BaseReferences<_$AppDatabase, $EquipmentTable, EquipmentData>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -26291,7 +26759,16 @@ class $$EquipmentLogsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$EquipmentLogsTable, EquipmentLog>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $EquipmentLogsTable,
+                    EquipmentLog
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -26615,7 +27092,16 @@ class $$InspectionsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$InspectionsTable, Inspection>(table),
+                  BaseReferences<_$AppDatabase, $InspectionsTable, Inspection>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -26844,7 +27330,16 @@ class $$InspectionItemsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$InspectionItemsTable, InspectionItem>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $InspectionItemsTable,
+                    InspectionItem
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -27157,7 +27652,16 @@ class $$DocumentsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$DocumentsTable, Document>(table),
+                  BaseReferences<_$AppDatabase, $DocumentsTable, Document>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -27408,7 +27912,16 @@ class $$WorkersTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$WorkersTable, Worker>(table),
+                  BaseReferences<_$AppDatabase, $WorkersTable, Worker>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -27632,7 +28145,16 @@ class $$ProjectMessagesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$ProjectMessagesTable, ProjectMessage>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ProjectMessagesTable,
+                    ProjectMessage
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -27887,7 +28409,16 @@ class $$SyncOutboxTableTableManager
                 lastError: lastError,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SyncOutboxTable, SyncOutboxData>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SyncOutboxTable,
+                    SyncOutboxData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -28061,6 +28592,7 @@ class ProjectDaoManager {
 
 mixin _$TaskDaoMixin on DatabaseAccessor<AppDatabase> {
   $TasksTable get tasks => attachedDatabase.tasks;
+  $ProjectsTable get projects => attachedDatabase.projects;
   TaskDaoManager get managers => TaskDaoManager(this);
 }
 
@@ -28069,6 +28601,8 @@ class TaskDaoManager {
   TaskDaoManager(this._db);
   $$TasksTableTableManager get tasks =>
       $$TasksTableTableManager(_db.attachedDatabase, _db.tasks);
+  $$ProjectsTableTableManager get projects =>
+      $$ProjectsTableTableManager(_db.attachedDatabase, _db.projects);
 }
 
 mixin _$DprDaoMixin on DatabaseAccessor<AppDatabase> {

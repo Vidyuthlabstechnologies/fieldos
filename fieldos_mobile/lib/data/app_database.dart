@@ -85,7 +85,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -98,7 +98,8 @@ class AppDatabase extends _$AppDatabase {
   // no Postgres/RLS counterpart needed). v6 adds ProjectMessages (team
   // chat, synced). v7 syncs attendance, expenses and receipts through their
   // own site_* cloud tables (receipts are no longer local-only), and adds
-  // MaterialUsage, PaymentsReceived and SiteExpenses.workerId.
+  // MaterialUsage, PaymentsReceived and SiteExpenses.workerId. v8 adds
+  // task progress, priority and start date (planning and the delay view).
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onUpgrade: (m, from, to) async {
@@ -142,6 +143,11 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(paymentsReceived);
             await m.addColumn(siteExpenses, siteExpenses.workerId);
             await _queueExistingSiteRecords();
+          }
+          if (from < 8) {
+            await m.addColumn(tasks, tasks.progress);
+            await m.addColumn(tasks, tasks.priority);
+            await m.addColumn(tasks, tasks.startDate);
           }
         },
       );
@@ -437,7 +443,7 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
 // Tasks
 // ---------------------------------------------------------------------------
 
-@DriftAccessor(tables: [Tasks])
+@DriftAccessor(tables: [Tasks, Projects])
 class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
   TaskDao(super.db);
 
@@ -459,10 +465,32 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
   Future<List<Task>> forProject(String projectId) =>
       (select(tasks)..where((t) => t.projectId.equals(projectId))).get();
 
+  /// Every task not yet done in the company's projects, for the late
+  /// counts on the home screen.
+  Future<List<Task>> openForCompany(String companyId) {
+    final q = select(tasks).join([innerJoin(projects, projects.id.equalsExp(tasks.projectId))])
+      ..where(projects.companyId.equals(companyId) & tasks.status.equals('done').not());
+    return q.map((r) => r.readTable(tasks)).get();
+  }
+
   Future<void> updateStatus(String id, String status) {
+    // Done means 100%; reopening a finished task keeps what was logged.
+    return edit(id, TasksCompanion(status: Value(status), progress: status == 'done' ? const Value(100) : const Value.absent()));
+  }
+
+  /// Progress from a daily report. Reaching 100 marks the task done, and
+  /// any progress moves a to-do task to in progress.
+  Future<void> setProgress(String id, int progress) async {
+    final p = progress.clamp(0, 100);
+    final row = await (select(tasks)..where((t) => t.id.equals(id))).getSingle();
+    final status = p >= 100 ? 'done' : (p > 0 && row.status == 'todo' ? 'in_progress' : row.status);
+    await edit(id, TasksCompanion(progress: Value(p), status: Value(status)));
+  }
+
+  /// Any change to a task, queued for sync like the others.
+  Future<void> edit(String id, TasksCompanion changes) {
     return transaction(() async {
-      await (update(tasks)..where((t) => t.id.equals(id)))
-          .write(TasksCompanion(status: Value(status), updatedAt: Value(DateTime.now())));
+      await (update(tasks)..where((t) => t.id.equals(id))).write(changes.copyWith(updatedAt: Value(DateTime.now())));
       final row = await (select(tasks)..where((t) => t.id.equals(id))).getSingle();
       await db.syncOutboxDao.enqueue(
         targetTable: 'tasks',

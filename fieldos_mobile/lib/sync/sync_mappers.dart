@@ -71,6 +71,9 @@ Map<String, dynamic> taskToSupabaseJson(Task t) => {
       'assignee_id': t.assigneeId,
       'due_date': _dateOnly(t.dueDate),
       'status': t.status,
+      'progress': t.progress,
+      'priority': t.priority,
+      'start_date': _dateOnly(t.startDate),
     };
 
 Map<String, dynamic> dprEntryToSupabaseJson(DprEntry d) => {
@@ -323,6 +326,9 @@ TasksCompanion taskFromSupabaseJson(Map<String, dynamic> row) => TasksCompanion.
       assigneeId: Value(row['assignee_id'] as String?),
       dueDate: Value(row['due_date'] == null ? null : DateTime.parse(row['due_date'] as String)),
       status: Value(row['status'] as String? ?? 'todo'),
+      progress: Value((row['progress'] as num?)?.toInt() ?? 0),
+      priority: Value(row['priority'] as String? ?? 'normal'),
+      startDate: Value(row['start_date'] == null ? null : DateTime.parse(row['start_date'] as String)),
     );
 
 DprEntriesCompanion dprEntryFromSupabaseJson(Map<String, dynamic> row) => DprEntriesCompanion.insert(

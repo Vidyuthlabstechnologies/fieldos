@@ -32,6 +32,7 @@ class DprDraftResult {
     required this.weather,
     required this.issues,
     required this.photoPaths,
+    this.taskProgress = const {},
   });
 
   final DateTime date;
@@ -42,6 +43,9 @@ class DprDraftResult {
   /// Issue descriptions to raise, in English.
   final List<String> issues;
   final List<String> photoPaths;
+
+  /// Task id to its new progress %, for the tasks moved forward today.
+  final Map<String, int> taskProgress;
 }
 
 /// Opens the draft screen; null when the person backs out.
@@ -80,6 +84,9 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
 
   DateTime _date = DateTime.now();
   final _photos = <String>[];
+
+  /// Progress set on this report, by task id. Only moved tasks are kept.
+  final _progress = <String, int>{};
 
   /// Issues found in the text, and the ones the person has unticked.
   Map<String, String> _issues = {};
@@ -223,6 +230,7 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
         weather: weather.isEmpty ? null : (weather.length > 50 ? weather.substring(0, 50) : weather),
         issues: issues,
         photoPaths: List.of(_photos),
+        taskProgress: Map.of(_progress),
       ),
     );
   }
@@ -360,6 +368,11 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                 onTap: _pickDate,
               ),
             ),
+            _TaskProgressSection(
+              projectId: widget.project.id,
+              values: _progress,
+              onChanged: (id, v) => setState(() => _progress[id] = v),
+            ),
             const SectionHeader('Photos'),
             SizedBox(
               height: 92,
@@ -431,5 +444,54 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
         ),
       ),
     );
+  }
+}
+
+
+/// "Progress today": each open task with a slider, so the report moves the
+/// plan forward instead of the plan being updated separately.
+class _TaskProgressSection extends ConsumerWidget {
+  const _TaskProgressSection({required this.projectId, required this.values, required this.onChanged});
+
+  final String projectId;
+  final Map<String, int> values;
+  final void Function(String taskId, int value) onChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final open = ref.watch(tasksProvider(projectId)).maybeWhen(
+          data: (tasks) => tasks.where((t) => t.status != 'done').toList()
+            ..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999))),
+          orElse: () => const <Task>[],
+        );
+    if (open.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const SectionHeader('Progress today'),
+      Text('Move the tasks worked on today. 100% marks a task done.',
+          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+      for (final t in open)
+        Builder(builder: (context) {
+          final v = values[t.id] ?? t.progress;
+          final moved = values.containsKey(t.id) && values[t.id] != t.progress;
+          return Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Expanded(child: Text(t.title, maxLines: 2, overflow: TextOverflow.ellipsis)),
+                Text(moved ? '${t.progress}% → $v%' : '$v%',
+                    style: theme.textTheme.labelLarge?.copyWith(color: moved ? theme.colorScheme.primary : null)),
+              ]),
+              Slider(
+                value: v.toDouble(),
+                max: 100,
+                divisions: 20,
+                label: '$v%',
+                onChanged: (x) => onChanged(t.id, x.round()),
+              ),
+            ]),
+          );
+        }),
+    ]);
   }
 }

@@ -114,6 +114,17 @@ class Tasks extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
+  /// How much of the task is done, 0-100. Moved forward from the daily
+  /// report, or by hand on the task.
+  IntColumn get progress => integer().withDefault(const Constant(0))();
+
+  /// 'high', 'normal' or 'low'. High ones sort to the top of the list.
+  TextColumn get priority => text().withLength(min: 1, max: 10).withDefault(const Constant('normal'))();
+
+  /// When work is planned to start. With [progress] it gives the forecast
+  /// finish, which the delay view compares against [dueDate].
+  DateTimeColumn get startDate => dateTime().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
