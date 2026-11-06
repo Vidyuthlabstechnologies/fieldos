@@ -6,6 +6,13 @@ on:
     paths: ['fieldos_mobile/**', 'supabase/**', '.github/workflows/mobile.yml']
   pull_request:
     paths: ['fieldos_mobile/**', 'supabase/**', '.github/workflows/mobile.yml']
+  workflow_dispatch:
+
+# A newer push to the same branch makes the older run pointless: stop it
+# rather than pay for both.
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze-and-test:
@@ -83,6 +90,12 @@ jobs:
     # Same idea as android-build, for the iPhone app. No Apple signing in
     # CI yet (that needs the owner's Apple Developer account), so this
     # checks that everything compiles and links, which is what breaks.
+    #
+    # Not on every pull request push: a macOS minute is billed as ten, so
+    # this one job was most of the account's Actions minutes, and in
+    # November 2026 GitHub stopped starting jobs for the account. It runs
+    # after a merge to master, and on demand from the Actions tab.
+    if: github.event_name != 'pull_request'
     runs-on: macos-latest
     defaults:
       run:
