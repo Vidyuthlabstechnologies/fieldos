@@ -92,6 +92,7 @@ class CloudSyncService {
 
   bool get isSignedIn => client.auth.currentSession != null;
   String? get email => client.auth.currentUser?.email;
+  String? get userId => client.auth.currentUser?.id;
 
   /// Resumes the session saved by a previous launch. Returns false (and
   /// forgets it) if it can no longer be refreshed, e.g. the user was

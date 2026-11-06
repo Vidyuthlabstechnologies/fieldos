@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
 import 'package:fieldos_mobile/features/map/site_map_screen.dart';
@@ -83,6 +84,8 @@ class HomeScreen extends ConsumerWidget {
             tooltip: tr('More'),
             onSelected: (v) {
               switch (v) {
+                case 'tasks':
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => MyTasksScreen(companyId: company.id)));
                 case 'map':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => SiteMapScreen(companyId: company.id)));
                 case 'subcontractors':
@@ -100,6 +103,8 @@ class HomeScreen extends ConsumerWidget {
               }
             },
             itemBuilder: (_) => [
+              PopupMenuItem(
+                  value: 'tasks', child: ListTile(leading: Icon(Icons.task_alt), title: Text(tr('My tasks')))),
               PopupMenuItem(value: 'map', child: ListTile(leading: Icon(Icons.map_outlined), title: Text(tr('Site map')))),
               PopupMenuItem(
                   value: 'subcontractors',

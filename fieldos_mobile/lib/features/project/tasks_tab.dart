@@ -12,6 +12,7 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/project/task_plan.dart';
+import 'package:fieldos_mobile/features/tasks/team_roster.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
@@ -38,14 +39,18 @@ class _TasksTabState extends ConsumerState<TasksTab> {
   }
 
   Future<void> _add() async {
-    final c = await showTaskSheet(context);
+    final roster = await ref.read(teamRosterProvider(widget.project.companyId).future);
+    if (!mounted) return;
+    final c = await showTaskSheet(context, roster: roster);
     if (c == null) return;
     await ref.read(appDatabaseProvider).taskDao.create(c.copyWith(id: Value(const Uuid().v4()), projectId: Value(_projectId)));
     _refresh();
   }
 
   Future<void> _open(Task t) async {
-    final result = await showTaskSheet(context, existing: t);
+    final roster = await ref.read(teamRosterProvider(widget.project.companyId).future);
+    if (!mounted) return;
+    final result = await showTaskSheet(context, existing: t, roster: roster);
     if (result == null) return;
     final dao = ref.read(appDatabaseProvider).taskDao;
     if (result.id.present && result.id.value == duplicateMarker) {
@@ -56,6 +61,7 @@ class _TasksTabState extends ConsumerState<TasksTab> {
         dueDate: Value(t.dueDate),
         startDate: Value(t.startDate),
         priority: Value(t.priority),
+        assigneeId: Value(t.assigneeId),
       ));
       if (mounted) showSnack(context, 'Copied. The copy starts at 0%.');
     } else {
@@ -67,6 +73,7 @@ class _TasksTabState extends ConsumerState<TasksTab> {
   @override
   Widget build(BuildContext context) {
     final tasks = ref.watch(tasksProvider(_projectId));
+    final roster = ref.watch(teamRosterProvider(widget.project.companyId)).valueOrNull;
     final now = DateTime.now();
     return Stack(
       children: [
@@ -120,7 +127,7 @@ class _TasksTabState extends ConsumerState<TasksTab> {
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                     ),
-                  for (final t in shown) _TaskCard(task: t, now: now, onTap: () => _open(t)),
+                  for (final t in shown) TaskCard(task: t, now: now, assignee: roster?.labelFor(t.assigneeId), onTap: () => _open(t)),
                 ],
               );
             },
@@ -181,11 +188,17 @@ class _ProgressHeader extends StatelessWidget {
   }
 }
 
-class _TaskCard extends StatelessWidget {
-  const _TaskCard({required this.task, required this.now, required this.onTap});
+/// One task: title, status, progress bar, dates and how late it is. Also
+/// used on My tasks, where [site] names the project it belongs to.
+class TaskCard extends StatelessWidget {
+  const TaskCard({super.key, required this.task, required this.now, required this.onTap, this.assignee, this.site});
   final Task task;
   final DateTime now;
   final VoidCallback onTap;
+
+  /// Who it is for ("You", a name), or null when nobody is named.
+  final String? assignee;
+  final String? site;
 
   @override
   Widget build(BuildContext context) {
@@ -237,6 +250,23 @@ class _TaskCard extends StatelessWidget {
               const SizedBox(width: 8),
               SizedBox(width: 40, child: Text('$pct%', textAlign: TextAlign.end, style: theme.textTheme.bodySmall)),
             ]),
+            if (site != null || assignee != null) ...[
+              const SizedBox(height: 6),
+              Wrap(spacing: 12, runSpacing: 4, children: [
+                if (site != null)
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(Icons.domain_outlined, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 4),
+                    Text(site!, style: theme.textTheme.bodySmall),
+                  ]),
+                if (assignee != null)
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(Icons.person_outline, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 4),
+                    Text(tr(assignee!), style: theme.textTheme.bodySmall),
+                  ]),
+              ]),
+            ],
             if (dates.isNotEmpty || lateText != null) ...[
               const SizedBox(height: 6),
               Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
@@ -256,18 +286,19 @@ const duplicateMarker = '__duplicate__';
 
 /// Add or edit a task. Returns the fields to write, a companion whose id is
 /// [duplicateMarker] for Duplicate, or null when cancelled.
-Future<TasksCompanion?> showTaskSheet(BuildContext context, {Task? existing}) {
+Future<TasksCompanion?> showTaskSheet(BuildContext context, {Task? existing, TeamRoster? roster}) {
   return showModalBottomSheet<TasksCompanion>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    builder: (_) => _TaskSheet(existing: existing),
+    builder: (_) => _TaskSheet(existing: existing, roster: roster),
   );
 }
 
 class _TaskSheet extends StatefulWidget {
-  const _TaskSheet({this.existing});
+  const _TaskSheet({this.existing, this.roster});
   final Task? existing;
+  final TeamRoster? roster;
 
   @override
   State<_TaskSheet> createState() => _TaskSheetState();
@@ -280,6 +311,7 @@ class _TaskSheetState extends State<_TaskSheet> {
   late double _progress = (widget.existing?.status == 'done' ? 100 : widget.existing?.progress ?? 0).toDouble();
   late DateTime? _start = widget.existing?.startDate;
   late DateTime? _due = widget.existing?.dueDate;
+  late String? _assignee = widget.existing?.assigneeId;
   String? _error;
 
   bool get _editing => widget.existing != null;
@@ -323,6 +355,7 @@ class _TaskSheetState extends State<_TaskSheet> {
         progress: Value(status == 'done' ? 100 : progress),
         startDate: Value(_start),
         dueDate: Value(_due),
+        assigneeId: Value(_assignee),
       ),
     );
   }
@@ -378,6 +411,29 @@ class _TaskSheetState extends State<_TaskSheet> {
                 ),
               ),
             ]),
+            if (widget.roster?.canAssign ?? false) ...[
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String?>(
+                initialValue: _assignee,
+                isExpanded: true,
+                decoration: InputDecoration(labelText: tr('Assigned to'), prefixIcon: const Icon(Icons.person_outline)),
+                items: [
+                  DropdownMenuItem<String?>(value: null, child: Text(tr('Nobody yet'))),
+                  for (final m in widget.roster!.members)
+                    DropdownMenuItem<String?>(
+                      value: m.userId,
+                      child: Text(
+                        m.userId == widget.roster!.myUserId ? '${tr('You')} (${m.email})' : m.email,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  // Someone who has since left the team keeps the task until it is moved.
+                  if (_assignee != null && widget.roster!.byId(_assignee) == null)
+                    DropdownMenuItem<String?>(value: _assignee, child: Text(tr('Someone on the team'))),
+                ],
+                onChanged: (v) => setState(() => _assignee = v),
+              ),
+            ],
             if (_editing) ...[
               const SizedBox(height: 16),
               Row(children: [

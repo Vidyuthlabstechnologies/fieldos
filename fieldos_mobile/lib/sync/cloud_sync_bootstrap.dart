@@ -12,7 +12,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/notification_service.dart';
+import 'package:fieldos_mobile/features/tasks/team_roster.dart';
 import 'cloud_sync_providers.dart';
+import 'cloud_sync_service.dart';
 
 final notificationServiceProvider = Provider<NotificationService>((ref) => NotificationService());
 
@@ -49,6 +51,17 @@ class CloudSyncBootstrap {
     final trigger = _ref.read(periodicSyncTriggerProvider);
     if (!trigger.isRunning) trigger.start();
     unawaited(trigger.tick());
+    unawaited(_refreshRoster(service, company.id));
+  }
+
+  /// Keeps the team list on the phone fresh, for assigning tasks offline.
+  Future<void> _refreshRoster(CloudSyncService service, String companyId) async {
+    try {
+      final roster = await service.roster(companyId);
+      await saveRoster(_ref.read(appDatabaseProvider), companyId, roster, myUserId: service.userId);
+    } catch (_) {
+      // Offline or not allowed: the last saved list stays.
+    }
   }
 
   /// App back in the foreground: pick up what colleagues did meanwhile.
