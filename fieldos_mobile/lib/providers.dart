@@ -15,6 +15,7 @@ import 'package:fieldos_mobile/services/billing_service.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
 import 'package:fieldos_mobile/services/sarvam_service.dart';
 import 'package:fieldos_mobile/services/settings_service.dart';
+import 'package:fieldos_mobile/services/translation_service.dart';
 import 'package:fieldos_mobile/services/voice_service.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
@@ -30,7 +31,11 @@ final settingsServiceProvider =
 
 final sarvamServiceProvider = Provider<SarvamService>((ref) => SarvamService());
 
-final voiceServiceProvider = Provider<VoiceService>((ref) => VoiceService());
+/// A recorder for the Sarvam fallback; each voice sheet makes its own and
+/// disposes it.
+final voiceServiceFactoryProvider = Provider<VoiceService Function()>((ref) => VoiceService.new);
+
+final translationServiceProvider = Provider<TranslationService>((ref) => TranslationService());
 
 final voiceDprAgentProvider = Provider<VoiceDprAgent>(
   (ref) => VoiceDprAgent(

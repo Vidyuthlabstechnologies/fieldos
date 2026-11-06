@@ -28,11 +28,23 @@ dependencies:
   # Exact Decimal arithmetic to match the Python estimation engine's precision.
   decimal: ^3.0.0
 
-  # Optional online voice-to-DPR (Sarvam). App is fully usable offline without it.
+  # Voice reports. The phone's own speech recognition (Google's on Android,
+  # Apple's on iPhone) does the listening: free, and offline once the
+  # language's speech pack is on the phone. Sarvam (dio + record) is only a
+  # fallback for phones that can't recognise the chosen language, and only
+  # when an owner has added their own key.
+  speech_to_text: ^7.5.0
   dio: ^5.11.1
-
-  # Voice capture for the optional voice-to-DPR feature.
   record: ^7.1.1
+
+  # On-device translation of a Hindi/Telugu/... report into English for
+  # the PDF and the client. Google ML Kit: free, offline after a one-time
+  # language download of about 30 MB.
+  google_mlkit_translation: ^0.15.1
+
+  # Opening the privacy policy, terms, the Play subscription page and
+  # email links.
+  url_launcher: ^6.3.2
 
   # Filesystem path helpers (databases dir, media dir).
   path: ^1.9.0

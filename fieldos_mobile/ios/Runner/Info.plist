@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>fieldos_mobile</string>
+	<string>FieldOS</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -33,7 +33,9 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>FieldOS lets you attach existing site photos to reports.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>FieldOS uses the microphone to capture spoken daily progress reports for voice-to-DPR.</string>
+	<string>FieldOS listens when you speak a daily site report, so you don't have to type it.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>FieldOS turns your spoken daily site report into text, so you don't have to type it.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

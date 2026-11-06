@@ -1,14 +1,71 @@
-/// Voice-to-DPR agent: records/uploaded audio -> Sarvam STT -> Sarvam LLM ->
-/// structured DPR draft. This is the app's first agent and the reference
-/// implementation of the [Agent] contract.
+/// Voice-to-DPR agent: a spoken site report in, a DPR draft out (summary,
+/// headcount, weather and the issues worth raising), for the engineer to
+/// check and save.
+///
+/// The phone hears the report itself ([DictationController]), and this
+/// agent reads it on the phone ([extractManpower], [extractWeather],
+/// [detectIssueEvidence]): free, offline, no account. Only when the phone
+/// can't recognise speech in the chosen language does a recording go to
+/// Sarvam for the words, and only with a key a company owner added.
 library;
 
 import 'dart:typed_data';
 
 import 'package:fieldos_mobile/agents/agent.dart';
 import 'package:fieldos_mobile/agents/dpr_intake.dart';
+import 'package:fieldos_mobile/agents/site_report_parser.dart';
 import 'package:fieldos_mobile/services/sarvam_service.dart';
 import 'package:fieldos_mobile/services/settings_service.dart';
+
+/// What a voice report says, ready for the draft screen.
+class DprDraft {
+  const DprDraft({
+    required this.transcript,
+    required this.summary,
+    this.manpower,
+    this.weather,
+    this.issues = const {},
+    this.delayFlagged = false,
+  });
+
+  /// The words as heard.
+  final String transcript;
+
+  /// Tidied for the report.
+  final String summary;
+  final int? manpower;
+  final String? weather;
+
+  /// Issue name ("water ingress") to the words that raised it.
+  final Map<String, String> issues;
+  final bool delayFlagged;
+}
+
+/// Reads [transcript] (and its English translation, when there is one, so
+/// a Hindi report that names the weather in English still finds it).
+DprDraft draftFromTranscript(String transcript, {String? english}) {
+  final readings = [transcript, if (english != null && english.trim().isNotEmpty) english];
+  int? manpower;
+  String? weather;
+  final issues = <String, String>{};
+  var delay = false;
+  for (final text in readings) {
+    manpower ??= extractManpower(text);
+    weather ??= extractWeather(text);
+    for (final e in detectIssueEvidence(text).entries) {
+      issues.putIfAbsent(e.key, () => e.value);
+    }
+    delay = delay || mentionsDelay(text);
+  }
+  return DprDraft(
+    transcript: transcript.trim(),
+    summary: tidySummary(transcript),
+    manpower: manpower,
+    weather: weather,
+    issues: issues,
+    delayFlagged: delay,
+  );
+}
 
 class VoiceDprAgent implements Agent {
   VoiceDprAgent({required this.sarvam, required this.settings});
@@ -20,58 +77,64 @@ class VoiceDprAgent implements Agent {
 
   @override
   String get description =>
-      'Turn a spoken site report into a structured DPR draft (summary, manpower, weather).';
+      'Turn a spoken site report into a DPR draft (summary, manpower, weather, issues), on the phone.';
 
   @override
   List<AgentTool> get tools => const [
-        AgentTool(name: 'transcribe', description: 'Speech-to-text via Sarvam.'),
-        AgentTool(name: 'structure', description: 'Summarise transcript into DPR fields.'),
+        AgentTool(name: 'read_report', description: 'Find headcount, weather and issues in the report, offline.'),
+        AgentTool(name: 'transcribe_fallback', description: 'Speech-to-text via Sarvam when the phone cannot.'),
       ];
 
-  /// `input` keys: `audioBytes` (Uint8List), `filename` (String),
-  /// `languageCode` (String, optional, default 'unknown').
+  /// Whether the Sarvam fallback can be used (an owner added a key).
+  Future<bool> canUseSarvam() async => (await settings.getSarvamApiKey())?.isNotEmpty ?? false;
+
+  /// `input` keys:
+  ///  - `transcript` (String): what the phone heard. The usual path.
+  ///  - `english` (String, optional): its English translation.
+  ///  - or `audioBytes` (Uint8List, WAV) with `languageCode` (Sarvam's
+  ///    code, optional): a recording for the Sarvam fallback.
+  ///  - `onProgress` (optional `void Function(int, int)`): Sarvam pieces done.
   @override
   Future<AgentResult> run(Map<String, dynamic> input) async {
-    final audio = input['audioBytes'] as Uint8List?;
-    final filename = (input['filename'] as String?) ?? 'dpr_voice.m4a';
-    if (audio == null || audio.isEmpty) {
-      return const AgentResult(ok: false, message: 'No audio provided.');
+    var transcript = ((input['transcript'] as String?) ?? '').trim();
+    if (transcript.isEmpty) {
+      final audio = input['audioBytes'] as Uint8List?;
+      if (audio == null || audio.isEmpty) {
+        return const AgentResult(ok: false, message: 'No words were heard. Try again, a little closer to the phone.');
+      }
+      final apiKey = await settings.getSarvamApiKey();
+      if (apiKey == null || apiKey.isEmpty) {
+        return const AgentResult(
+          ok: false,
+          message: "This phone can't turn speech into text in this language. Type the report instead, "
+              'or ask a company owner to add a Sarvam key in Settings.',
+        );
+      }
+      try {
+        transcript = await sarvam.transcribeWav(
+          wav: audio,
+          apiKey: apiKey,
+          languageCode: (input['languageCode'] as String?) ?? 'unknown',
+          onProgress: input['onProgress'] as void Function(int, int)?,
+        );
+      } on SarvamException catch (e) {
+        return AgentResult(ok: false, message: e.message);
+      }
     }
-    final apiKey = await settings.getSarvamApiKey();
-    if (apiKey == null || apiKey.isEmpty) {
-      return const AgentResult(
-        ok: false,
-        message: 'Voice-to-DPR is not configured. Ask a company owner to add the Sarvam API key in Settings.',
-      );
-    }
-    try {
-      final transcript = await sarvam.transcribe(
-        audioBytes: audio,
-        filename: filename,
-        apiKey: apiKey,
-        languageCode: (input['languageCode'] as String?) ?? 'unknown',
-      );
-      final structured = await sarvam.structureDpr(transcript, apiKey);
-      final enriched = await DprIntakeAgent().run({
-        'transcript': structured.transcript,
-        'work_summary': structured.workSummary,
-        'manpower_count': structured.manpowerCount,
-        'weather': structured.weather,
-      });
-      return AgentResult(
-        ok: true,
-        message: 'Drafted DPR from voice.',
-        data: {
-          'work_summary': structured.workSummary,
-          'manpower_count': structured.manpowerCount,
-          'weather': structured.weather,
-          'transcript': structured.transcript,
-          'detected_issues': enriched.data['detected_issues'],
-          'delay_flagged': enriched.data['delay_flagged'],
-        },
-      );
-    } on SarvamException catch (e) {
-      return AgentResult(ok: false, message: e.toString());
-    }
+
+    final draft = draftFromTranscript(transcript, english: input['english'] as String?);
+    return AgentResult(
+      ok: true,
+      message: draft.issues.isEmpty ? 'Drafted the DPR from your report.' : 'Drafted the DPR and found ${draft.issues.length} issue(s).',
+      data: {
+        'transcript': draft.transcript,
+        'work_summary': draft.summary,
+        'manpower_count': draft.manpower,
+        'weather': draft.weather,
+        'detected_issues': draft.issues.keys.toList(),
+        'issue_evidence': draft.issues,
+        'delay_flagged': draft.delayFlagged,
+      },
+    );
   }
 }
