@@ -448,4 +448,9 @@ const Map<String, String> stringsHi = {
   'Inactive': 'बंद',
   '{n} tasks late': '{n} काम देर से',
   '1 task late': '1 काम देर से',
+  'Try a sample site first': 'पहले एक नमूना साइट आज़माएँ',
+  'A sample site to try things on. It stays on this phone and your team never sees it.': 'आज़माने के लिए एक नमूना साइट। यह इसी फ़ोन पर रहती है और आपकी टीम इसे कभी नहीं देखती।',
+  'Remove the sample site?': 'नमूना साइट हटाएँ?',
+  'Its tasks, labour, reports and money are deleted from this phone. Your own projects are not touched.': 'इसके काम, मज़दूर, रिपोर्ट और पैसा इस फ़ोन से मिटा दिए जाते हैं। आपके अपने प्रोजेक्ट को कुछ नहीं होता।',
+  'Sample site removed': 'नमूना साइट हटा दी गई',
 };

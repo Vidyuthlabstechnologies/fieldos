@@ -1469,16 +1469,61 @@ class WorkerDao extends DatabaseAccessor<AppDatabase> with _$WorkerDaoMixin {
 const int syncOutboxMaxRetries = 5;
 
 @DriftAccessor(tables: [SyncOutbox])
+/// Settings key for [SyncOutboxDao.localOnlyIds].
+const localOnlyIdsKey = 'local_only_ids';
+
 class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMixin {
   SyncOutboxDao(super.db);
 
+  Set<String>? _localOnly;
+
+  /// Records that stay on this phone: the sample project and everything
+  /// made under it. Kept in settings under [localOnlyIdsKey].
+  Future<Set<String>> localOnlyIds() async {
+    final cached = _localOnly;
+    if (cached != null) return cached;
+    final raw = await db.settingsDao.get(localOnlyIdsKey);
+    final ids = <String>{if (raw != null && raw.isNotEmpty) ...(jsonDecode(raw) as List).cast<String>()};
+    return _localOnly = ids;
+  }
+
+  Future<void> _saveLocalOnly(Set<String> ids) => db.settingsDao.set(localOnlyIdsKey, jsonEncode(ids.toList()));
+
+  /// Keeps [id], and anything later written that points at it, off the
+  /// cloud.
+  Future<void> markLocalOnly(String id) async {
+    final ids = await localOnlyIds();
+    if (ids.add(id)) await _saveLocalOnly(ids);
+  }
+
+  Future<void> forgetLocalOnly(Iterable<String> remove) async {
+    final ids = await localOnlyIds();
+    ids.removeAll(remove);
+    await _saveLocalOnly(ids);
+  }
+
+  /// Queues a write for the cloud, unless the record is local-only or
+  /// points at one (a task of the sample project, a log of its machine):
+  /// then the record becomes local-only too and nothing is queued.
   Future<void> enqueue({
     required String targetTable,
     required String recordId,
     required String operation,
     required String payloadJson,
-  }) {
-    return into(syncOutbox).insert(SyncOutboxCompanion.insert(
+  }) async {
+    final local = await localOnlyIds();
+    if (local.isNotEmpty) {
+      var skip = local.contains(recordId);
+      if (!skip) {
+        final payload = jsonDecode(payloadJson);
+        skip = payload is Map && payload.values.any((v) => v is String && local.contains(v));
+      }
+      if (skip) {
+        await markLocalOnly(recordId);
+        return;
+      }
+    }
+    await into(syncOutbox).insert(SyncOutboxCompanion.insert(
       targetTable: targetTable,
       recordId: recordId,
       operation: operation,

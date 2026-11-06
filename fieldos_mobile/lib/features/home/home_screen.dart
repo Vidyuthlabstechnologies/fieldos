@@ -18,6 +18,7 @@ import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
+import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -28,6 +29,14 @@ class HomeScreen extends ConsumerWidget {
     if (project == null || !context.mounted) return;
     ref.invalidate(projectsProvider(companyId));
     showSnack(context, '${project.name} is ready');
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen(project: project)));
+  }
+
+  Future<void> _trySample(BuildContext context, WidgetRef ref, String companyId, String userId) async {
+    final project = await createSampleProject(ref.read(appDatabaseProvider), companyId: companyId, userId: userId);
+    ref.invalidate(projectsProvider(companyId));
+    ref.invalidate(sampleProjectIdProvider(companyId));
+    if (!context.mounted) return;
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen(project: project)));
   }
 
@@ -112,6 +121,8 @@ class HomeScreen extends ConsumerWidget {
                       'together, on this phone and offline.'),
                   actionLabel: tr('New project'),
                   onAction: () => _newProject(context, ref, company.id),
+                  secondaryLabel: tr('Try a sample site first'),
+                  onSecondary: () => _trySample(context, ref, company.id, session.user?.id ?? ''),
                 )
               : _ProjectList(projects: projects, userName: session.user?.name),
           loading: () => const Center(child: CircularProgressIndicator()),

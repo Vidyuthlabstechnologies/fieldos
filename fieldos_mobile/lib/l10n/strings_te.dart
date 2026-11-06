@@ -450,4 +450,9 @@ const Map<String, String> stringsTe = {
   'Inactive': 'ఇనాక్టివ్',
   '{n} tasks late': '{n} పనులు ఆలస్యం',
   '1 task late': '1 పని ఆలస్యం',
+  'Try a sample site first': 'ముందుగా ఒక నమూనా సైట్ ప్రయత్నించండి',
+  'A sample site to try things on. It stays on this phone and your team never sees it.': 'ప్రయత్నించడానికి ఒక నమూనా సైట్. ఇది ఈ ఫోన్‌లోనే ఉంటుంది, మీ టీమ్ దీన్ని ఎప్పుడూ చూడదు.',
+  'Remove the sample site?': 'నమూనా సైట్‌ను తీసివేయాలా?',
+  'Its tasks, labour, reports and money are deleted from this phone. Your own projects are not touched.': 'దీని పనులు, కూలీలు, రిపోర్టులు, డబ్బు ఈ ఫోన్ నుండి తొలగించబడతాయి. మీ సొంత ప్రాజెక్ట్‌లకు ఏమీ కాదు.',
+  'Sample site removed': 'నమూనా సైట్ తీసివేయబడింది',
 };
