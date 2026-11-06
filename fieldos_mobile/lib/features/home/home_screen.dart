@@ -19,6 +19,7 @@ import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
+import 'package:fieldos_mobile/features/search/search_screen.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -51,6 +52,12 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: _CompanyTitle(company: company, companies: session.companies),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: tr('Search'),
+            onPressed: () =>
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => SearchScreen(companyId: company.id))),
+          ),
           Consumer(builder: (context, ref, _) {
             final count = ref.watch(pendingApprovalsProvider(company.id)).maybeWhen(data: (l) => l.length, orElse: () => 0);
             return IconButton(

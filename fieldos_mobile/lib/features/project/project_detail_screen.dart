@@ -29,8 +29,11 @@ import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/sync/sync_engine.dart';
 
 class ProjectDetailScreen extends ConsumerStatefulWidget {
-  const ProjectDetailScreen({super.key, required this.project});
+  const ProjectDetailScreen({super.key, required this.project, this.initialTab = 0});
   final Project project;
+
+  /// The tab to open on (0 tasks, 1 reports, 2 issues, 10 workers...).
+  final int initialTab;
 
   @override
   ConsumerState<ProjectDetailScreen> createState() => _ProjectDetailScreenState();
@@ -50,7 +53,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 12, vsync: this);
+    _tabs = TabController(length: 12, vsync: this, initialIndex: widget.initialTab.clamp(0, 11));
     _maybeSubscribeToLiveUpdates();
   }
 
