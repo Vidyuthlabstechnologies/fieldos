@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase/supabase.dart';
 
+import 'package:fieldos_mobile/features/estimation/estimation_screen.dart';
 import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/auth/login_screen.dart';
@@ -135,6 +136,19 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(find.text(tr('DPR')), findsWidgets);
         expect(find.text(tr('Tasks')), findsWidgets);
+      });
+
+      testWidgets('estimation, which used to stay in English', (tester) async {
+        final (container, _) = await signedIn(tester);
+        await pump(tester, container, lang, const Scaffold(body: EstimationView(projectId: 'p', userId: 'u')));
+        expect(tester.takeException(), isNull);
+        expect(find.text(tr('Estimations')), findsOneWidget);
+        expect(find.text(tr('No estimations yet.')), findsOneWidget);
+        expect(tr('No estimations yet.'), isNot('No estimations yet.'));
+        await tester.tap(find.byTooltip(tr('Add')));
+        await tester.pumpAndSettle();
+        expect(find.text(tr('New estimation')), findsOneWidget);
+        expect(find.text(tr('Contractor profit % (optional)')), findsOneWidget);
       });
     });
   }

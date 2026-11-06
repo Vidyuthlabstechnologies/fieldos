@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/estimation/estimation_calc.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class EstimationView extends ConsumerStatefulWidget {
   const EstimationView({
@@ -37,7 +38,7 @@ class _EstimationViewState extends ConsumerState<EstimationView> {
         Expanded(
           child: estimationsList.when(
             data: (rows) => rows.isEmpty
-                ? const Center(child: Text('No estimations yet.'))
+                ? Center(child: Text(tr('No estimations yet.')))
                 : ListView(
                     children: [
                       for (final e in rows)
@@ -62,21 +63,21 @@ class _EstimationViewState extends ConsumerState<EstimationView> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('New estimation'),
+        title: Text(tr('New estimation')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Name')),
+            TextField(controller: name, decoration: InputDecoration(labelText: tr('Name'))),
             TextField(
               controller: profitPercent,
-              decoration: const InputDecoration(labelText: 'Contractor profit % (optional)'),
+              decoration: InputDecoration(labelText: tr('Contractor profit % (optional)')),
               keyboardType: TextInputType.number,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Create')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Create'))),
         ],
       ),
     );
@@ -98,8 +99,8 @@ Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd) =>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleSmall),
-          IconButton(icon: const Icon(Icons.add), tooltip: 'Add', onPressed: onAdd),
+          Text(tr(title), style: Theme.of(context).textTheme.titleSmall),
+          IconButton(icon: const Icon(Icons.add), tooltip: tr('Add'), onPressed: onAdd),
         ],
       ),
     );
@@ -119,7 +120,11 @@ class _EstimationTile extends ConsumerWidget {
     return Card(
       child: ListTile(
         title: Text(estimation.name),
-        subtitle: Text('Status: ${estimation.status}${estimation.contractorProfitPercent != null ? '  •  Profit: ${estimation.contractorProfitPercent!.toStringAsFixed(1)}%' : ''}'),
+        subtitle: Text([
+          trf('Status: {status}', {'status': tr(estimation.status)}),
+          if (estimation.contractorProfitPercent != null)
+            trf('Profit: {pct}%', {'pct': estimation.contractorProfitPercent!.toStringAsFixed(1)}),
+        ].join('  •  ')),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
@@ -163,7 +168,7 @@ class _CostHeadsScreenState extends ConsumerState<CostHeadsScreen> {
           Expanded(
             child: costHeadsList.when(
               data: (rows) => rows.isEmpty
-                  ? const Center(child: Text('No cost heads yet.'))
+                  ? Center(child: Text(tr('No cost heads yet.')))
                   : ListView(
                       children: [
                         for (final ch in rows)
@@ -193,36 +198,36 @@ class _CostHeadsScreenState extends ConsumerState<CostHeadsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add cost head'),
+        title: Text(tr('Add cost head')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Name')),
+            TextField(controller: name, decoration: InputDecoration(labelText: tr('Name'))),
             DropdownButtonFormField<String>(
               initialValue: calcVolume,
-              decoration: const InputDecoration(labelText: 'Calculation type'),
+              decoration: InputDecoration(labelText: tr('Calculation type')),
               items: const [calcVolume, calcArea, calcSteelWeight, calcCount]
                   .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                   .toList(),
               onChanged: (v) => calculationType.text = v ?? calcVolume,
             ),
-            TextField(controller: rawUnit, decoration: const InputDecoration(labelText: 'Raw unit (e.g. cft, m)')),
-            TextField(controller: billingUnit, decoration: const InputDecoration(labelText: 'Billing unit (e.g. cft, sqm)')),
+            TextField(controller: rawUnit, decoration: InputDecoration(labelText: tr('Raw unit (e.g. cft, m)'))),
+            TextField(controller: billingUnit, decoration: InputDecoration(labelText: tr('Billing unit (e.g. cft, sqm)'))),
             TextField(
               controller: conversionFactor,
-              decoration: const InputDecoration(labelText: 'Conversion factor'),
+              decoration: InputDecoration(labelText: tr('Conversion factor')),
               keyboardType: TextInputType.number,
             ),
             TextField(
               controller: ratePerUnit,
-              decoration: const InputDecoration(labelText: 'Rate per billing unit (optional)'),
+              decoration: InputDecoration(labelText: tr('Rate per billing unit (optional)')),
               keyboardType: TextInputType.number,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
         ],
       ),
     );
@@ -308,7 +313,7 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
             child: isSteel
                 ? ref.watch(steelEntriesProvider(widget.costHead.id)).when(
                       data: (rows) => rows.isEmpty
-                          ? const Center(child: Text('No entries yet.'))
+                          ? Center(child: Text(tr('No entries yet.')))
                           : ListView(
                               children: [
                                 for (final e in rows)
@@ -324,7 +329,7 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
                     )
                 : ref.watch(measurementEntriesProvider(widget.costHead.id)).when(
                       data: (rows) => rows.isEmpty
-                          ? const Center(child: Text('No entries yet.'))
+                          ? Center(child: Text(tr('No entries yet.')))
                           : ListView(
                               children: [
                                 for (final e in rows)
@@ -367,27 +372,27 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add measurement'),
+        title: Text(tr('Add measurement')),
         content: StatefulBuilder(
           builder: (ctx, setDialogState) => Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: description, decoration: const InputDecoration(labelText: 'Description')),
-              TextField(controller: length, decoration: const InputDecoration(labelText: 'Length'), keyboardType: TextInputType.number),
-              TextField(controller: width, decoration: const InputDecoration(labelText: 'Width'), keyboardType: TextInputType.number),
-              TextField(controller: depth, decoration: const InputDecoration(labelText: 'Depth'), keyboardType: TextInputType.number),
-              TextField(controller: nos, decoration: const InputDecoration(labelText: 'Nos'), keyboardType: TextInputType.number),
+              TextField(controller: description, decoration: InputDecoration(labelText: tr('Description'))),
+              TextField(controller: length, decoration: InputDecoration(labelText: tr('Length')), keyboardType: TextInputType.number),
+              TextField(controller: width, decoration: InputDecoration(labelText: tr('Width')), keyboardType: TextInputType.number),
+              TextField(controller: depth, decoration: InputDecoration(labelText: tr('Depth')), keyboardType: TextInputType.number),
+              TextField(controller: nos, decoration: InputDecoration(labelText: tr('Nos')), keyboardType: TextInputType.number),
               CheckboxListTile(
                 value: isDeduction.value,
-                title: const Text('Deduction'),
+                title: Text(tr('Deduction')),
                 onChanged: (v) => setDialogState(() => isDeduction.value = v ?? false),
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
         ],
       ),
     );
@@ -413,19 +418,19 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add steel entry'),
+        title: Text(tr('Add steel entry')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: description, decoration: const InputDecoration(labelText: 'Description')),
-            TextField(controller: barDiaMm, decoration: const InputDecoration(labelText: 'Bar dia (mm)'), keyboardType: TextInputType.number),
-            TextField(controller: nos, decoration: const InputDecoration(labelText: 'Nos'), keyboardType: TextInputType.number),
-            TextField(controller: lengthFt, decoration: const InputDecoration(labelText: 'Length (ft)'), keyboardType: TextInputType.number),
+            TextField(controller: description, decoration: InputDecoration(labelText: tr('Description'))),
+            TextField(controller: barDiaMm, decoration: InputDecoration(labelText: tr('Bar dia (mm)')), keyboardType: TextInputType.number),
+            TextField(controller: nos, decoration: InputDecoration(labelText: tr('Nos')), keyboardType: TextInputType.number),
+            TextField(controller: lengthFt, decoration: InputDecoration(labelText: tr('Length (ft)')), keyboardType: TextInputType.number),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
         ],
       ),
     );
@@ -469,8 +474,8 @@ class _MeasurementEntryTile extends ConsumerWidget {
           if (entry.length != null) 'L: ${entry.length}',
           if (entry.width != null) 'W: ${entry.width}',
           if (entry.depth != null) 'D: ${entry.depth}',
-          'Nos: ${entry.nos}',
-          if (entry.isDeduction) 'DEDUCTION',
+          trf('Nos: {n}', {'n': entry.nos}),
+          if (entry.isDeduction) tr('Deduction').toUpperCase(),
         ].join('  ·  ')),
         trailing: Text(
           '${qty.toStringAsFixed(3)} ${entry.isDeduction ? '-' : '+'}',
@@ -563,15 +568,15 @@ class _TotalSection extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Raw quantity: ${rawQty.toStringAsFixed(3)} ${costHead.rawUnit}',
+                Text(trf('Raw quantity: {qty}', {'qty': '${rawQty.toStringAsFixed(3)} ${costHead.rawUnit}'}),
                     style: const TextStyle(fontWeight: FontWeight.w600)),
-                Text('Billing quantity: ${billingQty.toStringAsFixed(3)} ${costHead.billingUnit}',
+                Text(trf('Billing quantity: {qty}', {'qty': '${billingQty.toStringAsFixed(3)} ${costHead.billingUnit}'}),
                     style: const TextStyle(fontWeight: FontWeight.w600)),
                 if (amount != null)
-                  Text('Amount: ${rupees(amount.toDouble(), paise: true)}',
+                  Text(trf('Amount: {amount}', {'amount': rupees(amount.toDouble(), paise: true)}),
                       style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: toneColor(context, PillTone.ok)))
                 else
-                  Text('Amount: not priced yet (add a rate to this item)',
+                  Text(tr('Amount: not priced yet (add a rate to this item)'),
                       style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
               ],
             ),

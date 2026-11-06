@@ -18,6 +18,7 @@ import 'package:fieldos_mobile/features/money/bill_pdf.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 final billsProvider = FutureProvider.autoDispose.family<List<ClientBill>, String>(
     (ref, projectId) => ref.watch(appDatabaseProvider).billDao.forProject(projectId));
@@ -75,11 +76,10 @@ class BillsView extends ConsumerWidget {
           return ListView(padding: const EdgeInsets.fromLTRB(12, 8, 12, 96), children: [
             _PnlCard(pnl: pnl),
             if (list.isEmpty)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(24),
-                child: Text(
-                  'Make running bills of measured work, or GST tax invoices, and send them as PDF. '
-                  'Previous and to-date quantities are worked out for you.',
+                child: Text(tr('Make running bills of measured work, or GST tax invoices, and send them as PDF. '
+                  'Previous and to-date quantities are worked out for you.'),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -104,7 +104,7 @@ class BillsView extends ConsumerWidget {
         child: FloatingActionButton.extended(
           heroTag: 'new_bill',
           icon: const Icon(Icons.add),
-          label: const Text('New bill'),
+          label: Text(tr('New bill')),
           onPressed: () async {
             final saved = await Navigator.of(context).push<bool>(
               MaterialPageRoute(builder: (_) => NewBillScreen(project: project, userId: userId)),
@@ -128,7 +128,7 @@ class BillsView extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.ios_share),
-            title: const Text('Share PDF'),
+            title: Text(tr('Share PDF')),
             onTap: () => Navigator.pop(ctx, 'share'),
           ),
           ListTile(
@@ -152,7 +152,7 @@ class BillsView extends ConsumerWidget {
             previousQty: previousFor(b, all),
           );
         } catch (e, st) {
-          if (context.mounted) showSnack(context, 'Could not share the bill. ${friendlyError(e, st)}', error: true);
+          if (context.mounted) showSnack(context, '${tr('Could not share the bill.')} ${friendlyError(e, st)}', error: true);
         }
       case 'paid':
         await ref.read(appDatabaseProvider).billDao.setStatus(b.id, b.status == 'paid' ? 'issued' : 'paid');
@@ -171,7 +171,7 @@ class _PnlCard extends StatelessWidget {
     Widget fig(String label, String value, {Color? color}) => Expanded(
           child: Column(children: [
             Text(value, style: theme.textTheme.titleMedium?.copyWith(color: color, fontWeight: FontWeight.w600)),
-            Text(label, style: theme.textTheme.bodySmall),
+            Text(tr(label), style: theme.textTheme.bodySmall),
           ]),
         );
     final pct = pnl.marginPct;
@@ -179,7 +179,7 @@ class _PnlCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Profit and loss', style: theme.textTheme.titleSmall),
+          Text(tr('Profit and loss'), style: theme.textTheme.titleSmall),
           const SizedBox(height: 10),
           Row(children: [
             fig('Billed', rupees(pnl.billed)),
@@ -190,9 +190,9 @@ class _PnlCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             [
-              if (pct != null) 'Margin ${pct.toStringAsFixed(1)}% of billed work',
-              'Client owes ${rupees(pnl.owed)} on unpaid bills',
-              'Received ${rupees(pnl.received)}',
+              if (pct != null) trf('Margin {pct}% of billed work', {'pct': pct.toStringAsFixed(1)}),
+              trf('Client owes {amount} on unpaid bills', {'amount': rupees(pnl.owed)}),
+              trf('Received {amount}', {'amount': rupees(pnl.received)}),
             ].join(' · '),
             style: theme.textTheme.bodySmall,
           ),
@@ -270,14 +270,14 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               controller: desc,
               autofocus: index == null,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Item (e.g. Brickwork in CM 1:6)'),
+              decoration: InputDecoration(labelText: tr('Item (e.g. Brickwork in CM 1:6)')),
             ),
-            TextField(controller: unit, decoration: const InputDecoration(labelText: 'Unit (cum, sqm, rft, nos)')),
+            TextField(controller: unit, decoration: InputDecoration(labelText: tr('Unit (cum, sqm, rft, nos)'))),
             TextField(
               controller: rate,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-              decoration: const InputDecoration(labelText: 'Rate (₹ per unit)'),
+              decoration: InputDecoration(labelText: tr('Rate (₹ per unit)')),
             ),
             TextField(
               controller: qty,
@@ -294,9 +294,9 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
                 setState(() => _lines.removeAt(index));
                 Navigator.pop(ctx);
               },
-              child: const Text('Remove'),
+              child: Text(tr('Remove')),
             ),
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Cancel'))),
           FilledButton(
             onPressed: () {
               final d = desc.text.trim();
@@ -305,7 +305,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               if (d.isEmpty || r == null || q == null || r < 0 || q < 0) return;
               Navigator.pop(ctx, BillLine(description: d, unit: unit.text.trim(), rate: r, qty: q));
             },
-            child: const Text('Save'),
+            child: Text(tr('Save')),
           ),
         ],
       ),
@@ -343,10 +343,10 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     final number = _number.text.trim().isEmpty ? nextBillNumber(bills.map((b) => b.billNumber), _kind) : _number.text.trim();
     final lines = _lines.where((l) => l.qty > 0).toList();
     String? error;
-    if (client.isEmpty) error = 'Who is the bill for? Add the client name.';
-    if (gstin.isNotEmpty && !isValidGstin(gstin)) error = 'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.';
-    if (lines.isEmpty) error = 'Add at least one item with a quantity.';
-    if (bills.any((b) => b.billNumber.toLowerCase() == number.toLowerCase())) error = 'Bill $number already exists.';
+    if (client.isEmpty) error = tr('Who is the bill for? Add the client name.');
+    if (gstin.isNotEmpty && !isValidGstin(gstin)) error = tr('That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.');
+    if (lines.isEmpty) error = tr('Add at least one item with a quantity.');
+    if (bills.any((b) => b.billNumber.toLowerCase() == number.toLowerCase())) error = trf('Bill {number} already exists.', {'number': number});
     if (error != null) {
       setState(() => _error = error);
       return;
@@ -382,22 +382,22 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Your details on bills'),
+        title: Text(tr('Your details on bills')),
         content: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             TextField(
               controller: gstin,
               textCapitalization: TextCapitalization.characters,
               maxLength: 15,
-              decoration: const InputDecoration(labelText: 'Your GSTIN'),
+              decoration: InputDecoration(labelText: tr('Your GSTIN')),
             ),
-            TextField(controller: address, maxLines: 3, decoration: const InputDecoration(labelText: 'Address')),
-            TextField(controller: upi, decoration: const InputDecoration(labelText: 'UPI id for payments (optional)')),
+            TextField(controller: address, maxLines: 3, decoration: InputDecoration(labelText: tr('Address'))),
+            TextField(controller: upi, decoration: InputDecoration(labelText: tr('UPI id for payments (optional)'))),
           ]),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Save'))),
         ],
       ),
     );
@@ -425,7 +425,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     final hasEarlier = bills.any((b) => b.kind == _kind);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('New bill')),
+      appBar: AppBar(title: Text(tr('New bill'))),
       body: SafeArea(
         child: ListView(padding: const EdgeInsets.fromLTRB(16, 12, 16, 32), children: [
           SegmentedButton<String>(
@@ -441,8 +441,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
           Card(
             child: ListTile(
               leading: const Icon(Icons.business_outlined),
-              title: const Text('Your details on bills'),
-              subtitle: Text(profile.gstin.isEmpty ? 'Add your GSTIN, address and UPI id' : 'GSTIN ${profile.gstin}'),
+              title: Text(tr('Your details on bills')),
+              subtitle: Text(profile.gstin.isEmpty ? tr('Add your GSTIN, address and UPI id') : 'GSTIN ${profile.gstin}'),
               trailing: const Icon(Icons.edit_outlined),
               onTap: () => _editProfile(profile),
             ),
@@ -452,7 +452,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               child: TextField(
                 controller: _number,
                 onChanged: (_) => _numberTouched = true,
-                decoration: const InputDecoration(labelText: 'Bill number'),
+                decoration: InputDecoration(labelText: tr('Bill number')),
               ),
             ),
             const SizedBox(width: 12),
@@ -475,20 +475,20 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
           TextField(
             controller: _client,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(labelText: 'Client name'),
+            decoration: InputDecoration(labelText: tr('Client name')),
           ),
           TextField(
             controller: _clientGstin,
             textCapitalization: TextCapitalization.characters,
             maxLength: 15,
-            decoration: const InputDecoration(labelText: 'Client GSTIN (optional)', counterText: ''),
+            decoration: InputDecoration(labelText: tr('Client GSTIN (optional)'), counterText: ''),
           ),
           const SizedBox(height: 12),
           Text('GST', style: theme.textTheme.labelLarge),
           const SizedBox(height: 6),
           SegmentedButton<double>(
-            segments: const [
-              ButtonSegment(value: 0, label: Text('None')),
+            segments: [
+              ButtonSegment(value: 0, label: Text(tr('None'))),
               ButtonSegment(value: 5, label: Text('5%')),
               ButtonSegment(value: 12, label: Text('12%')),
               ButtonSegment(value: 18, label: Text('18%')),
@@ -499,8 +499,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
           ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Client is in another state (IGST)'),
-            subtitle: const Text('Inside the state, GST splits into CGST and SGST'),
+            title: Text(tr('Client is in another state (IGST)')),
+            subtitle: Text(tr('Inside the state, GST splits into CGST and SGST')),
             value: _interState,
             onChanged: (v) => setState(() {
               _interState = v;
@@ -513,7 +513,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
                 controller: _retention,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(labelText: 'Retention %', helperText: 'Held back by the client'),
+                decoration: InputDecoration(labelText: tr('Retention %'), helperText: tr('Held back by the client')),
               ),
             ),
             const SizedBox(width: 12),
@@ -522,7 +522,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
                 controller: _tds,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(labelText: 'TDS %', helperText: 'Usually 1% or 2%'),
+                decoration: InputDecoration(labelText: tr('TDS %'), helperText: tr('Usually 1% or 2%')),
               ),
             ),
           ]),
@@ -530,7 +530,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
           if (_lines.isEmpty && hasEarlier)
             OutlinedButton.icon(
               icon: const Icon(Icons.content_copy_outlined),
-              label: const Text('Copy items from the last bill'),
+              label: Text(tr('Copy items from the last bill')),
               onPressed: () => _copyItems(bills),
             ),
           for (final (i, l) in _lines.indexed)
@@ -538,8 +538,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               child: ListTile(
                 title: Text(l.description),
                 subtitle: Text(_kind == 'ra'
-                    ? 'Previous ${fmtQty(previous[l.itemKey] ?? 0)} + this bill ${fmtQty(l.qty)} = '
-                        '${fmtQty((previous[l.itemKey] ?? 0) + l.qty)} ${l.unit} @ ${rupees(l.rate, paise: true)}'
+                    ? '${trf('Previous {prev} + this bill {qty} = {total}', {'prev': fmtQty(previous[l.itemKey] ?? 0), 'qty': fmtQty(l.qty), 'total': fmtQty((previous[l.itemKey] ?? 0) + l.qty)})}'
+                        ' ${l.unit} @ ${rupees(l.rate, paise: true)}'
                     : '${fmtQty(l.qty)} ${l.unit} @ ${rupees(l.rate, paise: true)}'),
                 trailing: Text(rupees(l.amount)),
                 onTap: () => _editLine(index: i, previous: previous),
@@ -547,7 +547,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
             ),
           TextButton.icon(
             icon: const Icon(Icons.add),
-            label: const Text('Add item'),
+            label: Text(tr('Add item')),
             onPressed: () => _editLine(previous: previous),
           ),
           const SizedBox(height: 8),
@@ -571,12 +571,12 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               ]),
             ),
           ),
-          TextField(controller: _notes, maxLength: 500, decoration: const InputDecoration(labelText: 'Notes (optional)')),
+          TextField(controller: _notes, maxLength: 500, decoration: InputDecoration(labelText: tr('Notes (optional)'))),
           if (_error != null) ...[const SizedBox(height: 8), FormMessage(_error!)],
           const SizedBox(height: 12),
           FilledButton(
             onPressed: _saving ? null : () => _save(bills),
-            child: Text(_saving ? 'Saving…' : 'Save bill'),
+            child: Text(_saving ? tr('Saving…') : tr('Save bill')),
           ),
         ]),
       ),
@@ -586,7 +586,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
   Widget _row(String label, String value, {bool bold = false}) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 2),
         child: Row(children: [
-          Expanded(child: Text(label, style: bold ? const TextStyle(fontWeight: FontWeight.w600) : null)),
+          Expanded(child: Text(tr(label), style: bold ? const TextStyle(fontWeight: FontWeight.w600) : null)),
           Text(value, style: bold ? const TextStyle(fontWeight: FontWeight.w600) : null),
         ]),
       );
