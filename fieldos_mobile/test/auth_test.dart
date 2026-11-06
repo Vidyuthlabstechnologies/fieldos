@@ -22,11 +22,11 @@ void main() {
       final user = await auth.register(
         username: 'alice',
         name: 'Alice',
-        password: 'pw',
+        password: 'pw1234',
       );
       expect(user.id, isNotEmpty);
 
-      final token = await auth.login('alice', 'pw');
+      final token = await auth.login('alice', 'pw1234');
       expect(token, isNotEmpty);
 
       final resolved = await auth.userForSession(token);
@@ -43,9 +43,14 @@ void main() {
       final db = AppDatabase.memory();
       addTearDown(() async => db.close());
       final auth = AuthService(db);
-      await auth.register(username: 'bob', name: 'Bob', password: 'pw');
+      await auth.register(username: 'bob', name: 'Bob', password: 'pw1234');
       expect(
-        () => auth.register(username: 'bob', name: 'Bob2', password: 'pw'),
+        () => auth.register(username: 'bob', name: 'Bob2', password: 'pw1234'),
+        throwsA(isA<AuthException>()),
+      );
+      // Capitals don't make a different person.
+      expect(
+        () => auth.register(username: 'BOB', name: 'Bob3', password: 'pw1234'),
         throwsA(isA<AuthException>()),
       );
     });
@@ -74,6 +79,34 @@ void main() {
 
       // Confirm nothing was actually written to the database by the empty-username attempt.
       expect(await db.userDao.byUsername(''), isNull);
+    });
+
+    test('new accounts need a 6-character password and a username without spaces', () async {
+      final db = AppDatabase.memory();
+      addTearDown(() async => db.close());
+      final auth = AuthService(db);
+      expect(() => auth.register(username: 'dev', name: 'Dev', password: '12345'), throwsA(isA<AuthException>()));
+      expect(() => auth.register(username: 'ravi kumar', name: 'Ravi', password: '123456'), throwsA(isA<AuthException>()));
+      final u = await auth.register(username: '  Ravi.K ', name: ' Ravi Kumar ', password: '123456');
+      expect(u.username, 'ravi.k');
+      expect(u.name, 'Ravi Kumar');
+    });
+
+    test('login ignores capitals and spaces around the username', () async {
+      final db = AppDatabase.memory();
+      addTearDown(() async => db.close());
+      final auth = AuthService(db);
+      await auth.register(username: 'meena', name: 'Meena', password: 'secret1');
+      expect(await auth.login(' Meena ', 'secret1'), isNotEmpty);
+      // An account made before usernames were lower-cased still works.
+      await db.userDao.create(UsersCompanion.insert(
+        id: 'old-user',
+        username: 'Suresh',
+        name: 'Suresh',
+        passwordHash: await hashPassword('oldpass'),
+      ));
+      expect(await auth.login('Suresh', 'oldpass'), isNotEmpty);
+      expect(await auth.login('suresh', 'oldpass'), isNotEmpty);
     });
   });
 }

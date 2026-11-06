@@ -224,6 +224,16 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
   Future<User?> byUsername(String username) =>
       (select(users)..where((u) => u.username.equals(username))).getSingleOrNull();
 
+  /// "Ravi" and "ravi" are the same person: the first account whose name
+  /// matches ignoring capitals.
+  Future<User?> byUsernameIgnoringCase(String username) async {
+    final rows = await (select(users)..where((u) => u.username.lower().equals(username.toLowerCase()))).get();
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  /// Whether anyone has made an account on this phone yet.
+  Future<bool> any() async => (await (select(users)..limit(1)).get()).isNotEmpty;
+
   Future<User?> byId(String id) =>
       (select(users)..where((u) => u.id.equals(id))).getSingleOrNull();
 

@@ -46,35 +46,52 @@ class AuthService {
   AuthService(this.db);
   final AppDatabase db;
 
-  /// Create the first account. Throws [AuthException] if the username exists.
+  /// Shortest password a new account may have.
+  static const minPasswordLength = 6;
+
+  static final _usernamePattern = RegExp(r'^[\p{L}\p{N}._@+-]{3,40}$', unicode: true);
+
+  /// Create an account. Usernames are kept in lower case so "Ravi" can log
+  /// in as "ravi". Throws [AuthException] with a message for the screen.
   Future<User> register({
     required String username,
     required String name,
     required String password,
   }) async {
-    if (username.isEmpty) throw AuthException('Username is required.');
-    if (name.isEmpty) throw AuthException('Full name is required.');
-    if (password.isEmpty) throw AuthException('Password is required.');
-    final existing = await db.userDao.byUsername(username);
+    final clean = username.trim().toLowerCase();
+    if (clean.isEmpty) throw AuthException('Choose a username.');
+    if (name.trim().isEmpty) throw AuthException('Enter your name.');
+    if (password.isEmpty) throw AuthException('Choose a password.');
+    if (!_usernamePattern.hasMatch(clean)) {
+      throw AuthException('Usernames are 3 to 40 letters or numbers, with no spaces (dots, dashes, _ and @ are fine).');
+    }
+    if (password.length < minPasswordLength) {
+      throw AuthException('Use at least $minPasswordLength characters for the password.');
+    }
+    final existing = await db.userDao.byUsernameIgnoringCase(clean);
     if (existing != null) {
-      throw AuthException('That username is already taken.');
+      throw AuthException('That username is already taken on this phone. Log in instead, or pick another.');
     }
     final user = UsersCompanion.insert(
-      id: Uuid().v4(),
-      username: username,
-      name: name,
+      id: const Uuid().v4(),
+      username: clean,
+      name: name.trim(),
       passwordHash: await hashPassword(password),
     );
     await db.userDao.create(user);
-    return (await db.userDao.byUsername(username))!;
+    return (await db.userDao.byUsername(clean))!;
   }
 
   /// Returns a session token on success, throws [AuthException] otherwise.
   Future<String> login(String username, String password) async {
-    final user = await db.userDao.byUsername(username);
-    if (user == null) throw AuthException('Invalid username or password.');
+    final typed = username.trim();
+    if (typed.isEmpty || password.isEmpty) throw AuthException('Enter your username and password.');
+    // Exact first (accounts made before usernames were kept in lower
+    // case), then ignoring capitals.
+    final user = await db.userDao.byUsername(typed) ?? await db.userDao.byUsernameIgnoringCase(typed);
+    if (user == null) throw AuthException('That username or password is not right.');
     final ok = await verifyPassword(password, user.passwordHash);
-    if (!ok) throw AuthException('Invalid username or password.');
+    if (!ok) throw AuthException('That username or password is not right.');
     final token = newSessionToken();
     await db.sessionDao.create(SessionsCompanion.insert(
       token: token,

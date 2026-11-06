@@ -90,6 +90,29 @@ class BrandTile extends StatelessWidget {
   }
 }
 
+/// The navy launch screen with the hat, shown while the app reads the saved
+/// session (it matches the native splash, so there is no jump).
+class BrandSplash extends StatelessWidget {
+  const BrandSplash({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Brand.navy,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            BrandMark(size: 132, onDark: true),
+            SizedBox(height: 12),
+            Wordmark(fontSize: 30, onDark: true),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// "FieldOS" set in the brand font, with "OS" in amber.
 class Wordmark extends StatelessWidget {
   const Wordmark({super.key, this.fontSize = 28, this.onDark = false});

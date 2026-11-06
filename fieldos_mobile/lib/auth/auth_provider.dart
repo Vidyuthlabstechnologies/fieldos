@@ -17,7 +17,12 @@ class SessionState {
     this.companies = const [],
     this.activeCompany,
     this.role,
+    this.restoring = false,
   });
+
+  /// Still reading the saved session at launch: show the splash, not the
+  /// login screen (which used to flash up on every start).
+  final bool restoring;
   final User? user;
   final String? token;
   final List<Company> companies;
@@ -30,13 +35,22 @@ class SessionState {
 }
 
 class SessionNotifier extends StateNotifier<SessionState> {
-  SessionNotifier(this._auth, this._db) : super(const SessionState()) {
+  SessionNotifier(this._auth, this._db) : super(const SessionState(restoring: true)) {
     _bootstrap();
   }
   final AuthService _auth;
   final AppDatabase _db;
 
   Future<void> _bootstrap() async {
+    try {
+      await _restore();
+    } catch (_) {
+      // A damaged session row must not leave the app stuck on the splash.
+      state = const SessionState();
+    }
+  }
+
+  Future<void> _restore() async {
     final token = await _db.settingsDao.get(_activeSessionKey);
     final user = await _auth.userForSession(token);
     if (user == null) {
@@ -57,13 +71,15 @@ class SessionNotifier extends StateNotifier<SessionState> {
     );
   }
 
+  /// Creates the account and signs straight in: "Create account" used to
+  /// leave people on the sign-up form with no session.
   Future<void> register({
     required String username,
     required String name,
     required String password,
   }) async {
     final user = await _auth.register(username: username, name: name, password: password);
-    state = SessionState(user: user, companies: const [], token: null);
+    await login(user.username, password);
   }
 
   Future<void> login(String username, String password) async {
