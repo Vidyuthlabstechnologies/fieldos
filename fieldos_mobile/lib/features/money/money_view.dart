@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/money/bills_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 
 const expenseCategories = ['Material', 'Labour', 'Transport', 'Equipment hire', 'Food & tea', 'Fuel', 'Other'];
@@ -38,14 +39,18 @@ String shortDay(DateTime d) => fmtDate(d);
 bool canSeeMoneyIn(String? role) => role == Roles.owner || role == Roles.manager;
 
 class MoneyView extends ConsumerWidget {
-  const MoneyView({super.key, required this.projectId, required this.userId});
+  const MoneyView({super.key, required this.projectId, required this.userId, this.project});
   final String projectId;
   final String userId;
+
+  /// Needed for the Bills tab (owners and project managers only).
+  final Project? project;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final role = ref.watch(sessionProvider).role;
     final showIn = canSeeMoneyIn(role);
+    final showBills = showIn && project != null;
     final expenses = ref.watch(expensesProvider(projectId));
     final received = showIn ? ref.watch(paymentsReceivedProvider(projectId)) : const AsyncValue.data(<PaymentsReceivedData>[]);
     final workers = ref.watch(workersProvider(projectId)).valueOrNull ?? const <Worker>[];
@@ -55,7 +60,7 @@ class MoneyView extends ConsumerWidget {
     final inTotal = received.valueOrNull?.fold<double>(0, (s, p) => s + p.amount) ?? 0;
 
     return DefaultTabController(
-      length: showIn ? 2 : 1,
+      length: 1 + (showIn ? 1 : 0) + (showBills ? 1 : 0),
       child: Column(
         children: [
           Card(
@@ -77,6 +82,7 @@ class MoneyView extends ConsumerWidget {
           TabBar(tabs: [
             const Tab(text: 'Spent'),
             if (showIn) const Tab(text: 'Received'),
+            if (showBills) const Tab(text: 'Bills'),
           ]),
           Expanded(
             child: TabBarView(children: [
@@ -110,6 +116,7 @@ class MoneyView extends ConsumerWidget {
                   onAdd: () => _addReceived(context, ref),
                   addLabel: 'Add payment received',
                 ),
+              if (showBills) BillsView(project: project!, userId: userId),
             ]),
           ),
         ],

@@ -45,6 +45,8 @@
 /// demonstrates by omission.
 library;
 
+import 'dart:convert';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:fieldos_mobile/data/app_database.dart';
 
@@ -677,4 +679,50 @@ PaymentsReceivedCompanion paymentReceivedFromSupabaseJson(Map<String, dynamic> r
       mode: Value(row['mode'] as String),
       recordedBy: Value(row['recorded_by'] as String),
       note: Value(row['note'] as String?),
+    );
+
+// ---------------------------------------------------------------------------
+// Client bills (site_client_bills)
+// ---------------------------------------------------------------------------
+
+Map<String, dynamic> clientBillToSupabaseJson(ClientBill b) => {
+      'id': b.id,
+      'project_id': b.projectId,
+      'kind': b.kind,
+      'bill_number': b.billNumber,
+      'bill_date': _dateOnly(b.billDate),
+      'client_name': b.clientName,
+      'client_gstin': b.clientGstin,
+      'sac': b.sac,
+      'lines': b.linesJson,
+      'gst_rate': b.gstRate,
+      'inter_state': b.interState,
+      'retention_pct': b.retentionPct,
+      'tds_pct': b.tdsPct,
+      'gross': b.gross,
+      'net_payable': b.netPayable,
+      'status': b.status,
+      'notes': b.notes,
+      'recorded_by': b.recordedBy,
+    };
+
+ClientBillsCompanion clientBillFromSupabaseJson(Map<String, dynamic> row) => ClientBillsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      kind: row['kind'] as String,
+      billNumber: row['bill_number'] as String,
+      billDate: DateTime.parse(row['bill_date'] as String),
+      clientName: row['client_name'] as String,
+      clientGstin: Value(row['client_gstin'] as String?),
+      sac: Value(row['sac'] as String? ?? '995411'),
+      linesJson: row['lines'] is String ? row['lines'] as String : jsonEncode(row['lines'] ?? const []),
+      gstRate: Value((row['gst_rate'] as num? ?? 18).toDouble()),
+      interState: Value(row['inter_state'] as bool? ?? false),
+      retentionPct: Value((row['retention_pct'] as num? ?? 0).toDouble()),
+      tdsPct: Value((row['tds_pct'] as num? ?? 0).toDouble()),
+      gross: (row['gross'] as num).toDouble(),
+      netPayable: (row['net_payable'] as num).toDouble(),
+      status: Value(row['status'] as String? ?? 'issued'),
+      notes: Value(row['notes'] as String?),
+      recordedBy: row['recorded_by'] as String,
     );

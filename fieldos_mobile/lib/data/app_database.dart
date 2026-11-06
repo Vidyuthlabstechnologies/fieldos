@@ -44,6 +44,7 @@ final _uuid = Uuid();
   MaterialReceipts,
   MaterialUsage,
   PaymentsReceived,
+  ClientBills,
   SiteExpenses,
   LabourAttendance,
   Subcontractors,
@@ -85,7 +86,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -100,6 +101,7 @@ class AppDatabase extends _$AppDatabase {
   // own site_* cloud tables (receipts are no longer local-only), and adds
   // MaterialUsage, PaymentsReceived and SiteExpenses.workerId. v8 adds
   // task progress, priority and start date (planning and the delay view).
+  // v9 adds ClientBills (RA bills and GST invoices, synced).
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onUpgrade: (m, from, to) async {
@@ -149,6 +151,9 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(tasks, tasks.priority);
             await m.addColumn(tasks, tasks.startDate);
           }
+          if (from < 9) {
+            await m.createTable(clientBills);
+          }
         },
       );
 
@@ -196,6 +201,7 @@ class AppDatabase extends _$AppDatabase {
   SyncOutboxDao get syncOutboxDao => SyncOutboxDao(this);
   MessageDao get messageDao => MessageDao(this);
   PaymentDao get paymentDao => PaymentDao(this);
+  BillDao get billDao => BillDao(this);
 }
 
 /// Where DPR photos and other local media are stored, relative to the app's
@@ -897,6 +903,47 @@ class PaymentDao extends DatabaseAccessor<AppDatabase> with _$PaymentDaoMixin {
       .get();
 
   Future<void> upsertFromRemote(PaymentsReceivedCompanion c) => into(paymentsReceived).insertOnConflictUpdate(c);
+}
+
+@DriftAccessor(tables: [ClientBills])
+class BillDao extends DatabaseAccessor<AppDatabase> with _$BillDaoMixin {
+  BillDao(super.db);
+
+  Future<ClientBill> create(ClientBillsCompanion companion) {
+    final id = companion.id.present ? companion.id.value : _uuid.v4();
+    return transaction(() async {
+      await into(clientBills).insert(companion.copyWith(id: Value(id)));
+      final row = await (select(clientBills)..where((b) => b.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'site_client_bills',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(clientBillToSupabaseJson(row)),
+      );
+      return row;
+    });
+  }
+
+  /// Newest first.
+  Future<List<ClientBill>> forProject(String projectId) => (select(clientBills)
+        ..where((b) => b.projectId.equals(projectId))
+        ..orderBy([(b) => OrderingTerm.desc(b.billDate), (b) => OrderingTerm.desc(b.createdAt)]))
+      .get();
+
+  Future<void> setStatus(String id, String status) {
+    return transaction(() async {
+      await (update(clientBills)..where((b) => b.id.equals(id))).write(ClientBillsCompanion(status: Value(status)));
+      final row = await (select(clientBills)..where((b) => b.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'site_client_bills',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(clientBillToSupabaseJson(row)),
+      );
+    });
+  }
+
+  Future<void> upsertFromRemote(ClientBillsCompanion c) => into(clientBills).insertOnConflictUpdate(c);
 }
 
 // ---------------------------------------------------------------------------

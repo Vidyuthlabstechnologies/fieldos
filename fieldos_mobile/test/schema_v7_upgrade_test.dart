@@ -33,6 +33,7 @@ void main() {
     for (final c in ['progress', 'priority', 'start_date']) {
       await db.customStatement('ALTER TABLE tasks DROP COLUMN $c');
     }
+    await db.customStatement('DROP TABLE client_bills');
     await db.customStatement('PRAGMA user_version = 6');
     await db.close();
 

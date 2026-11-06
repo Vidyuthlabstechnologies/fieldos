@@ -206,6 +206,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen>
           ),
           Builder(
             builder: (context) => MoneyView(
+              project: widget.project,
               projectId: widget.project.id,
               userId: ref.watch(sessionProvider).user?.id ?? '',
             ),
