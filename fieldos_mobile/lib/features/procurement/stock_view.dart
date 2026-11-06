@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' hide Column;
 
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/procurement/site_stock.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -34,16 +35,16 @@ class StockView extends ConsumerWidget {
             : ListView(padding: const EdgeInsets.only(bottom: 80), children: [
                 for (final l in lines)
                   ListTile(
-                    leading: _badge(l.status),
+                    leading: _badge(context, l.status),
                     title: Text(l.name),
                     subtitle: Text('Received ${_qty(l.received)} · Used ${_qty(l.used)}'),
                     trailing: Text('${_qty(l.balance)} ${l.unit ?? ''}'.trim(),
-                        style: TextStyle(fontWeight: FontWeight.w700, color: _color(l.status))),
+                        style: TextStyle(fontWeight: FontWeight.w700, color: _color(context, l.status))),
                     onTap: () => _recordUsage(context, ref, preset: l),
                   ),
               ]),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, st) => ErrorState(error: e, stack: st),
       ),
       Positioned(
         right: 16,
@@ -58,19 +59,21 @@ class StockView extends ConsumerWidget {
     ]);
   }
 
-  static Color? _color(StockStatus s) => switch (s) {
-        StockStatus.overused => Colors.red.shade700,
-        StockStatus.out => Colors.red.shade400,
-        StockStatus.low => Colors.orange.shade800,
+  static Color? _color(BuildContext context, StockStatus s) => switch (s) {
+        StockStatus.overused || StockStatus.out => toneColor(context, PillTone.danger),
+        StockStatus.low => toneColor(context, PillTone.warn),
         StockStatus.ok => null,
       };
 
-  static Widget _badge(StockStatus s) => switch (s) {
-        StockStatus.overused =>
-          const Tooltip(message: 'More used than received. Check for a missing GRN or loss.', child: Icon(Icons.error, color: Colors.red)),
-        StockStatus.out => const Tooltip(message: 'Nothing left', child: Icon(Icons.remove_circle, color: Colors.redAccent)),
-        StockStatus.low => const Tooltip(message: 'Running low: order soon', child: Icon(Icons.warning_amber, color: Colors.orange)),
-        StockStatus.ok => const Icon(Icons.check_circle_outline, color: Colors.green),
+  static Widget _badge(BuildContext context, StockStatus s) => switch (s) {
+        StockStatus.overused => Tooltip(
+            message: 'More used than received. Check for a missing GRN or loss.',
+            child: Icon(Icons.error, color: toneColor(context, PillTone.danger))),
+        StockStatus.out =>
+          Tooltip(message: 'Nothing left', child: Icon(Icons.remove_circle, color: toneColor(context, PillTone.danger))),
+        StockStatus.low => Tooltip(
+            message: 'Running low: order soon', child: Icon(Icons.warning_amber, color: toneColor(context, PillTone.warn))),
+        StockStatus.ok => Icon(Icons.check_circle_outline, color: toneColor(context, PillTone.ok)),
       };
 
   Future<void> _recordUsage(BuildContext context, WidgetRef ref, {StockLine? preset}) async {

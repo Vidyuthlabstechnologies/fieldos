@@ -11,7 +11,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/labour/attendance_list.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
@@ -83,33 +86,19 @@ class _LabourViewState extends ConsumerState<LabourView> {
         const SizedBox(height: 12),
         attendance.when(
           data: (rows) => rows.isEmpty
-              ? const Center(child: Text('No attendance yet.'))
-              : Column(
-                  children: [
-                    for (final a in rows)
-                      Card(
-                        child: ListTile(
-                          leading: Icon(
-                            a.withinGeofence == true ? Icons.location_on : Icons.location_off,
-                            color: a.withinGeofence == true ? Colors.green : Colors.orange,
-                          ),
-                          title: Text(a.workerName),
-                          subtitle: Text(
-                            'In ${a.punchIn.toLocal().toString().split('.')[0]}${a.punchOut != null ? '  •  Out ${a.punchOut!.toLocal().toString().split('.')[0]}' : ''}'
-                            '${a.lat != null ? '  •  (${a.lat!.toStringAsFixed(4)}, ${a.lng!.toStringAsFixed(4)})' : ''}',
-                          ),
-                          trailing: a.punchOut == null
-                              ? TextButton(
-                                  child: const Text('Punch out'),
-                                  onPressed: () => _punchOut(context, ref, a),
-                                )
-                              : null,
-                        ),
-                      ),
-                  ],
+              ? const EmptyState(
+                  icon: Icons.how_to_reg_outlined,
+                  title: 'No attendance yet',
+                  message: 'Punch workers in when they reach the site. The wage sheet counts their days from this.',
+                  compact: true,
+                )
+              : AttendanceList(
+                  rows: rows,
+                  onPunchOut: (a) => _punchOut(context, ref, a),
+                  onSetOutTime: (a) => _setOutTime(context, ref, a),
                 ),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('$e')),
+          error: (e, st) => ErrorState(error: e, stack: st),
         ),
       ],
     );
@@ -191,14 +180,20 @@ class _LabourViewState extends ConsumerState<LabourView> {
   Future<void> _punchInMany(BuildContext context, WidgetRef ref, AsyncValue<ProjectGeofence?> geofence) async {
     final workers = (await ref.read(workersProvider(widget.projectId).future)).where((w) => w.status == 'active').toList();
     final attendance = await ref.read(attendanceProvider(widget.projectId).future);
-    final alreadyIn = {for (final a in attendance) if (a.punchOut == null && a.workerId != null) a.workerId!};
+    // Only today's open punches: a punch-out forgotten last week must not
+    // keep someone off today's roll call.
+    final alreadyIn = {
+      for (final a in attendance)
+        if (a.punchOut == null && a.workerId != null && isSameDay(a.punchIn, DateTime.now())) a.workerId!,
+    };
     final candidates = workers.where((w) => !alreadyIn.contains(w.id)).toList();
     if (!context.mounted) return;
     if (candidates.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(workers.isEmpty
+      showSnack(
+          context,
+          workers.isEmpty
               ? 'Add your labourers in the Workers tab first.'
-              : 'Everyone in the Workers list is already punched in.')));
+              : 'Everyone in the Workers list is already punched in today.');
       return;
     }
     final picked = <String>{...candidates.map((w) => w.id)};
@@ -259,6 +254,26 @@ class _LabourViewState extends ConsumerState<LabourView> {
     ref.invalidate(attendanceProvider(widget.projectId));
   }
 
+  /// A punch left open on an earlier day: ask when they left that day
+  /// (punching out "now" would count the days in between as hours on site).
+  Future<void> _setOutTime(BuildContext context, WidgetRef ref, LabourAttendanceData a) async {
+    final inAt = a.punchIn.toLocal();
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 18, minute: 0),
+      helpText: 'When did ${a.workerName} leave on ${fmtDate(inAt, short: true)}?',
+    );
+    if (picked == null || !context.mounted) return;
+    final outAt = DateTime(inAt.year, inAt.month, inAt.day, picked.hour, picked.minute);
+    if (!outAt.isAfter(inAt)) {
+      showSnack(context, 'Pick a time after they punched in (${fmtTime(inAt)}).', error: true);
+      return;
+    }
+    await ref.read(appDatabaseProvider).attendanceDao.punchOut(a.id, at: outAt);
+    ref.invalidate(attendanceProvider(widget.projectId));
+    if (context.mounted) showSnack(context, '${a.workerName}: out at ${fmtTime(outAt)} on ${fmtDate(inAt, short: true)}');
+  }
+
   Future<void> _punchOut(BuildContext context, WidgetRef ref, LabourAttendanceData a) async {
     final lat = TextEditingController();
     final lng = TextEditingController();
@@ -297,25 +312,28 @@ class _GeofenceCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final geofence = ref.watch(geofenceProvider(projectId));
+    final scheme = Theme.of(context).colorScheme;
+    final set = geofence.valueOrNull != null;
     return Card(
-      color: Colors.blueGrey.shade50,
+      margin: EdgeInsets.zero,
+      color: scheme.surfaceContainerHighest,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
         child: Row(
           children: [
-            const Icon(Icons.gps_fixed),
-            const SizedBox(width: 8),
+            Icon(set ? Icons.gps_fixed : Icons.gps_not_fixed, color: scheme.onSurfaceVariant),
+            const SizedBox(width: 10),
             Expanded(
               child: geofence.when(
                 data: (g) => Text(g == null
-                    ? 'No geofence set — punches will not be validated.'
-                    : 'Geofence: (${g.centerLat.toStringAsFixed(4)}, ${g.centerLng.toStringAsFixed(4)}) ± ${g.radiusMeters.toInt()} m'),
-                loading: () => const Text('Loading geofence…'),
-                error: (e, _) => Text('$e'),
+                    ? 'No site area set, so punches are not checked. Set it while standing at the site.'
+                    : 'Site area: within ${g.radiusMeters.round()} m of the point you set. Punches outside it are marked.'),
+                loading: () => const Text('Checking the site area…'),
+                error: (e, st) => Text(friendlyError(e, st)),
               ),
             ),
             TextButton(
-              child: const Text('Configure'),
+              child: Text(set ? 'Change' : 'Set site area'),
               onPressed: () => _configure(context, ref),
             ),
           ],
@@ -331,13 +349,16 @@ class _GeofenceCard extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Set project geofence'),
+        title: const Text('Site area'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Stand at the centre of the site.'),
+            const Text('Stand in the middle of the site. Punches within the radius count as on site.'),
             GpsFields(lat: lat, lng: lng),
-            TextField(controller: radius, decoration: const InputDecoration(labelText: 'Radius (m)'), keyboardType: TextInputType.number),
+            TextField(
+                controller: radius,
+                decoration: const InputDecoration(labelText: 'Radius in metres', helperText: '100 m suits most sites'),
+                keyboardType: TextInputType.number),
           ],
         ),
         actions: [
@@ -349,9 +370,18 @@ class _GeofenceCard extends ConsumerWidget {
     if (ok != true || !context.mounted) return;
     final latV = double.tryParse(lat.text);
     final lngV = double.tryParse(lng.text);
-    if (latV == null || lngV == null) return;
-    await ref.read(appDatabaseProvider).geofenceDao.set(projectId, latV, lngV, double.tryParse(radius.text) ?? 100);
+    if (latV == null || lngV == null || latV.abs() > 90 || lngV.abs() > 180) {
+      showSnack(context, 'No location yet. Wait for the GPS fix, then save again.', error: true);
+      return;
+    }
+    final r = double.tryParse(radius.text.trim()) ?? 100;
+    if (r < 10 || r > 5000) {
+      showSnack(context, 'Use a radius between 10 and 5000 metres.', error: true);
+      return;
+    }
+    await ref.read(appDatabaseProvider).geofenceDao.set(projectId, latV, lngV, r);
     ref.invalidate(geofenceProvider(projectId));
+    if (context.mounted) showSnack(context, 'Site area saved');
   }
 }
 

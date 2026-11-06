@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 
@@ -44,7 +46,7 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, st) => ErrorState(error: e, stack: st),
           ),
         ),
       ],
@@ -157,26 +159,13 @@ class _EquipmentTile extends ConsumerWidget {
     );
   }
 
-  Widget _statusBadge(String status) {
-    Color color;
-    switch (status) {
-      case 'available':
-        color = Colors.green;
-      case 'in_use':
-        color = Colors.blue;
-      case 'maintenance':
-        color = Colors.orange;
-      case 'breakdown':
-        color = Colors.red;
-      default:
-        color = Colors.grey;
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-      child: Text(status, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
-    );
-  }
+  Widget _statusBadge(String status) => switch (status) {
+        'available' => const StatusPill('Available', tone: PillTone.ok),
+        'in_use' => const StatusPill('In use'),
+        'maintenance' => const StatusPill('In maintenance', tone: PillTone.warn),
+        'breakdown' => const StatusPill('Broken down', tone: PillTone.danger),
+        _ => StatusPill(status.replaceAll('_', ' ')),
+      };
 
   Future<void> _showLogs(BuildContext context, WidgetRef ref) async {
     final logs = await ref.read(equipmentLogsProvider(equipment.id).future);
@@ -195,10 +184,10 @@ class _EquipmentTile extends ConsumerWidget {
                     for (final l in logs)
                       ListTile(
                         dense: true,
-                        title: Text('${l.logDate.toLocal().toString().split(' ').first} · ${l.logType}'),
+                        title: Text('${fmtDate(l.logDate, short: true)} · ${l.logType.replaceAll('_', ' ')}'),
                         subtitle: Text([
                           l.hoursUsed != null ? '${l.hoursUsed} hrs' : '',
-                          l.cost != null ? '₹${l.cost}' : '',
+                          l.cost != null ? rupees(l.cost!) : '',
                           l.description ?? '',
                         ].where((e) => e.isNotEmpty).join(' · ')),
                       ),

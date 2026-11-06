@@ -243,6 +243,17 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# The app types in the emailed code (Team & sync), so these templates
+# carry the code instead of a link. The hosted project needs the same
+# templates pasted in its dashboard (docs/SUPABASE_PRODUCTION_RUNBOOK.md, section 3).
+[auth.email.template.confirmation]
+subject = "Your FieldOS code"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Your FieldOS password reset code"
+content_path = "./supabase/templates/recovery.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"

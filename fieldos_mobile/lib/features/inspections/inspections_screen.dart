@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
@@ -45,7 +47,7 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, st) => ErrorState(error: e, stack: st),
           ),
         ),
       ],
@@ -56,6 +58,7 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
     final title = TextEditingController();
     final inspectionType = TextEditingController(text: 'safety');
     final scheduledDate = TextEditingController();
+    DateTime? scheduledOn;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -90,7 +93,8 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
                   lastDate: DateTime(2030),
                 );
                 if (picked != null) {
-                  scheduledDate.text = picked.toIso8601String().split('T').first;
+                  scheduledOn = picked;
+                  scheduledDate.text = fmtDate(picked);
                 }
               },
             ),
@@ -108,9 +112,7 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
           projectId: widget.projectId,
           title: title.text.trim(),
           inspectionType: inspectionType.text,
-          scheduledDate: scheduledDate.text.isEmpty
-              ? const Value.absent()
-              : Value(DateTime.parse(scheduledDate.text)),
+          scheduledDate: scheduledOn == null ? const Value.absent() : Value(scheduledOn!),
           status: const Value('open'),
         ));
     ref.invalidate(inspectionsProvider(widget.projectId));
@@ -143,7 +145,10 @@ class _InspectionTile extends ConsumerWidget {
     return Card(
       child: ListTile(
         title: Text(inspection.title),
-        subtitle: Text('${inspection.inspectionType} · ${inspection.status}'),
+        subtitle: Text([
+          _typeLabel(inspection.inspectionType),
+          if (inspection.scheduledDate != null) 'due ${fmtDate(inspection.scheduledDate!, short: true)}',
+        ].join(' · ')),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -161,24 +166,18 @@ class _InspectionTile extends ConsumerWidget {
     );
   }
 
-Widget _statusBadge(String status) {
-    Color color;
-    switch (status) {
-      case 'open':
-        color = Colors.blue;
-      case 'in_progress':
-        color = Colors.orange;
-      case 'completed':
-        color = Colors.green;
-      default:
-        color = Colors.grey;
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-      child: Text(status, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
-    );
-  }
+String _typeLabel(String type) => switch (type) {
+        'mep' => 'MEP',
+        '' => 'Inspection',
+        _ => '${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}',
+      };
+
+Widget _statusBadge(String status) => switch (status) {
+        'open' => const StatusPill('Open'),
+        'in_progress' => const StatusPill('In progress', tone: PillTone.warn),
+        'completed' => const StatusPill('Done', tone: PillTone.ok),
+        _ => StatusPill(status.replaceAll('_', ' ')),
+      };
 
   Future<void> _showChecklist(BuildContext context, WidgetRef ref) async {
     final items = await ref.read(inspectionItemsProvider(inspection.id).future);

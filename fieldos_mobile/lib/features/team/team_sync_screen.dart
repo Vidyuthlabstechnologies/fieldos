@@ -28,10 +28,17 @@ class TeamSyncScreen extends ConsumerStatefulWidget {
   ConsumerState<TeamSyncScreen> createState() => _TeamSyncScreenState();
 }
 
+/// The step after sign-in that needs the code we emailed.
+enum _EmailCodeStep { confirmSignUp, resetPassword }
+
 class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _code = TextEditingController();
+  final _emailCode = TextEditingController();
+  final _newPassword = TextEditingController();
+  _EmailCodeStep? _codeStep;
+  String _codeEmail = '';
   bool _busy = false;
   String? _message;
   bool _messageIsError = false;
@@ -54,6 +61,8 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     _email.dispose();
     _password.dispose();
     _code.dispose();
+    _emailCode.dispose();
+    _newPassword.dispose();
     super.dispose();
   }
 
@@ -125,13 +134,88 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           case CloudSyncOutcome.signedUp:
             _say('Account created for $email.');
           case CloudSyncOutcome.needsEmailConfirmation:
-            _say('Check $email for a confirmation link, then sign in here.');
+            _startCodeStep(_EmailCodeStep.confirmSignUp, email);
+            _say('We sent a code to $email. Type it below to finish creating your account.');
+            _password.clear();
+            return;
+          case CloudSyncOutcome.wrongPassword:
+            _say('$email already has an account, and that password is not right for it. Try again, or tap '
+                '"Forgot password?" to choose a new one.', error: true);
+            return;
           case CloudSyncOutcome.failed:
-            _say(result.error ?? 'Could not sign in.', error: true);
+            final cause = result.cause;
+            _say(cause == null ? 'Could not sign in. Try again.' : friendlyError(cause, result.stack), error: true);
+            return;
         }
         _password.clear();
-        await ref.read(cloudSyncBootstrapProvider).ensureRunning();
-        await _refresh();
+        await _afterSignIn();
+      });
+
+  Future<void> _afterSignIn() async {
+    await ref.read(cloudSyncBootstrapProvider).ensureRunning();
+    await _refresh();
+  }
+
+  void _startCodeStep(_EmailCodeStep step, String email) => setState(() {
+        _codeStep = step;
+        _codeEmail = email;
+        _emailCode.clear();
+        _newPassword.clear();
+      });
+
+  void _leaveCodeStep() => setState(() {
+        _codeStep = null;
+        _message = null;
+        _emailCode.clear();
+        _newPassword.clear();
+      });
+
+  Future<void> _forgotPassword() => _run(() async {
+        final email = _email.text.trim();
+        if (!email.contains('@')) {
+          _say('Type your email above first, then tap "Forgot password?" again.', error: true);
+          return;
+        }
+        await ref.read(cloudSyncServiceProvider).sendPasswordResetCode(email);
+        _startCodeStep(_EmailCodeStep.resetPassword, email);
+        _say('If $email has an account, a code is on its way. Type it below with your new password.');
+      });
+
+  Future<void> _resendCode() => _run(() async {
+        final service = ref.read(cloudSyncServiceProvider);
+        if (_codeStep == _EmailCodeStep.resetPassword) {
+          await service.sendPasswordResetCode(_codeEmail);
+        } else {
+          await service.resendSignUpCode(_codeEmail);
+        }
+        _emailCode.clear();
+        _say('A new code is on its way to $_codeEmail. Codes stop working after an hour.');
+      });
+
+  Future<void> _submitCode() => _run(() async {
+        final code = _emailCode.text.replaceAll(RegExp(r'\s'), '');
+        if (!RegExp(r'^\d{6,10}$').hasMatch(code)) {
+          _say('Type the code from the email: it is 6 digits.', error: true);
+          return;
+        }
+        final service = ref.read(cloudSyncServiceProvider);
+        if (_codeStep == _EmailCodeStep.resetPassword) {
+          if (_newPassword.text.length < 6) {
+            _say('Choose a new password of at least 6 characters.', error: true);
+            return;
+          }
+          await service.resetPassword(email: _codeEmail, code: code, newPassword: _newPassword.text);
+          _say('New password saved. Signed in as $_codeEmail.');
+        } else {
+          await service.confirmSignUp(email: _codeEmail, code: code);
+          _say('Account created for $_codeEmail.');
+        }
+        setState(() {
+          _codeStep = null;
+          _emailCode.clear();
+          _newPassword.clear();
+        });
+        await _afterSignIn();
       });
 
   Future<void> _afterLinked(String companyId) async {
@@ -246,7 +330,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         'Team sync is not set up in this build of FieldOS. Everything still works offline on this phone.',
       ));
     } else if (!service.isSignedIn) {
-      children.addAll(_signInSection());
+      children.addAll(_codeStep == null ? _signInSection() : _codeSection(_codeStep!));
     } else {
       children.add(Row(children: [
         const Icon(Icons.verified_user, size: 18, color: Brand.ok),
@@ -318,9 +402,65 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           onSubmitted: (_) => _busy ? null : _signIn(),
           autocorrect: false,
         ),
-        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(onPressed: _busy ? null : _forgotPassword, child: const Text('Forgot password?')),
+        ),
         FilledButton(onPressed: _busy ? null : _signIn, child: _busyOr('Sign in')),
       ];
+
+  List<Widget> _codeSection(_EmailCodeStep step) {
+    final reset = step == _EmailCodeStep.resetPassword;
+    final muted = TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant);
+    return [
+      Text(reset ? 'Choose a new password' : 'Check your email', style: Theme.of(context).textTheme.titleMedium),
+      const SizedBox(height: 8),
+      Text(
+        reset
+            ? 'Type the code we emailed to $_codeEmail, and the new password for your cloud account.'
+            : 'Type the code we emailed to $_codeEmail. It can take a minute to arrive; look in spam too.',
+        style: muted,
+      ),
+      const SizedBox(height: 16),
+      TextField(
+        key: const Key('email-code'),
+        controller: _emailCode,
+        decoration: const InputDecoration(labelText: 'Code from the email', prefixIcon: Icon(Icons.pin_outlined)),
+        keyboardType: TextInputType.number,
+        autofillHints: const [AutofillHints.oneTimeCode],
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
+        textInputAction: reset ? TextInputAction.next : TextInputAction.done,
+        onSubmitted: reset ? null : (_) => _busy ? null : _submitCode(),
+        autocorrect: false,
+        enableSuggestions: false,
+      ),
+      if (reset) ...[
+        const SizedBox(height: 8),
+        TextField(
+          key: const Key('new-cloud-password'),
+          controller: _newPassword,
+          decoration: const InputDecoration(labelText: 'New password', prefixIcon: Icon(Icons.lock_outline)),
+          obscureText: true,
+          autofillHints: const [AutofillHints.newPassword],
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _busy ? null : _submitCode(),
+          autocorrect: false,
+        ),
+      ],
+      const SizedBox(height: 12),
+      FilledButton(
+        onPressed: _busy ? null : _submitCode,
+        child: _busyOr(reset ? 'Save new password' : 'Confirm email'),
+      ),
+      const SizedBox(height: 4),
+      Wrap(spacing: 8, children: [
+        TextButton(onPressed: _busy ? null : _resendCode, child: const Text('Send a new code')),
+        TextButton(onPressed: _busy ? null : _leaveCodeStep, child: const Text('Back to sign in')),
+      ]),
+      if (!reset)
+        Text('Got a link instead of a code? Open it, then come back and sign in.', style: muted),
+    ];
+  }
 
   List<Widget> _linkSection(String? companyName, {required bool canRegister}) => [
         if (canRegister) ...[

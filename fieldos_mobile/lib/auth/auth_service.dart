@@ -19,6 +19,9 @@ class Roles {
 
   static bool canWrite(String role) => role != viewer;
 
+  /// Who may approve or reject: the owner and project managers.
+  static bool canApprove(String? role) => role == owner || role == manager;
+
   /// The server (Supabase, mirroring the desktop backend) names roles
   /// owner / project_manager / site_engineer; the app's local vocabulary
   /// is owner / manager / member.
@@ -96,10 +99,15 @@ class AuthService {
     await db.sessionDao.create(SessionsCompanion.insert(
       token: token,
       userId: user.id,
-      expiresAt: DateTime.now().add(const Duration(days: 30)),
+      expiresAt: DateTime.now().add(sessionLength),
     ));
     return token;
   }
+
+  /// How long a phone stays signed in without being opened. Each launch
+  /// starts the count again, so people who use the app are never asked
+  /// for a password they may have forgotten.
+  static const sessionLength = Duration(days: 30);
 
   Future<void> logout(String token) => db.sessionDao.deleteByToken(token);
 
@@ -123,9 +131,14 @@ class AuthService {
     if (token == null || token.isEmpty) return null;
     final session = await db.sessionDao.byToken(token);
     if (session == null) return null;
-    if (session.expiresAt.isBefore(DateTime.now())) {
+    final now = DateTime.now();
+    if (session.expiresAt.isBefore(now)) {
       await db.sessionDao.deleteByToken(token);
       return null;
+    }
+    // Sliding: renewed at most once a day.
+    if (session.expiresAt.isBefore(now.add(sessionLength - const Duration(days: 1)))) {
+      await db.sessionDao.setExpiry(token, now.add(sessionLength));
     }
     return db.userDao.byId(session.userId);
   }

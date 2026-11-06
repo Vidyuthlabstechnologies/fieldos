@@ -16,23 +16,96 @@ import 'package:fieldos_mobile/services/bug_report_service.dart';
 /// row. Anything unexpected is kept for the next bug report.
 String friendlyError(Object error, [StackTrace? stack]) {
   if (error is AuthException) return error.message;
-  if (error is SocketException || error is HttpException) {
-    return 'No internet connection. Your work is saved on this phone; try again when you are online.';
-  }
+  if (error is SocketException || error is HttpException || error is HandshakeException) return offlineMessage;
   if (error is TimeoutException) return 'That took too long. Check your connection and try again.';
-  if (error is sb.AuthException) return error.message;
-  if (error is sb.PostgrestException) {
-    // RPCs raise readable messages ("invalid join code"); raw SQL errors
-    // are not, so only short, single-line messages go to the screen.
-    final m = error.message.trim();
-    if (m.isNotEmpty && m.length < 140 && !m.contains('\n')) return '${m[0].toUpperCase()}${m.substring(1)}.'.replaceAll('..', '.');
-  }
+  final known = switch (error) {
+    sb.AuthException e => _cloudAuthMessage(e),
+    sb.PostgrestException e => _cloudServerMessage(e),
+    _ => null,
+  };
+  if (known != null) return known;
   final text = error.toString();
-  if (text.contains('SocketException') || text.contains('Failed host lookup') || text.contains('Connection refused')) {
-    return 'No internet connection. Your work is saved on this phone; try again when you are online.';
+  if (text.contains('SocketException') ||
+      text.contains('ClientException') ||
+      text.contains('Failed host lookup') ||
+      text.contains('Connection refused')) {
+    return offlineMessage;
   }
   RecentErrors.record(error, stack);
   return 'Something went wrong. Please try again, or send a bug report from the menu.';
+}
+
+const offlineMessage = 'No internet connection. Your work is saved on this phone; try again when you are online.';
+const _cloudDownMessage =
+    'The FieldOS cloud is not answering right now. Your work is saved on this phone; try again in a few minutes.';
+const _signInAgainMessage = 'Your cloud sign-in has ended. Sign in again from Team & sync.';
+
+/// Supabase Auth's errors, by their stable codes. A message the server
+/// wrote for people is passed on when it is short; anything else is null.
+String? _cloudAuthMessage(sb.AuthException e) {
+  // No answer at all (offline), or the server itself failed (5xx), whose
+  // body may be a whole HTML page.
+  if (e is sb.AuthRetryableFetchException) return e.statusCode == null ? offlineMessage : _cloudDownMessage;
+  if (e is sb.AuthUnknownException) return _cloudDownMessage;
+  if (e is sb.AuthSessionMissingException) return 'Sign in from Team & sync first.';
+  switch (e.code) {
+    case 'invalid_credentials':
+      return 'That email and password do not match. Check them and try again.';
+    case 'email_not_confirmed':
+      return 'Confirm your email first: open the link we sent you, then sign in here.';
+    case 'user_already_exists' || 'email_exists':
+      return 'That email already has a FieldOS cloud account. Sign in with its password.';
+    case 'otp_expired':
+      return 'That code is not right, or it is too old. Check it, or send a new code.';
+    case 'same_password':
+      return 'That is already your password. Choose a different one, or sign in with it.';
+    case 'over_email_send_rate_limit' || 'over_request_rate_limit' || 'over_sms_send_rate_limit':
+      return 'Too many tries in a short time. Wait a few minutes, then try again.';
+    case 'signup_disabled':
+      return 'New cloud accounts are switched off for now. Write to us at the support address and we will help.';
+    case 'email_address_invalid' || 'email_address_not_authorized':
+      return 'That email address cannot be used. Check it, or try another.';
+    case 'session_expired' || 'session_not_found' || 'refresh_token_not_found' || 'refresh_token_already_used':
+    case 'bad_jwt' || 'user_not_found':
+      return _signInAgainMessage;
+  }
+  return _shortSentence(e.message);
+}
+
+/// Our own RPCs' messages (supabase/migrations), then PostgREST's codes.
+/// Raw SQL text never reaches the screen.
+String? _cloudServerMessage(sb.PostgrestException e) {
+  switch (e.message.trim().toLowerCase()) {
+    case 'invalid join code':
+      return 'That join code is not right. Check it with the person who shared it: it is 10 letters and numbers.';
+    case 'too many join attempts':
+      return 'Too many wrong join codes. Wait an hour, then try again with the code from your company owner.';
+    case 'this company is already registered to another account':
+      return 'This company is already on the cloud under another account. Ask its owner for a join code.';
+    case 'not authenticated' || 'sign in first':
+      return 'Sign in from Team & sync first.';
+    case 'only the company owner can change roles':
+      return 'Only the company owner can change roles.';
+    case 'owners cannot change their own role':
+      return 'You are the owner, so your own role stays the same.';
+    case 'only the company owner can reset the join code':
+      return 'Only the company owner can make a new join code.';
+  }
+  switch (e.code) {
+    case 'PGRST301' || 'PGRST302' || 'PGRST303' || '28000':
+      return _signInAgainMessage;
+    case '42501':
+      return 'Your role in this company does not allow that. Ask the owner.';
+  }
+  return null;
+}
+
+/// [m] as a sentence, when it is short enough to be meant for people.
+String? _shortSentence(String m) {
+  final t = m.trim();
+  if (t.isEmpty || t.length > 140 || t.contains('\n') || t.contains('{') || t.contains('<')) return null;
+  final s = '${t[0].toUpperCase()}${t.substring(1)}';
+  return s.endsWith('.') || s.endsWith('!') || s.endsWith('?') ? s : '$s.';
 }
 
 void showSnack(BuildContext context, String message, {bool error = false, SnackBarAction? action}) {
@@ -104,7 +177,8 @@ class EmptyState extends StatelessWidget {
     // Scrollable so pull-to-refresh still works on an empty list.
     return LayoutBuilder(
       builder: (context, c) => ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
+        // A compact one sits inside another list, which does the scrolling.
+        physics: compact ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
         shrinkWrap: compact,
         children: [
           ConstrainedBox(
@@ -177,6 +251,17 @@ class StatusPill extends StatelessWidget {
 }
 
 enum PillTone { ok, warn, danger, neutral }
+
+/// The text or icon colour for [tone], readable in light and dark mode.
+Color toneColor(BuildContext context, PillTone tone) {
+  final dark = Theme.of(context).brightness == Brightness.dark;
+  return switch (tone) {
+    PillTone.ok => dark ? const Color(0xFF8FD9B0) : Brand.ok,
+    PillTone.warn => dark ? Brand.amber : Brand.warn,
+    PillTone.danger => dark ? const Color(0xFFFF9C9C) : Brand.danger,
+    PillTone.neutral => Theme.of(context).colorScheme.onSurfaceVariant,
+  };
+}
 
 /// A section heading inside long screens (settings, reports).
 class SectionHeader extends StatelessWidget {

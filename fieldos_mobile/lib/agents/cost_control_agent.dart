@@ -12,6 +12,7 @@ library;
 import 'package:decimal/decimal.dart';
 
 import 'agent.dart';
+import '../core/format.dart';
 import '../estimation/estimation_calc.dart';
 
 class _LineReport {
@@ -98,13 +99,13 @@ class CostControlAgent implements Agent {
     final alerts = <String>[];
     for (final l in lines) {
       if (l.status == 'over') {
-        alerts.add('Over budget on "${l.name}": spent ${_fmt(l.actual)} of ${_fmt(l.budget)}.');
+        alerts.add('Over budget on ${l.name}: spent ${_fmt(l.actual)} of ${_fmt(l.budget)}.');
       } else if (l.status == 'at_risk') {
-        alerts.add('Approaching budget on "${l.name}": ${_fmt(l.actual)} of ${_fmt(l.budget)} (${_pct(l.actual, l.budget)}%).');
+        alerts.add('Close to budget on ${l.name}: ${_fmt(l.actual)} of ${_fmt(l.budget)} (${_pct(l.actual, l.budget)}%).');
       }
     }
     if (includeUnallocated && unallocated > Decimal.zero) {
-      alerts.add('Unallocated spend not mapped to a BOQ line: ${_fmt(unallocated)}.');
+      alerts.add('${_fmt(unallocated)} spent without a BOQ item.');
     }
 
     return AgentResult(
@@ -133,7 +134,7 @@ class CostControlAgent implements Agent {
   }
 }
 
-String _fmt(Decimal d) => d.toStringAsFixed(2);
+String _fmt(Decimal d) => rupees(d.toDouble());
 String _pct(Decimal actual, Decimal budget) {
   if (budget <= Decimal.zero) return '100';
   final ratio = (actual / budget).toDecimal(scaleOnInfinitePrecision: 28);

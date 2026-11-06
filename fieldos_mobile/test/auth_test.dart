@@ -136,5 +136,22 @@ void main() {
       expect(await auth.login('asha', 'second2'), isNotEmpty);
       expect(() => auth.login('asha', 'first1'), throwsA(isA<AuthException>()));
     });
+
+    test('using the app renews the sign-in, so active people are not logged out after 30 days', () async {
+      final db = AppDatabase.memory();
+      addTearDown(() async => db.close());
+      final auth = AuthService(db);
+      await auth.register(username: 'meena', name: 'Meena', password: '123456');
+      final token = await auth.login('meena', '123456');
+      // Pretend the sign-in was made 25 days ago.
+      await db.sessionDao.setExpiry(token, DateTime.now().add(const Duration(days: 5)));
+      expect(await auth.userForSession(token), isNotNull);
+      final renewed = (await db.sessionDao.byToken(token))!.expiresAt;
+      expect(renewed.isAfter(DateTime.now().add(const Duration(days: 29))), isTrue);
+      // An expired one is still refused and removed.
+      await db.sessionDao.setExpiry(token, DateTime.now().subtract(const Duration(minutes: 1)));
+      expect(await auth.userForSession(token), isNull);
+      expect(await db.sessionDao.byToken(token), isNull);
+    });
   });
 }

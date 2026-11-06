@@ -260,6 +260,9 @@ class SessionDao extends DatabaseAccessor<AppDatabase> with _$SessionDaoMixin {
   Future<void> deleteByToken(String token) =>
       (delete(sessions)..where((s) => s.token.equals(token))).go();
 
+  Future<void> setExpiry(String token, DateTime expiresAt) =>
+      (update(sessions)..where((s) => s.token.equals(token))).write(SessionsCompanion(expiresAt: Value(expiresAt)));
+
   Future<void> deleteExpired() =>
       (delete(sessions)..where((s) => s.expiresAt.isSmallerThanValue(DateTime.now()))).go();
 }
@@ -956,9 +959,12 @@ class AttendanceDao extends DatabaseAccessor<AppDatabase> with _$AttendanceDaoMi
     });
   }
 
-  Future<void> punchOut(String id, {double? lat, double? lng, bool? withinGeofence}) => transaction(() async {
+  /// Closes a punch now, or at [at] for one left open on an earlier day
+  /// (closing that "now" would count days as hours on site).
+  Future<void> punchOut(String id, {double? lat, double? lng, bool? withinGeofence, DateTime? at}) =>
+      transaction(() async {
         await (update(labourAttendance)..where((a) => a.id.equals(id))).write(LabourAttendanceCompanion(
-          punchOut: Value(DateTime.now()),
+          punchOut: Value(at ?? DateTime.now()),
           lat: lat == null ? const Value.absent() : Value(lat),
           lng: lng == null ? const Value.absent() : Value(lng),
           withinGeofence: withinGeofence == null ? const Value.absent() : Value(withinGeofence),
@@ -974,8 +980,11 @@ class AttendanceDao extends DatabaseAccessor<AppDatabase> with _$AttendanceDaoMi
 
   Future<void> upsertFromRemote(LabourAttendanceCompanion c) => into(labourAttendance).insertOnConflictUpdate(c);
 
-  Future<List<LabourAttendanceData>> forProject(String projectId) =>
-      (select(labourAttendance)..where((a) => a.projectId.equals(projectId))).get();
+  /// Newest punch first.
+  Future<List<LabourAttendanceData>> forProject(String projectId) => (select(labourAttendance)
+        ..where((a) => a.projectId.equals(projectId))
+        ..orderBy([(a) => OrderingTerm.desc(a.punchIn)]))
+      .get();
 }
 
 @DriftAccessor(tables: [ProjectGeofences])

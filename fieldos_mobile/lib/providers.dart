@@ -94,10 +94,16 @@ final costSummaryProvider =
   return ProjectCostSummary.forProject(db, project);
 });
 
-/// Company-wide pending approvals (the multi-level approvals queue).
+/// Pending approvals for one company's projects, oldest first (the Home
+/// badge and the Approvals screen). Another company's approvals on the
+/// same phone stay out of it.
 final pendingApprovalsProvider =
-    FutureProvider.autoDispose<List<Approval>>((ref) {
-  return ref.watch(appDatabaseProvider).approvalDao.pendingFor(null);
+    FutureProvider.autoDispose.family<List<Approval>, String>((ref, companyId) async {
+  final db = ref.watch(appDatabaseProvider);
+  final ids = {for (final p in await db.projectDao.forCompany(companyId)) p.id};
+  final pending = await db.approvalDao.pendingFor(null);
+  return [for (final a in pending) if (ids.contains(a.projectId)) a]
+    ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 });
 
 /// Procurement lists (the RFQ -> PO -> GRN chain).

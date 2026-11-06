@@ -41,7 +41,7 @@ class HomeScreen extends ConsumerWidget {
         title: _CompanyTitle(company: company, companies: session.companies),
         actions: [
           Consumer(builder: (context, ref, _) {
-            final count = ref.watch(pendingApprovalsProvider).maybeWhen(data: (l) => l.length, orElse: () => 0);
+            final count = ref.watch(pendingApprovalsProvider(company.id)).maybeWhen(data: (l) => l.length, orElse: () => 0);
             return IconButton(
               tooltip: count > 0 ? 'Approvals ($count waiting)' : 'Approvals',
               icon: Badge.count(count: count, isLabelVisible: count > 0, child: const Icon(Icons.approval_outlined)),

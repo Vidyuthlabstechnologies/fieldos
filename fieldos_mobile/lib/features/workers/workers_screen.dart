@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 
@@ -43,7 +45,7 @@ class _WorkersViewState extends ConsumerState<WorkersView> {
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, st) => ErrorState(error: e, stack: st),
           ),
         ),
       ],
@@ -116,7 +118,7 @@ class _WorkerTile extends ConsumerWidget {
         subtitle: Text([
           worker.role ?? '',
           worker.phone ?? '',
-          worker.dailyWage != null ? '₹${worker.dailyWage!.toStringAsFixed(0)}/day' : '',
+          worker.dailyWage != null ? '${rupees(worker.dailyWage!)} a day' : '',
         ].where((e) => e.isNotEmpty).join(' · ')),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -140,12 +142,6 @@ class _WorkerTile extends ConsumerWidget {
     );
   }
 
-  Widget _statusBadge(String status) {
-    final color = status == 'active' ? Colors.green : Colors.grey;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-      child: Text(status, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
-    );
-  }
+  Widget _statusBadge(String status) =>
+      status == 'active' ? const StatusPill('Active', tone: PillTone.ok) : const StatusPill('Not active');
 }
