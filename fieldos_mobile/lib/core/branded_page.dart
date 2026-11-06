@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 
 class BrandedSheetPage extends StatelessWidget {
-  const BrandedSheetPage({super.key, required this.header, required this.sheet, this.leading});
+  const BrandedSheetPage({super.key, required this.header, required this.sheet, this.trailing});
 
   /// True on short screens, where the header should use less height.
   static bool isCompact(BuildContext context) => MediaQuery.sizeOf(context).height < 700;
@@ -20,8 +20,8 @@ class BrandedSheetPage extends StatelessWidget {
   /// The sheet's content, laid out at most 420 wide.
   final Widget sheet;
 
-  /// An optional button at the top left of the navy part, such as close.
-  final Widget? leading;
+  /// An optional button at the top right of the navy part, such as a menu.
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +43,11 @@ class BrandedSheetPage extends StatelessWidget {
                       child: Column(children: [...header, const SizedBox(height: 28)]),
                     ),
                   ),
-                  if (leading != null)
+                  if (trailing != null)
                     Positioned(
                       top: 4,
-                      left: 4,
-                      child: IconTheme.merge(data: const IconThemeData(color: Colors.white), child: leading!),
+                      right: 4,
+                      child: IconTheme.merge(data: const IconThemeData(color: Colors.white), child: trailing!),
                     ),
                 ],
               ),

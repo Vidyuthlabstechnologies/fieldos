@@ -12,6 +12,7 @@ import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
 import 'package:fieldos_mobile/features/settings/settings_screen.dart';
 import 'package:fieldos_mobile/features/map/site_map_screen.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
+import 'package:fieldos_mobile/features/subscription/my_subscription_sheet.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 
@@ -87,7 +88,7 @@ class HomeScreen extends ConsumerWidget {
                 case 'settings':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
                 case 'subscription':
-                  _showSubscription(context, ref);
+                  showMySubscription(context);
                 case 'bug':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BugReportScreen()));
                 case 'logout':
@@ -202,20 +203,4 @@ class HomeScreen extends ConsumerWidget {
         ));
     ref.invalidate(projectsProvider(companyId));
   }
-}
-
-Future<void> _showSubscription(BuildContext context, WidgetRef ref) async {
-  final state = await ref.read(billingServiceProvider).current();
-  if (!context.mounted) return;
-  await showDialog<void>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: const Text('My subscription'),
-      content: Text(
-        '${state?.describe() ?? 'Could not reach the store right now.'}\n\n'
-        'To cancel or change your plan, open Google Play (or the App Store on iPhone), then Subscriptions.',
-      ),
-      actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('OK'))],
-    ),
-  );
 }
