@@ -98,3 +98,16 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # Inter, the brand typeface (Latin subset, see tools/subset_fonts.sh).
+  # Telugu, Hindi and other Indian scripts use the phone's own fonts.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.otf
+        - asset: assets/fonts/Inter-Medium.otf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.otf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.otf
+          weight: 700

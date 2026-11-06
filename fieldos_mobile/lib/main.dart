@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/app.dart';
+import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/services/bug_report_service.dart';
 
 void main() {
@@ -28,11 +29,8 @@ class AppWithMaterial extends StatelessWidget {
     return MaterialApp(
       title: 'FieldOS',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF1B5E20),
-        scaffoldBackgroundColor: const Color(0xFFF6F7F6),
-      ),
+      theme: buildFieldOsTheme(Brightness.light),
+      darkTheme: buildFieldOsTheme(Brightness.dark),
       home: const App(),
     );
   }
