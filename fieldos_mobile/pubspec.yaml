@@ -2,7 +2,7 @@ name: fieldos_mobile
 description: "FieldOS Mobile — offline-first agentic construction platform (Flutter)."
 publish_to: 'none'
 
-version: 1.3.0+5
+version: 1.4.0+6
 
 environment:
   sdk: ^3.12.2
@@ -72,6 +72,8 @@ dependencies:
   # DPR report as a PDF, shared to WhatsApp/email through the Android share
   # sheet -- how site reports actually travel in Indian construction today.
   pdf: ^3.13.1
+  # Date/time/GPS stamp on site photos (pure Dart; already pulled in by pdf).
+  image: ^4.12.0
   share_plus: ^13.3.1
 
   # Site map: OpenStreetMap tiles, no API key or billing (Google Maps would

@@ -328,6 +328,43 @@ class SiteExpenses extends Table {
   TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
   TextColumn get note => text().withLength(max: 300).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  /// Set when the money went to a worker (wages or an advance), so the wage
+  /// sheet can show what each person has already been paid.
+  TextColumn get workerId => text().withLength(max: 36).nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Material taken out of the site store and used. Received (MaterialReceipts)
+/// minus used is the stock on site, matched by material name and unit.
+class MaterialUsage extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get materialName => text().withLength(min: 1, max: 200)();
+  RealColumn get quantity => real()();
+  TextColumn get unit => text().withLength(max: 20).nullable()();
+  TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get usedOn => dateTime()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Money received for a project (client running-bill payments, advances).
+/// With SiteExpenses this gives each site's cash in vs cash out.
+class PaymentsReceived extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  RealColumn get amount => real()();
+  DateTimeColumn get receivedOn => dateTime()();
+  TextColumn get fromParty => text().withLength(min: 1, max: 120)();
+  TextColumn get mode => text().withLength(min: 1, max: 20)(); // cash, upi, bank, cheque
+  TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column<Object>> get primaryKey => {id};

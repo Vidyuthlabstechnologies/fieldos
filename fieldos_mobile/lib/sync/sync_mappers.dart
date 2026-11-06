@@ -32,7 +32,10 @@
 ///    syncing would need a real punches-to-daily-summary aggregation, not
 ///    a column mapping.
 /// Forcing any of the above would silently corrupt or mislead, so they're
-/// deliberately NOT wired rather than wired wrong. EquipmentLogs and
+/// deliberately NOT wired to those tables. Since schema v7 the phone's own
+/// shapes sync instead, to phone-shaped cloud tables (site_attendance,
+/// site_material_receipts, plus site_expenses, site_material_usage and
+/// site_payments_received): see the section at the end of this file. EquipmentLogs and
 /// InspectionItems (child/detail rows of Equipment/Inspection) are also not
 /// yet wired -- unlike the above, no shape mismatch is known here,
 /// just not yet verified. Extending to the rest of the ~30 tables is a
@@ -490,4 +493,140 @@ ProjectMessagesCompanion projectMessageFromSupabaseJson(Map<String, dynamic> row
       senderName: Value(row['sender_name'] as String),
       body: Value(row['body'] as String),
       createdAt: Value(DateTime.parse(row['created_at'] as String)),
+    );
+
+// ---------------------------------------------------------------------------
+// Site money, labour and stock (supabase/migrations/20261105050000_site_records.sql).
+// These have their own phone-shaped cloud tables (site_*), so the owner sees
+// the site's punches, expenses and material from anywhere without forcing
+// them into the desktop app's differently-shaped attendance / grns tables
+// (see the notes at the top of this file).
+// ---------------------------------------------------------------------------
+
+DateTime _parseTs(Object? v) => DateTime.parse(v as String);
+DateTime? _parseTsOrNull(Object? v) => v == null ? null : DateTime.parse(v as String);
+double _num(Object? v) => (v as num).toDouble();
+
+Map<String, dynamic> attendanceToSupabaseJson(LabourAttendanceData a) => {
+      'id': a.id,
+      'project_id': a.projectId,
+      'worker_name': a.workerName,
+      'worker_id': a.workerId,
+      'recorded_by': a.recordedBy,
+      'punch_in': _timestamp(a.punchIn.toUtc()),
+      'punch_out': _timestamp(a.punchOut?.toUtc()),
+      'lat': a.lat,
+      'lng': a.lng,
+      'within_geofence': a.withinGeofence,
+    };
+
+LabourAttendanceCompanion attendanceFromSupabaseJson(Map<String, dynamic> row) => LabourAttendanceCompanion(
+      id: Value(row['id'] as String),
+      projectId: Value(row['project_id'] as String),
+      workerName: Value(row['worker_name'] as String),
+      workerId: Value(row['worker_id'] as String?),
+      recordedBy: Value(row['recorded_by'] as String),
+      punchIn: Value(_parseTs(row['punch_in'])),
+      punchOut: Value(_parseTsOrNull(row['punch_out'])),
+      lat: Value((row['lat'] as num?)?.toDouble()),
+      lng: Value((row['lng'] as num?)?.toDouble()),
+      withinGeofence: Value(row['within_geofence'] as bool?),
+    );
+
+Map<String, dynamic> siteExpenseToSupabaseJson(SiteExpense e) => {
+      'id': e.id,
+      'project_id': e.projectId,
+      'cost_head_id': e.costHeadId,
+      'category': e.category,
+      'amount': e.amount,
+      'incurred_on': e.incurredOn,
+      'recorded_by': e.recordedBy,
+      'note': e.note,
+      'worker_id': e.workerId,
+    };
+
+SiteExpensesCompanion siteExpenseFromSupabaseJson(Map<String, dynamic> row) => SiteExpensesCompanion(
+      id: Value(row['id'] as String),
+      projectId: Value(row['project_id'] as String),
+      costHeadId: Value(row['cost_head_id'] as String?),
+      category: Value(row['category'] as String),
+      amount: Value(_num(row['amount'])),
+      incurredOn: Value(row['incurred_on'] as String),
+      recordedBy: Value(row['recorded_by'] as String),
+      note: Value(row['note'] as String?),
+      workerId: Value(row['worker_id'] as String?),
+    );
+
+Map<String, dynamic> materialReceiptToSupabaseJson(MaterialReceipt r) => {
+      'id': r.id,
+      'project_id': r.projectId,
+      'po_id': r.poId,
+      'supplier_id': r.supplierId,
+      'cost_head_id': r.costHeadId,
+      'material_name': r.materialName,
+      'quantity': r.quantity,
+      'unit': r.unit,
+      'amount': r.amount,
+      'received_by': r.receivedBy,
+      'received_on': _timestamp(r.receivedOn.toUtc()),
+      'notes': r.notes,
+    };
+
+MaterialReceiptsCompanion materialReceiptFromSupabaseJson(Map<String, dynamic> row) => MaterialReceiptsCompanion(
+      id: Value(row['id'] as String),
+      projectId: Value(row['project_id'] as String),
+      poId: Value(row['po_id'] as String?),
+      supplierId: Value(row['supplier_id'] as String?),
+      costHeadId: Value(row['cost_head_id'] as String?),
+      materialName: Value(row['material_name'] as String),
+      quantity: Value(_num(row['quantity'])),
+      unit: Value(row['unit'] as String?),
+      amount: Value(_num(row['amount'])),
+      receivedBy: Value(row['received_by'] as String),
+      receivedOn: Value(_parseTs(row['received_on'])),
+      notes: Value(row['notes'] as String?),
+    );
+
+Map<String, dynamic> materialUsageToSupabaseJson(MaterialUsageData u) => {
+      'id': u.id,
+      'project_id': u.projectId,
+      'material_name': u.materialName,
+      'quantity': u.quantity,
+      'unit': u.unit,
+      'recorded_by': u.recordedBy,
+      'used_on': _timestamp(u.usedOn.toUtc()),
+      'note': u.note,
+    };
+
+MaterialUsageCompanion materialUsageFromSupabaseJson(Map<String, dynamic> row) => MaterialUsageCompanion(
+      id: Value(row['id'] as String),
+      projectId: Value(row['project_id'] as String),
+      materialName: Value(row['material_name'] as String),
+      quantity: Value(_num(row['quantity'])),
+      unit: Value(row['unit'] as String?),
+      recordedBy: Value(row['recorded_by'] as String),
+      usedOn: Value(_parseTs(row['used_on'])),
+      note: Value(row['note'] as String?),
+    );
+
+Map<String, dynamic> paymentReceivedToSupabaseJson(PaymentsReceivedData p) => {
+      'id': p.id,
+      'project_id': p.projectId,
+      'amount': p.amount,
+      'received_on': _timestamp(p.receivedOn.toUtc()),
+      'from_party': p.fromParty,
+      'mode': p.mode,
+      'recorded_by': p.recordedBy,
+      'note': p.note,
+    };
+
+PaymentsReceivedCompanion paymentReceivedFromSupabaseJson(Map<String, dynamic> row) => PaymentsReceivedCompanion(
+      id: Value(row['id'] as String),
+      projectId: Value(row['project_id'] as String),
+      amount: Value(_num(row['amount'])),
+      receivedOn: Value(_parseTs(row['received_on'])),
+      fromParty: Value(row['from_party'] as String),
+      mode: Value(row['mode'] as String),
+      recordedBy: Value(row['recorded_by'] as String),
+      note: Value(row['note'] as String?),
     );
