@@ -19,6 +19,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/speech_service.dart';
 import 'package:fieldos_mobile/services/voice_service.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 /// What the sheet hands back.
 class VoiceReport {
@@ -113,9 +114,9 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
         builder: (ctx, scroll) => ListView(
           controller: scroll,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
-              child: Text('Which language will you speak?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              child: Text(tr('Which language will you speak?'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             ),
             for (final l in speechLanguages)
               ListTile(
@@ -242,12 +243,12 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
         children: [
           Row(
             children: [
-              Expanded(child: Text('Speak your report', style: theme.textTheme.titleLarge)),
+              Expanded(child: Text(tr('Speak your report'), style: theme.textTheme.titleLarge)),
               ActionChip(
                 avatar: const Icon(Icons.translate, size: 18),
                 label: Text(_language.isEnglish ? 'English' : _language.name),
                 onPressed: _sending == null && !_recording ? _pickLanguage : null,
-                tooltip: 'Change language',
+                tooltip: tr('Change language'),
               ),
             ],
           ),
@@ -268,10 +269,10 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
     final listening = d.state == DictationState.listening || d.state == DictationState.starting;
     final finishing = d.state == DictationState.finishing;
     final status = switch (d.state) {
-      DictationState.starting => 'Starting the microphone…',
+      DictationState.starting => tr('Starting the microphone…'),
       DictationState.listening => 'Listening · ${fmtClock(d.elapsed)}',
-      DictationState.finishing => 'Getting the last words…',
-      DictationState.paused => d.pausedForSilence ? 'Paused after a long silence. Tap the mic to carry on.' : 'Paused. Tap the mic to carry on.',
+      DictationState.finishing => tr('Getting the last words…'),
+      DictationState.paused => d.pausedForSilence ? tr('Paused after a long silence. Tap the mic to carry on.') : tr('Paused. Tap the mic to carry on.'),
       _ => d.problem == null ? 'Tap the mic and speak' : '',
     };
     return Column(
@@ -292,12 +293,12 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
         const SizedBox(height: 16),
         Row(
           children: [
-            TextButton(onPressed: finishing ? null : _typeInstead, child: const Text('Type instead')),
+            TextButton(onPressed: finishing ? null : _typeInstead, child: Text(tr('Type instead'))),
             const Spacer(),
             FilledButton.icon(
               onPressed: d.hasText && !finishing ? _done : null,
               icon: const Icon(Icons.check),
-              label: const Text('Done'),
+              label: Text(tr('Done')),
             ),
           ],
         ),
@@ -354,7 +355,7 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
         const SizedBox(height: 16),
         Row(
           children: [
-            TextButton(onPressed: sending ? null : _typeInstead, child: const Text('Type instead')),
+            TextButton(onPressed: sending ? null : _typeInstead, child: Text(tr('Type instead'))),
           ],
         ),
       ],
@@ -375,7 +376,7 @@ class _MicButton extends StatelessWidget {
     final ring = active ? 1.0 + 0.35 * level : 1.0;
     return Semantics(
       button: true,
-      label: active ? 'Pause listening' : 'Start listening',
+      label: active ? tr('Pause listening') : tr('Start listening'),
       child: SizedBox(
         width: 132,
         height: 132,
@@ -461,11 +462,11 @@ class _ProblemCard extends StatelessWidget {
       SpeechProblem.permissionDenied => (
           'Microphone is off for FieldOS',
           ios
-              ? 'Allow the microphone and speech recognition for FieldOS in Settings, then come back.'
-              : 'Allow the microphone for FieldOS in Settings, then come back.',
+              ? tr('Allow the microphone and speech recognition for FieldOS in Settings, then come back.')
+              : tr('Allow the microphone for FieldOS in Settings, then come back.'),
           [
-            FilledButton.tonal(onPressed: () => Geolocator.openAppSettings(), child: const Text('Open Settings')),
-            TextButton(onPressed: onRetry, child: const Text('Try again')),
+            FilledButton.tonal(onPressed: () => Geolocator.openAppSettings(), child: Text(tr('Open Settings'))),
+            TextButton(onPressed: onRetry, child: Text(tr('Try again'))),
           ],
         ),
       SpeechProblem.needsLanguagePack => (
@@ -475,19 +476,19 @@ class _ProblemCard extends StatelessWidget {
               : 'There is no internet, and the offline speech pack for $lang is not on this phone yet. '
                   'Connect once, then download it: Google app › Settings › Voice › Offline speech recognition › $lang. '
                   'After that, voice reports work anywhere on site.',
-          [TextButton(onPressed: onRetry, child: const Text('Try again'))],
+          [TextButton(onPressed: onRetry, child: Text(tr('Try again')))],
         ),
       SpeechProblem.languageUnsupported || SpeechProblem.noRecognizer => (
           problem == SpeechProblem.noRecognizer ? 'This phone has no speech recognition' : "This phone can't do $lang yet",
           problem == SpeechProblem.noRecognizer
-              ? 'Install or update the Google app from the Play Store, then try again. You can also type the report.'
-              : 'Update the Google app from the Play Store, pick another language above, or type the report.',
-          [TextButton(onPressed: onRetry, child: const Text('Try again'))],
+              ? tr('Install or update the Google app from the Play Store, then try again. You can also type the report.')
+              : tr('Update the Google app from the Play Store, pick another language above, or type the report.'),
+          [TextButton(onPressed: onRetry, child: Text(tr('Try again')))],
         ),
       SpeechProblem.other => (
           'Listening stopped',
           'The phone stopped listening. Tap Try again, or type the report.',
-          [TextButton(onPressed: onRetry, child: const Text('Try again'))],
+          [TextButton(onPressed: onRetry, child: Text(tr('Try again')))],
         ),
     };
     return Container(

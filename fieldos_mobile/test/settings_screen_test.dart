@@ -48,6 +48,7 @@ void main() {
     }
     expect(find.text('Sarvam fallback key'), findsNothing);
     await tester.scrollUntilVisible(find.text('Privacy policy'), 200);
+    await tester.scrollUntilVisible(find.text('Open-source licences'), 200);
     expect(find.text('Open-source licences'), findsOneWidget);
   });
 

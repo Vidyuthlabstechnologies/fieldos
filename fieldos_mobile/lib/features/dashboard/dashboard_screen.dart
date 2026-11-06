@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key, required this.companyId, required this.companyName});
@@ -24,15 +25,15 @@ class DashboardScreen extends ConsumerWidget {
     final projectsAsync = ref.watch(projectsProvider(companyId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard')),
+      appBar: AppBar(title: Text(tr('Dashboard'))),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(projectsProvider(companyId).future),
         child: projectsAsync.when(
           data: (projects) => projects.isEmpty
-              ? const EmptyState(
+              ? EmptyState(
                   icon: Icons.insights_outlined,
-                  title: 'No projects yet',
-                  message: 'Each site shows here with its budget, spending, open issues and daily reports.',
+                  title: tr('No projects yet'),
+                  message: tr('Each site shows here with its budget, spending, open issues and daily reports.'),
                 )
               : ListView(
                   padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
@@ -94,11 +95,11 @@ class _ProjectHealthCard extends ConsumerWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _Metric(label: 'Budget', value: s.status == 'no_budget' ? 'Not set' : rupees(s.budget)),
-                    _Metric(label: 'Spent', value: rupees(s.actual)),
+                    _Metric(label: tr('Budget'), value: s.status == 'no_budget' ? 'Not set' : rupees(s.budget)),
+                    _Metric(label: tr('Spent'), value: rupees(s.actual)),
                     if (s.status != 'no_budget')
                       _Metric(
-                        label: s.variance < 0 ? 'Over by' : 'Left',
+                        label: s.variance < 0 ? tr('Over by') : tr('Left'),
                         value: rupees(s.variance.abs()),
                         warn: s.variance < 0,
                       ),
@@ -106,7 +107,7 @@ class _ProjectHealthCard extends ConsumerWidget {
                 ),
                 if (s.status == 'no_budget') ...[
                   const SizedBox(height: 8),
-                  Text('Add a priced BOQ under Estimation to compare spending with a budget.',
+                  Text(tr('Add a priced BOQ under Estimation to compare spending with a budget.'),
                       style: theme.textTheme.bodySmall?.copyWith(color: muted)),
                 ],
                 const SizedBox(height: 10),
@@ -144,7 +145,7 @@ class _ProjectHealthCard extends ConsumerWidget {
                     alignment: Alignment.centerRight,
                     child: FilledButton.tonalIcon(
                       icon: const Icon(Icons.approval_outlined, size: 18),
-                      label: const Text('Ask for approval'),
+                      label: Text(tr('Ask for approval')),
                       onPressed: () => _raise(context, ref, s.projectId, s.variance),
                     ),
                   ),
@@ -174,10 +175,10 @@ class _ProjectHealthCard extends ConsumerWidget {
 }
 
 String _statusLabel(String status) => switch (status) {
-      'over' => 'Over budget',
-      'at_risk' => 'Close to budget',
-      'no_budget' => 'No budget yet',
-      _ => 'On track',
+      'over' => tr('Over budget'),
+      'at_risk' => tr('Close to budget'),
+      'no_budget' => tr('No budget yet'),
+      _ => tr('On track'),
     };
 
 PillTone _statusTone(String status) => switch (status) {

@@ -10,6 +10,7 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class WorkersView extends ConsumerStatefulWidget {
   const WorkersView({
@@ -34,7 +35,7 @@ class _WorkersViewState extends ConsumerState<WorkersView> {
         Expanded(
           child: workersList.when(
             data: (rows) => rows.isEmpty
-                ? const Center(child: Text('No workers yet.'))
+                ? Center(child: Text(tr('No workers yet.')))
                 : ListView(
                     children: [
                       for (final w in rows)
@@ -60,23 +61,23 @@ class _WorkersViewState extends ConsumerState<WorkersView> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add worker'),
+        title: Text(tr('Add worker')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Name')),
-            TextField(controller: role, decoration: const InputDecoration(labelText: 'Role')),
-            TextField(controller: phone, decoration: const InputDecoration(labelText: 'Phone')),
+            TextField(controller: name, decoration: InputDecoration(labelText: tr('Name'))),
+            TextField(controller: role, decoration: InputDecoration(labelText: tr('Role'))),
+            TextField(controller: phone, decoration: InputDecoration(labelText: tr('Phone'))),
             TextField(
               controller: dailyWage,
-              decoration: const InputDecoration(labelText: 'Daily wage'),
+              decoration: InputDecoration(labelText: tr('Daily wage')),
               keyboardType: TextInputType.number,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
         ],
       ),
     );
@@ -100,7 +101,7 @@ Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd) =>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title, style: Theme.of(context).textTheme.titleSmall),
-          IconButton(icon: const Icon(Icons.add), tooltip: 'Add', onPressed: onAdd),
+          IconButton(icon: const Icon(Icons.add), tooltip: tr('Add'), onPressed: onAdd),
         ],
       ),
     );
@@ -131,9 +132,9 @@ class _WorkerTile extends ConsumerWidget {
                 await ref.read(appDatabaseProvider).workerDao.setStatus(worker.id, s);
                 ref.invalidate(workersProvider(projectId));
               },
-              itemBuilder: (ctx) => const [
-                PopupMenuItem(value: 'active', child: Text('Active')),
-                PopupMenuItem(value: 'inactive', child: Text('Inactive')),
+              itemBuilder: (ctx) => [
+                PopupMenuItem(value: 'active', child: Text(tr('Active'))),
+                PopupMenuItem(value: 'inactive', child: Text(tr('Inactive'))),
               ],
             ),
           ],

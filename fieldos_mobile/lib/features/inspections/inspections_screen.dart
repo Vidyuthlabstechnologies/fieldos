@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class InspectionsView extends ConsumerStatefulWidget {
   const InspectionsView({super.key, required this.projectId, required this.userId});
@@ -33,7 +34,7 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
         Expanded(
           child: inspectionsList.when(
             data: (rows) => rows.isEmpty
-                ? const Center(child: Text('No inspections yet.'))
+                ? Center(child: Text(tr('No inspections yet.')))
                 : ListView(
                     children: [
                       for (final i in rows)
@@ -56,24 +57,24 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add inspection'),
+        title: Text(tr('Add inspection')),
         scrollable: true,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: title,
-              decoration: const InputDecoration(labelText: 'Title'),
+              decoration: InputDecoration(labelText: tr('Title')),
             ),
             DropdownButtonFormField<String>(
               initialValue: 'safety',
-              decoration: const InputDecoration(labelText: 'Type'),
+              decoration: InputDecoration(labelText: tr('Type')),
               items: [for (final t in _inspectionTypes) DropdownMenuItem(value: t, child: Text(_typeLabel(t)))],
               onChanged: (v) => inspectionType.text = v ?? 'safety',
             ),
             TextField(
               controller: scheduledDate,
-              decoration: const InputDecoration(labelText: 'Scheduled date (optional)'),
+              decoration: InputDecoration(labelText: tr('Scheduled date (optional)')),
               readOnly: true,
               onTap: () async {
                 final picked = await showDatePicker(
@@ -91,8 +92,8 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
         ],
       ),
     );
@@ -120,7 +121,7 @@ Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd) =>
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
       Text(title, style: Theme.of(context).textTheme.titleSmall),
-      IconButton(icon: const Icon(Icons.add), tooltip: 'Add', onPressed: onAdd),
+      IconButton(icon: const Icon(Icons.add), tooltip: tr('Add'), onPressed: onAdd),
     ],
   ),
 );
@@ -152,7 +153,7 @@ class _InspectionTile extends ConsumerWidget {
             const SizedBox(width: 8),
             IconButton(
               icon: const Icon(Icons.checklist),
-              tooltip: 'Checklist',
+              tooltip: tr('Checklist'),
               onPressed: () => _showChecklist(context),
             ),
           ],
@@ -177,7 +178,7 @@ class _InspectionTile extends ConsumerWidget {
             width: 400,
             child: items.when(
               data: (rows) => rows.isEmpty
-                  ? const Text('Nothing on the checklist yet. Add each thing to check, with a photo if it helps.')
+                  ? Text(tr('Nothing on the checklist yet. Add each thing to check, with a photo if it helps.'))
                   : Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -199,10 +200,10 @@ class _InspectionTile extends ConsumerWidget {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Close')),
-            OutlinedButton(onPressed: () => _addItem(ctx, ref), child: const Text('Add item')),
+            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(tr('Close'))),
+            OutlinedButton(onPressed: () => _addItem(ctx, ref), child: Text(tr('Add item'))),
             if (inspection.status != 'completed')
-              FilledButton(onPressed: () => _completeInspection(ctx, ref), child: const Text('Complete')),
+              FilledButton(onPressed: () => _completeInspection(ctx, ref), child: Text(tr('Complete'))),
           ],
         );
       },
@@ -216,7 +217,7 @@ class _InspectionTile extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (_, setItemState) => AlertDialog(
-          title: const Text('Add checklist item'),
+          title: Text(tr('Add checklist item')),
           scrollable: true,
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -226,12 +227,12 @@ class _InspectionTile extends ConsumerWidget {
                 autofocus: true,
                 textCapitalization: TextCapitalization.sentences,
                 maxLength: 300,
-                decoration: const InputDecoration(labelText: 'What to check', counterText: ''),
+                decoration: InputDecoration(labelText: tr('What to check'), counterText: ''),
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: Icon(photoPath == null ? Icons.photo_camera_outlined : Icons.check_circle_outline),
-                label: Text(photoPath == null ? 'Add a photo' : 'Photo added'),
+                label: Text(photoPath == null ? tr('Add a photo') : tr('Photo added')),
                 onPressed: () async {
                   final path = await captureCameraFirst(ctx, prefix: 'inspection');
                   if (path != null) setItemState(() => photoPath = path);
@@ -240,8 +241,8 @@ class _InspectionTile extends ConsumerWidget {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
           ],
         ),
       ),
@@ -272,16 +273,16 @@ class _InspectionTile extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Complete inspection'),
+        title: Text(tr('Complete inspection')),
         content: DropdownButtonFormField<String>(
           initialValue: result,
-          decoration: const InputDecoration(labelText: 'Overall result'),
+          decoration: InputDecoration(labelText: tr('Overall result')),
           items: [for (final e in _results.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
           onChanged: (v) => result = v ?? 'pass',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Complete')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Complete'))),
         ],
       ),
     );
@@ -295,8 +296,8 @@ class _InspectionTile extends ConsumerWidget {
 const _inspectionTypes = ['safety', 'quality', 'structural', 'mep', 'environmental', 'final', 'other'];
 
 String _typeLabel(String type) => switch (type) {
-  'mep' => 'MEP',
-  '' => 'Inspection',
+  'mep' => tr('MEP'),
+  '' => tr('Inspection'),
   _ => '${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}',
 };
 
@@ -373,7 +374,7 @@ class _PhotoThumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
-    label: 'Open photo',
+    label: tr('Open photo'),
     child: InkWell(
       borderRadius: BorderRadius.circular(6),
       onTap: () => showDialog<void>(

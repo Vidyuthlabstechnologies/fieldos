@@ -14,6 +14,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class SiteMapScreen extends ConsumerWidget {
   const SiteMapScreen({super.key, required this.companyId});
@@ -23,7 +24,7 @@ class SiteMapScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final projects = ref.watch(projectsProvider(companyId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Site map')),
+      appBar: AppBar(title: Text(tr('Site map'))),
       body: projects.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => ErrorState(error: e, stack: st),
@@ -42,7 +43,7 @@ class SiteMapScreen extends ConsumerWidget {
                       for (final p in unplaced)
                         ListTile(
                           title: Text(p.name),
-                          subtitle: const Text('Stand on site and tap to set it from GPS'),
+                          subtitle: Text(tr('Stand on site and tap to set it from GPS')),
                           trailing: const Icon(Icons.add_location_alt),
                           onTap: () => _placeHere(context, ref, p),
                         ),
@@ -77,10 +78,10 @@ class _Map extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (placed.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
           padding: EdgeInsets.all(24),
-          child: Text('No site locations yet. Set one below, or from a project\'s Labour tab.', textAlign: TextAlign.center),
+          child: Text(tr('No site locations yet. Set one below, or from a project\'s Labour tab.'), textAlign: TextAlign.center),
         ),
       );
     }

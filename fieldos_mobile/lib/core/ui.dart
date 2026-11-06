@@ -11,6 +11,7 @@ import 'package:supabase/supabase.dart' as sb;
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/services/bug_report_service.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 /// A message a site engineer can act on, never a stack trace or a database
 /// row. Anything unexpected is kept for the next bug report.
@@ -122,7 +123,7 @@ void showSnack(BuildContext context, String message, {bool error = false, SnackB
         Icon(error ? Icons.error_outline : Icons.check_circle_outline,
             color: error ? const Color(0xFFFFB4AB) : Brand.amber, size: 20),
         const SizedBox(width: 10),
-        Expanded(child: Text(message)),
+        Expanded(child: Text(tr(message))),
       ]),
       action: action,
       duration: Duration(seconds: error ? 6 : 3),
@@ -218,7 +219,7 @@ class ErrorState extends StatelessWidget {
                 textAlign: TextAlign.center, style: theme.textTheme.bodyLarge),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Try again')),
+              OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: Text(tr('Try again'))),
             ],
           ],
         ),
@@ -279,7 +280,7 @@ class SectionHeader extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: padding,
-      child: Text(title.toUpperCase(),
+      child: Text(tr(title).toUpperCase(),
           style: theme.textTheme.labelMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
             letterSpacing: 0.8,

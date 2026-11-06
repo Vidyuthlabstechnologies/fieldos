@@ -24,6 +24,7 @@ import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/speech_service.dart';
 import 'package:fieldos_mobile/services/translation_service.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class DprDraftResult {
   const DprDraftResult({
@@ -162,8 +163,8 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
               'English on this phone, with no internet and no cost.',
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Not now')),
-              FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Download')),
+              TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Not now'))),
+              FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Download'))),
             ],
           ),
         );
@@ -261,8 +262,8 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
     final heard = widget.spokenIn;
     return Scaffold(
       appBar: AppBar(
-        title: Text(heard != null ? 'Check your report' : 'New daily report'),
-        actions: [TextButton(onPressed: _save, child: const Text('Save', style: TextStyle(color: Colors.white)))],
+        title: Text(heard != null ? tr('Check your report') : tr('New daily report')),
+        actions: [TextButton(onPressed: _save, child: Text(tr('Save'), style: TextStyle(color: Colors.white)))],
       ),
       body: SafeArea(
         child: ListView(
@@ -308,10 +309,10 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
               minLines: 4,
               maxLines: 12,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Work done',
+              decoration: InputDecoration(
+                labelText: tr('Work done'),
                 alignLabelWithHint: true,
-                hintText: 'What was done, how many people worked, the weather, any problems',
+                hintText: tr('What was done, how many people worked, the weather, any problems'),
               ),
             ),
             if (canTranslate || _original != null || _translating)
@@ -321,17 +322,17 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                   if (_translating) ...[
                     const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
                     const SizedBox(width: 10),
-                    const Text('Translating on this phone…'),
+                    Text(tr('Translating on this phone…')),
                   ] else if (_original != null) ...[
                     const Icon(Icons.check_circle, size: 18, color: Brand.ok),
                     const SizedBox(width: 6),
                     Expanded(child: Text('Translated from ${lang?.englishName ?? 'the original'} on this phone')),
-                    TextButton(onPressed: _undoTranslation, child: const Text('Show original')),
+                    TextButton(onPressed: _undoTranslation, child: Text(tr('Show original'))),
                   ] else
                     OutlinedButton.icon(
                       onPressed: _translate,
                       icon: const Icon(Icons.translate),
-                      label: const Text('Translate to English'),
+                      label: Text(tr('Translate to English')),
                     ),
                 ]),
               ),
@@ -345,7 +346,7 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(4)],
                     onChanged: (_) => _manpowerTouched = true,
-                    decoration: const InputDecoration(labelText: 'People on site', prefixIcon: Icon(Icons.groups_outlined)),
+                    decoration: InputDecoration(labelText: tr('People on site'), prefixIcon: Icon(Icons.groups_outlined)),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -354,8 +355,8 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                     controller: _weather,
                     maxLength: 50,
                     onChanged: (_) => _weatherTouched = true,
-                    decoration: const InputDecoration(
-                      labelText: 'Weather',
+                    decoration: InputDecoration(
+                      labelText: tr('Weather'),
                       prefixIcon: Icon(Icons.wb_cloudy_outlined),
                       counterText: '',
                     ),
@@ -382,7 +383,7 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.event_outlined),
-                title: const Text('Report for'),
+                title: Text(tr('Report for')),
                 subtitle: Text('${fmtDay(_date)} · ${fmtDate(_date)}'),
                 trailing: const Icon(Icons.edit_calendar_outlined),
                 onTap: _pickDate,
@@ -414,7 +415,7 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                           child: IconButton.filledTonal(
                             visualDensity: VisualDensity.compact,
                             iconSize: 16,
-                            tooltip: 'Remove photo',
+                            tooltip: tr('Remove photo'),
                             onPressed: () => setState(() => _photos.remove(p)),
                             icon: const Icon(Icons.close),
                           ),
@@ -434,7 +435,7 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                         Icon(Icons.add_a_photo_outlined, color: theme.colorScheme.primary),
                         const SizedBox(height: 4),
-                        Text('Add photo', style: theme.textTheme.labelSmall),
+                        Text(tr('Add photo'), style: theme.textTheme.labelSmall),
                       ]),
                     ),
                   ),
@@ -443,9 +444,8 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
             ),
             const SectionHeader('Problems to raise'),
             if (_issues.isEmpty)
-              Text(
-                'None found. FieldOS looks for delays, shortages, leaks, cracks, breakdowns, safety and payment '
-                'problems as you write or speak, in English, Hindi and Telugu.',
+              Text(tr('None found. FieldOS looks for delays, shortages, leaks, cracks, breakdowns, safety and payment '
+                'problems as you write or speak, in English, Hindi and Telugu.'),
                 style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               )
             else
@@ -459,7 +459,7 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                   onChanged: (v) => setState(() => v == true ? _unticked.remove(e.key) : _unticked.add(e.key)),
                 ),
             const SizedBox(height: 24),
-            FilledButton.icon(onPressed: _save, icon: const Icon(Icons.check), label: const Text('Save report')),
+            FilledButton.icon(onPressed: _save, icon: const Icon(Icons.check), label: Text(tr('Save report'))),
           ],
         ),
       ),
@@ -488,7 +488,7 @@ class _TaskProgressSection extends ConsumerWidget {
     final theme = Theme.of(context);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       const SectionHeader('Progress today'),
-      Text('Move the tasks worked on today. 100% marks a task done.',
+      Text(tr('Move the tasks worked on today. 100% marks a task done.'),
           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
       for (final t in open)
         Builder(builder: (context) {
@@ -568,7 +568,7 @@ class _FromSiteRecords extends ConsumerWidget {
         if (showMaterials)
           ActionChip(
             avatar: const Icon(Icons.local_shipping_outlined, size: 18),
-            label: const Text('Add material received'),
+            label: Text(tr('Add material received')),
             onPressed: () => onAddLine(materials),
           ),
       ]),

@@ -18,6 +18,7 @@ import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -52,18 +53,18 @@ class HomeScreen extends ConsumerWidget {
           }),
           IconButton(
             icon: const Icon(Icons.insights_outlined),
-            tooltip: 'Dashboard',
+            tooltip: tr('Dashboard'),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => DashboardScreen(companyId: company.id, companyName: company.name),
             )),
           ),
           IconButton(
             icon: const Icon(Icons.groups_outlined),
-            tooltip: 'Team & sync',
+            tooltip: tr('Team & sync'),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeamSyncScreen())),
           ),
           PopupMenuButton<String>(
-            tooltip: 'More',
+            tooltip: tr('More'),
             onSelected: (v) {
               switch (v) {
                 case 'map':
@@ -83,19 +84,19 @@ class HomeScreen extends ConsumerWidget {
               }
             },
             itemBuilder: (_) => [
-              const PopupMenuItem(value: 'map', child: ListTile(leading: Icon(Icons.map_outlined), title: Text('Site map'))),
-              const PopupMenuItem(
+              PopupMenuItem(value: 'map', child: ListTile(leading: Icon(Icons.map_outlined), title: Text(tr('Site map')))),
+              PopupMenuItem(
                   value: 'subcontractors',
-                  child: ListTile(leading: Icon(Icons.engineering_outlined), title: Text('Subcontractors'))),
+                  child: ListTile(leading: Icon(Icons.engineering_outlined), title: Text(tr('Subcontractors')))),
               if (ref.read(billingServiceProvider).setUp)
-                const PopupMenuItem(
+                PopupMenuItem(
                     value: 'subscription',
-                    child: ListTile(leading: Icon(Icons.workspace_premium_outlined), title: Text('My subscription'))),
-              const PopupMenuItem(
-                  value: 'settings', child: ListTile(leading: Icon(Icons.settings_outlined), title: Text('Settings'))),
-              const PopupMenuItem(
-                  value: 'bug', child: ListTile(leading: Icon(Icons.bug_report_outlined), title: Text('Report a bug'))),
-              const PopupMenuItem(value: 'logout', child: ListTile(leading: Icon(Icons.logout), title: Text('Log out'))),
+                    child: ListTile(leading: Icon(Icons.workspace_premium_outlined), title: Text(tr('My subscription')))),
+              PopupMenuItem(
+                  value: 'settings', child: ListTile(leading: Icon(Icons.settings_outlined), title: Text(tr('Settings')))),
+              PopupMenuItem(
+                  value: 'bug', child: ListTile(leading: Icon(Icons.bug_report_outlined), title: Text(tr('Report a bug')))),
+              PopupMenuItem(value: 'logout', child: ListTile(leading: Icon(Icons.logout), title: Text(tr('Log out')))),
             ],
           ),
         ],
@@ -106,10 +107,10 @@ class HomeScreen extends ConsumerWidget {
           data: (projects) => projects.isEmpty
               ? EmptyState(
                   icon: Icons.domain_add_outlined,
-                  title: 'Start your first project',
-                  message: 'A project is one site. Its daily reports, labour, materials, money and photos stay '
-                      'together, on this phone and offline.',
-                  actionLabel: 'New project',
+                  title: tr('Start your first project'),
+                  message: tr('A project is one site. Its daily reports, labour, materials, money and photos stay '
+                      'together, on this phone and offline.'),
+                  actionLabel: tr('New project'),
                   onAction: () => _newProject(context, ref, company.id),
                 )
               : _ProjectList(projects: projects, userName: session.user?.name),
@@ -120,7 +121,7 @@ class HomeScreen extends ConsumerWidget {
       floatingActionButton: hasProjects
           ? FloatingActionButton.extended(
               icon: const Icon(Icons.add),
-              label: const Text('New project'),
+              label: Text(tr('New project')),
               onPressed: () => _newProject(context, ref, company.id),
             )
           : null,
@@ -153,7 +154,7 @@ class _CompanyTitle extends ConsumerWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-                  child: Text('Switch company', style: Theme.of(ctx).textTheme.titleLarge),
+                  child: Text(tr('Switch company'), style: Theme.of(ctx).textTheme.titleLarge),
                 ),
                 for (final c in companies)
                   ListTile(
@@ -203,8 +204,8 @@ class _ProjectList extends StatelessWidget {
     final greeting = now.hour < 12
         ? 'Good morning'
         : now.hour < 17
-            ? 'Good afternoon'
-            : 'Good evening';
+            ? tr('Good afternoon')
+            : tr('Good evening');
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 96),
@@ -283,12 +284,12 @@ class _ProjectCard extends ConsumerWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         StatusPill(projectStatusLabel(project.status), tone: projectStatusTone(project.status)),
-                        if (lateTasks > 0) StatusPill(lateTasks == 1 ? '1 task late' : '$lateTasks tasks late', tone: PillTone.danger),
+                        if (lateTasks > 0) StatusPill(lateTasks == 1 ? tr('1 task late') : trf('{n} tasks late', {'n': lateTasks}), tone: PillTone.danger),
                         if (onMap)
                           Row(mainAxisSize: MainAxisSize.min, children: [
                             Icon(Icons.place_outlined, size: 15, color: scheme.onSurfaceVariant),
                             const SizedBox(width: 2),
-                            Text('On the map',
+                            Text(tr('On the map'),
                                 style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
                           ]),
                       ],

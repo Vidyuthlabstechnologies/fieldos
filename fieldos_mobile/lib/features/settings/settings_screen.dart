@@ -17,6 +17,8 @@ import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/speech_service.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/l10n/language_picker.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -56,10 +58,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   static String _roleLabel(String? role) => switch (role) {
-        Roles.owner => 'Owner',
-        Roles.manager => 'Project manager',
-        Roles.viewer => 'Viewer',
-        _ => 'Site engineer',
+        Roles.owner => tr('Owner'),
+        Roles.manager => tr('Project manager'),
+        Roles.viewer => tr('Viewer'),
+        _ => tr('Site engineer'),
       };
 
   Future<void> _pickLanguage() async {
@@ -77,11 +79,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 4),
-              child: Text('Voice report language', style: Theme.of(ctx).textTheme.titleLarge),
+              child: Text(tr('Voice report language'), style: Theme.of(ctx).textTheme.titleLarge),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-              child: Text('The language you usually speak your daily reports in. You can still change it each time.',
+              child: Text(tr('The language you usually speak your daily reports in. You can still change it each time.'),
                   style: TextStyle(color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
             ),
             for (final l in speechLanguages)
@@ -113,7 +115,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final keySet = await ref.read(settingsServiceProvider).isVoiceConfigured();
     if (!mounted) return;
     setState(() => _sarvamKeySet = keySet);
-    showSnack(context, keySet ? 'Sarvam key saved' : 'Sarvam key removed');
+    showSnack(context, keySet ? tr('Sarvam key saved') : tr('Sarvam key removed'));
   }
 
   @override
@@ -133,7 +135,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         .join();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(tr('Settings'))),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
@@ -161,28 +163,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SectionHeader('Account', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           ListTile(
             leading: const Icon(Icons.lock_reset_outlined),
-            title: const Text('Change password'),
-            subtitle: const Text('For logging in on this phone'),
+            title: Text(tr('Change password')),
+            subtitle: Text(tr('For logging in on this phone')),
             onTap: _changePassword,
           ),
           ListTile(
             leading: const Icon(Icons.groups_outlined),
-            title: const Text('Team & sync'),
-            subtitle: const Text('Share projects with your team, back up to the cloud'),
+            title: Text(tr('Team & sync')),
+            subtitle: Text(tr('Share projects with your team, back up to the cloud')),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeamSyncScreen())),
           ),
           if (billing.setUp)
             ListTile(
               leading: const Icon(Icons.workspace_premium_outlined),
-              title: const Text('My subscription'),
-              subtitle: const Text('FieldOS Pro: manage, cancel or restore'),
+              title: Text(tr('My subscription')),
+              subtitle: Text(tr('FieldOS Pro: manage, cancel or restore')),
               onTap: () => showMySubscription(context),
             ),
 
+          const SectionHeader('App language', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
+          ListTile(
+            leading: const Icon(Icons.translate),
+            title: Text(tr('App language')),
+            subtitle: Text(ref.watch(languageProvider).nativeName),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => showLanguagePicker(context, ref),
+          ),
           const SectionHeader('Voice reports', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           ListTile(
             leading: const Icon(Icons.record_voice_over_outlined),
-            title: const Text('Language'),
+            title: Text(tr('Language')),
             subtitle: Text(speechLanguageFor(_voiceLanguage).label),
             trailing: const Icon(Icons.chevron_right),
             onTap: _pickLanguage,
@@ -190,10 +200,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           if (session.canManageSettings)
             ListTile(
               leading: const Icon(Icons.key_outlined),
-              title: const Text('Sarvam fallback key'),
+              title: Text(tr('Sarvam fallback key')),
               subtitle: Text(_sarvamKeySet
-                  ? 'Set. Used only on phones that cannot recognise the chosen language.'
-                  : 'Not set. Voice reports use the phone itself, free and offline.'),
+                  ? tr('Set. Used only on phones that cannot recognise the chosen language.')
+                  : tr('Not set. Voice reports use the phone itself, free and offline.')),
               trailing: const Icon(Icons.chevron_right),
               onTap: _sarvamKey,
             ),
@@ -201,12 +211,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SectionHeader('Help', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           ListTile(
             leading: const Icon(Icons.bug_report_outlined),
-            title: const Text('Report a bug'),
+            title: Text(tr('Report a bug')),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BugReportScreen())),
           ),
           ListTile(
             leading: const Icon(Icons.mail_outline),
-            title: const Text('Email support'),
+            title: Text(tr('Email support')),
             subtitle: const Text(Brand.supportEmail),
             onTap: () => emailSupport(subject: 'FieldOS: help'),
           ),
@@ -214,17 +224,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SectionHeader('About', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
-            title: const Text('Privacy policy'),
+            title: Text(tr('Privacy policy')),
             onTap: () => openPrivacyPolicy(context),
           ),
           ListTile(
             leading: const Icon(Icons.description_outlined),
-            title: const Text('Terms of use'),
+            title: Text(tr('Terms of use')),
             onTap: () => openTerms(context),
           ),
           ListTile(
             leading: const Icon(Icons.code),
-            title: const Text('Open-source licences'),
+            title: Text(tr('Open-source licences')),
             onTap: () => showLicensePage(
               context: context,
               applicationName: 'FieldOS',
@@ -235,7 +245,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('Version'),
+            title: Text(tr('Version')),
             subtitle: Text(_version ?? ''),
           ),
 
@@ -244,7 +254,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: OutlinedButton.icon(
               icon: const Icon(Icons.logout),
-              label: const Text('Log out'),
+              label: Text(tr('Log out')),
               onPressed: () {
                 ref.read(cloudSyncBootstrapProvider).stop();
                 ref.read(sessionProvider.notifier).logout();
@@ -301,14 +311,14 @@ class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Change password'),
+      title: Text(tr('Change password')),
       content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         TextField(
           controller: _current,
           obscureText: true,
           autofillHints: const [AutofillHints.password],
           textInputAction: TextInputAction.next,
-          decoration: const InputDecoration(labelText: 'Current password'),
+          decoration: InputDecoration(labelText: tr('Current password')),
         ),
         const SizedBox(height: 12),
         TextField(
@@ -317,15 +327,15 @@ class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
           autofillHints: const [AutofillHints.newPassword],
           onSubmitted: (_) => _busy ? null : _save(),
           decoration: InputDecoration(
-            labelText: 'New password',
+            labelText: tr('New password'),
             helperText: 'At least ${AuthService.minPasswordLength} characters',
           ),
         ),
         if (_error != null) ...[const SizedBox(height: 12), FormMessage(_error!)],
       ]),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-        FilledButton(onPressed: _busy ? null : _save, child: const Text('Change')),
+        TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(tr('Cancel'))),
+        FilledButton(onPressed: _busy ? null : _save, child: Text(tr('Change'))),
       ],
     );
   }
@@ -356,12 +366,11 @@ class _SarvamKeyDialogState extends ConsumerState<_SarvamKeyDialog> {
     final settings = ref.read(settingsServiceProvider);
     final muted = TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant);
     return AlertDialog(
-      title: const Text('Sarvam fallback key'),
+      title: Text(tr('Sarvam fallback key')),
       content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(
-          'Voice reports use the phone\'s own speech recognition, free and offline when the language pack is on '
+        Text(tr('Voice reports use the phone\'s own speech recognition, free and offline when the language pack is on '
           'the phone. Only phones that cannot recognise the chosen language at all send a recording to Sarvam AI '
-          '(sarvam.ai), which needs a key from your Sarvam account and is billed by Sarvam.',
+          '(sarvam.ai), which needs a key from your Sarvam account and is billed by Sarvam.'),
           style: muted,
         ),
         const SizedBox(height: 16),
@@ -371,12 +380,12 @@ class _SarvamKeyDialogState extends ConsumerState<_SarvamKeyDialog> {
           autocorrect: false,
           enableSuggestions: false,
           decoration: InputDecoration(
-            labelText: widget.keySet ? 'New key (replaces the saved one)' : 'Sarvam API key',
+            labelText: widget.keySet ? tr('New key (replaces the saved one)') : tr('Sarvam API key'),
             prefixIcon: const Icon(Icons.key_outlined),
           ),
         ),
         const SizedBox(height: 8),
-        Text('The key stays on this phone and is never shown again.', style: muted),
+        Text(tr('The key stays on this phone and is never shown again.'), style: muted),
       ]),
       actions: [
         if (widget.keySet)
@@ -385,9 +394,9 @@ class _SarvamKeyDialogState extends ConsumerState<_SarvamKeyDialog> {
               await settings.clearSarvamApiKey();
               if (context.mounted) Navigator.of(context).pop(false);
             },
-            child: const Text('Remove key'),
+            child: Text(tr('Remove key')),
           ),
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(tr('Cancel'))),
         FilledButton(
           onPressed: () async {
             final key = _key.text.trim();
@@ -395,7 +404,7 @@ class _SarvamKeyDialogState extends ConsumerState<_SarvamKeyDialog> {
             await settings.setSarvamApiKey(key);
             if (context.mounted) Navigator.of(context).pop(true);
           },
-          child: const Text('Save'),
+          child: Text(tr('Save')),
         ),
       ],
     );

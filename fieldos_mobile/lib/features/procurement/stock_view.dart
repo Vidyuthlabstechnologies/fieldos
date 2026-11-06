@@ -7,6 +7,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/procurement/site_stock.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 final siteStockProvider = FutureProvider.autoDispose.family<List<StockLine>, String>((ref, projectId) async {
   final db = ref.watch(appDatabaseProvider);
@@ -27,10 +28,10 @@ class StockView extends ConsumerWidget {
     return Stack(children: [
       stock.when(
         data: (lines) => lines.isEmpty
-            ? const Center(
+            ? Center(
                 child: Padding(
                 padding: EdgeInsets.all(24),
-                child: Text('Stock appears here once material is received in the GRN tab.', textAlign: TextAlign.center),
+                child: Text(tr('Stock appears here once material is received in the GRN tab.'), textAlign: TextAlign.center),
               ))
             : ListView(padding: const EdgeInsets.only(bottom: 80), children: [
                 for (final l in lines)
@@ -53,7 +54,7 @@ class StockView extends ConsumerWidget {
           heroTag: 'record-usage',
           onPressed: () => _recordUsage(context, ref),
           icon: const Icon(Icons.outbox),
-          label: const Text('Record material used'),
+          label: Text(tr('Record material used')),
         ),
       ),
     ]);
@@ -67,12 +68,12 @@ class StockView extends ConsumerWidget {
 
   static Widget _badge(BuildContext context, StockStatus s) => switch (s) {
         StockStatus.overused => Tooltip(
-            message: 'More used than received. Check for a missing GRN or loss.',
+            message: tr('More used than received. Check for a missing GRN or loss.'),
             child: Icon(Icons.error, color: toneColor(context, PillTone.danger))),
         StockStatus.out =>
-          Tooltip(message: 'Nothing left', child: Icon(Icons.remove_circle, color: toneColor(context, PillTone.danger))),
+          Tooltip(message: tr('Nothing left'), child: Icon(Icons.remove_circle, color: toneColor(context, PillTone.danger))),
         StockStatus.low => Tooltip(
-            message: 'Running low: order soon', child: Icon(Icons.warning_amber, color: toneColor(context, PillTone.warn))),
+            message: tr('Running low: order soon'), child: Icon(Icons.warning_amber, color: toneColor(context, PillTone.warn))),
         StockStatus.ok => Icon(Icons.check_circle_outline, color: toneColor(context, PillTone.ok)),
       };
 
@@ -84,26 +85,26 @@ class StockView extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Material used'),
+        title: Text(tr('Material used')),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(controller: name, decoration: const InputDecoration(labelText: 'Material (e.g. Cement)')),
+          TextField(controller: name, decoration: InputDecoration(labelText: tr('Material (e.g. Cement)'))),
           Row(children: [
             Expanded(
               child: TextField(
                 controller: qty,
                 autofocus: preset != null,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Quantity used'),
+                decoration: InputDecoration(labelText: tr('Quantity used')),
               ),
             ),
             const SizedBox(width: 8),
-            SizedBox(width: 90, child: TextField(controller: unit, decoration: const InputDecoration(labelText: 'Unit'))),
+            SizedBox(width: 90, child: TextField(controller: unit, decoration: InputDecoration(labelText: tr('Unit')))),
           ]),
-          TextField(controller: note, decoration: const InputDecoration(labelText: 'Where (e.g. 2nd floor slab)')),
+          TextField(controller: note, decoration: InputDecoration(labelText: tr('Where (e.g. 2nd floor slab)'))),
         ]),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Save'))),
         ],
       ),
     );
