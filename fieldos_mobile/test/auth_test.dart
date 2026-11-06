@@ -123,5 +123,18 @@ void main() {
       expect(c.name, 'Sri Sai Constructions');
       expect(await auth.roleInCompany(userId: u.id, companyId: c.id), Roles.owner);
     });
+
+    test('changing the password checks the current one', () async {
+      final db = AppDatabase.memory();
+      addTearDown(() async => db.close());
+      final auth = AuthService(db);
+      final u = await auth.register(username: 'asha', name: 'Asha', password: 'first1');
+      expect(() => auth.changePassword(userId: u.id, current: 'wrong1', next: 'second2'),
+          throwsA(isA<AuthException>().having((e) => e.message, 'message', 'Your current password is not right.')));
+      expect(() => auth.changePassword(userId: u.id, current: 'first1', next: '123'), throwsA(isA<AuthException>()));
+      await auth.changePassword(userId: u.id, current: 'first1', next: 'second2');
+      expect(await auth.login('asha', 'second2'), isNotEmpty);
+      expect(() => auth.login('asha', 'first1'), throwsA(isA<AuthException>()));
+    });
   });
 }

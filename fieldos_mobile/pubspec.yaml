@@ -111,6 +111,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  # Inter's licence, shown under Settings › Open-source licences.
+  assets:
+    - assets/fonts/OFL.txt
+
   # Inter, the brand typeface (Latin subset, see tools/subset_fonts.sh).
   # Telugu, Hindi and other Indian scripts use the phone's own fonts.
   fonts:

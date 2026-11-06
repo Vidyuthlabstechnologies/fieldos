@@ -103,6 +103,21 @@ class AuthService {
 
   Future<void> logout(String token) => db.sessionDao.deleteByToken(token);
 
+  /// Changes the password of [userId] after checking the current one.
+  /// Throws [AuthException] with a message for the screen.
+  Future<void> changePassword({required String userId, required String current, required String next}) async {
+    final user = await db.userDao.byId(userId);
+    if (user == null) throw AuthException('This account is no longer on this phone.');
+    if (!await verifyPassword(current, user.passwordHash)) {
+      throw AuthException('Your current password is not right.');
+    }
+    if (next.length < minPasswordLength) {
+      throw AuthException('Use at least $minPasswordLength characters for the new password.');
+    }
+    if (next == current) throw AuthException('The new password is the same as the current one.');
+    await db.userDao.setPasswordHash(userId, await hashPassword(next));
+  }
+
   /// Resolve a session token to its user, or null if missing/expired.
   Future<User?> userForSession(String? token) async {
     if (token == null || token.isEmpty) return null;

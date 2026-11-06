@@ -1,6 +1,6 @@
-import 'dart:ui' show PlatformDispatcher;
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/app.dart';
@@ -18,6 +18,10 @@ void main() {
     RecentErrors.record(error, stack);
     return false;
   };
+  // The brand font's licence, listed with the packages' licences.
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks(const ['Inter (font)'], await rootBundle.loadString('assets/fonts/OFL.txt'));
+  });
   runApp(const ProviderScope(child: AppWithMaterial()));
 }
 

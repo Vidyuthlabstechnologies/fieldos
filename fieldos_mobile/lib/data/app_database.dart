@@ -238,6 +238,9 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
       (select(users)..where((u) => u.id.equals(id))).getSingleOrNull();
 
   Future<void> create(UsersCompanion user) => into(users).insert(user);
+
+  Future<void> setPasswordHash(String userId, String hash) =>
+      (update(users)..where((u) => u.id.equals(userId))).write(UsersCompanion(passwordHash: Value(hash)));
 }
 
 // ---------------------------------------------------------------------------
