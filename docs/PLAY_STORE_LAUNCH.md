@@ -190,6 +190,53 @@ To turn it on (owner):
 Known limit: the check runs in the app. The cloud does not yet refuse
 someone who never paid but uses a modified copy of the app.
 
+## 7a. Access codes: letting Google's reviewers in
+
+Google rejects an app when its reviewers cannot reach every feature, and
+reviewers do not pay for subscriptions. On Android the paywall's ⋮ menu
+has **Enter access code**: a code opens FieldOS Pro for whoever types it,
+for as long as RevenueCat says so. There is no code entry on iPhone,
+because Apple does not allow codes that unlock features (App Review
+Guideline 3.1.1); Apple's reviewers use sandbox purchases. Codes are for
+reviewers and staff only. Never sell one or post one publicly: anything
+paid for must go through Google Play billing.
+
+Make a code (whoever runs RevenueCat):
+
+1. Make up 12 or more capital letters and numbers, for example with a
+   password generator. Spaces and dashes are ignored when it is typed.
+2. Its RevenueCat customer id is `access_` followed by the code in
+   capitals without spaces or dashes, like `access_K7Q2M9XR4TBZ` (do not
+   use this example).
+3. Create that customer and give it Pro. The RevenueCat dashboard cannot
+   create customers, so do one of these:
+   - **On a phone** with a release build (internal testing is fine): on
+     the paywall tap ⋮ → Enter access code, type the code, tap Unlock. It
+     says the code is not valid; that is expected the first time, and the
+     customer now exists. Then RevenueCat → Customers → search the
+     customer id → **Grant entitlement** → `pro` → pick how long.
+   - **With the REST API** (secret `sk_…` key, which never goes in the
+     app): `GET https://api.revenuecat.com/v1/subscribers/access_<CODE>`
+     creates the customer, then
+     `POST https://api.revenuecat.com/v1/subscribers/access_<CODE>/entitlements/pro/promotional`
+     with the body `{"duration": "yearly"}` gives it Pro.
+4. Type the code on a phone: FieldOS opens, and My subscription says
+   "Free access from the FieldOS team until …".
+5. Play Console → App content → **App access** → "All or some
+   functionality is restricted" → Add instructions, with no username or
+   password (FieldOS accounts are made on the phone):
+
+   > On the first screen tap "New to FieldOS? Create an account" and make
+   > any account; it is stored on the phone. When the subscription screen
+   > appears, tap ⋮ at the top right, then "Enter access code", type
+   > `<CODE>` and tap Unlock. Every feature is then open. To try the team
+   > features, open Settings → Team & sync and sign up with any email.
+
+To switch a code off, revoke its promotional entitlement in RevenueCat.
+Phones using it get the paywall the next time they open FieldOS online.
+A purchase or restore made after that always goes to the phone's own
+Google account, never to the shared code.
+
 ## 7b. Bug reports
 
 "Report a bug" is in the home menu and on the paywall. A report goes to
@@ -237,5 +284,6 @@ its summary table says what is missing or wrong without showing any value.
 | Release build hides Team & sync | It was built before `SUPABASE_URL` / `SUPABASE_ANON_KEY` were set. | Set them, then run the **release** workflow again (or push a new tag). |
 | Release build has no paywall | Built before the RevenueCat secrets were set, or `REVENUECAT_ANDROID_KEY` is empty. | Set the key (section 7, step 4), rebuild, re-upload to internal testing. |
 | Paywall says "Could not reach the store" or shows no prices | The build on the phone was not installed from Google Play (internal testing), the Google account is not a licence tester, or the products are not in RevenueCat's **default** offering. | Install from the internal-testing link, add the tester under Play Console → Setup → Licence testing, and check RevenueCat → Offerings. |
+| An access code says it is not valid | The code's customer has no active `pro` grant, or the code was typed differently. | RevenueCat → Customers → `access_<CODE>` (capitals, no spaces or dashes) → check the promotional entitlement and its end date (section 7a). |
 | Trial unlocks, but the app locks again straight after | The `pro` entitlement is not attached to the product that was bought. | RevenueCat → Entitlements → `pro` → attach every store product. |
 | `launch-readiness` is red | Only ever because a secret that *is* set is the wrong kind of value (❌ rows). Missing secrets never fail it. | Fix the ❌ rows; the Note column says what was expected. |

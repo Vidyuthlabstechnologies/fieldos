@@ -1,7 +1,8 @@
 /// The subscription screen: what FieldOS Pro gives, the plans with the
 /// store's own prices, and everything both stores ask a paywall to say
 /// (price, renewal, when the trial is charged, how to cancel, restore,
-/// terms and privacy).
+/// terms and privacy). On Android its menu also takes an access code from
+/// the FieldOS team, which is how Google's reviewers get in.
 library;
 
 import 'package:flutter/material.dart';
@@ -113,6 +114,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         }
       });
 
+  Future<void> _enterAccessCode() async {
+    final unlocked = await showDialog<bool>(context: context, builder: (_) => _AccessCodeDialog(billing: _billing));
+    if ((unlocked ?? false) && mounted) widget.onUnlocked();
+  }
+
   Future<void> _checkAgain() => _act(() async {
         final s = await _billing.current(fresh: true);
         if (!mounted) return;
@@ -134,7 +140,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final compact = BrandedSheetPage.isCompact(context);
     final muted = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.4);
     return BrandedSheetPage(
-      trailing: _Menu(busy: _busy),
+      trailing: _Menu(busy: _busy, onAccessCode: _billing.acceptsAccessCodes ? _enterAccessCode : null),
       header: [
         SizedBox(height: compact ? 8 : 28),
         BrandMark(size: compact ? 44 : 68, onDark: true),
@@ -375,9 +381,12 @@ class _PendingCard extends StatelessWidget {
 }
 
 class _Menu extends ConsumerWidget {
-  const _Menu({required this.busy});
+  const _Menu({required this.busy, required this.onAccessCode});
 
   final bool busy;
+
+  /// Null where access codes are not taken (iPhone).
+  final VoidCallback? onAccessCode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -391,16 +400,106 @@ class _Menu extends ConsumerWidget {
             Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BugReportScreen()));
           case 'email':
             emailSupport(subject: 'FieldOS: subscription');
+          case 'code':
+            onAccessCode?.call();
           case 'logout':
             ref.read(cloudSyncBootstrapProvider).stop();
             ref.read(sessionProvider.notifier).logout();
         }
       },
-      itemBuilder: (_) => const [
-        PopupMenuItem(value: 'email', child: ListTile(leading: Icon(Icons.mail_outline), title: Text('Email support'))),
-        PopupMenuItem(value: 'bug', child: ListTile(leading: Icon(Icons.bug_report_outlined), title: Text('Report a bug'))),
-        PopupMenuItem(value: 'logout', child: ListTile(leading: Icon(Icons.logout), title: Text('Log out'))),
+      itemBuilder: (_) => [
+        const PopupMenuItem(
+            value: 'email', child: ListTile(leading: Icon(Icons.mail_outline), title: Text('Email support'))),
+        const PopupMenuItem(
+            value: 'bug', child: ListTile(leading: Icon(Icons.bug_report_outlined), title: Text('Report a bug'))),
+        if (onAccessCode != null)
+          const PopupMenuItem(
+              value: 'code', child: ListTile(leading: Icon(Icons.key_outlined), title: Text('Enter access code'))),
+        const PopupMenuItem(value: 'logout', child: ListTile(leading: Icon(Icons.logout), title: Text('Log out'))),
       ],
+    );
+  }
+}
+
+/// "Enter access code", for the people the FieldOS team lets in without
+/// paying, such as Google's app reviewers. Closes with true once FieldOS is
+/// open.
+class _AccessCodeDialog extends StatefulWidget {
+  const _AccessCodeDialog({required this.billing});
+
+  final BillingService billing;
+
+  @override
+  State<_AccessCodeDialog> createState() => _AccessCodeDialogState();
+}
+
+class _AccessCodeDialogState extends State<_AccessCodeDialog> {
+  final _code = TextEditingController();
+  String? _error;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _code.dispose();
+    super.dispose();
+  }
+
+  Future<void> _redeem() async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await widget.billing.redeemAccessCode(_code.text);
+      if (mounted) Navigator.of(context).pop(true);
+    } on BillingException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } catch (e, st) {
+      if (mounted) setState(() => _error = friendlyError(e, st));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: !_busy,
+      child: AlertDialog(
+        title: const Text('Enter access code'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text('Only for people the FieldOS team gave a code to, such as app reviewers.'),
+              const SizedBox(height: 16),
+              TextField(
+                key: const Key('access-code'),
+                controller: _code,
+                autofocus: true,
+                enabled: !_busy,
+                autocorrect: false,
+                enableSuggestions: false,
+                textCapitalization: TextCapitalization.characters,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _redeem(),
+                decoration: InputDecoration(labelText: 'Access code', errorText: _error, errorMaxLines: 4),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: _busy ? null : () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: _busy ? null : _redeem,
+            child: _busy
+                ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Text('Unlock'),
+          ),
+        ],
+      ),
     );
   }
 }

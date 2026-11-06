@@ -10,6 +10,15 @@
 /// Keys come from --dart-define (REVENUECAT_ANDROID_KEY /
 /// REVENUECAT_IOS_KEY, the PUBLIC SDK keys). Without them nothing is
 /// locked, which is what development builds want.
+///
+/// Access codes (Android only) let people the FieldOS team chooses in
+/// without paying, above all Google's app reviewers, who must be able to
+/// see every feature. A code is a RevenueCat customer, `access_<CODE>`,
+/// that the team gives the `pro` entitlement as a promotional grant in the
+/// RevenueCat dashboard; taking the grant away there switches the code
+/// off. Codes are never sold: Google Play's billing rules cover anything
+/// paid for. Apple does not allow codes that unlock features at all (App
+/// Review Guideline 3.1.1); its reviewers test with sandbox purchases.
 library;
 
 import 'dart:io';
@@ -29,6 +38,21 @@ const entitlementId = 'pro';
 
 /// The Android application id, for the Play subscriptions page.
 const androidPackageName = 'com.mldynamic.fieldos';
+
+/// What an access code becomes in RevenueCat. The prefix keeps typed codes
+/// apart from real customers, so a code can only ever open a customer the
+/// FieldOS team made for it.
+const accessCodePrefix = 'access_';
+
+/// The RevenueCat customer for a typed access code: capitals, with spaces
+/// and dashes dropped, so "k7q2-m9xr 4tbz" and "K7Q2M9XR4TBZ" are the same
+/// code. Null when it can't be a code: other characters, or too short to
+/// be safe from guessing.
+String? accessCodeCustomerId(String typed) {
+  final code = typed.toUpperCase().replaceAll(RegExp(r'[\s-]'), '');
+  if (!RegExp(r'^[A-Z0-9]{10,40}$').hasMatch(code)) return null;
+  return '$accessCodePrefix$code';
+}
 
 class BillingConfig {
   static const androidKey = String.fromEnvironment('REVENUECAT_ANDROID_KEY');
@@ -56,15 +80,21 @@ class BillingException implements Exception {
 }
 
 class BillingService {
-  BillingService(this.db);
+  /// [apiKey] defaults to this build's RevenueCat key for this phone.
+  BillingService(this.db, {String? apiKey}) : _apiKey = apiKey ?? BillingConfig.keyForThisDevice;
 
   final AppDatabase db;
+  final String? _apiKey;
   static const _paidUntilKey = 'subscription_paid_until';
 
   /// The packages behind the plans last shown, by id.
   final Map<String, Package> _packages = {};
 
-  bool get setUp => BillingConfig.keyForThisDevice != null;
+  bool get setUp => _apiKey != null;
+
+  /// Whether the paywall offers "Enter access code" (Android only, see the
+  /// library comment).
+  bool get acceptsAccessCodes => setUp && defaultTargetPlatform == TargetPlatform.android;
 
   /// Who takes the money, as people call it on this phone.
   String get storeName => Platform.isIOS ? 'Apple' : 'Google Play';
@@ -73,7 +103,7 @@ class BillingService {
   String get cancelPath => Platform.isIOS ? 'Settings › your name › Subscriptions' : 'Google Play › Subscriptions';
 
   Future<void> _configure() async {
-    final key = BillingConfig.keyForThisDevice;
+    final key = _apiKey;
     if (key == null) throw StateError('Payments are not set up in this build.');
     if (!await Purchases.isConfigured) {
       await Purchases.configure(PurchasesConfiguration(key));
@@ -148,6 +178,7 @@ class BillingService {
     final package = _packages[planId];
     if (package == null) throw BillingException('That plan is no longer on sale. Please pick again.');
     try {
+      await _leaveAccessCode();
       final result = await Purchases.purchase(PurchaseParams.package(package));
       return await _remember(result.customerInfo);
     } on PlatformException catch (e) {
@@ -167,10 +198,38 @@ class BillingService {
   Future<SubscriptionState> restore() async {
     await _configure();
     try {
+      await _leaveAccessCode();
       return await _remember(await Purchases.restorePurchases());
     } on PlatformException catch (e) {
       throw billingErrorFor(PurchasesErrorHelper.getErrorCode(e), store: storeName);
     }
+  }
+
+  /// Opens FieldOS with an access code from the FieldOS team. Throws
+  /// [BillingException] for a mistyped code, or one that was never switched
+  /// on or has ended; the phone is then back on its own store account.
+  Future<SubscriptionState> redeemAccessCode(String typed) async {
+    final customer = accessCodeCustomerId(typed);
+    if (customer == null) {
+      throw BillingException('Access codes are 10 or more letters and numbers. Type it exactly as you got it.');
+    }
+    await _configure();
+    try {
+      final s = await _remember((await Purchases.logIn(customer)).customerInfo);
+      if (s.active) return s;
+      await _remember(await Purchases.logOut());
+    } on PlatformException catch (e) {
+      throw billingErrorFor(PurchasesErrorHelper.getErrorCode(e), store: storeName);
+    }
+    throw BillingException(
+        'That code is not valid or has ended. Check it and try again, or ask whoever gave it to you.');
+  }
+
+  /// Purchases and restores belong to this phone's own store account. A
+  /// phone that last used an access code leaves it first, so a purchase
+  /// can never land on a code that other people share.
+  Future<void> _leaveAccessCode() async {
+    if ((await Purchases.appUserID).startsWith(accessCodePrefix)) await Purchases.logOut();
   }
 
   /// The store page where this person can cancel or change the plan.
@@ -199,6 +258,7 @@ SubscriptionState stateFromCustomerInfo(CustomerInfo info) {
     expiresAt: e.expirationDate == null ? null : DateTime.tryParse(e.expirationDate!),
     willRenew: e.willRenew,
     billingIssue: e.billingIssueDetectedAt != null,
+    complimentary: e.store == Store.promotional,
   );
 }
 

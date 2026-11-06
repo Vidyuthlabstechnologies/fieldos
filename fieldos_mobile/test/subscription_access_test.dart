@@ -35,6 +35,9 @@ void main() {
     expect(SubscriptionState(active: true, expiresAt: d, willRenew: true, billingIssue: true).describe(),
         'Payment problem: update your payment method in the store before 8 Nov 2026');
     expect(SubscriptionState.none.describe(), 'No active subscription');
+    expect(SubscriptionState(active: true, complimentary: true, expiresAt: d).describe(),
+        'Free access from the FieldOS team until 8 Nov 2026');
+    expect(const SubscriptionState(active: true, complimentary: true).describe(), 'Free access from the FieldOS team');
   });
 
   group('plans in plain words', () {
