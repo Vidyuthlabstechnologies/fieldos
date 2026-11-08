@@ -60,11 +60,14 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         _plans = plans;
         _selected = defaultPlan(plans)?.id;
       });
+    } on BillingException catch (e, st) {
+      RecentErrors.record(e, st);
+      if (mounted) setState(() => _loadError = e.message);
     } catch (e, st) {
       RecentErrors.record(e, st);
       if (mounted) {
         setState(() => _loadError =
-            'Could not load the plans from ${_billing.storeName}. Check your internet connection and try again.');
+            'Could not load the plans from ${_billing.storeName}. Please try again, or send a bug report from the menu.');
       }
     }
   }
@@ -126,7 +129,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           widget.onUnlocked();
         } else {
           setState(() => _error = s == null
-              ? 'No internet connection. Connect and check again.'
+              ? 'Could not check with ${_billing.storeName} right now. Please try again in a minute.'
               : 'Still waiting for the payment. It can take a few minutes after you approve it.');
         }
       });

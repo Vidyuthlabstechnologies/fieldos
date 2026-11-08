@@ -4,7 +4,9 @@
 /// message stays hidden for the reporter.
 library;
 
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:supabase/supabase.dart';
 
@@ -55,10 +57,14 @@ class MessageReportService {
     } on PostgrestException catch (e) {
       // Already reported by this person: that's a success for them.
       if (e.code != '23505') {
-        throw MessageReportException('The report did not go through. Check the internet and try again.');
+        throw MessageReportException(
+            'The report did not go through. Please try again in a minute, or write to info@mldynamic.com.');
       }
-    } catch (_) {
-      throw MessageReportException('The report did not go through. Check the internet and try again.');
+    } catch (e) {
+      final offline = e is SocketException || e is TimeoutException || e.toString().contains('ClientException');
+      throw MessageReportException(offline
+          ? 'No internet connection. Connect and try again.'
+          : 'The report did not go through. Please try again in a minute, or write to info@mldynamic.com.');
     }
     await _remember(messageId);
   }

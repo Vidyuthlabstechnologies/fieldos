@@ -103,4 +103,13 @@ void main() {
     expect(other.pending, isFalse);
     expect(other.message, startsWith('Apple could not complete that.'));
   });
+
+  test('only a real network failure blames the internet when plans fail to load', () {
+    expect(plansErrorFor(PurchasesErrorCode.networkError, store: 'Google Play').message,
+        'No internet connection. Connect and try again.');
+    final setup = plansErrorFor(PurchasesErrorCode.configurationError, store: 'Google Play').message;
+    expect(setup, contains('not on sale in Google Play yet'));
+    expect(setup, isNot(contains('internet')));
+    expect(plansErrorFor(PurchasesErrorCode.unknownError, store: 'Google Play').message, isNot(contains('internet')));
+  });
 }

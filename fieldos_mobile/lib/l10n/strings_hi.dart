@@ -675,7 +675,6 @@ const Map<String, String> stringsHi = {
   'Quintal': 'क्विंटल',
   'Cement bag (50 kg)': 'सीमेंट बोरी (50 किलो)',
   'Continue with Google': 'Google से जारी रखें',
-  'Google sign-in did not go through. Check the internet and try again.': 'Google साइन-इन नहीं हुआ। इंटरनेट जाँचें और फिर कोशिश करें।',
   'More details (optional)': 'और जानकारी (वैकल्पिक)',
   'Report': 'रिपोर्ट करें',
   'Report this message': 'इस संदेश की रिपोर्ट करें',
@@ -689,4 +688,6 @@ const Map<String, String> stringsHi = {
   'Something else': 'कुछ और',
   'Sign in under Team & sync to report a message.': 'संदेश की रिपोर्ट करने के लिए Team & sync में साइन इन करें।',
   'The report did not go through. Check the internet and try again.': 'रिपोर्ट नहीं भेजी जा सकी। इंटरनेट जाँचें और फिर कोशिश करें।',
+  'Google sign-in did not go through. Please try again.': 'Google साइन-इन नहीं हुआ। फिर से कोशिश करें।',
+  'Google sign-in is not ready on this version of the app. Use your username and password for now.': 'ऐप के इस संस्करण में Google साइन-इन अभी तैयार नहीं है। अभी अपने यूज़रनेम और पासवर्ड से लॉगिन करें।',
 };
