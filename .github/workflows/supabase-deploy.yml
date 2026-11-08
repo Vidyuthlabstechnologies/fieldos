@@ -49,4 +49,5 @@ jobs:
           supabase link --project-ref "$ref"
 
       - name: Apply migrations
-        run: supabase db push --remote
+        # The manual run from the Actions tab is the confirmation.
+        run: supabase db push --remote --yes
