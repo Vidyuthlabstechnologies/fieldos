@@ -152,6 +152,8 @@ class SyncEngine {
               await table.insert(data);
             case 'update':
               await table.update(data).eq('id', entry.recordId);
+            case 'upsert':
+              await table.upsert(data);
             case 'delete':
               await table.delete().eq('id', entry.recordId);
             default:
@@ -222,6 +224,8 @@ class SyncEngine {
     await pull('site_material_usage', (r) => db.materialDao.upsertUsageFromRemote(materialUsageFromSupabaseJson(r)));
     await pull('site_payments_received', (r) => db.paymentDao.upsertFromRemote(paymentReceivedFromSupabaseJson(r)));
     await pull('site_client_bills', (r) => db.billDao.upsertFromRemote(clientBillFromSupabaseJson(r)));
+    await pull('site_attendance_marks',
+        (r) => db.attendanceDao.upsertMarkFromRemote(attendanceMarkFromSupabaseJson(r)));
     await pull('documents', (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');

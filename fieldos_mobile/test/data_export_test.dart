@@ -189,6 +189,16 @@ void main() {
       expect(row[summary.headers.indexOf('Received (₹)')], 50000.0);
     });
 
+    test('days marked by hand get their own sheet, cleared ones left out', () async {
+      expect((await buildExportSheets(db, const ExportScope.project('p1'))).map((s) => s.name), isNot(contains('Day register')));
+      await db.attendanceDao.setMark(projectId: 'p1', workerId: 'w1', day: '2026-11-08', units: 1.5, by: 'u');
+      await db.attendanceDao.setMark(projectId: 'p1', workerId: 'w1', day: '2026-11-07', units: null, by: 'u');
+      final reg = sheet(await buildExportSheets(db, const ExportScope.project('p1')), 'Day register');
+      expect(reg.rows, [
+        [DateTime(2026, 11, 8), 'Suresh', null, 1.5, 'Ravi'],
+      ]);
+    });
+
     test('whole company: every real site with a Site column, the demo site left out', () async {
       final sample = await createSampleProject(db, companyId: 'c', userId: 'u', now: DateTime(2026, 11, 8));
       final sheets = await buildExportSheets(db, const ExportScope.company('c'));

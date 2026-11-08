@@ -68,6 +68,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
   final bills = await rowsOf(db.clientBills, (t) => t.projectId.isIn(ids));
   final attendance = await rowsOf(db.labourAttendance, (t) => t.projectId.isIn(ids));
   final workers = await rowsOf(db.workers, (t) => t.projectId.isIn(ids));
+  final marks = (await rowsOf(db.attendanceMarks, (t) => t.projectId.isIn(ids))).where((m) => m.units != null).toList();
   final receipts = await rowsOf(db.materialReceipts, (t) => t.projectId.isIn(ids));
   final usage = await rowsOf(db.materialUsage, (t) => t.projectId.isIn(ids));
   final requests = await rowsOf(db.purchaseRequests, (t) => t.projectId.isIn(ids));
@@ -225,6 +226,17 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
           a.withinGeofence == null ? null : (a.withinGeofence! ? 'Yes' : 'No'),
         ]),
     ]),
+    if (marks.isNotEmpty)
+      XlsxSheet('Day register', h(['Date', 'Worker', 'Skill', 'Days of pay', 'Marked by']), [
+        for (final m in marks..sort((a, b) => b.day.compareTo(a.day)))
+          r(m.projectId, [
+            DateTime.tryParse(m.day),
+            workerName[m.workerId] ?? 'Worker',
+            workers.where((w) => w.id == m.workerId).firstOrNull?.role,
+            m.units,
+            who(m.recordedBy),
+          ]),
+      ]),
     XlsxSheet('Workers', h(['Name', 'Skill', 'Phone', 'Daily wage (₹)', 'Status', 'Added on']), [
       for (final w in workers..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase())))
         r(w.projectId, [w.name, w.role, w.phone, w.dailyWage, _word(w.status), w.createdAt]),

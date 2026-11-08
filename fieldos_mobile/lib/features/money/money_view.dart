@@ -1013,7 +1013,7 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
           ? _plain(existing.amount)
           : suggestedAmount == null
               ? ''
-              : suggestedAmount.round().toString());
+              : _plain((suggestedAmount * 100).roundToDouble() / 100));
   final noteC = TextEditingController(text: existing?.note ?? note ?? '');
   final paidToC = TextEditingController(text: existing?.paidTo ?? '');
   var categories = await ref.read(expenseCategoriesProvider(projectId).future);

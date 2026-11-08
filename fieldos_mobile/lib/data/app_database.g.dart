@@ -14055,6 +14055,478 @@ class LabourAttendanceCompanion extends UpdateCompanion<LabourAttendanceData> {
   }
 }
 
+class $AttendanceMarksTable extends AttendanceMarks
+    with TableInfo<$AttendanceMarksTable, AttendanceMark> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AttendanceMarksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _workerIdMeta = const VerificationMeta(
+    'workerId',
+  );
+  @override
+  late final GeneratedColumn<String> workerId = GeneratedColumn<String>(
+    'worker_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dayMeta = const VerificationMeta('day');
+  @override
+  late final GeneratedColumn<String> day = GeneratedColumn<String>(
+    'day',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 10,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitsMeta = const VerificationMeta('units');
+  @override
+  late final GeneratedColumn<double> units = GeneratedColumn<double>(
+    'units',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _recordedByMeta = const VerificationMeta(
+    'recordedBy',
+  );
+  @override
+  late final GeneratedColumn<String> recordedBy = GeneratedColumn<String>(
+    'recorded_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    workerId,
+    day,
+    units,
+    recordedBy,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'attendance_marks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AttendanceMark> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('worker_id')) {
+      context.handle(
+        _workerIdMeta,
+        workerId.isAcceptableOrUnknown(data['worker_id']!, _workerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_workerIdMeta);
+    }
+    if (data.containsKey('day')) {
+      context.handle(
+        _dayMeta,
+        day.isAcceptableOrUnknown(data['day']!, _dayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dayMeta);
+    }
+    if (data.containsKey('units')) {
+      context.handle(
+        _unitsMeta,
+        units.isAcceptableOrUnknown(data['units']!, _unitsMeta),
+      );
+    }
+    if (data.containsKey('recorded_by')) {
+      context.handle(
+        _recordedByMeta,
+        recordedBy.isAcceptableOrUnknown(data['recorded_by']!, _recordedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordedByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AttendanceMark map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AttendanceMark(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      workerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}worker_id'],
+      )!,
+      day: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}day'],
+      )!,
+      units: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}units'],
+      ),
+      recordedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recorded_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AttendanceMarksTable createAlias(String alias) {
+    return $AttendanceMarksTable(attachedDatabase, alias);
+  }
+}
+
+class AttendanceMark extends DataClass implements Insertable<AttendanceMark> {
+  final String id;
+  final String projectId;
+  final String workerId;
+
+  /// yyyy-mm-dd, local day.
+  final String day;
+  final double? units;
+  final String recordedBy;
+  final DateTime updatedAt;
+  const AttendanceMark({
+    required this.id,
+    required this.projectId,
+    required this.workerId,
+    required this.day,
+    this.units,
+    required this.recordedBy,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['worker_id'] = Variable<String>(workerId);
+    map['day'] = Variable<String>(day);
+    if (!nullToAbsent || units != null) {
+      map['units'] = Variable<double>(units);
+    }
+    map['recorded_by'] = Variable<String>(recordedBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  AttendanceMarksCompanion toCompanion(bool nullToAbsent) {
+    return AttendanceMarksCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      workerId: Value(workerId),
+      day: Value(day),
+      units: units == null && nullToAbsent
+          ? const Value.absent()
+          : Value(units),
+      recordedBy: Value(recordedBy),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory AttendanceMark.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AttendanceMark(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      workerId: serializer.fromJson<String>(json['workerId']),
+      day: serializer.fromJson<String>(json['day']),
+      units: serializer.fromJson<double?>(json['units']),
+      recordedBy: serializer.fromJson<String>(json['recordedBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'workerId': serializer.toJson<String>(workerId),
+      'day': serializer.toJson<String>(day),
+      'units': serializer.toJson<double?>(units),
+      'recordedBy': serializer.toJson<String>(recordedBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  AttendanceMark copyWith({
+    String? id,
+    String? projectId,
+    String? workerId,
+    String? day,
+    Value<double?> units = const Value.absent(),
+    String? recordedBy,
+    DateTime? updatedAt,
+  }) => AttendanceMark(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    workerId: workerId ?? this.workerId,
+    day: day ?? this.day,
+    units: units.present ? units.value : this.units,
+    recordedBy: recordedBy ?? this.recordedBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  AttendanceMark copyWithCompanion(AttendanceMarksCompanion data) {
+    return AttendanceMark(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      workerId: data.workerId.present ? data.workerId.value : this.workerId,
+      day: data.day.present ? data.day.value : this.day,
+      units: data.units.present ? data.units.value : this.units,
+      recordedBy: data.recordedBy.present
+          ? data.recordedBy.value
+          : this.recordedBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttendanceMark(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('workerId: $workerId, ')
+          ..write('day: $day, ')
+          ..write('units: $units, ')
+          ..write('recordedBy: $recordedBy, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, projectId, workerId, day, units, recordedBy, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AttendanceMark &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.workerId == this.workerId &&
+          other.day == this.day &&
+          other.units == this.units &&
+          other.recordedBy == this.recordedBy &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AttendanceMarksCompanion extends UpdateCompanion<AttendanceMark> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> workerId;
+  final Value<String> day;
+  final Value<double?> units;
+  final Value<String> recordedBy;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const AttendanceMarksCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.workerId = const Value.absent(),
+    this.day = const Value.absent(),
+    this.units = const Value.absent(),
+    this.recordedBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AttendanceMarksCompanion.insert({
+    required String id,
+    required String projectId,
+    required String workerId,
+    required String day,
+    this.units = const Value.absent(),
+    required String recordedBy,
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       workerId = Value(workerId),
+       day = Value(day),
+       recordedBy = Value(recordedBy);
+  static Insertable<AttendanceMark> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? workerId,
+    Expression<String>? day,
+    Expression<double>? units,
+    Expression<String>? recordedBy,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (workerId != null) 'worker_id': workerId,
+      if (day != null) 'day': day,
+      if (units != null) 'units': units,
+      if (recordedBy != null) 'recorded_by': recordedBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AttendanceMarksCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? workerId,
+    Value<String>? day,
+    Value<double?>? units,
+    Value<String>? recordedBy,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return AttendanceMarksCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      workerId: workerId ?? this.workerId,
+      day: day ?? this.day,
+      units: units ?? this.units,
+      recordedBy: recordedBy ?? this.recordedBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (workerId.present) {
+      map['worker_id'] = Variable<String>(workerId.value);
+    }
+    if (day.present) {
+      map['day'] = Variable<String>(day.value);
+    }
+    if (units.present) {
+      map['units'] = Variable<double>(units.value);
+    }
+    if (recordedBy.present) {
+      map['recorded_by'] = Variable<String>(recordedBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttendanceMarksCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('workerId: $workerId, ')
+          ..write('day: $day, ')
+          ..write('units: $units, ')
+          ..write('recordedBy: $recordedBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SubcontractorsTable extends Subcontractors
     with TableInfo<$SubcontractorsTable, Subcontractor> {
   @override
@@ -20543,6 +21015,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LabourAttendanceTable labourAttendance = $LabourAttendanceTable(
     this,
   );
+  late final $AttendanceMarksTable attendanceMarks = $AttendanceMarksTable(
+    this,
+  );
   late final $SubcontractorsTable subcontractors = $SubcontractorsTable(this);
   late final $WorkOrdersTable workOrders = $WorkOrdersTable(this);
   late final $ApprovalsTable approvals = $ApprovalsTable(this);
@@ -20590,6 +21065,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     clientBills,
     siteExpenses,
     labourAttendance,
+    attendanceMarks,
     subcontractors,
     workOrders,
     approvals,
@@ -27634,6 +28110,261 @@ typedef $$LabourAttendanceTableProcessedTableManager =
       LabourAttendanceData,
       PrefetchHooks Function()
     >;
+typedef $$AttendanceMarksTableCreateCompanionBuilder =
+    AttendanceMarksCompanion Function({
+      required String id,
+      required String projectId,
+      required String workerId,
+      required String day,
+      Value<double?> units,
+      required String recordedBy,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$AttendanceMarksTableUpdateCompanionBuilder =
+    AttendanceMarksCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> workerId,
+      Value<String> day,
+      Value<double?> units,
+      Value<String> recordedBy,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$AttendanceMarksTableFilterComposer
+    extends Composer<_$AppDatabase, $AttendanceMarksTable> {
+  $$AttendanceMarksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get workerId => $composableBuilder(
+    column: $table.workerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get day => $composableBuilder(
+    column: $table.day,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get units => $composableBuilder(
+    column: $table.units,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AttendanceMarksTableOrderingComposer
+    extends Composer<_$AppDatabase, $AttendanceMarksTable> {
+  $$AttendanceMarksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get workerId => $composableBuilder(
+    column: $table.workerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get day => $composableBuilder(
+    column: $table.day,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get units => $composableBuilder(
+    column: $table.units,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AttendanceMarksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AttendanceMarksTable> {
+  $$AttendanceMarksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get workerId =>
+      $composableBuilder(column: $table.workerId, builder: (column) => column);
+
+  GeneratedColumn<String> get day =>
+      $composableBuilder(column: $table.day, builder: (column) => column);
+
+  GeneratedColumn<double> get units =>
+      $composableBuilder(column: $table.units, builder: (column) => column);
+
+  GeneratedColumn<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$AttendanceMarksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AttendanceMarksTable,
+          AttendanceMark,
+          $$AttendanceMarksTableFilterComposer,
+          $$AttendanceMarksTableOrderingComposer,
+          $$AttendanceMarksTableAnnotationComposer,
+          $$AttendanceMarksTableCreateCompanionBuilder,
+          $$AttendanceMarksTableUpdateCompanionBuilder,
+          (
+            AttendanceMark,
+            BaseReferences<
+              _$AppDatabase,
+              $AttendanceMarksTable,
+              AttendanceMark
+            >,
+          ),
+          AttendanceMark,
+          PrefetchHooks Function()
+        > {
+  $$AttendanceMarksTableTableManager(
+    _$AppDatabase db,
+    $AttendanceMarksTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AttendanceMarksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AttendanceMarksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AttendanceMarksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> workerId = const Value.absent(),
+                Value<String> day = const Value.absent(),
+                Value<double?> units = const Value.absent(),
+                Value<String> recordedBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttendanceMarksCompanion(
+                id: id,
+                projectId: projectId,
+                workerId: workerId,
+                day: day,
+                units: units,
+                recordedBy: recordedBy,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String workerId,
+                required String day,
+                Value<double?> units = const Value.absent(),
+                required String recordedBy,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttendanceMarksCompanion.insert(
+                id: id,
+                projectId: projectId,
+                workerId: workerId,
+                day: day,
+                units: units,
+                recordedBy: recordedBy,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AttendanceMarksTable, AttendanceMark>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $AttendanceMarksTable,
+                    AttendanceMark
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AttendanceMarksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AttendanceMarksTable,
+      AttendanceMark,
+      $$AttendanceMarksTableFilterComposer,
+      $$AttendanceMarksTableOrderingComposer,
+      $$AttendanceMarksTableAnnotationComposer,
+      $$AttendanceMarksTableCreateCompanionBuilder,
+      $$AttendanceMarksTableUpdateCompanionBuilder,
+      (
+        AttendanceMark,
+        BaseReferences<_$AppDatabase, $AttendanceMarksTable, AttendanceMark>,
+      ),
+      AttendanceMark,
+      PrefetchHooks Function()
+    >;
 typedef $$SubcontractorsTableCreateCompanionBuilder =
     SubcontractorsCompanion Function({
       required String id,
@@ -30959,6 +31690,8 @@ class $AppDatabaseManager {
       $$SiteExpensesTableTableManager(_db, _db.siteExpenses);
   $$LabourAttendanceTableTableManager get labourAttendance =>
       $$LabourAttendanceTableTableManager(_db, _db.labourAttendance);
+  $$AttendanceMarksTableTableManager get attendanceMarks =>
+      $$AttendanceMarksTableTableManager(_db, _db.attendanceMarks);
   $$SubcontractorsTableTableManager get subcontractors =>
       $$SubcontractorsTableTableManager(_db, _db.subcontractors);
   $$WorkOrdersTableTableManager get workOrders =>
@@ -31238,6 +31971,7 @@ class ExpenseDaoManager {
 mixin _$AttendanceDaoMixin on DatabaseAccessor<AppDatabase> {
   $LabourAttendanceTable get labourAttendance =>
       attachedDatabase.labourAttendance;
+  $AttendanceMarksTable get attendanceMarks => attachedDatabase.attendanceMarks;
   AttendanceDaoManager get managers => AttendanceDaoManager(this);
 }
 
@@ -31248,6 +31982,11 @@ class AttendanceDaoManager {
       $$LabourAttendanceTableTableManager(
         _db.attachedDatabase,
         _db.labourAttendance,
+      );
+  $$AttendanceMarksTableTableManager get attendanceMarks =>
+      $$AttendanceMarksTableTableManager(
+        _db.attachedDatabase,
+        _db.attendanceMarks,
       );
 }
 

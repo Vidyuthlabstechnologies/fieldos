@@ -459,6 +459,26 @@ class LabourAttendance extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+/// A day's attendance marked by hand for one worker: absent, a quarter,
+/// half or full day, or 1½, double or triple for overtime. It takes the
+/// place of what that day's punches would count, so sites that keep a
+/// muster roll instead of GPS punches still get a right wage sheet. One
+/// row per worker per day; [units] null means "count the punches again".
+class AttendanceMarks extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get workerId => text().withLength(min: 1, max: 36)();
+
+  /// yyyy-mm-dd, local day.
+  TextColumn get day => text().withLength(min: 10, max: 10)();
+  RealColumn get units => real().nullable()();
+  TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 /// Per-project GPS geofence. A punch is flagged `withinGeofence` when the
 /// captured coordinates fall within `radiusMeters` of (centerLat, centerLng).
 class ProjectGeofences extends Table {

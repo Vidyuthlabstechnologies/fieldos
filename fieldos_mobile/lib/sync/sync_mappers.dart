@@ -775,3 +775,27 @@ ClientBillsCompanion clientBillFromSupabaseJson(Map<String, dynamic> row) => Cli
       notes: Value(row['notes'] as String?),
       recordedBy: row['recorded_by'] as String,
     );
+
+// --- Attendance marks (app schema v11, 20261109010000_attendance_marks.sql)
+
+Map<String, dynamic> attendanceMarkToSupabaseJson(AttendanceMark m) => {
+      'id': m.id,
+      'project_id': m.projectId,
+      'worker_id': m.workerId,
+      'day': m.day,
+      'units': m.units,
+      'recorded_by': m.recordedBy,
+      'updated_at': _timestamp(m.updatedAt.toUtc()),
+    };
+
+AttendanceMarksCompanion attendanceMarkFromSupabaseJson(Map<String, dynamic> row) => AttendanceMarksCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      workerId: row['worker_id'] as String,
+      day: row['day'] as String,
+      units: Value((row['units'] as num?)?.toDouble()),
+      recordedBy: row['recorded_by'] as String,
+      updatedAt: row['updated_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['updated_at'] as String).toLocal()),
+    );

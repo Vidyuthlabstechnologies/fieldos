@@ -53,6 +53,7 @@ String? _clip(String? s, int max) {
   ClientBills,
   SiteExpenses,
   LabourAttendance,
+  AttendanceMarks,
   Subcontractors,
   WorkOrders,
   Approvals,
@@ -92,7 +93,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -185,6 +186,9 @@ class AppDatabase extends _$AppDatabase {
               await _addColumnIfMissing(m, paymentsReceived, c);
             }
             await _numberExistingVouchers();
+          }
+          if (from < 11) {
+            await m.createTable(attendanceMarks);
           }
         },
       );
@@ -1179,7 +1183,7 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
 // Labour attendance (GPS)
 // ---------------------------------------------------------------------------
 
-@DriftAccessor(tables: [LabourAttendance])
+@DriftAccessor(tables: [LabourAttendance, AttendanceMarks])
 class AttendanceDao extends DatabaseAccessor<AppDatabase> with _$AttendanceDaoMixin {
   AttendanceDao(super.db);
 
@@ -1224,6 +1228,53 @@ class AttendanceDao extends DatabaseAccessor<AppDatabase> with _$AttendanceDaoMi
         ..where((a) => a.projectId.equals(projectId))
         ..orderBy([(a) => OrderingTerm.desc(a.punchIn)]))
       .get();
+
+  /// One id per worker per day on every phone, so two people marking the
+  /// same worker's day end up with one row, the later mark winning.
+  static String markId(String projectId, String workerId, String day) =>
+      _uuid.v5(Namespace.url.value, 'fieldos:attendance-mark:$projectId:$workerId:$day');
+
+  /// Hand-marked days of the site (rows cleared back to punches included,
+  /// with null units).
+  Future<List<AttendanceMark>> marksForProject(String projectId) =>
+      (select(attendanceMarks)..where((m) => m.projectId.equals(projectId))).get();
+
+  /// Marks [workerId]'s [day] as [units] days (null: count the punches).
+  Future<AttendanceMark> setMark({
+    required String projectId,
+    required String workerId,
+    required String day,
+    required double? units,
+    required String by,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final id = markId(projectId, workerId, day);
+        await into(attendanceMarks).insertOnConflictUpdate(AttendanceMarksCompanion.insert(
+          id: id,
+          projectId: projectId,
+          workerId: workerId,
+          day: day,
+          units: Value(units),
+          recordedBy: by,
+          updatedAt: Value(now ?? DateTime.now()),
+        ));
+        final row = await (select(attendanceMarks)..where((m) => m.id.equals(id))).getSingle();
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'site_attendance_marks',
+          recordId: id,
+          operation: 'upsert',
+          payloadJson: jsonEncode(attendanceMarkToSupabaseJson(row)),
+        );
+        return row;
+      });
+
+  /// A teammate's mark replaces ours only when it is newer.
+  Future<void> upsertMarkFromRemote(AttendanceMarksCompanion c) async {
+    final mine = await (select(attendanceMarks)..where((m) => m.id.equals(c.id.value))).getSingleOrNull();
+    if (mine != null && c.updatedAt.present && mine.updatedAt.isAfter(c.updatedAt.value)) return;
+    await into(attendanceMarks).insertOnConflictUpdate(c);
+  }
 }
 
 @DriftAccessor(tables: [ProjectGeofences])
