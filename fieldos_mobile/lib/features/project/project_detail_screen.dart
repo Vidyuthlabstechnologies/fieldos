@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/reports/period_report_screen.dart';
 import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
 import 'package:fieldos_mobile/features/project/dpr_draft_screen.dart';
 import 'package:fieldos_mobile/features/project/new_project_sheet.dart';
@@ -146,8 +147,16 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
             tooltip: tr('More'),
             onSelected: (v) {
               if (v == 'stage') _changeStage();
+              if (v == 'report') openPeriodReport(context, widget.project);
             },
             itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'report',
+                child: ListTile(
+                  leading: const Icon(Icons.summarize_outlined),
+                  title: Text(tr('Weekly or monthly report')),
+                ),
+              ),
               PopupMenuItem(
                 value: 'stage',
                 child: ListTile(
@@ -432,8 +441,22 @@ class _DprTabState extends ConsumerState<_DprTab> {
               }
               return ListView.builder(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 168),
-                itemCount: items.length,
-                itemBuilder: (_, i) {
+                itemCount: items.length + 1,
+                itemBuilder: (_, index) {
+                  if (index == 0) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.summarize_outlined),
+                          label: Text(tr('Weekly or monthly report')),
+                          onPressed: () => openPeriodReport(context, widget.project),
+                        ),
+                      ),
+                    );
+                  }
+                  final i = index - 1;
                   final d = items[i];
                   final issueCount = issues.where((x) => x.dprEntryId == d.id).length;
                   return Card(
