@@ -15,6 +15,9 @@ name: supabase-google-auth
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   enable:
     runs-on: ubuntu-latest

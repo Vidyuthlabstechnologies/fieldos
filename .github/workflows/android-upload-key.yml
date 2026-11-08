@@ -19,6 +19,9 @@ name: android-upload-key
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   create:
     runs-on: ubuntu-latest
