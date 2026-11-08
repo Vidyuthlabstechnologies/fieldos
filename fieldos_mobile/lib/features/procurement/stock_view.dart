@@ -5,6 +5,7 @@ import 'package:drift/drift.dart' hide Column;
 
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/procurement/purchase_screens.dart';
 import 'package:fieldos_mobile/features/procurement/site_stock.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
@@ -34,11 +35,22 @@ class StockView extends ConsumerWidget {
                 child: Text(tr('Stock appears here once material is received in the GRN tab.'), textAlign: TextAlign.center),
               ))
             : ListView(padding: const EdgeInsets.only(bottom: 80), children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+                    child: TextButton.icon(
+                      icon: const Icon(Icons.calculate_outlined),
+                      label: Text(tr('Unit converter')),
+                      onPressed: () => openUnitConverter(context),
+                    ),
+                  ),
+                ),
                 for (final l in lines)
                   ListTile(
                     leading: _badge(context, l.status),
                     title: Text(l.name),
-                    subtitle: Text('Received ${_qty(l.received)} · Used ${_qty(l.used)}'),
+                    subtitle: Text(trf('Received {got} · Used {used}', {'got': _qty(l.received), 'used': _qty(l.used)})),
                     trailing: Text('${_qty(l.balance)} ${l.unit ?? ''}'.trim(),
                         style: TextStyle(fontWeight: FontWeight.w700, color: _color(context, l.status))),
                     onTap: () => _recordUsage(context, ref, preset: l),
