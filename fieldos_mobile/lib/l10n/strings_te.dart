@@ -677,7 +677,6 @@ const Map<String, String> stringsTe = {
   'Quintal': 'క్వింటాల్',
   'Cement bag (50 kg)': 'సిమెంట్ బస్తా (50 కిలోలు)',
   'Continue with Google': 'Googleతో కొనసాగండి',
-  'Google sign-in did not go through. Check the internet and try again.': 'Google సైన్-ఇన్ జరగలేదు. ఇంటర్నెట్ చూసి మళ్ళీ ప్రయత్నించండి.',
   'More details (optional)': 'మరిన్ని వివరాలు (ఐచ్ఛికం)',
   'Report': 'రిపోర్ట్ చేయండి',
   'Report this message': 'ఈ సందేశాన్ని రిపోర్ట్ చేయండి',
@@ -691,4 +690,6 @@ const Map<String, String> stringsTe = {
   'Something else': 'ఇంకేదైనా',
   'Sign in under Team & sync to report a message.': 'సందేశాన్ని రిపోర్ట్ చేయడానికి Team & syncలో సైన్ ఇన్ చేయండి.',
   'The report did not go through. Check the internet and try again.': 'రిపోర్ట్ పంపడం కుదరలేదు. ఇంటర్నెట్ చూసి మళ్ళీ ప్రయత్నించండి.',
+  'Google sign-in did not go through. Please try again.': 'Google సైన్-ఇన్ జరగలేదు. మళ్ళీ ప్రయత్నించండి.',
+  'Google sign-in is not ready on this version of the app. Use your username and password for now.': 'యాప్ ఈ వెర్షన్‌లో Google సైన్-ఇన్ ఇంకా సిద్ధంగా లేదు. ప్రస్తుతానికి మీ యూజర్‌నేమ్, పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి.',
 };
