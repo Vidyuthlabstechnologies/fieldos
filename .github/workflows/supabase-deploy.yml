@@ -33,9 +33,11 @@ jobs:
             exit 1
           fi
 
+      # Pinned: CLI 3.0 changed `db push` to target a local stack unless
+      # --remote is passed, which broke the first production deploy.
       - uses: supabase/setup-cli@v3
         with:
-          version: latest
+          version: 3.0.0
 
       - name: Link to the production project
         run: |
@@ -47,4 +49,4 @@ jobs:
           supabase link --project-ref "$ref"
 
       - name: Apply migrations
-        run: supabase db push
+        run: supabase db push --remote
