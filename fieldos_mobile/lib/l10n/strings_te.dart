@@ -676,4 +676,6 @@ const Map<String, String> stringsTe = {
   'Tonne': 'టన్ను',
   'Quintal': 'క్వింటాల్',
   'Cement bag (50 kg)': 'సిమెంట్ బస్తా (50 కిలోలు)',
+  'Continue with Google': 'Googleతో కొనసాగండి',
+  'Google sign-in did not go through. Check the internet and try again.': 'Google సైన్-ఇన్ జరగలేదు. ఇంటర్నెట్ చూసి మళ్ళీ ప్రయత్నించండి.',
 };

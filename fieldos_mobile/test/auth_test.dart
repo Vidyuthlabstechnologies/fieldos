@@ -39,6 +39,23 @@ void main() {
       expect(await auth.userForSession('bogus'), isNull);
     });
 
+    test('Google sign-in opens the same account for the same email, whatever the capitals', () async {
+      final db = AppDatabase.memory();
+      addTearDown(() async => db.close());
+      final auth = AuthService(db);
+      final first = await auth.loginWithGoogle(email: 'Meena@Example.com', name: 'Meena');
+      final second = await auth.loginWithGoogle(email: ' meena@example.com ', name: 'M');
+      final a = await auth.userForSession(first);
+      final b = await auth.userForSession(second);
+      expect(a, isNotNull);
+      expect(a!.id, b!.id);
+      expect(a.username, 'meena@example.com');
+      expect(a.name, 'Meena');
+      // Nobody can open it with a password.
+      expect(() => auth.login('meena@example.com', ''), throwsA(isA<AuthException>()));
+      expect(() => auth.loginWithGoogle(email: 'no-at-sign', name: 'x'), throwsA(isA<AuthException>()));
+    });
+
     test('register twice with same username is rejected', () async {
       final db = AppDatabase.memory();
       addTearDown(() async => db.close());

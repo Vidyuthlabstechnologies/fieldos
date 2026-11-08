@@ -1,0 +1,26 @@
+name: isolation-check
+
+# Proves on the live database that one company can't see or change another
+# company's data: two throwaway accounts are made, tested against each other
+# across every table, and deleted. Runs after each database deploy and on
+# demand from the Actions tab.
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [supabase-deploy]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Two companies, no crossover
+        run: python3 tools/isolation_check.py

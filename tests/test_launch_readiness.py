@@ -190,7 +190,41 @@ def test_cloud_checks_report_one_row_per_migration(monkeypatch, tmp_path):
     rows = {r.name: r for r in lr.cloud_checks(URL, "sb_publishable_x", str(tmp_path))}
     assert rows["Migration initial_schema"].status == lr.OK and "2 tables" in rows["Migration initial_schema"].note
     assert rows["Migration bug_reports"].status == lr.OK
-    assert rows["Table bug_reports"].status == lr.FAIL and "READ" in rows["Table bug_reports"].note
+    # 200 with no rows: RLS hides them, but select should be revoked too.
+    assert rows["Table bug_reports"].status == lr.WARN
     assert rows["Migration site_records"].status == lr.FAIL
     assert "site_attendance, site_expenses" in rows["Migration site_records"].note
     assert rows["Confirm email"].status == lr.OK
+
+
+def test_cloud_checks_fail_when_rows_come_back_without_signing_in(monkeypatch, tmp_path):
+    (tmp_path / "20260101000000_initial_schema.sql").write_text("create table companies (id uuid);\ncreate table projects (id uuid);\n")
+
+    def fake_get(url, headers, timeout=15):
+        if url.endswith("/auth/v1/settings"):
+            return 200, {"external": {"email": True}, "disable_signup": False, "mailer_autoconfirm": True}
+        table = url.rsplit("/rest/v1/", 1)[1].split("?")[0]
+        # RLS hides rows from anon (empty list); a table with no policy leaks.
+        return 200, ([{"id": "x"}] if table == "projects" else [])
+
+    monkeypatch.setattr(lr, "_get", fake_get)
+    rows = {r.name: r for r in lr.cloud_checks(URL, "sb_publishable_x", str(tmp_path))}
+    leak = rows["Data without signing in"]
+    assert leak.status == lr.FAIL and "projects" in leak.note and "companies" not in leak.note
+
+
+def test_cloud_checks_pass_when_nothing_is_readable_without_signing_in(monkeypatch, tmp_path):
+    (tmp_path / "20260101000000_initial_schema.sql").write_text("create table companies (id uuid);\n")
+    monkeypatch.setattr(lr, "_get", lambda url, headers, timeout=15: (
+        (200, {"external": {"email": True}, "mailer_autoconfirm": True}) if url.endswith("/settings") else (401, None)))
+    rows = {r.name: r for r in lr.cloud_checks(URL, "sb_publishable_x", str(tmp_path))}
+    assert rows["Data without signing in"].status == lr.OK
+
+
+def test_bug_reports_readable_rows_fail(monkeypatch, tmp_path):
+    (tmp_path / "20260102000000_bug_reports.sql").write_text("create table if not exists bug_reports (id uuid);\n")
+    monkeypatch.setattr(lr, "_get", lambda url, headers, timeout=15: (
+        (200, {"external": {"email": True}, "mailer_autoconfirm": True}) if url.endswith("/settings")
+        else (200, [{"message": "someone's report"}])))
+    rows = {r.name: r for r in lr.cloud_checks(URL, "sb_publishable_x", str(tmp_path))}
+    assert rows["Table bug_reports"].status == lr.FAIL and "READ" in rows["Table bug_reports"].note

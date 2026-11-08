@@ -71,9 +71,11 @@ void main() {
       expect(await online.pendingCount(), 0);
       expect(await online.submit(_report('$marker sent directly')), BugReportOutcome.sent);
 
-      // anon reads nothing back
-      final seen = await anon.from('bug_reports').select().like('message', '$marker%');
-      expect(seen, isEmpty);
+      // anon can't read reports at all (select is revoked, not just hidden)
+      await expectLater(
+        anon.from('bug_reports').select().like('message', '$marker%'),
+        throwsA(isA<PostgrestException>()),
+      );
 
       // a client can't mark its own report as already filed (would hide it)
       await expectLater(

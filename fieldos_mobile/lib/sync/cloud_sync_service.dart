@@ -221,6 +221,19 @@ class CloudSyncService {
     }
   }
 
+  /// Team & sync with a Google account: Supabase checks [idToken] against
+  /// the Google provider's client id and signs in, making the cloud account
+  /// the first time. No password, so no wrong-password or email-code steps.
+  Future<CloudSyncResult> enableSyncWithGoogle({required String idToken}) async {
+    try {
+      await client.auth.signInWithIdToken(provider: OAuthProvider.google, idToken: idToken);
+      await _persist();
+      return const CloudSyncResult(CloudSyncOutcome.signedIn);
+    } catch (e, st) {
+      return CloudSyncResult(CloudSyncOutcome.failed, cause: e, stack: st);
+    }
+  }
+
   /// Finishes a sign-up that [enableSync] reported as
   /// [CloudSyncOutcome.needsEmailConfirmation], with the code from the
   /// confirmation email (supabase/templates/confirmation.html). Throws the

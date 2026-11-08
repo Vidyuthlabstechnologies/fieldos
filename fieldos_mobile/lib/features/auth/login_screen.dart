@@ -4,6 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/auth/google_auth.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/branded_page.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -79,6 +82,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  /// Google confirms who this is, then the account on this phone opens (or
+  /// is made) and Team & sync signs in with the same Google identity.
+  Future<void> _google() async {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final picked = await ref.read(googlePickerProvider).pick();
+      if (picked == null) return;
+      final cloud = ref.read(cloudSyncServiceProvider);
+      final result = await cloud.enableSyncWithGoogle(idToken: picked.idToken);
+      if (result.outcome == CloudSyncOutcome.failed) {
+        // Never open an account Google and the server haven't both agreed on.
+        setState(() => _error = tr('Google sign-in did not go through. Check the internet and try again.'));
+        return;
+      }
+      await ref.read(sessionProvider.notifier).loginWithGoogle(email: picked.email, name: picked.name);
+    } catch (e, st) {
+      if (mounted) setState(() => _error = e is AuthException ? e.message : friendlyError(e, st));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   void _switchMode() => setState(() {
         _registering = !_registering;
         _error = null;
@@ -137,6 +166,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 20),
+            if (ref.watch(googlePickerProvider).available) ...[
+              OutlinedButton.icon(
+                onPressed: _busy ? null : _google,
+                icon: const Icon(Icons.account_circle_outlined),
+                label: Text(tr('Continue with Google')),
+                style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+              ),
+              const SizedBox(height: 12),
+              Row(children: [
+                const Expanded(child: Divider()),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(tr('or'), style: theme.textTheme.bodySmall),
+                ),
+                const Expanded(child: Divider()),
+              ]),
+              const SizedBox(height: 12),
+            ],
             if (_registering) ...[
               TextField(
                 controller: _name,

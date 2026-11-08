@@ -240,21 +240,34 @@ def cloud_checks(url: str, anon_key: str, migrations_dir: str | None = None) -> 
     # Every table the repo's migrations create, one row per migration file.
     # A table answers 404 only when it is not there; anything else (200, or
     # 401/403 from RLS and grants) means it exists.
+    leaks: list[str] = []
     for migration, tables in tables_from_migrations(migrations_dir).items():
         missing = []
         for table in tables:
-            code, _ = _get(f"{base}/rest/v1/{table}?select=*&limit=1", headers)
+            code, body = _get(f"{base}/rest/v1/{table}?select=*&limit=1", headers)
             if code == 404:
                 missing.append(table)
             elif table in ANON_WRITE_ONLY and code == 200:
-                out.append(Result(f"Table {table}", FAIL,
-                                  "anyone can READ it; the migration only grants insert to anon"))
+                if isinstance(body, list) and body:
+                    out.append(Result(f"Table {table}", FAIL,
+                                      "anyone can READ it; the migration only grants insert to anon"))
+                else:
+                    out.append(Result(f"Table {table}", WARN,
+                                      "anon may still select from it (rows are hidden by RLS); "
+                                      "run supabase-deploy to apply bug_reports_write_only"))
+            elif code == 200 and isinstance(body, list) and body:
+                # Not signed in at all, and rows come back: every company's
+                # data in this table is open to the internet.
+                leaks.append(table)
         if missing:
             out.append(Result(f"Migration {migration}", FAIL,
                               f"not deployed: {', '.join(missing)}. Run the supabase-deploy workflow"))
         else:
             n = len(tables)
             out.append(Result(f"Migration {migration}", OK, f"{n} table{'s' if n != 1 else ''} deployed"))
+    out.append(Result("Data without signing in", FAIL if leaks else OK,
+                      f"rows readable with only the public key: {', '.join(leaks)}. Fix the row level security policies"
+                      if leaks else "no table returns rows to someone who isn't signed in"))
     return out
 
 
