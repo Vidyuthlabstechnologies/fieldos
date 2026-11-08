@@ -190,7 +190,8 @@ def test_cloud_checks_report_one_row_per_migration(monkeypatch, tmp_path):
     rows = {r.name: r for r in lr.cloud_checks(URL, "sb_publishable_x", str(tmp_path))}
     assert rows["Migration initial_schema"].status == lr.OK and "2 tables" in rows["Migration initial_schema"].note
     assert rows["Migration bug_reports"].status == lr.OK
-    assert rows["Table bug_reports"].status == lr.FAIL and "READ" in rows["Table bug_reports"].note
+    # 200 with no rows: RLS hides them, but select should be revoked too.
+    assert rows["Table bug_reports"].status == lr.WARN
     assert rows["Migration site_records"].status == lr.FAIL
     assert "site_attendance, site_expenses" in rows["Migration site_records"].note
     assert rows["Confirm email"].status == lr.OK
@@ -218,3 +219,12 @@ def test_cloud_checks_pass_when_nothing_is_readable_without_signing_in(monkeypat
         (200, {"external": {"email": True}, "mailer_autoconfirm": True}) if url.endswith("/settings") else (401, None)))
     rows = {r.name: r for r in lr.cloud_checks(URL, "sb_publishable_x", str(tmp_path))}
     assert rows["Data without signing in"].status == lr.OK
+
+
+def test_bug_reports_readable_rows_fail(monkeypatch, tmp_path):
+    (tmp_path / "20260102000000_bug_reports.sql").write_text("create table if not exists bug_reports (id uuid);\n")
+    monkeypatch.setattr(lr, "_get", lambda url, headers, timeout=15: (
+        (200, {"external": {"email": True}, "mailer_autoconfirm": True}) if url.endswith("/settings")
+        else (200, [{"message": "someone's report"}])))
+    rows = {r.name: r for r in lr.cloud_checks(URL, "sb_publishable_x", str(tmp_path))}
+    assert rows["Table bug_reports"].status == lr.FAIL and "READ" in rows["Table bug_reports"].note

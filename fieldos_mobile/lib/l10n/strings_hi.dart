@@ -674,4 +674,6 @@ const Map<String, String> stringsHi = {
   'Tonne': 'टन',
   'Quintal': 'क्विंटल',
   'Cement bag (50 kg)': 'सीमेंट बोरी (50 किलो)',
+  'Continue with Google': 'Google से जारी रखें',
+  'Google sign-in did not go through. Check the internet and try again.': 'Google साइन-इन नहीं हुआ। इंटरनेट जाँचें और फिर कोशिश करें।',
 };

@@ -82,8 +82,14 @@ class SessionNotifier extends StateNotifier<SessionState> {
     await login(user.username, password);
   }
 
-  Future<void> login(String username, String password) async {
-    final token = await _auth.login(username, password);
+  Future<void> login(String username, String password) => _open(_auth.login(username, password));
+
+  /// After Google confirmed who this is: opens (or makes) their account.
+  Future<void> loginWithGoogle({required String email, required String name}) =>
+      _open(_auth.loginWithGoogle(email: email, name: name));
+
+  Future<void> _open(Future<String> signIn) async {
+    final token = await signIn;
     final user = await _auth.userForSession(token);
     if (user == null) throw StateError('Session resolution failed after login.');
     await _db.settingsDao.set(_activeSessionKey, token);

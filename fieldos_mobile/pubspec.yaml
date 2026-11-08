@@ -99,6 +99,7 @@ dependencies:
   latlong2: ^0.10.1
   purchases_flutter: ^11.0.1
   package_info_plus: ^10.2.2
+  google_sign_in: ^7.2.0
 
 dev_dependencies:
   # Direct dependency: used by test/sync_engine_test.dart to check the local

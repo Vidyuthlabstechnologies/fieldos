@@ -248,8 +248,13 @@ def cloud_checks(url: str, anon_key: str, migrations_dir: str | None = None) -> 
             if code == 404:
                 missing.append(table)
             elif table in ANON_WRITE_ONLY and code == 200:
-                out.append(Result(f"Table {table}", FAIL,
-                                  "anyone can READ it; the migration only grants insert to anon"))
+                if isinstance(body, list) and body:
+                    out.append(Result(f"Table {table}", FAIL,
+                                      "anyone can READ it; the migration only grants insert to anon"))
+                else:
+                    out.append(Result(f"Table {table}", WARN,
+                                      "anon may still select from it (rows are hidden by RLS); "
+                                      "run supabase-deploy to apply bug_reports_write_only"))
             elif code == 200 and isinstance(body, list) and body:
                 # Not signed in at all, and rows come back: every company's
                 # data in this table is open to the internet.

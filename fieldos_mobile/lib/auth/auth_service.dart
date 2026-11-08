@@ -104,6 +104,32 @@ class AuthService {
     return token;
   }
 
+  /// Opens the account on this phone that belongs to this Google email, or
+  /// makes one (username = the email). The Google sign-in itself is checked
+  /// by Supabase; locally the account gets a random password nobody knows,
+  /// so it can only be opened through Google again.
+  Future<String> loginWithGoogle({required String email, required String name}) async {
+    final clean = email.trim().toLowerCase();
+    if (!clean.contains('@')) throw AuthException('Google did not share an email address.');
+    var user = await db.userDao.byUsernameIgnoringCase(clean);
+    if (user == null) {
+      await db.userDao.create(UsersCompanion.insert(
+        id: const Uuid().v4(),
+        username: clean,
+        name: name.trim().isEmpty ? clean.split('@').first : name.trim(),
+        passwordHash: await hashPassword(newSessionToken()),
+      ));
+      user = (await db.userDao.byUsername(clean))!;
+    }
+    final token = newSessionToken();
+    await db.sessionDao.create(SessionsCompanion.insert(
+      token: token,
+      userId: user.id,
+      expiresAt: DateTime.now().add(sessionLength),
+    ));
+    return token;
+  }
+
   /// How long a phone stays signed in without being opened. Each launch
   /// starts the count again, so people who use the app are never asked
   /// for a password they may have forgotten.
