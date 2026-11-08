@@ -1,0 +1,71 @@
+name: android-upload-key
+
+# Makes the Android upload key once and saves it as the four signing
+# secrets, so nobody has to run keytool on their own computer.
+#
+# Run it ONCE. Google Play only accepts updates signed with the same upload
+# key, so a new key for each release would make every update after the first
+# fail. This workflow refuses to run when ANDROID_KEYSTORE_BASE64 is already
+# set. With Play App Signing (the default for new apps) this is only the
+# upload key: if it is ever lost, Play support can reset it.
+#
+# Needs one secret first: SECRETS_WRITE_TOKEN, a fine-grained personal
+# access token for this repository with "Secrets: Read and write"
+# (github.com/settings/personal-access-tokens/new). The built-in
+# GITHUB_TOKEN is not allowed to write secrets.
+#
+# The fingerprints it prints (SHA-1 and SHA-256) are public and safe to
+# share: Google sign-in and the Play Console ask for them.
+on:
+  workflow_dispatch:
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    env:
+      EXISTING_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      GH_TOKEN: ${{ secrets.SECRETS_WRITE_TOKEN }}
+    steps:
+      - name: Stop if a key already exists
+        run: |
+          if [ -n "$EXISTING_KEYSTORE" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is already set. Play only accepts updates signed with the same upload key, so a new one is not made. Delete the four ANDROID_* secrets first only if no build was ever uploaded to Play."
+            exit 1
+          fi
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Add the SECRETS_WRITE_TOKEN secret first (a fine-grained token for this repo with Secrets: Read and write)."
+            exit 1
+          fi
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Make the key and save the secrets
+        run: |
+          set -euo pipefail
+          umask 077
+          work=$(mktemp -d)
+          pass=$(openssl rand -base64 30 | tr -dc 'A-Za-z0-9' | head -c 32)
+          alias=fieldos-upload
+          keytool -genkeypair -v -keystore "$work/upload.jks" -storetype PKCS12 \
+            -alias "$alias" -keyalg RSA -keysize 4096 -validity 10000 \
+            -storepass "$pass" -keypass "$pass" \
+            -dname "CN=FieldOS, O=ML Dynamic Solutions Private Limited, L=Hyderabad, ST=Telangana, C=IN" >/dev/null
+          echo "::add-mask::$pass"
+          base64 -w0 "$work/upload.jks" | gh secret set ANDROID_KEYSTORE_BASE64 --repo "$GITHUB_REPOSITORY"
+          printf '%s' "$alias" | gh secret set ANDROID_KEY_ALIAS --repo "$GITHUB_REPOSITORY"
+          printf '%s' "$pass" | gh secret set ANDROID_KEY_PASSWORD --repo "$GITHUB_REPOSITORY"
+          printf '%s' "$pass" | gh secret set ANDROID_STORE_PASSWORD --repo "$GITHUB_REPOSITORY"
+          {
+            echo "## Upload key created"
+            echo
+            echo "The four ANDROID_* secrets are saved. Fingerprints (public, safe to share):"
+            echo
+            echo '```'
+            keytool -list -v -keystore "$work/upload.jks" -storepass "$pass" -alias "$alias" | grep -E 'SHA1:|SHA256:'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          keytool -list -v -keystore "$work/upload.jks" -storepass "$pass" -alias "$alias" | grep -E 'SHA1:|SHA256:'
+          rm -rf "$work"
