@@ -104,7 +104,7 @@ class SyncEngine {
 
   static const userIdColumns = {
     'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
-    'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by',
+    'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by', 'edited_by',
   };
 
   Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>

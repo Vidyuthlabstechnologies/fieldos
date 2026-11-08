@@ -10560,6 +10560,54 @@ class $PaymentsReceivedTable extends PaymentsReceived
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _voidedMeta = const VerificationMeta('voided');
+  @override
+  late final GeneratedColumn<bool> voided = GeneratedColumn<bool>(
+    'voided',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("voided" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _voidReasonMeta = const VerificationMeta(
+    'voidReason',
+  );
+  @override
+  late final GeneratedColumn<String> voidReason = GeneratedColumn<String>(
+    'void_reason',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _editedAtMeta = const VerificationMeta(
+    'editedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> editedAt = GeneratedColumn<DateTime>(
+    'edited_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _editedByMeta = const VerificationMeta(
+    'editedBy',
+  );
+  @override
+  late final GeneratedColumn<String> editedBy = GeneratedColumn<String>(
+    'edited_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -10571,6 +10619,10 @@ class $PaymentsReceivedTable extends PaymentsReceived
     recordedBy,
     note,
     createdAt,
+    voided,
+    voidReason,
+    editedAt,
+    editedBy,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -10649,6 +10701,30 @@ class $PaymentsReceivedTable extends PaymentsReceived
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('voided')) {
+      context.handle(
+        _voidedMeta,
+        voided.isAcceptableOrUnknown(data['voided']!, _voidedMeta),
+      );
+    }
+    if (data.containsKey('void_reason')) {
+      context.handle(
+        _voidReasonMeta,
+        voidReason.isAcceptableOrUnknown(data['void_reason']!, _voidReasonMeta),
+      );
+    }
+    if (data.containsKey('edited_at')) {
+      context.handle(
+        _editedAtMeta,
+        editedAt.isAcceptableOrUnknown(data['edited_at']!, _editedAtMeta),
+      );
+    }
+    if (data.containsKey('edited_by')) {
+      context.handle(
+        _editedByMeta,
+        editedBy.isAcceptableOrUnknown(data['edited_by']!, _editedByMeta),
+      );
+    }
     return context;
   }
 
@@ -10694,6 +10770,22 @@ class $PaymentsReceivedTable extends PaymentsReceived
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      voided: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}voided'],
+      )!,
+      voidReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}void_reason'],
+      ),
+      editedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}edited_at'],
+      ),
+      editedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}edited_by'],
+      ),
     );
   }
 
@@ -10714,6 +10806,10 @@ class PaymentsReceivedData extends DataClass
   final String recordedBy;
   final String? note;
   final DateTime createdAt;
+  final bool voided;
+  final String? voidReason;
+  final DateTime? editedAt;
+  final String? editedBy;
   const PaymentsReceivedData({
     required this.id,
     required this.projectId,
@@ -10724,6 +10820,10 @@ class PaymentsReceivedData extends DataClass
     required this.recordedBy,
     this.note,
     required this.createdAt,
+    required this.voided,
+    this.voidReason,
+    this.editedAt,
+    this.editedBy,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -10739,6 +10839,16 @@ class PaymentsReceivedData extends DataClass
       map['note'] = Variable<String>(note);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['voided'] = Variable<bool>(voided);
+    if (!nullToAbsent || voidReason != null) {
+      map['void_reason'] = Variable<String>(voidReason);
+    }
+    if (!nullToAbsent || editedAt != null) {
+      map['edited_at'] = Variable<DateTime>(editedAt);
+    }
+    if (!nullToAbsent || editedBy != null) {
+      map['edited_by'] = Variable<String>(editedBy);
+    }
     return map;
   }
 
@@ -10753,6 +10863,16 @@ class PaymentsReceivedData extends DataClass
       recordedBy: Value(recordedBy),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       createdAt: Value(createdAt),
+      voided: Value(voided),
+      voidReason: voidReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voidReason),
+      editedAt: editedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(editedAt),
+      editedBy: editedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(editedBy),
     );
   }
 
@@ -10771,6 +10891,10 @@ class PaymentsReceivedData extends DataClass
       recordedBy: serializer.fromJson<String>(json['recordedBy']),
       note: serializer.fromJson<String?>(json['note']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      voided: serializer.fromJson<bool>(json['voided']),
+      voidReason: serializer.fromJson<String?>(json['voidReason']),
+      editedAt: serializer.fromJson<DateTime?>(json['editedAt']),
+      editedBy: serializer.fromJson<String?>(json['editedBy']),
     );
   }
   @override
@@ -10786,6 +10910,10 @@ class PaymentsReceivedData extends DataClass
       'recordedBy': serializer.toJson<String>(recordedBy),
       'note': serializer.toJson<String?>(note),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'voided': serializer.toJson<bool>(voided),
+      'voidReason': serializer.toJson<String?>(voidReason),
+      'editedAt': serializer.toJson<DateTime?>(editedAt),
+      'editedBy': serializer.toJson<String?>(editedBy),
     };
   }
 
@@ -10799,6 +10927,10 @@ class PaymentsReceivedData extends DataClass
     String? recordedBy,
     Value<String?> note = const Value.absent(),
     DateTime? createdAt,
+    bool? voided,
+    Value<String?> voidReason = const Value.absent(),
+    Value<DateTime?> editedAt = const Value.absent(),
+    Value<String?> editedBy = const Value.absent(),
   }) => PaymentsReceivedData(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -10809,6 +10941,10 @@ class PaymentsReceivedData extends DataClass
     recordedBy: recordedBy ?? this.recordedBy,
     note: note.present ? note.value : this.note,
     createdAt: createdAt ?? this.createdAt,
+    voided: voided ?? this.voided,
+    voidReason: voidReason.present ? voidReason.value : this.voidReason,
+    editedAt: editedAt.present ? editedAt.value : this.editedAt,
+    editedBy: editedBy.present ? editedBy.value : this.editedBy,
   );
   PaymentsReceivedData copyWithCompanion(PaymentsReceivedCompanion data) {
     return PaymentsReceivedData(
@@ -10825,6 +10961,12 @@ class PaymentsReceivedData extends DataClass
           : this.recordedBy,
       note: data.note.present ? data.note.value : this.note,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      voided: data.voided.present ? data.voided.value : this.voided,
+      voidReason: data.voidReason.present
+          ? data.voidReason.value
+          : this.voidReason,
+      editedAt: data.editedAt.present ? data.editedAt.value : this.editedAt,
+      editedBy: data.editedBy.present ? data.editedBy.value : this.editedBy,
     );
   }
 
@@ -10839,7 +10981,11 @@ class PaymentsReceivedData extends DataClass
           ..write('mode: $mode, ')
           ..write('recordedBy: $recordedBy, ')
           ..write('note: $note, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('voided: $voided, ')
+          ..write('voidReason: $voidReason, ')
+          ..write('editedAt: $editedAt, ')
+          ..write('editedBy: $editedBy')
           ..write(')'))
         .toString();
   }
@@ -10855,6 +11001,10 @@ class PaymentsReceivedData extends DataClass
     recordedBy,
     note,
     createdAt,
+    voided,
+    voidReason,
+    editedAt,
+    editedBy,
   );
   @override
   bool operator ==(Object other) =>
@@ -10868,7 +11018,11 @@ class PaymentsReceivedData extends DataClass
           other.mode == this.mode &&
           other.recordedBy == this.recordedBy &&
           other.note == this.note &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.voided == this.voided &&
+          other.voidReason == this.voidReason &&
+          other.editedAt == this.editedAt &&
+          other.editedBy == this.editedBy);
 }
 
 class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
@@ -10881,6 +11035,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
   final Value<String> recordedBy;
   final Value<String?> note;
   final Value<DateTime> createdAt;
+  final Value<bool> voided;
+  final Value<String?> voidReason;
+  final Value<DateTime?> editedAt;
+  final Value<String?> editedBy;
   final Value<int> rowid;
   const PaymentsReceivedCompanion({
     this.id = const Value.absent(),
@@ -10892,6 +11050,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
     this.recordedBy = const Value.absent(),
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.voided = const Value.absent(),
+    this.voidReason = const Value.absent(),
+    this.editedAt = const Value.absent(),
+    this.editedBy = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PaymentsReceivedCompanion.insert({
@@ -10904,6 +11066,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
     required String recordedBy,
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.voided = const Value.absent(),
+    this.voidReason = const Value.absent(),
+    this.editedAt = const Value.absent(),
+    this.editedBy = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        projectId = Value(projectId),
@@ -10922,6 +11088,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
     Expression<String>? recordedBy,
     Expression<String>? note,
     Expression<DateTime>? createdAt,
+    Expression<bool>? voided,
+    Expression<String>? voidReason,
+    Expression<DateTime>? editedAt,
+    Expression<String>? editedBy,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -10934,6 +11104,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
       if (recordedBy != null) 'recorded_by': recordedBy,
       if (note != null) 'note': note,
       if (createdAt != null) 'created_at': createdAt,
+      if (voided != null) 'voided': voided,
+      if (voidReason != null) 'void_reason': voidReason,
+      if (editedAt != null) 'edited_at': editedAt,
+      if (editedBy != null) 'edited_by': editedBy,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -10948,6 +11122,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
     Value<String>? recordedBy,
     Value<String?>? note,
     Value<DateTime>? createdAt,
+    Value<bool>? voided,
+    Value<String?>? voidReason,
+    Value<DateTime?>? editedAt,
+    Value<String?>? editedBy,
     Value<int>? rowid,
   }) {
     return PaymentsReceivedCompanion(
@@ -10960,6 +11138,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
       recordedBy: recordedBy ?? this.recordedBy,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
+      voided: voided ?? this.voided,
+      voidReason: voidReason ?? this.voidReason,
+      editedAt: editedAt ?? this.editedAt,
+      editedBy: editedBy ?? this.editedBy,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -10994,6 +11176,18 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (voided.present) {
+      map['voided'] = Variable<bool>(voided.value);
+    }
+    if (voidReason.present) {
+      map['void_reason'] = Variable<String>(voidReason.value);
+    }
+    if (editedAt.present) {
+      map['edited_at'] = Variable<DateTime>(editedAt.value);
+    }
+    if (editedBy.present) {
+      map['edited_by'] = Variable<String>(editedBy.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -11012,6 +11206,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
           ..write('recordedBy: $recordedBy, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
+          ..write('voided: $voided, ')
+          ..write('voidReason: $voidReason, ')
+          ..write('editedAt: $editedAt, ')
+          ..write('editedBy: $editedBy, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -12214,6 +12412,109 @@ class $SiteExpensesTable extends SiteExpenses
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _paidToMeta = const VerificationMeta('paidTo');
+  @override
+  late final GeneratedColumn<String> paidTo = GeneratedColumn<String>(
+    'paid_to',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _modeMeta = const VerificationMeta('mode');
+  @override
+  late final GeneratedColumn<String> mode = GeneratedColumn<String>(
+    'mode',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 20),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _gstPctMeta = const VerificationMeta('gstPct');
+  @override
+  late final GeneratedColumn<double> gstPct = GeneratedColumn<double>(
+    'gst_pct',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _gstInterStateMeta = const VerificationMeta(
+    'gstInterState',
+  );
+  @override
+  late final GeneratedColumn<bool> gstInterState = GeneratedColumn<bool>(
+    'gst_inter_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("gst_inter_state" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _voucherNoMeta = const VerificationMeta(
+    'voucherNo',
+  );
+  @override
+  late final GeneratedColumn<int> voucherNo = GeneratedColumn<int>(
+    'voucher_no',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _voidedMeta = const VerificationMeta('voided');
+  @override
+  late final GeneratedColumn<bool> voided = GeneratedColumn<bool>(
+    'voided',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("voided" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _voidReasonMeta = const VerificationMeta(
+    'voidReason',
+  );
+  @override
+  late final GeneratedColumn<String> voidReason = GeneratedColumn<String>(
+    'void_reason',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _editedAtMeta = const VerificationMeta(
+    'editedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> editedAt = GeneratedColumn<DateTime>(
+    'edited_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _editedByMeta = const VerificationMeta(
+    'editedBy',
+  );
+  @override
+  late final GeneratedColumn<String> editedBy = GeneratedColumn<String>(
+    'edited_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -12226,6 +12527,15 @@ class $SiteExpensesTable extends SiteExpenses
     note,
     createdAt,
     workerId,
+    paidTo,
+    mode,
+    gstPct,
+    gstInterState,
+    voucherNo,
+    voided,
+    voidReason,
+    editedAt,
+    editedBy,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -12311,6 +12621,63 @@ class $SiteExpensesTable extends SiteExpenses
         workerId.isAcceptableOrUnknown(data['worker_id']!, _workerIdMeta),
       );
     }
+    if (data.containsKey('paid_to')) {
+      context.handle(
+        _paidToMeta,
+        paidTo.isAcceptableOrUnknown(data['paid_to']!, _paidToMeta),
+      );
+    }
+    if (data.containsKey('mode')) {
+      context.handle(
+        _modeMeta,
+        mode.isAcceptableOrUnknown(data['mode']!, _modeMeta),
+      );
+    }
+    if (data.containsKey('gst_pct')) {
+      context.handle(
+        _gstPctMeta,
+        gstPct.isAcceptableOrUnknown(data['gst_pct']!, _gstPctMeta),
+      );
+    }
+    if (data.containsKey('gst_inter_state')) {
+      context.handle(
+        _gstInterStateMeta,
+        gstInterState.isAcceptableOrUnknown(
+          data['gst_inter_state']!,
+          _gstInterStateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('voucher_no')) {
+      context.handle(
+        _voucherNoMeta,
+        voucherNo.isAcceptableOrUnknown(data['voucher_no']!, _voucherNoMeta),
+      );
+    }
+    if (data.containsKey('voided')) {
+      context.handle(
+        _voidedMeta,
+        voided.isAcceptableOrUnknown(data['voided']!, _voidedMeta),
+      );
+    }
+    if (data.containsKey('void_reason')) {
+      context.handle(
+        _voidReasonMeta,
+        voidReason.isAcceptableOrUnknown(data['void_reason']!, _voidReasonMeta),
+      );
+    }
+    if (data.containsKey('edited_at')) {
+      context.handle(
+        _editedAtMeta,
+        editedAt.isAcceptableOrUnknown(data['edited_at']!, _editedAtMeta),
+      );
+    }
+    if (data.containsKey('edited_by')) {
+      context.handle(
+        _editedByMeta,
+        editedBy.isAcceptableOrUnknown(data['edited_by']!, _editedByMeta),
+      );
+    }
     return context;
   }
 
@@ -12360,6 +12727,42 @@ class $SiteExpensesTable extends SiteExpenses
         DriftSqlType.string,
         data['${effectivePrefix}worker_id'],
       ),
+      paidTo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}paid_to'],
+      ),
+      mode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mode'],
+      ),
+      gstPct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gst_pct'],
+      ),
+      gstInterState: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}gst_inter_state'],
+      )!,
+      voucherNo: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}voucher_no'],
+      ),
+      voided: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}voided'],
+      )!,
+      voidReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}void_reason'],
+      ),
+      editedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}edited_at'],
+      ),
+      editedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}edited_by'],
+      ),
     );
   }
 
@@ -12383,6 +12786,30 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
   /// Set when the money went to a worker (wages or an advance), so the wage
   /// sheet can show what each person has already been paid.
   final String? workerId;
+
+  /// Who the money went to when it isn't one of the site's workers
+  /// ("Balaji Hardware", "Tractor driver").
+  final String? paidTo;
+
+  /// cash, upi, bank or cheque, like PaymentsReceived.mode.
+  final String? mode;
+
+  /// GST rate in percent when the bill carried GST. [amount] is always what
+  /// was paid in total, GST included.
+  final double? gstPct;
+
+  /// IGST (another state) instead of CGST + SGST.
+  final bool gstInterState;
+
+  /// Voucher number within the site: 1, 2, 3...
+  final int? voucherNo;
+
+  /// Cancelled entries stay (struck through, with the reason) so the
+  /// voucher numbers have no gaps; they count in no total.
+  final bool voided;
+  final String? voidReason;
+  final DateTime? editedAt;
+  final String? editedBy;
   const SiteExpense({
     required this.id,
     required this.projectId,
@@ -12394,6 +12821,15 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
     this.note,
     required this.createdAt,
     this.workerId,
+    this.paidTo,
+    this.mode,
+    this.gstPct,
+    required this.gstInterState,
+    this.voucherNo,
+    required this.voided,
+    this.voidReason,
+    this.editedAt,
+    this.editedBy,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -12414,6 +12850,29 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
     if (!nullToAbsent || workerId != null) {
       map['worker_id'] = Variable<String>(workerId);
     }
+    if (!nullToAbsent || paidTo != null) {
+      map['paid_to'] = Variable<String>(paidTo);
+    }
+    if (!nullToAbsent || mode != null) {
+      map['mode'] = Variable<String>(mode);
+    }
+    if (!nullToAbsent || gstPct != null) {
+      map['gst_pct'] = Variable<double>(gstPct);
+    }
+    map['gst_inter_state'] = Variable<bool>(gstInterState);
+    if (!nullToAbsent || voucherNo != null) {
+      map['voucher_no'] = Variable<int>(voucherNo);
+    }
+    map['voided'] = Variable<bool>(voided);
+    if (!nullToAbsent || voidReason != null) {
+      map['void_reason'] = Variable<String>(voidReason);
+    }
+    if (!nullToAbsent || editedAt != null) {
+      map['edited_at'] = Variable<DateTime>(editedAt);
+    }
+    if (!nullToAbsent || editedBy != null) {
+      map['edited_by'] = Variable<String>(editedBy);
+    }
     return map;
   }
 
@@ -12433,6 +12892,27 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
       workerId: workerId == null && nullToAbsent
           ? const Value.absent()
           : Value(workerId),
+      paidTo: paidTo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paidTo),
+      mode: mode == null && nullToAbsent ? const Value.absent() : Value(mode),
+      gstPct: gstPct == null && nullToAbsent
+          ? const Value.absent()
+          : Value(gstPct),
+      gstInterState: Value(gstInterState),
+      voucherNo: voucherNo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voucherNo),
+      voided: Value(voided),
+      voidReason: voidReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voidReason),
+      editedAt: editedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(editedAt),
+      editedBy: editedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(editedBy),
     );
   }
 
@@ -12452,6 +12932,15 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
       note: serializer.fromJson<String?>(json['note']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       workerId: serializer.fromJson<String?>(json['workerId']),
+      paidTo: serializer.fromJson<String?>(json['paidTo']),
+      mode: serializer.fromJson<String?>(json['mode']),
+      gstPct: serializer.fromJson<double?>(json['gstPct']),
+      gstInterState: serializer.fromJson<bool>(json['gstInterState']),
+      voucherNo: serializer.fromJson<int?>(json['voucherNo']),
+      voided: serializer.fromJson<bool>(json['voided']),
+      voidReason: serializer.fromJson<String?>(json['voidReason']),
+      editedAt: serializer.fromJson<DateTime?>(json['editedAt']),
+      editedBy: serializer.fromJson<String?>(json['editedBy']),
     );
   }
   @override
@@ -12468,6 +12957,15 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
       'note': serializer.toJson<String?>(note),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'workerId': serializer.toJson<String?>(workerId),
+      'paidTo': serializer.toJson<String?>(paidTo),
+      'mode': serializer.toJson<String?>(mode),
+      'gstPct': serializer.toJson<double?>(gstPct),
+      'gstInterState': serializer.toJson<bool>(gstInterState),
+      'voucherNo': serializer.toJson<int?>(voucherNo),
+      'voided': serializer.toJson<bool>(voided),
+      'voidReason': serializer.toJson<String?>(voidReason),
+      'editedAt': serializer.toJson<DateTime?>(editedAt),
+      'editedBy': serializer.toJson<String?>(editedBy),
     };
   }
 
@@ -12482,6 +12980,15 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
     Value<String?> note = const Value.absent(),
     DateTime? createdAt,
     Value<String?> workerId = const Value.absent(),
+    Value<String?> paidTo = const Value.absent(),
+    Value<String?> mode = const Value.absent(),
+    Value<double?> gstPct = const Value.absent(),
+    bool? gstInterState,
+    Value<int?> voucherNo = const Value.absent(),
+    bool? voided,
+    Value<String?> voidReason = const Value.absent(),
+    Value<DateTime?> editedAt = const Value.absent(),
+    Value<String?> editedBy = const Value.absent(),
   }) => SiteExpense(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -12493,6 +13000,15 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
     note: note.present ? note.value : this.note,
     createdAt: createdAt ?? this.createdAt,
     workerId: workerId.present ? workerId.value : this.workerId,
+    paidTo: paidTo.present ? paidTo.value : this.paidTo,
+    mode: mode.present ? mode.value : this.mode,
+    gstPct: gstPct.present ? gstPct.value : this.gstPct,
+    gstInterState: gstInterState ?? this.gstInterState,
+    voucherNo: voucherNo.present ? voucherNo.value : this.voucherNo,
+    voided: voided ?? this.voided,
+    voidReason: voidReason.present ? voidReason.value : this.voidReason,
+    editedAt: editedAt.present ? editedAt.value : this.editedAt,
+    editedBy: editedBy.present ? editedBy.value : this.editedBy,
   );
   SiteExpense copyWithCompanion(SiteExpensesCompanion data) {
     return SiteExpense(
@@ -12512,6 +13028,19 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
       note: data.note.present ? data.note.value : this.note,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       workerId: data.workerId.present ? data.workerId.value : this.workerId,
+      paidTo: data.paidTo.present ? data.paidTo.value : this.paidTo,
+      mode: data.mode.present ? data.mode.value : this.mode,
+      gstPct: data.gstPct.present ? data.gstPct.value : this.gstPct,
+      gstInterState: data.gstInterState.present
+          ? data.gstInterState.value
+          : this.gstInterState,
+      voucherNo: data.voucherNo.present ? data.voucherNo.value : this.voucherNo,
+      voided: data.voided.present ? data.voided.value : this.voided,
+      voidReason: data.voidReason.present
+          ? data.voidReason.value
+          : this.voidReason,
+      editedAt: data.editedAt.present ? data.editedAt.value : this.editedAt,
+      editedBy: data.editedBy.present ? data.editedBy.value : this.editedBy,
     );
   }
 
@@ -12527,7 +13056,16 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
           ..write('recordedBy: $recordedBy, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
-          ..write('workerId: $workerId')
+          ..write('workerId: $workerId, ')
+          ..write('paidTo: $paidTo, ')
+          ..write('mode: $mode, ')
+          ..write('gstPct: $gstPct, ')
+          ..write('gstInterState: $gstInterState, ')
+          ..write('voucherNo: $voucherNo, ')
+          ..write('voided: $voided, ')
+          ..write('voidReason: $voidReason, ')
+          ..write('editedAt: $editedAt, ')
+          ..write('editedBy: $editedBy')
           ..write(')'))
         .toString();
   }
@@ -12544,6 +13082,15 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
     note,
     createdAt,
     workerId,
+    paidTo,
+    mode,
+    gstPct,
+    gstInterState,
+    voucherNo,
+    voided,
+    voidReason,
+    editedAt,
+    editedBy,
   );
   @override
   bool operator ==(Object other) =>
@@ -12558,7 +13105,16 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
           other.recordedBy == this.recordedBy &&
           other.note == this.note &&
           other.createdAt == this.createdAt &&
-          other.workerId == this.workerId);
+          other.workerId == this.workerId &&
+          other.paidTo == this.paidTo &&
+          other.mode == this.mode &&
+          other.gstPct == this.gstPct &&
+          other.gstInterState == this.gstInterState &&
+          other.voucherNo == this.voucherNo &&
+          other.voided == this.voided &&
+          other.voidReason == this.voidReason &&
+          other.editedAt == this.editedAt &&
+          other.editedBy == this.editedBy);
 }
 
 class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
@@ -12572,6 +13128,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
   final Value<String?> note;
   final Value<DateTime> createdAt;
   final Value<String?> workerId;
+  final Value<String?> paidTo;
+  final Value<String?> mode;
+  final Value<double?> gstPct;
+  final Value<bool> gstInterState;
+  final Value<int?> voucherNo;
+  final Value<bool> voided;
+  final Value<String?> voidReason;
+  final Value<DateTime?> editedAt;
+  final Value<String?> editedBy;
   final Value<int> rowid;
   const SiteExpensesCompanion({
     this.id = const Value.absent(),
@@ -12584,6 +13149,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.workerId = const Value.absent(),
+    this.paidTo = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.gstPct = const Value.absent(),
+    this.gstInterState = const Value.absent(),
+    this.voucherNo = const Value.absent(),
+    this.voided = const Value.absent(),
+    this.voidReason = const Value.absent(),
+    this.editedAt = const Value.absent(),
+    this.editedBy = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SiteExpensesCompanion.insert({
@@ -12597,6 +13171,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.workerId = const Value.absent(),
+    this.paidTo = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.gstPct = const Value.absent(),
+    this.gstInterState = const Value.absent(),
+    this.voucherNo = const Value.absent(),
+    this.voided = const Value.absent(),
+    this.voidReason = const Value.absent(),
+    this.editedAt = const Value.absent(),
+    this.editedBy = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        projectId = Value(projectId),
@@ -12615,6 +13198,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
     Expression<String>? note,
     Expression<DateTime>? createdAt,
     Expression<String>? workerId,
+    Expression<String>? paidTo,
+    Expression<String>? mode,
+    Expression<double>? gstPct,
+    Expression<bool>? gstInterState,
+    Expression<int>? voucherNo,
+    Expression<bool>? voided,
+    Expression<String>? voidReason,
+    Expression<DateTime>? editedAt,
+    Expression<String>? editedBy,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -12628,6 +13220,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
       if (note != null) 'note': note,
       if (createdAt != null) 'created_at': createdAt,
       if (workerId != null) 'worker_id': workerId,
+      if (paidTo != null) 'paid_to': paidTo,
+      if (mode != null) 'mode': mode,
+      if (gstPct != null) 'gst_pct': gstPct,
+      if (gstInterState != null) 'gst_inter_state': gstInterState,
+      if (voucherNo != null) 'voucher_no': voucherNo,
+      if (voided != null) 'voided': voided,
+      if (voidReason != null) 'void_reason': voidReason,
+      if (editedAt != null) 'edited_at': editedAt,
+      if (editedBy != null) 'edited_by': editedBy,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -12643,6 +13244,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
     Value<String?>? note,
     Value<DateTime>? createdAt,
     Value<String?>? workerId,
+    Value<String?>? paidTo,
+    Value<String?>? mode,
+    Value<double?>? gstPct,
+    Value<bool>? gstInterState,
+    Value<int?>? voucherNo,
+    Value<bool>? voided,
+    Value<String?>? voidReason,
+    Value<DateTime?>? editedAt,
+    Value<String?>? editedBy,
     Value<int>? rowid,
   }) {
     return SiteExpensesCompanion(
@@ -12656,6 +13266,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
       workerId: workerId ?? this.workerId,
+      paidTo: paidTo ?? this.paidTo,
+      mode: mode ?? this.mode,
+      gstPct: gstPct ?? this.gstPct,
+      gstInterState: gstInterState ?? this.gstInterState,
+      voucherNo: voucherNo ?? this.voucherNo,
+      voided: voided ?? this.voided,
+      voidReason: voidReason ?? this.voidReason,
+      editedAt: editedAt ?? this.editedAt,
+      editedBy: editedBy ?? this.editedBy,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -12693,6 +13312,33 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
     if (workerId.present) {
       map['worker_id'] = Variable<String>(workerId.value);
     }
+    if (paidTo.present) {
+      map['paid_to'] = Variable<String>(paidTo.value);
+    }
+    if (mode.present) {
+      map['mode'] = Variable<String>(mode.value);
+    }
+    if (gstPct.present) {
+      map['gst_pct'] = Variable<double>(gstPct.value);
+    }
+    if (gstInterState.present) {
+      map['gst_inter_state'] = Variable<bool>(gstInterState.value);
+    }
+    if (voucherNo.present) {
+      map['voucher_no'] = Variable<int>(voucherNo.value);
+    }
+    if (voided.present) {
+      map['voided'] = Variable<bool>(voided.value);
+    }
+    if (voidReason.present) {
+      map['void_reason'] = Variable<String>(voidReason.value);
+    }
+    if (editedAt.present) {
+      map['edited_at'] = Variable<DateTime>(editedAt.value);
+    }
+    if (editedBy.present) {
+      map['edited_by'] = Variable<String>(editedBy.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -12712,6 +13358,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
           ..write('workerId: $workerId, ')
+          ..write('paidTo: $paidTo, ')
+          ..write('mode: $mode, ')
+          ..write('gstPct: $gstPct, ')
+          ..write('gstInterState: $gstInterState, ')
+          ..write('voucherNo: $voucherNo, ')
+          ..write('voided: $voided, ')
+          ..write('voidReason: $voidReason, ')
+          ..write('editedAt: $editedAt, ')
+          ..write('editedBy: $editedBy, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -25296,6 +25951,10 @@ typedef $$PaymentsReceivedTableCreateCompanionBuilder =
       required String recordedBy,
       Value<String?> note,
       Value<DateTime> createdAt,
+      Value<bool> voided,
+      Value<String?> voidReason,
+      Value<DateTime?> editedAt,
+      Value<String?> editedBy,
       Value<int> rowid,
     });
 typedef $$PaymentsReceivedTableUpdateCompanionBuilder =
@@ -25309,6 +25968,10 @@ typedef $$PaymentsReceivedTableUpdateCompanionBuilder =
       Value<String> recordedBy,
       Value<String?> note,
       Value<DateTime> createdAt,
+      Value<bool> voided,
+      Value<String?> voidReason,
+      Value<DateTime?> editedAt,
+      Value<String?> editedBy,
       Value<int> rowid,
     });
 
@@ -25363,6 +26026,26 @@ class $$PaymentsReceivedTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get voided => $composableBuilder(
+    column: $table.voided,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get editedAt => $composableBuilder(
+    column: $table.editedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get editedBy => $composableBuilder(
+    column: $table.editedBy,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -25420,6 +26103,26 @@ class $$PaymentsReceivedTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get voided => $composableBuilder(
+    column: $table.voided,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get editedAt => $composableBuilder(
+    column: $table.editedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get editedBy => $composableBuilder(
+    column: $table.editedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PaymentsReceivedTableAnnotationComposer
@@ -25461,6 +26164,20 @@ class $$PaymentsReceivedTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get voided =>
+      $composableBuilder(column: $table.voided, builder: (column) => column);
+
+  GeneratedColumn<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get editedAt =>
+      $composableBuilder(column: $table.editedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get editedBy =>
+      $composableBuilder(column: $table.editedBy, builder: (column) => column);
 }
 
 class $$PaymentsReceivedTableTableManager
@@ -25509,6 +26226,10 @@ class $$PaymentsReceivedTableTableManager
                 Value<String> recordedBy = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> voided = const Value.absent(),
+                Value<String?> voidReason = const Value.absent(),
+                Value<DateTime?> editedAt = const Value.absent(),
+                Value<String?> editedBy = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PaymentsReceivedCompanion(
                 id: id,
@@ -25520,6 +26241,10 @@ class $$PaymentsReceivedTableTableManager
                 recordedBy: recordedBy,
                 note: note,
                 createdAt: createdAt,
+                voided: voided,
+                voidReason: voidReason,
+                editedAt: editedAt,
+                editedBy: editedBy,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -25533,6 +26258,10 @@ class $$PaymentsReceivedTableTableManager
                 required String recordedBy,
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> voided = const Value.absent(),
+                Value<String?> voidReason = const Value.absent(),
+                Value<DateTime?> editedAt = const Value.absent(),
+                Value<String?> editedBy = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PaymentsReceivedCompanion.insert(
                 id: id,
@@ -25544,6 +26273,10 @@ class $$PaymentsReceivedTableTableManager
                 recordedBy: recordedBy,
                 note: note,
                 createdAt: createdAt,
+                voided: voided,
+                voidReason: voidReason,
+                editedAt: editedAt,
+                editedBy: editedBy,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -26087,6 +26820,15 @@ typedef $$SiteExpensesTableCreateCompanionBuilder =
       Value<String?> note,
       Value<DateTime> createdAt,
       Value<String?> workerId,
+      Value<String?> paidTo,
+      Value<String?> mode,
+      Value<double?> gstPct,
+      Value<bool> gstInterState,
+      Value<int?> voucherNo,
+      Value<bool> voided,
+      Value<String?> voidReason,
+      Value<DateTime?> editedAt,
+      Value<String?> editedBy,
       Value<int> rowid,
     });
 typedef $$SiteExpensesTableUpdateCompanionBuilder =
@@ -26101,6 +26843,15 @@ typedef $$SiteExpensesTableUpdateCompanionBuilder =
       Value<String?> note,
       Value<DateTime> createdAt,
       Value<String?> workerId,
+      Value<String?> paidTo,
+      Value<String?> mode,
+      Value<double?> gstPct,
+      Value<bool> gstInterState,
+      Value<int?> voucherNo,
+      Value<bool> voided,
+      Value<String?> voidReason,
+      Value<DateTime?> editedAt,
+      Value<String?> editedBy,
       Value<int> rowid,
     });
 
@@ -26160,6 +26911,51 @@ class $$SiteExpensesTableFilterComposer
 
   ColumnFilters<String> get workerId => $composableBuilder(
     column: $table.workerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paidTo => $composableBuilder(
+    column: $table.paidTo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get gstPct => $composableBuilder(
+    column: $table.gstPct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get gstInterState => $composableBuilder(
+    column: $table.gstInterState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get voucherNo => $composableBuilder(
+    column: $table.voucherNo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get voided => $composableBuilder(
+    column: $table.voided,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get editedAt => $composableBuilder(
+    column: $table.editedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get editedBy => $composableBuilder(
+    column: $table.editedBy,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -26222,6 +27018,51 @@ class $$SiteExpensesTableOrderingComposer
     column: $table.workerId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get paidTo => $composableBuilder(
+    column: $table.paidTo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get gstPct => $composableBuilder(
+    column: $table.gstPct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get gstInterState => $composableBuilder(
+    column: $table.gstInterState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get voucherNo => $composableBuilder(
+    column: $table.voucherNo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get voided => $composableBuilder(
+    column: $table.voided,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get editedAt => $composableBuilder(
+    column: $table.editedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get editedBy => $composableBuilder(
+    column: $table.editedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SiteExpensesTableAnnotationComposer
@@ -26268,6 +27109,37 @@ class $$SiteExpensesTableAnnotationComposer
 
   GeneratedColumn<String> get workerId =>
       $composableBuilder(column: $table.workerId, builder: (column) => column);
+
+  GeneratedColumn<String> get paidTo =>
+      $composableBuilder(column: $table.paidTo, builder: (column) => column);
+
+  GeneratedColumn<String> get mode =>
+      $composableBuilder(column: $table.mode, builder: (column) => column);
+
+  GeneratedColumn<double> get gstPct =>
+      $composableBuilder(column: $table.gstPct, builder: (column) => column);
+
+  GeneratedColumn<bool> get gstInterState => $composableBuilder(
+    column: $table.gstInterState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get voucherNo =>
+      $composableBuilder(column: $table.voucherNo, builder: (column) => column);
+
+  GeneratedColumn<bool> get voided =>
+      $composableBuilder(column: $table.voided, builder: (column) => column);
+
+  GeneratedColumn<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get editedAt =>
+      $composableBuilder(column: $table.editedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get editedBy =>
+      $composableBuilder(column: $table.editedBy, builder: (column) => column);
 }
 
 class $$SiteExpensesTableTableManager
@@ -26311,6 +27183,15 @@ class $$SiteExpensesTableTableManager
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<String?> workerId = const Value.absent(),
+                Value<String?> paidTo = const Value.absent(),
+                Value<String?> mode = const Value.absent(),
+                Value<double?> gstPct = const Value.absent(),
+                Value<bool> gstInterState = const Value.absent(),
+                Value<int?> voucherNo = const Value.absent(),
+                Value<bool> voided = const Value.absent(),
+                Value<String?> voidReason = const Value.absent(),
+                Value<DateTime?> editedAt = const Value.absent(),
+                Value<String?> editedBy = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SiteExpensesCompanion(
                 id: id,
@@ -26323,6 +27204,15 @@ class $$SiteExpensesTableTableManager
                 note: note,
                 createdAt: createdAt,
                 workerId: workerId,
+                paidTo: paidTo,
+                mode: mode,
+                gstPct: gstPct,
+                gstInterState: gstInterState,
+                voucherNo: voucherNo,
+                voided: voided,
+                voidReason: voidReason,
+                editedAt: editedAt,
+                editedBy: editedBy,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -26337,6 +27227,15 @@ class $$SiteExpensesTableTableManager
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<String?> workerId = const Value.absent(),
+                Value<String?> paidTo = const Value.absent(),
+                Value<String?> mode = const Value.absent(),
+                Value<double?> gstPct = const Value.absent(),
+                Value<bool> gstInterState = const Value.absent(),
+                Value<int?> voucherNo = const Value.absent(),
+                Value<bool> voided = const Value.absent(),
+                Value<String?> voidReason = const Value.absent(),
+                Value<DateTime?> editedAt = const Value.absent(),
+                Value<String?> editedBy = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SiteExpensesCompanion.insert(
                 id: id,
@@ -26349,6 +27248,15 @@ class $$SiteExpensesTableTableManager
                 note: note,
                 createdAt: createdAt,
                 workerId: workerId,
+                paidTo: paidTo,
+                mode: mode,
+                gstPct: gstPct,
+                gstInterState: gstInterState,
+                voucherNo: voucherNo,
+                voided: voided,
+                voidReason: voidReason,
+                editedAt: editedAt,
+                editedBy: editedBy,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

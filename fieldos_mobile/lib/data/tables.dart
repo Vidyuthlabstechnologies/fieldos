@@ -343,6 +343,28 @@ class SiteExpenses extends Table {
   /// sheet can show what each person has already been paid.
   TextColumn get workerId => text().withLength(max: 36).nullable()();
 
+  // v10, the money book (Onsite customers asked for vouchers an accountant
+  // can work with): who was paid, how, GST, a voucher number, and edits
+  // and cancellations that keep a trail instead of deleting.
+  /// Who the money went to when it isn't one of the site's workers
+  /// ("Balaji Hardware", "Tractor driver").
+  TextColumn get paidTo => text().withLength(max: 120).nullable()();
+  /// cash, upi, bank or cheque, like PaymentsReceived.mode.
+  TextColumn get mode => text().withLength(max: 20).nullable()();
+  /// GST rate in percent when the bill carried GST. [amount] is always what
+  /// was paid in total, GST included.
+  RealColumn get gstPct => real().nullable()();
+  /// IGST (another state) instead of CGST + SGST.
+  BoolColumn get gstInterState => boolean().withDefault(const Constant(false))();
+  /// Voucher number within the site: 1, 2, 3...
+  IntColumn get voucherNo => integer().nullable()();
+  /// Cancelled entries stay (struck through, with the reason) so the
+  /// voucher numbers have no gaps; they count in no total.
+  BoolColumn get voided => boolean().withDefault(const Constant(false))();
+  TextColumn get voidReason => text().withLength(max: 200).nullable()();
+  DateTimeColumn get editedAt => dateTime().nullable()();
+  TextColumn get editedBy => text().withLength(max: 64).nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -376,6 +398,11 @@ class PaymentsReceived extends Table {
   TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
   TextColumn get note => text().withLength(max: 300).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  // v10: corrected or cancelled with a trail, like SiteExpenses.
+  BoolColumn get voided => boolean().withDefault(const Constant(false))();
+  TextColumn get voidReason => text().withLength(max: 200).nullable()();
+  DateTimeColumn get editedAt => dateTime().nullable()();
+  TextColumn get editedBy => text().withLength(max: 64).nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};

@@ -22,6 +22,12 @@ part 'app_database.g.dart';
 
 final _uuid = Uuid();
 
+String? _clip(String? s, int max) {
+  final v = s?.trim();
+  if (v == null || v.isEmpty) return null;
+  return v.length > max ? v.substring(0, max) : v;
+}
+
 @DriftDatabase(tables: [
   Users,
   Sessions,
@@ -86,7 +92,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -101,7 +107,9 @@ class AppDatabase extends _$AppDatabase {
   // own site_* cloud tables (receipts are no longer local-only), and adds
   // MaterialUsage, PaymentsReceived and SiteExpenses.workerId. v8 adds
   // task progress, priority and start date (planning and the delay view).
-  // v9 adds ClientBills (RA bills and GST invoices, synced).
+  // v9 adds ClientBills (RA bills and GST invoices, synced). v10 is the
+  // money book: paid-to, mode, GST, voucher numbers and edit/cancel trails
+  // on expenses, and edit/cancel trails on payments received.
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onUpgrade: (m, from, to) async {
@@ -154,8 +162,55 @@ class AppDatabase extends _$AppDatabase {
           if (from < 9) {
             await m.createTable(clientBills);
           }
+          if (from < 10) {
+            for (final c in [
+              siteExpenses.paidTo,
+              siteExpenses.mode,
+              siteExpenses.gstPct,
+              siteExpenses.gstInterState,
+              siteExpenses.voucherNo,
+              siteExpenses.voided,
+              siteExpenses.voidReason,
+              siteExpenses.editedAt,
+              siteExpenses.editedBy,
+            ]) {
+              await _addColumnIfMissing(m, siteExpenses, c);
+            }
+            for (final c in [
+              paymentsReceived.voided,
+              paymentsReceived.voidReason,
+              paymentsReceived.editedAt,
+              paymentsReceived.editedBy,
+            ]) {
+              await _addColumnIfMissing(m, paymentsReceived, c);
+            }
+            await _numberExistingVouchers();
+          }
         },
       );
+
+  /// A table made by an earlier step of this same upgrade (createTable
+  /// uses today's columns) already has the column.
+  Future<void> _addColumnIfMissing(Migrator m, TableInfo table, GeneratedColumn column) async {
+    final cols = await customSelect('PRAGMA table_info(${table.actualTableName})').get();
+    if (cols.any((r) => r.read<String>('name') == column.name)) return;
+    await m.addColumn(table, column);
+  }
+
+  /// Expenses written before v10 get voucher numbers in date order, per
+  /// site, so the first printed voucher isn't number 1 of a busy site.
+  /// Local only: the cloud learns each number with the row's next edit.
+  Future<void> _numberExistingVouchers() async {
+    final rows = await (select(siteExpenses)
+          ..orderBy([(e) => OrderingTerm.asc(e.incurredOn), (e) => OrderingTerm.asc(e.createdAt)]))
+        .get();
+    final next = <String, int>{};
+    for (final e in rows) {
+      final n = (next[e.projectId] ?? 0) + 1;
+      next[e.projectId] = n;
+      await (update(siteExpenses)..where((x) => x.id.equals(e.id))).write(SiteExpensesCompanion(voucherNo: Value(n)));
+    }
+  }
 
   Future<void> _queueExistingSiteRecords() async {
     for (final a in await select(labourAttendance).get()) {
@@ -897,10 +952,55 @@ class PaymentDao extends DatabaseAccessor<AppDatabase> with _$PaymentDaoMixin {
     });
   }
 
+  /// Payments that count: cancelled ones are left out of every total.
   Future<List<PaymentsReceivedData>> forProject(String projectId) => (select(paymentsReceived)
+        ..where((p) => p.projectId.equals(projectId) & p.voided.equals(false))
+        ..orderBy([(p) => OrderingTerm.desc(p.receivedOn)]))
+      .get();
+
+  /// Every payment of the site, cancelled ones too, for the money book.
+  Future<List<PaymentsReceivedData>> allForProject(String projectId) => (select(paymentsReceived)
         ..where((p) => p.projectId.equals(projectId))
         ..orderBy([(p) => OrderingTerm.desc(p.receivedOn)]))
       .get();
+
+  Future<PaymentsReceivedData> edit(String id, PaymentsReceivedCompanion changes, {required String by, DateTime? now}) {
+    return transaction(() async {
+      await (update(paymentsReceived)..where((p) => p.id.equals(id))).write(changes.copyWith(
+        id: const Value.absent(),
+        projectId: const Value.absent(),
+        recordedBy: const Value.absent(),
+        createdAt: const Value.absent(),
+        editedAt: Value(now ?? DateTime.now()),
+        editedBy: Value(by),
+      ));
+      return _queueUpdate(id);
+    });
+  }
+
+  Future<PaymentsReceivedData> setVoided(String id,
+      {required bool voided, String? reason, required String by, DateTime? now}) {
+    return transaction(() async {
+      await (update(paymentsReceived)..where((p) => p.id.equals(id))).write(PaymentsReceivedCompanion(
+        voided: Value(voided),
+        voidReason: Value(voided ? _clip(reason, 200) : null),
+        editedAt: Value(now ?? DateTime.now()),
+        editedBy: Value(by),
+      ));
+      return _queueUpdate(id);
+    });
+  }
+
+  Future<PaymentsReceivedData> _queueUpdate(String id) async {
+    final row = await (select(paymentsReceived)..where((p) => p.id.equals(id))).getSingle();
+    await db.syncOutboxDao.enqueue(
+      targetTable: 'site_payments_received',
+      recordId: row.id,
+      operation: 'update',
+      payloadJson: jsonEncode(paymentReceivedToSupabaseJson(row)),
+    );
+    return row;
+  }
 
   Future<void> upsertFromRemote(PaymentsReceivedCompanion c) => into(paymentsReceived).insertOnConflictUpdate(c);
 }
@@ -957,7 +1057,10 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
   Future<SiteExpense> create(SiteExpensesCompanion companion) {
     final id = companion.id.present ? companion.id.value : _uuid.v4();
     return transaction(() async {
-      await into(siteExpenses).insert(companion.copyWith(id: Value(id)));
+      final voucher = companion.voucherNo.present && companion.voucherNo.value != null
+          ? companion.voucherNo
+          : Value(await nextVoucherNo(companion.projectId.value));
+      await into(siteExpenses).insert(companion.copyWith(id: Value(id), voucherNo: voucher));
       final row = await (select(siteExpenses)..where((e) => e.id.equals(id))).getSingle();
       await db.syncOutboxDao.enqueue(
         targetTable: 'site_expenses',
@@ -969,8 +1072,69 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     });
   }
 
+  /// The site's expenses that count: cancelled ones are left out, so every
+  /// total (wage sheet, reports, budget, dashboard) ignores them.
   Future<List<SiteExpense>> forProject(String projectId) =>
+      (select(siteExpenses)..where((e) => e.projectId.equals(projectId) & e.voided.equals(false))).get();
+
+  /// Every expense of the site, cancelled ones too, for the money book.
+  Future<List<SiteExpense>> allForProject(String projectId) =>
       (select(siteExpenses)..where((e) => e.projectId.equals(projectId))).get();
+
+  Future<SiteExpense?> byId(String id) => (select(siteExpenses)..where((e) => e.id.equals(id))).getSingleOrNull();
+
+  /// One more than the highest voucher number this phone knows for the
+  /// site (its own entries and everything synced from the team).
+  Future<int> nextVoucherNo(String projectId) async {
+    final max = siteExpenses.voucherNo.max();
+    final row = await (selectOnly(siteExpenses)
+          ..addColumns([max])
+          ..where(siteExpenses.projectId.equals(projectId)))
+        .getSingle();
+    return (row.read(max) ?? 0) + 1;
+  }
+
+  /// Corrects an entry. The voucher number, site and who first wrote it
+  /// stay; who changed it and when are kept on the row.
+  Future<SiteExpense> edit(String id, SiteExpensesCompanion changes, {required String by, DateTime? now}) {
+    return transaction(() async {
+      await (update(siteExpenses)..where((e) => e.id.equals(id))).write(changes.copyWith(
+        id: const Value.absent(),
+        projectId: const Value.absent(),
+        recordedBy: const Value.absent(),
+        voucherNo: const Value.absent(),
+        createdAt: const Value.absent(),
+        editedAt: Value(now ?? DateTime.now()),
+        editedBy: Value(by),
+      ));
+      return _queueUpdate(id);
+    });
+  }
+
+  /// Cancels an entry: it stays in the book, struck through with [reason],
+  /// and counts in no total. [undo] brings it back.
+  Future<SiteExpense> setVoided(String id, {required bool voided, String? reason, required String by, DateTime? now}) {
+    return transaction(() async {
+      await (update(siteExpenses)..where((e) => e.id.equals(id))).write(SiteExpensesCompanion(
+        voided: Value(voided),
+        voidReason: Value(voided ? _clip(reason, 200) : null),
+        editedAt: Value(now ?? DateTime.now()),
+        editedBy: Value(by),
+      ));
+      return _queueUpdate(id);
+    });
+  }
+
+  Future<SiteExpense> _queueUpdate(String id) async {
+    final row = await (select(siteExpenses)..where((e) => e.id.equals(id))).getSingle();
+    await db.syncOutboxDao.enqueue(
+      targetTable: 'site_expenses',
+      recordId: row.id,
+      operation: 'update',
+      payloadJson: jsonEncode(siteExpenseToSupabaseJson(row)),
+    );
+    return row;
+  }
 
   Future<void> upsertFromRemote(SiteExpensesCompanion c) => into(siteExpenses).insertOnConflictUpdate(c);
 
@@ -1468,10 +1632,10 @@ class WorkerDao extends DatabaseAccessor<AppDatabase> with _$WorkerDaoMixin {
 /// retrying a permanently-broken write forever.
 const int syncOutboxMaxRetries = 5;
 
-@DriftAccessor(tables: [SyncOutbox])
 /// Settings key for [SyncOutboxDao.localOnlyIds].
 const localOnlyIdsKey = 'local_only_ids';
 
+@DriftAccessor(tables: [SyncOutbox])
 class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMixin {
   SyncOutboxDao(super.db);
 

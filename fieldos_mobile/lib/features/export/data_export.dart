@@ -15,6 +15,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/export/xlsx_writer.dart';
+import 'package:fieldos_mobile/features/money/money_book.dart' show gstSplit, voucherLabel;
 import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
 
 /// What to put in the file.
@@ -119,8 +120,8 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
       [
         for (final x in projects)
           () {
-            final inAmt = sum(received.where((e) => e.projectId == x.id), (e) => e.amount);
-            final spent = sum(expenses.where((e) => e.projectId == x.id), (e) => e.amount);
+            final inAmt = sum(received.where((e) => e.projectId == x.id && !e.voided), (e) => e.amount);
+            final spent = sum(expenses.where((e) => e.projectId == x.id && !e.voided), (e) => e.amount);
             final material = sum(receipts.where((e) => e.projectId == x.id), (e) => e.amount);
             return <Object?>[
               x.name,
@@ -140,19 +141,50 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
           }(),
       ],
     ),
-    XlsxSheet('Money spent', h(['Date', 'Category', 'Worker', 'Amount (₹)', 'Note', 'Entered by']), [
-      for (final e in expenses..sort((a, b) => newest(day(a.incurredOn, a.createdAt), day(b.incurredOn, b.createdAt))))
-        r(e.projectId, [
-          day(e.incurredOn, e.createdAt),
-          e.category,
-          e.workerId == null ? null : workerName[e.workerId],
-          e.amount,
-          e.note,
-          who(e.recordedBy),
+    XlsxSheet(
+        'Money spent',
+        h([
+          'Date',
+          'Voucher no.',
+          'Category',
+          'Worker',
+          'Paid to',
+          'Mode',
+          'Amount (₹)',
+          'Before GST (₹)',
+          'GST %',
+          'CGST (₹)',
+          'SGST (₹)',
+          'IGST (₹)',
+          'Note',
+          'Status',
+          'Entered by',
         ]),
-    ]),
+        [
+          for (final e in expenses..sort((a, b) => newest(day(a.incurredOn, a.createdAt), day(b.incurredOn, b.createdAt))))
+            () {
+              final gst = (e.gstPct ?? 0) > 0 ? gstSplit(e.amount, e.gstPct!, interState: e.gstInterState) : null;
+              return r(e.projectId, [
+                day(e.incurredOn, e.createdAt),
+                e.voucherNo == null ? null : voucherLabel(e.voucherNo),
+                e.category,
+                e.workerId == null ? null : workerName[e.workerId],
+                e.paidTo,
+                _modes[e.mode] ?? _word(e.mode),
+                e.amount,
+                gst?.taxable,
+                gst == null ? null : e.gstPct,
+                gst?.cgst,
+                gst?.sgst,
+                gst?.igst,
+                e.note,
+                _status(e.voided, e.voidReason),
+                who(e.recordedBy),
+              ]);
+            }(),
+        ]),
     if (showMoneyIn)
-      XlsxSheet('Money received', h(['Date', 'From', 'Mode', 'Amount (₹)', 'Note', 'Entered by']), [
+      XlsxSheet('Money received', h(['Date', 'From', 'Mode', 'Amount (₹)', 'Note', 'Status', 'Entered by']), [
         for (final e in received..sort((a, b) => newest(a.receivedOn, b.receivedOn)))
           r(e.projectId, [
             e.receivedOn,
@@ -160,6 +192,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
             _modes[e.mode] ?? _word(e.mode),
             e.amount,
             e.note,
+            _status(e.voided, e.voidReason),
             who(e.recordedBy),
           ]),
       ]),
@@ -355,4 +388,13 @@ Future<File> writeExportFile(
   final file = File(p.join(dir.path, exportFileName(label, now ?? DateTime.now())));
   await file.writeAsBytes(bytes, flush: true);
   return file;
+}
+
+/// "Cancelled: entered twice" for a cancelled entry, else nothing. The
+/// row stays in the file so the voucher numbers have no gaps, and the
+/// Summary leaves it out of every total.
+String? _status(bool voided, String? reason) {
+  if (!voided) return null;
+  final why = reason?.trim() ?? '';
+  return why.isEmpty ? 'Cancelled' : 'Cancelled: $why';
 }

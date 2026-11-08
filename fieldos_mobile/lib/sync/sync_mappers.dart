@@ -593,7 +593,35 @@ Map<String, dynamic> siteExpenseToSupabaseJson(SiteExpense e) => {
       'recorded_by': e.recordedBy,
       'note': e.note,
       'worker_id': e.workerId,
+      // v10 money-book columns go only when set. Entries made on v10 always
+      // carry a voucher number, so 20261109000000_money_book.sql must be in
+      // the cloud before a v10 build ships; older rows sync either way.
+      if (_usesMoneyBook(e)) ...{
+        'paid_to': e.paidTo,
+        'mode': e.mode,
+        'gst_pct': e.gstPct,
+        'gst_inter_state': e.gstInterState,
+        'voucher_no': e.voucherNo,
+        'voided': e.voided,
+        'void_reason': e.voidReason,
+        'edited_at': e.editedAt == null ? null : _timestamp(e.editedAt!.toUtc()),
+        'edited_by': e.editedBy,
+      },
     };
+
+bool _usesMoneyBook(SiteExpense e) =>
+    e.paidTo != null ||
+    e.mode != null ||
+    e.gstPct != null ||
+    e.gstInterState ||
+    e.voided ||
+    e.editedAt != null ||
+    (e.voucherNo != null && e.voucherNo! > 0);
+
+/// A column the cloud didn't send (an older cloud schema) leaves the local
+/// value alone instead of wiping it.
+Value<T> _ifSent<T>(Map<String, dynamic> row, String key, T Function(Object? v) read) =>
+    row.containsKey(key) ? Value(read(row[key])) : const Value.absent();
 
 SiteExpensesCompanion siteExpenseFromSupabaseJson(Map<String, dynamic> row) => SiteExpensesCompanion(
       id: Value(row['id'] as String),
@@ -605,6 +633,17 @@ SiteExpensesCompanion siteExpenseFromSupabaseJson(Map<String, dynamic> row) => S
       recordedBy: Value(row['recorded_by'] as String),
       note: Value(row['note'] as String?),
       workerId: Value(row['worker_id'] as String?),
+      paidTo: _ifSent(row, 'paid_to', (v) => v as String?),
+      mode: _ifSent(row, 'mode', (v) => v as String?),
+      gstPct: _ifSent(row, 'gst_pct', (v) => v == null ? null : _num(v)),
+      gstInterState: _ifSent(row, 'gst_inter_state', (v) => v as bool? ?? false),
+      // A voucher number is never taken away: a row the cloud hasn't
+      // numbered yet keeps the one this phone gave it.
+      voucherNo: row['voucher_no'] == null ? const Value.absent() : Value((row['voucher_no'] as num).toInt()),
+      voided: _ifSent(row, 'voided', (v) => v as bool? ?? false),
+      voidReason: _ifSent(row, 'void_reason', (v) => v as String?),
+      editedAt: _ifSent(row, 'edited_at', (v) => v == null ? null : _parseTs(v)),
+      editedBy: _ifSent(row, 'edited_by', (v) => v as String?),
     );
 
 Map<String, dynamic> materialReceiptToSupabaseJson(MaterialReceipt r) => {
@@ -668,6 +707,12 @@ Map<String, dynamic> paymentReceivedToSupabaseJson(PaymentsReceivedData p) => {
       'mode': p.mode,
       'recorded_by': p.recordedBy,
       'note': p.note,
+      if (p.voided || p.editedAt != null) ...{
+        'voided': p.voided,
+        'void_reason': p.voidReason,
+        'edited_at': p.editedAt == null ? null : _timestamp(p.editedAt!.toUtc()),
+        'edited_by': p.editedBy,
+      },
     };
 
 PaymentsReceivedCompanion paymentReceivedFromSupabaseJson(Map<String, dynamic> row) => PaymentsReceivedCompanion(
@@ -679,6 +724,10 @@ PaymentsReceivedCompanion paymentReceivedFromSupabaseJson(Map<String, dynamic> r
       mode: Value(row['mode'] as String),
       recordedBy: Value(row['recorded_by'] as String),
       note: Value(row['note'] as String?),
+      voided: _ifSent(row, 'voided', (v) => v as bool? ?? false),
+      voidReason: _ifSent(row, 'void_reason', (v) => v as String?),
+      editedAt: _ifSent(row, 'edited_at', (v) => v == null ? null : _parseTs(v)),
+      editedBy: _ifSent(row, 'edited_by', (v) => v as String?),
     );
 
 // ---------------------------------------------------------------------------

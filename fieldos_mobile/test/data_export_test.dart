@@ -119,7 +119,7 @@ void main() {
       final spent = sheet(sheets, 'Money spent');
       expect(spent.headers.first, 'Date'); // no Site column for a single site
       expect(spent.rows, [
-        [DateTime(2026, 11, 7), 'Labour', 'Suresh', 800.0, null, 'Ravi'],
+        [DateTime(2026, 11, 7), null, 'Labour', 'Suresh', null, null, 800.0, null, null, null, null, null, null, null, 'Ravi'],
       ]);
       expect(sheet(sheets, 'Money received').rows.single, contains('UPI'));
       expect(sheet(sheets, 'Attendance').rows.single[3], 9.5);
@@ -131,6 +131,62 @@ void main() {
       expect(row[summary.headers.indexOf('Received (₹)')], 50000.0);
       expect(row[summary.headers.indexOf('Spent (₹)')], 800.0);
       expect(row[summary.headers.indexOf('Balance (₹)')], 49200.0);
+    });
+
+    test('vouchers, GST and cancelled entries: in the file, out of the totals', () async {
+      await db.into(db.siteExpenses).insert(SiteExpensesCompanion.insert(
+          id: 'e3',
+          projectId: 'p1',
+          category: 'Material',
+          amount: 1180,
+          incurredOn: '2026-11-08',
+          recordedBy: 'u',
+          paidTo: const Value('Sri Balaji Hardware'),
+          mode: const Value('upi'),
+          gstPct: const Value(18),
+          voucherNo: const Value(2)));
+      await db.into(db.siteExpenses).insert(SiteExpensesCompanion.insert(
+          id: 'e4',
+          projectId: 'p1',
+          category: 'Fuel',
+          amount: 500,
+          incurredOn: '2026-11-06',
+          recordedBy: 'u',
+          voucherNo: const Value(3),
+          voided: const Value(true),
+          voidReason: const Value('entered twice')));
+      await db.into(db.paymentsReceived).insert(PaymentsReceivedCompanion.insert(
+          id: 'r2',
+          projectId: 'p1',
+          amount: 9000,
+          receivedOn: DateTime(2026, 11, 2),
+          fromParty: 'Mr Rao',
+          mode: 'cash',
+          recordedBy: 'u',
+          voided: const Value(true)));
+
+      final sheets = await buildExportSheets(db, const ExportScope.project('p1'));
+      final spent = sheet(sheets, 'Money spent');
+      final col = spent.headers.indexOf;
+      final gstRow = spent.rows.firstWhere((r) => r[col('Category')] == 'Material');
+      expect(gstRow[col('Voucher no.')], 'V-2');
+      expect(gstRow[col('Paid to')], 'Sri Balaji Hardware');
+      expect(gstRow[col('Mode')], 'UPI');
+      expect(gstRow[col('Before GST (₹)')], 1000.0);
+      expect(gstRow[col('CGST (₹)')], 90.0);
+      expect(gstRow[col('SGST (₹)')], 90.0);
+      expect(gstRow[col('IGST (₹)')], 0.0);
+      final cancelled = spent.rows.firstWhere((r) => r[col('Category')] == 'Fuel');
+      expect(cancelled[col('Status')], 'Cancelled: entered twice');
+      expect(cancelled[col('Amount (₹)')], 500.0); // the record stays as written
+
+      final received = sheet(sheets, 'Money received');
+      expect(received.rows.map((r) => r[received.headers.indexOf('Status')]), containsAll([null, 'Cancelled']));
+
+      final summary = sheet(sheets, 'Summary');
+      final row = summary.rows.single;
+      expect(row[summary.headers.indexOf('Spent (₹)')], 800.0 + 1180.0);
+      expect(row[summary.headers.indexOf('Received (₹)')], 50000.0);
     });
 
     test('whole company: every real site with a Site column, the demo site left out', () async {
