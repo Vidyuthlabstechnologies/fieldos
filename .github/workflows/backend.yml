@@ -11,7 +11,7 @@ jobs:
   test:
     # Fully offline by design (see README.md) -- SQLite only, no external
     # services to stand up.
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v7
 

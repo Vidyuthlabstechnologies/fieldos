@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   create:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
     env:
       EXISTING_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       GH_TOKEN: ${{ secrets.SECRETS_WRITE_TOKEN }}
