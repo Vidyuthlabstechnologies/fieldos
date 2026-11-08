@@ -15,6 +15,8 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/procurement/po_share.dart';
+import 'package:fieldos_mobile/features/procurement/purchase_screens.dart';
+import 'package:fieldos_mobile/features/procurement/purchase_tools.dart';
 import 'package:fieldos_mobile/features/procurement/stock_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
@@ -39,6 +41,7 @@ class ProcurementView extends ConsumerStatefulWidget {
 class _ProcurementViewState extends ConsumerState<ProcurementView>
     with SingleTickerProviderStateMixin {
   late final TabController _tabs;
+  late final _engine = ref.read(cloudSyncEngineProvider);
   void Function()? _vendorsLiveCallback;
 
   @override
@@ -53,7 +56,7 @@ class _ProcurementViewState extends ConsumerState<ProcurementView>
   Future<void> _maybeSubscribeToVendorUpdates() async {
     final service = ref.read(cloudSyncServiceProvider);
     if (!service.isSignedIn) return;
-    final engine = ref.read(cloudSyncEngineProvider);
+    final engine = _engine;
     _vendorsLiveCallback = () {
       if (mounted) ref.invalidate(suppliersProvider(widget.companyId));
     };
@@ -68,9 +71,9 @@ class _ProcurementViewState extends ConsumerState<ProcurementView>
 
   @override
   void dispose() {
-    final engine = ref.read(cloudSyncEngineProvider);
-    if (identical(engine.onVendorsChanged, _vendorsLiveCallback)) {
-      engine.onVendorsChanged = null;
+    // ref can't be used in dispose, so the engine read in initState is used.
+    if (_vendorsLiveCallback != null && identical(_engine.onVendorsChanged, _vendorsLiveCallback)) {
+      _engine.onVendorsChanged = null;
     }
     _tabs.dispose();
     super.dispose();
@@ -107,6 +110,7 @@ class _ProcurementViewState extends ConsumerState<ProcurementView>
                 ),
                 _GrnTab(
                   projectId: widget.projectId,
+                  companyId: widget.companyId,
                   userId: widget.userId,
                 ),
                 StockView(projectId: widget.projectId, userId: widget.userId),
@@ -130,6 +134,18 @@ Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd) =>
 
 // --- Suppliers ------------------------------------------------------------
 
+/// Every site's orders and deliveries, per supplier.
+final supplierLedgerProvider = FutureProvider.autoDispose.family<Map<String, SupplierLedger>, String>((ref, companyId) async {
+  final db = ref.watch(appDatabaseProvider);
+  final orders = <PurchaseOrder>[];
+  final receipts = <MaterialReceipt>[];
+  for (final p in await db.projectDao.forCompany(companyId)) {
+    orders.addAll(await db.purchaseDao.ordersFor(p.id));
+    receipts.addAll(await db.materialDao.forProject(p.id));
+  }
+  return supplierLedgers(orders, receipts, DateTime.now());
+});
+
 class _SuppliersTab extends ConsumerWidget {
   const _SuppliersTab({required this.companyId});
   final String companyId;
@@ -137,9 +153,10 @@ class _SuppliersTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final suppliers = ref.watch(suppliersProvider(companyId));
+    final ledgers = ref.watch(supplierLedgerProvider(companyId)).valueOrNull ?? const <String, SupplierLedger>{};
     return Column(
       children: [
-        _sectionHeader(context, 'Suppliers', () => _add(context, ref)),
+        _sectionHeader(context, tr('Suppliers'), () => _add(context, ref)),
         Expanded(
           child: suppliers.when(
             data: (rows) => rows.isEmpty
@@ -149,9 +166,20 @@ class _SuppliersTab extends ConsumerWidget {
                       for (final s in rows)
                         ListTile(
                           title: Text(s.name),
-                          subtitle: Text([s.contactPhone, s.email]
-                              .where((e) => e != null && e.isNotEmpty)
-                              .join(' · ')),
+                          subtitle: Text([
+                            ...[s.contactPhone, s.email].where((e) => e != null && e.isNotEmpty).cast<String>(),
+                            if (ledgers[s.id] case final l?) ...[
+                              if (l.ordered > 0) trf('ordered {amount}', {'amount': rupees(l.ordered)}),
+                              if (l.received > 0) trf('delivered {amount}', {'amount': rupees(l.received)}),
+                              if (l.toCome > 0) trf('{amount} still to come', {'amount': rupees(l.toCome)}),
+                            ],
+                          ].join(' · ')),
+                          trailing: switch (ledgers[s.id]) {
+                            final l? when l.lateOrders > 0 =>
+                              StatusPill(trf('{n} late', {'n': l.lateOrders}), tone: PillTone.danger),
+                            final l? when l.openOrders > 0 => StatusPill(trf('{n} open', {'n': l.openOrders})),
+                            _ => null,
+                          },
                         ),
                     ],
                   ),
@@ -212,7 +240,7 @@ class _RfqTab extends ConsumerWidget {
     final suppliers = ref.watch(suppliersProvider(companyId));
     return Column(
       children: [
-        _sectionHeader(context, 'Purchase requests (RFQ)', () => _add(context, ref)),
+        _sectionHeader(context, tr('Purchase requests (RFQ)'), () => _add(context, ref)),
         Expanded(
           child: requests.when(
             data: (rows) => rows.isEmpty
@@ -344,6 +372,9 @@ class _PoTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final orders = ref.watch(ordersProvider(projectId));
     final suppliers = ref.watch(suppliersProvider(companyId));
+    final requests = ref.watch(requestsProvider(projectId)).valueOrNull ?? const <PurchaseRequest>[];
+    final receipts = ref.watch(receiptsProvider(projectId)).valueOrNull ?? const <MaterialReceipt>[];
+    final now = DateTime.now();
     return Column(
       children: [
         Expanded(
@@ -354,8 +385,12 @@ class _PoTab extends ConsumerWidget {
                     children: [
                       for (final o in rows)
                         ListTile(
-                          title: Text(o.totalAmount == null ? 'Purchase order' : 'Purchase order · ${rupees(o.totalAmount!)}'),
-                          subtitle: Text('${_supName(suppliers, o.supplierId)} · ${_statusLabel(o.status)}'),
+                          title: Text(_poTitle(o, requests.where((r) => r.id == o.requestId).firstOrNull)),
+                          subtitle: Text([
+                            _supName(suppliers, o.supplierId),
+                            _poStage(o, poProgress(o, requests.where((r) => r.id == o.requestId).firstOrNull, receipts)),
+                            if (poIsLate(o, now)) trf('late since {date}', {'date': fmtDate(o.deliveryDate!, short: true)}),
+                          ].join(' · ')),
                           trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                             IconButton(
                               tooltip: tr('Send to supplier'),
@@ -365,7 +400,8 @@ class _PoTab extends ConsumerWidget {
                             if (o.status == 'issued')
                               FilledButton(
                                 child: Text(tr('Receive')),
-                                onPressed: () => _receive(context, ref, o, suppliers),
+                                onPressed: () => _receive(context, ref, o, requests.where((r) => r.id == o.requestId).firstOrNull,
+                                    poProgress(o, requests.where((r) => r.id == o.requestId).firstOrNull, receipts)),
                               ),
                           ]),
                         ),
@@ -392,12 +428,19 @@ class _PoTab extends ConsumerWidget {
     await SharePlus.instance.share(ShareParams(text: text));
   }
 
-  Future<void> _receive(BuildContext context, WidgetRef ref, PurchaseOrder o,
-      AsyncValue<List<Supplier>> suppliers) async {
-    final qty = TextEditingController();
-    final unit = TextEditingController();
-    final amount = TextEditingController(text: (o.totalAmount ?? '').toString());
+  Future<void> _receive(BuildContext context, WidgetRef ref, PurchaseOrder o, PurchaseRequest? request, PoProgress progress) async {
+    final pending = progress.pending;
+    final material = TextEditingController(text: request?.materialName ?? '');
+    final qty = TextEditingController(text: pending == null || pending <= 0 ? '' : fmtQty(pending));
+    final unit = TextEditingController(text: request?.unit ?? '');
+    final leftToPay = o.totalAmount == null ? null : o.totalAmount! - progress.amountReceived;
+    final amount = TextEditingController(text: leftToPay == null || leftToPay <= 0 ? '' : fmtQty(leftToPay));
     final photoPath = ValueNotifier<String?>(null);
+    var closeOrder = true;
+    void updateClose() {
+      final q = double.tryParse(qty.text.trim());
+      closeOrder = pending == null || q == null || q >= pending - 0.0001;
+    }
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -406,7 +449,22 @@ class _PoTab extends ConsumerWidget {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: qty, decoration: InputDecoration(labelText: tr('Qty received')), keyboardType: TextInputType.number),
+              if (progress.received > 0 && progress.ordered != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(trf('{got} of {ordered} {unit} already received', {
+                    'got': fmtQty(progress.received),
+                    'ordered': fmtQty(progress.ordered!),
+                    'unit': progress.unit,
+                  }).replaceAll('  ', ' ')),
+                ),
+              TextField(controller: material, decoration: InputDecoration(labelText: tr('Material (e.g. Cement)'))),
+              TextField(
+                controller: qty,
+                decoration: InputDecoration(labelText: tr('Qty received')),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                onChanged: (_) => setGrnState(updateClose),
+              ),
               TextField(controller: unit, decoration: InputDecoration(labelText: tr('Unit'))),
               TextField(controller: amount, decoration: InputDecoration(labelText: tr('Invoice amount')), keyboardType: TextInputType.number),
               const SizedBox(height: 12),
@@ -420,6 +478,13 @@ class _PoTab extends ConsumerWidget {
                     setGrnState(() {});
                   }
                 },
+              ),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                value: closeOrder,
+                onChanged: (v) => setGrnState(() => closeOrder = v ?? true),
+                title: Text(tr('Everything on this order has come')),
+                subtitle: closeOrder ? null : Text(tr('The order stays open for the rest.')),
               ),
             ],
           ),
@@ -442,15 +507,15 @@ class _PoTab extends ConsumerWidget {
           poId: Value(o.id),
           supplierId: Value(o.supplierId),
           costHeadId: const Value(null),
-          materialName: 'Goods from PO',
-          quantity: double.tryParse(qty.text) ?? 1,
+          materialName: material.text.trim().isEmpty ? tr('Goods from PO') : material.text.trim(),
+          quantity: double.tryParse(qty.text.trim()) ?? 1,
           unit: Value(unit.text.trim()),
-          amount: double.tryParse(amount.text) ?? 0,
+          amount: double.tryParse(amount.text.trim()) ?? 0,
           receivedBy: userId,
           receivedOn: DateTime.now(),
           notes: Value(notes),
         ));
-    await db.purchaseDao.setOrderStatus(o.id, 'delivered');
+    if (closeOrder) await db.purchaseDao.setOrderStatus(o.id, 'delivered');
     ref.invalidate(ordersProvider(projectId));
     ref.invalidate(receiptsProvider(projectId));
     ref.invalidate(siteStockProvider(projectId));
@@ -462,7 +527,23 @@ String _supName(AsyncValue<List<Supplier>> suppliers, String id) {
   for (final s in suppliers.valueOrNull ?? const <Supplier>[]) {
     if (s.id == id) return s.name;
   }
-  return 'Supplier not on this phone';
+  return tr('Supplier not on this phone');
+}
+
+String _poTitle(PurchaseOrder o, PurchaseRequest? request) {
+  final what = request == null
+      ? tr('Purchase order')
+      : [request.materialName.trim(), fmtQty(request.quantity), request.unit.trim()].where((e) => e.isNotEmpty).join(' ');
+  return o.totalAmount == null ? what : '$what · ${rupees(o.totalAmount!)}';
+}
+
+/// "Sent to supplier", or how much of it has come when it came in parts.
+String _poStage(PurchaseOrder o, PoProgress p) {
+  if (p.partlyReceived && !closedOrderStatuses.contains(o.status)) {
+    return trf('{got} of {ordered} received, {left} to come',
+        {'got': fmtQty(p.received), 'ordered': fmtQty(p.ordered!), 'left': fmtQty(p.pending!)});
+  }
+  return _statusLabel(o.status);
 }
 
 /// Request and order stages in plain words.
@@ -481,8 +562,9 @@ String _statusLabel(String status) => switch (status) {
 // --- GRN ------------------------------------------------------------------
 
 class _GrnTab extends ConsumerWidget {
-  const _GrnTab({required this.projectId, required this.userId});
+  const _GrnTab({required this.projectId, required this.companyId, required this.userId});
   final String projectId;
+  final String companyId;
   final String userId;
 
   @override
@@ -493,6 +575,17 @@ class _GrnTab extends ConsumerWidget {
           ? Center(child: Text(tr('No goods receipts yet.')))
           : ListView(
               children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+                    child: TextButton.icon(
+                      icon: const Icon(Icons.trending_up),
+                      label: Text(tr('Material rates')),
+                      onPressed: () => openMaterialRates(context, projectId, companyId),
+                    ),
+                  ),
+                ),
                 for (final m in rows)
                   ListTile(
                     leading: const Icon(Icons.inventory),
@@ -500,7 +593,7 @@ class _GrnTab extends ConsumerWidget {
                     subtitle: Text([
                       '${fmtQty(m.quantity)} ${m.unit ?? ''}'.trim(),
                       rupees(m.amount),
-                      'received ${fmtDate(m.receivedOn, short: true)}',
+                      trf('received {date}', {'date': fmtDate(m.receivedOn, short: true)}),
                     ].join(' · ')),
                   ),
               ],
