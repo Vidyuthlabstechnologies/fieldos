@@ -20,8 +20,9 @@ class LegalDocument {
 
 const privacyPolicy = LegalDocument(
   title: 'Privacy policy',
-  updated: '6 November 2026',
-  intro: 'FieldOS is made by ML Dynamic Solutions Private Limited. FieldOS stores the projects, reports, photos, '
+  updated: '8 November 2026',
+  intro:
+      'FieldOS is made by ML Dynamic Solutions Private Limited. FieldOS stores the projects, reports, photos, '
       'attendance and other site records you create on your phone. If you sign in to Team & sync, those records, '
       'your email address and the name you entered are also stored in our cloud database (Supabase, region: Mumbai, '
       "India) so that the members of your company can see them. Only members of your company can read your "
@@ -64,6 +65,10 @@ const privacyPolicy = LegalDocument(
           "your phone's operating system version and the app's last few error messages. No project data, photos or "
           'contacts are included. Reports are stored in our cloud database and copied to our private issue tracker on '
           'GitHub so that we can fix the problem.\n\n'
+          'If you use "Report this message" in project chat, we receive the reported message, the name it was '
+          'sent under, the reason you picked, anything you add, and your account id. The sender is not told who '
+          'reported it. Reports are stored in our cloud database and copied to our private issue tracker on '
+          'GitHub so that we can review them within 24 hours.\n\n'
           'Apart from what this policy describes, nothing about how you use FieldOS leaves your phone. We do not sell '
           'data or show ads.',
     ),
@@ -84,51 +89,176 @@ const privacyPolicy = LegalDocument(
 
 const termsOfUse = LegalDocument(
   title: 'Terms of use',
-  updated: '6 November 2026',
-  intro: 'These terms are between you and ML Dynamic Solutions Private Limited ("we"), who make FieldOS. By creating '
-      'an account or using the app you agree to them.',
+  updated: '8 November 2026',
+  intro:
+      'These terms of use ("terms") are an agreement between you and ML Dynamic Solutions Private Limited, '
+      'a company incorporated in India ("we", "us"), which makes the FieldOS app and its cloud service '
+      '("FieldOS"). By creating an account, starting a free trial or using FieldOS, you agree to these '
+      'terms and to the privacy policy. If you use FieldOS for a company, you confirm that you may accept '
+      'these terms for it, and "you" includes that company. If you do not agree, do not use FieldOS.',
   sections: [
     LegalSection(
-      'Your account',
-      'Your FieldOS account and its records are kept on your phone. Keep your password safe: we cannot see it or '
-          'reset it, and records that are only on the phone cannot be recovered without it. Turning on Team & sync '
-          'keeps a copy in the cloud for your company.',
+      '1. Who can use FieldOS',
+      'You must be at least 18 years old and able to enter a binding contract under Indian law. FieldOS is '
+          'made for builders, contractors and their site teams, for business use.',
     ),
     LegalSection(
-      'Subscription and free trial',
-      'FieldOS needs a FieldOS Pro subscription, bought through Google Play or the App Store, billed monthly. New '
-          'subscribers get a 3-day free trial; the first payment is taken when the trial ends unless you cancel before '
-          'then. The subscription renews every month at the price shown in the store until you cancel. Cancel at least '
-          '24 hours before the end of the current period to avoid the next charge, in your Google Play or App Store '
-          'subscriptions. Payments and refunds are handled by the store under its policies.',
+      '2. Your account and your team',
+      'Give true details when you sign up and keep them up to date. Keep your password and your phone '
+          'secure; you are responsible for what is done with your account. Tell us at info@mldynamic.com '
+          'straight away if you think someone else has used it.\n\nRecords you make without Team & sync stay '
+          'only on your phone, and we cannot recover them if the phone is lost or reset. With Team & sync on, '
+          'a copy is kept in our cloud for your company.\n\nThe person who creates a company in Team & sync is '
+          'its owner. The owner decides who joins and what role they have, and is responsible for making sure '
+          'members follow these terms. Members can see the company\'s records that their role allows.',
     ),
     LegalSection(
-      'Your data',
-      'You own the records you create. We use the copy in our cloud only to run FieldOS for you and your company, as '
-          'described in the privacy policy.',
+      '3. Subscription, free trial and payment',
+      'FieldOS needs a FieldOS Pro subscription, bought through Google Play or the Apple App Store, '
+          'monthly or yearly at the price the store shows before you pay, including any taxes the store '
+          'charges.\n\nNew subscribers get one 3-day free trial, where the store offers it to them. Unless you '
+          'cancel before the trial ends, the first payment is taken when it ends. The subscription then renews '
+          'automatically for the same period at the price then current, until you cancel. Cancel at least 24 '
+          'hours before the end of a period, in your Google Play or App Store subscriptions, to avoid the next '
+          'charge. Uninstalling the app does not cancel a subscription.\n\nThe store takes the payment, and '
+          'refunds are handled by the store under its own policies. If we change the price, the store tells '
+          'you before the new price applies, and you can cancel before then. If a payment fails or a '
+          'subscription ends, FieldOS cannot be used until you subscribe again. Your records are not deleted: '
+          'they stay on your phone, and in the cloud for your company if Team & sync is on, and are there '
+          'again when you resubscribe.',
     ),
     LegalSection(
-      'Check the numbers',
-      'FieldOS helps with estimates, quantities, wages, payments and reports, and it reads spoken reports '
-          'automatically. Check figures and reports before relying on them for construction, payment or legal '
-          'decisions; you are responsible for those decisions.',
+      '4. Your content',
+      'You own the projects, reports, photos, messages and other records you and your team put into '
+          'FieldOS ("your content"). You give us permission to store, copy, process and show your content only '
+          'to run FieldOS for you and your company, to keep it secure and to fix problems, as the privacy '
+          'policy describes. We do not sell your content or use it for advertising.\n\nYou confirm that you '
+          'have the right to put your content into FieldOS, including photos of people and the details of '
+          'workers you record, and that you have told them where your law requires it. Keep your own copies of '
+          'anything important; FieldOS can export reports and records.',
     ),
     LegalSection(
-      'Fair use',
-      'Do not use FieldOS to break the law, to store content you have no right to, to get into other companies\' '
-          'data, or to interfere with the service. We may suspend accounts that do.',
+      '5. Team chat and other shared content',
+      'Project chat, photos, comments and other content you share are seen by the other members of your '
+          'company. We do not allow objectionable content or abusive users. Do not post or share anything '
+          'that:\n\n• threatens, harasses, bullies or abuses anyone, or attacks people for their caste, '
+          'religion, gender, sexuality, disability, region or any other part of who they are;\n• is sexual, '
+          'obscene, violent or hateful, or involves a child in any harmful way;\n• is spam, a scam or fraud, '
+          'or asks for money under false pretences;\n• is false or misleading in a way meant to harm someone, '
+          'or impersonates another person;\n• shares someone\'s private information without their '
+          'permission;\n• infringes anyone\'s copyright, trademark or other rights; or\n• breaks any law in '
+          'force in India, including the content the Information Technology Act, 2000 and its rules prohibit.',
     ),
     LegalSection(
-      'Availability and liability',
-      'The offline features work on your phone. Cloud features may sometimes be unavailable. As far as the law allows, '
-          'FieldOS is provided as it is, and our total liability to you is limited to what you paid for FieldOS in the '
-          '12 months before the claim.',
+      '6. Reporting content and how we act',
+      'Press and hold any message from someone else in project chat and tap "Report this message". You can '
+          'also report any content or user by writing to info@mldynamic.com. The person you report is not told '
+          'who reported them, and a message you report is hidden on your phone.\n\nWe review every report '
+          'within 24 hours. If the content breaks these terms we remove it, and we may warn, suspend or '
+          'permanently remove the user who posted it. We may also keep the content and pass it to the police '
+          'or other authorities where the law requires it.',
     ),
     LegalSection(
-      'Changes and law',
-      'We may update these terms; the date above shows the latest version. Indian law applies, and the courts at '
-          'Hyderabad, Telangana have jurisdiction.',
+      '7. Acceptable use',
+      'Do not use FieldOS to break the law, and do not: try to get into another company\'s data or any '
+          'account that is not yours; test, probe or get round FieldOS\'s security; copy, decompile or reverse '
+          'engineer the app, except as far as the law allows; use bots or scripts to collect data from '
+          'FieldOS; upload viruses or other harmful code; overload or interfere with the service; or resell or '
+          'rent FieldOS to others.',
     ),
-    LegalSection('Contact', 'info@mldynamic.com'),
+    LegalSection(
+      '8. Check the numbers',
+      'FieldOS helps with estimates, quantities, wages, payments, attendance and reports, and it turns '
+          'spoken reports into text automatically. These can contain mistakes. Check figures and reports '
+          'before you rely on them. FieldOS is not engineering, structural, legal, tax or accounting advice, '
+          'and it does not make you compliant with labour, wage, tax or safety laws; those decisions and '
+          'duties remain yours.',
+    ),
+    LegalSection(
+      '9. Other companies\' services',
+      'Some parts of FieldOS use services from other companies, including Google Play and the Apple App '
+          'Store (payments), RevenueCat (checking subscriptions), Supabase (our cloud database), Google '
+          '(sign-in, speech and translation), Apple (speech), OpenStreetMap (maps) and, only where your '
+          'company owner adds a key, Sarvam AI (speech). Their own terms apply to their services, and we are '
+          'not responsible for them.',
+    ),
+    LegalSection(
+      '10. Changes to FieldOS',
+      'We keep improving FieldOS, so features may change, and we may stop a feature where we have a good '
+          'reason. Features that work offline keep working on your phone; cloud features need an internet '
+          'connection and may sometimes be unavailable, for example during maintenance. We will tell you in '
+          'the app before removing a feature that is a main part of what you pay for.',
+    ),
+    LegalSection(
+      '11. Our rights in FieldOS',
+      'FieldOS, its software, design, name and logo belong to us or the people we license them from. We '
+          'give you a personal, non-exclusive, non-transferable right to use the app while you follow these '
+          'terms. If you send us ideas or feedback, we may use them without owing you anything.',
+    ),
+    LegalSection(
+      '12. Ending your use, suspension and termination',
+      'You can stop using FieldOS at any time. Cancel your subscription in the store, and delete your '
+          'cloud account in the app under Team & sync, "Delete my cloud account", or by writing to us. What '
+          'happens to your company\'s records when you delete your account is explained in the privacy '
+          'policy.\n\nWe may suspend or close your account, with notice where it is reasonable to give it, if '
+          'you seriously or repeatedly break these terms, if the law requires it, or if your use puts other '
+          'users or FieldOS at risk. If we close your account without a good reason under these terms, we will '
+          'refund the unused part of your subscription through the store or directly. Sections 4, 8, 13, 14, '
+          '15 and 17 continue after these terms end.',
+    ),
+    LegalSection(
+      '13. No guarantees',
+      'We work hard to keep FieldOS accurate, secure and available, but as far as the law allows, FieldOS '
+          'is provided "as is" and "as available", without any promise that it will be free of errors or '
+          'interruptions or that it suits a particular purpose.',
+    ),
+    LegalSection(
+      '14. Limits on our liability',
+      'As far as the law allows, we are not liable for indirect or consequential loss, or for loss of '
+          'profit, business, contracts or data, arising from your use of FieldOS. Our total liability to you '
+          'for all claims about FieldOS is limited to the amount you paid for FieldOS in the 12 months before '
+          'the event that led to the claim.\n\nNothing in these terms limits liability that cannot be limited '
+          'by law, including liability for fraud, and nothing takes away your rights under the Consumer '
+          'Protection Act, 2019 where that Act applies to you.',
+    ),
+    LegalSection(
+      '15. Your responsibility to us',
+      'If someone makes a claim against us because of content you or your team put into FieldOS, or '
+          'because you broke these terms or the law, you will cover our reasonable losses and costs from that '
+          'claim. This does not apply to the extent the claim was caused by our own fault.',
+    ),
+    LegalSection(
+      '16. Changes to these terms',
+      'We may update these terms, for example when the law or FieldOS changes. The date at the top shows '
+          'the current version. If a change matters to you, we will tell you in the app at least 15 days '
+          'before it takes effect. If you keep using FieldOS after that, the new terms apply; if you do not '
+          'agree, cancel and stop using FieldOS.',
+    ),
+    LegalSection(
+      '17. Law and disputes',
+      'These terms are governed by the laws of India. If you have a complaint, please write to us first so '
+          'we can try to settle it; most problems can be solved this way within 30 days. If it is not settled, '
+          'the courts at Hyderabad, Telangana have exclusive jurisdiction, except where consumer law lets you '
+          'bring a claim where you live.',
+    ),
+    LegalSection(
+      '18. Grievance officer',
+      'Complaints about content in FieldOS, or about these terms, can be sent to our Grievance Officer at '
+          'info@mldynamic.com, or by post to the address below, marked "Grievance Officer". We acknowledge a '
+          'complaint within 24 hours and resolve it within 15 days of receiving it.',
+    ),
+    LegalSection(
+      '19. General',
+      'These terms and the privacy policy are the whole agreement between you and us about FieldOS. If a '
+          'court finds any part of them unenforceable, the rest still applies. If we do not enforce a right '
+          'straight away, we can still enforce it later. You may not transfer these terms to anyone else; we '
+          'may transfer them to a company that takes over FieldOS, and your rights under them will not be '
+          'reduced.',
+    ),
+    LegalSection(
+      '20. Contact us',
+      'info@mldynamic.com, ML Dynamic Solutions Private Limited, 606, 6th Floor, Gowra Fountainhead, '
+          'Patrika Nagar, Madhapur, Hi-Tech City, Hyderabad, Telangana 500081, India.',
+    ),
   ],
 );
