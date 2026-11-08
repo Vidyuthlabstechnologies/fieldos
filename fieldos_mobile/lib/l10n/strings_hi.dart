@@ -690,4 +690,15 @@ const Map<String, String> stringsHi = {
   'The report did not go through. Check the internet and try again.': 'रिपोर्ट नहीं भेजी जा सकी। इंटरनेट जाँचें और फिर कोशिश करें।',
   'Google sign-in did not go through. Please try again.': 'Google साइन-इन नहीं हुआ। फिर से कोशिश करें।',
   'Google sign-in is not ready on this version of the app. Use your username and password for now.': 'ऐप के इस संस्करण में Google साइन-इन अभी तैयार नहीं है। अभी अपने यूज़रनेम और पासवर्ड से लॉगिन करें।',
+  // Excel export (Onsite review batch R1)
+  'Your data': 'आपका डेटा',
+  'Export all sites to Excel': 'सभी साइटें Excel में निकालें',
+  'Every record on this phone, in one file you keep. Free, always.': 'इस फ़ोन का हर रिकॉर्ड, एक फ़ाइल में जो आपके पास रहे। हमेशा मुफ़्त।',
+  'Export to Excel': 'Excel में निकालें',
+  'Export my data': 'मेरा डेटा निकालें',
+  'Your records stay yours': 'आपके रिकॉर्ड आपके ही रहते हैं',
+  'Everything you entered stays on this phone and is never deleted when a plan ends. Export it to Excel any time, free.': 'आपने जो भी डाला वह इस फ़ोन पर रहता है और प्लान ख़त्म होने पर कभी नहीं मिटता। इसे कभी भी Excel में मुफ़्त निकालें।',
+  'Making the Excel file…': 'Excel फ़ाइल बन रही है…',
+  'There is nothing to export yet.': 'निकालने के लिए अभी कुछ नहीं है।',
+  '{name}: all records from FieldOS': '{name}: FieldOS से सभी रिकॉर्ड',
 };

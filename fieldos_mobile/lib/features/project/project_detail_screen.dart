@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/reports/period_report_screen.dart';
 import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
 import 'package:fieldos_mobile/features/project/dpr_draft_screen.dart';
@@ -148,6 +149,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
             onSelected: (v) {
               if (v == 'stage') _changeStage();
               if (v == 'report') openPeriodReport(context, widget.project);
+              if (v == 'excel') exportProjectToExcel(context, ref, widget.project);
             },
             itemBuilder: (_) => [
               PopupMenuItem(
@@ -155,6 +157,13 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 child: ListTile(
                   leading: const Icon(Icons.summarize_outlined),
                   title: Text(tr('Weekly or monthly report')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'excel',
+                child: ListTile(
+                  leading: const Icon(Icons.table_view_outlined),
+                  title: Text(tr('Export to Excel')),
                 ),
               ),
               PopupMenuItem(

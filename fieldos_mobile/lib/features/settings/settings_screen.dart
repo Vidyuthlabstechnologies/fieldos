@@ -10,6 +10,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
 import 'package:fieldos_mobile/features/subscription/my_subscription_sheet.dart';
 import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
@@ -309,6 +310,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: _sarvamKey,
             ),
 
+          const SectionHeader('Your data', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
+          ListTile(
+            key: const Key('settings-export-excel'),
+            leading: const Icon(Icons.table_view_outlined),
+            title: Text(tr('Export all sites to Excel')),
+            subtitle: Text(tr('Every record on this phone, in one file you keep. Free, always.')),
+            onTap: () => exportCompanyToExcel(context, ref),
+          ),
           const SectionHeader('Help', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           ListTile(
             leading: const Icon(Icons.bug_report_outlined),

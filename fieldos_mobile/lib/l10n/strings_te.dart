@@ -692,4 +692,15 @@ const Map<String, String> stringsTe = {
   'The report did not go through. Check the internet and try again.': 'రిపోర్ట్ పంపడం కుదరలేదు. ఇంటర్నెట్ చూసి మళ్ళీ ప్రయత్నించండి.',
   'Google sign-in did not go through. Please try again.': 'Google సైన్-ఇన్ జరగలేదు. మళ్ళీ ప్రయత్నించండి.',
   'Google sign-in is not ready on this version of the app. Use your username and password for now.': 'యాప్ ఈ వెర్షన్‌లో Google సైన్-ఇన్ ఇంకా సిద్ధంగా లేదు. ప్రస్తుతానికి మీ యూజర్‌నేమ్, పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి.',
+  // Excel export (Onsite review batch R1)
+  'Your data': 'మీ డేటా',
+  'Export all sites to Excel': 'అన్ని సైట్‌లను Excel లోకి తీయండి',
+  'Every record on this phone, in one file you keep. Free, always.': 'ఈ ఫోన్‌లోని ప్రతి రికార్డు, మీ దగ్గర ఉండే ఒకే ఫైల్‌లో. ఎప్పుడూ ఉచితం.',
+  'Export to Excel': 'Excel లోకి తీయండి',
+  'Export my data': 'నా డేటా తీయండి',
+  'Your records stay yours': 'మీ రికార్డులు మీవే',
+  'Everything you entered stays on this phone and is never deleted when a plan ends. Export it to Excel any time, free.': 'మీరు నమోదు చేసినదంతా ఈ ఫోన్‌లోనే ఉంటుంది, ప్లాన్ ముగిసినా ఎప్పటికీ తొలగించబడదు. ఎప్పుడైనా ఉచితంగా Excel లోకి తీయండి.',
+  'Making the Excel file…': 'Excel ఫైల్ తయారవుతోంది…',
+  'There is nothing to export yet.': 'తీయడానికి ఇంకా ఏమీ లేదు.',
+  '{name}: all records from FieldOS': '{name}: FieldOS నుండి అన్ని రికార్డులు',
 };
