@@ -12,6 +12,10 @@ on:
         description: 'Also build the iPhone app (macOS runner, billed at 10x minutes)'
         type: boolean
         default: false
+      revenuecat_test_key:
+        description: 'RevenueCat Test Store key (test_...) for a test APK to download; never for Play'
+        type: string
+        default: ''
 
 # A newer push to the same branch makes the older run pointless: stop it
 # rather than pay for both.
@@ -102,6 +106,27 @@ jobs:
       - run: flutter pub get
 
       - run: flutter build apk --debug
+        if: inputs.revenuecat_test_key == ''
+
+      # A test APK wired to RevenueCat's Test Store, for trying the paywall
+      # and finishing RevenueCat's onboarding. Purchases in it are fake, so
+      # it is a debug build and is never released.
+      - name: Build RevenueCat test APK
+        if: inputs.revenuecat_test_key != ''
+        env:
+          RC_TEST_KEY: ${{ inputs.revenuecat_test_key }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          case "$RC_TEST_KEY" in test_*) ;; *) echo "::error::Expected a test_ key"; exit 1;; esac
+          flutter build apk --debug --dart-define=REVENUECAT_ANDROID_KEY=$RC_TEST_KEY \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+      - uses: actions/upload-artifact@v7
+        if: inputs.revenuecat_test_key != ''
+        with:
+          name: fieldos-revenuecat-test-apk
+          path: fieldos_mobile/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 7
 
   ios-build:
     # Same idea as android-build, for the iPhone app. No Apple signing in

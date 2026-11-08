@@ -40,8 +40,8 @@ class FakeRevenueCat {
     final viaPlay = paying.contains(id);
     final ent = <String, Object?>{
       if (viaPromo || viaPlay)
-        'pro': {
-          'identifier': 'pro',
+        'fieldos_pro': {
+          'identifier': 'fieldos_pro',
           'isActive': true,
           'willRenew': viaPlay,
           'latestPurchaseDate': _day,

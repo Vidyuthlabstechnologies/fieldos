@@ -14,7 +14,7 @@
 /// Access codes (Android only) let people the FieldOS team chooses in
 /// without paying, above all Google's app reviewers, who must be able to
 /// see every feature. A code is a RevenueCat customer, `access_<CODE>`,
-/// that the team gives the `pro` entitlement as a promotional grant in the
+/// that the team gives the `fieldos_pro` entitlement as a promotional grant in the
 /// RevenueCat dashboard; taking the grant away there switches the code
 /// off. Codes are never sold: Google Play's billing rules cover anything
 /// paid for. Apple does not allow codes that unlock features at all (App
@@ -34,7 +34,7 @@ import 'package:fieldos_mobile/services/subscription_access.dart';
 export 'package:fieldos_mobile/services/subscription_access.dart';
 
 /// The RevenueCat entitlement every product unlocks.
-const entitlementId = 'pro';
+const entitlementId = 'fieldos_pro';
 
 /// The Android application id, for the Play subscriptions page.
 const androidPackageName = 'com.mldynamic.fieldos';

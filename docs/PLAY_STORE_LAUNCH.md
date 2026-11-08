@@ -180,7 +180,7 @@ To turn it on (owner):
 3. **RevenueCat** (free up to USD 2,500 a month in revenue): create a
    project, add the Android app (`com.mldynamic.fieldos`, with a Play
    service account JSON) and the iOS app.
-   - Create the entitlement `pro` and attach the store products.
+   - Create the entitlement `fieldos_pro` and attach the store products.
    - Make the default offering contain them.
 4. Add the repo secrets `REVENUECAT_ANDROID_KEY` and `REVENUECAT_IOS_KEY`:
    the public SDK keys, from RevenueCat → API keys (`goog_…` and `appl_…`;
@@ -215,7 +215,7 @@ Make a code (whoever runs RevenueCat):
      the paywall tap ⋮ → Enter access code, type the code, tap Unlock. It
      says the code is not valid; that is expected the first time, and the
      customer now exists. Then RevenueCat → Customers → search the
-     customer id → **Grant entitlement** → `pro` → pick how long.
+     customer id → **Grant entitlement** → `fieldos_pro` → pick how long.
    - **With the REST API** (secret `sk_…` key, which never goes in the
      app): `GET https://api.revenuecat.com/v1/subscribers/access_<CODE>`
      creates the customer, then
@@ -285,6 +285,6 @@ its summary table says what is missing or wrong without showing any value.
 | Release build hides Team & sync | It was built before `SUPABASE_URL` / `SUPABASE_ANON_KEY` were set. | Set them, then run the **release** workflow again (or push a new tag). |
 | Release build has no paywall | Built before the RevenueCat secrets were set, or `REVENUECAT_ANDROID_KEY` is empty. | Set the key (section 7, step 4), rebuild, re-upload to internal testing. |
 | Paywall says "Could not reach the store" or shows no prices | The build on the phone was not installed from Google Play (internal testing), the Google account is not a licence tester, or the products are not in RevenueCat's **default** offering. | Install from the internal-testing link, add the tester under Play Console → Setup → Licence testing, and check RevenueCat → Offerings. |
-| An access code says it is not valid | The code's customer has no active `pro` grant, or the code was typed differently. | RevenueCat → Customers → `access_<CODE>` (capitals, no spaces or dashes) → check the promotional entitlement and its end date (section 7a). |
-| Trial unlocks, but the app locks again straight after | The `pro` entitlement is not attached to the product that was bought. | RevenueCat → Entitlements → `pro` → attach every store product. |
+| An access code says it is not valid | The code's customer has no active `fieldos_pro` grant, or the code was typed differently. | RevenueCat → Customers → `access_<CODE>` (capitals, no spaces or dashes) → check the promotional entitlement and its end date (section 7a). |
+| Trial unlocks, but the app locks again straight after | The `fieldos_pro` entitlement is not attached to the product that was bought. | RevenueCat → Entitlements → `fieldos_pro` → attach every store product. |
 | `launch-readiness` is red | Only ever because a secret that *is* set is the wrong kind of value (❌ rows). Missing secrets never fail it. | Fix the ❌ rows; the Note column says what was expected. |
