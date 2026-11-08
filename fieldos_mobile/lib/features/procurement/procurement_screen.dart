@@ -18,6 +18,7 @@ import 'package:fieldos_mobile/features/procurement/po_share.dart';
 import 'package:fieldos_mobile/features/procurement/stock_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
+import 'package:fieldos_mobile/sync/sync_engine.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
@@ -41,6 +42,11 @@ class _ProcurementViewState extends ConsumerState<ProcurementView>
   late final TabController _tabs;
   void Function()? _vendorsLiveCallback;
 
+  /// The engine the vendor callback was hooked onto, kept so [dispose] can
+  /// unhook it without `ref` (Riverpod refuses `ref` once disposal starts,
+  /// which used to throw whenever the Procure tab was torn down).
+  SyncEngine? _liveEngine;
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +60,7 @@ class _ProcurementViewState extends ConsumerState<ProcurementView>
     final service = ref.read(cloudSyncServiceProvider);
     if (!service.isSignedIn) return;
     final engine = ref.read(cloudSyncEngineProvider);
+    _liveEngine = engine;
     _vendorsLiveCallback = () {
       if (mounted) ref.invalidate(suppliersProvider(widget.companyId));
     };
@@ -68,8 +75,8 @@ class _ProcurementViewState extends ConsumerState<ProcurementView>
 
   @override
   void dispose() {
-    final engine = ref.read(cloudSyncEngineProvider);
-    if (identical(engine.onVendorsChanged, _vendorsLiveCallback)) {
+    final engine = _liveEngine;
+    if (engine != null && identical(engine.onVendorsChanged, _vendorsLiveCallback)) {
       engine.onVendorsChanged = null;
     }
     _tabs.dispose();
