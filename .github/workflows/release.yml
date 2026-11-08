@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   mobile:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
     defaults:
       run:
         working-directory: fieldos_mobile
@@ -29,6 +29,8 @@ jobs:
       # ("No space left on device" while packaging). Remove preinstalled
       # toolchains these jobs never use. The Android SDK stays.
       - name: Free disk space
+        # Only on GitHub's machines: never delete things on your own computer.
+        if: runner.environment == 'github-hosted'
         working-directory: .
         run: |
           df -h /
@@ -36,6 +38,16 @@ jobs:
             /usr/local/share/powershell /usr/local/share/chromium /usr/local/share/boost
           sudo docker image prune --all --force > /dev/null 2>&1 || true
           df -h /
+
+      # On your own computer (self-hosted runner) Java and the Android SDK
+      # aren't there already, as they are on GitHub's machines.
+      - uses: actions/setup-java@v6
+        if: runner.environment != 'github-hosted'
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        if: runner.environment != 'github-hosted'
 
       - uses: subosito/flutter-action@v2
         with:
@@ -147,7 +159,7 @@ jobs:
   publish-release:
     needs: [mobile, desktop]
     if: always() && (needs.mobile.result == 'success' || needs.desktop.result == 'success')
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v7
         with:
