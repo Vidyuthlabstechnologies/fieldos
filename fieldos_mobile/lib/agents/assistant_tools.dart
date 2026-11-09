@@ -15,6 +15,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart' show Value;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/auth/auth_service.dart' show Roles;
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/dashboard/project_cost_summary.dart';
@@ -69,11 +70,19 @@ class ToolOutcome {
 }
 
 class AssistantTools {
-  AssistantTools({required this.db, required this.companyId, required this.userId, DateTime Function()? clock})
+  AssistantTools(
+      {required this.db, required this.companyId, required this.userId, required this.role, DateTime Function()? clock})
       : _clock = clock ?? DateTime.now;
 
   final AppDatabase db;
   final String companyId;
+
+  /// The person's role in the company. Money received from the client is
+  /// for the owner and managers only, as on the screens (canSeeMoneyIn), so
+  /// the assistant must not read it out or record it for anyone else.
+  final String? role;
+  bool get _seesMoneyIn => Roles.canApprove(role);
+  static const _moneyInOnly = 'Only the owner or a manager can see or record money received from the client.';
 
   /// The local user id, as the screens record it (recordedBy, createdBy).
   final String userId;
@@ -155,6 +164,7 @@ class AssistantTools {
         }) +
             _noteSuffix(i);
       case 'record_payment_received':
+        if (!_seesMoneyIn) throw ToolInputError(_moneyInOnly);
         final p = await _project(i);
         return trf('Payment received {amount} from {party} at {site}',
             {'amount': rupees(_money1(i)), 'party': _text(i, 'from_party', 120), 'site': p.name});
@@ -234,6 +244,7 @@ class AssistantTools {
         ));
         return _saved(p.id, {'amount': amount, 'category': _category(i)});
       case 'record_payment_received':
+        if (!_seesMoneyIn) throw ToolInputError(_moneyInOnly);
         final p = await _project(i);
         final mode = _str(i, 'mode', required: true)!;
         if (!_paymentModes.contains(mode)) throw ToolInputError('mode must be cash, upi, bank or cheque.');
@@ -401,7 +412,7 @@ class AssistantTools {
       'spent_total': _round(expenses.fold<double>(0, (s, e) => s + e.amount)),
       'spent_this_month':
           _round(expenses.where((e) => e.incurredOn.startsWith(monthKey)).fold<double>(0, (s, e) => s + e.amount)),
-      'received_from_client': _round(payments.fold<double>(0, (s, x) => s + x.amount)),
+      if (_seesMoneyIn) 'received_from_client': _round(payments.fold<double>(0, (s, x) => s + x.amount)),
       'budget': _round(cost.budget),
       'actual_cost': _round(cost.actual),
       'budget_status': cost.status,
@@ -465,11 +476,11 @@ class AssistantTools {
     return {
       'from': isoDay(from),
       'spent': _round(expenses.fold<double>(0, (s, e) => s + e.amount)),
-      'received': _round(payments.fold<double>(0, (s, x) => s + x.amount)),
+      if (_seesMoneyIn) 'received': _round(payments.fold<double>(0, (s, x) => s + x.amount)),
       'expenses': [
         for (final e in expenses.take(50)) {'date': e.incurredOn, 'amount': e.amount, 'category': e.category, 'note': e.note}
       ],
-      'payments': [
+      if (_seesMoneyIn) 'payments': [
         for (final x in payments.take(30))
           {'date': isoDay(x.receivedOn), 'amount': x.amount, 'from': x.fromParty, 'mode': x.mode}
       ],

@@ -52,7 +52,7 @@ void main() {
 
   setUp(() async {
     db = AppDatabase.memory();
-    tools = AssistantTools(db: db, companyId: 'c1', userId: 'u1');
+    tools = AssistantTools(db: db, companyId: 'c1', userId: 'u1', role: 'owner');
     await db.projectDao.create(ProjectsCompanion.insert(id: 'p1', companyId: 'c1', name: 'Villa', status: const Value('active')));
   });
   tearDown(() => db.close());
