@@ -202,21 +202,14 @@ class _SiteBriefCard extends ConsumerWidget {
               const SizedBox(width: 8),
               StatusPill(levelLabel(b.level), tone: levelTone(b.level)),
             ]),
+            // What needs the owner, as one plain line in the status colour,
+            // instead of a row of red and amber chips.
             if (b.flags.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Wrap(spacing: 6, runSpacing: 6, children: [
-                for (final f in b.flags)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: f.weight >= 3 ? scheme.errorContainer : scheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(flagLabel(f),
-                        style: theme.textTheme.labelMedium?.copyWith(
-                            color: f.weight >= 3 ? scheme.onErrorContainer : scheme.onSecondaryContainer)),
-                  ),
-              ]),
+              const SizedBox(height: 6),
+              Text(b.flags.map(flagLabel).join(' · '),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: toneColor(context, b.flags.first.weight >= 3 ? PillTone.danger : PillTone.warn))),
             ],
             const SizedBox(height: 12),
             Row(children: [
@@ -255,12 +248,10 @@ class _Fact extends StatelessWidget {
     final theme = Theme.of(context);
     return Expanded(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
-        const SizedBox(height: 2),
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
-          child: Text(value, style: theme.textTheme.titleSmall),
+          child: Text(value, style: theme.textTheme.titleMedium),
         ),
         Text(label, maxLines: 1, overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
@@ -313,11 +304,13 @@ class TodayBriefCard extends ConsumerWidget {
     final title = urgent
         ? (t.needYou == 1 ? tr('1 site needs you') : trf('{n} sites need you', {'n': t.needYou}))
         : tr('Nothing urgent today');
+    final accent = urgent ? toneColor(context, PillTone.danger) : scheme.secondary;
+    // A plain white card like the rest of Home. Urgency shows as a small
+    // coloured dot and the headline, not as a pink block.
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: 16),
       child: Card(
         margin: EdgeInsets.zero,
-        color: urgent ? scheme.errorContainer : scheme.secondaryContainer,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () async {
@@ -327,14 +320,17 @@ class TodayBriefCard extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
             child: Row(children: [
-              Icon(urgent ? Icons.priority_high_rounded : Icons.wb_twilight_outlined,
-                  color: urgent ? scheme.onErrorContainer : scheme.onSecondaryContainer),
-              const SizedBox(width: 12),
+              Container(
+                width: 10,
+                height: 10,
+                margin: const EdgeInsets.only(left: 2, right: 14),
+                decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
+              ),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('$title · ${tr("Today's brief")}',
-                      style: theme.textTheme.titleSmall
-                          ?.copyWith(color: urgent ? scheme.onErrorContainer : scheme.onSecondaryContainer)),
+                  Text(tr("Today's brief"), style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
+                  const SizedBox(height: 2),
+                  Text(title, style: theme.textTheme.titleMedium),
                   const SizedBox(height: 2),
                   Text(
                     [
@@ -342,12 +338,11 @@ class TodayBriefCard extends ConsumerWidget {
                       trf('{done} of {all} reported', {'done': t.reported, 'all': briefs.length}),
                       if (showMoney) trf('{amount} spent', {'amount': rupees(t.spent)}),
                     ].join(' · '),
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: urgent ? scheme.onErrorContainer : scheme.onSecondaryContainer),
+                    style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                   ),
                 ]),
               ),
-              Icon(Icons.chevron_right, color: urgent ? scheme.onErrorContainer : scheme.onSecondaryContainer),
+              Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
             ]),
           ),
         ),

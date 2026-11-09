@@ -26,15 +26,23 @@ class Brand {
   static const inkMuted = Color(0xFF5B6B80);
   static const line = Color(0xFFDDE3EB);
 
-  /// Status colours, chosen to stay readable in bright sunlight.
-  static const ok = Color(0xFF1E8E5A);
-  static const okSoft = Color(0xFFE3F4EB);
-  static const warn = Color(0xFFB86E00);
-  static const warnSoft = Color(0xFFFFF1D6);
-  static const danger = Color(0xFFC62828);
-  static const dangerSoft = Color(0xFFFDECEC);
+  /// Status colours. Earthy and muted so they sit with the navy and
+  /// amber instead of shouting over them: a moss green, a burnt ochre and
+  /// a brick red, still dark enough to read in bright sunlight. They mark
+  /// a status with a small dot or a word, never a big filled block.
+  static const ok = Color(0xFF3F7A5C);
+  static const okSoft = Color(0xFFEAF2EC);
+  static const warn = Color(0xFFA8650B);
+  static const warnSoft = Color(0xFFFBF1DF);
+  static const danger = Color(0xFFB0412E);
+  static const dangerSoft = Color(0xFFF8ECE8);
 
   static const fontFamily = 'Inter';
+
+  /// Inter has no Indian scripts. Phones fall back to their own fonts on
+  /// their own; naming the Noto families keeps Hindi, Telugu, Tamil,
+  /// Kannada and Marathi in one consistent face wherever they are present.
+  static const fontFallback = ['NotoSansDevanagari', 'NotoSansTelugu', 'NotoSansTamil', 'NotoSansKannada'];
 
   static const supportEmail = 'info@mldynamic.com';
   static const companyName = 'ML Dynamic Solutions Private Limited';

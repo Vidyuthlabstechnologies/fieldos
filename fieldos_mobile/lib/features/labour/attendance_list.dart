@@ -67,7 +67,7 @@ class _AttendanceListState extends State<AttendanceList> {
         if (forgotten.isNotEmpty) ...[
           _DayHeader(
             title: tr('Not punched out'),
-            detail: 'Set when they left. Until then each counts as half a day.',
+            detail: tr('Set when they left. Until then each counts as half a day.'),
             warn: true,
           ),
           for (final a in forgotten)
@@ -100,7 +100,7 @@ class _AttendanceListState extends State<AttendanceList> {
             padding: const EdgeInsets.only(top: 8),
             child: OutlinedButton.icon(
               icon: const Icon(Icons.history),
-              label: Text('Show earlier days ($hidden more)'),
+              label: Text(trf('Show earlier days ({n} more)', {'n': hidden})),
               onPressed: () => setState(() => _earlier += AttendanceList.pageDays),
             ),
           ),
@@ -111,7 +111,7 @@ class _AttendanceListState extends State<AttendanceList> {
   /// "8 people", counting each worker once however many punches they have.
   static String _people(List<LabourAttendanceData> punches) {
     final n = {for (final p in punches) p.workerId ?? 'name:${p.workerName.trim().toLowerCase()}'}.length;
-    return n == 1 ? '1 person' : '$n people';
+    return n == 1 ? tr('1 person') : trf('{n} people', {'n': n});
   }
 }
 
@@ -159,18 +159,20 @@ class _PunchTile extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final (icon, color, place) = switch (punch.withinGeofence) {
-      true => (Icons.location_on, theme.brightness == Brightness.dark ? const Color(0xFF8FD9B0) : Brand.ok, 'On site'),
-      false => (Icons.wrong_location_outlined, _warnColor(theme), 'Away from the site area'),
-      null => (Icons.location_disabled_outlined, scheme.onSurfaceVariant, 'Not checked'),
+      true => (Icons.location_on, theme.brightness == Brightness.dark ? const Color(0xFF8FD9B0) : Brand.ok, tr('On site')),
+      false => (Icons.wrong_location_outlined, _warnColor(theme), tr('Away from the site area')),
+      null => (Icons.location_disabled_outlined, scheme.onSurfaceVariant, tr('Not checked')),
     };
     final inAt = punch.punchIn.toLocal();
     final out = punch.punchOut?.toLocal();
     final times = [
-      showDate ? 'In ${fmtDate(inAt, short: true, now: now)}, ${fmtTime(inAt)}' : 'In ${fmtTime(inAt)}',
+      showDate
+          ? trf('In {time}', {'time': '${fmtDate(inAt, short: true, now: now)}, ${fmtTime(inAt)}'})
+          : trf('In {time}', {'time': fmtTime(inAt)}),
       if (out != null)
-        isSameDay(out, inAt) ? 'out ${fmtTime(out)}' : 'out ${fmtDateTime(out, now: now)}'
+        trf('out {time}', {'time': isSameDay(out, inAt) ? fmtTime(out) : fmtDateTime(out, now: now)})
       else if (!showDate)
-        'not out yet',
+        tr('not out yet'),
       if (out != null) fmtHours(out.difference(inAt)),
     ].join(' · ');
     return Card(

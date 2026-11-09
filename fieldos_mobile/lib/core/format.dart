@@ -3,6 +3,8 @@
 /// here touches the network.
 library;
 
+import 'package:fieldos_mobile/l10n/language.dart';
+
 const _months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /// "6 Nov 2026" (the year is left out for dates in the current year when
@@ -30,8 +32,8 @@ String fmtDateTime(DateTime d, {DateTime? now}) {
   final today = DateTime(n.year, n.month, n.day);
   final diff = today.difference(day).inDays;
   final label = switch (diff) {
-    0 => 'Today',
-    1 => 'Yesterday',
+    0 => tr('Today'),
+    1 => tr('Yesterday'),
     _ => fmtDate(l, short: true, now: n),
   };
   return '$label, ${fmtTime(l)}';
@@ -43,8 +45,8 @@ String fmtDay(DateTime d, {DateTime? now}) {
   final n = (now ?? DateTime.now()).toLocal();
   final diff = DateTime(n.year, n.month, n.day).difference(DateTime(l.year, l.month, l.day)).inDays;
   return switch (diff) {
-    0 => 'Today',
-    1 => 'Yesterday',
+    0 => tr('Today'),
+    1 => tr('Yesterday'),
     _ => fmtDate(l, short: true, now: n),
   };
 }

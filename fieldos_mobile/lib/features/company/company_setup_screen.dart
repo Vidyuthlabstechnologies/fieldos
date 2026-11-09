@@ -59,7 +59,7 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
         const BrandMark(size: 64, onDark: true),
         const SizedBox(height: 10),
         Text(
-          firstName.isEmpty ? 'Welcome to FieldOS' : 'Welcome, $firstName',
+          firstName.isEmpty ? tr('Welcome to FieldOS') : trf('Welcome, {name}', {'name': firstName}),
           style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white),
         ),
         const SizedBox(height: 6),
@@ -129,11 +129,11 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
           TextButton(
             onPressed: _busy ? null : () => ref.read(sessionProvider.notifier).logout(),
             style: TextButton.styleFrom(foregroundColor: theme.colorScheme.onSurfaceVariant),
-            child: Text(user == null ? 'Log out' : 'Not ${user.name}? Log out'),
+            child: Text(user == null ? tr('Log out') : trf('Not {name}? Log out', {'name': user.name})),
           ),
           const SizedBox(height: 8),
           Text(
-            'Need help? ${Brand.supportEmail}',
+            trf('Need help? {email}', {'email': Brand.supportEmail}),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),

@@ -38,7 +38,7 @@ class SiteMapScreen extends ConsumerWidget {
                 Material(
                   elevation: 4,
                   child: ExpansionTile(
-                    title: Text('${unplaced.length} project${unplaced.length == 1 ? '' : 's'} without a site location'),
+                    title: Text(trf('{n} projects without a site location', {'n': unplaced.length})),
                     children: [
                       for (final p in unplaced)
                         ListTile(
@@ -64,9 +64,9 @@ class SiteMapScreen extends ConsumerWidget {
       await ref.read(appDatabaseProvider).geofenceDao.set(p.id, fix.lat, fix.lng, 100);
       ref.invalidate(projectsProvider(companyId));
       ref.invalidate(geofenceProvider(p.id));
-      messenger.showSnackBar(SnackBar(content: Text('${p.name} placed here, with a 100 m attendance geofence.')));
+      messenger.showSnackBar(SnackBar(content: Text(trf('{name} placed here, with a 100 m attendance geofence.', {'name': p.name}))));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(e is LocationUnavailable ? e.message : 'Could not get a GPS fix.')));
+      messenger.showSnackBar(SnackBar(content: Text(e is LocationUnavailable ? e.message : tr('Could not get a GPS fix.'))));
     }
   }
 }

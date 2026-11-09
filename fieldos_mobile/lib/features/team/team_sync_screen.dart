@@ -372,7 +372,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       children.add(Row(children: [
         const Icon(Icons.verified_user, size: 18, color: Brand.ok),
         const SizedBox(width: 8),
-        Expanded(child: Text('Signed in as ${service.email ?? ''}')),
+        Expanded(child: Text(trf('Signed in as {email}', {'email': service.email ?? ''}))),
         TextButton(onPressed: _busy ? null : _signOut, child: Text(tr('Sign out'))),
       ]));
       children.add(const SizedBox(height: 16));
@@ -501,7 +501,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
 
   List<Widget> _linkSection(String? companyName, {required bool canRegister}) => [
         if (canRegister) ...[
-          Text('Put $companyName on the cloud', style: Theme.of(context).textTheme.titleMedium),
+          Text(trf('Put {company} on the cloud', {'company': companyName ?? ''}), style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 4),
           Text(tr('You become the owner. Your team joins with a code you share from here.')),
           const SizedBox(height: 8),
@@ -543,9 +543,9 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       const SizedBox(height: 4),
       Text(tr('Runs automatically when the app opens and every few minutes while it is open.')),
       const SizedBox(height: 8),
-      Text('Last synced: $last · Waiting to send: $_pending', style: Theme.of(context).textTheme.bodySmall),
+      Text(trf('Last synced: {last} · Waiting to send: {n}', {'last': last, 'n': _pending}), style: Theme.of(context).textTheme.bodySmall),
       if (_parked > 0)
-        Text('$_parked change${_parked == 1 ? '' : 's'} could not be sent after several tries.',
+        Text(trf('{n} changes could not be sent after several tries.', {'n': _parked}),
             style: TextStyle(color: Theme.of(context).colorScheme.error)),
       const SizedBox(height: 8),
       Row(children: [

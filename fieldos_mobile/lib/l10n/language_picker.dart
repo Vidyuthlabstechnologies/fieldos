@@ -29,9 +29,13 @@ Future<void> showLanguagePicker(BuildContext context, WidgetRef ref) async {
   final picked = await showModalBottomSheet<AppLanguage>(
     context: context,
     showDragHandle: true,
+    isScrollControlled: true,
+    // Six languages: scroll on short phones and in landscape.
     builder: (ctx) => SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.8),
+        child: ListView(
+        shrinkWrap: true,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
@@ -47,12 +51,13 @@ Future<void> showLanguagePicker(BuildContext context, WidgetRef ref) async {
           const SizedBox(height: 8),
         ],
       ),
+      ),
     ),
   );
   if (picked != null && picked != current) await chooseLanguage(ref, picked);
 }
 
-/// English · हिन्दी · తెలుగు, the current one highlighted.
+/// Every language in its own script, the current one highlighted.
 class LanguageChooserRow extends ConsumerWidget {
   const LanguageChooserRow({super.key, this.color});
   final Color? color;

@@ -125,7 +125,10 @@ class BillsView extends ConsumerWidget {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           ListTile(
             title: Text('${billKinds[b.kind]} ${b.billNumber}'),
-            subtitle: Text('${rupees(b.netPayable, paise: true)} payable · ${rupeesInWords(b.netPayable)}'),
+            subtitle: Text([
+              trf('{amount} payable', {'amount': rupees(b.netPayable, paise: true)}),
+              if (currentLanguage == AppLanguage.en) rupeesInWords(b.netPayable),
+            ].join(' · ')),
           ),
           ListTile(
             leading: const Icon(Icons.ios_share),

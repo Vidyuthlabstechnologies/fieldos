@@ -33,6 +33,7 @@ import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/services/read_aloud.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
 /// Opens the assistant; [listen] starts with the microphone.
@@ -168,13 +169,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   }
 
   /// The voice to read [text] with, by its script.
-  static String _ttsLanguage(String text) {
-    if (RegExp(r'[ఀ-౿]').hasMatch(text)) return 'te-IN';
-    if (RegExp(r'[ऀ-ॿ]').hasMatch(text)) return 'hi-IN';
-    if (RegExp(r'[஀-௿]').hasMatch(text)) return 'ta-IN';
-    if (RegExp(r'[ಀ-೿]').hasMatch(text)) return 'kn-IN';
-    return 'en-IN';
-  }
+  static String _ttsLanguage(String text) => ReadAloud.localeFor(text);
 
   Future<void> _open(ScreenLink link) async {
     final nav = Navigator.of(context);

@@ -18,7 +18,7 @@ import 'package:fieldos_mobile/l10n/language.dart';
 String friendlyError(Object error, [StackTrace? stack]) {
   if (error is AuthException) return error.message;
   if (error is SocketException || error is HttpException || error is HandshakeException) return offlineMessage;
-  if (error is TimeoutException) return 'That took too long. Check your connection and try again.';
+  if (error is TimeoutException) return tr('That took too long. Check your connection and try again.');
   final known = switch (error) {
     sb.AuthException e => _cloudAuthMessage(e),
     sb.PostgrestException e => _cloudServerMessage(e),
@@ -33,13 +33,13 @@ String friendlyError(Object error, [StackTrace? stack]) {
     return offlineMessage;
   }
   RecentErrors.record(error, stack);
-  return 'Something went wrong. Please try again, or send a bug report from the menu.';
+  return tr('Something went wrong. Please try again, or send a bug report from the menu.');
 }
 
-const offlineMessage = 'No internet connection. Your work is saved on this phone; try again when you are online.';
-const _cloudDownMessage =
-    'The FieldOS cloud is not answering right now. Your work is saved on this phone; try again in a few minutes.';
-const _signInAgainMessage = 'Your cloud sign-in has ended. Sign in again from Team & sync.';
+String get offlineMessage => tr('No internet connection. Your work is saved on this phone; try again when you are online.');
+String get _cloudDownMessage =>
+    tr('The FieldOS cloud is not answering right now. Your work is saved on this phone; try again in a few minutes.');
+String get _signInAgainMessage => tr('Your cloud sign-in has ended. Sign in again from Team & sync.');
 
 /// Supabase Auth's errors, by their stable codes. A message the server
 /// wrote for people is passed on when it is short; anything else is null.
@@ -48,24 +48,24 @@ String? _cloudAuthMessage(sb.AuthException e) {
   // body may be a whole HTML page.
   if (e is sb.AuthRetryableFetchException) return e.statusCode == null ? offlineMessage : _cloudDownMessage;
   if (e is sb.AuthUnknownException) return _cloudDownMessage;
-  if (e is sb.AuthSessionMissingException) return 'Sign in from Team & sync first.';
+  if (e is sb.AuthSessionMissingException) return tr('Sign in from Team & sync first.');
   switch (e.code) {
     case 'invalid_credentials':
-      return 'That email and password do not match. Check them and try again.';
+      return tr('That email and password do not match. Check them and try again.');
     case 'email_not_confirmed':
-      return 'Confirm your email first: open the link we sent you, then sign in here.';
+      return tr('Confirm your email first: open the link we sent you, then sign in here.');
     case 'user_already_exists' || 'email_exists':
-      return 'That email already has a FieldOS cloud account. Sign in with its password.';
+      return tr('That email already has a FieldOS cloud account. Sign in with its password.');
     case 'otp_expired':
-      return 'That code is not right, or it is too old. Check it, or send a new code.';
+      return tr('That code is not right, or it is too old. Check it, or send a new code.');
     case 'same_password':
-      return 'That is already your password. Choose a different one, or sign in with it.';
+      return tr('That is already your password. Choose a different one, or sign in with it.');
     case 'over_email_send_rate_limit' || 'over_request_rate_limit' || 'over_sms_send_rate_limit':
-      return 'Too many tries in a short time. Wait a few minutes, then try again.';
+      return tr('Too many tries in a short time. Wait a few minutes, then try again.');
     case 'signup_disabled':
-      return 'New cloud accounts are switched off for now. Write to us at the support address and we will help.';
+      return tr('New cloud accounts are switched off for now. Write to us at the support address and we will help.');
     case 'email_address_invalid' || 'email_address_not_authorized':
-      return 'That email address cannot be used. Check it, or try another.';
+      return tr('That email address cannot be used. Check it, or try another.');
     case 'session_expired' || 'session_not_found' || 'refresh_token_not_found' || 'refresh_token_already_used':
     case 'bad_jwt' || 'user_not_found':
       return _signInAgainMessage;
@@ -78,29 +78,29 @@ String? _cloudAuthMessage(sb.AuthException e) {
 String? _cloudServerMessage(sb.PostgrestException e) {
   switch (e.message.trim().toLowerCase()) {
     case 'invalid join code':
-      return 'That join code is not right. Check it with the person who shared it: it is 10 letters and numbers.';
+      return tr('That join code is not right. Check it with the person who shared it: it is 10 letters and numbers.');
     case 'too many join attempts':
-      return 'Too many wrong join codes. Wait an hour, then try again with the code from your company owner.';
+      return tr('Too many wrong join codes. Wait an hour, then try again with the code from your company owner.');
     case 'this company is already registered to another account':
-      return 'This company is already on the cloud under another account. Ask its owner for a join code.';
+      return tr('This company is already on the cloud under another account. Ask its owner for a join code.');
     case 'not authenticated' || 'sign in first':
-      return 'Sign in from Team & sync first.';
+      return tr('Sign in from Team & sync first.');
     case 'only the company owner can change roles':
-      return 'Only the company owner can change roles.';
+      return tr('Only the company owner can change roles.');
     case 'owners cannot change their own role':
-      return 'You are the owner, so your own role stays the same.';
+      return tr('You are the owner, so your own role stays the same.');
     case 'only the company owner can reset the join code':
-      return 'Only the company owner can make a new join code.';
+      return tr('Only the company owner can make a new join code.');
     case 'only the company owner can remove people':
-      return 'Only the company owner can remove people from the team.';
+      return tr('Only the company owner can remove people from the team.');
     case 'the owner cannot be removed':
-      return 'The company owner cannot be removed from the team.';
+      return tr('The company owner cannot be removed from the team.');
   }
   switch (e.code) {
     case 'PGRST301' || 'PGRST302' || 'PGRST303' || '28000':
       return _signInAgainMessage;
     case '42501':
-      return 'Your role in this company does not allow that. Ask the owner.';
+      return tr('Your role in this company does not allow that. Ask the owner.');
   }
   return null;
 }
@@ -238,7 +238,10 @@ class ErrorState extends StatelessWidget {
   }
 }
 
-/// A small coloured label for statuses: "open", "paid", "late".
+/// A quiet status label: "open", "paid", "late". A soft grey tag with a
+/// small coloured dot for the status, so a list of them reads calmly and
+/// colour stays a hint, not a block of red or green. Problems
+/// ([PillTone.danger]) also colour the word, because those need acting on.
 class StatusPill extends StatelessWidget {
   const StatusPill(this.label, {super.key, this.tone = PillTone.neutral});
 
@@ -247,20 +250,27 @@ class StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final (bg, fg) = switch (tone) {
-      PillTone.ok => (dark ? const Color(0xFF173D2B) : Brand.okSoft, dark ? const Color(0xFF8FD9B0) : Brand.ok),
-      PillTone.warn => (dark ? const Color(0xFF4A3305) : Brand.warnSoft, dark ? Brand.amber : Brand.warn),
-      PillTone.danger => (dark ? const Color(0xFF4A1A1A) : Brand.dangerSoft, dark ? const Color(0xFFFF9C9C) : Brand.danger),
-      PillTone.neutral => (
-          Theme.of(context).colorScheme.surfaceContainerHighest,
-          Theme.of(context).colorScheme.onSurfaceVariant
-        ),
-    };
+    final scheme = Theme.of(context).colorScheme;
+    final dot = tone == PillTone.neutral ? null : toneColor(context, tone);
+    final fg = tone == PillTone.danger ? toneColor(context, tone) : scheme.onSurfaceVariant;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(label, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600)),
+      padding: EdgeInsets.fromLTRB(dot == null ? 9 : 7, 3, 9, 3),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.7)),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        if (dot != null) ...[
+          Container(width: 6, height: 6, decoration: BoxDecoration(color: dot, shape: BoxShape.circle)),
+          const SizedBox(width: 6),
+        ],
+        Flexible(
+          child: Text(tr(label),
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600, height: 1.3)),
+        ),
+      ]),
     );
   }
 }
@@ -271,9 +281,9 @@ enum PillTone { ok, warn, danger, neutral }
 Color toneColor(BuildContext context, PillTone tone) {
   final dark = Theme.of(context).brightness == Brightness.dark;
   return switch (tone) {
-    PillTone.ok => dark ? const Color(0xFF8FD9B0) : Brand.ok,
-    PillTone.warn => dark ? Brand.amber : Brand.warn,
-    PillTone.danger => dark ? const Color(0xFFFF9C9C) : Brand.danger,
+    PillTone.ok => dark ? const Color(0xFF9CC9AE) : Brand.ok,
+    PillTone.warn => dark ? const Color(0xFFE9B562) : Brand.warn,
+    PillTone.danger => dark ? const Color(0xFFF0A08F) : Brand.danger,
     PillTone.neutral => Theme.of(context).colorScheme.onSurfaceVariant,
   };
 }
@@ -290,11 +300,11 @@ class SectionHeader extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: padding,
-      child: Text(tr(title).toUpperCase(),
-          style: theme.textTheme.labelMedium?.copyWith(
+      // Sentence case and normal tracking: a quiet label, not a shouted one.
+      child: Text(tr(title),
+          style: theme.textTheme.titleSmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
-            letterSpacing: 0.8,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
           )),
     );
   }
@@ -312,7 +322,7 @@ class FormMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
-    final color = error ? theme.colorScheme.error : (dark ? const Color(0xFF8FD9B0) : Brand.ok);
+    final color = error ? theme.colorScheme.error : (dark ? const Color(0xFF9CC9AE) : Brand.ok);
     return Semantics(
       liveRegion: true,
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [

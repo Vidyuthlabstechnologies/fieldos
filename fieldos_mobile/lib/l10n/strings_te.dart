@@ -1139,4 +1139,354 @@ const Map<String, String> stringsTe = {
   '{n} expenses': '{n} ఖర్చులు',
   '{pct}% done. At this rate the job costs {total}, {over} over budget.': '{pct}% పూర్తి. ఇదే వేగంతో పని {total} అవుతుంది, బడ్జెట్ కంటే {over} ఎక్కువ.',
   '{pct}% done. At this rate the job finishes within budget ({total}).': '{pct}% పూర్తి. ఇదే వేగంతో పని బడ్జెట్‌లోనే పూర్తవుతుంది ({total}).',
+
+  // Read aloud
+  'Stop':
+      'ఆపు',
+
+  // Home quick actions
+  'Attendance':
+      'హాజరు',
+  'Which site?':
+      'ఏ సైట్?',
+
+  // Home quick actions
+  'Expense':
+      'ఖర్చు',
+
+  // Everyday screens: tasks, attendance, issues and status tags
+  '1 day late':
+      '1 రోజు ఆలస్యం',
+  '1 issue':
+      '1 సమస్య',
+  '1 person':
+      '1 వ్యక్తి',
+  'Away from the site area':
+      'సైట్ ప్రాంతం బయట',
+  'Broken down':
+      'పాడైంది',
+  'Completed':
+      'పూర్తయింది',
+  'Could not get a GPS fix.':
+      'GPS స్థానం దొరకలేదు.',
+  'Due date':
+      'గడువు తేదీ',
+  'Due {date}':
+      'గడువు {date}',
+  'Failed':
+      'ఫెయిల్',
+  'Fixed {date}':
+      '{date} న సరిచేశారు',
+  'Forecast {date}':
+      'అంచనా {date}',
+  'From a daily report':
+      'రోజువారీ రిపోర్ట్ నుండి',
+  'GPS fix, accurate to about {m} m':
+      'GPS దొరికింది, సుమారు {m} మీ. ఖచ్చితం',
+  'Getting your location…':
+      'మీ స్థానం తీసుకుంటోంది…',
+  'Give the task a name.':
+      'పనికి పేరు ఇవ్వండి.',
+  'Handed over':
+      'అప్పగించారు',
+  'Heading 1 day late':
+      '1 రోజు ఆలస్యం అయ్యేలా ఉంది',
+  'Heading {n} days late':
+      '{n} రోజులు ఆలస్యం అయ్యేలా ఉంది',
+  'In maintenance':
+      'మరమ్మతులో',
+  'In progress':
+      'జరుగుతోంది',
+  'In {time}':
+      'వచ్చారు {time}',
+  'Late ({n})':
+      'ఆలస్యం ({n})',
+  'No site area set, so punches are not checked. Set it while standing at the site.':
+      'సైట్ ప్రాంతం సెట్ చేయలేదు, అందుకే హాజరు చోటు చెక్ కాదు. సైట్‌లో నిలబడి సెట్ చేయండి.',
+  'Not active':
+      'యాక్టివ్ కాదు',
+  'Not checked':
+      'చెక్ చేయలేదు',
+  'Not started yet':
+      'ఇంకా మొదలవలేదు',
+  'Nothing is late. Tasks show here when they pass their due date, or when their pace means they will finish after it.':
+      'ఏదీ ఆలస్యం కాలేదు. పని గడువు దాటినప్పుడు, లేదా దాని వేగం చూస్తే గడువు తర్వాత ముగిసేలా ఉన్నప్పుడు ఇక్కడ కనిపిస్తుంది.',
+  'On hold':
+      'ఆపారు',
+  'On site':
+      'సైట్‌లో',
+  'Open':
+      'తెరిచి ఉంది',
+  'Partly passed':
+      'కొంత పాస్',
+  'Passed':
+      'పాస్',
+  'Planning':
+      'ప్లానింగ్‌లో',
+  'Punch in {n} of {total}':
+      '{total} లో {n} మందికి హాజరు వేయండి',
+  'Raised {date}':
+      '{date} న నమోదు',
+  'Report saved, and {n} problems raised as issues.':
+      'రిపోర్ట్ సేవ్ అయింది, {n} సమస్యలు నమోదయ్యాయి.',
+  'Report saved.':
+      'రిపోర్ట్ సేవ్ అయింది.',
+  'Set when they left. Until then each counts as half a day.':
+      'వారు ఎప్పుడు వెళ్ళారో సెట్ చేయండి. అప్పటి వరకు ఒక్కొక్కరు అర రోజుగా లెక్క.',
+  'Show earlier days ({n} more)':
+      'ముందు రోజులు చూపించు ({n} ఇంకా)',
+  'Site area: within {m} m of the point you set. Punches outside it are marked.':
+      'సైట్ ప్రాంతం: మీరు పెట్టిన చోటు నుండి {m} మీ. లోపల. బయట వేసిన హాజరుకు గుర్తు పడుతుంది.',
+  'Start date':
+      'మొదలు తేదీ',
+  'Start {date}':
+      'మొదలు {date}',
+  'The due date is before the start date.':
+      'గడువు తేదీ మొదలు తేదీ కంటే ముందు ఉంది.',
+  'When did {name} leave on {date}?':
+      '{name} {date} న ఎప్పుడు వెళ్ళారు?',
+  'When does work start?':
+      'పని ఎప్పుడు మొదలవుతుంది?',
+  'When must it be finished?':
+      'ఎప్పటికి పూర్తవ్వాలి?',
+  'Work has stopped for now':
+      'పని ప్రస్తుతం ఆగింది',
+  'Work is going on at the site':
+      'సైట్‌లో పని జరుగుతోంది',
+  'done {date}':
+      '{date} న అయింది',
+  'due {date}':
+      '{date} లోపు',
+  'not out yet':
+      'ఇంకా వెళ్ళలేదు',
+  'out {time}':
+      'వెళ్ళారు {time}',
+  '{done} of {total} tasks done':
+      '{total} లో {done} పనులు పూర్తి',
+  '{n} days late':
+      '{n} రోజులు ఆలస్యం',
+  '{n} issues':
+      '{n} సమస్యలు',
+  '{n}% complete':
+      '{n}% పూర్తి',
+
+  // Task status and expense categories shown through tr() from data
+  'To do':
+      'చేయాలి',
+  'Transport':
+      'రవాణా',
+  'Equipment hire':
+      'యంత్రాల అద్దె',
+  'Food & tea':
+      'భోజనం & టీ',
+  'Other':
+      'ఇతర',
+
+  // Sign-in, company setup, plans page, sync and cloud error messages
+  '1 day':
+      '1 రోజు',
+  '1 month':
+      '1 నెల',
+  '1 week':
+      '1 వారం',
+  '1 year':
+      '1 సంవత్సరం',
+  '{n} months':
+      '{n} నెలలు',
+  '{n} weeks':
+      '{n} వారాలు',
+  '{n} years':
+      '{n} సంవత్సరాలు',
+  'Access code':
+      'యాక్సెస్ కోడ్',
+  'Approve it in your UPI or bank app. FieldOS opens by itself once {store} confirms the payment, usually within a few minutes.':
+      'మీ UPI లేదా బ్యాంక్ యాప్‌లో ఆమోదించండి. {store} పేమెంట్ నిర్ధారించగానే FieldOS దానంతట అదే తెరుచుకుంటుంది, సాధారణంగా కొన్ని నిమిషాల్లో.',
+  'At least {n} characters':
+      'కనీసం {n} అక్షరాలు',
+  'Check again':
+      'మళ్ళీ చెక్ చేయండి',
+  'Choose a plan':
+      'ప్లాన్ ఎంచుకోండి',
+  'Choose your plan':
+      'మీ ప్లాన్ ఎంచుకోండి',
+  'Confirm your email first: open the link we sent you, then sign in here.':
+      'ముందు మీ ఈమెయిల్ నిర్ధారించండి: మేము పంపిన లింక్ తెరిచి, తర్వాత ఇక్కడ సైన్ ఇన్ అవ్వండి.',
+  'Copy last report ({day})':
+      'చివరి రిపోర్ట్ కాపీ చేయండి ({day})',
+  'Could not check with {store} right now. Please try again in a minute.':
+      'ఇప్పుడు {store} తో చెక్ చేయలేకపోయాం. ఒక నిమిషం తర్వాత మళ్ళీ ప్రయత్నించండి.',
+  'Could not check your subscription with {store} right now. Please try again in a minute.':
+      'ఇప్పుడు {store} తో మీ సబ్‌స్క్రిప్షన్ చెక్ చేయలేకపోయాం. ఒక నిమిషం తర్వాత మళ్ళీ ప్రయత్నించండి.',
+  'Could not load the plans from {store}. Please try again, or send a bug report from the menu.':
+      '{store} నుండి ప్లాన్‌లు రాలేదు. మళ్ళీ ప్రయత్నించండి, లేదా మెనూ నుండి బగ్ రిపోర్ట్ పంపండి.',
+  'Could not open {store}. Open {path} yourself.':
+      '{store} తెరుచుకోలేదు. మీరే {path} తెరవండి.',
+  'Download {language} translation?':
+      '{language} అనువాదం డౌన్‌లోడ్ చేయాలా?',
+  'Enter access code':
+      'యాక్సెస్ కోడ్ ఇవ్వండి',
+  'Every 3 months':
+      'ప్రతి 3 నెలలు',
+  'Every 6 months':
+      'ప్రతి 6 నెలలు',
+  'For example ravi, or your phone number':
+      'ఉదాహరణకు ravi, లేదా మీ ఫోన్ నంబర్',
+  'Heard in {language} by Sarvam. Check the words before saving.':
+      'Sarvam {language} లో విన్నది. సేవ్ చేసే ముందు మాటలు చెక్ చేయండి.',
+  'Heard in {language} on this phone. Check the words before saving.':
+      'ఈ ఫోన్ {language} లో విన్నది. సేవ్ చేసే ముందు మాటలు చెక్ చేయండి.',
+  'Keep every site on track':
+      'ప్రతి సైట్‌ను సరైన దారిలో ఉంచండి',
+  'Last synced: {last} · Waiting to send: {n}':
+      'చివరి సింక్: {last} · పంపాల్సినవి: {n}',
+  'Made in Hyderabad by {company}':
+      '{company} హైదరాబాద్‌లో తయారు చేసింది',
+  'Manage or cancel':
+      'మార్చండి లేదా రద్దు చేయండి',
+  'Monthly':
+      'నెలవారీ',
+  'Need help? {email}':
+      'సహాయం కావాలా? {email}',
+  'New cloud accounts are switched off for now. Write to us at the support address and we will help.':
+      'కొత్త క్లౌడ్ ఖాతాలు ప్రస్తుతం ఆపారు. సపోర్ట్ చిరునామాకు రాయండి, మేము సహాయం చేస్తాం.',
+  'No FieldOS subscription was found on this {store} account.':
+      'ఈ {store} ఖాతాలో FieldOS సబ్‌స్క్రిప్షన్ దొరకలేదు.',
+  'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.':
+      'ఈ {store} ఖాతాలో FieldOS సబ్‌స్క్రిప్షన్ దొరకలేదు. వేరే ఖాతాతో తీసుకుంటే, {store} లో దానికి మారి మళ్ళీ ప్రయత్నించండి.',
+  'No internet connection. Your work is saved on this phone; try again when you are online.':
+      'ఇంటర్నెట్ లేదు. మీ పని ఈ ఫోన్‌లో సేవ్ అయింది; ఇంటర్నెట్ వచ్చాక మళ్ళీ ప్రయత్నించండి.',
+  'Not {name}? Log out':
+      '{name} కాదా? లాగ్ అవుట్',
+  'Only for people the FieldOS team gave a code to, such as app reviewers.':
+      'FieldOS టీమ్ కోడ్ ఇచ్చిన వారికి మాత్రమే, ఉదాహరణకు యాప్ రివ్యూయర్లు.',
+  'Only the company owner can change roles.':
+      'కంపెనీ ఓనర్ మాత్రమే పాత్రలు మార్చగలరు.',
+  'Only the company owner can make a new join code.':
+      'కంపెనీ ఓనర్ మాత్రమే కొత్త జాయిన్ కోడ్ చేయగలరు.',
+  'Only the company owner can remove people from the team.':
+      'కంపెనీ ఓనర్ మాత్రమే టీమ్ నుండి వ్యక్తులను తీసేయగలరు.',
+  'Payment waiting for approval':
+      'పేమెంట్ ఆమోదం కోసం ఆగుతోంది',
+  'Put {company} on the cloud':
+      '{company} ను క్లౌడ్‌లో పెట్టండి',
+  'Restore purchase':
+      'కొనుగోలు తిరిగి పొందండి',
+  'Sign in from Team & sync first.':
+      'ముందు టీమ్ & సింక్ నుండి సైన్ ఇన్ అవ్వండి.',
+  'Signed in as {email}':
+      '{email} తో సైన్ ఇన్ అయ్యారు',
+  'Something went wrong. Please try again, or send a bug report from the menu.':
+      'ఏదో తప్పు జరిగింది. మళ్ళీ ప్రయత్నించండి, లేదా మెనూ నుండి బగ్ రిపోర్ట్ పంపండి.',
+  'Start {length} free trial':
+      '{length} ఉచిత ట్రయల్ మొదలుపెట్టండి',
+  'Still waiting for the payment. It can take a few minutes after you approve it.':
+      'ఇంకా పేమెంట్ కోసం ఆగుతోంది. ఆమోదించాక కొన్ని నిమిషాలు పట్టవచ్చు.',
+  'Subscribe for {price}':
+      '{price} కి సబ్‌స్క్రైబ్ చేయండి',
+  'Terms':
+      'నిబంధనలు',
+  'That code is not right, or it is too old. Check it, or send a new code.':
+      'ఈ కోడ్ సరైనది కాదు, లేదా పాతది. చెక్ చేయండి, లేదా కొత్త కోడ్ పంపండి.',
+  'That email address cannot be used. Check it, or try another.':
+      'ఈ ఈమెయిల్ వాడలేము. చెక్ చేయండి, లేదా వేరేది ప్రయత్నించండి.',
+  'That email already has a FieldOS cloud account. Sign in with its password.':
+      'ఈ ఈమెయిల్‌కు ఇప్పటికే FieldOS క్లౌడ్ ఖాతా ఉంది. దాని పాస్‌వర్డ్‌తో సైన్ ఇన్ అవ్వండి.',
+  'That email and password do not match. Check them and try again.':
+      'ఈమెయిల్, పాస్‌వర్డ్ సరిపోలలేదు. చెక్ చేసి మళ్ళీ ప్రయత్నించండి.',
+  'That is already your password. Choose a different one, or sign in with it.':
+      'ఇది ఇప్పటికే మీ పాస్‌వర్డ్. వేరేది ఎంచుకోండి, లేదా దీనితో సైన్ ఇన్ అవ్వండి.',
+  'That join code is not right. Check it with the person who shared it: it is 10 letters and numbers.':
+      'ఈ జాయిన్ కోడ్ సరైనది కాదు. పంపిన వారితో చెక్ చేయండి: ఇందులో 10 అక్షరాలు, అంకెలు ఉంటాయి.',
+  'That took too long. Check your connection and try again.':
+      'చాలా సమయం పట్టింది. మీ కనెక్షన్ చెక్ చేసి మళ్ళీ ప్రయత్నించండి.',
+  'The FieldOS cloud is not answering right now. Your work is saved on this phone; try again in a few minutes.':
+      'FieldOS క్లౌడ్ ఇప్పుడు స్పందించడం లేదు. మీ పని ఈ ఫోన్‌లో సేవ్ అయింది; కొన్ని నిమిషాల తర్వాత మళ్ళీ ప్రయత్నించండి.',
+  'The FieldOS team gave you this access, so there is nothing to pay or cancel. When it ends, FieldOS asks you to choose a plan, and your records stay on this phone.':
+      'ఈ యాక్సెస్ FieldOS టీమ్ ఇచ్చింది, కాబట్టి చెల్లించాల్సింది, రద్దు చేయాల్సింది ఏమీ లేదు. ముగిశాక FieldOS ప్లాన్ ఎంచుకోమంటుంది, మీ రికార్డులు ఈ ఫోన్‌లోనే ఉంటాయి.',
+  'The company owner cannot be removed from the team.':
+      'కంపెనీ ఓనర్‌ను టీమ్ నుండి తీసేయలేము.',
+  'The purchase did not finish. Please try again.':
+      'కొనుగోలు పూర్తవలేదు. మళ్ళీ ప్రయత్నించండి.',
+  'The subscription is not on sale yet. Please try again later.':
+      'సబ్‌స్క్రిప్షన్ ఇంకా అమ్మకానికి లేదు. తర్వాత మళ్ళీ ప్రయత్నించండి.',
+  'This company is already on the cloud under another account. Ask its owner for a join code.':
+      'ఈ కంపెనీ ఇప్పటికే వేరే ఖాతాతో క్లౌడ్‌లో ఉంది. దాని ఓనర్‌ను జాయిన్ కోడ్ అడగండి.',
+  'This is a one-time download of about 30 MB. After that, {language} reports translate to English on this phone, with no internet and no cost.':
+      'ఇది సుమారు 30 MB ఒక్కసారి డౌన్‌లోడ్. ఆ తర్వాత {language} రిపోర్ట్‌లు ఈ ఫోన్‌లోనే ఇంగ్లీష్‌లోకి మారతాయి, ఇంటర్నెట్ లేకుండా, ఖర్చు లేకుండా.',
+  'To cancel, open {path}. You keep FieldOS Pro until the end of the period you have paid for, and your records stay on this phone.':
+      'రద్దు చేయడానికి {path} తెరవండి. చెల్లించిన కాలం ముగిసే వరకు FieldOS Pro ఉంటుంది, మీ రికార్డులు ఈ ఫోన్‌లోనే ఉంటాయి.',
+  'Too many tries in a short time. Wait a few minutes, then try again.':
+      'తక్కువ సమయంలో చాలా ప్రయత్నాలు. కొన్ని నిమిషాలు ఆగి మళ్ళీ ప్రయత్నించండి.',
+  'Too many wrong join codes. Wait an hour, then try again with the code from your company owner.':
+      'చాలా తప్పు జాయిన్ కోడ్‌లు. ఒక గంట ఆగి, కంపెనీ ఓనర్ ఇచ్చిన కోడ్‌తో మళ్ళీ ప్రయత్నించండి.',
+  'Translated from {language} on this phone':
+      'ఈ ఫోన్‌లో {language} నుండి అనువదించారు',
+  'Try it free for {length}':
+      '{length} ఉచితంగా వాడి చూడండి',
+  'Unlock':
+      'అన్‌లాక్',
+  'Update payment method':
+      'పేమెంట్ పద్ధతి మార్చండి',
+  'Versions — {name}':
+      'వెర్షన్‌లు — {name}',
+  'Weekly':
+      'వారానికి',
+  'Welcome to FieldOS':
+      'FieldOS కి స్వాగతం',
+  'Welcome, {name}':
+      'స్వాగతం, {name}',
+  'Which day is this report for?':
+      'ఈ రిపోర్ట్ ఏ రోజుది?',
+  'Works out to {price} a month':
+      'నెలకు {price} అవుతుంది',
+  'Yearly':
+      'సంవత్సరానికి',
+  'You are the owner, so your own role stays the same.':
+      'మీరు ఓనర్, కాబట్టి మీ పాత్ర అలాగే ఉంటుంది.',
+  'Your cloud sign-in has ended. Sign in again from Team & sync.':
+      'మీ క్లౌడ్ సైన్ ఇన్ ముగిసింది. టీమ్ & సింక్ నుండి మళ్ళీ సైన్ ఇన్ అవ్వండి.',
+  'Your plan':
+      'మీ ప్లాన్',
+  'Your role in this company does not allow that. Ask the owner.':
+      'ఈ కంపెనీలో మీ పాత్రకు దీనికి అనుమతి లేదు. ఓనర్‌ను అడగండి.',
+  'Your subscription is on this phone.':
+      'మీ సబ్‌స్క్రిప్షన్ ఈ ఫోన్‌లో ఉంది.',
+  'and {n} more':
+      'ఇంకా {n}',
+  'every 3 months':
+      'ప్రతి 3 నెలలకు',
+  'every 6 months':
+      'ప్రతి 6 నెలలకు',
+  'every month':
+      'ప్రతి నెల',
+  'every week':
+      'ప్రతి వారం',
+  'every year':
+      'ప్రతి సంవత్సరం',
+  'the original':
+      'అసలు భాష',
+  '{amount} payable':
+      '{amount} చెల్లించాలి',
+  '{length} free':
+      '{length} ఉచితం',
+  '{length} free, then {price}. {store} charges you when the trial ends unless you cancel at least 24 hours before. It renews {renews} until you cancel in {cancelIn}.':
+      '{length} ఉచితం, తర్వాత {price}. కనీసం 24 గంటల ముందు రద్దు చేయకపోతే ట్రయల్ ముగియగానే {store} డబ్బు తీసుకుంటుంది. మీరు {cancelIn} లో రద్దు చేసే వరకు {renews} పునరుద్ధరించబడుతుంది.',
+  '{name} placed here, with a 100 m attendance geofence.':
+      '{name} ఇక్కడ పెట్టారు, 100 మీ. హాజరు ప్రాంతంతో.',
+  '{n} changes could not be sent after several tries.':
+      'చాలా ప్రయత్నాల తర్వాత కూడా {n} మార్పులు పంపలేకపోయాం.',
+  '{n} projects without a site location':
+      '{n} ప్రాజెక్టులకు సైట్ లొకేషన్ లేదు',
+  '{price} a month':
+      'నెలకు {price}',
+  '{price} a week':
+      'వారానికి {price}',
+  '{price} a year':
+      'సంవత్సరానికి {price}',
+  '{price} every 3 months':
+      'ప్రతి 3 నెలలకు {price}',
+  '{price} every 6 months':
+      'ప్రతి 6 నెలలకు {price}',
+  '{price}, charged by {store} today. It renews {renews} until you cancel in {cancelIn}, at least 24 hours before the next payment.':
+      '{price}, ఈ రోజు {store} తీసుకుంటుంది. తదుపరి చెల్లింపుకు కనీసం 24 గంటల ముందు {cancelIn} లో రద్దు చేసే వరకు {renews} పునరుద్ధరించబడుతుంది.',
 };

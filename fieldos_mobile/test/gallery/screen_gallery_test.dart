@@ -20,6 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase/supabase.dart';
 
+import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -69,7 +70,17 @@ Future<void> _loadFonts() async {
       File(Platform.resolvedExecutable).parent.parent.parent.parent.parent.parent.path;
   await load('MaterialIcons', ['$flutterRoot/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf']);
   await load('Roboto', ['$flutterRoot/bin/cache/artifacts/material_fonts/Roboto-Regular.ttf']);
+  // Phones bring their own Indian-script fonts; the test machine doesn't.
+  // Point INDIC_FONTS at a folder of Noto Sans .ttf files to render those.
+  final indic = Platform.environment['INDIC_FONTS'];
+  if (indic != null) {
+    for (final f in Brand.fontFallback) {
+      final file = File('$indic/$f.ttf');
+      if (file.existsSync()) await load(f, [file.path]);
+    }
+  }
 }
+
 
 /// Draws Android's translucent 3-button bar (back, home, recents) over the
 /// bottom of [shot], as a phone with button navigation shows it.
@@ -217,13 +228,33 @@ void main() {
     for (final i in List.generate(11, (i) => i))
       '6${i.toString().padLeft(2, '0')}_tour': (t, c, db, p) => shoot(t, c, '6${i.toString().padLeft(2, '0')}_tour',
           AppTourScreen(companyId: p.companyId, project: p, initialStep: i)),
+    // The everyday screens in each Indian language, to catch words that
+    // overflow or fall back to English.
+    for (final lang in [AppLanguage.hi, AppLanguage.te, AppLanguage.ta, AppLanguage.kn, AppLanguage.mr]) ...{
+      '70_home_${lang.code}': (t, c, db, p) => shoot(t, c, '70_home_${lang.code}', const HomeScreen(), lang: lang),
+      '71_tasks_${lang.code}': (t, c, db, p) =>
+          shoot(t, c, '71_tasks_${lang.code}', ProjectDetailScreen(project: p), lang: lang),
+      '72_labour_${lang.code}': (t, c, db, p) =>
+          shoot(t, c, '72_labour_${lang.code}', ProjectDetailScreen(project: p, initialTab: 5), lang: lang),
+      '73_money_${lang.code}': (t, c, db, p) =>
+          shoot(t, c, '73_money_${lang.code}', ProjectDetailScreen(project: p, initialTab: 6), lang: lang),
+      '74_tour_${lang.code}': (t, c, db, p) => shoot(t, c, '74_tour_${lang.code}',
+          AppTourScreen(companyId: p.companyId, project: p, initialStep: 1), lang: lang),
+    },
   };
 
   for (final entry in shots.entries) {
     testWidgets('render ${entry.key}', (tester) async {
       _withInvite = entry.key.contains('invite');
-      final (container, db, project) = await sampleCompany(tester);
-      await entry.value(tester, container, db, project);
+      // Real soft shadows, as on a phone. Tests draw them as solid black
+      // outlines by default, which made every button look heavy-rimmed.
+      debugDisableShadows = false;
+      try {
+        final (container, db, project) = await sampleCompany(tester);
+        await entry.value(tester, container, db, project);
+      } finally {
+        debugDisableShadows = true;
+      }
     }, skip: !_render || (_only != null && !entry.key.contains(_only!)));
   }
 }

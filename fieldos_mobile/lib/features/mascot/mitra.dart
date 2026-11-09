@@ -11,6 +11,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:fieldos_mobile/core/brand.dart';
+import 'package:fieldos_mobile/services/read_aloud.dart';
 
 /// Mitra's moods, in the same order as the Rive scene's `mood` number.
 enum MitraMood {
@@ -49,12 +50,15 @@ class Mitra extends StatelessWidget {
   Widget build(BuildContext context) {
     final calm = still || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
     final asset = calm ? stillAsset(mood) : animatedAsset(mood);
-    return ExcludeSemantics(
+    // Its own layer: the animated frames repaint only Mitra, never the
+    // list or card around it, so scrolling stays smooth.
+    return RepaintBoundary(
+      child: ExcludeSemantics(
       child: SizedBox.square(
         dimension: size,
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 220),
-          switchInCurve: Curves.easeOutBack,
+          switchInCurve: Curves.easeOutCubic,
           transitionBuilder: (child, a) => FadeTransition(
             opacity: a,
             child: ScaleTransition(scale: Tween(begin: 0.92, end: 1.0).animate(a), child: child),
@@ -71,6 +75,7 @@ class Mitra extends StatelessWidget {
             errorBuilder: (_, _, _) => Center(child: BrandMark(size: size * 0.7)),
           ),
         ),
+      ),
       ),
     );
   }
@@ -100,7 +105,11 @@ class MitraSays extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Mitra(mood: mood, size: size),
+        // Tap Mitra to hear the words, for anyone who would rather listen.
+        GestureDetector(
+          onTap: () => ReadAloud.toggle([title, ?message].join('. ')),
+          child: Mitra(mood: mood, size: size),
+        ),
         Expanded(
           child: CustomPaint(
             painter: _BubbleTail(color: scheme.surfaceContainerHigh),
@@ -174,7 +183,10 @@ class MitraEmpty extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Mitra(mood: mood, size: c.maxHeight.isFinite && c.maxHeight < 260 ? 72 : 112),
+                    GestureDetector(
+                      onTap: () => ReadAloud.toggle([text, ?hint].join('. ')),
+                      child: Mitra(mood: mood, size: c.maxHeight.isFinite && c.maxHeight < 260 ? 72 : 112),
+                    ),
                     const SizedBox(height: 8),
                     Text(text, textAlign: TextAlign.center, style: theme.textTheme.titleSmall),
                     if (hint != null) ...[

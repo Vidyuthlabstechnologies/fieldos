@@ -112,7 +112,7 @@ void main() {
       expect(find.text('Lake View'), findsOneWidget);
       expect(find.text('Given to me'), findsNothing);
       expect(find.textContaining('Turn on Team & sync'), findsOneWidget);
-      expect(find.text('DUE IN THE NEXT 7 DAYS (1)'), findsOneWidget);
+      expect(find.text('Due in the next 7 days (1)'), findsOneWidget);
     });
 
     testWidgets('with a team, it starts on mine and Everyone shows who has the rest', (tester) async {

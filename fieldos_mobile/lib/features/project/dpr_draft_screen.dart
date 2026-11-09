@@ -157,10 +157,12 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
         final ok = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: Text('Download ${lang!.englishName} translation?'),
+            title: Text(trf('Download {language} translation?', {'language': _langName(lang!)})),
             content: Text(
-              'This is a one-time download of about 30 MB. After that, ${lang.englishName} reports translate to '
-              'English on this phone, with no internet and no cost.',
+              trf(
+                  'This is a one-time download of about 30 MB. After that, {language} reports translate to '
+                  'English on this phone, with no internet and no cost.',
+                  {'language': _langName(lang)}),
             ),
             actions: [
               TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Not now'))),
@@ -201,7 +203,7 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
       initialDate: _date,
       firstDate: now.subtract(const Duration(days: 60)),
       lastDate: now,
-      helpText: 'Which day is this report for?',
+      helpText: tr('Which day is this report for?'),
     );
     if (picked != null) setState(() => _date = DateTime(picked.year, picked.month, picked.day, now.hour, now.minute));
   }
@@ -278,8 +280,9 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                   Expanded(
                     child: Text(
                       widget.viaSarvam
-                          ? 'Heard in ${heard.englishName} by Sarvam. Check the words before saving.'
-                          : 'Heard in ${heard.englishName} on this phone. Check the words before saving.',
+                          ? trf('Heard in {language} by Sarvam. Check the words before saving.', {'language': _langName(heard)})
+                          : trf('Heard in {language} on this phone. Check the words before saving.',
+                              {'language': _langName(heard)}),
                       style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     ),
                   ),
@@ -326,7 +329,7 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                   ] else if (_original != null) ...[
                     const Icon(Icons.check_circle, size: 18, color: Brand.ok),
                     const SizedBox(width: 6),
-                    Expanded(child: Text('Translated from ${lang?.englishName ?? 'the original'} on this phone')),
+                    Expanded(child: Text(trf('Translated from {language} on this phone', {'language': lang == null ? tr('the original') : _langName(lang)}))),
                     TextButton(onPressed: _undoTranslation, child: Text(tr('Show original'))),
                   ] else
                     OutlinedButton.icon(
@@ -556,7 +559,7 @@ class _FromSiteRecords extends ConsumerWidget {
         if (last != null)
           ActionChip(
             avatar: const Icon(Icons.content_copy_outlined, size: 18),
-            label: Text('Copy last report (${fmtDay(last.entryDate)})'),
+            label: Text(trf('Copy last report ({day})', {'day': fmtDay(last.entryDate)})),
             onPressed: () => onUseLast(last.workSummary),
           ),
         if (workers > 0)
@@ -575,3 +578,7 @@ class _FromSiteRecords extends ConsumerWidget {
     );
   }
 }
+
+/// A language's name as the reader knows it: in English for the English
+/// app, in its own script otherwise.
+String _langName(SpeechLanguage l) => currentLanguage == AppLanguage.en ? l.englishName : l.name;

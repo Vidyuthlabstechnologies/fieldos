@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/assistant/assistant_screen.dart';
 import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
+import 'package:fieldos_mobile/features/home/quick_actions.dart';
 import 'package:fieldos_mobile/features/map/site_map_screen.dart';
 import 'package:fieldos_mobile/features/project/new_project_sheet.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
@@ -83,6 +84,9 @@ class HomeScreen extends ConsumerWidget {
           ),
           Consumer(builder: (context, ref, _) {
             final count = ref.watch(pendingApprovalsProvider(company.id)).maybeWhen(data: (l) => l.length, orElse: () => 0);
+            // In the bar only while something waits; otherwise it is in the
+            // menu, so the bar stays at search and the dashboard.
+            if (count == 0) return const SizedBox.shrink();
             return IconButton(
               tooltip: count > 0 ? trf('Approvals ({n} waiting)', {'n': count}) : tr('Approvals'),
               icon: Badge.count(count: count, isLabelVisible: count > 0, child: const Icon(Icons.approval_outlined)),
@@ -97,15 +101,14 @@ class HomeScreen extends ConsumerWidget {
               builder: (_) => DashboardScreen(companyId: company.id, companyName: company.name),
             )),
           ),
-          IconButton(
-            icon: const Icon(Icons.groups_outlined),
-            tooltip: tr('Team & sync'),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeamSyncScreen())),
-          ),
           PopupMenuButton<String>(
             tooltip: tr('More'),
             onSelected: (v) {
               switch (v) {
+                case 'team':
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeamSyncScreen()));
+                case 'approvals':
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => ApprovalsScreen(companyId: company.id)));
                 case 'brief':
                   openOwnerBrief(context, companyId: company.id, companyName: company.name);
                 case 'payables':
@@ -131,6 +134,11 @@ class HomeScreen extends ConsumerWidget {
               }
             },
             itemBuilder: (_) => [
+              PopupMenuItem(
+                  value: 'team', child: ListTile(leading: Icon(Icons.groups_outlined), title: Text(tr('Team & sync')))),
+              PopupMenuItem(
+                  value: 'approvals',
+                  child: ListTile(leading: Icon(Icons.approval_outlined), title: Text(tr('Approvals')))),
               PopupMenuItem(
                   value: 'brief',
                   child: ListTile(leading: Icon(Icons.wb_twilight_outlined), title: Text(tr('Site brief')))),
@@ -310,6 +318,8 @@ class _ProjectList extends StatelessWidget {
             ),
           ]),
         ),
+        // The day's four jobs as big picture buttons, one tap each.
+        QuickActions(projects: projects),
         TodayBriefCard(companyId: company.id, companyName: company.name),
         const SectionHeader('Projects'),
         for (final p in sorted) ...[
@@ -352,8 +362,8 @@ class _ProjectCard extends ConsumerWidget {
               Container(
                 width: 46,
                 height: 46,
-                decoration: BoxDecoration(color: scheme.secondaryContainer, borderRadius: BorderRadius.circular(12)),
-                child: Icon(Icons.apartment_rounded, color: scheme.onSecondaryContainer),
+                decoration: BoxDecoration(color: scheme.surfaceContainer, borderRadius: BorderRadius.circular(12)),
+                child: Icon(Icons.apartment_rounded, color: scheme.primary.withValues(alpha: 0.85)),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -367,14 +377,21 @@ class _ProjectCard extends ConsumerWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
+                    // Only what differs from normal: a running site needs no
+                    // "Active" badge, so the line shows any other stage, late
+                    // work, and whether the site is on the map.
+                    if (project.status != 'active' || lateTasks > 0 || onMap) ...[
                     const SizedBox(height: 8),
                     Wrap(
-                      spacing: 8,
+                      spacing: 12,
                       runSpacing: 4,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        StatusPill(projectStatusLabel(project.status), tone: projectStatusTone(project.status)),
-                        if (lateTasks > 0) StatusPill(lateTasks == 1 ? tr('1 task late') : trf('{n} tasks late', {'n': lateTasks}), tone: PillTone.danger),
+                        if (project.status != 'active')
+                          StatusPill(projectStatusLabel(project.status), tone: projectStatusTone(project.status)),
+                        if (lateTasks > 0)
+                          _Note(lateTasks == 1 ? tr('1 task late') : trf('{n} tasks late', {'n': lateTasks}),
+                              color: toneColor(context, PillTone.danger)),
                         if (onMap)
                           Row(mainAxisSize: MainAxisSize.min, children: [
                             Icon(Icons.place_outlined, size: 15, color: scheme.onSurfaceVariant),
@@ -384,6 +401,7 @@ class _ProjectCard extends ConsumerWidget {
                           ]),
                       ],
                     ),
+                    ],
                   ],
                 ),
               ),
@@ -394,4 +412,19 @@ class _ProjectCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// A small dot and a few words: a status worth noticing, without a
+/// coloured block around it.
+class _Note extends StatelessWidget {
+  const _Note(this.text, {required this.color});
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
+        Container(width: 6, height: 6, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 6),
+        Text(text, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.w600)),
+      ]);
 }

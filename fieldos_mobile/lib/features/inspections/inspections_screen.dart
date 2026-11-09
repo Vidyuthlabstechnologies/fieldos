@@ -143,9 +143,9 @@ class _InspectionTile extends ConsumerWidget {
           [
             _typeLabel(inspection.inspectionType),
             if (inspection.completedDate != null)
-              'done ${fmtDate(inspection.completedDate!, short: true)}'
+              trf('done {date}', {'date': fmtDate(inspection.completedDate!, short: true)})
             else if (inspection.scheduledDate != null)
-              'due ${fmtDate(inspection.scheduledDate!, short: true)}',
+              trf('due {date}', {'date': fmtDate(inspection.scheduledDate!, short: true)}),
           ].join(' · '),
         ),
         trailing: Row(

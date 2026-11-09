@@ -372,7 +372,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Text('Made in Hyderabad by ${Brand.companyName}',
+          Text(trf('Made in Hyderabad by {company}', {'company': Brand.companyName}),
               textAlign: TextAlign.center, style: theme.textTheme.bodySmall?.copyWith(color: muted.color)),
         ],
       ),
@@ -437,7 +437,7 @@ class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
           onSubmitted: (_) => _busy ? null : _save(),
           decoration: InputDecoration(
             labelText: tr('New password'),
-            helperText: 'At least ${AuthService.minPasswordLength} characters',
+            helperText: trf('At least {n} characters', {'n': AuthService.minPasswordLength}),
           ),
         ),
         if (_error != null) ...[const SizedBox(height: 12), FormMessage(_error!)],
