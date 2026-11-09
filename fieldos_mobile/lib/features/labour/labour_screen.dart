@@ -288,12 +288,17 @@ class _LabourViewState extends ConsumerState<LabourView> {
     if (picked == null || !context.mounted) return;
     final outAt = DateTime(inAt.year, inAt.month, inAt.day, picked.hour, picked.minute);
     if (!outAt.isAfter(inAt)) {
-      showSnack(context, 'Pick a time after they punched in (${fmtTime(inAt)}).', error: true);
+      showSnack(context, trf('Pick a time after they punched in ({time}).', {'time': fmtTime(inAt)}), error: true);
       return;
     }
     await ref.read(appDatabaseProvider).attendanceDao.punchOut(a.id, at: outAt);
     ref.invalidate(attendanceProvider(widget.projectId));
-    if (context.mounted) showSnack(context, '${a.workerName}: out at ${fmtTime(outAt)} on ${fmtDate(inAt, short: true)}');
+    if (context.mounted) {
+      showSnack(
+          context,
+          trf('{name}: out at {time} on {date}',
+              {'name': a.workerName, 'time': fmtTime(outAt), 'date': fmtDate(inAt, short: true)}));
+    }
   }
 
   Future<void> _punchOut(BuildContext context, WidgetRef ref, LabourAttendanceData a) async {
@@ -355,9 +360,13 @@ class _GeofenceCard extends ConsumerWidget {
                 error: (e, st) => Text(friendlyError(e, st)),
               ),
             ),
-            TextButton(
-              child: Text(set ? tr('Change') : tr('Set site area')),
-              onPressed: () => _configure(context, ref),
+            ConstrainedBox(
+              // A long label (Tamil) wraps rather than pushing the row off a small phone.
+              constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.36),
+              child: TextButton(
+                child: Text(set ? tr('Change') : tr('Set site area'), textAlign: TextAlign.center),
+                onPressed: () => _configure(context, ref),
+              ),
             ),
           ],
         ),

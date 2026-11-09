@@ -114,7 +114,7 @@ class _PeriodReportScreenState extends ConsumerState<PeriodReportScreen> {
               if (r == null)
                 const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator()))
               else ...[
-                Text('${widget.project.name} · ${periodRange(r.period)}', style: theme.textTheme.titleMedium),
+                Text('${widget.project.name} · ${periodRangeLabel(r.period)}', style: theme.textTheme.titleMedium),
                 const SizedBox(height: 12),
                 if (r.isEmpty)
                   EmptyState(

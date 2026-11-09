@@ -32,7 +32,7 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
     final inspectionsList = ref.watch(inspectionsProvider(widget.projectId));
     return Column(
       children: [
-        _sectionHeader(context, 'Inspections', () => _addInspection(context, ref)),
+        _sectionHeader(context, tr('Inspections'), () => _addInspection(context, ref)),
         Expanded(
           child: inspectionsList.when(
             data: (rows) => rows.isEmpty
@@ -71,7 +71,7 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
             DropdownButtonFormField<String>(
               initialValue: 'safety',
               decoration: InputDecoration(labelText: tr('Type')),
-              items: [for (final t in _inspectionTypes) DropdownMenuItem(value: t, child: Text(_typeLabel(t)))],
+              items: [for (final t in inspectionTypes) DropdownMenuItem(value: t, child: Text(_typeLabel(t)))],
               onChanged: (v) => inspectionType.text = v ?? 'safety',
             ),
             TextField(
@@ -279,7 +279,7 @@ class _InspectionTile extends ConsumerWidget {
         content: DropdownButtonFormField<String>(
           initialValue: result,
           decoration: InputDecoration(labelText: tr('Overall result')),
-          items: [for (final e in _results.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
+          items: [for (final e in _results.entries) DropdownMenuItem(value: e.key, child: Text(tr(e.value)))],
           onChanged: (v) => result = v ?? 'pass',
         ),
         actions: [
@@ -295,12 +295,12 @@ class _InspectionTile extends ConsumerWidget {
   }
 }
 
-const _inspectionTypes = ['safety', 'quality', 'structural', 'mep', 'environmental', 'final', 'other'];
+const inspectionTypes = ['safety', 'quality', 'structural', 'mep', 'environmental', 'final', 'other'];
 
 String _typeLabel(String type) => switch (type) {
   'mep' => tr('MEP'),
   '' => tr('Inspection'),
-  _ => '${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}',
+  _ => tr('${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}'),
 };
 
 /// An inspection's overall result, in words.
@@ -319,7 +319,7 @@ Widget _statusBadge(Inspection i) => switch (i.status) {
 };
 
 /// A checklist item's status, in words.
-const _itemStatuses = {'pending': 'Not checked', 'pass': 'Pass', 'fail': 'Fail', 'na': 'Not needed'};
+const inspectionItemStatuses = {'pending': 'Not checked', 'pass': 'Pass', 'fail': 'Fail', 'na': 'Not needed'};
 
 const _photoPrefix = 'Photo: ';
 
@@ -350,7 +350,7 @@ class _ChecklistItemTile extends StatelessWidget {
     final (:photoPath, :text) = splitInspectionNotes(item.notes);
     final photo = photoPath == null ? null : File(photoPath);
     final onThisPhone = photo != null && photo.existsSync();
-    final details = [if (photoPath != null && !onThisPhone) 'Photo is on the phone that took it', ?text];
+    final details = [if (photoPath != null && !onThisPhone) tr('Photo is on the phone that took it'), ?text];
     return ListTile(
       contentPadding: EdgeInsets.zero,
       dense: true,
@@ -358,9 +358,9 @@ class _ChecklistItemTile extends StatelessWidget {
       title: Text(item.itemDescription),
       subtitle: details.isEmpty ? null : Text(details.join('\n')),
       trailing: DropdownButton<String>(
-        value: _itemStatuses.containsKey(item.status) ? item.status : null,
+        value: inspectionItemStatuses.containsKey(item.status) ? item.status : null,
         hint: Text(item.status),
-        items: [for (final e in _itemStatuses.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
+        items: [for (final e in inspectionItemStatuses.entries) DropdownMenuItem(value: e.key, child: Text(tr(e.value)))],
         onChanged: (s) {
           if (s != null && s != item.status) onChanged(s);
         },

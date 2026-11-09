@@ -573,7 +573,7 @@ class _DprFacts extends StatelessWidget {
       spacing: 6,
       runSpacing: 6,
       children: [
-        StatusPill(dpr.manpowerCount > 0 ? trf('{n} people', {'n': dpr.manpowerCount}) : 'Headcount not given'),
+        StatusPill(dpr.manpowerCount > 0 ? trf('{n} people', {'n': dpr.manpowerCount}) : tr('Headcount not given')),
         if (dpr.weather != null && dpr.weather!.isNotEmpty) StatusPill(dpr.weather!),
         if (issueCount > 0) StatusPill(issueCount == 1 ? tr('1 issue') : trf('{n} issues', {'n': issueCount}), tone: PillTone.warn),
       ],
@@ -703,12 +703,16 @@ class _IssuesTab extends ConsumerWidget {
                       ),
                       trailing: resolved
                           ? const Icon(Icons.check_circle, color: Brand.ok)
-                          : TextButton(
-                              onPressed: () async {
-                                await ref.read(appDatabaseProvider).issueDao.resolve(iss.id);
-                                ref.invalidate(issuesProvider(project.id));
-                              },
-                              child: Text(tr('Mark fixed')),
+                          // A long "Mark fixed" (Tamil) wraps instead of taking the whole tile.
+                          : ConstrainedBox(
+                              constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.3),
+                              child: TextButton(
+                                onPressed: () async {
+                                  await ref.read(appDatabaseProvider).issueDao.resolve(iss.id);
+                                  ref.invalidate(issuesProvider(project.id));
+                                },
+                                child: Text(tr('Mark fixed'), textAlign: TextAlign.center),
+                              ),
                             ),
                     ),
                   );

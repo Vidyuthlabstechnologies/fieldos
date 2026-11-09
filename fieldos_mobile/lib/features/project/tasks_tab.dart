@@ -171,8 +171,7 @@ class _ProgressHeader extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Text(trf('{n}% complete', {'n': pct}), style: theme.textTheme.titleMedium),
-            const Spacer(),
+            Expanded(child: Text(trf('{n}% complete', {'n': pct}), style: theme.textTheme.titleMedium)),
             if (lateCount > 0)
               Text(trf('{n} late', {'n': lateCount}),
                   style: theme.textTheme.bodyMedium

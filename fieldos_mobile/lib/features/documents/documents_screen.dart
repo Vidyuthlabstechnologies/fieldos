@@ -35,7 +35,7 @@ class _DocumentsViewState extends ConsumerState<DocumentsView> {
     final documentsList = ref.watch(documentsProvider(widget.projectId));
     return Column(
       children: [
-        _sectionHeader(context, 'Documents', () => _pickAndUpload(context, ref)),
+        _sectionHeader(context, tr('Documents'), () => _pickAndUpload(context, ref)),
         Expanded(
           child: documentsList.when(
             data: (rows) => rows.isEmpty

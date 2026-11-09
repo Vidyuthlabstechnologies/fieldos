@@ -1537,4 +1537,327 @@ const Map<String, String> stringsTe = {
       'అన్నీ తొలగించు',
   'No earlier chats yet. Your chats are kept on this phone.':
       'ఇంకా పాత సంభాషణలు లేవు. మీ సంభాషణలు ఈ ఫోన్‌లోనే ఉంటాయి.',
+  // 1.7.1 bug-hunt: labels that used to stay in English.
+  '1 open issue':
+      '1 తెరిచి ఉన్న సమస్య',
+  '{n} open issues':
+      '{n} తెరిచి ఉన్న సమస్యలు',
+  '1 worker punched in':
+      '1 కార్మికుడు పంచ్-ఇన్ అయ్యారు',
+  '{n} workers punched in':
+      '{n} మంది కార్మికులు పంచ్-ఇన్ అయ్యారు',
+  'A material receipt is waiting for a decision':
+      'మెటీరియల్ రసీదు నిర్ణయం కోసం వేచి ఉంది',
+  'A purchase order is waiting for a decision':
+      'ఒక కొనుగోలు ఆర్డర్ (PO) నిర్ణయం కోసం వేచి ఉంది',
+  'A request is waiting for a decision':
+      'ఒక అభ్యర్థన నిర్ణయం కోసం వేచి ఉంది',
+  'A site over budget is waiting for a decision':
+      'బడ్జెట్ దాటిన సైట్ నిర్ణయం కోసం వేచి ఉంది',
+  'A new code is on its way to {email}. Codes stop working after an hour.':
+      '{email}కి కొత్త కోడ్ వస్తోంది. కోడ్‌లు ఒక గంట తర్వాత పనిచేయవు.',
+  'A project':
+      'ఒక ప్రాజెక్ట్',
+  'A purchase is already in progress. Wait for it to finish.':
+      'ఒక కొనుగోలు ఇప్పటికే జరుగుతోంది. అది పూర్తయ్యే వరకు ఆగండి.',
+  'Access codes are 10 or more letters and numbers. Type it exactly as you got it.':
+      'యాక్సెస్ కోడ్‌లో 10 లేదా అంతకంటే ఎక్కువ అక్షరాలు, అంకెలు ఉంటాయి. మీకు వచ్చినట్లే టైప్ చేయండి.',
+  'Account created for {email}.':
+      '{email} కోసం ఖాతా సృష్టించబడింది.',
+  'Approval requested':
+      'ఆమోదం కోరబడింది',
+  'Choose a new password of at least 6 characters.':
+      'కనీసం 6 అక్షరాల కొత్త పాస్‌వర్డ్ ఎంచుకోండి.',
+  'Companies where you are the only member are deleted from the cloud with all their records. Companies with other members keep their records, and ownership passes to another member.':
+      'మీరు ఒక్కరే సభ్యులుగా ఉన్న కంపెనీలు వాటి అన్ని రికార్డులతో సహా క్లౌడ్ నుండి తొలగించబడతాయి. ఇతర సభ్యులు ఉన్న కంపెనీల రికార్డులు ఉంటాయి, యాజమాన్యం మరో సభ్యునికి వెళ్తుంది.',
+  'Could not sign in. Try again.':
+      'సైన్ ఇన్ కాలేదు. మళ్ళీ ప్రయత్నించండి.',
+  'Data on this phone is not deleted. Uninstall the app to remove it.':
+      'ఈ ఫోన్‌లోని డేటా తొలగించబడదు. దాన్ని తీసేయాలంటే యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయండి.',
+  'Edit item':
+      'ఐటెమ్ మార్చండి',
+  'Enter the join code from your company owner.':
+      'మీ కంపెనీ యజమాని ఇచ్చిన జాయిన్ కోడ్ ఇవ్వండి.',
+  'Enter your email and a password of at least 6 characters.':
+      'మీ ఈమెయిల్, కనీసం 6 అక్షరాల పాస్‌వర్డ్ ఇవ్వండి.',
+  'Free access from the FieldOS team':
+      'FieldOS టీమ్ నుండి ఉచిత యాక్సెస్',
+  'Free access from the FieldOS team until {date}':
+      '{date} వరకు FieldOS టీమ్ నుండి ఉచిత యాక్సెస్',
+  'Free trial (will not renew)':
+      'ఉచిత ట్రయల్ (రిన్యూ కాదు)',
+  'Free trial until {date} (will not renew)':
+      '{date} వరకు ఉచిత ట్రయల్ (రిన్యూ కాదు)',
+  'Free trial until {date}, then paid':
+      '{date} వరకు ఉచిత ట్రయల్, తర్వాత చెల్లింపు',
+  'Free trial, then paid':
+      'ఉచిత ట్రయల్, తర్వాత చెల్లింపు',
+  'Get the {language} speech pack to work offline':
+      'ఇంటర్నెట్ లేకుండా పనిచేయడానికి {language} స్పీచ్ ప్యాక్ తీసుకోండి',
+  'Give the project a name, such as the site or building.':
+      'ప్రాజెక్ట్‌కు పేరు ఇవ్వండి, సైట్ లేదా బిల్డింగ్ పేరు లాగా.',
+  'Headcount not given':
+      'హెడ్‌కౌంట్ ఇవ్వలేదు',
+  'If {email} has an account, a code is on its way. Type it below with your new password.':
+      '{email}కి ఖాతా ఉంటే, కోడ్ వస్తోంది. దాన్ని కింద మీ కొత్త పాస్‌వర్డ్‌తో టైప్ చేయండి.',
+  'Items':
+      'ఐటెమ్‌లు',
+  'Join company':
+      'కంపెనీలో చేరండి',
+  'Joined {company}. Projects will appear after the first sync.':
+      '{company}లో చేరారు. మొదటి సింక్ తర్వాత ప్రాజెక్ట్‌లు కనిపిస్తాయి.',
+  'Keep the names under 200 characters.':
+      'పేర్లు 200 అక్షరాల లోపు ఉంచండి.',
+  'Listening stopped':
+      'వినడం ఆగిపోయింది',
+  'Listening · {time}':
+      'వింటోంది · {time}',
+  'Location is blocked for FieldOS. Allow it in Android settings.':
+      'FieldOSకి లొకేషన్ బ్లాక్ చేయబడింది. Android సెట్టింగ్‌లలో అనుమతి ఇవ్వండి.',
+  'Location is turned off. Turn on GPS and try again.':
+      'లొకేషన్ ఆఫ్‌లో ఉంది. GPS ఆన్ చేసి మళ్ళీ ప్రయత్నించండి.',
+  'Location permission was not given.':
+      'లొకేషన్ అనుమతి ఇవ్వలేదు.',
+  'Mark as not paid':
+      'చెల్లించలేదని గుర్తించండి',
+  'Mark as paid':
+      'చెల్లించినట్లు గుర్తించండి',
+  'Microphone is off for FieldOS':
+      'FieldOSకి మైక్రోఫోన్ ఆఫ్‌లో ఉంది',
+  'New issue (critical)':
+      'కొత్త సమస్య (అత్యవసరం)',
+  'New issue (high)':
+      'కొత్త సమస్య (ఎక్కువ)',
+  'New issue (low)':
+      'కొత్త సమస్య (తక్కువ)',
+  'New issue (medium)':
+      'కొత్త సమస్య (మధ్యస్థం)',
+  'New join code created. The old code no longer works.':
+      'కొత్త జాయిన్ కోడ్ వచ్చింది. పాత కోడ్ ఇక పనిచేయదు.',
+  'New password saved. Signed in as {email}.':
+      'కొత్త పాస్‌వర్డ్ సేవ్ అయింది. {email}గా సైన్ ఇన్ అయ్యారు.',
+  'No active subscription':
+      'యాక్టివ్ సబ్‌స్క్రిప్షన్ లేదు',
+  'No internet connection. Connect and try again.':
+      'ఇంటర్నెట్ లేదు. కనెక్ట్ అయి మళ్ళీ ప్రయత్నించండి.',
+  'Not set':
+      'సెట్ చేయలేదు',
+  'One project for each site. Its daily reports, labour, materials, money and photos stay together.':
+      'ప్రతి సైట్‌కు ఒక ప్రాజెక్ట్. దాని రోజువారీ రిపోర్ట్‌లు, కూలీలు, మెటీరియల్, డబ్బు, ఫోటోలు అన్నీ ఒకే చోట ఉంటాయి.',
+  'Payment problem: update your payment method in the store':
+      'చెల్లింపు సమస్య: స్టోర్‌లో మీ చెల్లింపు పద్ధతిని అప్‌డేట్ చేయండి',
+  'Payment problem: update your payment method in the store before {date}':
+      'చెల్లింపు సమస్య: {date} లోపు స్టోర్‌లో మీ చెల్లింపు పద్ధతిని అప్‌డేట్ చేయండి',
+  'Photo is on the phone that took it':
+      'ఫోటో తీసిన ఫోన్‌లోనే ఉంది',
+  'Pick a time after they punched in ({time}).':
+      'పంచ్-ఇన్ ({time}) తర్వాతి సమయం ఎంచుకోండి.',
+  'Put company on the cloud':
+      'కంపెనీని క్లౌడ్‌లో పెట్టండి',
+  'Quantity this bill':
+      'ఈ బిల్లు పరిమాణం',
+  'Recording · {time} · tap to stop and send':
+      'రికార్డింగ్ · {time} · ఆపి పంపడానికి నొక్కండి',
+  'Sign in':
+      'సైన్ ఇన్',
+  'Signed in as {email}.':
+      '{email}గా సైన్ ఇన్ అయ్యారు.',
+  'Signed out. This phone keeps working offline.':
+      'సైన్ అవుట్ అయ్యారు. ఈ ఫోన్ ఇంటర్నెట్ లేకుండా పనిచేస్తూనే ఉంటుంది.',
+  'Subscribed':
+      'సబ్‌స్క్రైబ్ చేశారు',
+  'Subscribed until {date} (cancelled)':
+      '{date} వరకు సబ్‌స్క్రిప్షన్ (రద్దు చేశారు)',
+  'Subscribed, renews on {date}':
+      'సబ్‌స్క్రైబ్ చేశారు, {date}న రిన్యూ అవుతుంది',
+  'Sync now':
+      'ఇప్పుడే సింక్ చేయండి',
+  'Synced. 1 change sent, latest data received.':
+      'సింక్ అయింది. 1 మార్పు పంపబడింది, తాజా డేటా వచ్చింది.',
+  'Synced. {n} changes sent, latest data received.':
+      'సింక్ అయింది. {n} మార్పులు పంపబడ్డాయి, తాజా డేటా వచ్చింది.',
+  'Tap the mic and speak':
+      'మైక్ నొక్కి మాట్లాడండి',
+  'Tap to start recording':
+      'రికార్డింగ్ మొదలుపెట్టడానికి నొక్కండి',
+  'That code is not valid or has ended. Check it and try again, or ask whoever gave it to you.':
+      'ఈ కోడ్ సరైనది కాదు లేదా గడువు ముగిసింది. చెక్ చేసి మళ్ళీ ప్రయత్నించండి, లేదా ఇచ్చిన వారిని అడగండి.',
+  'That plan is no longer on sale. Please pick again.':
+      'ఈ ప్లాన్ ఇప్పుడు అమ్మకంలో లేదు. మళ్ళీ ఎంచుకోండి.',
+  'The FieldOS plans are not on sale in {store} yet. Please try again later, or send a bug report from the menu.':
+      'FieldOS ప్లాన్‌లు ఇంకా {store}లో అమ్మకంలో లేవు. తర్వాత మళ్ళీ ప్రయత్నించండి, లేదా మెనూ నుండి బగ్ రిపోర్ట్ పంపండి.',
+  'The owner or a project manager decides these. You can see what is waiting.':
+      'వీటిపై యజమాని లేదా ప్రాజెక్ట్ మేనేజర్ నిర్ణయిస్తారు. ఏవి వేచి ఉన్నాయో మీరు చూడవచ్చు.',
+  'The phone stopped listening. Tap Try again, or type the report.':
+      'ఫోన్ వినడం ఆపేసింది. మళ్ళీ ప్రయత్నించండి నొక్కండి, లేదా రిపోర్ట్ టైప్ చేయండి.',
+  'There is no internet, and the offline speech pack for {language} is not on this phone yet. Connect once, then download it: Google app › Settings › Voice › Offline speech recognition › {englishName}. After that, voice reports work anywhere on site.':
+      'ఇంటర్నెట్ లేదు, {language} ఆఫ్‌లైన్ స్పీచ్ ప్యాక్ ఇంకా ఈ ఫోన్‌లో లేదు. ఒకసారి కనెక్ట్ అయి డౌన్‌లోడ్ చేయండి: Google యాప్ › Settings › Voice › Offline speech recognition › {englishName}. ఆ తర్వాత వాయిస్ రిపోర్ట్‌లు సైట్‌లో ఎక్కడైనా పనిచేస్తాయి.',
+  'This iPhone needs internet to recognise {language} speech. Connect and try again, or type the report.':
+      'ఈ iPhoneకి {language} మాటలు గుర్తించడానికి ఇంటర్నెట్ కావాలి. కనెక్ట్ అయి మళ్ళీ ప్రయత్నించండి, లేదా రిపోర్ట్ టైప్ చేయండి.',
+  'This needs internet for {language}':
+      '{language} కోసం ఇంటర్నెట్ కావాలి',
+  'This permanently deletes {email} from FieldOS cloud.':
+      'ఇది {email}ని FieldOS క్లౌడ్ నుండి శాశ్వతంగా తొలగిస్తుంది.',
+  'This phone can\'t do {language} yet':
+      'ఈ ఫోన్ ఇంకా {language} చేయలేదు',
+  'This phone can\'t turn {language} speech into text itself, so FieldOS will record you and send the recording to Sarvam when you stop. This needs internet.':
+      'ఈ ఫోన్ {language} మాటలను సొంతంగా టెక్స్ట్‌గా మార్చలేదు, కాబట్టి FieldOS మీ మాటలు రికార్డ్ చేసి, మీరు ఆపగానే రికార్డింగ్‌ను Sarvamకి పంపుతుంది. దీనికి ఇంటర్నెట్ కావాలి.',
+  'This phone has no speech recognition':
+      'ఈ ఫోన్‌లో మాట గుర్తింపు లేదు',
+  'This phone is not allowed to make purchases. Check the payment settings or parental controls in {store}.':
+      'ఈ ఫోన్ నుండి కొనుగోళ్లకు అనుమతి లేదు. {store}లో చెల్లింపు సెట్టింగ్‌లు లేదా పేరెంటల్ కంట్రోల్స్ చూడండి.',
+  'This plan is not on sale in your country right now.':
+      'ఈ ప్లాన్ ఇప్పుడు మీ దేశంలో అమ్మకంలో లేదు.',
+  'This {store} account already pays for FieldOS for someone else. Write to us and we will sort it out.':
+      'ఈ {store} ఖాతా ఇప్పటికే మరొకరి కోసం FieldOSకి చెల్లిస్తోంది. మాకు రాయండి, మేము సరిచేస్తాం.',
+  'Turning your recording into text…':
+      'మీ రికార్డింగ్‌ను టెక్స్ట్‌గా మారుస్తోంది…',
+  'Turning your recording into text… {n} of {total}':
+      'మీ రికార్డింగ్‌ను టెక్స్ట్‌గా మారుస్తోంది… {total}లో {n}',
+  'Type the code from the email: it is 6 digits.':
+      'ఈమెయిల్‌లో వచ్చిన కోడ్ టైప్ చేయండి: అది 6 అంకెలు.',
+  'Type the code we emailed to {email}, and the new password for your cloud account.':
+      '{email}కి పంపిన కోడ్, మీ క్లౌడ్ ఖాతా కొత్త పాస్‌వర్డ్ టైప్ చేయండి.',
+  'Type the code we emailed to {email}. It can take a minute to arrive; look in spam too.':
+      '{email}కి పంపిన కోడ్ టైప్ చేయండి. రావడానికి ఒక నిమిషం పట్టవచ్చు; స్పామ్‌లో కూడా చూడండి.',
+  'Type your email above first, then tap "Forgot password?" again.':
+      'ముందు పైన మీ ఈమెయిల్ టైప్ చేసి, తర్వాత "పాస్‌వర్డ్ మర్చిపోయారా?" మళ్ళీ నొక్కండి.',
+  'We sent a code to {email}. Type it below to finish creating your account.':
+      'మేము {email}కి కోడ్ పంపాం. మీ ఖాతా సృష్టించడం పూర్తి చేయడానికి దాన్ని కింద టైప్ చేయండి.',
+  'Work measured this bill':
+      'ఈ బిల్లులో కొలిచిన పని',
+  'Working for someone else\'s company?':
+      'వేరొకరి కంపెనీ కోసం పనిచేస్తున్నారా?',
+  'Your cloud account is deleted. This phone keeps working offline.':
+      'మీ క్లౌడ్ ఖాతా తొలగించబడింది. ఈ ఫోన్ ఇంటర్నెట్ లేకుండా పనిచేస్తూనే ఉంటుంది.',
+  'Your payment is waiting for approval, for example in your UPI app. FieldOS opens by itself once {store} confirms it.':
+      'మీ చెల్లింపు ఆమోదం కోసం వేచి ఉంది, ఉదాహరణకు మీ UPI యాప్‌లో. {store} నిర్ధారించగానే FieldOS తనంతట తానే తెరుచుకుంటుంది.',
+  'about {amount}':
+      'సుమారు {amount}',
+  'never':
+      'ఎప్పుడూ లేదు',
+  'raised on {date}':
+      '{date}న లేవనెత్తారు',
+  'raised today':
+      'ఈరోజు లేవనెత్తారు',
+  'raised yesterday':
+      'నిన్న లేవనెత్తారు',
+  'this account':
+      'ఈ ఖాతా',
+  'your company':
+      'మీ కంపెనీ',
+  '{amount} a day':
+      'రోజుకు {amount}',
+  '{company} is on the cloud. Share the join code with your team.':
+      '{company} క్లౌడ్‌లో ఉంది. మీ టీమ్‌తో జాయిన్ కోడ్ షేర్ చేయండి.',
+  '{day}, marked {mark}':
+      '{day}, {mark} గుర్తించారు',
+  '{day}, {h} h':
+      '{day}, {h} గం',
+  '{day}, {h} h, no punch-out':
+      '{day}, {h} గం, పంచ్-అవుట్ లేదు',
+  '{email} already has an account, and that password is not right for it. Try again, or tap "Forgot password?" to choose a new one.':
+      '{email}కి ఇప్పటికే ఖాతా ఉంది, ఈ పాస్‌వర్డ్ దానికి సరైనది కాదు. మళ్ళీ ప్రయత్నించండి, లేదా కొత్తది ఎంచుకోవడానికి "పాస్‌వర్డ్ మర్చిపోయారా?" నొక్కండి.',
+  '{email} is no longer on the team.':
+      '{email} ఇక టీమ్‌లో లేరు.',
+  '{email} will stop getting this company\'s projects and cannot send anything new. Work they already recorded stays.':
+      '{email}కి ఈ కంపెనీ ప్రాజెక్ట్‌లు రావడం ఆగిపోతుంది, కొత్తగా ఏమీ పంపలేరు. వారు ఇప్పటికే నమోదు చేసిన పని ఉంటుంది.',
+  '{h} h {m} min':
+      '{h} గం {m} ని',
+  '{m} min':
+      '{m} ని',
+  '{m} min {s} s':
+      '{m} ని {s} సె',
+  '{s} s':
+      '{s} సె',
+  '{name} is ready':
+      '{name} సిద్ధంగా ఉంది',
+  '{name}: out at {time} on {date}':
+      '{name}: {date}న {time}కి బయటకు',
+  '{n} new updates from your team':
+      'మీ టీమ్ నుండి {n} కొత్త అప్‌డేట్‌లు',
+  '{sent} sent, {waiting} waiting. They will retry on the next sync.':
+      '{sent} పంపబడ్డాయి, {waiting} వేచి ఉన్నాయి. తర్వాతి సింక్‌లో మళ్ళీ ప్రయత్నిస్తాయి.',
+  '{store} could not complete that. Please try again, or send a bug report from the menu.':
+      '{store} దీన్ని పూర్తి చేయలేకపోయింది. మళ్ళీ ప్రయత్నించండి, లేదా మెనూ నుండి బగ్ రిపోర్ట్ పంపండి.',
+  '{store} had a problem with that. Please try again in a minute.':
+      '{store}కి దీనితో సమస్య వచ్చింది. ఒక నిమిషం తర్వాత మళ్ళీ ప్రయత్నించండి.',
+  '{store} is having a problem right now. Please try again in a minute.':
+      '{store}లో ఇప్పుడు సమస్య ఉంది. ఒక నిమిషం తర్వాత మళ్ళీ ప్రయత్నించండి.',
+  'Speak daily reports in your own language':
+      'మీ భాషలోనే రోజువారీ రిపోర్ట్ చెప్పండి',
+  'Labour, wages and materials in one place':
+      'కూలీలు, వేతనాలు, మెటీరియల్ ఒకే చోట',
+  'Photos, issues and team chat for every site':
+      'ప్రతి సైట్‌కు ఫోటోలు, సమస్యలు, టీమ్ చాట్',
+  'Works offline, syncs when you are back online':
+      'ఇంటర్నెట్ లేకుండా పనిచేస్తుంది, ఇంటర్నెట్ రాగానే సింక్ అవుతుంది',
+  'Sunny':
+      'ఎండ',
+  'Cloudy':
+      'మబ్బులు',
+  'Rain':
+      'వర్షం',
+  'Heavy rain':
+      'భారీ వర్షం',
+  'Light rain':
+      'చిరుజల్లులు',
+  'Hot':
+      'వేడి',
+  'Windy':
+      'గాలి',
+  'Cold':
+      'చలి',
+  'Mason':
+      'మేస్త్రీ',
+  'Helper':
+      'హెల్పర్',
+  'Carpenter':
+      'వడ్రంగి',
+  'Bar bender':
+      'బార్ బెండర్',
+  'Electrician':
+      'ఎలక్ట్రీషియన్',
+  'Plumber':
+      'ప్లంబర్',
+  'Painter':
+      'పెయింటర్',
+  'Welder':
+      'వెల్డర్',
+  'Tiler':
+      'టైల్స్ మేస్త్రీ',
+  'Labourer':
+      'కూలీ',
+  'Supervisor':
+      'సూపర్‌వైజర్',
+  'Driver':
+      'డ్రైవర్',
+  'Operator':
+      'ఆపరేటర్',
+  'Fitter':
+      'ఫిట్టర్',
+  'Cash':
+      'నగదు',
+  'UPI':
+      'UPI',
+  'Bank transfer':
+      'బ్యాంక్ ట్రాన్స్‌ఫర్',
+  'Cheque':
+      'చెక్',
+  'Pass':
+      'సరే',
+  'Fail':
+      'లోపం',
+  'Not needed':
+      'అవసరం లేదు',
+  'Safety':
+      'భద్రత',
+  'Quality':
+      'నాణ్యత',
+  'Structural':
+      'నిర్మాణం',
+  'Environmental':
+      'పర్యావరణం',
+  'Final':
+      'చివరి',
 };

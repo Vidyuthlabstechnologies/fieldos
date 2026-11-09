@@ -37,20 +37,23 @@ class SubscriptionState {
   final bool complimentary;
 
   String describe() {
-    if (!active) return 'No active subscription';
+    if (!active) return tr('No active subscription');
     final date = expiresAt == null ? null : fmtDate(expiresAt!);
+    final d = {'date': date ?? ''};
     if (complimentary) {
-      return date == null ? 'Free access from the FieldOS team' : 'Free access from the FieldOS team until $date';
+      return date == null ? tr('Free access from the FieldOS team') : trf('Free access from the FieldOS team until {date}', d);
     }
     if (billingIssue) {
-      return 'Payment problem: update your payment method in the store${date == null ? '' : ' before $date'}';
+      return date == null
+          ? tr('Payment problem: update your payment method in the store')
+          : trf('Payment problem: update your payment method in the store before {date}', d);
     }
     if (inTrial) {
-      if (date == null) return willRenew ? 'Free trial, then paid' : 'Free trial (will not renew)';
-      return willRenew ? 'Free trial until $date, then paid' : 'Free trial until $date (will not renew)';
+      if (date == null) return willRenew ? tr('Free trial, then paid') : tr('Free trial (will not renew)');
+      return willRenew ? trf('Free trial until {date}, then paid', d) : trf('Free trial until {date} (will not renew)', d);
     }
-    if (date == null) return 'Subscribed';
-    return willRenew ? 'Subscribed, renews on $date' : 'Subscribed until $date (cancelled)';
+    if (date == null) return tr('Subscribed');
+    return willRenew ? trf('Subscribed, renews on {date}', d) : trf('Subscribed until {date} (cancelled)', d);
   }
 }
 

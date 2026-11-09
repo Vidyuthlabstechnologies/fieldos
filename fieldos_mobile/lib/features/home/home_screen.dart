@@ -36,7 +36,7 @@ class HomeScreen extends ConsumerWidget {
     final project = await showNewProjectSheet(context, companyId: companyId);
     if (project == null || !context.mounted) return;
     ref.invalidate(projectsProvider(companyId));
-    showSnack(context, '${project.name} is ready');
+    showSnack(context, trf('{name} is ready', {'name': project.name}));
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen(project: project)));
   }
 
@@ -425,6 +425,8 @@ class _Note extends StatelessWidget {
   Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
         Container(width: 6, height: 6, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 6),
-        Text(text, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.w600)),
+        Flexible(
+          child: Text(text, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.w600)),
+        ),
       ]);
 }

@@ -220,8 +220,10 @@ class _DayCell extends StatelessWidget {
     final label = m == null
         ? '$day'
         : m.marked != null
-            ? '$day, marked ${markLabel(m.marked!)}'
-            : '$day, ${m.hours.toStringAsFixed(1)} h${m.openPunch ? ', no punch-out' : ''}';
+            ? trf('{day}, marked {mark}', {'day': day, 'mark': markLabel(m.marked!)})
+            : m.openPunch
+                ? trf('{day}, {h} h, no punch-out', {'day': day, 'h': m.hours.toStringAsFixed(1)})
+                : trf('{day}, {h} h', {'day': day, 'h': m.hours.toStringAsFixed(1)});
     return Semantics(
       label: label,
       excludeSemantics: true,

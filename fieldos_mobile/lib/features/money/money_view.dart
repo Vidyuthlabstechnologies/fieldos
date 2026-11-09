@@ -295,7 +295,10 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
           final total = totalOf(shown);
           final cancelled = shown.where((e) => e.voided).length;
           final billCounts = ref.watch(expenseBillCountsProvider(widget.projectId)).value ?? const {};
-          return Column(children: [
+          // In a short space (a landscape phone, or the tour's preview) the
+          // search, filters and total would leave no room for the list, so
+          // the whole view scrolls at a usable height instead of breaking.
+          return _MinHeight(height: 360, child: Column(children: [
             if (all.isNotEmpty) ...[
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -414,7 +417,7 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
                           ],
                         ),
             ),
-          ]);
+          ]));
         },
       ),
       Positioned(
@@ -1309,10 +1312,38 @@ class _Figure extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) => Column(children: [
-        Text(label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-        const SizedBox(height: 4),
-        Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: color)),
-      ]);
+  // Each figure gets a third of the card and shrinks to fit it, so lakh
+  // amounts with large text never run into each other.
+  Widget build(BuildContext context) => Expanded(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: Column(children: [
+            Text(label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(value, maxLines: 1, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: color)),
+            ),
+          ]),
+        ),
+      );
+}
+
+/// Lays [child] out at least [height] tall, scrolling when the space is
+/// shorter than that.
+class _MinHeight extends StatelessWidget {
+  const _MinHeight({required this.height, required this.child});
+  final double height;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, box) => box.maxHeight >= height
+            ? child
+            : SingleChildScrollView(child: SizedBox(height: height, child: child)),
+      );
 }
