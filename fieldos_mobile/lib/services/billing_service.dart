@@ -123,6 +123,18 @@ class BillingService {
     return raw == null || raw.isEmpty ? null : DateTime.tryParse(raw);
   }
 
+  /// This phone's RevenueCat customer id. FieldOS's server asks RevenueCat
+  /// about it before the AI assistant answers. Null when payments aren't
+  /// set up in this build.
+  Future<String?> customerId() async {
+    try {
+      await _configure();
+      return await Purchases.appUserID;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// The store's current answer, or null if it can't be reached (offline).
   /// [fresh] skips RevenueCat's few-minute cache, for "check again" after a
   /// payment that was waiting for approval.

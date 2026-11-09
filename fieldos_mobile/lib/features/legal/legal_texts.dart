@@ -40,13 +40,22 @@ const privacyPolicy = LegalDocument(
           "language's offline speech pack is on the phone, your speech is turned into text on the phone. Otherwise "
           "the phone's speech service may send it to Google or Apple to be recognised, under their privacy policies. "
           'FieldOS does not record or keep your voice.\n\n'
-          "Only if your phone can't recognise the language you chose, and your company owner has added a Sarvam key, "
-          'FieldOS records your report and sends the recording to Sarvam AI (sarvam.ai) to be turned into text. '
-          'FieldOS does not keep the recording afterwards.\n\n'
+          "Only if your phone can't recognise the language you chose, and you are signed in to Team & sync, FieldOS "
+          'records your report and sends the recording through its own server to Sarvam AI (sarvam.ai) to be turned '
+          'into text. FieldOS does not keep the recording afterwards.\n\n'
           'Translating a report to English happens on the phone, using Google ML Kit. The language pack is downloaded '
           'from Google once, and the text of your report is never sent. ML Kit does send Google diagnostic details so '
           'that Google can maintain it: the phone model and system version, the app version, an identifier for this '
           'installation, the languages chosen, and how long translation took.',
+    ),
+    LegalSection(
+      'AI assistant',
+      'When you use Ask FieldOS, what you type or say, and the site details the assistant needs to answer (such as '
+          'project names, workers, tasks and amounts on this phone), go through FieldOS\'s server to Anthropic '
+          '(anthropic.com), whose Claude model works out the reply. Anthropic\'s commercial terms do not let it use '
+          'this to train its models. FieldOS keeps only a daily count of how much each account uses the assistant, '
+          'not the conversation. Nothing is saved to your records until you tap Save on the card the assistant '
+          'shows.',
     ),
     LegalSection(
       'Maps',
@@ -169,7 +178,9 @@ const termsOfUse = LegalDocument(
     LegalSection(
       '8. Check the numbers',
       'FieldOS helps with estimates, quantities, wages, payments, attendance and reports, and it turns '
-          'spoken reports into text automatically. These can contain mistakes. Check figures and reports '
+          'spoken reports into text automatically, and its AI assistant answers questions and fills in records '
+          'for you to confirm. These can contain mistakes. Check figures, reports and what the assistant '
+          'proposes '
           'before you rely on them. FieldOS is not engineering, structural, legal, tax or accounting advice, '
           'and it does not make you compliant with labour, wage, tax or safety laws; those decisions and '
           'duties remain yours.',
@@ -178,8 +189,8 @@ const termsOfUse = LegalDocument(
       '9. Other companies\' services',
       'Some parts of FieldOS use services from other companies, including Google Play and the Apple App '
           'Store (payments), RevenueCat (checking subscriptions), Supabase (our cloud database), Google '
-          '(sign-in, speech and translation), Apple (speech), OpenStreetMap (maps) and, only where your '
-          'company owner adds a key, Sarvam AI (speech). Their own terms apply to their services, and we are '
+          '(sign-in, speech and translation), Apple (speech), OpenStreetMap (maps), Anthropic (the AI '
+          'assistant) and Sarvam AI (speech, only for languages your phone can\'t recognise). Their own terms apply to their services, and we are '
           'not responsible for them.',
     ),
     LegalSection(

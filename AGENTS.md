@@ -14,8 +14,16 @@ before assuming otherwise) with:
   wrapper (`frontend/android/`) is deprecated; don't build on it.
 - **Real-time**: WebSocket per-project rooms (desktop app only; the Flutter
   mobile app has no connection to the backend at all yet)
-- **Voice AI**: Sarvam AI for Indic language voice DPR — the one feature
-  that needs internet, on both desktop and mobile
+- **Voice AI**: Sarvam AI for Indic language voice DPR, only when the
+  phone's own recognizer can't do the language. On mobile it goes through
+  the `ai-assistant` Supabase edge function with one shared key; users never
+  enter a key.
+- **AI assistant (mobile)**: "Ask FieldOS" on Home. Claude runs behind the
+  `ai-assistant` edge function (`supabase/functions/ai-assistant/`, keys are
+  function secrets, plan + daily limits checked there); the actions run on
+  the phone (`lib/agents/assistant_tools.dart`) and every change waits on a
+  confirm card. Tool names in `tools.ts` and `assistant_tools.dart` must
+  match (a test checks). See `docs/AI_ASSISTANT.md`.
 
 ## Code Style Rules
 

@@ -100,6 +100,9 @@ dependencies:
   purchases_flutter: ^11.0.1
   package_info_plus: ^10.2.2
   google_sign_in: ^7.2.0
+  # The AI assistant reads its answers out loud with the phone's own voice
+  # (Android/iOS text to speech): free and offline, no Sarvam needed.
+  flutter_tts: ^4.2.5
 
 dev_dependencies:
   # Direct dependency: used by test/sync_engine_test.dart to check the local

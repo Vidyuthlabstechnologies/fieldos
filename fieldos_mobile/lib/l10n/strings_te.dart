@@ -692,4 +692,117 @@ const Map<String, String> stringsTe = {
   'The report did not go through. Check the internet and try again.': 'రిపోర్ట్ పంపడం కుదరలేదు. ఇంటర్నెట్ చూసి మళ్ళీ ప్రయత్నించండి.',
   'Google sign-in did not go through. Please try again.': 'Google సైన్-ఇన్ జరగలేదు. మళ్ళీ ప్రయత్నించండి.',
   'Google sign-in is not ready on this version of the app. Use your username and password for now.': 'యాప్ ఈ వెర్షన్‌లో Google సైన్-ఇన్ ఇంకా సిద్ధంగా లేదు. ప్రస్తుతానికి మీ యూజర్‌నేమ్, పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి.',
+  // AI assistant (Ask FieldOS)
+  'Add worker {name} at {site}':
+      '{site}లో కార్మికుడు {name}ని చేర్చండి',
+  'Add ₹5,000 spent on cement':
+      'సిమెంట్‌కి ₹5,000 ఖర్చు రాయి',
+  'Ask FieldOS':
+      'FieldOSని అడగండి',
+  'Ask or tell FieldOS anything…':
+      'FieldOSని ఏదైనా అడగండి లేదా చెప్పండి…',
+  'Could not save':
+      'సేవ్ కాలేదు',
+  'Expense {amount} for {category} at {site}':
+      '{site}లో {category} ఖర్చు {amount}',
+  'Home':
+      'హోమ్',
+  'How do I make a bill for my client?':
+      'నా క్లయింట్‌కి బిల్లు ఎలా తయారు చేయాలి?',
+  'How much did I spend this month?':
+      'ఈ నెల ఎంత ఖర్చయింది?',
+  'Just say it: "Add ₹5,000 for cement", "Who came today?"':
+      'చెప్పండి చాలు: "సిమెంట్‌కి ₹5,000 రాయి", "ఈరోజు ఎవరు వచ్చారు?"',
+  'Mark all workers present':
+      'అందరు కార్మికులకు హాజరు వేయి',
+  'Mark done: {title}':
+      'పూర్తయింది: {title}',
+  'Mark present at {site}: {names}':
+      '{site}లో హాజరు: {names}',
+  'Material received at {site}: {qty} {material}':
+      '{site}కి సామాను వచ్చింది: {qty} {material}',
+  'Material used at {site}: {qty} {material}':
+      '{site}లో సామాను వాడారు: {qty} {material}',
+  'Namaste! What should I do?':
+      'నమస్తే! నేను ఏం చేయాలి?',
+  'Namaste, {name}! What should I do?':
+      'నమస్తే, {name}! నేను ఏం చేయాలి?',
+  'New chat':
+      'కొత్త చాట్',
+  'New project: {name}':
+      'కొత్త ప్రాజెక్ట్: {name}',
+  'New task at {site}: {title}':
+      '{site}లో కొత్త పని: {title}',
+  'Not saved':
+      'సేవ్ చేయలేదు',
+  'Open {screen}':
+      '{screen} తెరవండి',
+  'Payment received {amount} from {party} at {site}':
+      '{site}కి {party} నుండి {amount} వచ్చింది',
+  'Problem at {site}: {text}':
+      '{site}లో సమస్య: {text}',
+  'Read aloud':
+      'చదివి వినిపించు',
+  'Read answers aloud':
+      'జవాబులు చదివి వినిపించు',
+  'Save this?':
+      'దీన్ని సేవ్ చేయాలా?',
+  'Saved':
+      'సేవ్ అయింది',
+  'Set {title} to {p}%':
+      '{title}ని {p}%కి మార్చు',
+  'Sign in once to use the assistant':
+      'అసిస్టెంట్ కోసం ఒక్కసారి సైన్ ఇన్ చేయండి',
+  'Sign in to Team & sync':
+      'టీమ్ & సింక్‌లో సైన్ ఇన్ చేయండి',
+  'Something went wrong: {error}':
+      'ఏదో తప్పు జరిగింది: {error}',
+  'Speak':
+      'మాట్లాడండి',
+  'Speak to FieldOS':
+      'FieldOSతో మాట్లాడండి',
+  'Stop reading answers aloud':
+      'జవాబులు చదవడం ఆపు',
+  'Tap Save or Cancel above first':
+      'ముందు పైన సేవ్ లేదా రద్దు నొక్కండి',
+  'Tell me in your own words, by typing or with the mic. I can add expenses, attendance, tasks, reports and more, and answer questions about your sites. I always ask before saving anything.':
+      'మీ మాటల్లో టైప్ చేసి లేదా మైక్‌తో చెప్పండి. ఖర్చులు, హాజరు, పనులు, రిపోర్టులు ఇంకా చాలా నేను చేర్చగలను, మీ సైట్ల గురించి ప్రశ్నలకు జవాబిస్తాను. ఏదైనా సేవ్ చేసే ముందు ఎప్పుడూ అడుగుతాను.',
+  'That took too many steps. Try asking for one thing at a time.':
+      'దీనికి చాలా అడుగులు పట్టాయి. ఒక్కసారికి ఒక్క పనే అడగండి.',
+  'The answer was cut short. Please ask again in fewer words.':
+      'జవాబు మధ్యలో ఆగిపోయింది. తక్కువ మాటల్లో మళ్ళీ అడగండి.',
+  'The assistant can\'t help with that one. Try asking another way.':
+      'అసిస్టెంట్ దీనికి సహాయం చేయలేదు. వేరే విధంగా అడిగి చూడండి.',
+  'The assistant thinks on FieldOS\'s server, so it needs your FieldOS account and internet. Your site data stays on this phone; only what you ask, and what is needed to answer it, is sent.':
+      'అసిస్టెంట్ FieldOS సర్వర్‌లో ఆలోచిస్తుంది, కాబట్టి దానికి మీ FieldOS ఖాతా, ఇంటర్నెట్ కావాలి. మీ సైట్ డేటా ఈ ఫోన్‌లోనే ఉంటుంది; మీరు అడిగింది, జవాబుకు కావలసింది మాత్రమే పంపబడుతుంది.',
+  'Today\'s report for {site}: {text}':
+      '{site} ఈరోజు రిపోర్ట్: {text}',
+  'Type or speak. I will do it in the app.':
+      'టైప్ చేయండి లేదా మాట్లాడండి. యాప్‌లో పని నేను చేస్తాను.',
+  'What happened on my sites today?':
+      'ఈరోజు నా సైట్లలో ఏం జరిగింది?',
+  'Which tasks are late?':
+      'ఏ పనులు ఆలస్యంగా ఉన్నాయి?',
+  'Working on it…':
+      'చేస్తున్నాను…',
+  'Write today\'s daily report':
+      'ఈరోజు డైలీ రిపోర్ట్ రాయి',
+  'Sign in to Team & sync once to use the assistant.':
+      'అసిస్టెంట్ కోసం ఒక్కసారి టీమ్ & సింక్‌లో సైన్ ఇన్ చేయండి.',
+  'Sign in to FieldOS again to use the assistant.':
+      'అసిస్టెంట్ కోసం FieldOSలో మళ్ళీ సైన్ ఇన్ చేయండి.',
+  'The assistant comes with the FieldOS plan. Start or renew it in My subscription.':
+      'అసిస్టెంట్ FieldOS ప్లాన్‌తో వస్తుంది. నా సబ్‌స్క్రిప్షన్‌లో దాన్ని మొదలుపెట్టండి లేదా రెన్యూ చేయండి.',
+  'You\'ve used the assistant a lot today. It will be ready again tomorrow.':
+      'ఈరోజు మీరు అసిస్టెంట్‌ను చాలా వాడారు. రేపు మళ్ళీ సిద్ధంగా ఉంటుంది.',
+  'No internet. The assistant needs internet; everything else in FieldOS works offline.':
+      'ఇంటర్నెట్ లేదు. అసిస్టెంట్‌కి ఇంటర్నెట్ కావాలి; FieldOSలో మిగతావన్నీ ఆఫ్‌లైన్‌లో పనిచేస్తాయి.',
+  'The assistant could not answer just now. Please try again in a minute.':
+      'అసిస్టెంట్ ఇప్పుడు జవాబివ్వలేకపోయింది. ఒక నిమిషం తర్వాత మళ్ళీ ప్రయత్నించండి.',
+  'The assistant is not switched on yet. Please try again later.':
+      'అసిస్టెంట్ ఇంకా ఆన్ కాలేదు. తర్వాత మళ్ళీ ప్రయత్నించండి.',
+  'This chat has grown too long. Start a new chat.':
+      'ఈ చాట్ చాలా పొడవైంది. కొత్త చాట్ మొదలుపెట్టండి.',
+  'The assistant took too long. Check your internet and try again.':
+      'అసిస్టెంట్ చాలా సమయం తీసుకుంది. ఇంటర్నెట్ చూసి మళ్ళీ ప్రయత్నించండి.',
 };

@@ -690,4 +690,117 @@ const Map<String, String> stringsHi = {
   'The report did not go through. Check the internet and try again.': 'रिपोर्ट नहीं भेजी जा सकी। इंटरनेट जाँचें और फिर कोशिश करें।',
   'Google sign-in did not go through. Please try again.': 'Google साइन-इन नहीं हुआ। फिर से कोशिश करें।',
   'Google sign-in is not ready on this version of the app. Use your username and password for now.': 'ऐप के इस संस्करण में Google साइन-इन अभी तैयार नहीं है। अभी अपने यूज़रनेम और पासवर्ड से लॉगिन करें।',
+  // AI assistant (Ask FieldOS)
+  'Add worker {name} at {site}':
+      '{site} पर मज़दूर {name} जोड़ें',
+  'Add ₹5,000 spent on cement':
+      'सीमेंट पर ₹5,000 खर्च लिखो',
+  'Ask FieldOS':
+      'FieldOS से पूछें',
+  'Ask or tell FieldOS anything…':
+      'FieldOS से कुछ भी पूछें या कहें…',
+  'Could not save':
+      'सेव नहीं हो सका',
+  'Expense {amount} for {category} at {site}':
+      '{site} पर {category} का खर्च {amount}',
+  'Home':
+      'होम',
+  'How do I make a bill for my client?':
+      'अपने क्लाइंट का बिल कैसे बनाऊँ?',
+  'How much did I spend this month?':
+      'इस महीने कितना खर्च हुआ?',
+  'Just say it: "Add ₹5,000 for cement", "Who came today?"':
+      'बस बोलिए: "सीमेंट के लिए ₹5,000 लिखो", "आज कौन आया?"',
+  'Mark all workers present':
+      'सभी मज़दूरों की हाज़िरी लगाओ',
+  'Mark done: {title}':
+      'पूरा हुआ: {title}',
+  'Mark present at {site}: {names}':
+      '{site} पर हाज़िर: {names}',
+  'Material received at {site}: {qty} {material}':
+      '{site} पर माल आया: {qty} {material}',
+  'Material used at {site}: {qty} {material}':
+      '{site} पर माल लगा: {qty} {material}',
+  'Namaste! What should I do?':
+      'नमस्ते! मैं क्या करूँ?',
+  'Namaste, {name}! What should I do?':
+      'नमस्ते, {name}! मैं क्या करूँ?',
+  'New chat':
+      'नई बातचीत',
+  'New project: {name}':
+      'नया प्रोजेक्ट: {name}',
+  'New task at {site}: {title}':
+      '{site} पर नया काम: {title}',
+  'Not saved':
+      'सेव नहीं किया',
+  'Open {screen}':
+      '{screen} खोलें',
+  'Payment received {amount} from {party} at {site}':
+      '{site} पर {party} से {amount} मिले',
+  'Problem at {site}: {text}':
+      '{site} पर समस्या: {text}',
+  'Read aloud':
+      'पढ़कर सुनाएँ',
+  'Read answers aloud':
+      'जवाब पढ़कर सुनाएँ',
+  'Save this?':
+      'इसे सेव करें?',
+  'Saved':
+      'सेव हो गया',
+  'Set {title} to {p}%':
+      '{title} को {p}% करें',
+  'Sign in once to use the assistant':
+      'असिस्टेंट के लिए एक बार साइन इन करें',
+  'Sign in to Team & sync':
+      'टीम और सिंक में साइन इन करें',
+  'Something went wrong: {error}':
+      'कुछ गड़बड़ हुई: {error}',
+  'Speak':
+      'बोलें',
+  'Speak to FieldOS':
+      'FieldOS से बोलें',
+  'Stop reading answers aloud':
+      'जवाब पढ़ना बंद करें',
+  'Tap Save or Cancel above first':
+      'पहले ऊपर सेव या रद्द दबाएँ',
+  'Tell me in your own words, by typing or with the mic. I can add expenses, attendance, tasks, reports and more, and answer questions about your sites. I always ask before saving anything.':
+      'अपनी भाषा में लिखकर या माइक से बताइए। मैं खर्च, हाज़िरी, काम, रिपोर्ट और बहुत कुछ जोड़ सकता हूँ, और आपकी साइटों के बारे में सवालों के जवाब दे सकता हूँ। कुछ भी सेव करने से पहले मैं हमेशा पूछता हूँ।',
+  'That took too many steps. Try asking for one thing at a time.':
+      'इसमें बहुत ज़्यादा कदम लग गए। एक बार में एक ही काम कहें।',
+  'The answer was cut short. Please ask again in fewer words.':
+      'जवाब अधूरा रह गया। कृपया कम शब्दों में फिर से पूछें।',
+  'The assistant can\'t help with that one. Try asking another way.':
+      'असिस्टेंट इसमें मदद नहीं कर सकता। किसी और तरह से पूछकर देखें।',
+  'The assistant thinks on FieldOS\'s server, so it needs your FieldOS account and internet. Your site data stays on this phone; only what you ask, and what is needed to answer it, is sent.':
+      'असिस्टेंट FieldOS के सर्वर पर सोचता है, इसलिए उसे आपका FieldOS खाता और इंटरनेट चाहिए। आपकी साइट का डेटा इसी फ़ोन पर रहता है; सिर्फ़ आपका सवाल और जवाब के लिए ज़रूरी जानकारी भेजी जाती है।',
+  'Today\'s report for {site}: {text}':
+      '{site} की आज की रिपोर्ट: {text}',
+  'Type or speak. I will do it in the app.':
+      'लिखें या बोलें। ऐप में काम मैं कर दूँगा।',
+  'What happened on my sites today?':
+      'आज मेरी साइटों पर क्या हुआ?',
+  'Which tasks are late?':
+      'कौन से काम देर से चल रहे हैं?',
+  'Working on it…':
+      'कर रहा हूँ…',
+  'Write today\'s daily report':
+      'आज की दैनिक रिपोर्ट लिखो',
+  'Sign in to Team & sync once to use the assistant.':
+      'असिस्टेंट के लिए एक बार टीम और सिंक में साइन इन करें।',
+  'Sign in to FieldOS again to use the assistant.':
+      'असिस्टेंट के लिए FieldOS में फिर से साइन इन करें।',
+  'The assistant comes with the FieldOS plan. Start or renew it in My subscription.':
+      'असिस्टेंट FieldOS प्लान के साथ आता है। इसे मेरी सदस्यता में शुरू या रिन्यू करें।',
+  'You\'ve used the assistant a lot today. It will be ready again tomorrow.':
+      'आज आपने असिस्टेंट बहुत इस्तेमाल किया है। कल यह फिर तैयार होगा।',
+  'No internet. The assistant needs internet; everything else in FieldOS works offline.':
+      'इंटरनेट नहीं है। असिस्टेंट को इंटरनेट चाहिए; FieldOS का बाकी सब बिना इंटरनेट के चलता है।',
+  'The assistant could not answer just now. Please try again in a minute.':
+      'असिस्टेंट अभी जवाब नहीं दे सका। एक मिनट बाद फिर कोशिश करें।',
+  'The assistant is not switched on yet. Please try again later.':
+      'असिस्टेंट अभी चालू नहीं हुआ है। बाद में फिर कोशिश करें।',
+  'This chat has grown too long. Start a new chat.':
+      'यह बातचीत बहुत लंबी हो गई है। नई बातचीत शुरू करें।',
+  'The assistant took too long. Check your internet and try again.':
+      'असिस्टेंट ने बहुत देर लगाई। इंटरनेट देखें और फिर कोशिश करें।',
 };

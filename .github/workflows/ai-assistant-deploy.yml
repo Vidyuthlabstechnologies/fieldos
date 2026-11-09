@@ -1,0 +1,79 @@
+name: ai-assistant-deploy
+
+# One click from the Actions tab puts the AI assistant's server side live on
+# the production Supabase project: copies the keys from the repo secrets into
+# the function's secrets (they never go in the app), deploys
+# supabase/functions/ai-assistant, then checks it refuses a caller with no
+# session. Run supabase-deploy first, so the ai_usage table exists.
+#
+# Repo secrets it uses (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_URL, SUPABASE_ACCESS_TOKEN   already set for supabase-deploy
+#   ANTHROPIC_API_KEY                     console.anthropic.com -> API keys
+#   SARVAM_API_KEY                        dashboard.sarvam.ai -> API keys
+#   REVENUECAT_SECRET_KEY                 RevenueCat -> project -> API keys -> secret (v1) key, sk_...
+# Optional repo variables: AI_MODEL, AI_DAILY_CHAT_CALLS, AI_DAILY_VOICE_SECONDS.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
+      REVENUECAT_SECRET_KEY: ${{ secrets.REVENUECAT_SECRET_KEY }}
+      AI_MODEL: ${{ vars.AI_MODEL }}
+      AI_DAILY_CHAT_CALLS: ${{ vars.AI_DAILY_CHAT_CALLS }}
+      AI_DAILY_VOICE_SECONDS: ${{ vars.AI_DAILY_VOICE_SECONDS }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the secrets are set
+        run: |
+          missing=""
+          for name in SUPABASE_URL SUPABASE_ACCESS_TOKEN ANTHROPIC_API_KEY REVENUECAT_SECRET_KEY; do
+            [ -z "${!name}" ] && missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repo secrets:$missing"
+            exit 1
+          fi
+          [ -z "$SARVAM_API_KEY" ] && echo "::warning::SARVAM_API_KEY is not set: voice in languages the phone can't recognise will say it is not switched on."
+          ref=$(echo "$SUPABASE_URL" | sed -E 's#^https?://([^.]+)\.supabase\.co.*#\1#')
+          if [ "$ref" = "$SUPABASE_URL" ] || [ -z "$ref" ]; then
+            echo "::error::SUPABASE_URL should look like https://abcdefghijkl.supabase.co"
+            exit 1
+          fi
+          echo "PROJECT_REF=$ref" >> "$GITHUB_ENV"
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 3.0.0
+
+      - name: Copy the keys into the function's secrets
+        run: |
+          umask 077
+          f=$(mktemp)
+          for name in ANTHROPIC_API_KEY SARVAM_API_KEY REVENUECAT_SECRET_KEY AI_MODEL AI_DAILY_CHAT_CALLS AI_DAILY_VOICE_SECONDS; do
+            [ -n "${!name}" ] && printf '%s=%s\n' "$name" "${!name}" >> "$f"
+          done
+          supabase secrets set --project-ref "$PROJECT_REF" --env-file "$f"
+          rm -f "$f"
+
+      - name: Deploy the function
+        run: supabase functions deploy ai-assistant --project-ref "$PROJECT_REF" --use-api
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Check it is live and refuses callers with no session
+        working-directory: supabase/functions/ai-assistant
+        env:
+          AI_FUNCTION_URL: ${{ secrets.SUPABASE_URL }}/functions/v1/ai-assistant
+        run: deno test --allow-env --allow-net live_test.ts

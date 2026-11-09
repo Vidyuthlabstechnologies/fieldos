@@ -1,6 +1,6 @@
 /// Settings for everyone: the account, the subscription, voice reports,
-/// help and the legal pages. Only the Sarvam key (a paid fallback for voice
-/// reports) is limited to company owners.
+/// help and the legal pages. There is no AI or speech key to set: FieldOS's
+/// server holds the shared keys (see lib/services/ai_backend.dart).
 library;
 
 import 'package:flutter/material.dart';
@@ -32,7 +32,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String? _voiceLanguage;
-  bool _sarvamKeySet = false;
   String? _version;
 
   @override
@@ -45,7 +44,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _load() async {
     final settings = ref.read(settingsServiceProvider);
     final language = await settings.getVoiceLanguage();
-    final keySet = await settings.isVoiceConfigured();
     String? version;
     try {
       final info = await PackageInfo.fromPlatform();
@@ -56,7 +54,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (!mounted) return;
     setState(() {
       _voiceLanguage = language;
-      _sarvamKeySet = keySet;
       _version = version;
     });
   }
@@ -167,18 +164,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _changePassword() async {
     final changed = await showDialog<bool>(context: context, builder: (_) => const _ChangePasswordDialog());
     if ((changed ?? false) && mounted) showSnack(context, 'Password changed');
-  }
-
-  Future<void> _sarvamKey() async {
-    final saved = await showDialog<bool>(
-      context: context,
-      builder: (_) => _SarvamKeyDialog(keySet: _sarvamKeySet),
-    );
-    if (saved == null || !mounted) return;
-    final keySet = await ref.read(settingsServiceProvider).isVoiceConfigured();
-    if (!mounted) return;
-    setState(() => _sarvamKeySet = keySet);
-    showSnack(context, keySet ? tr('Sarvam key saved') : tr('Sarvam key removed'));
   }
 
   @override
@@ -298,16 +283,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             trailing: const Icon(Icons.chevron_right),
             onTap: _pickLanguage,
           ),
-          if (session.canManageSettings)
-            ListTile(
-              leading: const Icon(Icons.key_outlined),
-              title: Text(tr('Sarvam fallback key')),
-              subtitle: Text(_sarvamKeySet
-                  ? tr('Set. Used only on phones that cannot recognise the chosen language.')
-                  : tr('Not set. Voice reports use the phone itself, free and offline.')),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _sarvamKey,
-            ),
 
           const SectionHeader('Help', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           ListTile(
@@ -437,76 +412,6 @@ class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
       actions: [
         TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(tr('Cancel'))),
         FilledButton(onPressed: _busy ? null : _save, child: Text(tr('Change'))),
-      ],
-    );
-  }
-}
-
-/// The Sarvam key: write-only (never shown back), owners only, and only a
-/// fallback for phones whose speech recognition can't do the language.
-class _SarvamKeyDialog extends ConsumerStatefulWidget {
-  const _SarvamKeyDialog({required this.keySet});
-
-  final bool keySet;
-
-  @override
-  ConsumerState<_SarvamKeyDialog> createState() => _SarvamKeyDialogState();
-}
-
-class _SarvamKeyDialogState extends ConsumerState<_SarvamKeyDialog> {
-  final _key = TextEditingController();
-
-  @override
-  void dispose() {
-    _key.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final settings = ref.read(settingsServiceProvider);
-    final muted = TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant);
-    return AlertDialog(
-      title: Text(tr('Sarvam fallback key')),
-      content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(tr('Voice reports use the phone\'s own speech recognition, free and offline when the language pack is on '
-          'the phone. Only phones that cannot recognise the chosen language at all send a recording to Sarvam AI '
-          '(sarvam.ai), which needs a key from your Sarvam account and is billed by Sarvam.'),
-          style: muted,
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          controller: _key,
-          obscureText: true,
-          autocorrect: false,
-          enableSuggestions: false,
-          decoration: InputDecoration(
-            labelText: widget.keySet ? tr('New key (replaces the saved one)') : tr('Sarvam API key'),
-            prefixIcon: const Icon(Icons.key_outlined),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(tr('The key stays on this phone and is never shown again.'), style: muted),
-      ]),
-      actions: [
-        if (widget.keySet)
-          TextButton(
-            onPressed: () async {
-              await settings.clearSarvamApiKey();
-              if (context.mounted) Navigator.of(context).pop(false);
-            },
-            child: Text(tr('Remove key')),
-          ),
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(tr('Cancel'))),
-        FilledButton(
-          onPressed: () async {
-            final key = _key.text.trim();
-            if (key.isEmpty) return;
-            await settings.setSarvamApiKey(key);
-            if (context.mounted) Navigator.of(context).pop(true);
-          },
-          child: Text(tr('Save')),
-        ),
       ],
     );
   }
