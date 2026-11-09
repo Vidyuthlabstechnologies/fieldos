@@ -45,6 +45,8 @@ jobs:
         run: supabase start
       - name: Allowance checks
         run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -f supabase/tests/ai_usage_test.sql
+      - name: Table grants, row level security and SECURITY DEFINER checks
+        run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/grants_test.sql
 
   live:
     needs: unit
