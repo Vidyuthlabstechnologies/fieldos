@@ -793,6 +793,11 @@ const Map<String, String> stringsTe = {
       'అసిస్టెంట్ కోసం FieldOSలో మళ్ళీ సైన్ ఇన్ చేయండి.',
   'The assistant comes with the FieldOS plan. Start or renew it in My subscription.':
       'అసిస్టెంట్ FieldOS ప్లాన్‌తో వస్తుంది. నా సబ్‌స్క్రిప్షన్‌లో దాన్ని మొదలుపెట్టండి లేదా రెన్యూ చేయండి.',
+  'You\'ve used this month\'s assistant allowance. It starts again on the 1st. Everything else in FieldOS works as usual.':
+      'ఈ నెల అసిస్టెంట్ పరిమితి అయిపోయింది. 1వ తేదీన మళ్ళీ మొదలవుతుంది. FieldOSలో మిగతావన్నీ మామూలుగానే పనిచేస్తాయి.',
+  'This month\'s voice allowance is used up. Please type, or use the phone\'s own voice typing.':
+      'ఈ నెల వాయిస్ సమయం అయిపోయింది. దయచేసి టైప్ చేయండి, లేదా ఫోన్ సొంత వాయిస్ టైపింగ్ వాడండి.',
+  '{n}% of this month\'s assistant use is left': 'ఈ నెల అసిస్టెంట్ పరిమితిలో {n}% మిగిలి ఉంది',
   'You\'ve used the assistant a lot today. It will be ready again tomorrow.':
       'ఈరోజు మీరు అసిస్టెంట్‌ను చాలా వాడారు. రేపు మళ్ళీ సిద్ధంగా ఉంటుంది.',
   'No internet. The assistant needs internet; everything else in FieldOS works offline.':

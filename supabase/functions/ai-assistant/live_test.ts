@@ -3,21 +3,31 @@
 // skipped when its key isn't in the environment, so this file is safe to run
 // anywhere. It spends a few paise of Anthropic and Sarvam credit per run.
 //
-//   ANTHROPIC_API_KEY=... SARVAM_API_KEY=... REVENUECAT_SECRET_KEY=... \
+//   ANTHROPIC_API_KEY=... SARVAM_API_KEY=... REVENUECAT_ANDROID_KEY=... \
 //     deno test --allow-env --allow-net supabase/functions/ai-assistant/live_test.ts
 
 import Anthropic from "@anthropic-ai/sdk";
 import { assert, assertEquals } from "@std/assert";
 
-import { chatParams, entitlementActive, MODEL_DEFAULT } from "./core.ts";
+import {
+  chatParams,
+  claudeCostInr,
+  entitlementActive,
+  fallbackCostInr,
+  fallbackParams,
+  fromOpenAi,
+  MODEL_DEFAULT,
+} from "./core.ts";
 import { WRITE_TOOLS } from "./tools.ts";
 
 const env = (k: string) => Deno.env.get(k) || undefined;
 const anthropicKey = env("ANTHROPIC_API_KEY");
 const sarvamKey = env("SARVAM_API_KEY");
-const revenuecatKey = env("REVENUECAT_SECRET_KEY");
+const revenuecatKey = env("REVENUECAT_SECRET_KEY") ?? env("REVENUECAT_ANDROID_KEY");
 const functionUrl = env("AI_FUNCTION_URL");
 const model = env("AI_MODEL") ?? MODEL_DEFAULT;
+
+const usdInr = 95;
 
 const appState =
   `<app_state>{"today":"2026-11-09","app_language":"en","company":"Sri Sai Constructions","user":"Ravi","projects":[{"id":"p1","name":"Narapally Villa","status":"active"}]}</app_state>`;
@@ -61,6 +71,38 @@ Deno.test({
     const text = second.content.filter((b) => b.type === "text").map((b) => (b as { text: string }).text).join(" ");
     console.log("reply:", text);
     assert(text.length > 0 && text.length < 600);
+    // The whole question, both calls, must stay cheap: that is what keeps the margin.
+    const cost = claudeCostInr(model, first.usage, usdInr) + claudeCostInr(model, second.usage, usdInr);
+    console.log(`cost of this question: ₹${cost.toFixed(4)}`);
+    assert(cost < 0.15, `one question cost ₹${cost}`);
+  },
+});
+
+Deno.test({
+  name: "fallback: DeepSeek on the Sarvam key takes the same tools",
+  ignore: !sarvamKey,
+  async fn() {
+    const messages = [{
+      role: "user",
+      content: [{ type: "text", text: appState }, { type: "text", text: "Add 4500 rupees for cement today" }],
+    }];
+    const res = await fetch("https://api.sarvam.ai/v2/chat/completions", {
+      method: "POST",
+      headers: { "api-subscription-key": sarvamKey!, "content-type": "application/json" },
+      body: JSON.stringify(fallbackParams(messages)),
+    });
+    const body = await res.json();
+    console.log("fallback:", res.status, JSON.stringify(body).slice(0, 400));
+    assertEquals(res.status, 200);
+    const { content, stopReason } = fromOpenAi(body);
+    assertEquals(stopReason, "tool_use");
+    const add = content.find((b) => (b as { name?: string }).name === "add_expense") as
+      | { input: { amount: number; project_id: string } }
+      | undefined;
+    assert(add, JSON.stringify(content));
+    assertEquals(add.input.amount, 4500);
+    assertEquals(add.input.project_id, "p1");
+    console.log(`fallback call cost: ₹${fallbackCostInr(body.usage).toFixed(4)}`);
   },
 });
 
@@ -137,12 +179,15 @@ Deno.test({
 });
 
 Deno.test({
-  name: "revenuecat: the secret key can read customers",
+  name: "revenuecat: the key can read customers",
   ignore: !revenuecatKey,
   async fn() {
     // One fixed id, so repeated runs don't fill RevenueCat with test customers.
     const res = await fetch("https://api.revenuecat.com/v1/subscribers/fieldos-ci-key-check", {
-      headers: { authorization: `Bearer ${revenuecatKey}` },
+      headers: {
+        authorization: `Bearer ${revenuecatKey}`,
+        ...(revenuecatKey!.startsWith("goog_") ? { "x-platform": "android" } : {}),
+      },
     });
     const body = await res.json();
     console.log("revenuecat:", res.status);

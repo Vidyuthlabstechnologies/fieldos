@@ -38,7 +38,7 @@ class _ScriptedBackend implements AiBackend {
 
 AiReply _text(String t) => AiReply(content: [
       {'type': 'text', 'text': t}
-    ], stopReason: 'end_turn', leftToday: 99);
+    ], stopReason: 'end_turn', allowanceLeft: 99);
 
 AiReply _tools(List<(String id, String name, Map<String, dynamic> input)> uses, {String? say}) => AiReply(content: [
       {'type': 'thinking', 'thinking': '', 'signature': 'sig'},
@@ -74,7 +74,7 @@ void main() {
 
     expect(c.items.whereType<AssistantSaid>().single.text, 'You have one site, Villa.');
     expect(c.lastReply, 'You have one site, Villa.');
-    expect(c.leftToday, 99);
+    expect(c.allowanceLeft, 99);
     // Second call carries the first reply unchanged (thinking included) and the result.
     final second = backend.sent[1];
     expect(second, hasLength(3));

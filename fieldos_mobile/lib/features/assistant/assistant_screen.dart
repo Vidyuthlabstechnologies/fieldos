@@ -271,6 +271,15 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                         },
                       ),
           ),
+          if (signedIn && (_chat.allowanceLeft ?? 100) <= 20)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Text(
+                trf('{n}% of this month\'s assistant use is left', {'n': '${_chat.allowanceLeft}'}),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ),
           if (signedIn)
             _Composer(
               controller: _input,

@@ -791,6 +791,11 @@ const Map<String, String> stringsHi = {
       'असिस्टेंट के लिए FieldOS में फिर से साइन इन करें।',
   'The assistant comes with the FieldOS plan. Start or renew it in My subscription.':
       'असिस्टेंट FieldOS प्लान के साथ आता है। इसे मेरी सदस्यता में शुरू या रिन्यू करें।',
+  'You\'ve used this month\'s assistant allowance. It starts again on the 1st. Everything else in FieldOS works as usual.':
+      'इस महीने की असिस्टेंट सीमा पूरी हो गई। यह 1 तारीख को फिर शुरू होगी। FieldOS का बाकी सब पहले जैसा चलता है।',
+  'This month\'s voice allowance is used up. Please type, or use the phone\'s own voice typing.':
+      'इस महीने का वॉइस समय पूरा हो गया। कृपया टाइप करें, या फ़ोन की अपनी वॉइस टाइपिंग इस्तेमाल करें।',
+  '{n}% of this month\'s assistant use is left': 'इस महीने की असिस्टेंट सीमा का {n}% बाकी है',
   'You\'ve used the assistant a lot today. It will be ready again tomorrow.':
       'आज आपने असिस्टेंट बहुत इस्तेमाल किया है। कल यह फिर तैयार होगा।',
   'No internet. The assistant needs internet; everything else in FieldOS works offline.':

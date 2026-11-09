@@ -1,15 +1,18 @@
 // ai-assistant: the FieldOS AI assistant's server side. Holds the shared
 // Anthropic and Sarvam keys (set as function secrets, never in the app),
-// checks the caller's Supabase session and FieldOS plan, and caps each
-// account's daily use. All request logic is in core.ts.
+// checks the caller's Supabase session and FieldOS plan, and caps what each
+// account's use may cost a month. All request logic is in core.ts.
 //
 // Function secrets (set by .github/workflows/ai-assistant-deploy.yml from the
 // repo secrets of the same names):
 //   ANTHROPIC_API_KEY       Claude, for the chat
-//   SARVAM_API_KEY          speech to text, only for languages a phone can't do
-//   REVENUECAT_SECRET_KEY   a RevenueCat v1 secret key (sk_...), to check the plan
-// Optional: AI_MODEL, AI_DAILY_CHAT_CALLS, AI_DAILY_VOICE_SECONDS, and
-// AI_PLAN_CHECK=off for a test project only.
+//   SARVAM_API_KEY          speech to text for languages a phone can't do, and
+//                           the fallback chat model when Anthropic is down
+//   REVENUECAT_SECRET_KEY   a RevenueCat v1 secret key (sk_...), to check the plan;
+//   or REVENUECAT_ANDROID_KEY  the app's own public key (goog_...), which can
+//                           read a customer's entitlements too
+// Optional: AI_MODEL, AI_MONTHLY_BUDGET_INR, AI_DAILY_CHAT_CALLS, AI_USD_INR,
+// and AI_PLAN_CHECK=off for a test project only.
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase.
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -20,12 +23,12 @@ import { type Deps, entitlementActive, handle, limitsFromEnv, MODEL_DEFAULT } fr
 const env = (k: string) => Deno.env.get(k) ?? undefined;
 const anthropicKey = env("ANTHROPIC_API_KEY");
 const sarvamKey = env("SARVAM_API_KEY");
-const revenuecatKey = env("REVENUECAT_SECRET_KEY");
+const revenuecatKey = env("REVENUECAT_SECRET_KEY") || env("REVENUECAT_ANDROID_KEY");
 
 const admin = createClient(env("SUPABASE_URL")!, env("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
-const anthropic = anthropicKey ? new Anthropic({ apiKey: anthropicKey, maxRetries: 2, timeout: 120_000 }) : null;
+const anthropic = anthropicKey ? new Anthropic({ apiKey: anthropicKey, maxRetries: 1, timeout: 30_000 }) : null;
 
 // A plan rarely changes within minutes; asking RevenueCat on every tool round
 // would add a second or so to each step of the conversation.
@@ -41,7 +44,11 @@ const deps: Deps = {
     const hit = planCache.get(subscriberId);
     if (hit && Date.now() - hit.at < PLAN_CACHE_MS) return hit.ok;
     const res = await fetch(`https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(subscriberId)}`, {
-      headers: { authorization: `Bearer ${revenuecatKey}` },
+      headers: {
+        authorization: `Bearer ${revenuecatKey}`,
+        // A public app key reads the customer the way the app's own SDK does.
+        ...(revenuecatKey!.startsWith("goog_") ? { "x-platform": "android" } : {}),
+      },
     });
     if (!res.ok) {
       console.error("revenuecat", res.status, await res.text());
@@ -59,12 +66,27 @@ const deps: Deps = {
       p_limit: limit,
     });
     if (error) throw error;
-    return data as number | null;
+    return data == null ? null : Number(data);
+  },
+  async addSpend(userId, units) {
+    const { data, error } = await admin.rpc("ai_spend_add", { p_user: userId, p_amount: units });
+    if (error) throw error;
+    return Number(data ?? 0);
   },
   async callClaude(params) {
     // deno-lint-ignore no-explicit-any
     const msg = await anthropic!.beta.messages.create(params as any);
-    return { content: msg.content as unknown[], stop_reason: msg.stop_reason };
+    return { content: msg.content as unknown[], stop_reason: msg.stop_reason, usage: msg.usage };
+  },
+  async callFallback(params) {
+    const res = await fetch("https://api.sarvam.ai/v2/chat/completions", {
+      method: "POST",
+      headers: { "api-subscription-key": sarvamKey!, "content-type": "application/json" },
+      body: JSON.stringify(params),
+      signal: AbortSignal.timeout(35_000),
+    });
+    if (!res.ok) throw new Error(`sarvam chat ${res.status}: ${await res.text()}`);
+    return await res.json();
   },
   async transcribe(wav, languageCode) {
     const form = new FormData();

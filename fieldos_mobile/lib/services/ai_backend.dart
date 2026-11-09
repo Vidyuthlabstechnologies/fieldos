@@ -4,7 +4,8 @@
 /// Both run in the `ai-assistant` Supabase edge function, which holds the
 /// one shared Anthropic key and the one shared Sarvam key. Nobody ever types
 /// a key into the app, and no key ships inside it. The function checks the
-/// person's FieldOS sign-in and plan, and caps each account's daily use.
+/// person's FieldOS sign-in and plan, and caps what each account's use may cost
+/// in a month.
 library;
 
 import 'dart:async';
@@ -18,7 +19,7 @@ class AiException implements Exception {
   AiException(this.message, {this.code = 'error'});
   final String message;
 
-  /// The server's reason: signed_out, no_plan, daily_limit, too_large,
+  /// The server's reason: signed_out, no_plan, daily_limit, monthly_limit, too_large,
   /// not_configured, upstream, offline, ...
   final String code;
 
@@ -30,10 +31,11 @@ class AiException implements Exception {
 /// to the server unchanged on the next call: the API needs its own blocks
 /// (thinking included) to carry on the conversation.
 class AiReply {
-  const AiReply({required this.content, required this.stopReason, this.leftToday});
+  const AiReply({required this.content, required this.stopReason, this.allowanceLeft});
   final List<Map<String, dynamic>> content;
   final String? stopReason;
-  final int? leftToday;
+  /// Share of this month's assistant allowance still left, 0-100.
+  final int? allowanceLeft;
 
   String get text => [
         for (final b in content)
@@ -74,7 +76,7 @@ class SupabaseAiBackend implements AiBackend {
     return AiReply(
       content: [for (final b in (data['content'] as List? ?? const [])) Map<String, dynamic>.from(b as Map)],
       stopReason: data['stop_reason'] as String?,
-      leftToday: (data['left_today'] as num?)?.toInt(),
+      allowanceLeft: (data['allowance_left'] as num?)?.toInt(),
     );
   }
 

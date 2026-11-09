@@ -53,6 +53,7 @@ jobs:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
       REVENUECAT_SECRET_KEY: ${{ secrets.REVENUECAT_SECRET_KEY }}
+      REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
       AI_MODEL: ${{ vars.AI_MODEL }}
     defaults:
       run:
@@ -64,7 +65,7 @@ jobs:
           deno-version: v2.x
       - name: Which secrets are set
         run: |
-          for name in ANTHROPIC_API_KEY SARVAM_API_KEY REVENUECAT_SECRET_KEY; do
+          for name in ANTHROPIC_API_KEY SARVAM_API_KEY REVENUECAT_ANDROID_KEY; do
             if [ -n "${!name}" ]; then echo "set      $name"; else echo "::warning::Repo secret $name is not set; its live test is skipped."; fi
           done
       - run: deno test --allow-env --allow-net live_test.ts

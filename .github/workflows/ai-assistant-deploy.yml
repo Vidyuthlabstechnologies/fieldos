@@ -9,9 +9,10 @@ name: ai-assistant-deploy
 # Repo secrets it uses (Settings -> Secrets and variables -> Actions):
 #   SUPABASE_URL, SUPABASE_ACCESS_TOKEN   already set for supabase-deploy
 #   ANTHROPIC_API_KEY                     console.anthropic.com -> API keys
-#   SARVAM_API_KEY                        dashboard.sarvam.ai -> API keys
-#   REVENUECAT_SECRET_KEY                 RevenueCat -> project -> API keys -> secret (v1) key, sk_...
-# Optional repo variables: AI_MODEL, AI_DAILY_CHAT_CALLS, AI_DAILY_VOICE_SECONDS.
+#   SARVAM_API_KEY                        dashboard.sarvam.ai -> API keys (voice fallback, backup chat model)
+#   REVENUECAT_ANDROID_KEY                already set for the app build (goog_...); reads the plan.
+#                                         REVENUECAT_SECRET_KEY (sk_...) is used instead when set.
+# Optional repo variables: AI_MODEL, AI_MONTHLY_BUDGET_INR, AI_DAILY_CHAT_CALLS, AI_USD_INR.
 on:
   workflow_dispatch:
 
@@ -27,23 +28,26 @@ jobs:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
       REVENUECAT_SECRET_KEY: ${{ secrets.REVENUECAT_SECRET_KEY }}
+      REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
       AI_MODEL: ${{ vars.AI_MODEL }}
+      AI_MONTHLY_BUDGET_INR: ${{ vars.AI_MONTHLY_BUDGET_INR }}
       AI_DAILY_CHAT_CALLS: ${{ vars.AI_DAILY_CHAT_CALLS }}
-      AI_DAILY_VOICE_SECONDS: ${{ vars.AI_DAILY_VOICE_SECONDS }}
+      AI_USD_INR: ${{ vars.AI_USD_INR }}
     steps:
       - uses: actions/checkout@v7
 
       - name: Check the secrets are set
         run: |
           missing=""
-          for name in SUPABASE_URL SUPABASE_ACCESS_TOKEN ANTHROPIC_API_KEY REVENUECAT_SECRET_KEY; do
+          for name in SUPABASE_URL SUPABASE_ACCESS_TOKEN ANTHROPIC_API_KEY; do
             [ -z "${!name}" ] && missing="$missing $name"
           done
+          [ -z "$REVENUECAT_SECRET_KEY$REVENUECAT_ANDROID_KEY" ] && missing="$missing REVENUECAT_ANDROID_KEY"
           if [ -n "$missing" ]; then
             echo "::error::Missing repo secrets:$missing"
             exit 1
           fi
-          [ -z "$SARVAM_API_KEY" ] && echo "::warning::SARVAM_API_KEY is not set: voice in languages the phone can't recognise will say it is not switched on."
+          [ -z "$SARVAM_API_KEY" ] && echo "::warning::SARVAM_API_KEY is not set: voice in languages the phone can't recognise will say it is not switched on, and there is no backup model when Anthropic is down."
           ref=$(echo "$SUPABASE_URL" | sed -E 's#^https?://([^.]+)\.supabase\.co.*#\1#')
           if [ "$ref" = "$SUPABASE_URL" ] || [ -z "$ref" ]; then
             echo "::error::SUPABASE_URL should look like https://abcdefghijkl.supabase.co"
@@ -59,7 +63,8 @@ jobs:
         run: |
           umask 077
           f=$(mktemp)
-          for name in ANTHROPIC_API_KEY SARVAM_API_KEY REVENUECAT_SECRET_KEY AI_MODEL AI_DAILY_CHAT_CALLS AI_DAILY_VOICE_SECONDS; do
+          for name in ANTHROPIC_API_KEY SARVAM_API_KEY REVENUECAT_SECRET_KEY REVENUECAT_ANDROID_KEY \
+            AI_MODEL AI_MONTHLY_BUDGET_INR AI_DAILY_CHAT_CALLS AI_USD_INR; do
             [ -n "${!name}" ] && printf '%s=%s\n' "$name" "${!name}" >> "$f"
           done
           supabase secrets set --project-ref "$PROJECT_REF" --env-file "$f"

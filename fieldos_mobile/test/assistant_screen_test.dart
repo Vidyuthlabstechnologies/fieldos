@@ -125,6 +125,21 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a low monthly allowance is shown under the chat', (tester) async {
+    final ai = _FakeAi(replies: [
+      const AiReply(content: [
+        {'type': 'text', 'text': 'You have one site.'}
+      ], stopReason: 'end_turn', allowanceLeft: 15),
+    ]);
+    final (container, _, _) = await setUp(tester, ai);
+    await pump(tester, container, const AssistantScreen());
+    expect(find.textContaining('assistant use is left'), findsNothing);
+    await tester.tap(find.text('Which tasks are late?'));
+    await settle(tester);
+    expect(find.text("15% of this month's assistant use is left"), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('the assistant speaks Hindi in a Hindi app', (tester) async {
     setCurrentLanguage(AppLanguage.hi);
     final (container, _, _) = await setUp(tester, _FakeAi());

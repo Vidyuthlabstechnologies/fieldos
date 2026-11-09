@@ -84,8 +84,8 @@ class AssistantConversation extends ChangeNotifier {
   /// The newest assistant text, for reading aloud.
   String? lastReply;
 
-  /// Calls left today, as the server last said.
-  int? leftToday;
+  /// Share of this month's allowance left (0-100), as the server last said.
+  int? allowanceLeft;
 
   bool get waitingForConfirm => items.any((i) => i is ConfirmAction && i.state == ConfirmState.waiting);
 
@@ -148,7 +148,7 @@ class AssistantConversation extends ChangeNotifier {
   Future<void> _run() async {
     for (var step = 0; step < maxSteps; step++) {
       final reply = await backend.chat(history);
-      leftToday = reply.leftToday ?? leftToday;
+      allowanceLeft = reply.allowanceLeft ?? allowanceLeft;
       history.add({'role': 'assistant', 'content': reply.content});
       final text = reply.text;
       if (text.isNotEmpty) {
