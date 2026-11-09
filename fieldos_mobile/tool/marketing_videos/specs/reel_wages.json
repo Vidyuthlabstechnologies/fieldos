@@ -1,0 +1,8 @@
+{"name":"fieldos-reel-2-saturday-wages","width":1080,"height":1920,"mood":"drive","voice":"af_heart","speed":1.05,"bug":true,
+"scenes":[
+ {"type":"hook","lines":["Saturday payday.","Who worked","how many days?"],"vo":"It's Saturday. The gang is waiting for wages, and the attendance is in a notebook.","min":3.4},
+ {"type":"phone","shot":"07_labour","kicker":"Step 1","title":["Punch in","the whole gang."],"vo":"With Field O S, punch everyone in with G P S, in ten seconds.","highlights":[{"box":[32,596,1016,128],"at":1.0,"hold":1.5}],"taps":[{"at_xy":[796,660],"at":1.8}]},
+ {"type":"phone","shot":"10_workers","kicker":"Step 2","title":["Wages saved","once."],"vo":"Each worker's daily wage is saved once.","highlights":[{"box":[24,515,1032,1110],"at":0.9,"hold":1.8}]},
+ {"type":"phone","shot":"11_wage_sheet","kicker":"Saturday","title":["Wage sheet,","ready."],"vo":"On Saturday the wage sheet is already done: days, overtime, and what's still due.","highlights":[{"box":[30,280,1020,70],"at":1.2,"hold":1.6},{"box":[24,400,1032,920],"at":3.0,"hold":2.0}]},
+ {"type":"cta","vo":"No more notebook fights. Try Field O S free for three days.","min":4.6,"title":"Pay wages without the fights","sub":"Try FieldOS free for 3 days."}
+]}
