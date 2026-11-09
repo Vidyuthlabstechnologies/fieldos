@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:fieldos_mobile/auth/apple_auth.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/auth/google_auth.dart';
 import 'package:fieldos_mobile/core/theme.dart';
@@ -117,6 +118,59 @@ void main() {
     final users = await tester.runAsync(() => container.read(appDatabaseProvider).select(container.read(appDatabaseProvider).users).get());
     expect(users, isEmpty);
   });
+
+  testWidgets('no Apple button off iPhone', (tester) async {
+    await pumpScreen(tester, const LoginScreen(), overrides: [applePickerProvider.overrideWithValue(_FakeApple(available: false))]);
+    expect(find.byKey(const Key('login-apple')), findsNothing);
+  });
+
+  for (final size in sizes) {
+    testWidgets('login with Apple and Google fits ${size.width.toInt()}x${size.height.toInt()}', (tester) async {
+      await pumpScreen(tester, const LoginScreen(), size: size, overrides: [
+        applePickerProvider.overrideWithValue(_FakeApple(available: true)),
+        googlePickerProvider.overrideWithValue(_FakePicker(available: true)),
+      ]);
+      expect(find.byKey(const Key('login-apple')), findsOneWidget);
+      expect(find.text('Continue with Google'), findsOneWidget);
+    });
+  }
+
+  testWidgets('Apple sign-in that the server refuses keeps the phone signed out', (tester) async {
+    final container = await pumpScreen(tester, const LoginScreen(), overrides: [
+      applePickerProvider.overrideWithValue(_FakeApple(available: true)),
+      cloudSyncClientProvider.overrideWithValue(SupabaseClient('http://localhost:1', 'anon',
+          authOptions: const AuthClientOptions(autoRefreshToken: false, authFlowType: AuthFlowType.implicit))),
+    ]);
+    await tester.tap(find.byKey(const Key('login-apple')));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 500)));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('The FieldOS cloud is not answering right now.'), findsOneWidget);
+    final users = await tester.runAsync(() => container.read(appDatabaseProvider).select(container.read(appDatabaseProvider).users).get());
+    expect(users, isEmpty);
+  });
+
+  test('Apple nonce is random, URL-safe, and hashed as hex SHA-256', () async {
+    final a = newAppleNonce();
+    expect(a, hasLength(32));
+    expect(a, matches(RegExp(r'^[0-9A-Za-z._-]+$')));
+    expect(newAppleNonce(), isNot(a));
+    expect(await sha256Hex('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+  });
+
+  test('Apple name is joined from the parts Apple shares', () {
+    expect(appleDisplayName('Meena', 'Rao'), 'Meena Rao');
+    expect(appleDisplayName(' Meena ', null), 'Meena');
+    expect(appleDisplayName(null, ''), isNull);
+  });
+}
+
+class _FakeApple implements AppleAccountPicker {
+  _FakeApple({required this.available});
+  @override
+  final bool available;
+  @override
+  Future<AppleIdentityResult?> pick() async =>
+      const AppleIdentityResult(idToken: 'not-a-real-token', rawNonce: 'nonce', email: 'meena@privaterelay.appleid.com', name: 'Meena');
 }
 
 class _FakePicker implements GoogleAccountPicker {

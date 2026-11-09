@@ -234,6 +234,24 @@ class CloudSyncService {
     }
   }
 
+  /// Team & sync with Sign in with Apple (iPhone): Supabase checks
+  /// [idToken] against the Apple provider (client id = the app's bundle id)
+  /// and the hash of [rawNonce] inside it. Returns the email Supabase has
+  /// for this person, which Apple puts in the token even on later sign-ins
+  /// when it no longer shares it with the app; null when sign-in failed.
+  Future<({CloudSyncResult result, String? email})> enableSyncWithApple({
+    required String idToken,
+    required String rawNonce,
+  }) async {
+    try {
+      final res = await client.auth.signInWithIdToken(provider: OAuthProvider.apple, idToken: idToken, nonce: rawNonce);
+      await _persist();
+      return (result: const CloudSyncResult(CloudSyncOutcome.signedIn), email: res.user?.email);
+    } catch (e, st) {
+      return (result: CloudSyncResult(CloudSyncOutcome.failed, cause: e, stack: st), email: null);
+    }
+  }
+
   /// Finishes a sign-up that [enableSync] reported as
   /// [CloudSyncOutcome.needsEmailConfirmation], with the code from the
   /// confirmation email (supabase/templates/confirmation.html). Throws the

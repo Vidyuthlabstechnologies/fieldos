@@ -5,13 +5,22 @@
 /// Needs GOOGLE_WEB_CLIENT_ID at build time (the "Web application" OAuth
 /// client in Google Cloud, also set as the Google provider's client id in
 /// Supabase). Builds without it don't show the button.
+///
+/// iPhone also needs GOOGLE_IOS_CLIENT_ID (the "iOS" OAuth client for
+/// bundle id com.mldynamic.fieldos) and its reversed form as a URL scheme
+/// (ios/Flutter/Google.xcconfig). Without it the button stays hidden on
+/// iPhone, because the Google SDK would crash rather than fail politely.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 /// The OAuth client Supabase checks the Google ID token against.
 const googleWebClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
+
+/// The iOS OAuth client the Google SDK signs in with on iPhone.
+const googleIosClientId = String.fromEnvironment('GOOGLE_IOS_CLIENT_ID');
 
 class GoogleIdentityResult {
   const GoogleIdentityResult({required this.email, required this.name, required this.idToken});
@@ -32,14 +41,19 @@ abstract class GoogleAccountPicker {
 }
 
 class PlatformGooglePicker implements GoogleAccountPicker {
-  PlatformGooglePicker({this.webClientId = googleWebClientId});
+  PlatformGooglePicker({this.webClientId = googleWebClientId, this.iosClientId = googleIosClientId});
   final String webClientId;
+  final String iosClientId;
   Future<void>? _init;
 
-  @override
-  bool get available => webClientId.isNotEmpty && GoogleSignIn.instance.supportsAuthenticate();
+  bool get _ios => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
-  Future<void> _ready() => _init ??= GoogleSignIn.instance.initialize(serverClientId: webClientId);
+  @override
+  bool get available =>
+      webClientId.isNotEmpty && (!_ios || iosClientId.isNotEmpty) && GoogleSignIn.instance.supportsAuthenticate();
+
+  Future<void> _ready() => _init ??= GoogleSignIn.instance
+      .initialize(clientId: _ios ? iosClientId : null, serverClientId: webClientId);
 
   @override
   Future<GoogleIdentityResult?> pick() async {

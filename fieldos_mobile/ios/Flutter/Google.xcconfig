@@ -1,0 +1,10 @@
+// "Continue with Google" on iPhone opens Google's sign-in page, which
+// returns to the app through this URL scheme: the iOS OAuth client id
+// (Google Cloud > APIs & Services > Credentials > the iOS client for
+// com.mldynamic.fieldos), reversed. It is public (it ships inside every
+// copy of the app), so it is fine in git.
+//
+// The build passes the same client, forwards, as
+// --dart-define=GOOGLE_IOS_CLIENT_ID=...; without it the Google button is
+// hidden on iPhone and this placeholder does nothing.
+GOOGLE_REVERSED_CLIENT_ID = com.mldynamic.fieldos.google-not-set
