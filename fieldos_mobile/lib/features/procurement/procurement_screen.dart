@@ -159,7 +159,7 @@ class _SuppliersTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final suppliers = ref.watch(suppliersProvider(companyId));
-    final ledgers = ref.watch(supplierLedgerProvider(companyId)).valueOrNull ?? const <String, SupplierLedger>{};
+    final ledgers = ref.watch(supplierLedgerProvider(companyId)).value ?? const <String, SupplierLedger>{};
     return Column(
       children: [
         _sectionHeader(context, tr('Suppliers'), () => _add(context, ref)),
@@ -369,7 +369,7 @@ class _RfqTab extends ConsumerWidget {
   }
 
   Future<String?> _pickSupplier(BuildContext context, AsyncValue<List<Supplier>> suppliers) async {
-    final rows = suppliers.valueOrNull ?? [];
+    final rows = suppliers.value ?? [];
     if (rows.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Add a supplier first.'))));
       return null;
@@ -399,8 +399,8 @@ class _PoTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final orders = ref.watch(ordersProvider(projectId));
     final suppliers = ref.watch(suppliersProvider(companyId));
-    final requests = ref.watch(requestsProvider(projectId)).valueOrNull ?? const <PurchaseRequest>[];
-    final receipts = ref.watch(receiptsProvider(projectId)).valueOrNull ?? const <MaterialReceipt>[];
+    final requests = ref.watch(requestsProvider(projectId)).value ?? const <PurchaseRequest>[];
+    final receipts = ref.watch(receiptsProvider(projectId)).value ?? const <MaterialReceipt>[];
     final now = DateTime.now();
     return Column(
       children: [
@@ -443,13 +443,13 @@ class _PoTab extends ConsumerWidget {
   }
 
   Future<void> _sharePo(WidgetRef ref, PurchaseOrder o, AsyncValue<List<Supplier>> suppliers) async {
-    final requests = ref.read(requestsProvider(projectId)).valueOrNull ?? const <PurchaseRequest>[];
-    final projects = ref.read(projectsProvider(companyId)).valueOrNull ?? const <Project>[];
+    final requests = ref.read(requestsProvider(projectId)).value ?? const <PurchaseRequest>[];
+    final projects = ref.read(projectsProvider(companyId)).value ?? const <Project>[];
     final text = poShareText(
       order: o,
       companyName: ref.read(sessionProvider).activeCompany?.name ?? '',
       projectName: projects.where((p) => p.id == projectId).firstOrNull?.name,
-      supplierName: (suppliers.valueOrNull ?? const <Supplier>[]).where((s) => s.id == o.supplierId).firstOrNull?.name,
+      supplierName: (suppliers.value ?? const <Supplier>[]).where((s) => s.id == o.supplierId).firstOrNull?.name,
       request: requests.where((r) => r.id == o.requestId).firstOrNull,
     );
     await SharePlus.instance.share(ShareParams(text: text));
@@ -552,7 +552,7 @@ class _PoTab extends ConsumerWidget {
 }
 
 String _supName(AsyncValue<List<Supplier>> suppliers, String id) {
-  for (final s in suppliers.valueOrNull ?? const <Supplier>[]) {
+  for (final s in suppliers.value ?? const <Supplier>[]) {
     if (s.id == id) return s.name;
   }
   return tr('Supplier not on this phone');

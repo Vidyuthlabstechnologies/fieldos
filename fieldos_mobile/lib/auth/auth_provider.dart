@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/providers.dart' show appDatabaseProvider, authServiceProvider;
 
 const _activeSessionKey = 'active_session_token';
 
@@ -34,12 +35,17 @@ class SessionState {
   bool get canManageSettings => role != null && Roles.canManageSettings(role!);
 }
 
-class SessionNotifier extends StateNotifier<SessionState> {
-  SessionNotifier(this._auth, this._db) : super(const SessionState(restoring: true)) {
+class SessionNotifier extends Notifier<SessionState> {
+  late AuthService _auth;
+  late AppDatabase _db;
+
+  @override
+  SessionState build() {
+    _auth = ref.watch(authServiceProvider);
+    _db = ref.watch(appDatabaseProvider);
     _bootstrap();
+    return const SessionState(restoring: true);
   }
-  final AuthService _auth;
-  final AppDatabase _db;
 
   Future<void> _bootstrap() async {
     try {

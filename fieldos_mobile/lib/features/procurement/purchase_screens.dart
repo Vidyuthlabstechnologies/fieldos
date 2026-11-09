@@ -27,7 +27,7 @@ class MaterialRatesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final receipts = ref.watch(receiptsProvider(projectId));
-    final suppliers = ref.watch(suppliersProvider(companyId)).valueOrNull ?? const <Supplier>[];
+    final suppliers = ref.watch(suppliersProvider(companyId)).value ?? const <Supplier>[];
     String? supplierName(String? id) => suppliers.where((s) => s.id == id).firstOrNull?.name;
     return Scaffold(
       appBar: AppBar(title: Text(tr('Material rates'))),

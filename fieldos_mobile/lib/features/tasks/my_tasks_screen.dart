@@ -77,8 +77,8 @@ class _MyTasksScreenState extends ConsumerState<MyTasksScreen> {
   @override
   Widget build(BuildContext context) {
     final tasksAsync = ref.watch(openTasksProvider(widget.companyId));
-    final projects = ref.watch(projectsProvider(widget.companyId)).valueOrNull ?? const <Project>[];
-    final roster = ref.watch(teamRosterProvider(widget.companyId)).valueOrNull ??
+    final projects = ref.watch(projectsProvider(widget.companyId)).value ?? const <Project>[];
+    final roster = ref.watch(teamRosterProvider(widget.companyId)).value ??
         const TeamRoster(members: [], myUserId: null);
     final canFilter = roster.myUserId != null;
     final mine = canFilter && (_mine ?? true);
