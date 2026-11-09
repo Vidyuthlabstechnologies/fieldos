@@ -123,6 +123,9 @@ final receiptsProvider = FutureProvider.autoDispose.family<List<MaterialReceipt>
 /// Labour attendance + GPS geofence for a project.
 final attendanceProvider = FutureProvider.autoDispose.family<List<LabourAttendanceData>, String>(
     (ref, projectId) => ref.watch(appDatabaseProvider).attendanceDao.forProject(projectId));
+/// Days marked by hand on the day register.
+final attendanceMarksProvider = FutureProvider.autoDispose.family<List<AttendanceMark>, String>(
+    (ref, projectId) => ref.watch(appDatabaseProvider).attendanceDao.marksForProject(projectId));
 final geofenceProvider = FutureProvider.autoDispose.family<ProjectGeofence?, String>(
     (ref, projectId) => ref.watch(appDatabaseProvider).geofenceDao.effectiveFor(projectId));
 

@@ -247,6 +247,10 @@ class Suppliers extends Table {
   TextColumn get notes => text().withLength(max: 500).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
+  /// v13: what was owed to the supplier when the company started using
+  /// FieldOS (negative: an advance they still hold).
+  RealColumn get openingBalance => real().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -343,6 +347,28 @@ class SiteExpenses extends Table {
   /// sheet can show what each person has already been paid.
   TextColumn get workerId => text().withLength(max: 36).nullable()();
 
+  // v10, the money book (Onsite customers asked for vouchers an accountant
+  // can work with): who was paid, how, GST, a voucher number, and edits
+  // and cancellations that keep a trail instead of deleting.
+  /// Who the money went to when it isn't one of the site's workers
+  /// ("Balaji Hardware", "Tractor driver").
+  TextColumn get paidTo => text().withLength(max: 120).nullable()();
+  /// cash, upi, bank or cheque, like PaymentsReceived.mode.
+  TextColumn get mode => text().withLength(max: 20).nullable()();
+  /// GST rate in percent when the bill carried GST. [amount] is always what
+  /// was paid in total, GST included.
+  RealColumn get gstPct => real().nullable()();
+  /// IGST (another state) instead of CGST + SGST.
+  BoolColumn get gstInterState => boolean().withDefault(const Constant(false))();
+  /// Voucher number within the site: 1, 2, 3...
+  IntColumn get voucherNo => integer().nullable()();
+  /// Cancelled entries stay (struck through, with the reason) so the
+  /// voucher numbers have no gaps; they count in no total.
+  BoolColumn get voided => boolean().withDefault(const Constant(false))();
+  TextColumn get voidReason => text().withLength(max: 200).nullable()();
+  DateTimeColumn get editedAt => dateTime().nullable()();
+  TextColumn get editedBy => text().withLength(max: 64).nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -376,6 +402,11 @@ class PaymentsReceived extends Table {
   TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
   TextColumn get note => text().withLength(max: 300).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  // v10: corrected or cancelled with a trail, like SiteExpenses.
+  BoolColumn get voided => boolean().withDefault(const Constant(false))();
+  TextColumn get voidReason => text().withLength(max: 200).nullable()();
+  DateTimeColumn get editedAt => dateTime().nullable()();
+  TextColumn get editedBy => text().withLength(max: 64).nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -427,6 +458,58 @@ class LabourAttendance extends Table {
   RealColumn get lng => real().nullable()();
   BoolColumn get withinGeofence => boolean().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A day's attendance marked by hand for one worker: absent, a quarter,
+/// half or full day, or 1½, double or triple for overtime. It takes the
+/// place of what that day's punches would count, so sites that keep a
+/// muster roll instead of GPS punches still get a right wage sheet. One
+/// row per worker per day; [units] null means "count the punches again".
+class AttendanceMarks extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get workerId => text().withLength(min: 1, max: 36)();
+
+  /// yyyy-mm-dd, local day.
+  TextColumn get day => text().withLength(min: 10, max: 10)();
+  RealColumn get units => real().nullable()();
+  TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A bill, receipt or quotation kept with an expense: a photo or a PDF.
+/// The file stays on the phone that added it, like DPR photos (v14).
+class ExpenseAttachments extends Table {
+  TextColumn get id => text()();
+  TextColumn get expenseId => text().withLength(min: 1, max: 36)();
+  TextColumn get filePath => text().withLength(min: 1, max: 500)();
+  /// image/jpeg, image/png or application/pdf.
+  TextColumn get mimeType => text().withLength(max: 100)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// The site's notebook: what was agreed with the client, measurements to
+/// check, phone numbers, reminders (v14, synced as site_notes). A removed
+/// note is marked [deleted] rather than dropped, because pulls don't carry
+/// deletes.
+class ProjectNotes extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get body => text().withLength(min: 1, max: 4000)();
+  BoolColumn get pinned => boolean().withDefault(const Constant(false))();
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -506,6 +589,17 @@ class Equipment extends Table {
   RealColumn get dailyRate => real().nullable()();
   TextColumn get notes => text().withLength(max: 500).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  // v12 (Onsite review batch R4): machines charged by the hour, and the
+  // hire register for machines taken on rent.
+  RealColumn get hourlyRate => real().nullable()();
+
+  /// 'own' or 'hired'.
+  TextColumn get ownership => text().withLength(min: 1, max: 10).withDefault(const Constant('own'))();
+  TextColumn get hiredFrom => text().withLength(max: 120).nullable()();
+  DateTimeColumn get hiredOn => dateTime().nullable()();
+  DateTimeColumn get returnDueOn => dateTime().nullable()();
+  DateTimeColumn get returnedOn => dateTime().nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};

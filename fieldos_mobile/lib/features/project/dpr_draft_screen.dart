@@ -207,8 +207,8 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
   }
 
   Future<void> _addPhoto() async {
-    final path = await captureCameraFirst(context, prefix: 'dpr', place: widget.project.name);
-    if (path != null && mounted) setState(() => _photos.add(path));
+    final picked = await captureCameraFirstMany(context, prefix: 'dpr', place: widget.project.name);
+    if (picked.isNotEmpty && mounted) setState(() => _photos.addAll(picked.map((f) => f.path)));
   }
 
   void _save() {
@@ -435,7 +435,7 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                         Icon(Icons.add_a_photo_outlined, color: theme.colorScheme.primary),
                         const SizedBox(height: 4),
-                        Text(tr('Add photo'), style: theme.textTheme.labelSmall),
+                        Text(tr('Add photos'), style: theme.textTheme.labelSmall),
                       ]),
                     ),
                   ),

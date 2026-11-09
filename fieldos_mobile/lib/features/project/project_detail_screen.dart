@@ -5,10 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/features/project/site_notes_screen.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/reports/period_report_screen.dart';
 import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
 import 'package:fieldos_mobile/features/project/dpr_draft_screen.dart';
@@ -148,13 +151,33 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
             onSelected: (v) {
               if (v == 'stage') _changeStage();
               if (v == 'report') openPeriodReport(context, widget.project);
+              if (v == 'excel') exportProjectToExcel(context, ref, widget.project);
+              if (v == 'notes') {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => SiteNotesScreen(projectId: widget.project.id, siteName: widget.project.name),
+                ));
+              }
             },
             itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'notes',
+                child: ListTile(
+                  leading: const Icon(Icons.sticky_note_2_outlined),
+                  title: Text(tr('Site notes')),
+                ),
+              ),
               PopupMenuItem(
                 value: 'report',
                 child: ListTile(
                   leading: const Icon(Icons.summarize_outlined),
                   title: Text(tr('Weekly or monthly report')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'excel',
+                child: ListTile(
+                  leading: const Icon(Icons.table_view_outlined),
+                  title: Text(tr('Export to Excel')),
                 ),
               ),
               PopupMenuItem(
@@ -373,6 +396,12 @@ class _DprTabState extends ConsumerState<_DprTab> {
     }
   }
 
+  /// The report's author, an owner or a PM may take photos off it.
+  bool _canChangeReport(DprEntry d) {
+    final session = ref.read(sessionProvider);
+    return d.createdBy == session.user?.id || Roles.canApprove(session.role);
+  }
+
   void _showDetails(DprEntry d, int issueCount) {
     showModalBottomSheet<void>(
       context: context,
@@ -391,16 +420,10 @@ class _DprTabState extends ConsumerState<_DprTab> {
             _DprFacts(dpr: d, issueCount: issueCount),
             const SizedBox(height: 16),
             SelectableText(d.workSummary, style: Theme.of(ctx).textTheme.bodyLarge?.copyWith(height: 1.45)),
-            FutureBuilder<List<DprPhoto>>(
-              future: ref.read(appDatabaseProvider).dprDao.photosFor(d.id),
-              builder: (ctx, snap) {
-                final paths = photosOnThisPhone((snap.data ?? const <DprPhoto>[]).map((p) => p.photoPath));
-                if (paths.isEmpty) return const SizedBox.shrink();
-                return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const SectionHeader('Photos'),
-                  PhotoStrip(paths: paths, shareText: '${widget.project.name} · ${fmtDate(d.entryDate)}'),
-                ]);
-              },
+            DprPhotosBlock(
+              dpr: d,
+              shareText: '${widget.project.name} · ${fmtDate(d.entryDate)}',
+              canDelete: _canChangeReport(d),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
@@ -708,6 +731,52 @@ class _IssuesTab extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// A saved report's photos. Whoever may change the report can delete one
+/// from the full-screen viewer, and the strip reloads.
+class DprPhotosBlock extends ConsumerStatefulWidget {
+  const DprPhotosBlock({super.key, required this.dpr, required this.shareText, this.canDelete = false});
+  final DprEntry dpr;
+  final String shareText;
+  final bool canDelete;
+
+  @override
+  ConsumerState<DprPhotosBlock> createState() => _DprPhotosBlockState();
+}
+
+class _DprPhotosBlockState extends ConsumerState<DprPhotosBlock> {
+  late Future<List<DprPhoto>> _photos = _load();
+
+  Future<List<DprPhoto>> _load() => ref.read(appDatabaseProvider).dprDao.photosFor(widget.dpr.id);
+
+  Future<void> _delete(List<DprPhoto> photos, String path) async {
+    final db = ref.read(appDatabaseProvider);
+    for (final p in photos.where((p) => p.photoPath == path)) {
+      await db.dprDao.deletePhoto(p.id);
+    }
+    if (mounted) setState(() => _photos = _load());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<DprPhoto>>(
+      future: _photos,
+      builder: (ctx, snap) {
+        final photos = snap.data ?? const <DprPhoto>[];
+        final paths = photosOnThisPhone(photos.map((p) => p.photoPath));
+        if (paths.isEmpty) return const SizedBox.shrink();
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const SectionHeader('Photos'),
+          PhotoStrip(
+            paths: paths,
+            shareText: widget.shareText,
+            onDelete: widget.canDelete ? (path) => _delete(photos, path) : null,
+          ),
+        ]);
+      },
     );
   }
 }

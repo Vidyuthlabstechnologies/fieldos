@@ -120,7 +120,25 @@ Map<String, dynamic> equipmentToSupabaseJson(EquipmentData e) => {
       'status': e.status,
       'daily_rate': e.dailyRate,
       'notes': e.notes,
+      // v12 hire columns go only when used, like the money book's.
+      if (e.hourlyRate != null || e.ownership != 'own') ...{
+        'hourly_rate': e.hourlyRate,
+        'ownership': e.ownership,
+        'hired_from': e.hiredFrom,
+        'hired_on': _isoDate(e.hiredOn),
+        'return_due_on': _isoDate(e.returnDueOn),
+        'returned_on': _isoDate(e.returnedOn),
+      },
     };
+
+String? _isoDate(DateTime? d) => d == null
+    ? null
+    : '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+DateTime? _readDate(Object? v) {
+  final d = v == null ? null : DateTime.tryParse(v as String);
+  return d == null ? null : DateTime(d.year, d.month, d.day);
+}
 
 Map<String, dynamic> inspectionToSupabaseJson(Inspection i) => {
       'id': i.id,
@@ -196,6 +214,7 @@ Map<String, dynamic> supplierToSupabaseJson(Supplier s) => {
       'gst_number': s.gstNumber,
       'category': s.category,
       'notes': s.notes,
+      if (s.openingBalance != null) 'opening_balance': s.openingBalance,
     };
 
 Map<String, dynamic> estimationToSupabaseJson(Estimation e) => {
@@ -375,6 +394,12 @@ EquipmentCompanion equipmentFromSupabaseJson(Map<String, dynamic> row) => Equipm
       status: Value(row['status'] as String? ?? 'available'),
       dailyRate: Value((row['daily_rate'] as num?)?.toDouble()),
       notes: Value(row['notes'] as String?),
+      hourlyRate: _ifSent(row, 'hourly_rate', (v) => (v as num?)?.toDouble()),
+      ownership: _ifSent(row, 'ownership', (v) => v as String? ?? 'own'),
+      hiredFrom: _ifSent(row, 'hired_from', (v) => v as String?),
+      hiredOn: _ifSent(row, 'hired_on', _readDate),
+      returnDueOn: _ifSent(row, 'return_due_on', _readDate),
+      returnedOn: _ifSent(row, 'returned_on', _readDate),
     );
 
 InspectionsCompanion inspectionFromSupabaseJson(Map<String, dynamic> row) => InspectionsCompanion.insert(
@@ -452,6 +477,7 @@ SuppliersCompanion supplierFromSupabaseJson(Map<String, dynamic> row) => Supplie
       gstNumber: Value(row['gst_number'] as String?),
       category: Value(row['category'] as String?),
       notes: Value(row['notes'] as String?),
+      openingBalance: _ifSent(row, 'opening_balance', (v) => (v as num?)?.toDouble()),
     );
 
 EstimationsCompanion estimationFromSupabaseJson(Map<String, dynamic> row) => EstimationsCompanion.insert(
@@ -593,7 +619,35 @@ Map<String, dynamic> siteExpenseToSupabaseJson(SiteExpense e) => {
       'recorded_by': e.recordedBy,
       'note': e.note,
       'worker_id': e.workerId,
+      // v10 money-book columns go only when set. Entries made on v10 always
+      // carry a voucher number, so 20261109000000_money_book.sql must be in
+      // the cloud before a v10 build ships; older rows sync either way.
+      if (_usesMoneyBook(e)) ...{
+        'paid_to': e.paidTo,
+        'mode': e.mode,
+        'gst_pct': e.gstPct,
+        'gst_inter_state': e.gstInterState,
+        'voucher_no': e.voucherNo,
+        'voided': e.voided,
+        'void_reason': e.voidReason,
+        'edited_at': e.editedAt == null ? null : _timestamp(e.editedAt!.toUtc()),
+        'edited_by': e.editedBy,
+      },
     };
+
+bool _usesMoneyBook(SiteExpense e) =>
+    e.paidTo != null ||
+    e.mode != null ||
+    e.gstPct != null ||
+    e.gstInterState ||
+    e.voided ||
+    e.editedAt != null ||
+    (e.voucherNo != null && e.voucherNo! > 0);
+
+/// A column the cloud didn't send (an older cloud schema) leaves the local
+/// value alone instead of wiping it.
+Value<T> _ifSent<T>(Map<String, dynamic> row, String key, T Function(Object? v) read) =>
+    row.containsKey(key) ? Value(read(row[key])) : const Value.absent();
 
 SiteExpensesCompanion siteExpenseFromSupabaseJson(Map<String, dynamic> row) => SiteExpensesCompanion(
       id: Value(row['id'] as String),
@@ -605,6 +659,17 @@ SiteExpensesCompanion siteExpenseFromSupabaseJson(Map<String, dynamic> row) => S
       recordedBy: Value(row['recorded_by'] as String),
       note: Value(row['note'] as String?),
       workerId: Value(row['worker_id'] as String?),
+      paidTo: _ifSent(row, 'paid_to', (v) => v as String?),
+      mode: _ifSent(row, 'mode', (v) => v as String?),
+      gstPct: _ifSent(row, 'gst_pct', (v) => v == null ? null : _num(v)),
+      gstInterState: _ifSent(row, 'gst_inter_state', (v) => v as bool? ?? false),
+      // A voucher number is never taken away: a row the cloud hasn't
+      // numbered yet keeps the one this phone gave it.
+      voucherNo: row['voucher_no'] == null ? const Value.absent() : Value((row['voucher_no'] as num).toInt()),
+      voided: _ifSent(row, 'voided', (v) => v as bool? ?? false),
+      voidReason: _ifSent(row, 'void_reason', (v) => v as String?),
+      editedAt: _ifSent(row, 'edited_at', (v) => v == null ? null : _parseTs(v)),
+      editedBy: _ifSent(row, 'edited_by', (v) => v as String?),
     );
 
 Map<String, dynamic> materialReceiptToSupabaseJson(MaterialReceipt r) => {
@@ -668,6 +733,12 @@ Map<String, dynamic> paymentReceivedToSupabaseJson(PaymentsReceivedData p) => {
       'mode': p.mode,
       'recorded_by': p.recordedBy,
       'note': p.note,
+      if (p.voided || p.editedAt != null) ...{
+        'voided': p.voided,
+        'void_reason': p.voidReason,
+        'edited_at': p.editedAt == null ? null : _timestamp(p.editedAt!.toUtc()),
+        'edited_by': p.editedBy,
+      },
     };
 
 PaymentsReceivedCompanion paymentReceivedFromSupabaseJson(Map<String, dynamic> row) => PaymentsReceivedCompanion(
@@ -679,6 +750,10 @@ PaymentsReceivedCompanion paymentReceivedFromSupabaseJson(Map<String, dynamic> r
       mode: Value(row['mode'] as String),
       recordedBy: Value(row['recorded_by'] as String),
       note: Value(row['note'] as String?),
+      voided: _ifSent(row, 'voided', (v) => v as bool? ?? false),
+      voidReason: _ifSent(row, 'void_reason', (v) => v as String?),
+      editedAt: _ifSent(row, 'edited_at', (v) => v == null ? null : _parseTs(v)),
+      editedBy: _ifSent(row, 'edited_by', (v) => v as String?),
     );
 
 // ---------------------------------------------------------------------------
@@ -725,4 +800,56 @@ ClientBillsCompanion clientBillFromSupabaseJson(Map<String, dynamic> row) => Cli
       status: Value(row['status'] as String? ?? 'issued'),
       notes: Value(row['notes'] as String?),
       recordedBy: row['recorded_by'] as String,
+    );
+
+// --- Attendance marks (app schema v11, 20261109010000_attendance_marks.sql)
+
+Map<String, dynamic> attendanceMarkToSupabaseJson(AttendanceMark m) => {
+      'id': m.id,
+      'project_id': m.projectId,
+      'worker_id': m.workerId,
+      'day': m.day,
+      'units': m.units,
+      'recorded_by': m.recordedBy,
+      'updated_at': _timestamp(m.updatedAt.toUtc()),
+    };
+
+AttendanceMarksCompanion attendanceMarkFromSupabaseJson(Map<String, dynamic> row) => AttendanceMarksCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      workerId: row['worker_id'] as String,
+      day: row['day'] as String,
+      units: Value((row['units'] as num?)?.toDouble()),
+      recordedBy: row['recorded_by'] as String,
+      updatedAt: row['updated_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['updated_at'] as String).toLocal()),
+    );
+
+// --- Site notes (app schema v14, 20261109040000_site_notes.sql)
+
+Map<String, dynamic> projectNoteToSupabaseJson(ProjectNote n) => {
+      'id': n.id,
+      'project_id': n.projectId,
+      'body': n.body,
+      'pinned': n.pinned,
+      'deleted': n.deleted,
+      'created_by': n.createdBy,
+      'created_at': _timestamp(n.createdAt.toUtc()),
+      'updated_at': _timestamp(n.updatedAt.toUtc()),
+    };
+
+ProjectNotesCompanion projectNoteFromSupabaseJson(Map<String, dynamic> row) => ProjectNotesCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      body: row['body'] as String,
+      pinned: Value(row['pinned'] as bool? ?? false),
+      deleted: Value(row['deleted'] as bool? ?? false),
+      createdBy: row['created_by'] as String,
+      createdAt: row['created_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['created_at'] as String).toLocal()),
+      updatedAt: row['updated_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['updated_at'] as String).toLocal()),
     );

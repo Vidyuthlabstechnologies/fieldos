@@ -70,6 +70,7 @@ void main() {
     Brightness brightness = Brightness.light,
     bool codes = true,
     Object? plansError,
+    bool withCompany = false,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -87,6 +88,13 @@ void main() {
       container.dispose();
       await db.close();
     });
+    if (withCompany) {
+      await tester.runAsync(() async {
+        final session = container.read(sessionProvider.notifier);
+        await session.register(username: 'ravi', name: 'Ravi Kumar', password: '123456');
+        await session.createCompany('Sri Sai Constructions');
+      });
+    }
     await tester.pumpWidget(UncontrolledProviderScope(
       container: container,
       child: MaterialApp(
@@ -122,6 +130,21 @@ void main() {
     await tapBuy(tester);
     expect(billing.bought, ['m']);
     expect(unlocked, ['yes']);
+  });
+
+  // Onsite's most-liked review: "either pay 35k a year or we delete your
+  // data". Here the paywall promises the opposite and the export is on it.
+  testWidgets('the paywall says records are kept and offers the Excel export', (tester) async {
+    await pump(tester, withCompany: true);
+    await tester.ensureVisible(find.byKey(const Key('paywall-your-data')));
+    expect(find.text('Your records stay yours'), findsOneWidget);
+    expect(find.textContaining('never deleted when a plan ends'), findsOneWidget);
+    expect(find.byKey(const Key('paywall-export')), findsOneWidget);
+  });
+
+  testWidgets('before a company exists there is nothing to export, so no card', (tester) async {
+    await pump(tester);
+    expect(find.byKey(const Key('paywall-your-data')), findsNothing);
   });
 
   testWidgets('plans that are not on sale yet are not blamed on the internet', (tester) async {

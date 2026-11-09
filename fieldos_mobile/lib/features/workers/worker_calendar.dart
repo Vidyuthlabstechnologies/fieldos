@@ -19,7 +19,10 @@ class DayMark {
   final DateTime day;
   double hours = 0;
   bool openPunch = false;
-  double get credit => dayCredit(hours, hasOpenPunch: openPunch);
+
+  /// Days of pay marked by hand, which replace what the punches count.
+  double? marked;
+  double get credit => marked ?? dayCredit(hours, hasOpenPunch: openPunch);
   double get overtime => hours > overtimeAfterHours ? hours - overtimeAfterHours : 0;
 }
 
@@ -33,14 +36,15 @@ class WorkerMonth {
   double get daysWorked => days.values.fold(0, (s, d) => s + d.credit);
   double get hours => days.values.fold(0, (s, d) => s + d.hours);
   double get overtime => days.values.fold(0, (s, d) => s + d.overtime);
-  int get missedPunchOuts => days.values.where((d) => d.openPunch).length;
+  int get missedPunchOuts => days.values.where((d) => d.openPunch && d.marked == null).length;
 }
 
 bool punchIsFor(LabourAttendanceData p, Worker w) =>
     p.workerId != null ? p.workerId == w.id : p.workerName.trim().toLowerCase() == w.name.trim().toLowerCase();
 
 /// The same counting as the wage sheet, so the calendar and the pay agree.
-WorkerMonth buildWorkerMonth(Iterable<LabourAttendanceData> punches, Worker worker, DateTime anyDayInMonth) {
+WorkerMonth buildWorkerMonth(Iterable<LabourAttendanceData> punches, Worker worker, DateTime anyDayInMonth,
+    {Iterable<AttendanceMark> marks = const []}) {
   final month = DateTime(anyDayInMonth.year, anyDayInMonth.month);
   final next = DateTime(month.year, month.month + 1);
   final days = <int, DayMark>{};
@@ -56,6 +60,10 @@ WorkerMonth buildWorkerMonth(Iterable<LabourAttendanceData> punches, Worker work
     } else {
       mark.hours += h;
     }
+  }
+  for (final MapEntry(key: day, value: units) in (marksByWorker(marks)[worker.id] ?? const {}).entries) {
+    if (day.isBefore(month) || !day.isBefore(next)) continue;
+    days.putIfAbsent(day.day, () => DayMark(day)).marked = units;
   }
   return WorkerMonth(month, days);
 }
@@ -80,6 +88,10 @@ class _WorkerCalendarScreenState extends ConsumerState<WorkerCalendarScreen> {
   late DateTime _month = DateTime((widget.now ?? DateTime.now()).year, (widget.now ?? DateTime.now()).month);
   late final Future<List<LabourAttendanceData>> _punches =
       ref.read(appDatabaseProvider).attendanceDao.forProject(widget.worker.projectId);
+  late final Future<List<AttendanceMark>> _marks =
+      ref.read(appDatabaseProvider).attendanceDao.marksForProject(widget.worker.projectId);
+  late final Future<(List<LabourAttendanceData>, List<AttendanceMark>)> _data =
+      Future.wait([_punches, _marks]).then((r) => (r[0] as List<LabourAttendanceData>, r[1] as List<AttendanceMark>));
 
   void _shift(int months) => setState(() => _month = DateTime(_month.year, _month.month + months));
 
@@ -90,11 +102,11 @@ class _WorkerCalendarScreenState extends ConsumerState<WorkerCalendarScreen> {
     final isCurrent = _month.year == now.year && _month.month == now.month;
     return Scaffold(
       appBar: AppBar(title: Text(widget.worker.name)),
-      body: FutureBuilder<List<LabourAttendanceData>>(
-        future: _punches,
+      body: FutureBuilder<(List<LabourAttendanceData>, List<AttendanceMark>)>(
+        future: _data,
         builder: (context, snap) {
           if (!snap.hasData) return const Center(child: CircularProgressIndicator());
-          final m = buildWorkerMonth(snap.data!, widget.worker, _month);
+          final m = buildWorkerMonth(snap.data!.$1, widget.worker, _month, marks: snap.data!.$2);
           final wage = widget.worker.dailyWage;
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -130,7 +142,7 @@ class _WorkerCalendarScreenState extends ConsumerState<WorkerCalendarScreen> {
                 if (m.missedPunchOuts > 0)
                   StatusPill(trf('{n} punch-outs missed', {'n': m.missedPunchOuts}), tone: PillTone.danger),
                 if (wage != null && wage > 0)
-                  StatusPill(trf('Earned {amount}', {'amount': rupees(m.daysWorked * wage)})),
+                  StatusPill(trf('Earned {amount}', {'amount': rupees(m.daysWorked * wage, paise: true)})),
               ]),
               if (m.days.isEmpty)
                 Padding(
@@ -192,6 +204,12 @@ class _DayCell extends StatelessWidget {
     final m = mark;
     final Color? fill = m == null
         ? null
+        : m.marked != null
+            ? (m.marked! >= 1
+                ? toneColor(context, PillTone.ok)
+                : m.marked! > 0
+                    ? toneColor(context, PillTone.warn)
+                    : toneColor(context, PillTone.danger))
         : m.openPunch && m.hours == 0
             ? toneColor(context, PillTone.danger)
             : m.credit >= 1
@@ -201,7 +219,9 @@ class _DayCell extends StatelessWidget {
                     : toneColor(context, PillTone.danger);
     final label = m == null
         ? '$day'
-        : '$day, ${m.hours.toStringAsFixed(1)} h${m.openPunch ? ', no punch-out' : ''}';
+        : m.marked != null
+            ? '$day, marked ${markLabel(m.marked!)}'
+            : '$day, ${m.hours.toStringAsFixed(1)} h${m.openPunch ? ', no punch-out' : ''}';
     return Semantics(
       label: label,
       excludeSemantics: true,
@@ -212,7 +232,11 @@ class _DayCell extends StatelessWidget {
           border: isToday ? Border.all(color: theme.colorScheme.primary, width: 2) : null,
         ),
         alignment: Alignment.center,
-        child: Text('$day', style: TextStyle(color: fill == null ? null : Colors.white, fontWeight: FontWeight.w600)),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text('$day', style: TextStyle(color: fill == null ? null : Colors.white, fontWeight: FontWeight.w600)),
+          if (m?.marked != null)
+            Text(markLabel(m!.marked!), style: const TextStyle(color: Colors.white, fontSize: 10, height: 1)),
+        ]),
       ),
     );
   }

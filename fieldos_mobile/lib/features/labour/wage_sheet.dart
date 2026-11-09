@@ -28,6 +28,38 @@ double dayCredit(double closedHours, {required bool hasOpenPunch}) {
   return hasOpenPunch && credit < 0.5 ? 0.5 : credit;
 }
 
+/// What a hand mark can say about a day, as days of pay.
+const markUnits = [0.0, 0.25, 0.5, 1.0, 1.5, 2.0, 3.0];
+
+/// "½", "1½", "2×"... as shown on the register and the calendar.
+String markLabel(double units) => switch (units) {
+      0 => 'A',
+      0.25 => '¼',
+      0.5 => '½',
+      1 => '1',
+      1.5 => '1½',
+      2 => '2×',
+      3 => '3×',
+      _ => units.toString(),
+    };
+
+/// yyyy-mm-dd for a local day, as marks store it.
+String markDay(DateTime d) =>
+    '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+/// The marks that count, as worker id -> day -> units. Cleared marks
+/// (null units) are left out, so those days go back to their punches.
+Map<String, Map<DateTime, double>> marksByWorker(Iterable<AttendanceMark> marks) {
+  final out = <String, Map<DateTime, double>>{};
+  for (final m in marks) {
+    final u = m.units;
+    final d = DateTime.tryParse(m.day);
+    if (u == null || d == null) continue;
+    out.putIfAbsent(m.workerId, () => {})[DateTime(d.year, d.month, d.day)] = u;
+  }
+  return out;
+}
+
 class WageLine {
   WageLine({required this.key, required this.name, this.workerId, this.dailyWage});
 
@@ -39,6 +71,9 @@ class WageLine {
   double hours = 0;
   double overtimeHours = 0;
   int missingPunchOuts = 0;
+
+  /// Days in the period whose pay comes from a hand mark.
+  int markedDays = 0;
   double paidInPeriod = 0;
   double earnedBefore = 0;
   double paidBefore = 0;
@@ -79,8 +114,10 @@ WageSheet buildWageSheet({
   required List<SiteExpense> expenses,
   required DateTime from,
   required DateTime to,
+  Iterable<AttendanceMark> marks = const [],
 }) {
   final byId = {for (final w in workers) w.id: w};
+  final marked = marksByWorker(marks);
   final lines = <String, WageLine>{};
 
   WageLine lineFor(String? workerId, String name) {
@@ -110,14 +147,34 @@ WageSheet buildWageSheet({
           hours += h;
         }
       }
-      final credit = dayCredit(hours, hasOpenPunch: open);
+      // A hand mark for the day decides its pay; the hours stay on show.
+      final mark = line.workerId == null ? null : marked[line.workerId]?[day.key];
+      final credit = mark ?? dayCredit(hours, hasOpenPunch: open);
       if (day.key.isBefore(from)) {
         line.earnedBefore += credit * (line.dailyWage ?? 0);
       } else if (day.key.isBefore(to)) {
         line.days += credit;
         line.hours += hours;
         if (hours > overtimeAfterHours) line.overtimeHours += hours - overtimeAfterHours;
-        if (open) line.missingPunchOuts++;
+        if (open && mark == null) line.missingPunchOuts++;
+        if (mark != null) line.markedDays++;
+      }
+    }
+  }
+
+  // Days marked by hand with no punch at all.
+  for (final MapEntry(key: workerId, value: byDay) in marked.entries) {
+    final w = byId[workerId];
+    if (w == null) continue;
+    final line = lineFor(w.id, w.name);
+    final punched = days[line.key] ?? const {};
+    for (final MapEntry(key: day, value: units) in byDay.entries) {
+      if (punched.containsKey(day)) continue;
+      if (day.isBefore(from)) {
+        line.earnedBefore += units * (line.dailyWage ?? 0);
+      } else if (day.isBefore(to)) {
+        line.days += units;
+        line.markedDays++;
       }
     }
   }

@@ -9,6 +9,8 @@ import 'package:uuid/uuid.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/equipment/hire_register.dart';
+import 'package:fieldos_mobile/features/equipment/hire_register_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
@@ -28,6 +30,8 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
     return Column(
       children: [
         _sectionHeader(context, 'Equipment', () => _addEquipment(context, ref)),
+        if (equipmentList.valueOrNull?.any(isHired) ?? false)
+          _HireSummary(equipment: equipmentList.value!, projectId: widget.projectId),
         Expanded(
           child: equipmentList.when(
             data: (rows) => rows.isEmpty
@@ -46,25 +50,47 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
     );
   }
 
-  Future<void> _addEquipment(BuildContext context, WidgetRef ref) async {
-    final name = TextEditingController();
-    final equipmentType = TextEditingController();
-    final model = TextEditingController();
-    final registrationNumber = TextEditingController();
-    final dailyRate = TextEditingController();
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr('Add equipment')),
+  Future<void> _addEquipment(BuildContext context, WidgetRef ref) =>
+      editEquipment(context, ref, projectId: widget.projectId);
+}
+
+/// Adds a machine, or changes [existing]: its rates, and for a hired one
+/// who it came from, since when and when it goes back.
+Future<void> editEquipment(BuildContext context, WidgetRef ref,
+    {required String projectId, EquipmentData? existing}) async {
+  final e = existing;
+  final name = TextEditingController(text: e?.name ?? '');
+  final equipmentType = TextEditingController(text: e?.equipmentType ?? '');
+  final model = TextEditingController(text: e?.model ?? '');
+  final registrationNumber = TextEditingController(text: e?.registrationNumber ?? '');
+  final dailyRate = TextEditingController(text: _plain(e?.dailyRate));
+  final hourlyRate = TextEditingController(text: _plain(e?.hourlyRate));
+  final hiredFrom = TextEditingController(text: e?.hiredFrom ?? '');
+  var hired = e?.ownership == 'hired';
+  final today = DateTime.now();
+  var hiredOn = e?.hiredOn ?? DateTime(today.year, today.month, today.day);
+  DateTime? returnDue = e?.returnDueOn;
+  String? nameError;
+
+  Future<DateTime?> pick(BuildContext ctx, DateTime initial, {DateTime? first}) => showDatePicker(
+      context: ctx, initialDate: initial, firstDate: first ?? DateTime(2020), lastDate: DateTime(today.year + 3));
+
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, set) => AlertDialog(
+        title: Text(e == null ? tr('Add equipment') : tr('Edit equipment')),
         scrollable: true,
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
+              key: const Key('equipment-name'),
               controller: name,
-              autofocus: true,
+              autofocus: e == null,
               textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(labelText: tr('Name'), hintText: tr('e.g. JCB 3DX')),
+              decoration: InputDecoration(labelText: tr('Name'), hintText: tr('e.g. JCB 3DX'), errorText: nameError),
             ),
             TextField(
               controller: equipmentType,
@@ -81,37 +107,113 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
               decoration: InputDecoration(labelText: tr('Registration number (optional)')),
             ),
             TextField(
+              key: const Key('equipment-hourly-rate'),
+              controller: hourlyRate,
+              decoration: InputDecoration(labelText: tr('Rate per hour (optional)'), prefixText: '₹ '),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+            TextField(
               controller: dailyRate,
               decoration: InputDecoration(labelText: tr('Daily rate (optional)'), prefixText: '₹ '),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
+            SwitchListTile(
+              key: const Key('equipment-hired'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(tr('Hired from someone')),
+              value: hired,
+              onChanged: (v) => set(() => hired = v),
+            ),
+            if (hired) ...[
+              TextField(
+                key: const Key('equipment-hired-from'),
+                controller: hiredFrom,
+                maxLength: 120,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(labelText: tr('Hired from'), counterText: ''),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.event),
+                title: Text(tr('On site since')),
+                subtitle: Text(fmtDate(hiredOn)),
+                onTap: () async {
+                  final d = await pick(ctx, hiredOn);
+                  if (d == null) return;
+                  set(() {
+                    hiredOn = d;
+                    if (returnDue != null && returnDue!.isBefore(d)) returnDue = d;
+                  });
+                },
+              ),
+              ListTile(
+                key: const Key('equipment-return-due'),
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.event_available),
+                title: Text(tr('Goes back on (optional)')),
+                subtitle: Text(returnDue == null ? tr('Not agreed') : fmtDate(returnDue!)),
+                trailing: returnDue == null
+                    ? null
+                    : IconButton(
+                        tooltip: tr('Clear'), icon: const Icon(Icons.close), onPressed: () => set(() => returnDue = null)),
+                onTap: () async {
+                  final d = await pick(ctx, returnDue ?? hiredOn.add(const Duration(days: 7)), first: hiredOn);
+                  if (d != null) set(() => returnDue = d);
+                },
+              ),
+            ],
           ],
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
+          FilledButton(
+            key: const Key('equipment-save'),
+            onPressed: () {
+              if (name.text.trim().isEmpty) {
+                set(() => nameError = tr('Enter a name'));
+                return;
+              }
+              Navigator.of(ctx).pop(true);
+            },
+            child: Text(tr('Save')),
+          ),
         ],
       ),
-    );
-    if (ok != true || name.text.trim().isEmpty || !context.mounted) return;
-    await ref
-        .read(appDatabaseProvider)
-        .equipmentDao
-        .create(
-          EquipmentCompanion.insert(
-            id: const Uuid().v4(),
-            projectId: widget.projectId,
-            name: name.text.trim(),
-            equipmentType: Value(_orNull(equipmentType.text)),
-            model: Value(_orNull(model.text)),
-            registrationNumber: Value(_orNull(registrationNumber.text)),
-            dailyRate: Value(_amount(dailyRate.text)),
-            status: const Value('available'),
-          ),
-        );
-    ref.invalidate(equipmentProvider(widget.projectId));
+    ),
+  );
+  if (ok != true || !context.mounted) return;
+  final fields = EquipmentCompanion(
+    name: Value(_cut(name.text.trim(), 200)),
+    equipmentType: Value(_orNull(equipmentType.text)),
+    model: Value(_orNull(model.text)),
+    registrationNumber: Value(_orNull(registrationNumber.text)),
+    dailyRate: Value(_amount(dailyRate.text)),
+    hourlyRate: Value(_amount(hourlyRate.text)),
+    ownership: Value(hired ? 'hired' : 'own'),
+    hiredFrom: Value(hired ? _orNull(hiredFrom.text) : null),
+    hiredOn: Value(hired ? hiredOn : null),
+    returnDueOn: Value(hired ? returnDue : null),
+    // The cloud keeps a return on or after the hire date.
+    returnedOn: Value(!hired || e?.returnedOn == null
+        ? null
+        : (e!.returnedOn!.isBefore(hiredOn) ? hiredOn : e.returnedOn)),
+  );
+  final dao = ref.read(appDatabaseProvider).equipmentDao;
+  if (e == null) {
+    await dao.create(fields.copyWith(
+      id: Value(const Uuid().v4()),
+      projectId: Value(projectId),
+      status: const Value('available'),
+    ));
+  } else {
+    await dao.edit(e.id, fields);
   }
+  ref.invalidate(equipmentProvider(projectId));
 }
+
+String _plain(double? v) => v == null ? '' : (v == v.roundToDouble() ? v.toInt().toString() : v.toString());
+
+String _cut(String s, int max) => s.length <= max ? s : s.substring(0, max);
 
 Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd) => Padding(
   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -137,10 +239,14 @@ class _EquipmentTile extends ConsumerWidget {
         title: Text(equipment.name),
         subtitle: Text(
           [
-            equipment.equipmentType ?? '',
-            equipment.model ?? '',
-            equipment.registrationNumber ?? '',
-          ].where((e) => e.isNotEmpty).join(' · '),
+            [
+              equipment.equipmentType ?? '',
+              equipment.model ?? '',
+              equipment.registrationNumber ?? '',
+              if (equipment.hourlyRate != null) trf('{rate}/hour', {'rate': rupees(equipment.hourlyRate!, paise: true)}),
+            ].where((e) => e.isNotEmpty).join(' · '),
+            if (isHired(equipment)) hireLine(equipment, DateTime.now()),
+          ].where((e) => e.isNotEmpty).join('\n'),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -150,7 +256,17 @@ class _EquipmentTile extends ConsumerWidget {
             PopupMenuButton<String>(
               initialValue: equipment.status,
               onSelected: (s) async {
-                await ref.read(appDatabaseProvider).equipmentDao.updateStatus(equipment.id, s);
+                final dao = ref.read(appDatabaseProvider).equipmentDao;
+                if (s == '_edit') {
+                  await editEquipment(context, ref, projectId: projectId, existing: equipment);
+                  return;
+                }
+                if (s == '_returned') {
+                  await dao.markReturned(equipment.id, DateTime.now());
+                  if (context.mounted) showSnack(context, 'Marked as returned.');
+                } else {
+                  await dao.updateStatus(equipment.id, s);
+                }
                 ref.invalidate(equipmentProvider(projectId));
               },
               itemBuilder: (ctx) => [
@@ -158,6 +274,10 @@ class _EquipmentTile extends ConsumerWidget {
                 PopupMenuItem(value: 'in_use', child: Text(tr('In use'))),
                 PopupMenuItem(value: 'maintenance', child: Text(tr('Maintenance'))),
                 PopupMenuItem(value: 'breakdown', child: Text(tr('Breakdown'))),
+                const PopupMenuDivider(),
+                PopupMenuItem(value: '_edit', child: Text(tr('Edit details'))),
+                if (isHired(equipment) && equipment.returnedOn == null)
+                  PopupMenuItem(value: '_returned', child: Text(tr('Returned to owner'))),
               ],
             ),
             IconButton(icon: const Icon(Icons.list_alt), tooltip: tr('View logs'), onPressed: () => _showLogs(context)),
@@ -247,8 +367,22 @@ class _EquipmentTile extends ConsumerWidget {
                 onChanged: (v) => logType.text = v ?? 'usage',
               ),
               TextField(
+                key: const Key('log-hours'),
                 controller: hoursUsed,
-                decoration: InputDecoration(labelText: tr('Hours (optional)'), errorText: hoursError),
+                onChanged: (_) => setDialogState(() {}),
+                decoration: InputDecoration(
+                  labelText: tr('Hours (optional)'),
+                  errorText: hoursError,
+                  helperText: () {
+                    final c = costAtHourlyRate(equipment, _amount(hoursUsed.text));
+                    return c == null || cost.text.trim().isNotEmpty
+                        ? null
+                        : trf('At {rate}/hour: {amount}', {
+                            'rate': rupees(equipment.hourlyRate!, paise: true),
+                            'amount': rupees(c, paise: true),
+                          });
+                  }(),
+                ),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
               ),
               TextField(
@@ -258,6 +392,7 @@ class _EquipmentTile extends ConsumerWidget {
               ),
               TextField(
                 controller: cost,
+                onChanged: (_) => setDialogState(() {}),
                 decoration: InputDecoration(labelText: tr('Cost (optional)'), prefixText: '₹ '),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
               ),
@@ -294,7 +429,10 @@ class _EquipmentTile extends ConsumerWidget {
             logType: logType.text,
             hoursUsed: Value(_amount(hoursUsed.text)),
             description: Value(_orNull(description.text)),
-            cost: Value(_amount(cost.text)),
+            // Hours worked by a machine with an hourly rate cost that
+            // much unless a cost was typed.
+            cost: Value(_amount(cost.text) ??
+                (logType.text == 'usage' ? costAtHourlyRate(equipment, _amount(hoursUsed.text)) : null)),
             createdBy: userId,
           ),
         );
@@ -321,4 +459,52 @@ String? _orNull(String text) => text.trim().isEmpty ? null : text.trim();
 double? _amount(String text) {
   final v = double.tryParse(text.replaceAll(RegExp(r'[₹,\s]'), ''));
   return v == null || v < 0 || v.isNaN || v.isInfinite ? null : v;
+}
+
+/// "Hired from Sri Balaji since 3 Nov · 6 days · back by 10 Nov".
+String hireLine(EquipmentData e, DateTime now) {
+  final parts = <String>[
+    if ((e.hiredFrom ?? '').isNotEmpty) trf('Hired from {who}', {'who': e.hiredFrom!}) else tr('Hired'),
+    if (e.hiredOn != null) trf('since {date}', {'date': fmtDate(e.hiredOn!, short: true)}),
+    trf('{n} days', {'n': daysOnHire(e, now)}),
+  ];
+  switch (hireState(e, now)) {
+    case HireState.returned:
+      parts.add(trf('returned {date}', {'date': fmtDate(e.returnedOn!, short: true)}));
+    case HireState.overdue:
+      parts.add(trf('{n} days late to go back', {'n': daysOverdue(e, now)}));
+    case HireState.dueSoon:
+    case HireState.onHire:
+      if (e.returnDueOn != null) parts.add(trf('back by {date}', {'date': fmtDate(e.returnDueOn!, short: true)}));
+  }
+  return parts.join(' · ');
+}
+
+class _HireSummary extends ConsumerWidget {
+  const _HireSummary({required this.equipment, required this.projectId});
+  final List<EquipmentData> equipment;
+  final String projectId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final now = DateTime.now();
+    final onHire = equipment.where((e) => isHired(e) && e.returnedOn == null).toList();
+    final late = onHire.where((e) => hireState(e, now) == HireState.overdue).length;
+    return Card(
+      key: const Key('hire-summary'),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: ListTile(
+        leading: const Icon(Icons.handshake_outlined),
+        title: Text(tr('Hire register')),
+        subtitle: Text([
+          trf('{n} on hire', {'n': onHire.length}),
+          if (late > 0) trf('{n} late to go back', {'n': late}),
+        ].join(' · ')),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => HireRegisterScreen(projectId: projectId),
+        )),
+      ),
+    );
+  }
 }
