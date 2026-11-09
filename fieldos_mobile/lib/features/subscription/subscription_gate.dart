@@ -5,11 +5,14 @@ import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/features/subscription/paywall_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/billing_service.dart';
+import 'package:fieldos_mobile/services/company_plan.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
 export 'package:fieldos_mobile/features/subscription/paywall_screen.dart';
 
 /// Shows [child] only while this person has a subscription (the 3-day
-/// trial counts). Otherwise shows the paywall. Checked on open, every time
+/// trial counts) or their company has a company plan (sold by invoice, see
+/// lib/services/company_plan.dart). Otherwise shows the paywall. Checked on open, every time
 /// the app comes back to the foreground, and whenever the store reports a
 /// change (a payment that was waiting for approval going through).
 class SubscriptionGate extends ConsumerStatefulWidget {
@@ -31,6 +34,8 @@ class _SubscriptionGateState extends ConsumerState<SubscriptionGate> with Widget
     WidgetsBinding.instance.addObserver(this);
     if (!ref.read(billingServiceProvider).setUp) {
       _access = Access.allowed; // development build, or payments not configured yet
+      // Still learn the company plan, for its site limit.
+      ref.read(companyPlanServiceProvider).current().catchError((_) => null);
     } else {
       _check(firstTime: true);
       _listen();
@@ -74,17 +79,30 @@ class _SubscriptionGateState extends ConsumerState<SubscriptionGate> with Widget
 
   Future<void> _check({bool firstTime = false}) async {
     final billing = ref.read(billingServiceProvider);
+    final company = ref.read(companyPlanServiceProvider);
     if (!billing.setUp) return;
-    final paidUntil = await billing.lastPaidUntil();
-    // Open straight away for someone who was paid up last time, and let
-    // the store's answer catch up in the background.
+    // Open straight away for someone who was paid up (or covered by their
+    // company) last time, and let the answers catch up in the background.
     if (firstTime && mounted) {
-      final remembered = accessFor(billingSetUp: true, live: null, lastPaidUntil: paidUntil, now: DateTime.now());
-      if (remembered == Access.allowed) _set(Access.allowed);
+      final now = DateTime.now();
+      final remembered = accessFor(
+                    billingSetUp: true, live: null, lastPaidUntil: await billing.lastPaidUntil(), now: now) ==
+                Access.allowed ||
+            await company.access(live: null, now: now) == Access.allowed;
+      if (remembered && mounted) _set(Access.allowed);
     }
-    final live = await billing.current();
-    final access =
-        accessFor(billingSetUp: true, live: live, lastPaidUntil: await billing.lastPaidUntil(), now: DateTime.now());
+    // Both asked every time: the company plan's site limit is needed even
+    // by someone who also pays in the store.
+    final results = await Future.wait<Object?>([billing.current(), company.current()]);
+    final now = DateTime.now();
+    final store = accessFor(
+        billingSetUp: true,
+        live: results[0] as SubscriptionState?,
+        lastPaidUntil: await billing.lastPaidUntil(),
+        now: now);
+    final access = store == Access.allowed
+        ? Access.allowed
+        : await company.access(live: results[1] as List<CompanyPlan>?, now: now);
     if (mounted && access != _access) _set(access);
   }
 
@@ -93,7 +111,7 @@ class _SubscriptionGateState extends ConsumerState<SubscriptionGate> with Widget
     return switch (_access) {
       null => const BrandSplash(),
       Access.allowed => widget.child,
-      Access.blocked => PaywallScreen(onUnlocked: () => _set(Access.allowed)),
+      Access.blocked => PaywallScreen(onUnlocked: () => _set(Access.allowed), onCompanyLinked: _check),
     };
   }
 }

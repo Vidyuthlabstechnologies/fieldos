@@ -216,3 +216,21 @@ section { padding: 88px 0; }
 .mitra-note{display:flex;gap:16px;align-items:center;margin-top:20px;padding:14px 18px;border-radius:16px;background:rgba(245,165,36,.12)}
 .mitra-note img{flex:none;width:96px;height:96px}
 .mitra-note p{margin:0}
+
+/* For builders: company plan tiers (no public prices) and the audit form */
+.tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+@media (max-width: 1000px) { .tiers { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .tiers { grid-template-columns: 1fr; } }
+.tier { background: var(--white); border: 1px solid var(--line); border-radius: 18px; padding: 26px; }
+.tier.best { border: 2px solid var(--navy); box-shadow: var(--shadow); }
+.tier h3 { margin: 10px 0 2px; }
+.tier .per { color: var(--ink-muted); margin: 0 0 6px; font-weight: 600; }
+.tier .tag { display: inline-block; background: var(--amber); color: var(--navy-deep); font-weight: 800; border-radius: 999px; padding: 3px 12px; font-size: .8rem; }
+.tier .tag-soft { background: var(--amber-soft); color: #8a5300; }
+.lead-form { background: var(--white); border: 1px solid var(--line); border-radius: 18px; padding: 26px; box-shadow: var(--shadow); display: grid; gap: 14px; }
+.lead-form label { display: grid; gap: 6px; font-weight: 600; font-size: .95rem; }
+.lead-form .opt { color: var(--ink-muted); font-weight: 400; }
+.lead-form input, .lead-form select { font: inherit; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); color: var(--ink); width: 100%; box-sizing: border-box; }
+.lead-form input:focus, .lead-form select:focus { outline: 2px solid var(--amber); outline-offset: 1px; border-color: var(--amber-dark); }
+.lead-form button { justify-self: start; cursor: pointer; }
+.lead-form .hp { position: absolute; left: -9999px; }

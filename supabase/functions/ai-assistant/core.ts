@@ -2,7 +2,8 @@
 // globals and network clients so the tests can drive every path with fakes.
 // index.ts wires in the real Supabase, RevenueCat, Anthropic and Sarvam.
 //
-// Two actions, both for signed-in accounts with an active FieldOS plan:
+// Two actions, both for signed-in accounts with an active FieldOS plan (their
+// own store subscription, or their company's plan):
 //   chat        one step of the assistant conversation. The app sends the
 //               whole history (the API needs it, unchanged, every time) and
 //               gets the next assistant message back. When that message asks
@@ -65,6 +66,8 @@ export interface Deps {
   userFromToken(token: string): Promise<{ id: string } | null>;
   /** Whether this RevenueCat customer has the fieldos_pro entitlement now. */
   hasPlan(subscriberId: string): Promise<boolean>;
+  /** Whether this account is covered by a company plan (sold by invoice, see the company_plans migration). */
+  hasCompanyPlan(userId: string): Promise<boolean>;
   /** Takes from today's call allowance: the new total, or null when over [limit]. */
   takeUsage(userId: string, kind: "chat", amount: number, limit: number): Promise<number | null>;
   /** Adds [units] (0 just reads) to this month's spend and returns the total. */
@@ -127,7 +130,8 @@ async function route(req: Request, deps: Deps): Promise<Response> {
   const user = token ? await deps.userFromToken(token) : null;
   if (!user) throw new HttpError(401, "signed_out", "Sign in to FieldOS again to use the assistant.");
 
-  if (deps.planCheck) {
+  // A company plan covers everyone in the company, store subscription or not.
+  if (deps.planCheck && !(await deps.hasCompanyPlan(user.id))) {
     if (!deps.configured.revenuecat) {
       throw new HttpError(503, "not_configured", "The assistant is not switched on yet. Please try again later.");
     }

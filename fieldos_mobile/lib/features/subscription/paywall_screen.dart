@@ -3,6 +3,10 @@
 /// (price, renewal, when the trial is charged, how to cancel, restore,
 /// terms and privacy). On Android its menu also takes an access code from
 /// the FieldOS team, which is how Google's reviewers get in.
+///
+/// Builder firms on a company plan (sold by invoice, outside the stores)
+/// get in by signing in to their company. Store rules: that plan's price,
+/// and any way to buy it, never appear here.
 library;
 
 import 'package:flutter/material.dart';
@@ -18,12 +22,18 @@ import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/billing_service.dart';
 import 'package:fieldos_mobile/services/bug_report_service.dart';
+import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
 class PaywallScreen extends ConsumerStatefulWidget {
-  const PaywallScreen({super.key, required this.onUnlocked});
+  const PaywallScreen({super.key, required this.onUnlocked, this.onCompanyLinked});
 
   final VoidCallback onUnlocked;
+
+  /// Checks again for a company plan after the person signs in to their
+  /// company; the gate opens by itself when one covers them.
+  final Future<void> Function()? onCompanyLinked;
 
   @override
   ConsumerState<PaywallScreen> createState() => _PaywallScreenState();
@@ -122,6 +132,19 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   Future<void> _enterAccessCode() async {
     final unlocked = await showDialog<bool>(context: context, builder: (_) => _AccessCodeDialog(billing: _billing));
     if ((unlocked ?? false) && mounted) widget.onUnlocked();
+  }
+
+  Future<void> _companySignIn() async {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeamSyncScreen()));
+    if (!mounted) return;
+    await _act(() async {
+      await widget.onCompanyLinked?.call();
+      if (!mounted) return;
+      setState(() => _error = ref.read(cloudSyncServiceProvider).isSignedIn
+          ? 'No company plan was found for this account. Join your company with the code from its owner, or '
+              'sign in with the email the plan is under.'
+          : 'Sign in to your company first, then FieldOS opens by itself.');
+    });
   }
 
   Future<void> _checkAgain() => _act(() async {
@@ -225,11 +248,59 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   style: _linkStyle, onPressed: () => openPrivacyPolicy(context), child: const Text('Privacy policy')),
             ],
           ),
+          if (widget.onCompanyLinked != null && ref.watch(cloudSyncAvailableProvider)) ...[
+            const SizedBox(height: 8),
+            _CompanyPlanCard(onSignIn: _busy ? null : _companySignIn),
+          ],
           if (ref.watch(sessionProvider).activeCompany != null) ...[
             const SizedBox(height: 8),
             const _YourDataCard(),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// For people whose company has a FieldOS company plan. It says only that
+/// such a plan lets them in: no price, and nothing that points to buying it.
+class _CompanyPlanCard extends StatelessWidget {
+  const _CompanyPlanCard({required this.onSignIn});
+
+  final VoidCallback? onSignIn;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      key: const Key('paywall-company-plan'),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              Icon(Icons.apartment_outlined, color: theme.colorScheme.primary),
+              const SizedBox(width: 10),
+              Expanded(child: Text(tr('Your company has a FieldOS plan?'), style: theme.textTheme.titleSmall)),
+            ]),
+            const SizedBox(height: 6),
+            Text(
+              tr('Sign in and join your company with the code from its owner. Everyone in the company is included.'),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.4),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                key: const Key('paywall-company-sign-in'),
+                icon: const Icon(Icons.login),
+                label: Text(tr('Sign in to my company')),
+                onPressed: onSignIn,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

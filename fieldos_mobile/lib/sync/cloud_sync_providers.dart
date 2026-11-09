@@ -14,6 +14,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/ai_backend.dart';
 import 'package:fieldos_mobile/services/bug_report_service.dart';
+import 'package:fieldos_mobile/services/company_plan.dart';
 import 'package:fieldos_mobile/services/message_report_service.dart';
 import 'cloud_sync_service.dart';
 import 'periodic_sync_trigger.dart';
@@ -68,6 +69,17 @@ final cloudSyncServiceProvider = Provider<CloudSyncService>((ref) {
   );
   ref.onDispose(service.dispose);
   return service;
+});
+
+/// Company plans (sold by invoice, switched on by the FieldOS team) come
+/// from the same cloud account as Team & sync.
+final companyPlanServiceProvider = Provider<CompanyPlanService>((ref) {
+  final available = ref.watch(cloudSyncAvailableProvider);
+  return CompanyPlanService(
+    db: ref.watch(appDatabaseProvider),
+    cloud: available ? ref.watch(cloudSyncServiceProvider) : null,
+    available: available,
+  );
 });
 
 /// Keeps the Supabase session in the app's private local database (the

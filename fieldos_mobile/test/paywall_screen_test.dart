@@ -9,6 +9,21 @@ import 'package:fieldos_mobile/features/subscription/my_subscription_sheet.dart'
 import 'package:fieldos_mobile/features/subscription/paywall_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/billing_service.dart';
+import 'package:fieldos_mobile/services/company_plan.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
+
+/// Company plans as the server would answer, with no network.
+class FakeCompanyPlans extends CompanyPlanService {
+  FakeCompanyPlans(AppDatabase db, this.plans) : super(db: db, cloud: null);
+
+  List<CompanyPlan>? plans;
+
+  @override
+  Future<List<CompanyPlan>?> current() async {
+    if (plans != null) await remember(plans!);
+    return plans;
+  }
+}
 
 /// A store that answers from a script, so the paywall can be checked
 /// without Google Play.
@@ -71,6 +86,7 @@ void main() {
     bool codes = true,
     Object? plansError,
     bool withCompany = false,
+    Future<void> Function()? onCompanyLinked,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -83,6 +99,7 @@ void main() {
     final container = ProviderContainer(overrides: [
       appDatabaseProvider.overrideWithValue(db),
       billingServiceProvider.overrideWithValue(billing),
+      companyPlanServiceProvider.overrideWithValue(FakeCompanyPlans(db, const [])),
     ]);
     addTearDown(() async {
       container.dispose();
@@ -99,7 +116,7 @@ void main() {
       container: container,
       child: MaterialApp(
         theme: buildFieldOsTheme(brightness),
-        home: PaywallScreen(onUnlocked: () => unlocked.add('yes')),
+        home: PaywallScreen(onUnlocked: () => unlocked.add('yes'), onCompanyLinked: onCompanyLinked),
       ),
     ));
     await tester.pumpAndSettle();
@@ -246,6 +263,7 @@ void main() {
     final container = ProviderContainer(overrides: [
       appDatabaseProvider.overrideWithValue(db),
       billingServiceProvider.overrideWithValue(billing),
+      companyPlanServiceProvider.overrideWithValue(FakeCompanyPlans(db, const [])),
     ]);
     addTearDown(() async {
       container.dispose();
@@ -274,5 +292,63 @@ void main() {
     expect(find.text('Subscribed, renews on 6 Dec 2026'), findsOneWidget);
     expect(find.text('Manage or cancel'), findsOneWidget);
     expect(find.text('Restore purchase'), findsOneWidget);
+  });
+
+  // Store rules: a company plan is sold by invoice, so the app may let its
+  // people in but never show its price or a way to buy it.
+  testWidgets('people on a company plan can sign in to it; no price or purchase link for it', (tester) async {
+    await pump(tester, onCompanyLinked: () async {});
+    final card = find.byKey(const Key('paywall-company-plan'));
+    await tester.ensureVisible(card);
+    expect(find.descendant(of: card, matching: find.text('Your company has a FieldOS plan?')), findsOneWidget);
+    expect(find.descendant(of: card, matching: find.text('Sign in to my company')), findsOneWidget);
+    expect(find.descendant(of: card, matching: find.textContaining('₹')), findsNothing);
+    expect(find.descendant(of: card, matching: find.textContaining('http')), findsNothing);
+    expect(find.descendant(of: card, matching: find.textContaining('lakh')), findsNothing);
+  });
+
+  testWidgets('no company plan card where the gate cannot check one', (tester) async {
+    await pump(tester);
+    expect(find.byKey(const Key('paywall-company-plan')), findsNothing);
+  });
+
+  testWidgets('My subscription: a company plan shows its sites and needs no store subscription', (tester) async {
+    tester.view.physicalSize = const Size(412, 915);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final db = AppDatabase.memory();
+    final billing = FakeBilling(db, offers: const [monthly]);
+    final container = ProviderContainer(overrides: [
+      appDatabaseProvider.overrideWithValue(db),
+      billingServiceProvider.overrideWithValue(billing),
+      companyPlanServiceProvider.overrideWithValue(FakeCompanyPlans(db, [
+        CompanyPlan(
+            companyId: null, plan: 'site_pro', siteLimit: 3, endsOn: DateTime(2027, 3, 31), companyName: null),
+      ])),
+    ]);
+    addTearDown(() async {
+      container.dispose();
+      await db.close();
+    });
+    await tester.runAsync(() async {
+      final session = container.read(sessionProvider.notifier);
+      await session.register(username: 'ravi', name: 'Ravi Kumar', password: '123456');
+      await session.createCompany('Sri Sai Constructions');
+    });
+    await tester.pumpWidget(UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        theme: buildFieldOsTheme(Brightness.light),
+        home: const Scaffold(body: MySubscriptionSheet()),
+      ),
+    ));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200)));
+    await tester.pumpAndSettle();
+    expect(find.text('FieldOS Site Pro'), findsOneWidget);
+    expect(find.textContaining('Everyone in the company is included. Up to 3 active sites.'), findsOneWidget);
+    expect(find.text('0 of 3 active sites in use'), findsOneWidget);
+    expect(find.textContaining('do not need a subscription of your own'), findsOneWidget);
+    expect(find.text('Manage or cancel'), findsNothing);
+    expect(find.textContaining('₹'), findsNothing);
   });
 }

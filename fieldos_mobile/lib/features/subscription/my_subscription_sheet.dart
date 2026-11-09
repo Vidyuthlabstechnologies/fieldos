@@ -1,5 +1,6 @@
 /// "My subscription": the plan's state in plain words, and the ways to
-/// manage, cancel or restore it.
+/// manage, cancel or restore it. A company plan (sold by invoice) shows
+/// here too, with its active-site count; never its price (store rules).
 library;
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,8 @@ import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/billing_service.dart';
+import 'package:fieldos_mobile/services/company_plan.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
 Future<void> showMySubscription(BuildContext context) => showModalBottomSheet<void>(
       context: context,
@@ -27,6 +30,8 @@ class MySubscriptionSheet extends ConsumerStatefulWidget {
 
 class _MySubscriptionSheetState extends ConsumerState<MySubscriptionSheet> {
   SubscriptionState? _state;
+  CompanyPlan? _companyPlan;
+  int _openSites = 0;
   bool _loading = true;
   bool _busy = false;
   String? _message;
@@ -41,10 +46,21 @@ class _MySubscriptionSheetState extends ConsumerState<MySubscriptionSheet> {
   }
 
   Future<void> _load() async {
-    final s = await _billing.current();
+    final companyPlans = ref.read(companyPlanServiceProvider);
+    final results = await Future.wait<Object?>([_billing.current(), companyPlans.current()]);
+    final companyId = ref.read(sessionProvider).activeCompany?.id;
+    final plans = results[1] as List<CompanyPlan>? ?? await companyPlans.remembered();
+    final plan = planForCompany(plans, companyId);
+    final open = companyId == null
+        ? 0
+        : (await ref.read(appDatabaseProvider).projectDao.forCompany(companyId))
+            .where((p) => countsAsActiveSite(p.status))
+            .length;
     if (mounted) {
       setState(() {
-        _state = s;
+        _state = results[0] as SubscriptionState?;
+        _companyPlan = plan;
+        _openSites = open;
         _loading = false;
       });
     }
@@ -106,8 +122,14 @@ class _MySubscriptionSheetState extends ConsumerState<MySubscriptionSheet> {
               Expanded(child: Text('FieldOS Pro', style: theme.textTheme.titleLarge)),
             ]),
             const SizedBox(height: 20),
+            if (!_loading && _companyPlan != null) ...[
+              _CompanyPlanTile(plan: _companyPlan!, openSites: _openSites),
+              const SizedBox(height: 16),
+            ],
             if (_loading)
               const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))
+            else if (_companyPlan != null && !(s?.active ?? false))
+              Text('You do not need a subscription of your own while your company plan covers you.', style: muted)
             else if (s == null)
               FormMessage('Could not check your subscription with ${_billing.storeName} right now. Please try again in a minute.')
             else
@@ -133,6 +155,8 @@ class _MySubscriptionSheetState extends ConsumerState<MySubscriptionSheet> {
                 'asks you to choose a plan, and your records stay on this phone.',
                 style: muted,
               )
+            else if (_companyPlan != null && !(s?.active ?? false))
+              const SizedBox.shrink()
             else ...[
               FilledButton.icon(
                 onPressed: _busy ? null : _manage,
@@ -155,6 +179,41 @@ class _MySubscriptionSheetState extends ConsumerState<MySubscriptionSheet> {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CompanyPlanTile extends StatelessWidget {
+  const _CompanyPlanTile({required this.plan, required this.openSites});
+
+  final CompanyPlan plan;
+  final int openSites;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final limit = plan.siteLimit;
+    return Card(
+      key: const Key('company-plan-tile'),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            const Icon(Icons.apartment_outlined, color: Brand.ok),
+            const SizedBox(width: 10),
+            Expanded(child: Text(plan.name, style: theme.textTheme.titleMedium)),
+          ]),
+          const SizedBox(height: 6),
+          Text(plan.describe(), style: theme.textTheme.bodyMedium),
+          if (limit != null) ...[
+            const SizedBox(height: 10),
+            LinearProgressIndicator(value: (openSites / limit).clamp(0, 1).toDouble()),
+            const SizedBox(height: 6),
+            Text('$openSites of $limit active sites in use', style: theme.textTheme.bodySmall),
+          ],
+        ]),
       ),
     );
   }

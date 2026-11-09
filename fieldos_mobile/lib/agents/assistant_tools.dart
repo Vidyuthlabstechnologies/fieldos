@@ -20,6 +20,7 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/dashboard/project_cost_summary.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/services/company_plan.dart';
 
 /// 2026-11-09, the way site_expenses stores its day.
 String isoDay(DateTime d) =>
@@ -221,6 +222,8 @@ class AssistantTools {
   Future<ToolOutcome> _write(String name, Map<String, dynamic> i) async {
     switch (name) {
       case 'create_project':
+        final blocked = await newActiveSiteBlocked(db, companyId);
+        if (blocked != null) throw ToolInputError(blocked);
         final client = _str(i, 'client_name');
         final p = await db.projectDao.create(ProjectsCompanion.insert(
           id: _uuid.v4(),

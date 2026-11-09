@@ -58,6 +58,15 @@ const deps: Deps = {
     planCache.set(subscriberId, { ok, at: Date.now() });
     return ok;
   },
+  async hasCompanyPlan(userId) {
+    const { data, error } = await admin.rpc("company_plan_covers", { p_user: userId });
+    if (error) {
+      // Not deployed yet, or the database is down: fall back to the store check.
+      console.error("company_plan_covers", error.message);
+      return false;
+    }
+    return data === true;
+  },
   async takeUsage(userId, kind, amount, limit) {
     const { data, error } = await admin.rpc("ai_usage_take", {
       p_user: userId,
