@@ -154,4 +154,14 @@ jobs:
 
       - run: flutter pub get
 
-      - run: flutter build ios --release --no-codesign
+      # Flutter hides Xcode's own messages when a build fails; keep the
+      # full log and print Xcode's error lines so the cause is visible.
+      - name: flutter build ios --release --no-codesign
+        run: |
+          set -o pipefail
+          if ! flutter build ios --release --no-codesign -v > ios-build.log 2>&1; then
+            grep -E "error:|error -|requires a provisioning|Signing for|entitlement" ios-build.log | sort -u | head -60
+            tail -40 ios-build.log
+            exit 1
+          fi
+          tail -5 ios-build.log

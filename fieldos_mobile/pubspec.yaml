@@ -101,6 +101,9 @@ dependencies:
   purchases_flutter: ^11.0.1
   package_info_plus: ^10.2.2
   google_sign_in: ^7.2.0
+  # Sign in with Apple on iPhone: Apple requires it next to Continue with
+  # Google (App Review Guideline 4.8). Not shown on Android.
+  sign_in_with_apple: ^8.2.0
   # The AI assistant reads its answers out loud with the phone's own voice
   # (Android/iOS text to speech): free and offline, no Sarvam needed.
   flutter_tts: ^4.2.5

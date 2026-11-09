@@ -1,0 +1,60 @@
+# Codemagic builds the iPhone app on its Macs and sends it to TestFlight.
+# It does not use GitHub Actions at all. The free plan includes 500 Mac
+# minutes a month; one FieldOS build takes about 15-20 of them.
+#
+# Builds only start when someone presses "Start new build" in Codemagic
+# (there is no "triggering" section on purpose), so nothing runs by itself.
+#
+# One-time setup, click by click: docs/APP_STORE_LAUNCH.md, "Build with
+# Codemagic". In short:
+#   - Team settings > Integrations > Developer Portal: add the App Store
+#     Connect API key and name it "FieldOS App Store Connect".
+#   - App settings > Environment variables: group "fieldos_ios" with
+#     SUPABASE_URL, SUPABASE_ANON_KEY, REVENUECAT_IOS_KEY (secure),
+#     APP_STORE_APPLE_ID (the app's number in App Store Connect > App
+#     Information > Apple ID), and optionally GOOGLE_WEB_CLIENT_ID and
+#     GOOGLE_IOS_CLIENT_ID.
+workflows:
+  ios-app-store:
+    name: FieldOS iPhone (TestFlight)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: FieldOS App Store Connect
+    environment:
+      groups:
+        - fieldos_ios
+      vars:
+        BUNDLE_ID: com.mldynamic.fieldos
+      flutter: 3.44.9
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        # Codemagic makes (or reuses) the distribution certificate and the
+        # App Store profile for this bundle id with the API key.
+        distribution_type: app_store
+        bundle_identifier: com.mldynamic.fieldos
+    scripts:
+      - name: Use the App Store signing files
+        script: xcode-project use-profiles
+      - name: Build the App Store copy
+        script: |
+          # Each upload needs a higher build number than the last one in
+          # App Store Connect; start from the pubspec's +N if there is none.
+          latest=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo 0)
+          pubspec=$(sed -nE 's/^version: .*\+([0-9]+).*/\1/p' fieldos_mobile/pubspec.yaml)
+          next=$(( latest >= pubspec ? latest + 1 : pubspec ))
+          export BUILD_NUMBER=$next
+          export EXPORT_OPTIONS_PLIST=/Users/builder/export_options.plist
+          echo "Build number $BUILD_NUMBER"
+          fieldos_mobile/tool/ios/build_ipa.sh
+    artifacts:
+      - fieldos_mobile/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        # Lands in TestFlight for the team to try; sending it to App Review
+        # stays a button the owner presses in App Store Connect.
+        submit_to_testflight: true
+        submit_to_app_store: false

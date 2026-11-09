@@ -3,8 +3,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/auth/apple_auth.dart';
 import 'package:fieldos_mobile/auth/google_auth.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_service.dart';
@@ -119,6 +121,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  /// Sign in with Apple (iPhone only), the same way as [_google]: Apple
+  /// confirms who this is, Supabase agrees, then the account on this phone
+  /// opens or is made.
+  Future<void> _apple() async {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final picked = await ref.read(applePickerProvider).pick();
+      if (picked == null) return;
+      final cloud = ref.read(cloudSyncServiceProvider);
+      final signedIn = await cloud.enableSyncWithApple(idToken: picked.idToken, rawNonce: picked.rawNonce);
+      final result = signedIn.result;
+      if (result.outcome == CloudSyncOutcome.failed) {
+        if (mounted) setState(() => _error = friendlyError(result.cause ?? StateError('Apple sign-in failed'), result.stack));
+        return;
+      }
+      final email = picked.email ?? signedIn.email;
+      if (email == null || !email.contains('@')) {
+        if (mounted) setState(() => _error = tr('Apple did not share an email address. Please try again, or use a username and password.'));
+        return;
+      }
+      await ref.read(sessionProvider.notifier).loginWithGoogle(email: email, name: picked.name ?? '');
+    } on SignInWithAppleException catch (e, st) {
+      RecentErrors.record(e, st);
+      if (mounted) setState(() => _error = tr('Apple sign-in did not go through. Please try again.'));
+    } catch (e, st) {
+      if (mounted) setState(() => _error = e is AuthException ? e.message : friendlyError(e, st));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   void _switchMode() => setState(() {
         _registering = !_registering;
         _error = null;
@@ -177,6 +214,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 20),
+            if (ref.watch(applePickerProvider).available) ...[
+              // Apple's own button, as its design rules ask: black, with
+              // the Apple logo, never restyled.
+              SizedBox(
+                height: 48,
+                child: SignInWithAppleButton(
+                  key: const Key('login-apple'),
+                  onPressed: _busy ? () {} : _apple,
+                  text: tr('Sign in with Apple'),
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (!ref.watch(googlePickerProvider).available) ...[
+                Row(children: [
+                  const Expanded(child: Divider()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(tr('or'), style: theme.textTheme.bodySmall),
+                  ),
+                  const Expanded(child: Divider()),
+                ]),
+                const SizedBox(height: 12),
+              ],
+            ],
             if (ref.watch(googlePickerProvider).available) ...[
               OutlinedButton.icon(
                 onPressed: _busy ? null : _google,
