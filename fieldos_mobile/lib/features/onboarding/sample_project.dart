@@ -252,17 +252,17 @@ class SampleProjectBanner extends ConsumerWidget {
     if (id != project.id) return const SizedBox.shrink();
     final theme = Theme.of(context);
     return Material(
-      color: theme.colorScheme.tertiaryContainer,
+      color: theme.colorScheme.secondaryContainer,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
         child: Row(
           children: [
-            Icon(Icons.science_outlined, color: theme.colorScheme.onTertiaryContainer),
+            Icon(Icons.science_outlined, color: theme.colorScheme.onSecondaryContainer),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 tr('A sample site to try things on. It stays on this phone and your team never sees it.'),
-                style: TextStyle(color: theme.colorScheme.onTertiaryContainer),
+                style: TextStyle(color: theme.colorScheme.onSecondaryContainer),
               ),
             ),
             TextButton(onPressed: () => _remove(context, ref), child: Text(tr('Remove'))),

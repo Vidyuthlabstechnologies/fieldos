@@ -323,3 +323,22 @@ class FormMessage extends StatelessWidget {
     );
   }
 }
+
+/// Keeps every screen clear of the phone's own navigation: the 3-button
+/// bar (back, home, recents) or the gesture bar. Android 15 draws apps
+/// edge to edge, under that bar, so without this the bottom buttons
+/// (Add task, Speak report, a chat's send box...) sat behind back/home.
+/// The strip under the bar is painted in the page colour.
+class SystemNavBarSafeArea extends StatelessWidget {
+  const SystemNavBarSafeArea({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    return ColoredBox(
+      color: dark ? const Color(0xFF0A1424) : Brand.paper,
+      child: SafeArea(top: false, left: false, right: false, child: child),
+    );
+  }
+}

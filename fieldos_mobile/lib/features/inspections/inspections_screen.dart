@@ -15,6 +15,7 @@ import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
 class InspectionsView extends ConsumerStatefulWidget {
   const InspectionsView({super.key, required this.projectId, required this.userId});
@@ -35,7 +36,7 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
         Expanded(
           child: inspectionsList.when(
             data: (rows) => rows.isEmpty
-                ? Center(child: Text(tr('No inspections yet.')))
+                ? MitraEmpty(tr('No inspections yet.'), mood: MitraMood.checklist)
                 : ListView(
                     children: [
                       for (final i in rows)

@@ -22,6 +22,7 @@ import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
 class ProcurementView extends ConsumerStatefulWidget {
   const ProcurementView({
@@ -160,7 +161,7 @@ class _SuppliersTab extends ConsumerWidget {
         Expanded(
           child: suppliers.when(
             data: (rows) => rows.isEmpty
-                ? Center(child: Text(tr('No suppliers yet.')))
+                ? MitraEmpty(tr('No suppliers yet.'))
                 : ListView(
                     children: [
                       for (final s in rows)
@@ -244,7 +245,7 @@ class _RfqTab extends ConsumerWidget {
         Expanded(
           child: requests.when(
             data: (rows) => rows.isEmpty
-                ? Center(child: Text(tr('No RFQs yet.')))
+                ? MitraEmpty(tr('No RFQs yet.'))
                 : ListView(
                     children: [
                       for (final r in rows)
@@ -380,7 +381,7 @@ class _PoTab extends ConsumerWidget {
         Expanded(
           child: orders.when(
             data: (rows) => rows.isEmpty
-                ? Center(child: Text(tr('No purchase orders yet.')))
+                ? MitraEmpty(tr('No purchase orders yet.'))
                 : ListView(
                     children: [
                       for (final o in rows)
@@ -572,7 +573,7 @@ class _GrnTab extends ConsumerWidget {
     final receipts = ref.watch(receiptsProvider(projectId));
     return receipts.when(
       data: (rows) => rows.isEmpty
-          ? Center(child: Text(tr('No goods receipts yet.')))
+          ? MitraEmpty(tr('No goods receipts yet.'))
           : ListView(
               children: [
                 Align(

@@ -11,6 +11,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
 class EquipmentView extends ConsumerStatefulWidget {
   const EquipmentView({super.key, required this.projectId, required this.userId});
@@ -31,7 +32,7 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
         Expanded(
           child: equipmentList.when(
             data: (rows) => rows.isEmpty
-                ? Center(child: Text(tr('No equipment yet.')))
+                ? MitraEmpty(tr('No equipment yet.'), mood: MitraMood.hammer)
                 : ListView(
                     children: [
                       for (final e in rows)

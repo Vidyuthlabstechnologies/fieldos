@@ -14,6 +14,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
 class DocumentsView extends ConsumerStatefulWidget {
   const DocumentsView({
@@ -38,7 +39,7 @@ class _DocumentsViewState extends ConsumerState<DocumentsView> {
         Expanded(
           child: documentsList.when(
             data: (rows) => rows.isEmpty
-                ? Center(child: Text(tr('No documents yet.')))
+                ? MitraEmpty(tr('No documents yet.'))
                 : ListView(
                     children: [
                       for (final d in rows)

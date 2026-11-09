@@ -120,6 +120,9 @@ flutter:
   # Inter's licence, shown under Settings › Open-source licences.
   assets:
     - assets/fonts/OFL.txt
+    # Mitra the mascot: one looping WebP and one still PNG per mood
+    # (made by mascot/render_frames.py from the Rive scene).
+    - assets/mascot/
 
   # Inter, the brand typeface (Latin subset, see tools/subset_fonts.sh).
   # Telugu, Hindi and other Indian scripts use the phone's own fonts.
