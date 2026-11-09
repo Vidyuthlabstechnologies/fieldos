@@ -376,6 +376,8 @@ class SettingsDao extends DatabaseAccessor<AppDatabase> with _$SettingsDaoMixin 
   Future<void> set(String key, String value) => into(appSettings).insertOnConflictUpdate(
         AppSettingsCompanion.insert(key: key, value: value),
       );
+
+  Future<void> remove(String key) => (delete(appSettings)..where((s) => s.key.equals(key))).go();
 }
 
 // ---------------------------------------------------------------------------

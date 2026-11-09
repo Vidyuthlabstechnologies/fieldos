@@ -2378,4 +2378,26 @@ const Map<String, String> stringsTa = {
       'ஒவ்வொரு 6 மாதமும் {price}',
   '{price}, charged by {store} today. It renews {renews} until you cancel in {cancelIn}, at least 24 hours before the next payment.':
       '{price}, இன்று {store} வசூலிக்கும். அடுத்த கட்டணத்துக்கு குறைந்தது 24 மணி நேரம் முன் {cancelIn} இல் ரத்து செய்யும் வரை {renews} புதுப்பிக்கப்படும்.',
+  'Show this week\'s expenses':
+      'இந்த வாரச் செலவுகளைக் காட்டு',
+  'What is due this week?':
+      'இந்த வாரம் என்ன முடிக்க வேண்டும்?',
+  'Who was absent today?':
+      'இன்று யார் வரவில்லை?',
+  'How much did labour cost this week?':
+      'இந்த வாரம் கூலிக்கு எவ்வளவு செலவானது?',
+  'Any open issues on site?':
+      'தளத்தில் ஏதேனும் திறந்த பிரச்சினை உள்ளதா?',
+  'Which materials are running low?':
+      'எந்தப் பொருள் குறைவாக உள்ளது?',
+  'What needs my approval?':
+      'என் ஒப்புதலுக்கு என்ன காத்திருக்கிறது?',
+  'You might ask next':
+      'அடுத்து இதைக் கேட்கலாம்',
+  'Past chats':
+      'பழைய உரையாடல்கள்',
+  'Delete all':
+      'அனைத்தையும் நீக்கு',
+  'No earlier chats yet. Your chats are kept on this phone.':
+      'இன்னும் பழைய உரையாடல்கள் இல்லை. உங்கள் உரையாடல்கள் இந்த ஃபோனிலேயே இருக்கும்.',
 };
