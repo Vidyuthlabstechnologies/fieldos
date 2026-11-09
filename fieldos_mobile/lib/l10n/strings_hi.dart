@@ -1487,4 +1487,30 @@ const Map<String, String> stringsHi = {
       'हर 6 महीने {price}',
   '{price}, charged by {store} today. It renews {renews} until you cancel in {cancelIn}, at least 24 hours before the next payment.':
       '{price}, आज {store} लेगा। यह {renews} अपने आप नया होगा, जब तक आप अगले भुगतान से कम से कम 24 घंटे पहले {cancelIn} में रद्द न करें।',
+
+  // Wage sheet
+  'Earned {earned} · Paid {paid} · Still due {due}':
+      'कमाई {earned} · दिया {paid} · बाकी {due}',
+  '{n} day ({h} h)':
+      '{n} दिन ({h} घंटे)',
+  '{n} days ({h} h)':
+      '{n} दिन ({h} घंटे)',
+  'OT {h} h':
+      'ओवरटाइम {h} घंटे',
+  'no daily wage set':
+      'रोज़ की मज़दूरी तय नहीं',
+  '{amount}/day':
+      '{amount}/दिन',
+  '1 missing punch-out (half day)':
+      '1 बार बाहर का पंच नहीं (आधा दिन)',
+  '{n} missing punch-outs (half days)':
+      '{n} बार बाहर का पंच नहीं (आधे दिन)',
+  'paid {amount}':
+      'दिया {amount}',
+  'advance':
+      'एडवांस',
+  'due':
+      'बाकी',
+  '{from} to {to}':
+      '{from} से {to}',
 };

@@ -41,7 +41,8 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
 
   String _days(double d) => d == d.roundToDouble() ? d.toInt().toString() : d.toStringAsFixed(1);
 
-  String _range() => '${shortDay(_from)} to ${shortDay(_to.subtract(const Duration(days: 1)))}';
+  String _range() => trf('{from} to {to}',
+      {'from': shortDay(_from), 'to': shortDay(_to.subtract(const Duration(days: 1)))});
 
   String _shareText(WageSheet s) {
     final b = StringBuffer('Wage sheet · ${widget.projectName}\n${_range()}\n\n');
@@ -91,7 +92,11 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: Text(
-                  'Earned ${rupees(sheet.totalEarned, paise: true)} · Paid ${rupees(sheet.totalPaid, paise: true)} · Still due ${rupees(sheet.totalDue, paise: true)}',
+                  trf('Earned {earned} · Paid {paid} · Still due {due}', {
+                    'earned': rupees(sheet.totalEarned, paise: true),
+                    'paid': rupees(sheet.totalPaid, paise: true),
+                    'due': rupees(sheet.totalDue, paise: true),
+                  }),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
@@ -106,12 +111,18 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                             ListTile(
                               title: Text(l.name),
                               subtitle: Text([
-                                '${_days(l.days)} days (${l.hours.toStringAsFixed(1)} h)',
-                                if (l.overtimeHours > 0) 'OT ${l.overtimeHours.toStringAsFixed(1)} h',
-                                if (l.dailyWage == null) 'no daily wage set' else '${rupees(l.dailyWage!, paise: true)}/day',
-                                if (l.missingPunchOuts > 0) '${l.missingPunchOuts} missing punch-out (half day)',
+                                trf(l.days == 1 ? '{n} day ({h} h)' : '{n} days ({h} h)',
+                                    {'n': _days(l.days), 'h': l.hours.toStringAsFixed(1)}),
+                                if (l.overtimeHours > 0) trf('OT {h} h', {'h': l.overtimeHours.toStringAsFixed(1)}),
+                                if (l.dailyWage == null)
+                                  tr('no daily wage set')
+                                else
+                                  trf('{amount}/day', {'amount': rupees(l.dailyWage!, paise: true)}),
+                                if (l.missingPunchOuts > 0)
+                                  trf(l.missingPunchOuts == 1 ? '1 missing punch-out (half day)' : '{n} missing punch-outs (half days)',
+                                      {'n': l.missingPunchOuts}),
                                 if (l.markedDays > 0) trf('{n} marked by hand', {'n': l.markedDays}),
-                                if (l.paidInPeriod > 0) 'paid ${rupees(l.paidInPeriod, paise: true)}',
+                                if (l.paidInPeriod > 0) trf('paid {amount}', {'amount': rupees(l.paidInPeriod, paise: true)}),
                               ].join(' · ')),
                               trailing: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -121,7 +132,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                                       style: TextStyle(
                                           fontWeight: FontWeight.w700,
                                           color: l.balanceDue < 0 ? toneColor(context, PillTone.warn) : null)),
-                                  Text(l.balanceDue < 0 ? 'advance' : 'due', style: const TextStyle(fontSize: 11)),
+                                  Text(l.balanceDue < 0 ? tr('advance') : tr('due'), style: const TextStyle(fontSize: 11)),
                                 ],
                               ),
                               onTap: l.workerId == null

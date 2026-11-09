@@ -1489,4 +1489,30 @@ const Map<String, String> stringsTe = {
       'ప్రతి 6 నెలలకు {price}',
   '{price}, charged by {store} today. It renews {renews} until you cancel in {cancelIn}, at least 24 hours before the next payment.':
       '{price}, ఈ రోజు {store} తీసుకుంటుంది. తదుపరి చెల్లింపుకు కనీసం 24 గంటల ముందు {cancelIn} లో రద్దు చేసే వరకు {renews} పునరుద్ధరించబడుతుంది.',
+
+  // Wage sheet
+  'Earned {earned} · Paid {paid} · Still due {due}':
+      'సంపాదన {earned} · చెల్లించింది {paid} · ఇంకా బాకీ {due}',
+  '{n} day ({h} h)':
+      '{n} రోజు ({h} గం)',
+  '{n} days ({h} h)':
+      '{n} రోజులు ({h} గం)',
+  'OT {h} h':
+      'ఓవర్‌టైమ్ {h} గం',
+  'no daily wage set':
+      'రోజు కూలీ పెట్టలేదు',
+  '{amount}/day':
+      '{amount}/రోజు',
+  '1 missing punch-out (half day)':
+      '1 పంచ్-అవుట్ లేదు (సగం రోజు)',
+  '{n} missing punch-outs (half days)':
+      '{n} పంచ్-అవుట్‌లు లేవు (సగం రోజులు)',
+  'paid {amount}':
+      'చెల్లించింది {amount}',
+  'advance':
+      'అడ్వాన్స్',
+  'due':
+      'బాకీ',
+  '{from} to {to}':
+      '{from} నుండి {to}',
 };
