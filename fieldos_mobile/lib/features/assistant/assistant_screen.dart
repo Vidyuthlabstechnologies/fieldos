@@ -115,7 +115,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
       'today': isoDay(now),
       'weekday': days[now.weekday - 1],
       'time': '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
-      'app_language': currentLanguage.englishName,
+      'app_language': spokenLanguage.englishName,
       'company': _company.name,
       'user': session.user?.name,
       'role': session.role,

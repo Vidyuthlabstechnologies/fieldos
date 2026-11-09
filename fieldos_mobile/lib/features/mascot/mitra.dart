@@ -107,7 +107,7 @@ class MitraSays extends StatelessWidget {
       children: [
         // Tap Mitra to hear the words, for anyone who would rather listen.
         GestureDetector(
-          onTap: () => ReadAloud.toggle([title, ?message].join('. ')),
+          onTap: () => ReadAloud.toggle(ReadAloud.spoken([title, ?message])),
           child: Mitra(mood: mood, size: size),
         ),
         Expanded(
@@ -184,7 +184,7 @@ class MitraEmpty extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     GestureDetector(
-                      onTap: () => ReadAloud.toggle([text, ?hint].join('. ')),
+                      onTap: () => ReadAloud.toggle(ReadAloud.spoken([text, ?hint])),
                       child: Mitra(mood: mood, size: c.maxHeight.isFinite && c.maxHeight < 260 ? 72 : 112),
                     ),
                     const SizedBox(height: 8),

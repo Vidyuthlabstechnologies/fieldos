@@ -7,6 +7,8 @@ import 'package:fieldos_mobile/features/company/company_setup_screen.dart';
 import 'package:fieldos_mobile/features/home/home_screen.dart';
 import 'package:fieldos_mobile/features/reminders/reminders.dart';
 import 'package:fieldos_mobile/features/subscription/subscription_gate.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/l10n/language_welcome.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
@@ -54,7 +56,10 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       if (next.activeCompany?.id != prev?.activeCompany?.id) ref.read(reminderSchedulerProvider).refresh();
     });
     final session = ref.watch(sessionProvider);
-    if (session.restoring) return const BrandSplash();
+    // First launch: ask which language the person speaks before anything else.
+    final languageChosen = ref.watch(languageChosenProvider);
+    if (session.restoring || languageChosen.isLoading) return const BrandSplash();
+    if (languageChosen.value == false) return const LanguageWelcomeScreen();
     if (!session.isAuthenticated) return const LoginScreen();
     // Everyone needs a subscription (the 3-day store trial counts) past login.
     return SubscriptionGate(child: session.needsCompany ? const CompanySetupScreen() : const HomeScreen());

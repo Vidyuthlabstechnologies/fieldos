@@ -190,14 +190,19 @@ class _AppTourScreenState extends ConsumerState<AppTourScreen> {
   void _go(int to, int count) {
     if (to < 0 || to >= count) return;
     setState(() => _index = to);
-    if (_voice) _read(appTourSteps()[to]);
+    if (_voice) _read(to);
   }
 
-  void _read(TourStep step) => ReadAloud.say('${step.title}. ${step.body}');
+  /// Mitra's recorded line for step [i] in the person's language, or the
+  /// step's own words when there is none.
+  void _read(int i) {
+    final step = appTourSteps()[i];
+    ReadAloud.guide('tour_$i', fallback: ReadAloud.spoken([step.title, step.body]));
+  }
 
-  void _toggleVoice(TourStep step) {
+  void _toggleVoice() {
     setState(() => _voice = !_voice);
-    _voice ? _read(step) : ReadAloud.stop();
+    _voice ? _read(_index) : ReadAloud.stop();
   }
 
   @override
@@ -258,7 +263,9 @@ class _AppTourScreenState extends ConsumerState<AppTourScreen> {
               count: steps.length,
               bottomInset: media.viewPadding.bottom,
               voice: _voice,
-              onVoice: () => _toggleVoice(step),
+              onVoice: _toggleVoice,
+              onMitra: () => ReadAloud.toggleGuide('tour_$_index',
+                  fallback: ReadAloud.spoken([step.title, step.body])),
               onSkip: () => Navigator.of(context).pop(),
               onBack: _index == 0 ? null : () => _go(_index - 1, steps.length),
               onNext: last ? null : () => _go(_index + 1, steps.length),
@@ -281,6 +288,7 @@ class _GuideCard extends StatelessWidget {
     required this.onSkip,
     this.voice = false,
     this.onVoice,
+    this.onMitra,
     this.onBack,
     this.onNext,
     this.onExplore,
@@ -294,6 +302,9 @@ class _GuideCard extends StatelessWidget {
   final VoidCallback onSkip;
   final bool voice;
   final VoidCallback? onVoice;
+
+  /// Tapping Mitra says this step once.
+  final VoidCallback? onMitra;
   final VoidCallback? onBack;
   final VoidCallback? onNext;
   final VoidCallback? onExplore;
@@ -353,7 +364,7 @@ class _GuideCard extends StatelessWidget {
                 children: [
                   // Tapping Mitra reads the step aloud too.
                   GestureDetector(
-                    onTap: () => ReadAloud.toggle('${step.title}. ${step.body}'),
+                    onTap: onMitra,
                     child: Mitra(mood: step.mood, size: 104),
                   ),
                   const SizedBox(width: 8),

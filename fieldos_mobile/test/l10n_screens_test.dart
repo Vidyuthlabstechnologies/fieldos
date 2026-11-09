@@ -53,8 +53,13 @@ void main() {
   }
 
   Future<void> pump(WidgetTester tester, ProviderContainer container, AppLanguage lang, Widget home) async {
-    // Saved the way the picker saves it, so the language controller loads it.
-    await tester.runAsync(() => container.read(appDatabaseProvider).settingsDao.set(languageSettingKey, lang.code));
+    // Saved the way the picker and the Settings switch save them, so the
+    // language controller loads them: this language, on screen too.
+    await tester.runAsync(() async {
+      final settings = container.read(appDatabaseProvider).settingsDao;
+      await settings.set(languageSettingKey, lang.code);
+      await settings.set(screensInLanguageKey, lang == AppLanguage.en ? '0' : '1');
+    });
     setCurrentLanguage(lang);
     tester.view.physicalSize = const Size(320, 640);
     tester.view.devicePixelRatio = 1;
@@ -75,18 +80,28 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('picking Telugu in Settings switches the open screen and is remembered', (tester) async {
+  testWidgets('picking Telugu keeps English screens until the screens switch is on', (tester) async {
     final (container, db) = await signedIn(tester);
     await pump(tester, container, AppLanguage.en, const SettingsScreen());
     expect(find.text('Settings'), findsOneWidget);
-    await tester.tap(find.text('App language').last);
+    expect(find.textContaining('Show screens in'), findsNothing, reason: 'nothing to switch for English');
+    await tester.tap(find.text('Your language').last);
     await tester.pumpAndSettle();
     await tester.tap(find.text('తెలుగు'));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pumpAndSettle();
+    // Mitra and voice input now use Telugu; the screens stay English.
+    expect(spokenLanguage, AppLanguage.te);
+    expect(find.text('Settings'), findsOneWidget);
+    expect(await tester.runAsync(() => db.settingsDao.get(languageSettingKey)), 'te');
+
+    await tester.scrollUntilVisible(find.text('Show screens in తెలుగు'), 200);
+    await tester.tap(find.text('Show screens in తెలుగు'));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
     expect(find.text('సెట్టింగ్‌లు'), findsOneWidget);
     expect(find.text('Settings'), findsNothing);
-    expect(await tester.runAsync(() => db.settingsDao.get(languageSettingKey)), 'te');
+    expect(await tester.runAsync(() => db.settingsDao.get(screensInLanguageKey)), '1');
   });
 
   for (final lang in [AppLanguage.hi, AppLanguage.te]) {
@@ -119,7 +134,7 @@ void main() {
         final (container, _) = await signedIn(tester);
         await pump(tester, container, lang, const SettingsScreen());
         expect(tester.takeException(), isNull);
-        expect(find.text(tr('App language')), findsWidgets);
+        expect(find.text(tr('Your language')), findsWidgets);
         expect(find.text(lang.nativeName), findsOneWidget);
       });
 

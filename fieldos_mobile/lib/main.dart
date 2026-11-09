@@ -41,7 +41,11 @@ class AppWithMaterial extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final language = ref.watch(languageProvider);
+    ref.watch(languageProvider);
+    ref.watch(screensInLanguageProvider);
+    // Dialogs and date pickers follow the screens, which stay English
+    // unless the person asked for their language on screen too.
+    final language = currentLanguage;
     return MaterialApp(
       title: 'FieldOS',
       // Date pickers, dialogs' OK/Cancel and the like in the same language.
