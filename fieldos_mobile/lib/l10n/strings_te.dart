@@ -1108,4 +1108,9 @@ const Map<String, String> stringsTe = {
   'Who you owe': 'ఎవరికి బాకీ ఉంది',
   'Zoho Books expenses (CSV)': 'Zoho Books ఖర్చులు (CSV)',
   '{amount} over 90 days': '{amount} 90 రోజులకు పైగా',
+
+  // Client progress update.
+  'PDF for the client': 'క్లయింట్ కోసం PDF',
+  'Progress and photos only': 'ప్రగతి, ఫోటోలు మాత్రమే',
+  'With billed, received and balance due': 'బిల్లు, వచ్చిన మొత్తం, బాకీతో సహా',
 };

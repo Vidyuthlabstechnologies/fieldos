@@ -134,6 +134,60 @@ List<String> _pieces(String text) {
 
 String _sentence(String s) => s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1).replaceAll('_', ' ')}';
 
+/// Text for a PDF in any Indian script. The built-in font only has Latin
+/// letters, so text in other scripts is drawn by the phone's own text
+/// engine and placed as a picture. [prepare] every string first (it is
+/// async), then lay out with [text] or [one] (layout is synchronous).
+class PdfTextKit {
+  PdfTextKit([this.paintText = paintWithPhoneFonts]);
+  final TextPicturePainter paintText;
+  final _pictures = <String, TextPicture?>{};
+
+  static String _key(String s, double size, bool bold, PdfColor c, double w) => '$size|$bold|${c.toInt()}|$w|$s';
+
+  Future<void> prepare(String? s, {double size = 11, bool bold = false, PdfColor color = _ink, double width = 500}) async {
+    if (s == null || s.trim().isEmpty || !needsLocalScript(s)) return;
+    for (final piece in _pieces(s).where(needsLocalScript)) {
+      final k = _key(piece, size, bold, color, width);
+      if (_pictures.containsKey(k)) continue;
+      try {
+        _pictures[k] = await paintText(piece, fontSize: size, bold: bold, argb: color.toInt(), maxWidth: width);
+      } catch (_) {
+        _pictures[k] = null;
+      }
+    }
+  }
+
+  /// [s] as real text when the built-in font can draw it, otherwise as
+  /// pictures (one per paragraph), all prepared before.
+  List<pw.Widget> text(String s, {double size = 11, bool bold = false, PdfColor color = _ink, double width = 500}) {
+    pw.Widget plain(String t) => pw.Text(_latin(t),
+        style: pw.TextStyle(fontSize: size, color: color, fontWeight: bold ? pw.FontWeight.bold : null, lineSpacing: 2));
+    if (!needsLocalScript(s)) return [plain(s)];
+    return [
+      for (final piece in _pieces(s))
+        if (!needsLocalScript(piece))
+          pw.Padding(padding: const pw.EdgeInsets.only(bottom: 3), child: plain(piece))
+        else if (_pictures[_key(piece, size, bold, color, width)] case final p?)
+          pw.Padding(
+            padding: const pw.EdgeInsets.only(bottom: 3),
+            child: pw.Image(pw.MemoryImage(p.png), width: p.width, height: p.height),
+          )
+        else
+          pw.Text('(written in a local language: see the message this report came with)',
+              style: pw.TextStyle(fontSize: size - 1, color: _muted)),
+    ];
+  }
+
+  pw.Widget one(String s, {double size = 11, bool bold = false, PdfColor color = _ink, double width = 500}) {
+    final parts = text(s, size: size, bold: bold, color: color, width: width);
+    return parts.length == 1 ? parts.single : pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: parts);
+  }
+}
+
+/// The FieldOS hard hat, for other reports' headers and footers.
+void paintFieldOsHat(PdfGraphics c, double size, {required PdfColor line}) => _paintHat(c, size, line: line);
+
 /// Builds the PDF bytes. Photos that are missing or unreadable are skipped
 /// rather than failing the whole report. [paintText] draws local-script
 /// text; tests pass a stand-in.
@@ -155,49 +209,13 @@ Future<Uint8List> buildDprPdf({
     creator: 'FieldOS',
   );
 
-  // Pictures for local-script text, made before the (synchronous) layout.
-  final pictures = <String, TextPicture?>{};
-  String key(String s, double size, bool bold, PdfColor c, double w) => '$size|$bold|${c.toInt()}|$w|$s';
-  Future<void> prepare(String? s, {double size = 11, bool bold = false, PdfColor color = _ink, double width = 500}) async {
-    if (s == null || s.trim().isEmpty || !needsLocalScript(s)) return;
-    for (final piece in _pieces(s).where(needsLocalScript)) {
-      final k = key(piece, size, bold, color, width);
-      if (pictures.containsKey(k)) continue;
-      try {
-        pictures[k] = await paintText(piece, fontSize: size, bold: bold, argb: color.toInt(), maxWidth: width);
-      } catch (_) {
-        pictures[k] = null;
-      }
-    }
-  }
-
-  /// [s] as real text when the built-in font can draw it, otherwise as
-  /// pictures (one per paragraph), all prepared above.
-  List<pw.Widget> text(String s, {double size = 11, bool bold = false, PdfColor color = _ink, double width = 500}) {
-    pw.Widget plain(String t) => pw.Text(_latin(t),
-        style: pw.TextStyle(fontSize: size, color: color, fontWeight: bold ? pw.FontWeight.bold : null, lineSpacing: 2));
-    if (!needsLocalScript(s)) return [plain(s)];
-    return [
-      for (final piece in _pieces(s))
-        if (!needsLocalScript(piece))
-          pw.Padding(padding: const pw.EdgeInsets.only(bottom: 3), child: plain(piece))
-        else if (pictures[key(piece, size, bold, color, width)] case final p?)
-          pw.Padding(
-            padding: const pw.EdgeInsets.only(bottom: 3),
-            child: pw.Image(pw.MemoryImage(p.png), width: p.width, height: p.height),
-          )
-        else
-          pw.Text('(written in a local language: see the message this report came with)',
-              style: pw.TextStyle(fontSize: size - 1, color: _muted)),
-    ];
-  }
-
-  pw.Widget one(String s, {double size = 11, bool bold = false, PdfColor color = _ink, double width = 500}) {
-    final parts = text(s, size: size, bold: bold, color: color, width: width);
-    return parts.length == 1
-        ? parts.single
-        : pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: parts);
-  }
+  final kit = PdfTextKit(paintText);
+  Future<void> prepare(String? s, {double size = 11, bool bold = false, PdfColor color = _ink, double width = 500}) =>
+      kit.prepare(s, size: size, bold: bold, color: color, width: width);
+  List<pw.Widget> text(String s, {double size = 11, bool bold = false, PdfColor color = _ink, double width = 500}) =>
+      kit.text(s, size: size, bold: bold, color: color, width: width);
+  pw.Widget one(String s, {double size = 11, bool bold = false, PdfColor color = _ink, double width = 500}) =>
+      kit.one(s, size: size, bold: bold, color: color, width: width);
 
   final client = project.clientName?.trim() ?? '';
   final weather = dpr.weather?.trim() ?? '';

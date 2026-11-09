@@ -1106,4 +1106,9 @@ const Map<String, String> stringsHi = {
   'Who you owe': 'किसका बकाया है',
   'Zoho Books expenses (CSV)': 'Zoho Books खर्च (CSV)',
   '{amount} over 90 days': '{amount} 90 दिन से ज़्यादा',
+
+  // Client progress update.
+  'PDF for the client': 'क्लाइंट के लिए PDF',
+  'Progress and photos only': 'सिर्फ़ प्रगति और फ़ोटो',
+  'With billed, received and balance due': 'बिल, मिली रकम और बाकी के साथ',
 };
