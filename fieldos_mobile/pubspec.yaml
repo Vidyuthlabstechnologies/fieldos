@@ -53,14 +53,13 @@ dependencies:
   path: ^1.9.0
 
   # File picker for attaching documents (Storage Access Framework / document picker).
-  # Pinned to this exact beta: file_picker <11 hardcodes compileSdk 34  # (breaks once anything needs >=36); 11.x ignores the android.builtInKotlin
-  # gradle property and unconditionally skips its own Kotlin plugin under
-  # AGP 9+, which conflicts with flutter_plugin_android_lifecycle (still
-  # applying the traditional plugin unconditionally) and leaves
-  # FilePickerPlugin never compiled. 12.0.0-beta.7 is the first version that
-  # actually respects the flag instead of ignoring it. See
-  # docs/MOBILE_GUIDE.md.
-  file_picker: 12.0.0-beta.7
+  # Pinned to an exact version: file_picker <11 hardcodes compileSdk 34,
+  # and 11.x skips its own Kotlin plugin under AGP 9+, which leaves
+  # FilePickerPlugin never compiled. 12.0.0-beta.7 was the first version that
+  # respects android.builtInKotlin; 13.x is the stable federated release of
+  # that work (and fixes Android picks that never completed). Check a release
+  # APK build before moving it. See docs/MOBILE_GUIDE.md.
+  file_picker: 13.3.2
 
   # Camera-first photo evidence capture (DPR/inspection proof photos).
   # Uses the system camera app / Android Photo Picker, so no runtime
