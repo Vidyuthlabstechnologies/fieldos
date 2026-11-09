@@ -12,25 +12,26 @@ const textSizeKey = 'text_size';
 /// The choices, as a multiple of the phone's own size.
 const textSizes = {'normal': 1.0, 'large': 1.15, 'larger': 1.3};
 
-class TextSizeController extends StateNotifier<String> {
-  TextSizeController(this._ref) : super('normal') {
+class TextSizeController extends Notifier<String> {
+  @override
+  String build() {
     _load();
+    return 'normal';
   }
-  final Ref _ref;
 
   Future<void> _load() async {
-    final saved = await _ref.read(appDatabaseProvider).settingsDao.get(textSizeKey);
-    if (mounted && textSizes.containsKey(saved)) state = saved!;
+    final saved = await ref.read(appDatabaseProvider).settingsDao.get(textSizeKey);
+    if (ref.mounted && textSizes.containsKey(saved)) state = saved!;
   }
 
   Future<void> choose(String size) async {
     if (!textSizes.containsKey(size)) return;
     state = size;
-    await _ref.read(appDatabaseProvider).settingsDao.set(textSizeKey, size);
+    await ref.read(appDatabaseProvider).settingsDao.set(textSizeKey, size);
   }
 }
 
-final textSizeProvider = StateNotifierProvider<TextSizeController, String>((ref) => TextSizeController(ref));
+final textSizeProvider = NotifierProvider<TextSizeController, String>(TextSizeController.new);
 
 /// The phone's scale times ours, capped so layouts still fit.
 TextScaler combinedTextScaler(TextScaler phone, String size) {

@@ -27,8 +27,14 @@ void main() {
   LicenseRegistry.addLicense(() async* {
     yield LicenseEntryWithLineBreaks(const ['Inter (font)'], await rootBundle.loadString('assets/fonts/OFL.txt'));
   });
-  runApp(const ProviderScope(child: AppWithMaterial()));
+  runApp(const ProviderScope(retry: noProviderRetry, child: AppWithMaterial()));
 }
+
+/// Riverpod 3 retries a failed provider on its own, with backoff. FieldOS
+/// screens already show the error with a way to try again, and a silent
+/// retry would repeat paid or rate-limited calls (store plans, cloud), so
+/// a failure stays a failure until the person or the code asks again.
+Duration? noProviderRetry(int retryCount, Object error) => null;
 
 class AppWithMaterial extends ConsumerWidget {
   const AppWithMaterial({super.key});

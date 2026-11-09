@@ -248,7 +248,7 @@ class SampleProjectBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final id = ref.watch(sampleProjectIdProvider(project.companyId)).valueOrNull;
+    final id = ref.watch(sampleProjectIdProvider(project.companyId)).value;
     if (id != project.id) return const SizedBox.shrink();
     final theme = Theme.of(context);
     // A thin, quiet strip: it explains the demo without taking over the

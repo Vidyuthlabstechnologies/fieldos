@@ -94,7 +94,7 @@ class ValueCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final v = ref.watch(valueSummaryProvider(companyId)).valueOrNull;
+    final v = ref.watch(valueSummaryProvider(companyId)).value;
     if (v == null || v.records == 0) return const SizedBox.shrink();
     final theme = Theme.of(context);
     final facts = valueFacts(v);

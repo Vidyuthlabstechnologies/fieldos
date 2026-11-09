@@ -22,7 +22,7 @@ class ApprovalsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pending = ref.watch(pendingApprovalsProvider(companyId));
-    final projects = ref.watch(projectsProvider(companyId)).valueOrNull ?? const <Project>[];
+    final projects = ref.watch(projectsProvider(companyId)).value ?? const <Project>[];
     final names = {for (final p in projects) p.id: p.name};
     final canDecide = Roles.canApprove(ref.watch(sessionProvider).role);
 

@@ -294,7 +294,7 @@ class TodayBriefCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final briefs = ref.watch(todayBriefProvider(companyId)).valueOrNull;
+    final briefs = ref.watch(todayBriefProvider(companyId)).value;
     if (briefs == null || briefs.isEmpty) return const SizedBox.shrink();
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;

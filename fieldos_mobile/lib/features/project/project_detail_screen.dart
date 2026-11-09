@@ -443,7 +443,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
   @override
   Widget build(BuildContext context) {
     final dpr = ref.watch(dprProvider(widget.project.id));
-    final issues = ref.watch(issuesProvider(widget.project.id)).valueOrNull ?? const <Issue>[];
+    final issues = ref.watch(issuesProvider(widget.project.id)).value ?? const <Issue>[];
     return Stack(
       children: [
         RefreshIndicator(

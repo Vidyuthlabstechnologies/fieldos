@@ -59,9 +59,7 @@ final locationServiceProvider = Provider<LocationService>((ref) => LocationServi
 
 final billingServiceProvider = Provider<BillingService>((ref) => BillingService(ref.watch(appDatabaseProvider)));
 
-final sessionProvider = StateNotifierProvider<SessionNotifier, SessionState>(
-  (ref) => SessionNotifier(ref.watch(authServiceProvider), ref.watch(appDatabaseProvider)),
-);
+final sessionProvider = NotifierProvider<SessionNotifier, SessionState>(SessionNotifier.new);
 
 /// List providers, keyed by parent id, for the detail screens.
 final projectsProvider =

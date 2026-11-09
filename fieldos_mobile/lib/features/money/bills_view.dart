@@ -68,8 +68,8 @@ class BillsView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bills = ref.watch(billsProvider(project.id));
     final received =
-        ref.watch(paymentsReceivedProvider(project.id)).valueOrNull?.fold<double>(0, (s, p) => s + p.amount) ?? 0;
-    final spent = ref.watch(costSummaryProvider(project.id)).valueOrNull?.actual ?? 0;
+        ref.watch(paymentsReceivedProvider(project.id)).value?.fold<double>(0, (s, p) => s + p.amount) ?? 0;
+    final spent = ref.watch(costSummaryProvider(project.id)).value?.actual ?? 0;
     return Stack(children: [
       bills.when(
         data: (list) {
@@ -249,7 +249,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
 
   void _gstinChanged() {
     if (_interStateTouched) return;
-    final ours = ref.read(billingProfileProvider(widget.project.companyId)).valueOrNull?.gstin;
+    final ours = ref.read(billingProfileProvider(widget.project.companyId)).value?.gstin;
     final inter = isInterState(ours, _clientGstin.text);
     if (inter != _interState) setState(() => _interState = inter);
   }
@@ -420,8 +420,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bills = ref.watch(billsProvider(widget.project.id)).valueOrNull ?? const <ClientBill>[];
-    final profile = ref.watch(billingProfileProvider(widget.project.companyId)).valueOrNull ?? const BillingProfile();
+    final bills = ref.watch(billsProvider(widget.project.id)).value ?? const <ClientBill>[];
+    final profile = ref.watch(billingProfileProvider(widget.project.companyId)).value ?? const BillingProfile();
     final previous = _previous(bills);
     final totals = billTotals(_lines,
         gstRate: _gstRate, interState: _interState, retentionPct: _pct(_retention), tdsPct: _pct(_tds));

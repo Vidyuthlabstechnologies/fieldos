@@ -120,8 +120,8 @@ class MoneyView extends ConsumerWidget {
     final expenses = ref.watch(expensesProvider(projectId));
     final received = showIn ? ref.watch(paymentsReceivedProvider(projectId)) : const AsyncValue.data(<PaymentsReceivedData>[]);
 
-    final spent = expenses.valueOrNull?.fold<double>(0, (s, e) => s + e.amount) ?? 0;
-    final inTotal = received.valueOrNull?.fold<double>(0, (s, p) => s + p.amount) ?? 0;
+    final spent = expenses.value?.fold<double>(0, (s, e) => s + e.amount) ?? 0;
+    final inTotal = received.value?.fold<double>(0, (s, p) => s + p.amount) ?? 0;
 
     return DefaultTabController(
       length: 1 + (showIn ? 1 : 0) + (showBills ? 1 : 0),
@@ -281,9 +281,9 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
   @override
   Widget build(BuildContext context) {
     final rows = ref.watch(moneyBookExpensesProvider(widget.projectId));
-    final workers = ref.watch(workersProvider(widget.projectId)).valueOrNull ?? const <Worker>[];
+    final workers = ref.watch(workersProvider(widget.projectId)).value ?? const <Worker>[];
     final workerName = {for (final w in workers) w.id: w.name};
-    final categories = ref.watch(expenseCategoriesProvider(widget.projectId)).valueOrNull ?? defaultExpenseCategories;
+    final categories = ref.watch(expenseCategoriesProvider(widget.projectId)).value ?? defaultExpenseCategories;
     final theme = Theme.of(context);
 
     return Stack(children: [
@@ -294,7 +294,7 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
           final shown = _filter.expenses(all, workerName: workerName);
           final total = totalOf(shown);
           final cancelled = shown.where((e) => e.voided).length;
-          final billCounts = ref.watch(expenseBillCountsProvider(widget.projectId)).valueOrNull ?? const {};
+          final billCounts = ref.watch(expenseBillCountsProvider(widget.projectId)).value ?? const {};
           return Column(children: [
             if (all.isNotEmpty) ...[
               Padding(

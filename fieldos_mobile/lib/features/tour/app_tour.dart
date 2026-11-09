@@ -426,7 +426,7 @@ class TourInviteCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final seen = ref.watch(tourSeenProvider).valueOrNull ?? true;
+    final seen = ref.watch(tourSeenProvider).value ?? true;
     if (seen) return const SizedBox.shrink();
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
