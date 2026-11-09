@@ -14,9 +14,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import 'package:fieldos_mobile/agents/assistant_chat_store.dart';
 import 'package:fieldos_mobile/agents/assistant_conversation.dart';
 import 'package:fieldos_mobile/agents/assistant_tools.dart';
 import 'package:fieldos_mobile/core/brand.dart';
+import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
@@ -51,7 +53,11 @@ class AssistantScreen extends ConsumerStatefulWidget {
 
 class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   late final AssistantConversation _chat;
+  late final AssistantChatStore _store;
   late final Company _company;
+
+  /// The chat on screen, as saved on the phone.
+  String _chatId = AssistantChatStore.newId();
   final _input = TextEditingController();
   final _scroll = ScrollController();
   FlutterTts? _tts;
@@ -64,6 +70,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     final session = ref.read(sessionProvider);
     _company = session.activeCompany!;
     final db = ref.read(appDatabaseProvider);
+    _store = AssistantChatStore(db: db, companyId: _company.id, userId: session.user?.id ?? '');
     _chat = AssistantConversation(
       backend: ref.read(aiBackendProvider),
       tools: AssistantTools(db: db, companyId: _company.id, userId: session.user?.id ?? '', role: session.role),
@@ -73,8 +80,51 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
         ref.invalidate(openTasksProvider(_company.id));
         ref.invalidate(pendingApprovalsProvider(_company.id));
       },
+      onSettled: _save,
     )..addListener(_changed);
+    _continueLastChat();
     if (widget.startListening) WidgetsBinding.instance.addPostFrameCallback((_) => _listen());
+  }
+
+  /// Opens the newest saved chat, so the conversation carries on.
+  Future<void> _continueLastChat() async {
+    final chats = await _store.list();
+    if (chats.isEmpty || !mounted || _chat.busy || _chat.items.isNotEmpty) return;
+    await _openSaved(chats.first.id);
+  }
+
+  Future<void> _openSaved(String id) async {
+    final saved = await _store.load(id);
+    if (saved == null || !mounted || _chat.busy) return;
+    _chatId = id;
+    _chat.restore(saved);
+  }
+
+  Future<void> _save() async {
+    final first = _chat.items.whereType<PersonSaid>().firstOrNull;
+    if (first == null) return;
+    final title = first.text.length > 80 ? '${first.text.substring(0, 80)}…' : first.text;
+    try {
+      await _store.save(_chatId, title: title, chat: _chat.toJson());
+    } catch (_) {
+      // Saving is a convenience: the chat itself carries on.
+    }
+  }
+
+  void _newChat() {
+    if (_chat.busy) return;
+    _chat.clear();
+    _chatId = AssistantChatStore.newId();
+  }
+
+  Future<void> _pastChats() async {
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => _PastChats(store: _store, currentId: _chatId, onCurrentDeleted: _newChat),
+    );
+    if (picked != null && picked != _chatId) await _openSaved(picked);
   }
 
   @override
@@ -125,6 +175,8 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     };
     return '<app_state>${jsonEncode(state)}</app_state>';
   }
+
+  bool get _showFollowUps => !_chat.busy && !_chat.waitingForConfirm && _chat.followUps.isNotEmpty;
 
   Future<void> _send([String? text]) async {
     final words = (text ?? _input.text).trim();
@@ -233,11 +285,16 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
               if (!_speakReplies) _stopSpeaking();
             },
           ),
+          IconButton(
+            tooltip: tr('Past chats'),
+            icon: const Icon(Icons.history),
+            onPressed: _chat.busy ? null : _pastChats,
+          ),
           if (_chat.items.isNotEmpty)
             IconButton(
               tooltip: tr('New chat'),
               icon: const Icon(Icons.add_comment_outlined),
-              onPressed: _chat.busy ? null : _chat.clear,
+              onPressed: _chat.busy ? null : _newChat,
             ),
         ],
       ),
@@ -251,9 +308,11 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                     : ListView.builder(
                         controller: _scroll,
                         padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                        itemCount: _chat.items.length + (_chat.busy && !_chat.waitingForConfirm ? 1 : 0),
+                        itemCount: _chat.items.length + (_chat.busy && !_chat.waitingForConfirm || _showFollowUps ? 1 : 0),
                         itemBuilder: (context, n) {
-                          if (n == _chat.items.length) return const _Typing();
+                          if (n == _chat.items.length) {
+                            return _showFollowUps ? _FollowUps(questions: _chat.followUps, onPick: _send) : const _Typing();
+                          }
                           return switch (_chat.items[n]) {
                             PersonSaid(:final text) => _Bubble(text: text, mine: true),
                             AssistantSaid(:final text) => _Bubble(
@@ -311,6 +370,115 @@ class _Avatar extends StatelessWidget {
           ),
         ),
       );
+}
+
+/// Questions to tap next, under the last answer.
+class _FollowUps extends StatelessWidget {
+  const _FollowUps({required this.questions, required this.onPick});
+  final List<String> questions;
+  final void Function(String) onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(tr('You might ask next'),
+            style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        const SizedBox(height: 6),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (final q in questions)
+            ActionChip(avatar: const Icon(Icons.subdirectory_arrow_right, size: 16), label: Text(q), onPressed: () => onPick(q)),
+        ]),
+      ]),
+    );
+  }
+}
+
+/// Earlier chats, newest first: tap one to carry on with it.
+class _PastChats extends StatefulWidget {
+  const _PastChats({required this.store, required this.currentId, required this.onCurrentDeleted});
+  final AssistantChatStore store;
+  final String currentId;
+
+  /// The chat on screen was deleted: clear it too.
+  final VoidCallback onCurrentDeleted;
+
+  @override
+  State<_PastChats> createState() => _PastChatsState();
+}
+
+class _PastChatsState extends State<_PastChats> {
+  List<SavedChatInfo>? _chats;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final chats = await widget.store.list();
+    if (mounted) setState(() => _chats = chats);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final chats = _chats;
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.7),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 8, 8),
+            child: Row(children: [
+              Expanded(child: Text(tr('Past chats'), style: theme.textTheme.titleLarge)),
+              if (chats != null && chats.isNotEmpty)
+                TextButton(
+                  onPressed: () async {
+                    await widget.store.deleteAll();
+                    widget.onCurrentDeleted();
+                    _load();
+                  },
+                  child: Text(tr('Delete all')),
+                ),
+            ]),
+          ),
+          if (chats == null)
+            const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
+          else if (chats.isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              child: Text(tr('No earlier chats yet. Your chats are kept on this phone.'),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+            )
+          else
+            Flexible(
+              child: ListView(shrinkWrap: true, children: [
+                for (final c in chats)
+                  ListTile(
+                    leading: Icon(c.id == widget.currentId ? Icons.chat : Icons.chat_bubble_outline),
+                    title: Text(c.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    subtitle: Text(fmtDateTime(c.updatedAt)),
+                    onTap: () => Navigator.of(context).pop(c.id),
+                    trailing: IconButton(
+                      tooltip: tr('Delete'),
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () async {
+                        await widget.store.delete(c.id);
+                        if (c.id == widget.currentId) widget.onCurrentDeleted();
+                        _load();
+                      },
+                    ),
+                  ),
+              ]),
+            ),
+        ]),
+      ),
+    );
+  }
 }
 
 class _Welcome extends StatelessWidget {

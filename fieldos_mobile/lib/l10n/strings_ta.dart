@@ -2418,4 +2418,26 @@ const Map<String, String> stringsTa = {
   // Settings section
   'Language and voice':
       'மொழி, குரல்',
+  'Show this week\'s expenses':
+      'இந்த வாரச் செலவுகளைக் காட்டு',
+  'What is due this week?':
+      'இந்த வாரம் என்ன முடிக்க வேண்டும்?',
+  'Who was absent today?':
+      'இன்று யார் வரவில்லை?',
+  'How much did labour cost this week?':
+      'இந்த வாரம் கூலிக்கு எவ்வளவு செலவானது?',
+  'Any open issues on site?':
+      'தளத்தில் ஏதேனும் திறந்த பிரச்சினை உள்ளதா?',
+  'Which materials are running low?':
+      'எந்தப் பொருள் குறைவாக உள்ளது?',
+  'What needs my approval?':
+      'என் ஒப்புதலுக்கு என்ன காத்திருக்கிறது?',
+  'You might ask next':
+      'அடுத்து இதைக் கேட்கலாம்',
+  'Past chats':
+      'பழைய உரையாடல்கள்',
+  'Delete all':
+      'அனைத்தையும் நீக்கு',
+  'No earlier chats yet. Your chats are kept on this phone.':
+      'இன்னும் பழைய உரையாடல்கள் இல்லை. உங்கள் உரையாடல்கள் இந்த ஃபோனிலேயே இருக்கும்.',
 };

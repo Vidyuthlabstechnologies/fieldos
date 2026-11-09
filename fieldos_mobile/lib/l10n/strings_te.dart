@@ -1529,4 +1529,26 @@ const Map<String, String> stringsTe = {
   // Settings section
   'Language and voice':
       'భాష, వాయిస్',
+  'Show this week\'s expenses':
+      'ఈ వారం ఖర్చులు చూపించు',
+  'What is due this week?':
+      'ఈ వారం ఏమేమి చేయాలి?',
+  'Who was absent today?':
+      'ఈ రోజు ఎవరు రాలేదు?',
+  'How much did labour cost this week?':
+      'ఈ వారం కూలీలకు ఎంత ఖర్చైంది?',
+  'Any open issues on site?':
+      'సైట్‌లో ఏవైనా సమస్యలు తెరిచి ఉన్నాయా?',
+  'Which materials are running low?':
+      'ఏ సామాను తక్కువగా ఉంది?',
+  'What needs my approval?':
+      'నా ఆమోదం కోసం ఏమి ఉంది?',
+  'You might ask next':
+      'తర్వాత మీరు ఇది అడగవచ్చు',
+  'Past chats':
+      'పాత సంభాషణలు',
+  'Delete all':
+      'అన్నీ తొలగించు',
+  'No earlier chats yet. Your chats are kept on this phone.':
+      'ఇంకా పాత సంభాషణలు లేవు. మీ సంభాషణలు ఈ ఫోన్‌లోనే ఉంటాయి.',
 };

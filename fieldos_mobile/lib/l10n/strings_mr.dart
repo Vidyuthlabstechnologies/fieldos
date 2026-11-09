@@ -2418,4 +2418,26 @@ const Map<String, String> stringsMr = {
   // Settings section
   'Language and voice':
       'भाषा आणि आवाज',
+  'Show this week\'s expenses':
+      'या आठवड्याचा खर्च दाखवा',
+  'What is due this week?':
+      'या आठवड्यात काय काय करायचे आहे?',
+  'Who was absent today?':
+      'आज कोण आले नाही?',
+  'How much did labour cost this week?':
+      'या आठवड्यात मजुरीवर किती खर्च झाला?',
+  'Any open issues on site?':
+      'साइटवर काही उघडी अडचण आहे का?',
+  'Which materials are running low?':
+      'कोणते साहित्य कमी पडत आहे?',
+  'What needs my approval?':
+      'माझ्या मंजुरीसाठी काय बाकी आहे?',
+  'You might ask next':
+      'पुढे तुम्ही हे विचारू शकता',
+  'Past chats':
+      'जुन्या गप्पा',
+  'Delete all':
+      'सर्व हटवा',
+  'No earlier chats yet. Your chats are kept on this phone.':
+      'अजून जुन्या गप्पा नाहीत. तुमच्या गप्पा याच फोनवर राहतात.',
 };
