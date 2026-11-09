@@ -22,6 +22,8 @@ import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
+import 'package:fieldos_mobile/features/money/money_view.dart' show canSeeMoneyIn;
+import 'package:fieldos_mobile/features/procurement/payables_screen.dart';
 import 'package:fieldos_mobile/features/search/search_screen.dart';
 import 'package:fieldos_mobile/features/tour/app_tour.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
@@ -106,6 +108,8 @@ class HomeScreen extends ConsumerWidget {
               switch (v) {
                 case 'brief':
                   openOwnerBrief(context, companyId: company.id, companyName: company.name);
+                case 'payables':
+                  openPayables(context, company.id);
                 case 'tasks':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => MyTasksScreen(companyId: company.id)));
                 case 'map':
@@ -130,6 +134,10 @@ class HomeScreen extends ConsumerWidget {
               PopupMenuItem(
                   value: 'brief',
                   child: ListTile(leading: Icon(Icons.wb_twilight_outlined), title: Text(tr('Site brief')))),
+              if (canSeeMoneyIn(session.role))
+                PopupMenuItem(
+                    value: 'payables',
+                    child: ListTile(leading: Icon(Icons.account_balance_wallet_outlined), title: Text(tr('Who you owe')))),
               PopupMenuItem(
                   value: 'tasks', child: ListTile(leading: Icon(Icons.task_alt), title: Text(tr('My tasks')))),
               PopupMenuItem(value: 'map', child: ListTile(leading: Icon(Icons.map_outlined), title: Text(tr('Site map')))),

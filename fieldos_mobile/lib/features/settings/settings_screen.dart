@@ -305,6 +305,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             subtitle: Text(tr('Every record on this phone, in one file you keep. Free, always.')),
             onTap: () => exportCompanyToExcel(context, ref),
           ),
+          if (canSeeMoneyIn(session.role))
+            ListTile(
+              key: const Key('settings-export-accounts'),
+              leading: const Icon(Icons.account_balance_outlined),
+              title: Text(tr('Send to your accountant')),
+              subtitle: Text(tr('Tally vouchers or a Zoho Books file, with GST split out')),
+              onTap: () => showAccountsExport(context, ref),
+            ),
           if (company != null && session.canManageSettings) ...[
             const SectionHeader('Bills and reports', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
             _BrandingTiles(companyId: company.id),
