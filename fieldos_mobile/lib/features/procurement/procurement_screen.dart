@@ -17,6 +17,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/procurement/po_share.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_screens.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_tools.dart';
+import 'package:fieldos_mobile/features/procurement/supplier_statement_screen.dart';
 import 'package:fieldos_mobile/features/procurement/stock_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
@@ -140,11 +141,14 @@ final supplierLedgerProvider = FutureProvider.autoDispose.family<Map<String, Sup
   final db = ref.watch(appDatabaseProvider);
   final orders = <PurchaseOrder>[];
   final receipts = <MaterialReceipt>[];
+  final expenses = <SiteExpense>[];
   for (final p in await db.projectDao.forCompany(companyId)) {
     orders.addAll(await db.purchaseDao.ordersFor(p.id));
     receipts.addAll(await db.materialDao.forProject(p.id));
+    expenses.addAll(await db.expenseDao.forProject(p.id));
   }
-  return supplierLedgers(orders, receipts, DateTime.now());
+  return supplierLedgers(orders, receipts, DateTime.now(),
+      suppliers: await db.supplierDao.forCompany(companyId), expenses: expenses);
 });
 
 class _SuppliersTab extends ConsumerWidget {
@@ -173,8 +177,16 @@ class _SuppliersTab extends ConsumerWidget {
                               if (l.ordered > 0) trf('ordered {amount}', {'amount': rupees(l.ordered)}),
                               if (l.received > 0) trf('delivered {amount}', {'amount': rupees(l.received)}),
                               if (l.toCome > 0) trf('{amount} still to come', {'amount': rupees(l.toCome)}),
+                              if (l.balance > 0.005) trf('you owe {amount}', {'amount': rupees(l.balance)}),
+                              if (l.balance < -0.005) trf('advance {amount}', {'amount': rupees(-l.balance)}),
                             ],
                           ].join(' · ')),
+                          onTap: () async {
+                            await Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => SupplierStatementScreen(companyId: companyId, supplierId: s.id),
+                            ));
+                            ref.invalidate(supplierLedgerProvider(companyId));
+                          },
                           trailing: switch (ledgers[s.id]) {
                             final l? when l.lateOrders > 0 =>
                               StatusPill(trf('{n} late', {'n': l.lateOrders}), tone: PillTone.danger),

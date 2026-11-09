@@ -16,6 +16,7 @@ class FakeBilling extends BillingService {
   FakeBilling(super.db, {required this.offers});
 
   final List<PlanOffer> offers;
+  Object? plansError;
   Object? buyError;
   SubscriptionState? afterBuy = const SubscriptionState(active: true, inTrial: true);
   SubscriptionState restored = SubscriptionState.none;
@@ -31,7 +32,10 @@ class FakeBilling extends BillingService {
   @override
   String get cancelPath => 'Google Play › Subscriptions';
   @override
-  Future<List<PlanOffer>> plans() async => offers;
+  Future<List<PlanOffer>> plans() async {
+    if (plansError != null) throw plansError!;
+    return offers;
+  }
   @override
   Future<SubscriptionState?> buy(String planId) async {
     bought.add(planId);
@@ -65,12 +69,16 @@ void main() {
     Size size = const Size(412, 915),
     Brightness brightness = Brightness.light,
     bool codes = true,
+    Object? plansError,
+    bool withCompany = false,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final db = AppDatabase.memory();
-    final billing = FakeBilling(db, offers: offers)..codes = codes;
+    final billing = FakeBilling(db, offers: offers)
+      ..codes = codes
+      ..plansError = plansError;
     final unlocked = <String>[];
     final container = ProviderContainer(overrides: [
       appDatabaseProvider.overrideWithValue(db),
@@ -80,6 +88,13 @@ void main() {
       container.dispose();
       await db.close();
     });
+    if (withCompany) {
+      await tester.runAsync(() async {
+        final session = container.read(sessionProvider.notifier);
+        await session.register(username: 'ravi', name: 'Ravi Kumar', password: '123456');
+        await session.createCompany('Sri Sai Constructions');
+      });
+    }
     await tester.pumpWidget(UncontrolledProviderScope(
       container: container,
       child: MaterialApp(
@@ -115,6 +130,28 @@ void main() {
     await tapBuy(tester);
     expect(billing.bought, ['m']);
     expect(unlocked, ['yes']);
+  });
+
+  // Onsite's most-liked review: "either pay 35k a year or we delete your
+  // data". Here the paywall promises the opposite and the export is on it.
+  testWidgets('the paywall says records are kept and offers the Excel export', (tester) async {
+    await pump(tester, withCompany: true);
+    await tester.ensureVisible(find.byKey(const Key('paywall-your-data')));
+    expect(find.text('Your records stay yours'), findsOneWidget);
+    expect(find.textContaining('never deleted when a plan ends'), findsOneWidget);
+    expect(find.byKey(const Key('paywall-export')), findsOneWidget);
+  });
+
+  testWidgets('before a company exists there is nothing to export, so no card', (tester) async {
+    await pump(tester);
+    expect(find.byKey(const Key('paywall-your-data')), findsNothing);
+  });
+
+  testWidgets('plans that are not on sale yet are not blamed on the internet', (tester) async {
+    await pump(tester, plansError: plansErrorFor(PurchasesErrorCode.configurationError, store: 'Google Play'));
+    expect(find.textContaining('not on sale in Google Play yet'), findsOneWidget);
+    expect(find.textContaining('internet'), findsNothing);
+    expect(find.text('Try again'), findsOneWidget);
   });
 
   testWidgets('without a trial the price is on the button', (tester) async {

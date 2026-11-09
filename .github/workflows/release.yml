@@ -94,9 +94,9 @@ jobs:
           # Without it the "Continue with Google" button is hidden.
           GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
           # Published privacy policy and terms pages (repository variables,
-          # not secrets). Without them the app shows the copy it carries.
-          PRIVACY_POLICY_URL: ${{ vars.PRIVACY_POLICY_URL }}
-          TERMS_URL: ${{ vars.TERMS_URL }}
+          # not secrets). Default: the live site on Netlify.
+          PRIVACY_POLICY_URL: ${{ vars.PRIVACY_POLICY_URL || 'https://fieldos-mldynamic.netlify.app/privacy-policy.html' }}
+          TERMS_URL: ${{ vars.TERMS_URL || 'https://fieldos-mldynamic.netlify.app/terms-of-use.html' }}
         run: |
           DEFINES="--dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY --dart-define=REVENUECAT_ANDROID_KEY=$REVENUECAT_ANDROID_KEY --dart-define=REVENUECAT_IOS_KEY=$REVENUECAT_IOS_KEY --dart-define=PRIVACY_POLICY_URL=$PRIVACY_POLICY_URL --dart-define=TERMS_URL=$TERMS_URL --dart-define=GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID"
           flutter build apk --release $DEFINES

@@ -7038,6 +7038,17 @@ class $SuppliersTable extends Suppliers
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _openingBalanceMeta = const VerificationMeta(
+    'openingBalance',
+  );
+  @override
+  late final GeneratedColumn<double> openingBalance = GeneratedColumn<double>(
+    'opening_balance',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -7051,6 +7062,7 @@ class $SuppliersTable extends Suppliers
     category,
     notes,
     createdAt,
+    openingBalance,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -7139,6 +7151,15 @@ class $SuppliersTable extends Suppliers
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('opening_balance')) {
+      context.handle(
+        _openingBalanceMeta,
+        openingBalance.isAcceptableOrUnknown(
+          data['opening_balance']!,
+          _openingBalanceMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -7192,6 +7213,10 @@ class $SuppliersTable extends Suppliers
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      openingBalance: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}opening_balance'],
+      ),
     );
   }
 
@@ -7213,6 +7238,10 @@ class Supplier extends DataClass implements Insertable<Supplier> {
   final String? category;
   final String? notes;
   final DateTime createdAt;
+
+  /// v13: what was owed to the supplier when the company started using
+  /// FieldOS (negative: an advance they still hold).
+  final double? openingBalance;
   const Supplier({
     required this.id,
     required this.companyId,
@@ -7225,6 +7254,7 @@ class Supplier extends DataClass implements Insertable<Supplier> {
     this.category,
     this.notes,
     required this.createdAt,
+    this.openingBalance,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -7254,6 +7284,9 @@ class Supplier extends DataClass implements Insertable<Supplier> {
       map['notes'] = Variable<String>(notes);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || openingBalance != null) {
+      map['opening_balance'] = Variable<double>(openingBalance);
+    }
     return map;
   }
 
@@ -7284,6 +7317,9 @@ class Supplier extends DataClass implements Insertable<Supplier> {
           ? const Value.absent()
           : Value(notes),
       createdAt: Value(createdAt),
+      openingBalance: openingBalance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(openingBalance),
     );
   }
 
@@ -7304,6 +7340,7 @@ class Supplier extends DataClass implements Insertable<Supplier> {
       category: serializer.fromJson<String?>(json['category']),
       notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      openingBalance: serializer.fromJson<double?>(json['openingBalance']),
     );
   }
   @override
@@ -7321,6 +7358,7 @@ class Supplier extends DataClass implements Insertable<Supplier> {
       'category': serializer.toJson<String?>(category),
       'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'openingBalance': serializer.toJson<double?>(openingBalance),
     };
   }
 
@@ -7336,6 +7374,7 @@ class Supplier extends DataClass implements Insertable<Supplier> {
     Value<String?> category = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
+    Value<double?> openingBalance = const Value.absent(),
   }) => Supplier(
     id: id ?? this.id,
     companyId: companyId ?? this.companyId,
@@ -7350,6 +7389,9 @@ class Supplier extends DataClass implements Insertable<Supplier> {
     category: category.present ? category.value : this.category,
     notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
+    openingBalance: openingBalance.present
+        ? openingBalance.value
+        : this.openingBalance,
   );
   Supplier copyWithCompanion(SuppliersCompanion data) {
     return Supplier(
@@ -7368,6 +7410,9 @@ class Supplier extends DataClass implements Insertable<Supplier> {
       category: data.category.present ? data.category.value : this.category,
       notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      openingBalance: data.openingBalance.present
+          ? data.openingBalance.value
+          : this.openingBalance,
     );
   }
 
@@ -7384,7 +7429,8 @@ class Supplier extends DataClass implements Insertable<Supplier> {
           ..write('gstNumber: $gstNumber, ')
           ..write('category: $category, ')
           ..write('notes: $notes, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('openingBalance: $openingBalance')
           ..write(')'))
         .toString();
   }
@@ -7402,6 +7448,7 @@ class Supplier extends DataClass implements Insertable<Supplier> {
     category,
     notes,
     createdAt,
+    openingBalance,
   );
   @override
   bool operator ==(Object other) =>
@@ -7417,7 +7464,8 @@ class Supplier extends DataClass implements Insertable<Supplier> {
           other.gstNumber == this.gstNumber &&
           other.category == this.category &&
           other.notes == this.notes &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.openingBalance == this.openingBalance);
 }
 
 class SuppliersCompanion extends UpdateCompanion<Supplier> {
@@ -7432,6 +7480,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
   final Value<String?> category;
   final Value<String?> notes;
   final Value<DateTime> createdAt;
+  final Value<double?> openingBalance;
   final Value<int> rowid;
   const SuppliersCompanion({
     this.id = const Value.absent(),
@@ -7445,6 +7494,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     this.category = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.openingBalance = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SuppliersCompanion.insert({
@@ -7459,6 +7509,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     this.category = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.openingBalance = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        companyId = Value(companyId),
@@ -7475,6 +7526,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     Expression<String>? category,
     Expression<String>? notes,
     Expression<DateTime>? createdAt,
+    Expression<double>? openingBalance,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -7489,6 +7541,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
       if (category != null) 'category': category,
       if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
+      if (openingBalance != null) 'opening_balance': openingBalance,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -7505,6 +7558,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     Value<String?>? category,
     Value<String?>? notes,
     Value<DateTime>? createdAt,
+    Value<double?>? openingBalance,
     Value<int>? rowid,
   }) {
     return SuppliersCompanion(
@@ -7519,6 +7573,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
       category: category ?? this.category,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
+      openingBalance: openingBalance ?? this.openingBalance,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -7559,6 +7614,9 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (openingBalance.present) {
+      map['opening_balance'] = Variable<double>(openingBalance.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -7579,6 +7637,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
           ..write('category: $category, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
+          ..write('openingBalance: $openingBalance, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -10560,6 +10619,54 @@ class $PaymentsReceivedTable extends PaymentsReceived
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _voidedMeta = const VerificationMeta('voided');
+  @override
+  late final GeneratedColumn<bool> voided = GeneratedColumn<bool>(
+    'voided',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("voided" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _voidReasonMeta = const VerificationMeta(
+    'voidReason',
+  );
+  @override
+  late final GeneratedColumn<String> voidReason = GeneratedColumn<String>(
+    'void_reason',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _editedAtMeta = const VerificationMeta(
+    'editedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> editedAt = GeneratedColumn<DateTime>(
+    'edited_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _editedByMeta = const VerificationMeta(
+    'editedBy',
+  );
+  @override
+  late final GeneratedColumn<String> editedBy = GeneratedColumn<String>(
+    'edited_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -10571,6 +10678,10 @@ class $PaymentsReceivedTable extends PaymentsReceived
     recordedBy,
     note,
     createdAt,
+    voided,
+    voidReason,
+    editedAt,
+    editedBy,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -10649,6 +10760,30 @@ class $PaymentsReceivedTable extends PaymentsReceived
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('voided')) {
+      context.handle(
+        _voidedMeta,
+        voided.isAcceptableOrUnknown(data['voided']!, _voidedMeta),
+      );
+    }
+    if (data.containsKey('void_reason')) {
+      context.handle(
+        _voidReasonMeta,
+        voidReason.isAcceptableOrUnknown(data['void_reason']!, _voidReasonMeta),
+      );
+    }
+    if (data.containsKey('edited_at')) {
+      context.handle(
+        _editedAtMeta,
+        editedAt.isAcceptableOrUnknown(data['edited_at']!, _editedAtMeta),
+      );
+    }
+    if (data.containsKey('edited_by')) {
+      context.handle(
+        _editedByMeta,
+        editedBy.isAcceptableOrUnknown(data['edited_by']!, _editedByMeta),
+      );
+    }
     return context;
   }
 
@@ -10694,6 +10829,22 @@ class $PaymentsReceivedTable extends PaymentsReceived
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      voided: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}voided'],
+      )!,
+      voidReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}void_reason'],
+      ),
+      editedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}edited_at'],
+      ),
+      editedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}edited_by'],
+      ),
     );
   }
 
@@ -10714,6 +10865,10 @@ class PaymentsReceivedData extends DataClass
   final String recordedBy;
   final String? note;
   final DateTime createdAt;
+  final bool voided;
+  final String? voidReason;
+  final DateTime? editedAt;
+  final String? editedBy;
   const PaymentsReceivedData({
     required this.id,
     required this.projectId,
@@ -10724,6 +10879,10 @@ class PaymentsReceivedData extends DataClass
     required this.recordedBy,
     this.note,
     required this.createdAt,
+    required this.voided,
+    this.voidReason,
+    this.editedAt,
+    this.editedBy,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -10739,6 +10898,16 @@ class PaymentsReceivedData extends DataClass
       map['note'] = Variable<String>(note);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['voided'] = Variable<bool>(voided);
+    if (!nullToAbsent || voidReason != null) {
+      map['void_reason'] = Variable<String>(voidReason);
+    }
+    if (!nullToAbsent || editedAt != null) {
+      map['edited_at'] = Variable<DateTime>(editedAt);
+    }
+    if (!nullToAbsent || editedBy != null) {
+      map['edited_by'] = Variable<String>(editedBy);
+    }
     return map;
   }
 
@@ -10753,6 +10922,16 @@ class PaymentsReceivedData extends DataClass
       recordedBy: Value(recordedBy),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       createdAt: Value(createdAt),
+      voided: Value(voided),
+      voidReason: voidReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voidReason),
+      editedAt: editedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(editedAt),
+      editedBy: editedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(editedBy),
     );
   }
 
@@ -10771,6 +10950,10 @@ class PaymentsReceivedData extends DataClass
       recordedBy: serializer.fromJson<String>(json['recordedBy']),
       note: serializer.fromJson<String?>(json['note']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      voided: serializer.fromJson<bool>(json['voided']),
+      voidReason: serializer.fromJson<String?>(json['voidReason']),
+      editedAt: serializer.fromJson<DateTime?>(json['editedAt']),
+      editedBy: serializer.fromJson<String?>(json['editedBy']),
     );
   }
   @override
@@ -10786,6 +10969,10 @@ class PaymentsReceivedData extends DataClass
       'recordedBy': serializer.toJson<String>(recordedBy),
       'note': serializer.toJson<String?>(note),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'voided': serializer.toJson<bool>(voided),
+      'voidReason': serializer.toJson<String?>(voidReason),
+      'editedAt': serializer.toJson<DateTime?>(editedAt),
+      'editedBy': serializer.toJson<String?>(editedBy),
     };
   }
 
@@ -10799,6 +10986,10 @@ class PaymentsReceivedData extends DataClass
     String? recordedBy,
     Value<String?> note = const Value.absent(),
     DateTime? createdAt,
+    bool? voided,
+    Value<String?> voidReason = const Value.absent(),
+    Value<DateTime?> editedAt = const Value.absent(),
+    Value<String?> editedBy = const Value.absent(),
   }) => PaymentsReceivedData(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -10809,6 +11000,10 @@ class PaymentsReceivedData extends DataClass
     recordedBy: recordedBy ?? this.recordedBy,
     note: note.present ? note.value : this.note,
     createdAt: createdAt ?? this.createdAt,
+    voided: voided ?? this.voided,
+    voidReason: voidReason.present ? voidReason.value : this.voidReason,
+    editedAt: editedAt.present ? editedAt.value : this.editedAt,
+    editedBy: editedBy.present ? editedBy.value : this.editedBy,
   );
   PaymentsReceivedData copyWithCompanion(PaymentsReceivedCompanion data) {
     return PaymentsReceivedData(
@@ -10825,6 +11020,12 @@ class PaymentsReceivedData extends DataClass
           : this.recordedBy,
       note: data.note.present ? data.note.value : this.note,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      voided: data.voided.present ? data.voided.value : this.voided,
+      voidReason: data.voidReason.present
+          ? data.voidReason.value
+          : this.voidReason,
+      editedAt: data.editedAt.present ? data.editedAt.value : this.editedAt,
+      editedBy: data.editedBy.present ? data.editedBy.value : this.editedBy,
     );
   }
 
@@ -10839,7 +11040,11 @@ class PaymentsReceivedData extends DataClass
           ..write('mode: $mode, ')
           ..write('recordedBy: $recordedBy, ')
           ..write('note: $note, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('voided: $voided, ')
+          ..write('voidReason: $voidReason, ')
+          ..write('editedAt: $editedAt, ')
+          ..write('editedBy: $editedBy')
           ..write(')'))
         .toString();
   }
@@ -10855,6 +11060,10 @@ class PaymentsReceivedData extends DataClass
     recordedBy,
     note,
     createdAt,
+    voided,
+    voidReason,
+    editedAt,
+    editedBy,
   );
   @override
   bool operator ==(Object other) =>
@@ -10868,7 +11077,11 @@ class PaymentsReceivedData extends DataClass
           other.mode == this.mode &&
           other.recordedBy == this.recordedBy &&
           other.note == this.note &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.voided == this.voided &&
+          other.voidReason == this.voidReason &&
+          other.editedAt == this.editedAt &&
+          other.editedBy == this.editedBy);
 }
 
 class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
@@ -10881,6 +11094,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
   final Value<String> recordedBy;
   final Value<String?> note;
   final Value<DateTime> createdAt;
+  final Value<bool> voided;
+  final Value<String?> voidReason;
+  final Value<DateTime?> editedAt;
+  final Value<String?> editedBy;
   final Value<int> rowid;
   const PaymentsReceivedCompanion({
     this.id = const Value.absent(),
@@ -10892,6 +11109,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
     this.recordedBy = const Value.absent(),
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.voided = const Value.absent(),
+    this.voidReason = const Value.absent(),
+    this.editedAt = const Value.absent(),
+    this.editedBy = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PaymentsReceivedCompanion.insert({
@@ -10904,6 +11125,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
     required String recordedBy,
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.voided = const Value.absent(),
+    this.voidReason = const Value.absent(),
+    this.editedAt = const Value.absent(),
+    this.editedBy = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        projectId = Value(projectId),
@@ -10922,6 +11147,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
     Expression<String>? recordedBy,
     Expression<String>? note,
     Expression<DateTime>? createdAt,
+    Expression<bool>? voided,
+    Expression<String>? voidReason,
+    Expression<DateTime>? editedAt,
+    Expression<String>? editedBy,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -10934,6 +11163,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
       if (recordedBy != null) 'recorded_by': recordedBy,
       if (note != null) 'note': note,
       if (createdAt != null) 'created_at': createdAt,
+      if (voided != null) 'voided': voided,
+      if (voidReason != null) 'void_reason': voidReason,
+      if (editedAt != null) 'edited_at': editedAt,
+      if (editedBy != null) 'edited_by': editedBy,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -10948,6 +11181,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
     Value<String>? recordedBy,
     Value<String?>? note,
     Value<DateTime>? createdAt,
+    Value<bool>? voided,
+    Value<String?>? voidReason,
+    Value<DateTime?>? editedAt,
+    Value<String?>? editedBy,
     Value<int>? rowid,
   }) {
     return PaymentsReceivedCompanion(
@@ -10960,6 +11197,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
       recordedBy: recordedBy ?? this.recordedBy,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
+      voided: voided ?? this.voided,
+      voidReason: voidReason ?? this.voidReason,
+      editedAt: editedAt ?? this.editedAt,
+      editedBy: editedBy ?? this.editedBy,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -10994,6 +11235,18 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (voided.present) {
+      map['voided'] = Variable<bool>(voided.value);
+    }
+    if (voidReason.present) {
+      map['void_reason'] = Variable<String>(voidReason.value);
+    }
+    if (editedAt.present) {
+      map['edited_at'] = Variable<DateTime>(editedAt.value);
+    }
+    if (editedBy.present) {
+      map['edited_by'] = Variable<String>(editedBy.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -11012,6 +11265,10 @@ class PaymentsReceivedCompanion extends UpdateCompanion<PaymentsReceivedData> {
           ..write('recordedBy: $recordedBy, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
+          ..write('voided: $voided, ')
+          ..write('voidReason: $voidReason, ')
+          ..write('editedAt: $editedAt, ')
+          ..write('editedBy: $editedBy, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -12214,6 +12471,109 @@ class $SiteExpensesTable extends SiteExpenses
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _paidToMeta = const VerificationMeta('paidTo');
+  @override
+  late final GeneratedColumn<String> paidTo = GeneratedColumn<String>(
+    'paid_to',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _modeMeta = const VerificationMeta('mode');
+  @override
+  late final GeneratedColumn<String> mode = GeneratedColumn<String>(
+    'mode',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 20),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _gstPctMeta = const VerificationMeta('gstPct');
+  @override
+  late final GeneratedColumn<double> gstPct = GeneratedColumn<double>(
+    'gst_pct',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _gstInterStateMeta = const VerificationMeta(
+    'gstInterState',
+  );
+  @override
+  late final GeneratedColumn<bool> gstInterState = GeneratedColumn<bool>(
+    'gst_inter_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("gst_inter_state" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _voucherNoMeta = const VerificationMeta(
+    'voucherNo',
+  );
+  @override
+  late final GeneratedColumn<int> voucherNo = GeneratedColumn<int>(
+    'voucher_no',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _voidedMeta = const VerificationMeta('voided');
+  @override
+  late final GeneratedColumn<bool> voided = GeneratedColumn<bool>(
+    'voided',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("voided" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _voidReasonMeta = const VerificationMeta(
+    'voidReason',
+  );
+  @override
+  late final GeneratedColumn<String> voidReason = GeneratedColumn<String>(
+    'void_reason',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _editedAtMeta = const VerificationMeta(
+    'editedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> editedAt = GeneratedColumn<DateTime>(
+    'edited_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _editedByMeta = const VerificationMeta(
+    'editedBy',
+  );
+  @override
+  late final GeneratedColumn<String> editedBy = GeneratedColumn<String>(
+    'edited_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -12226,6 +12586,15 @@ class $SiteExpensesTable extends SiteExpenses
     note,
     createdAt,
     workerId,
+    paidTo,
+    mode,
+    gstPct,
+    gstInterState,
+    voucherNo,
+    voided,
+    voidReason,
+    editedAt,
+    editedBy,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -12311,6 +12680,63 @@ class $SiteExpensesTable extends SiteExpenses
         workerId.isAcceptableOrUnknown(data['worker_id']!, _workerIdMeta),
       );
     }
+    if (data.containsKey('paid_to')) {
+      context.handle(
+        _paidToMeta,
+        paidTo.isAcceptableOrUnknown(data['paid_to']!, _paidToMeta),
+      );
+    }
+    if (data.containsKey('mode')) {
+      context.handle(
+        _modeMeta,
+        mode.isAcceptableOrUnknown(data['mode']!, _modeMeta),
+      );
+    }
+    if (data.containsKey('gst_pct')) {
+      context.handle(
+        _gstPctMeta,
+        gstPct.isAcceptableOrUnknown(data['gst_pct']!, _gstPctMeta),
+      );
+    }
+    if (data.containsKey('gst_inter_state')) {
+      context.handle(
+        _gstInterStateMeta,
+        gstInterState.isAcceptableOrUnknown(
+          data['gst_inter_state']!,
+          _gstInterStateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('voucher_no')) {
+      context.handle(
+        _voucherNoMeta,
+        voucherNo.isAcceptableOrUnknown(data['voucher_no']!, _voucherNoMeta),
+      );
+    }
+    if (data.containsKey('voided')) {
+      context.handle(
+        _voidedMeta,
+        voided.isAcceptableOrUnknown(data['voided']!, _voidedMeta),
+      );
+    }
+    if (data.containsKey('void_reason')) {
+      context.handle(
+        _voidReasonMeta,
+        voidReason.isAcceptableOrUnknown(data['void_reason']!, _voidReasonMeta),
+      );
+    }
+    if (data.containsKey('edited_at')) {
+      context.handle(
+        _editedAtMeta,
+        editedAt.isAcceptableOrUnknown(data['edited_at']!, _editedAtMeta),
+      );
+    }
+    if (data.containsKey('edited_by')) {
+      context.handle(
+        _editedByMeta,
+        editedBy.isAcceptableOrUnknown(data['edited_by']!, _editedByMeta),
+      );
+    }
     return context;
   }
 
@@ -12360,6 +12786,42 @@ class $SiteExpensesTable extends SiteExpenses
         DriftSqlType.string,
         data['${effectivePrefix}worker_id'],
       ),
+      paidTo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}paid_to'],
+      ),
+      mode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mode'],
+      ),
+      gstPct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gst_pct'],
+      ),
+      gstInterState: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}gst_inter_state'],
+      )!,
+      voucherNo: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}voucher_no'],
+      ),
+      voided: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}voided'],
+      )!,
+      voidReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}void_reason'],
+      ),
+      editedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}edited_at'],
+      ),
+      editedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}edited_by'],
+      ),
     );
   }
 
@@ -12383,6 +12845,30 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
   /// Set when the money went to a worker (wages or an advance), so the wage
   /// sheet can show what each person has already been paid.
   final String? workerId;
+
+  /// Who the money went to when it isn't one of the site's workers
+  /// ("Balaji Hardware", "Tractor driver").
+  final String? paidTo;
+
+  /// cash, upi, bank or cheque, like PaymentsReceived.mode.
+  final String? mode;
+
+  /// GST rate in percent when the bill carried GST. [amount] is always what
+  /// was paid in total, GST included.
+  final double? gstPct;
+
+  /// IGST (another state) instead of CGST + SGST.
+  final bool gstInterState;
+
+  /// Voucher number within the site: 1, 2, 3...
+  final int? voucherNo;
+
+  /// Cancelled entries stay (struck through, with the reason) so the
+  /// voucher numbers have no gaps; they count in no total.
+  final bool voided;
+  final String? voidReason;
+  final DateTime? editedAt;
+  final String? editedBy;
   const SiteExpense({
     required this.id,
     required this.projectId,
@@ -12394,6 +12880,15 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
     this.note,
     required this.createdAt,
     this.workerId,
+    this.paidTo,
+    this.mode,
+    this.gstPct,
+    required this.gstInterState,
+    this.voucherNo,
+    required this.voided,
+    this.voidReason,
+    this.editedAt,
+    this.editedBy,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -12414,6 +12909,29 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
     if (!nullToAbsent || workerId != null) {
       map['worker_id'] = Variable<String>(workerId);
     }
+    if (!nullToAbsent || paidTo != null) {
+      map['paid_to'] = Variable<String>(paidTo);
+    }
+    if (!nullToAbsent || mode != null) {
+      map['mode'] = Variable<String>(mode);
+    }
+    if (!nullToAbsent || gstPct != null) {
+      map['gst_pct'] = Variable<double>(gstPct);
+    }
+    map['gst_inter_state'] = Variable<bool>(gstInterState);
+    if (!nullToAbsent || voucherNo != null) {
+      map['voucher_no'] = Variable<int>(voucherNo);
+    }
+    map['voided'] = Variable<bool>(voided);
+    if (!nullToAbsent || voidReason != null) {
+      map['void_reason'] = Variable<String>(voidReason);
+    }
+    if (!nullToAbsent || editedAt != null) {
+      map['edited_at'] = Variable<DateTime>(editedAt);
+    }
+    if (!nullToAbsent || editedBy != null) {
+      map['edited_by'] = Variable<String>(editedBy);
+    }
     return map;
   }
 
@@ -12433,6 +12951,27 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
       workerId: workerId == null && nullToAbsent
           ? const Value.absent()
           : Value(workerId),
+      paidTo: paidTo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paidTo),
+      mode: mode == null && nullToAbsent ? const Value.absent() : Value(mode),
+      gstPct: gstPct == null && nullToAbsent
+          ? const Value.absent()
+          : Value(gstPct),
+      gstInterState: Value(gstInterState),
+      voucherNo: voucherNo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voucherNo),
+      voided: Value(voided),
+      voidReason: voidReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voidReason),
+      editedAt: editedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(editedAt),
+      editedBy: editedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(editedBy),
     );
   }
 
@@ -12452,6 +12991,15 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
       note: serializer.fromJson<String?>(json['note']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       workerId: serializer.fromJson<String?>(json['workerId']),
+      paidTo: serializer.fromJson<String?>(json['paidTo']),
+      mode: serializer.fromJson<String?>(json['mode']),
+      gstPct: serializer.fromJson<double?>(json['gstPct']),
+      gstInterState: serializer.fromJson<bool>(json['gstInterState']),
+      voucherNo: serializer.fromJson<int?>(json['voucherNo']),
+      voided: serializer.fromJson<bool>(json['voided']),
+      voidReason: serializer.fromJson<String?>(json['voidReason']),
+      editedAt: serializer.fromJson<DateTime?>(json['editedAt']),
+      editedBy: serializer.fromJson<String?>(json['editedBy']),
     );
   }
   @override
@@ -12468,6 +13016,15 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
       'note': serializer.toJson<String?>(note),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'workerId': serializer.toJson<String?>(workerId),
+      'paidTo': serializer.toJson<String?>(paidTo),
+      'mode': serializer.toJson<String?>(mode),
+      'gstPct': serializer.toJson<double?>(gstPct),
+      'gstInterState': serializer.toJson<bool>(gstInterState),
+      'voucherNo': serializer.toJson<int?>(voucherNo),
+      'voided': serializer.toJson<bool>(voided),
+      'voidReason': serializer.toJson<String?>(voidReason),
+      'editedAt': serializer.toJson<DateTime?>(editedAt),
+      'editedBy': serializer.toJson<String?>(editedBy),
     };
   }
 
@@ -12482,6 +13039,15 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
     Value<String?> note = const Value.absent(),
     DateTime? createdAt,
     Value<String?> workerId = const Value.absent(),
+    Value<String?> paidTo = const Value.absent(),
+    Value<String?> mode = const Value.absent(),
+    Value<double?> gstPct = const Value.absent(),
+    bool? gstInterState,
+    Value<int?> voucherNo = const Value.absent(),
+    bool? voided,
+    Value<String?> voidReason = const Value.absent(),
+    Value<DateTime?> editedAt = const Value.absent(),
+    Value<String?> editedBy = const Value.absent(),
   }) => SiteExpense(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -12493,6 +13059,15 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
     note: note.present ? note.value : this.note,
     createdAt: createdAt ?? this.createdAt,
     workerId: workerId.present ? workerId.value : this.workerId,
+    paidTo: paidTo.present ? paidTo.value : this.paidTo,
+    mode: mode.present ? mode.value : this.mode,
+    gstPct: gstPct.present ? gstPct.value : this.gstPct,
+    gstInterState: gstInterState ?? this.gstInterState,
+    voucherNo: voucherNo.present ? voucherNo.value : this.voucherNo,
+    voided: voided ?? this.voided,
+    voidReason: voidReason.present ? voidReason.value : this.voidReason,
+    editedAt: editedAt.present ? editedAt.value : this.editedAt,
+    editedBy: editedBy.present ? editedBy.value : this.editedBy,
   );
   SiteExpense copyWithCompanion(SiteExpensesCompanion data) {
     return SiteExpense(
@@ -12512,6 +13087,19 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
       note: data.note.present ? data.note.value : this.note,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       workerId: data.workerId.present ? data.workerId.value : this.workerId,
+      paidTo: data.paidTo.present ? data.paidTo.value : this.paidTo,
+      mode: data.mode.present ? data.mode.value : this.mode,
+      gstPct: data.gstPct.present ? data.gstPct.value : this.gstPct,
+      gstInterState: data.gstInterState.present
+          ? data.gstInterState.value
+          : this.gstInterState,
+      voucherNo: data.voucherNo.present ? data.voucherNo.value : this.voucherNo,
+      voided: data.voided.present ? data.voided.value : this.voided,
+      voidReason: data.voidReason.present
+          ? data.voidReason.value
+          : this.voidReason,
+      editedAt: data.editedAt.present ? data.editedAt.value : this.editedAt,
+      editedBy: data.editedBy.present ? data.editedBy.value : this.editedBy,
     );
   }
 
@@ -12527,7 +13115,16 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
           ..write('recordedBy: $recordedBy, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
-          ..write('workerId: $workerId')
+          ..write('workerId: $workerId, ')
+          ..write('paidTo: $paidTo, ')
+          ..write('mode: $mode, ')
+          ..write('gstPct: $gstPct, ')
+          ..write('gstInterState: $gstInterState, ')
+          ..write('voucherNo: $voucherNo, ')
+          ..write('voided: $voided, ')
+          ..write('voidReason: $voidReason, ')
+          ..write('editedAt: $editedAt, ')
+          ..write('editedBy: $editedBy')
           ..write(')'))
         .toString();
   }
@@ -12544,6 +13141,15 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
     note,
     createdAt,
     workerId,
+    paidTo,
+    mode,
+    gstPct,
+    gstInterState,
+    voucherNo,
+    voided,
+    voidReason,
+    editedAt,
+    editedBy,
   );
   @override
   bool operator ==(Object other) =>
@@ -12558,7 +13164,16 @@ class SiteExpense extends DataClass implements Insertable<SiteExpense> {
           other.recordedBy == this.recordedBy &&
           other.note == this.note &&
           other.createdAt == this.createdAt &&
-          other.workerId == this.workerId);
+          other.workerId == this.workerId &&
+          other.paidTo == this.paidTo &&
+          other.mode == this.mode &&
+          other.gstPct == this.gstPct &&
+          other.gstInterState == this.gstInterState &&
+          other.voucherNo == this.voucherNo &&
+          other.voided == this.voided &&
+          other.voidReason == this.voidReason &&
+          other.editedAt == this.editedAt &&
+          other.editedBy == this.editedBy);
 }
 
 class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
@@ -12572,6 +13187,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
   final Value<String?> note;
   final Value<DateTime> createdAt;
   final Value<String?> workerId;
+  final Value<String?> paidTo;
+  final Value<String?> mode;
+  final Value<double?> gstPct;
+  final Value<bool> gstInterState;
+  final Value<int?> voucherNo;
+  final Value<bool> voided;
+  final Value<String?> voidReason;
+  final Value<DateTime?> editedAt;
+  final Value<String?> editedBy;
   final Value<int> rowid;
   const SiteExpensesCompanion({
     this.id = const Value.absent(),
@@ -12584,6 +13208,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.workerId = const Value.absent(),
+    this.paidTo = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.gstPct = const Value.absent(),
+    this.gstInterState = const Value.absent(),
+    this.voucherNo = const Value.absent(),
+    this.voided = const Value.absent(),
+    this.voidReason = const Value.absent(),
+    this.editedAt = const Value.absent(),
+    this.editedBy = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SiteExpensesCompanion.insert({
@@ -12597,6 +13230,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.workerId = const Value.absent(),
+    this.paidTo = const Value.absent(),
+    this.mode = const Value.absent(),
+    this.gstPct = const Value.absent(),
+    this.gstInterState = const Value.absent(),
+    this.voucherNo = const Value.absent(),
+    this.voided = const Value.absent(),
+    this.voidReason = const Value.absent(),
+    this.editedAt = const Value.absent(),
+    this.editedBy = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        projectId = Value(projectId),
@@ -12615,6 +13257,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
     Expression<String>? note,
     Expression<DateTime>? createdAt,
     Expression<String>? workerId,
+    Expression<String>? paidTo,
+    Expression<String>? mode,
+    Expression<double>? gstPct,
+    Expression<bool>? gstInterState,
+    Expression<int>? voucherNo,
+    Expression<bool>? voided,
+    Expression<String>? voidReason,
+    Expression<DateTime>? editedAt,
+    Expression<String>? editedBy,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -12628,6 +13279,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
       if (note != null) 'note': note,
       if (createdAt != null) 'created_at': createdAt,
       if (workerId != null) 'worker_id': workerId,
+      if (paidTo != null) 'paid_to': paidTo,
+      if (mode != null) 'mode': mode,
+      if (gstPct != null) 'gst_pct': gstPct,
+      if (gstInterState != null) 'gst_inter_state': gstInterState,
+      if (voucherNo != null) 'voucher_no': voucherNo,
+      if (voided != null) 'voided': voided,
+      if (voidReason != null) 'void_reason': voidReason,
+      if (editedAt != null) 'edited_at': editedAt,
+      if (editedBy != null) 'edited_by': editedBy,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -12643,6 +13303,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
     Value<String?>? note,
     Value<DateTime>? createdAt,
     Value<String?>? workerId,
+    Value<String?>? paidTo,
+    Value<String?>? mode,
+    Value<double?>? gstPct,
+    Value<bool>? gstInterState,
+    Value<int?>? voucherNo,
+    Value<bool>? voided,
+    Value<String?>? voidReason,
+    Value<DateTime?>? editedAt,
+    Value<String?>? editedBy,
     Value<int>? rowid,
   }) {
     return SiteExpensesCompanion(
@@ -12656,6 +13325,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
       workerId: workerId ?? this.workerId,
+      paidTo: paidTo ?? this.paidTo,
+      mode: mode ?? this.mode,
+      gstPct: gstPct ?? this.gstPct,
+      gstInterState: gstInterState ?? this.gstInterState,
+      voucherNo: voucherNo ?? this.voucherNo,
+      voided: voided ?? this.voided,
+      voidReason: voidReason ?? this.voidReason,
+      editedAt: editedAt ?? this.editedAt,
+      editedBy: editedBy ?? this.editedBy,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -12693,6 +13371,33 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
     if (workerId.present) {
       map['worker_id'] = Variable<String>(workerId.value);
     }
+    if (paidTo.present) {
+      map['paid_to'] = Variable<String>(paidTo.value);
+    }
+    if (mode.present) {
+      map['mode'] = Variable<String>(mode.value);
+    }
+    if (gstPct.present) {
+      map['gst_pct'] = Variable<double>(gstPct.value);
+    }
+    if (gstInterState.present) {
+      map['gst_inter_state'] = Variable<bool>(gstInterState.value);
+    }
+    if (voucherNo.present) {
+      map['voucher_no'] = Variable<int>(voucherNo.value);
+    }
+    if (voided.present) {
+      map['voided'] = Variable<bool>(voided.value);
+    }
+    if (voidReason.present) {
+      map['void_reason'] = Variable<String>(voidReason.value);
+    }
+    if (editedAt.present) {
+      map['edited_at'] = Variable<DateTime>(editedAt.value);
+    }
+    if (editedBy.present) {
+      map['edited_by'] = Variable<String>(editedBy.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -12712,6 +13417,15 @@ class SiteExpensesCompanion extends UpdateCompanion<SiteExpense> {
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
           ..write('workerId: $workerId, ')
+          ..write('paidTo: $paidTo, ')
+          ..write('mode: $mode, ')
+          ..write('gstPct: $gstPct, ')
+          ..write('gstInterState: $gstInterState, ')
+          ..write('voucherNo: $voucherNo, ')
+          ..write('voided: $voided, ')
+          ..write('voidReason: $voidReason, ')
+          ..write('editedAt: $editedAt, ')
+          ..write('editedBy: $editedBy, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -13394,6 +14108,1368 @@ class LabourAttendanceCompanion extends UpdateCompanion<LabourAttendanceData> {
           ..write('lng: $lng, ')
           ..write('withinGeofence: $withinGeofence, ')
           ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AttendanceMarksTable extends AttendanceMarks
+    with TableInfo<$AttendanceMarksTable, AttendanceMark> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AttendanceMarksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _workerIdMeta = const VerificationMeta(
+    'workerId',
+  );
+  @override
+  late final GeneratedColumn<String> workerId = GeneratedColumn<String>(
+    'worker_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dayMeta = const VerificationMeta('day');
+  @override
+  late final GeneratedColumn<String> day = GeneratedColumn<String>(
+    'day',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 10,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitsMeta = const VerificationMeta('units');
+  @override
+  late final GeneratedColumn<double> units = GeneratedColumn<double>(
+    'units',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _recordedByMeta = const VerificationMeta(
+    'recordedBy',
+  );
+  @override
+  late final GeneratedColumn<String> recordedBy = GeneratedColumn<String>(
+    'recorded_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    workerId,
+    day,
+    units,
+    recordedBy,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'attendance_marks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AttendanceMark> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('worker_id')) {
+      context.handle(
+        _workerIdMeta,
+        workerId.isAcceptableOrUnknown(data['worker_id']!, _workerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_workerIdMeta);
+    }
+    if (data.containsKey('day')) {
+      context.handle(
+        _dayMeta,
+        day.isAcceptableOrUnknown(data['day']!, _dayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dayMeta);
+    }
+    if (data.containsKey('units')) {
+      context.handle(
+        _unitsMeta,
+        units.isAcceptableOrUnknown(data['units']!, _unitsMeta),
+      );
+    }
+    if (data.containsKey('recorded_by')) {
+      context.handle(
+        _recordedByMeta,
+        recordedBy.isAcceptableOrUnknown(data['recorded_by']!, _recordedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordedByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AttendanceMark map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AttendanceMark(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      workerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}worker_id'],
+      )!,
+      day: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}day'],
+      )!,
+      units: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}units'],
+      ),
+      recordedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recorded_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $AttendanceMarksTable createAlias(String alias) {
+    return $AttendanceMarksTable(attachedDatabase, alias);
+  }
+}
+
+class AttendanceMark extends DataClass implements Insertable<AttendanceMark> {
+  final String id;
+  final String projectId;
+  final String workerId;
+
+  /// yyyy-mm-dd, local day.
+  final String day;
+  final double? units;
+  final String recordedBy;
+  final DateTime updatedAt;
+  const AttendanceMark({
+    required this.id,
+    required this.projectId,
+    required this.workerId,
+    required this.day,
+    this.units,
+    required this.recordedBy,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['worker_id'] = Variable<String>(workerId);
+    map['day'] = Variable<String>(day);
+    if (!nullToAbsent || units != null) {
+      map['units'] = Variable<double>(units);
+    }
+    map['recorded_by'] = Variable<String>(recordedBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  AttendanceMarksCompanion toCompanion(bool nullToAbsent) {
+    return AttendanceMarksCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      workerId: Value(workerId),
+      day: Value(day),
+      units: units == null && nullToAbsent
+          ? const Value.absent()
+          : Value(units),
+      recordedBy: Value(recordedBy),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory AttendanceMark.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AttendanceMark(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      workerId: serializer.fromJson<String>(json['workerId']),
+      day: serializer.fromJson<String>(json['day']),
+      units: serializer.fromJson<double?>(json['units']),
+      recordedBy: serializer.fromJson<String>(json['recordedBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'workerId': serializer.toJson<String>(workerId),
+      'day': serializer.toJson<String>(day),
+      'units': serializer.toJson<double?>(units),
+      'recordedBy': serializer.toJson<String>(recordedBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  AttendanceMark copyWith({
+    String? id,
+    String? projectId,
+    String? workerId,
+    String? day,
+    Value<double?> units = const Value.absent(),
+    String? recordedBy,
+    DateTime? updatedAt,
+  }) => AttendanceMark(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    workerId: workerId ?? this.workerId,
+    day: day ?? this.day,
+    units: units.present ? units.value : this.units,
+    recordedBy: recordedBy ?? this.recordedBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  AttendanceMark copyWithCompanion(AttendanceMarksCompanion data) {
+    return AttendanceMark(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      workerId: data.workerId.present ? data.workerId.value : this.workerId,
+      day: data.day.present ? data.day.value : this.day,
+      units: data.units.present ? data.units.value : this.units,
+      recordedBy: data.recordedBy.present
+          ? data.recordedBy.value
+          : this.recordedBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttendanceMark(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('workerId: $workerId, ')
+          ..write('day: $day, ')
+          ..write('units: $units, ')
+          ..write('recordedBy: $recordedBy, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, projectId, workerId, day, units, recordedBy, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AttendanceMark &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.workerId == this.workerId &&
+          other.day == this.day &&
+          other.units == this.units &&
+          other.recordedBy == this.recordedBy &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AttendanceMarksCompanion extends UpdateCompanion<AttendanceMark> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> workerId;
+  final Value<String> day;
+  final Value<double?> units;
+  final Value<String> recordedBy;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const AttendanceMarksCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.workerId = const Value.absent(),
+    this.day = const Value.absent(),
+    this.units = const Value.absent(),
+    this.recordedBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AttendanceMarksCompanion.insert({
+    required String id,
+    required String projectId,
+    required String workerId,
+    required String day,
+    this.units = const Value.absent(),
+    required String recordedBy,
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       workerId = Value(workerId),
+       day = Value(day),
+       recordedBy = Value(recordedBy);
+  static Insertable<AttendanceMark> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? workerId,
+    Expression<String>? day,
+    Expression<double>? units,
+    Expression<String>? recordedBy,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (workerId != null) 'worker_id': workerId,
+      if (day != null) 'day': day,
+      if (units != null) 'units': units,
+      if (recordedBy != null) 'recorded_by': recordedBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AttendanceMarksCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? workerId,
+    Value<String>? day,
+    Value<double?>? units,
+    Value<String>? recordedBy,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return AttendanceMarksCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      workerId: workerId ?? this.workerId,
+      day: day ?? this.day,
+      units: units ?? this.units,
+      recordedBy: recordedBy ?? this.recordedBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (workerId.present) {
+      map['worker_id'] = Variable<String>(workerId.value);
+    }
+    if (day.present) {
+      map['day'] = Variable<String>(day.value);
+    }
+    if (units.present) {
+      map['units'] = Variable<double>(units.value);
+    }
+    if (recordedBy.present) {
+      map['recorded_by'] = Variable<String>(recordedBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttendanceMarksCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('workerId: $workerId, ')
+          ..write('day: $day, ')
+          ..write('units: $units, ')
+          ..write('recordedBy: $recordedBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ExpenseAttachmentsTable extends ExpenseAttachments
+    with TableInfo<$ExpenseAttachmentsTable, ExpenseAttachment> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExpenseAttachmentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _expenseIdMeta = const VerificationMeta(
+    'expenseId',
+  );
+  @override
+  late final GeneratedColumn<String> expenseId = GeneratedColumn<String>(
+    'expense_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _filePathMeta = const VerificationMeta(
+    'filePath',
+  );
+  @override
+  late final GeneratedColumn<String> filePath = GeneratedColumn<String>(
+    'file_path',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 500,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _mimeTypeMeta = const VerificationMeta(
+    'mimeType',
+  );
+  @override
+  late final GeneratedColumn<String> mimeType = GeneratedColumn<String>(
+    'mime_type',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    expenseId,
+    filePath,
+    mimeType,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'expense_attachments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExpenseAttachment> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('expense_id')) {
+      context.handle(
+        _expenseIdMeta,
+        expenseId.isAcceptableOrUnknown(data['expense_id']!, _expenseIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_expenseIdMeta);
+    }
+    if (data.containsKey('file_path')) {
+      context.handle(
+        _filePathMeta,
+        filePath.isAcceptableOrUnknown(data['file_path']!, _filePathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_filePathMeta);
+    }
+    if (data.containsKey('mime_type')) {
+      context.handle(
+        _mimeTypeMeta,
+        mimeType.isAcceptableOrUnknown(data['mime_type']!, _mimeTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_mimeTypeMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ExpenseAttachment map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExpenseAttachment(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      expenseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}expense_id'],
+      )!,
+      filePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_path'],
+      )!,
+      mimeType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mime_type'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ExpenseAttachmentsTable createAlias(String alias) {
+    return $ExpenseAttachmentsTable(attachedDatabase, alias);
+  }
+}
+
+class ExpenseAttachment extends DataClass
+    implements Insertable<ExpenseAttachment> {
+  final String id;
+  final String expenseId;
+  final String filePath;
+
+  /// image/jpeg, image/png or application/pdf.
+  final String mimeType;
+  final DateTime createdAt;
+  const ExpenseAttachment({
+    required this.id,
+    required this.expenseId,
+    required this.filePath,
+    required this.mimeType,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['expense_id'] = Variable<String>(expenseId);
+    map['file_path'] = Variable<String>(filePath);
+    map['mime_type'] = Variable<String>(mimeType);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ExpenseAttachmentsCompanion toCompanion(bool nullToAbsent) {
+    return ExpenseAttachmentsCompanion(
+      id: Value(id),
+      expenseId: Value(expenseId),
+      filePath: Value(filePath),
+      mimeType: Value(mimeType),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ExpenseAttachment.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExpenseAttachment(
+      id: serializer.fromJson<String>(json['id']),
+      expenseId: serializer.fromJson<String>(json['expenseId']),
+      filePath: serializer.fromJson<String>(json['filePath']),
+      mimeType: serializer.fromJson<String>(json['mimeType']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'expenseId': serializer.toJson<String>(expenseId),
+      'filePath': serializer.toJson<String>(filePath),
+      'mimeType': serializer.toJson<String>(mimeType),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ExpenseAttachment copyWith({
+    String? id,
+    String? expenseId,
+    String? filePath,
+    String? mimeType,
+    DateTime? createdAt,
+  }) => ExpenseAttachment(
+    id: id ?? this.id,
+    expenseId: expenseId ?? this.expenseId,
+    filePath: filePath ?? this.filePath,
+    mimeType: mimeType ?? this.mimeType,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  ExpenseAttachment copyWithCompanion(ExpenseAttachmentsCompanion data) {
+    return ExpenseAttachment(
+      id: data.id.present ? data.id.value : this.id,
+      expenseId: data.expenseId.present ? data.expenseId.value : this.expenseId,
+      filePath: data.filePath.present ? data.filePath.value : this.filePath,
+      mimeType: data.mimeType.present ? data.mimeType.value : this.mimeType,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpenseAttachment(')
+          ..write('id: $id, ')
+          ..write('expenseId: $expenseId, ')
+          ..write('filePath: $filePath, ')
+          ..write('mimeType: $mimeType, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, expenseId, filePath, mimeType, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExpenseAttachment &&
+          other.id == this.id &&
+          other.expenseId == this.expenseId &&
+          other.filePath == this.filePath &&
+          other.mimeType == this.mimeType &&
+          other.createdAt == this.createdAt);
+}
+
+class ExpenseAttachmentsCompanion extends UpdateCompanion<ExpenseAttachment> {
+  final Value<String> id;
+  final Value<String> expenseId;
+  final Value<String> filePath;
+  final Value<String> mimeType;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const ExpenseAttachmentsCompanion({
+    this.id = const Value.absent(),
+    this.expenseId = const Value.absent(),
+    this.filePath = const Value.absent(),
+    this.mimeType = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExpenseAttachmentsCompanion.insert({
+    required String id,
+    required String expenseId,
+    required String filePath,
+    required String mimeType,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       expenseId = Value(expenseId),
+       filePath = Value(filePath),
+       mimeType = Value(mimeType);
+  static Insertable<ExpenseAttachment> custom({
+    Expression<String>? id,
+    Expression<String>? expenseId,
+    Expression<String>? filePath,
+    Expression<String>? mimeType,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (expenseId != null) 'expense_id': expenseId,
+      if (filePath != null) 'file_path': filePath,
+      if (mimeType != null) 'mime_type': mimeType,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExpenseAttachmentsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? expenseId,
+    Value<String>? filePath,
+    Value<String>? mimeType,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return ExpenseAttachmentsCompanion(
+      id: id ?? this.id,
+      expenseId: expenseId ?? this.expenseId,
+      filePath: filePath ?? this.filePath,
+      mimeType: mimeType ?? this.mimeType,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (expenseId.present) {
+      map['expense_id'] = Variable<String>(expenseId.value);
+    }
+    if (filePath.present) {
+      map['file_path'] = Variable<String>(filePath.value);
+    }
+    if (mimeType.present) {
+      map['mime_type'] = Variable<String>(mimeType.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpenseAttachmentsCompanion(')
+          ..write('id: $id, ')
+          ..write('expenseId: $expenseId, ')
+          ..write('filePath: $filePath, ')
+          ..write('mimeType: $mimeType, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ProjectNotesTable extends ProjectNotes
+    with TableInfo<$ProjectNotesTable, ProjectNote> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProjectNotesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 4000,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
+  @override
+  late final GeneratedColumn<bool> pinned = GeneratedColumn<bool>(
+    'pinned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("pinned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _deletedMeta = const VerificationMeta(
+    'deleted',
+  );
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+    'deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    body,
+    pinned,
+    deleted,
+    createdBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'project_notes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProjectNote> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('pinned')) {
+      context.handle(
+        _pinnedMeta,
+        pinned.isAcceptableOrUnknown(data['pinned']!, _pinnedMeta),
+      );
+    }
+    if (data.containsKey('deleted')) {
+      context.handle(
+        _deletedMeta,
+        deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProjectNote map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProjectNote(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+      pinned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}pinned'],
+      )!,
+      deleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}deleted'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ProjectNotesTable createAlias(String alias) {
+    return $ProjectNotesTable(attachedDatabase, alias);
+  }
+}
+
+class ProjectNote extends DataClass implements Insertable<ProjectNote> {
+  final String id;
+  final String projectId;
+  final String body;
+  final bool pinned;
+  final bool deleted;
+  final String createdBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const ProjectNote({
+    required this.id,
+    required this.projectId,
+    required this.body,
+    required this.pinned,
+    required this.deleted,
+    required this.createdBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['body'] = Variable<String>(body);
+    map['pinned'] = Variable<bool>(pinned);
+    map['deleted'] = Variable<bool>(deleted);
+    map['created_by'] = Variable<String>(createdBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ProjectNotesCompanion toCompanion(bool nullToAbsent) {
+    return ProjectNotesCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      body: Value(body),
+      pinned: Value(pinned),
+      deleted: Value(deleted),
+      createdBy: Value(createdBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ProjectNote.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProjectNote(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      body: serializer.fromJson<String>(json['body']),
+      pinned: serializer.fromJson<bool>(json['pinned']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'body': serializer.toJson<String>(body),
+      'pinned': serializer.toJson<bool>(pinned),
+      'deleted': serializer.toJson<bool>(deleted),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ProjectNote copyWith({
+    String? id,
+    String? projectId,
+    String? body,
+    bool? pinned,
+    bool? deleted,
+    String? createdBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => ProjectNote(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    body: body ?? this.body,
+    pinned: pinned ?? this.pinned,
+    deleted: deleted ?? this.deleted,
+    createdBy: createdBy ?? this.createdBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ProjectNote copyWithCompanion(ProjectNotesCompanion data) {
+    return ProjectNote(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      body: data.body.present ? data.body.value : this.body,
+      pinned: data.pinned.present ? data.pinned.value : this.pinned,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProjectNote(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('body: $body, ')
+          ..write('pinned: $pinned, ')
+          ..write('deleted: $deleted, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    body,
+    pinned,
+    deleted,
+    createdBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProjectNote &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.body == this.body &&
+          other.pinned == this.pinned &&
+          other.deleted == this.deleted &&
+          other.createdBy == this.createdBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ProjectNotesCompanion extends UpdateCompanion<ProjectNote> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> body;
+  final Value<bool> pinned;
+  final Value<bool> deleted;
+  final Value<String> createdBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const ProjectNotesCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.body = const Value.absent(),
+    this.pinned = const Value.absent(),
+    this.deleted = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ProjectNotesCompanion.insert({
+    required String id,
+    required String projectId,
+    required String body,
+    this.pinned = const Value.absent(),
+    this.deleted = const Value.absent(),
+    required String createdBy,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       body = Value(body),
+       createdBy = Value(createdBy);
+  static Insertable<ProjectNote> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? body,
+    Expression<bool>? pinned,
+    Expression<bool>? deleted,
+    Expression<String>? createdBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (body != null) 'body': body,
+      if (pinned != null) 'pinned': pinned,
+      if (deleted != null) 'deleted': deleted,
+      if (createdBy != null) 'created_by': createdBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ProjectNotesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? body,
+    Value<bool>? pinned,
+    Value<bool>? deleted,
+    Value<String>? createdBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ProjectNotesCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      body: body ?? this.body,
+      pinned: pinned ?? this.pinned,
+      deleted: deleted ?? this.deleted,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (pinned.present) {
+      map['pinned'] = Variable<bool>(pinned.value);
+    }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProjectNotesCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('body: $body, ')
+          ..write('pinned: $pinned, ')
+          ..write('deleted: $deleted, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -15498,6 +17574,78 @@ class $EquipmentTable extends Equipment
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _hourlyRateMeta = const VerificationMeta(
+    'hourlyRate',
+  );
+  @override
+  late final GeneratedColumn<double> hourlyRate = GeneratedColumn<double>(
+    'hourly_rate',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ownershipMeta = const VerificationMeta(
+    'ownership',
+  );
+  @override
+  late final GeneratedColumn<String> ownership = GeneratedColumn<String>(
+    'ownership',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('own'),
+  );
+  static const VerificationMeta _hiredFromMeta = const VerificationMeta(
+    'hiredFrom',
+  );
+  @override
+  late final GeneratedColumn<String> hiredFrom = GeneratedColumn<String>(
+    'hired_from',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _hiredOnMeta = const VerificationMeta(
+    'hiredOn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> hiredOn = GeneratedColumn<DateTime>(
+    'hired_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _returnDueOnMeta = const VerificationMeta(
+    'returnDueOn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> returnDueOn = GeneratedColumn<DateTime>(
+    'return_due_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _returnedOnMeta = const VerificationMeta(
+    'returnedOn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> returnedOn = GeneratedColumn<DateTime>(
+    'returned_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -15510,6 +17658,12 @@ class $EquipmentTable extends Equipment
     dailyRate,
     notes,
     createdAt,
+    hourlyRate,
+    ownership,
+    hiredFrom,
+    hiredOn,
+    returnDueOn,
+    returnedOn,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -15592,6 +17746,45 @@ class $EquipmentTable extends Equipment
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('hourly_rate')) {
+      context.handle(
+        _hourlyRateMeta,
+        hourlyRate.isAcceptableOrUnknown(data['hourly_rate']!, _hourlyRateMeta),
+      );
+    }
+    if (data.containsKey('ownership')) {
+      context.handle(
+        _ownershipMeta,
+        ownership.isAcceptableOrUnknown(data['ownership']!, _ownershipMeta),
+      );
+    }
+    if (data.containsKey('hired_from')) {
+      context.handle(
+        _hiredFromMeta,
+        hiredFrom.isAcceptableOrUnknown(data['hired_from']!, _hiredFromMeta),
+      );
+    }
+    if (data.containsKey('hired_on')) {
+      context.handle(
+        _hiredOnMeta,
+        hiredOn.isAcceptableOrUnknown(data['hired_on']!, _hiredOnMeta),
+      );
+    }
+    if (data.containsKey('return_due_on')) {
+      context.handle(
+        _returnDueOnMeta,
+        returnDueOn.isAcceptableOrUnknown(
+          data['return_due_on']!,
+          _returnDueOnMeta,
+        ),
+      );
+    }
+    if (data.containsKey('returned_on')) {
+      context.handle(
+        _returnedOnMeta,
+        returnedOn.isAcceptableOrUnknown(data['returned_on']!, _returnedOnMeta),
+      );
+    }
     return context;
   }
 
@@ -15641,6 +17834,30 @@ class $EquipmentTable extends Equipment
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      hourlyRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}hourly_rate'],
+      ),
+      ownership: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ownership'],
+      )!,
+      hiredFrom: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hired_from'],
+      ),
+      hiredOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}hired_on'],
+      ),
+      returnDueOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}return_due_on'],
+      ),
+      returnedOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}returned_on'],
+      ),
     );
   }
 
@@ -15661,6 +17878,14 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
   final double? dailyRate;
   final String? notes;
   final DateTime createdAt;
+  final double? hourlyRate;
+
+  /// 'own' or 'hired'.
+  final String ownership;
+  final String? hiredFrom;
+  final DateTime? hiredOn;
+  final DateTime? returnDueOn;
+  final DateTime? returnedOn;
   const EquipmentData({
     required this.id,
     required this.projectId,
@@ -15672,6 +17897,12 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
     this.dailyRate,
     this.notes,
     required this.createdAt,
+    this.hourlyRate,
+    required this.ownership,
+    this.hiredFrom,
+    this.hiredOn,
+    this.returnDueOn,
+    this.returnedOn,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -15696,6 +17927,22 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
       map['notes'] = Variable<String>(notes);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || hourlyRate != null) {
+      map['hourly_rate'] = Variable<double>(hourlyRate);
+    }
+    map['ownership'] = Variable<String>(ownership);
+    if (!nullToAbsent || hiredFrom != null) {
+      map['hired_from'] = Variable<String>(hiredFrom);
+    }
+    if (!nullToAbsent || hiredOn != null) {
+      map['hired_on'] = Variable<DateTime>(hiredOn);
+    }
+    if (!nullToAbsent || returnDueOn != null) {
+      map['return_due_on'] = Variable<DateTime>(returnDueOn);
+    }
+    if (!nullToAbsent || returnedOn != null) {
+      map['returned_on'] = Variable<DateTime>(returnedOn);
+    }
     return map;
   }
 
@@ -15721,6 +17968,22 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
           ? const Value.absent()
           : Value(notes),
       createdAt: Value(createdAt),
+      hourlyRate: hourlyRate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hourlyRate),
+      ownership: Value(ownership),
+      hiredFrom: hiredFrom == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hiredFrom),
+      hiredOn: hiredOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hiredOn),
+      returnDueOn: returnDueOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnDueOn),
+      returnedOn: returnedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnedOn),
     );
   }
 
@@ -15742,6 +18005,12 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
       dailyRate: serializer.fromJson<double?>(json['dailyRate']),
       notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      hourlyRate: serializer.fromJson<double?>(json['hourlyRate']),
+      ownership: serializer.fromJson<String>(json['ownership']),
+      hiredFrom: serializer.fromJson<String?>(json['hiredFrom']),
+      hiredOn: serializer.fromJson<DateTime?>(json['hiredOn']),
+      returnDueOn: serializer.fromJson<DateTime?>(json['returnDueOn']),
+      returnedOn: serializer.fromJson<DateTime?>(json['returnedOn']),
     );
   }
   @override
@@ -15758,6 +18027,12 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
       'dailyRate': serializer.toJson<double?>(dailyRate),
       'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'hourlyRate': serializer.toJson<double?>(hourlyRate),
+      'ownership': serializer.toJson<String>(ownership),
+      'hiredFrom': serializer.toJson<String?>(hiredFrom),
+      'hiredOn': serializer.toJson<DateTime?>(hiredOn),
+      'returnDueOn': serializer.toJson<DateTime?>(returnDueOn),
+      'returnedOn': serializer.toJson<DateTime?>(returnedOn),
     };
   }
 
@@ -15772,6 +18047,12 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
     Value<double?> dailyRate = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
+    Value<double?> hourlyRate = const Value.absent(),
+    String? ownership,
+    Value<String?> hiredFrom = const Value.absent(),
+    Value<DateTime?> hiredOn = const Value.absent(),
+    Value<DateTime?> returnDueOn = const Value.absent(),
+    Value<DateTime?> returnedOn = const Value.absent(),
   }) => EquipmentData(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -15787,6 +18068,12 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
     dailyRate: dailyRate.present ? dailyRate.value : this.dailyRate,
     notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
+    hourlyRate: hourlyRate.present ? hourlyRate.value : this.hourlyRate,
+    ownership: ownership ?? this.ownership,
+    hiredFrom: hiredFrom.present ? hiredFrom.value : this.hiredFrom,
+    hiredOn: hiredOn.present ? hiredOn.value : this.hiredOn,
+    returnDueOn: returnDueOn.present ? returnDueOn.value : this.returnDueOn,
+    returnedOn: returnedOn.present ? returnedOn.value : this.returnedOn,
   );
   EquipmentData copyWithCompanion(EquipmentCompanion data) {
     return EquipmentData(
@@ -15804,6 +18091,18 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
       dailyRate: data.dailyRate.present ? data.dailyRate.value : this.dailyRate,
       notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      hourlyRate: data.hourlyRate.present
+          ? data.hourlyRate.value
+          : this.hourlyRate,
+      ownership: data.ownership.present ? data.ownership.value : this.ownership,
+      hiredFrom: data.hiredFrom.present ? data.hiredFrom.value : this.hiredFrom,
+      hiredOn: data.hiredOn.present ? data.hiredOn.value : this.hiredOn,
+      returnDueOn: data.returnDueOn.present
+          ? data.returnDueOn.value
+          : this.returnDueOn,
+      returnedOn: data.returnedOn.present
+          ? data.returnedOn.value
+          : this.returnedOn,
     );
   }
 
@@ -15819,7 +18118,13 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
           ..write('status: $status, ')
           ..write('dailyRate: $dailyRate, ')
           ..write('notes: $notes, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('hourlyRate: $hourlyRate, ')
+          ..write('ownership: $ownership, ')
+          ..write('hiredFrom: $hiredFrom, ')
+          ..write('hiredOn: $hiredOn, ')
+          ..write('returnDueOn: $returnDueOn, ')
+          ..write('returnedOn: $returnedOn')
           ..write(')'))
         .toString();
   }
@@ -15836,6 +18141,12 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
     dailyRate,
     notes,
     createdAt,
+    hourlyRate,
+    ownership,
+    hiredFrom,
+    hiredOn,
+    returnDueOn,
+    returnedOn,
   );
   @override
   bool operator ==(Object other) =>
@@ -15850,7 +18161,13 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
           other.status == this.status &&
           other.dailyRate == this.dailyRate &&
           other.notes == this.notes &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.hourlyRate == this.hourlyRate &&
+          other.ownership == this.ownership &&
+          other.hiredFrom == this.hiredFrom &&
+          other.hiredOn == this.hiredOn &&
+          other.returnDueOn == this.returnDueOn &&
+          other.returnedOn == this.returnedOn);
 }
 
 class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
@@ -15864,6 +18181,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
   final Value<double?> dailyRate;
   final Value<String?> notes;
   final Value<DateTime> createdAt;
+  final Value<double?> hourlyRate;
+  final Value<String> ownership;
+  final Value<String?> hiredFrom;
+  final Value<DateTime?> hiredOn;
+  final Value<DateTime?> returnDueOn;
+  final Value<DateTime?> returnedOn;
   final Value<int> rowid;
   const EquipmentCompanion({
     this.id = const Value.absent(),
@@ -15876,6 +18199,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
     this.dailyRate = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.hourlyRate = const Value.absent(),
+    this.ownership = const Value.absent(),
+    this.hiredFrom = const Value.absent(),
+    this.hiredOn = const Value.absent(),
+    this.returnDueOn = const Value.absent(),
+    this.returnedOn = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   EquipmentCompanion.insert({
@@ -15889,6 +18218,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
     this.dailyRate = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.hourlyRate = const Value.absent(),
+    this.ownership = const Value.absent(),
+    this.hiredFrom = const Value.absent(),
+    this.hiredOn = const Value.absent(),
+    this.returnDueOn = const Value.absent(),
+    this.returnedOn = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        projectId = Value(projectId),
@@ -15904,6 +18239,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
     Expression<double>? dailyRate,
     Expression<String>? notes,
     Expression<DateTime>? createdAt,
+    Expression<double>? hourlyRate,
+    Expression<String>? ownership,
+    Expression<String>? hiredFrom,
+    Expression<DateTime>? hiredOn,
+    Expression<DateTime>? returnDueOn,
+    Expression<DateTime>? returnedOn,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -15917,6 +18258,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
       if (dailyRate != null) 'daily_rate': dailyRate,
       if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
+      if (hourlyRate != null) 'hourly_rate': hourlyRate,
+      if (ownership != null) 'ownership': ownership,
+      if (hiredFrom != null) 'hired_from': hiredFrom,
+      if (hiredOn != null) 'hired_on': hiredOn,
+      if (returnDueOn != null) 'return_due_on': returnDueOn,
+      if (returnedOn != null) 'returned_on': returnedOn,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -15932,6 +18279,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
     Value<double?>? dailyRate,
     Value<String?>? notes,
     Value<DateTime>? createdAt,
+    Value<double?>? hourlyRate,
+    Value<String>? ownership,
+    Value<String?>? hiredFrom,
+    Value<DateTime?>? hiredOn,
+    Value<DateTime?>? returnDueOn,
+    Value<DateTime?>? returnedOn,
     Value<int>? rowid,
   }) {
     return EquipmentCompanion(
@@ -15945,6 +18298,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
       dailyRate: dailyRate ?? this.dailyRate,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
+      hourlyRate: hourlyRate ?? this.hourlyRate,
+      ownership: ownership ?? this.ownership,
+      hiredFrom: hiredFrom ?? this.hiredFrom,
+      hiredOn: hiredOn ?? this.hiredOn,
+      returnDueOn: returnDueOn ?? this.returnDueOn,
+      returnedOn: returnedOn ?? this.returnedOn,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -15982,6 +18341,24 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (hourlyRate.present) {
+      map['hourly_rate'] = Variable<double>(hourlyRate.value);
+    }
+    if (ownership.present) {
+      map['ownership'] = Variable<String>(ownership.value);
+    }
+    if (hiredFrom.present) {
+      map['hired_from'] = Variable<String>(hiredFrom.value);
+    }
+    if (hiredOn.present) {
+      map['hired_on'] = Variable<DateTime>(hiredOn.value);
+    }
+    if (returnDueOn.present) {
+      map['return_due_on'] = Variable<DateTime>(returnDueOn.value);
+    }
+    if (returnedOn.present) {
+      map['returned_on'] = Variable<DateTime>(returnedOn.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -16001,6 +18378,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
           ..write('dailyRate: $dailyRate, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
+          ..write('hourlyRate: $hourlyRate, ')
+          ..write('ownership: $ownership, ')
+          ..write('hiredFrom: $hiredFrom, ')
+          ..write('hiredOn: $hiredOn, ')
+          ..write('returnDueOn: $returnDueOn, ')
+          ..write('returnedOn: $returnedOn, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -19888,6 +22271,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LabourAttendanceTable labourAttendance = $LabourAttendanceTable(
     this,
   );
+  late final $AttendanceMarksTable attendanceMarks = $AttendanceMarksTable(
+    this,
+  );
+  late final $ExpenseAttachmentsTable expenseAttachments =
+      $ExpenseAttachmentsTable(this);
+  late final $ProjectNotesTable projectNotes = $ProjectNotesTable(this);
   late final $SubcontractorsTable subcontractors = $SubcontractorsTable(this);
   late final $WorkOrdersTable workOrders = $WorkOrdersTable(this);
   late final $ApprovalsTable approvals = $ApprovalsTable(this);
@@ -19935,6 +22324,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     clientBills,
     siteExpenses,
     labourAttendance,
+    attendanceMarks,
+    expenseAttachments,
+    projectNotes,
     subcontractors,
     workOrders,
     approvals,
@@ -23582,6 +25974,7 @@ typedef $$SuppliersTableCreateCompanionBuilder =
       Value<String?> category,
       Value<String?> notes,
       Value<DateTime> createdAt,
+      Value<double?> openingBalance,
       Value<int> rowid,
     });
 typedef $$SuppliersTableUpdateCompanionBuilder =
@@ -23597,6 +25990,7 @@ typedef $$SuppliersTableUpdateCompanionBuilder =
       Value<String?> category,
       Value<String?> notes,
       Value<DateTime> createdAt,
+      Value<double?> openingBalance,
       Value<int> rowid,
     });
 
@@ -23661,6 +26055,11 @@ class $$SuppliersTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get openingBalance => $composableBuilder(
+    column: $table.openingBalance,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -23728,6 +26127,11 @@ class $$SuppliersTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get openingBalance => $composableBuilder(
+    column: $table.openingBalance,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SuppliersTableAnnotationComposer
@@ -23775,6 +26179,11 @@ class $$SuppliersTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<double> get openingBalance => $composableBuilder(
+    column: $table.openingBalance,
+    builder: (column) => column,
+  );
 }
 
 class $$SuppliersTableTableManager
@@ -23816,6 +26225,7 @@ class $$SuppliersTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<double?> openingBalance = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SuppliersCompanion(
                 id: id,
@@ -23829,6 +26239,7 @@ class $$SuppliersTableTableManager
                 category: category,
                 notes: notes,
                 createdAt: createdAt,
+                openingBalance: openingBalance,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -23844,6 +26255,7 @@ class $$SuppliersTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<double?> openingBalance = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SuppliersCompanion.insert(
                 id: id,
@@ -23857,6 +26269,7 @@ class $$SuppliersTableTableManager
                 category: category,
                 notes: notes,
                 createdAt: createdAt,
+                openingBalance: openingBalance,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -25296,6 +27709,10 @@ typedef $$PaymentsReceivedTableCreateCompanionBuilder =
       required String recordedBy,
       Value<String?> note,
       Value<DateTime> createdAt,
+      Value<bool> voided,
+      Value<String?> voidReason,
+      Value<DateTime?> editedAt,
+      Value<String?> editedBy,
       Value<int> rowid,
     });
 typedef $$PaymentsReceivedTableUpdateCompanionBuilder =
@@ -25309,6 +27726,10 @@ typedef $$PaymentsReceivedTableUpdateCompanionBuilder =
       Value<String> recordedBy,
       Value<String?> note,
       Value<DateTime> createdAt,
+      Value<bool> voided,
+      Value<String?> voidReason,
+      Value<DateTime?> editedAt,
+      Value<String?> editedBy,
       Value<int> rowid,
     });
 
@@ -25363,6 +27784,26 @@ class $$PaymentsReceivedTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get voided => $composableBuilder(
+    column: $table.voided,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get editedAt => $composableBuilder(
+    column: $table.editedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get editedBy => $composableBuilder(
+    column: $table.editedBy,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -25420,6 +27861,26 @@ class $$PaymentsReceivedTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get voided => $composableBuilder(
+    column: $table.voided,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get editedAt => $composableBuilder(
+    column: $table.editedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get editedBy => $composableBuilder(
+    column: $table.editedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PaymentsReceivedTableAnnotationComposer
@@ -25461,6 +27922,20 @@ class $$PaymentsReceivedTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get voided =>
+      $composableBuilder(column: $table.voided, builder: (column) => column);
+
+  GeneratedColumn<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get editedAt =>
+      $composableBuilder(column: $table.editedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get editedBy =>
+      $composableBuilder(column: $table.editedBy, builder: (column) => column);
 }
 
 class $$PaymentsReceivedTableTableManager
@@ -25509,6 +27984,10 @@ class $$PaymentsReceivedTableTableManager
                 Value<String> recordedBy = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> voided = const Value.absent(),
+                Value<String?> voidReason = const Value.absent(),
+                Value<DateTime?> editedAt = const Value.absent(),
+                Value<String?> editedBy = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PaymentsReceivedCompanion(
                 id: id,
@@ -25520,6 +27999,10 @@ class $$PaymentsReceivedTableTableManager
                 recordedBy: recordedBy,
                 note: note,
                 createdAt: createdAt,
+                voided: voided,
+                voidReason: voidReason,
+                editedAt: editedAt,
+                editedBy: editedBy,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -25533,6 +28016,10 @@ class $$PaymentsReceivedTableTableManager
                 required String recordedBy,
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> voided = const Value.absent(),
+                Value<String?> voidReason = const Value.absent(),
+                Value<DateTime?> editedAt = const Value.absent(),
+                Value<String?> editedBy = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PaymentsReceivedCompanion.insert(
                 id: id,
@@ -25544,6 +28031,10 @@ class $$PaymentsReceivedTableTableManager
                 recordedBy: recordedBy,
                 note: note,
                 createdAt: createdAt,
+                voided: voided,
+                voidReason: voidReason,
+                editedAt: editedAt,
+                editedBy: editedBy,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -26087,6 +28578,15 @@ typedef $$SiteExpensesTableCreateCompanionBuilder =
       Value<String?> note,
       Value<DateTime> createdAt,
       Value<String?> workerId,
+      Value<String?> paidTo,
+      Value<String?> mode,
+      Value<double?> gstPct,
+      Value<bool> gstInterState,
+      Value<int?> voucherNo,
+      Value<bool> voided,
+      Value<String?> voidReason,
+      Value<DateTime?> editedAt,
+      Value<String?> editedBy,
       Value<int> rowid,
     });
 typedef $$SiteExpensesTableUpdateCompanionBuilder =
@@ -26101,6 +28601,15 @@ typedef $$SiteExpensesTableUpdateCompanionBuilder =
       Value<String?> note,
       Value<DateTime> createdAt,
       Value<String?> workerId,
+      Value<String?> paidTo,
+      Value<String?> mode,
+      Value<double?> gstPct,
+      Value<bool> gstInterState,
+      Value<int?> voucherNo,
+      Value<bool> voided,
+      Value<String?> voidReason,
+      Value<DateTime?> editedAt,
+      Value<String?> editedBy,
       Value<int> rowid,
     });
 
@@ -26160,6 +28669,51 @@ class $$SiteExpensesTableFilterComposer
 
   ColumnFilters<String> get workerId => $composableBuilder(
     column: $table.workerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paidTo => $composableBuilder(
+    column: $table.paidTo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get gstPct => $composableBuilder(
+    column: $table.gstPct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get gstInterState => $composableBuilder(
+    column: $table.gstInterState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get voucherNo => $composableBuilder(
+    column: $table.voucherNo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get voided => $composableBuilder(
+    column: $table.voided,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get editedAt => $composableBuilder(
+    column: $table.editedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get editedBy => $composableBuilder(
+    column: $table.editedBy,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -26222,6 +28776,51 @@ class $$SiteExpensesTableOrderingComposer
     column: $table.workerId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get paidTo => $composableBuilder(
+    column: $table.paidTo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mode => $composableBuilder(
+    column: $table.mode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get gstPct => $composableBuilder(
+    column: $table.gstPct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get gstInterState => $composableBuilder(
+    column: $table.gstInterState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get voucherNo => $composableBuilder(
+    column: $table.voucherNo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get voided => $composableBuilder(
+    column: $table.voided,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get editedAt => $composableBuilder(
+    column: $table.editedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get editedBy => $composableBuilder(
+    column: $table.editedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SiteExpensesTableAnnotationComposer
@@ -26268,6 +28867,37 @@ class $$SiteExpensesTableAnnotationComposer
 
   GeneratedColumn<String> get workerId =>
       $composableBuilder(column: $table.workerId, builder: (column) => column);
+
+  GeneratedColumn<String> get paidTo =>
+      $composableBuilder(column: $table.paidTo, builder: (column) => column);
+
+  GeneratedColumn<String> get mode =>
+      $composableBuilder(column: $table.mode, builder: (column) => column);
+
+  GeneratedColumn<double> get gstPct =>
+      $composableBuilder(column: $table.gstPct, builder: (column) => column);
+
+  GeneratedColumn<bool> get gstInterState => $composableBuilder(
+    column: $table.gstInterState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get voucherNo =>
+      $composableBuilder(column: $table.voucherNo, builder: (column) => column);
+
+  GeneratedColumn<bool> get voided =>
+      $composableBuilder(column: $table.voided, builder: (column) => column);
+
+  GeneratedColumn<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get editedAt =>
+      $composableBuilder(column: $table.editedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get editedBy =>
+      $composableBuilder(column: $table.editedBy, builder: (column) => column);
 }
 
 class $$SiteExpensesTableTableManager
@@ -26311,6 +28941,15 @@ class $$SiteExpensesTableTableManager
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<String?> workerId = const Value.absent(),
+                Value<String?> paidTo = const Value.absent(),
+                Value<String?> mode = const Value.absent(),
+                Value<double?> gstPct = const Value.absent(),
+                Value<bool> gstInterState = const Value.absent(),
+                Value<int?> voucherNo = const Value.absent(),
+                Value<bool> voided = const Value.absent(),
+                Value<String?> voidReason = const Value.absent(),
+                Value<DateTime?> editedAt = const Value.absent(),
+                Value<String?> editedBy = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SiteExpensesCompanion(
                 id: id,
@@ -26323,6 +28962,15 @@ class $$SiteExpensesTableTableManager
                 note: note,
                 createdAt: createdAt,
                 workerId: workerId,
+                paidTo: paidTo,
+                mode: mode,
+                gstPct: gstPct,
+                gstInterState: gstInterState,
+                voucherNo: voucherNo,
+                voided: voided,
+                voidReason: voidReason,
+                editedAt: editedAt,
+                editedBy: editedBy,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -26337,6 +28985,15 @@ class $$SiteExpensesTableTableManager
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<String?> workerId = const Value.absent(),
+                Value<String?> paidTo = const Value.absent(),
+                Value<String?> mode = const Value.absent(),
+                Value<double?> gstPct = const Value.absent(),
+                Value<bool> gstInterState = const Value.absent(),
+                Value<int?> voucherNo = const Value.absent(),
+                Value<bool> voided = const Value.absent(),
+                Value<String?> voidReason = const Value.absent(),
+                Value<DateTime?> editedAt = const Value.absent(),
+                Value<String?> editedBy = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SiteExpensesCompanion.insert(
                 id: id,
@@ -26349,6 +29006,15 @@ class $$SiteExpensesTableTableManager
                 note: note,
                 createdAt: createdAt,
                 workerId: workerId,
+                paidTo: paidTo,
+                mode: mode,
+                gstPct: gstPct,
+                gstInterState: gstInterState,
+                voucherNo: voucherNo,
+                voided: voided,
+                voidReason: voidReason,
+                editedAt: editedAt,
+                editedBy: editedBy,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -26724,6 +29390,751 @@ typedef $$LabourAttendanceTableProcessedTableManager =
         >,
       ),
       LabourAttendanceData,
+      PrefetchHooks Function()
+    >;
+typedef $$AttendanceMarksTableCreateCompanionBuilder =
+    AttendanceMarksCompanion Function({
+      required String id,
+      required String projectId,
+      required String workerId,
+      required String day,
+      Value<double?> units,
+      required String recordedBy,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$AttendanceMarksTableUpdateCompanionBuilder =
+    AttendanceMarksCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> workerId,
+      Value<String> day,
+      Value<double?> units,
+      Value<String> recordedBy,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$AttendanceMarksTableFilterComposer
+    extends Composer<_$AppDatabase, $AttendanceMarksTable> {
+  $$AttendanceMarksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get workerId => $composableBuilder(
+    column: $table.workerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get day => $composableBuilder(
+    column: $table.day,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get units => $composableBuilder(
+    column: $table.units,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AttendanceMarksTableOrderingComposer
+    extends Composer<_$AppDatabase, $AttendanceMarksTable> {
+  $$AttendanceMarksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get workerId => $composableBuilder(
+    column: $table.workerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get day => $composableBuilder(
+    column: $table.day,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get units => $composableBuilder(
+    column: $table.units,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AttendanceMarksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AttendanceMarksTable> {
+  $$AttendanceMarksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get workerId =>
+      $composableBuilder(column: $table.workerId, builder: (column) => column);
+
+  GeneratedColumn<String> get day =>
+      $composableBuilder(column: $table.day, builder: (column) => column);
+
+  GeneratedColumn<double> get units =>
+      $composableBuilder(column: $table.units, builder: (column) => column);
+
+  GeneratedColumn<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$AttendanceMarksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AttendanceMarksTable,
+          AttendanceMark,
+          $$AttendanceMarksTableFilterComposer,
+          $$AttendanceMarksTableOrderingComposer,
+          $$AttendanceMarksTableAnnotationComposer,
+          $$AttendanceMarksTableCreateCompanionBuilder,
+          $$AttendanceMarksTableUpdateCompanionBuilder,
+          (
+            AttendanceMark,
+            BaseReferences<
+              _$AppDatabase,
+              $AttendanceMarksTable,
+              AttendanceMark
+            >,
+          ),
+          AttendanceMark,
+          PrefetchHooks Function()
+        > {
+  $$AttendanceMarksTableTableManager(
+    _$AppDatabase db,
+    $AttendanceMarksTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AttendanceMarksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AttendanceMarksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AttendanceMarksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> workerId = const Value.absent(),
+                Value<String> day = const Value.absent(),
+                Value<double?> units = const Value.absent(),
+                Value<String> recordedBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttendanceMarksCompanion(
+                id: id,
+                projectId: projectId,
+                workerId: workerId,
+                day: day,
+                units: units,
+                recordedBy: recordedBy,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String workerId,
+                required String day,
+                Value<double?> units = const Value.absent(),
+                required String recordedBy,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttendanceMarksCompanion.insert(
+                id: id,
+                projectId: projectId,
+                workerId: workerId,
+                day: day,
+                units: units,
+                recordedBy: recordedBy,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AttendanceMarksTable, AttendanceMark>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $AttendanceMarksTable,
+                    AttendanceMark
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AttendanceMarksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AttendanceMarksTable,
+      AttendanceMark,
+      $$AttendanceMarksTableFilterComposer,
+      $$AttendanceMarksTableOrderingComposer,
+      $$AttendanceMarksTableAnnotationComposer,
+      $$AttendanceMarksTableCreateCompanionBuilder,
+      $$AttendanceMarksTableUpdateCompanionBuilder,
+      (
+        AttendanceMark,
+        BaseReferences<_$AppDatabase, $AttendanceMarksTable, AttendanceMark>,
+      ),
+      AttendanceMark,
+      PrefetchHooks Function()
+    >;
+typedef $$ExpenseAttachmentsTableCreateCompanionBuilder =
+    ExpenseAttachmentsCompanion Function({
+      required String id,
+      required String expenseId,
+      required String filePath,
+      required String mimeType,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$ExpenseAttachmentsTableUpdateCompanionBuilder =
+    ExpenseAttachmentsCompanion Function({
+      Value<String> id,
+      Value<String> expenseId,
+      Value<String> filePath,
+      Value<String> mimeType,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$ExpenseAttachmentsTableFilterComposer
+    extends Composer<_$AppDatabase, $ExpenseAttachmentsTable> {
+  $$ExpenseAttachmentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get expenseId => $composableBuilder(
+    column: $table.expenseId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get filePath => $composableBuilder(
+    column: $table.filePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mimeType => $composableBuilder(
+    column: $table.mimeType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ExpenseAttachmentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExpenseAttachmentsTable> {
+  $$ExpenseAttachmentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get expenseId => $composableBuilder(
+    column: $table.expenseId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filePath => $composableBuilder(
+    column: $table.filePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mimeType => $composableBuilder(
+    column: $table.mimeType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ExpenseAttachmentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExpenseAttachmentsTable> {
+  $$ExpenseAttachmentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get expenseId =>
+      $composableBuilder(column: $table.expenseId, builder: (column) => column);
+
+  GeneratedColumn<String> get filePath =>
+      $composableBuilder(column: $table.filePath, builder: (column) => column);
+
+  GeneratedColumn<String> get mimeType =>
+      $composableBuilder(column: $table.mimeType, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$ExpenseAttachmentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExpenseAttachmentsTable,
+          ExpenseAttachment,
+          $$ExpenseAttachmentsTableFilterComposer,
+          $$ExpenseAttachmentsTableOrderingComposer,
+          $$ExpenseAttachmentsTableAnnotationComposer,
+          $$ExpenseAttachmentsTableCreateCompanionBuilder,
+          $$ExpenseAttachmentsTableUpdateCompanionBuilder,
+          (
+            ExpenseAttachment,
+            BaseReferences<
+              _$AppDatabase,
+              $ExpenseAttachmentsTable,
+              ExpenseAttachment
+            >,
+          ),
+          ExpenseAttachment,
+          PrefetchHooks Function()
+        > {
+  $$ExpenseAttachmentsTableTableManager(
+    _$AppDatabase db,
+    $ExpenseAttachmentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExpenseAttachmentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExpenseAttachmentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExpenseAttachmentsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> expenseId = const Value.absent(),
+                Value<String> filePath = const Value.absent(),
+                Value<String> mimeType = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExpenseAttachmentsCompanion(
+                id: id,
+                expenseId: expenseId,
+                filePath: filePath,
+                mimeType: mimeType,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String expenseId,
+                required String filePath,
+                required String mimeType,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExpenseAttachmentsCompanion.insert(
+                id: id,
+                expenseId: expenseId,
+                filePath: filePath,
+                mimeType: mimeType,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ExpenseAttachmentsTable, ExpenseAttachment>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ExpenseAttachmentsTable,
+                    ExpenseAttachment
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ExpenseAttachmentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExpenseAttachmentsTable,
+      ExpenseAttachment,
+      $$ExpenseAttachmentsTableFilterComposer,
+      $$ExpenseAttachmentsTableOrderingComposer,
+      $$ExpenseAttachmentsTableAnnotationComposer,
+      $$ExpenseAttachmentsTableCreateCompanionBuilder,
+      $$ExpenseAttachmentsTableUpdateCompanionBuilder,
+      (
+        ExpenseAttachment,
+        BaseReferences<
+          _$AppDatabase,
+          $ExpenseAttachmentsTable,
+          ExpenseAttachment
+        >,
+      ),
+      ExpenseAttachment,
+      PrefetchHooks Function()
+    >;
+typedef $$ProjectNotesTableCreateCompanionBuilder =
+    ProjectNotesCompanion Function({
+      required String id,
+      required String projectId,
+      required String body,
+      Value<bool> pinned,
+      Value<bool> deleted,
+      required String createdBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ProjectNotesTableUpdateCompanionBuilder =
+    ProjectNotesCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> body,
+      Value<bool> pinned,
+      Value<bool> deleted,
+      Value<String> createdBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$ProjectNotesTableFilterComposer
+    extends Composer<_$AppDatabase, $ProjectNotesTable> {
+  $$ProjectNotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get pinned => $composableBuilder(
+    column: $table.pinned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ProjectNotesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProjectNotesTable> {
+  $$ProjectNotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get pinned => $composableBuilder(
+    column: $table.pinned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ProjectNotesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProjectNotesTable> {
+  $$ProjectNotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<bool> get pinned =>
+      $composableBuilder(column: $table.pinned, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ProjectNotesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProjectNotesTable,
+          ProjectNote,
+          $$ProjectNotesTableFilterComposer,
+          $$ProjectNotesTableOrderingComposer,
+          $$ProjectNotesTableAnnotationComposer,
+          $$ProjectNotesTableCreateCompanionBuilder,
+          $$ProjectNotesTableUpdateCompanionBuilder,
+          (
+            ProjectNote,
+            BaseReferences<_$AppDatabase, $ProjectNotesTable, ProjectNote>,
+          ),
+          ProjectNote,
+          PrefetchHooks Function()
+        > {
+  $$ProjectNotesTableTableManager(_$AppDatabase db, $ProjectNotesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProjectNotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProjectNotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ProjectNotesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> body = const Value.absent(),
+                Value<bool> pinned = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProjectNotesCompanion(
+                id: id,
+                projectId: projectId,
+                body: body,
+                pinned: pinned,
+                deleted: deleted,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String body,
+                Value<bool> pinned = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                required String createdBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProjectNotesCompanion.insert(
+                id: id,
+                projectId: projectId,
+                body: body,
+                pinned: pinned,
+                deleted: deleted,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ProjectNotesTable, ProjectNote>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ProjectNotesTable,
+                    ProjectNote
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ProjectNotesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProjectNotesTable,
+      ProjectNote,
+      $$ProjectNotesTableFilterComposer,
+      $$ProjectNotesTableOrderingComposer,
+      $$ProjectNotesTableAnnotationComposer,
+      $$ProjectNotesTableCreateCompanionBuilder,
+      $$ProjectNotesTableUpdateCompanionBuilder,
+      (
+        ProjectNote,
+        BaseReferences<_$AppDatabase, $ProjectNotesTable, ProjectNote>,
+      ),
+      ProjectNote,
       PrefetchHooks Function()
     >;
 typedef $$SubcontractorsTableCreateCompanionBuilder =
@@ -27764,6 +31175,12 @@ typedef $$EquipmentTableCreateCompanionBuilder =
       Value<double?> dailyRate,
       Value<String?> notes,
       Value<DateTime> createdAt,
+      Value<double?> hourlyRate,
+      Value<String> ownership,
+      Value<String?> hiredFrom,
+      Value<DateTime?> hiredOn,
+      Value<DateTime?> returnDueOn,
+      Value<DateTime?> returnedOn,
       Value<int> rowid,
     });
 typedef $$EquipmentTableUpdateCompanionBuilder =
@@ -27778,6 +31195,12 @@ typedef $$EquipmentTableUpdateCompanionBuilder =
       Value<double?> dailyRate,
       Value<String?> notes,
       Value<DateTime> createdAt,
+      Value<double?> hourlyRate,
+      Value<String> ownership,
+      Value<String?> hiredFrom,
+      Value<DateTime?> hiredOn,
+      Value<DateTime?> returnDueOn,
+      Value<DateTime?> returnedOn,
       Value<int> rowid,
     });
 
@@ -27837,6 +31260,36 @@ class $$EquipmentTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get hourlyRate => $composableBuilder(
+    column: $table.hourlyRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownership => $composableBuilder(
+    column: $table.ownership,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hiredFrom => $composableBuilder(
+    column: $table.hiredFrom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get hiredOn => $composableBuilder(
+    column: $table.hiredOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get returnDueOn => $composableBuilder(
+    column: $table.returnDueOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get returnedOn => $composableBuilder(
+    column: $table.returnedOn,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -27899,6 +31352,36 @@ class $$EquipmentTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get hourlyRate => $composableBuilder(
+    column: $table.hourlyRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownership => $composableBuilder(
+    column: $table.ownership,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hiredFrom => $composableBuilder(
+    column: $table.hiredFrom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get hiredOn => $composableBuilder(
+    column: $table.hiredOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get returnDueOn => $composableBuilder(
+    column: $table.returnDueOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get returnedOn => $composableBuilder(
+    column: $table.returnedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$EquipmentTableAnnotationComposer
@@ -27943,6 +31426,30 @@ class $$EquipmentTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<double> get hourlyRate => $composableBuilder(
+    column: $table.hourlyRate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownership =>
+      $composableBuilder(column: $table.ownership, builder: (column) => column);
+
+  GeneratedColumn<String> get hiredFrom =>
+      $composableBuilder(column: $table.hiredFrom, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get hiredOn =>
+      $composableBuilder(column: $table.hiredOn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get returnDueOn => $composableBuilder(
+    column: $table.returnDueOn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get returnedOn => $composableBuilder(
+    column: $table.returnedOn,
+    builder: (column) => column,
+  );
 }
 
 class $$EquipmentTableTableManager
@@ -27986,6 +31493,12 @@ class $$EquipmentTableTableManager
                 Value<double?> dailyRate = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<double?> hourlyRate = const Value.absent(),
+                Value<String> ownership = const Value.absent(),
+                Value<String?> hiredFrom = const Value.absent(),
+                Value<DateTime?> hiredOn = const Value.absent(),
+                Value<DateTime?> returnDueOn = const Value.absent(),
+                Value<DateTime?> returnedOn = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => EquipmentCompanion(
                 id: id,
@@ -27998,6 +31511,12 @@ class $$EquipmentTableTableManager
                 dailyRate: dailyRate,
                 notes: notes,
                 createdAt: createdAt,
+                hourlyRate: hourlyRate,
+                ownership: ownership,
+                hiredFrom: hiredFrom,
+                hiredOn: hiredOn,
+                returnDueOn: returnDueOn,
+                returnedOn: returnedOn,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -28012,6 +31531,12 @@ class $$EquipmentTableTableManager
                 Value<double?> dailyRate = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<double?> hourlyRate = const Value.absent(),
+                Value<String> ownership = const Value.absent(),
+                Value<String?> hiredFrom = const Value.absent(),
+                Value<DateTime?> hiredOn = const Value.absent(),
+                Value<DateTime?> returnDueOn = const Value.absent(),
+                Value<DateTime?> returnedOn = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => EquipmentCompanion.insert(
                 id: id,
@@ -28024,6 +31549,12 @@ class $$EquipmentTableTableManager
                 dailyRate: dailyRate,
                 notes: notes,
                 createdAt: createdAt,
+                hourlyRate: hourlyRate,
+                ownership: ownership,
+                hiredFrom: hiredFrom,
+                hiredOn: hiredOn,
+                returnDueOn: returnDueOn,
+                returnedOn: returnedOn,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -30051,6 +33582,12 @@ class $AppDatabaseManager {
       $$SiteExpensesTableTableManager(_db, _db.siteExpenses);
   $$LabourAttendanceTableTableManager get labourAttendance =>
       $$LabourAttendanceTableTableManager(_db, _db.labourAttendance);
+  $$AttendanceMarksTableTableManager get attendanceMarks =>
+      $$AttendanceMarksTableTableManager(_db, _db.attendanceMarks);
+  $$ExpenseAttachmentsTableTableManager get expenseAttachments =>
+      $$ExpenseAttachmentsTableTableManager(_db, _db.expenseAttachments);
+  $$ProjectNotesTableTableManager get projectNotes =>
+      $$ProjectNotesTableTableManager(_db, _db.projectNotes);
   $$SubcontractorsTableTableManager get subcontractors =>
       $$SubcontractorsTableTableManager(_db, _db.subcontractors);
   $$WorkOrdersTableTableManager get workOrders =>
@@ -30315,6 +33852,8 @@ class BillDaoManager {
 mixin _$ExpenseDaoMixin on DatabaseAccessor<AppDatabase> {
   $SiteExpensesTable get siteExpenses => attachedDatabase.siteExpenses;
   $WorkOrdersTable get workOrders => attachedDatabase.workOrders;
+  $ExpenseAttachmentsTable get expenseAttachments =>
+      attachedDatabase.expenseAttachments;
   ExpenseDaoManager get managers => ExpenseDaoManager(this);
 }
 
@@ -30325,11 +33864,17 @@ class ExpenseDaoManager {
       $$SiteExpensesTableTableManager(_db.attachedDatabase, _db.siteExpenses);
   $$WorkOrdersTableTableManager get workOrders =>
       $$WorkOrdersTableTableManager(_db.attachedDatabase, _db.workOrders);
+  $$ExpenseAttachmentsTableTableManager get expenseAttachments =>
+      $$ExpenseAttachmentsTableTableManager(
+        _db.attachedDatabase,
+        _db.expenseAttachments,
+      );
 }
 
 mixin _$AttendanceDaoMixin on DatabaseAccessor<AppDatabase> {
   $LabourAttendanceTable get labourAttendance =>
       attachedDatabase.labourAttendance;
+  $AttendanceMarksTable get attendanceMarks => attachedDatabase.attendanceMarks;
   AttendanceDaoManager get managers => AttendanceDaoManager(this);
 }
 
@@ -30341,6 +33886,23 @@ class AttendanceDaoManager {
         _db.attachedDatabase,
         _db.labourAttendance,
       );
+  $$AttendanceMarksTableTableManager get attendanceMarks =>
+      $$AttendanceMarksTableTableManager(
+        _db.attachedDatabase,
+        _db.attendanceMarks,
+      );
+}
+
+mixin _$NoteDaoMixin on DatabaseAccessor<AppDatabase> {
+  $ProjectNotesTable get projectNotes => attachedDatabase.projectNotes;
+  NoteDaoManager get managers => NoteDaoManager(this);
+}
+
+class NoteDaoManager {
+  final _$NoteDaoMixin _db;
+  NoteDaoManager(this._db);
+  $$ProjectNotesTableTableManager get projectNotes =>
+      $$ProjectNotesTableTableManager(_db.attachedDatabase, _db.projectNotes);
 }
 
 mixin _$GeofenceDaoMixin on DatabaseAccessor<AppDatabase> {

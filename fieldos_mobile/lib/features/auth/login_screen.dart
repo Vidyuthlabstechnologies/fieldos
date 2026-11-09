@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/auth/google_auth.dart';
@@ -12,6 +13,7 @@ import 'package:fieldos_mobile/core/branded_page.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/services/bug_report_service.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/l10n/language_picker.dart';
 
@@ -97,10 +99,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final result = await cloud.enableSyncWithGoogle(idToken: picked.idToken);
       if (result.outcome == CloudSyncOutcome.failed) {
         // Never open an account Google and the server haven't both agreed on.
-        setState(() => _error = tr('Google sign-in did not go through. Check the internet and try again.'));
+        if (mounted) setState(() => _error = friendlyError(result.cause ?? StateError('Google sign-in failed'), result.stack));
         return;
       }
       await ref.read(sessionProvider.notifier).loginWithGoogle(email: picked.email, name: picked.name);
+    } on GoogleSignInException catch (e, st) {
+      RecentErrors.record(e, st);
+      final setup = e.code == GoogleSignInExceptionCode.clientConfigurationError ||
+          e.code == GoogleSignInExceptionCode.providerConfigurationError;
+      if (mounted) {
+        setState(() => _error = setup
+            ? tr('Google sign-in is not ready on this version of the app. Use your username and password for now.')
+            : tr('Google sign-in did not go through. Please try again.'));
+      }
     } catch (e, st) {
       if (mounted) setState(() => _error = e is AuthException ? e.message : friendlyError(e, st));
     } finally {

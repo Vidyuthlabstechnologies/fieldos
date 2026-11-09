@@ -112,7 +112,8 @@ void main() {
     await tester.tap(find.text('Continue with Google'));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 500)));
     await tester.pumpAndSettle();
-    expect(find.text('Google sign-in did not go through. Check the internet and try again.'), findsOneWidget);
+    // The server can't be reached here, so the message says so (and only then).
+    expect(find.textContaining('The FieldOS cloud is not answering right now.'), findsOneWidget);
     final users = await tester.runAsync(() => container.read(appDatabaseProvider).select(container.read(appDatabaseProvider).users).get());
     expect(users, isEmpty);
   });

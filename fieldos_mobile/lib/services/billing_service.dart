@@ -14,7 +14,7 @@
 /// Access codes (Android only) let people the FieldOS team chooses in
 /// without paying, above all Google's app reviewers, who must be able to
 /// see every feature. A code is a RevenueCat customer, `access_<CODE>`,
-/// that the team gives the `pro` entitlement as a promotional grant in the
+/// that the team gives the `fieldos_pro` entitlement as a promotional grant in the
 /// RevenueCat dashboard; taking the grant away there switches the code
 /// off. Codes are never sold: Google Play's billing rules cover anything
 /// paid for. Apple does not allow codes that unlock features at all (App
@@ -34,7 +34,7 @@ import 'package:fieldos_mobile/services/subscription_access.dart';
 export 'package:fieldos_mobile/services/subscription_access.dart';
 
 /// The RevenueCat entitlement every product unlocks.
-const entitlementId = 'pro';
+const entitlementId = 'fieldos_pro';
 
 /// The Android application id, for the Play subscriptions page.
 const androidPackageName = 'com.mldynamic.fieldos';
@@ -150,7 +150,12 @@ class BillingService {
   /// when this person can still take it.
   Future<List<PlanOffer>> plans() async {
     await _configure();
-    final offerings = await Purchases.getOfferings();
+    final Offerings offerings;
+    try {
+      offerings = await Purchases.getOfferings();
+    } on PlatformException catch (e) {
+      throw plansErrorFor(PurchasesErrorHelper.getErrorCode(e), store: storeName);
+    }
     final packages = offerings.current?.availablePackages ?? const <Package>[];
     _packages
       ..clear()
@@ -324,6 +329,26 @@ PlanPeriod _planPeriod(PackageType type, String? iso) {
       };
   }
 }
+
+/// Why the plans could not be loaded, as a message people can act on. Only
+/// a real network failure blames the internet: a store or setup problem
+/// (no products on sale yet, a wrong key) says so instead.
+@visibleForTesting
+BillingException plansErrorFor(PurchasesErrorCode code, {required String store}) => switch (code) {
+      PurchasesErrorCode.networkError || PurchasesErrorCode.offlineConnectionError =>
+        BillingException('No internet connection. Connect and try again.'),
+      PurchasesErrorCode.configurationError ||
+      PurchasesErrorCode.productNotAvailableForPurchaseError ||
+      PurchasesErrorCode.invalidCredentialsError =>
+        BillingException('The FieldOS plans are not on sale in $store yet. Please try again later, or send a bug '
+            'report from the menu.'),
+      PurchasesErrorCode.storeProblemError =>
+        BillingException('$store is having a problem right now. Please try again in a minute.'),
+      PurchasesErrorCode.purchaseNotAllowedError => BillingException(
+          'This phone is not allowed to make purchases. Check the payment settings or parental controls in $store.'),
+      _ => BillingException('Could not load the plans from $store. Please try again, or send a bug report from the '
+          'menu.'),
+    };
 
 /// A store error as a message people can act on.
 @visibleForTesting

@@ -109,7 +109,7 @@ class _MySubscriptionSheetState extends ConsumerState<MySubscriptionSheet> {
             if (_loading)
               const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))
             else if (s == null)
-              FormMessage('Could not reach ${_billing.storeName} right now. Check your internet connection.')
+              FormMessage('Could not check your subscription with ${_billing.storeName} right now. Please try again in a minute.')
             else
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Icon(

@@ -11,8 +11,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/branded_page.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
 import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/billing_service.dart';
 import 'package:fieldos_mobile/services/bug_report_service.dart';
@@ -60,11 +62,14 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         _plans = plans;
         _selected = defaultPlan(plans)?.id;
       });
+    } on BillingException catch (e, st) {
+      RecentErrors.record(e, st);
+      if (mounted) setState(() => _loadError = e.message);
     } catch (e, st) {
       RecentErrors.record(e, st);
       if (mounted) {
         setState(() => _loadError =
-            'Could not load the plans from ${_billing.storeName}. Check your internet connection and try again.');
+            'Could not load the plans from ${_billing.storeName}. Please try again, or send a bug report from the menu.');
       }
     }
   }
@@ -126,7 +131,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           widget.onUnlocked();
         } else {
           setState(() => _error = s == null
-              ? 'No internet connection. Connect and check again.'
+              ? 'Could not check with ${_billing.storeName} right now. Please try again in a minute.'
               : 'Still waiting for the payment. It can take a few minutes after you approve it.');
         }
       });
@@ -220,7 +225,55 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   style: _linkStyle, onPressed: () => openPrivacyPolicy(context), child: const Text('Privacy policy')),
             ],
           ),
+          if (ref.watch(sessionProvider).activeCompany != null) ...[
+            const SizedBox(height: 8),
+            const _YourDataCard(),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+/// Onsite's most-liked review is about a paywall that held people's
+/// records until they paid. FieldOS never does that: the paywall says so,
+/// and the export works here, with or without a plan.
+class _YourDataCard extends ConsumerWidget {
+  const _YourDataCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    return Card(
+      key: const Key('paywall-your-data'),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              Icon(Icons.verified_user_outlined, color: theme.colorScheme.primary),
+              const SizedBox(width: 10),
+              Expanded(child: Text(tr('Your records stay yours'), style: theme.textTheme.titleSmall)),
+            ]),
+            const SizedBox(height: 6),
+            Text(
+              tr('Everything you entered stays on this phone and is never deleted when a plan ends. '
+                  'Export it to Excel any time, free.'),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.4),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                key: const Key('paywall-export'),
+                icon: const Icon(Icons.table_view_outlined),
+                label: Text(tr('Export my data')),
+                onPressed: () => exportCompanyToExcel(context, ref),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
