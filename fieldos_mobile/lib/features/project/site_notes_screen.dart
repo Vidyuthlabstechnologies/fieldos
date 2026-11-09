@@ -150,7 +150,7 @@ class _SiteNotesScreenState extends ConsumerState<SiteNotesScreen> {
   @override
   Widget build(BuildContext context) {
     final notes = ref.watch(siteNotesProvider(widget.projectId));
-    final names = ref.watch(_userNamesProvider).valueOrNull ?? const {};
+    final names = ref.watch(_userNamesProvider).value ?? const {};
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(widget.siteName == null ? tr('Site notes') : '${tr('Notes')} · ${widget.siteName}')),

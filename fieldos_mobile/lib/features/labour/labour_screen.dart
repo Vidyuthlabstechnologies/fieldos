@@ -178,7 +178,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
 
     final latV = double.tryParse(lat.text);
     final lngV = double.tryParse(lng.text);
-    final g = geofence.valueOrNull;
+    final g = geofence.value;
     final within = (g != null && latV != null && lngV != null)
         ? haversineMeters(latV, lngV, g.centerLat, g.centerLng) <= g.radiusMeters
         : null;
@@ -254,7 +254,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
     if (ok != true || picked.isEmpty || !context.mounted) return;
     final latV = double.tryParse(lat.text);
     final lngV = double.tryParse(lng.text);
-    final g = geofence.valueOrNull;
+    final g = geofence.value;
     final within = (g != null && latV != null && lngV != null)
         ? haversineMeters(latV, lngV, g.centerLat, g.centerLng) <= g.radiusMeters
         : null;
@@ -318,7 +318,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
     if (ok != true || !context.mounted) return;
     final latV = double.tryParse(lat.text);
     final lngV = double.tryParse(lng.text);
-    final g = ref.read(geofenceProvider(widget.projectId)).valueOrNull;
+    final g = ref.read(geofenceProvider(widget.projectId)).value;
     final within = (g != null && latV != null && lngV != null)
         ? haversineMeters(latV, lngV, g.centerLat, g.centerLng) <= g.radiusMeters
         : a.withinGeofence;
@@ -335,7 +335,7 @@ class _GeofenceCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final geofence = ref.watch(geofenceProvider(projectId));
     final scheme = Theme.of(context).colorScheme;
-    final set = geofence.valueOrNull != null;
+    final set = geofence.value != null;
     return Card(
       margin: EdgeInsets.zero,
       color: scheme.surfaceContainerHighest,
@@ -487,9 +487,9 @@ class _TodayHeadcount extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final workers = ref.watch(workersProvider(projectId)).valueOrNull;
-    final punches = ref.watch(attendanceProvider(projectId)).valueOrNull;
-    final marks = ref.watch(attendanceMarksProvider(projectId)).valueOrNull;
+    final workers = ref.watch(workersProvider(projectId)).value;
+    final punches = ref.watch(attendanceProvider(projectId)).value;
+    final marks = ref.watch(attendanceMarksProvider(projectId)).value;
     if (workers == null || punches == null || marks == null) return const SizedBox.shrink();
     final today = DateTime.now();
     final rows = buildRegister(workers: workers, punches: punches, marks: marks, day: today);

@@ -60,9 +60,9 @@ class RateHint extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final history = ref.watch(companyReceiptsProvider(companyId)).valueOrNull;
+    final history = ref.watch(companyReceiptsProvider(companyId)).value;
     if (history == null) return const SizedBox.shrink();
-    final suppliers = ref.watch(suppliersProvider(companyId)).valueOrNull ?? const <Supplier>[];
+    final suppliers = ref.watch(suppliersProvider(companyId)).value ?? const <Supplier>[];
     return ListenableBuilder(
       listenable: Listenable.merge([material, unit, qty, amount]),
       builder: (context, _) {

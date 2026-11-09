@@ -73,16 +73,17 @@ AppLanguage languageFromDevice([List<Locale>? locales]) {
   return AppLanguage.en;
 }
 
-class LanguageController extends StateNotifier<AppLanguage> {
-  LanguageController(this._ref) : super(_current) {
+class LanguageController extends Notifier<AppLanguage> {
+  @override
+  AppLanguage build() {
     _load();
+    return _current;
   }
-  final Ref _ref;
 
   Future<void> _load() async {
-    final saved = AppLanguage.fromCode(await _ref.read(appDatabaseProvider).settingsDao.get(languageSettingKey));
+    final saved = AppLanguage.fromCode(await ref.read(appDatabaseProvider).settingsDao.get(languageSettingKey));
     final l = saved ?? languageFromDevice();
-    if (!mounted) return;
+    if (!ref.mounted) return;
     setCurrentLanguage(l);
     state = l;
   }
@@ -90,8 +91,8 @@ class LanguageController extends StateNotifier<AppLanguage> {
   Future<void> choose(AppLanguage l) async {
     setCurrentLanguage(l);
     state = l;
-    await _ref.read(appDatabaseProvider).settingsDao.set(languageSettingKey, l.code);
+    await ref.read(appDatabaseProvider).settingsDao.set(languageSettingKey, l.code);
   }
 }
 
-final languageProvider = StateNotifierProvider<LanguageController, AppLanguage>((ref) => LanguageController(ref));
+final languageProvider = NotifierProvider<LanguageController, AppLanguage>(LanguageController.new);

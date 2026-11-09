@@ -121,7 +121,7 @@ class _ProjectChatViewState extends ConsumerState<ProjectChatView> {
     final me = ref.watch(sessionProvider).user?.id;
     final messages = ref.watch(projectMessagesProvider(widget.projectId));
     final signedIn = ref.watch(cloudSyncServiceProvider).isSignedIn;
-    final reported = ref.watch(reportedMessagesProvider).valueOrNull ?? const <String>{};
+    final reported = ref.watch(reportedMessagesProvider).value ?? const <String>{};
 
     return Column(
       children: [

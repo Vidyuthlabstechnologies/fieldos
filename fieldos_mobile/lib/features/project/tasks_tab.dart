@@ -73,7 +73,7 @@ class _TasksTabState extends ConsumerState<TasksTab> {
   @override
   Widget build(BuildContext context) {
     final tasks = ref.watch(tasksProvider(_projectId));
-    final roster = ref.watch(teamRosterProvider(widget.project.companyId)).valueOrNull;
+    final roster = ref.watch(teamRosterProvider(widget.project.companyId)).value;
     final now = DateTime.now();
     return Stack(
       children: [

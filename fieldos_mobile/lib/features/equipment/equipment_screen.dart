@@ -31,7 +31,7 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
     return Column(
       children: [
         _sectionHeader(context, 'Equipment', () => _addEquipment(context, ref)),
-        if (equipmentList.valueOrNull?.any(isHired) ?? false)
+        if (equipmentList.value?.any(isHired) ?? false)
           _HireSummary(equipment: equipmentList.value!, projectId: widget.projectId),
         Expanded(
           child: equipmentList.when(

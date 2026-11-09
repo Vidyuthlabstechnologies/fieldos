@@ -285,7 +285,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             secondary: const Icon(Icons.lock_outline),
             title: Text(tr('App lock')),
             subtitle: Text(tr('Ask for a 4-digit PIN when FieldOS opens or comes back after a minute')),
-            value: ref.watch(appLockOnProvider).valueOrNull ?? false,
+            value: ref.watch(appLockOnProvider).value ?? false,
             onChanged: _toggleLock,
           ),
           const SectionHeader('Voice reports', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),

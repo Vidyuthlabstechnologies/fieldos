@@ -69,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
     final session = ref.watch(sessionProvider);
     final company = session.activeCompany!;
     final projectsAsync = ref.watch(projectsProvider(company.id));
-    final hasProjects = projectsAsync.valueOrNull?.isNotEmpty ?? false;
+    final hasProjects = projectsAsync.value?.isNotEmpty ?? false;
 
     return Scaffold(
       appBar: AppBar(
