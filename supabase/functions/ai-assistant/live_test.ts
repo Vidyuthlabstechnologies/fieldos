@@ -191,7 +191,8 @@ Deno.test({
     });
     const body = await res.json();
     console.log("revenuecat:", res.status);
-    assertEquals(res.status, 200);
+    // 201 the first time a key sees this id (RevenueCat creates the customer), 200 after.
+    assert(res.status === 200 || res.status === 201, `status ${res.status}`);
     assertEquals(entitlementActive(body), false);
   },
 });
