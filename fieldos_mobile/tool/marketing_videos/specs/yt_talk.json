@@ -1,0 +1,119 @@
+{
+ "name": "fieldos-youtube-talk-to-your-site-app",
+ "width": 1920,
+ "height": 1080,
+ "mood": "drive",
+ "speed": 1.03,
+ "bug": true,
+ "caption_style": "bold",
+ "music_db": -15,
+ "scenes": [
+  {
+   "type": "hook",
+   "lines": [
+    "What if your site app",
+    "did the paperwork",
+    "when you talk to it?"
+   ],
+   "vo": "What if your site app did the paperwork, just by talking to it?",
+   "min": 4.2
+  },
+  {
+   "type": "mitra",
+   "mood": "talk",
+   "lines": [
+    "Watch.",
+    "Four entries.",
+    "Zero typing."
+   ],
+   "vo": "Watch. Four entries, zero typing.",
+   "min": 3
+  },
+  {
+   "type": "chat",
+   "kicker": "1. Expense",
+   "title": [
+    "Money,",
+    "saved."
+   ],
+   "ask": "Add ₹5,000 spent on cement at Kompally",
+   "reply": "Sure, Ravi. Here it is for Kompally Villa.",
+   "card": "Expense ₹5,000 for Material at Kompally Villa, Block B · cement",
+   "final": "Saved ₹5,000 for cement at Kompally Villa.",
+   "vo": "One. Add five thousand for cement at Kompally. It shows a card. Tap save.",
+   "min": 8.2,
+   "save_after": 2.6
+  },
+  {
+   "type": "chat",
+   "side": "right",
+   "kicker": "2. A question",
+   "title": [
+    "Who came",
+    "today?"
+   ],
+   "ask": "Who came to Kompally today?",
+   "reply": "4 people punched in at Kompally Villa today: Ramesh, Suresh, Anil and Venkat. Lakshmi is absent.",
+   "vo": "Two. Who came to Kompally today? It reads your attendance, and answers.",
+   "min": 7.2
+  },
+  {
+   "type": "chat",
+   "kicker": "3. A task",
+   "title": [
+    "Tomorrow,",
+    "planned."
+   ],
+   "ask": "Add a task: plaster the first floor by Friday",
+   "reply": "Here is the task for Kompally Villa.",
+   "card": "Task: Plaster first floor · due Fri 13 Nov · Kompally Villa",
+   "final": "Added. I will remind you on Friday morning.",
+   "vo": "Three. Add a task. Plaster the first floor by Friday.",
+   "min": 8,
+   "save_after": 2.6
+  },
+  {
+   "type": "chat",
+   "side": "right",
+   "kicker": "4. Daily report",
+   "title": [
+    "Report,",
+    "done."
+   ],
+   "ask": "Today 6 masons did brick work on the first floor. Sunny.",
+   "reply": "I will save today's report for Kompally Villa.",
+   "card": "Daily report · 6 people · Sunny · Brick work on first floor",
+   "final": "Saved. Share it on WhatsApp from the DPR tab.",
+   "vo": "Four. Today six masons did brick work on the first floor. That's the daily report.",
+   "min": 8.4,
+   "save_after": 2.8
+  },
+  {
+   "type": "mitra",
+   "mood": "thumbsUp",
+   "lines": [
+    "Nothing saves",
+    "until you tap Save."
+   ],
+   "vo": "And nothing is saved until you tap save. You stay in control.",
+   "min": 3.4
+  },
+  {
+   "type": "phone",
+   "shot": "te/14_assistant",
+   "side": "right",
+   "kicker": "తెలుగు · हिंदी",
+   "title": [
+    "Speak your",
+    "language."
+   ],
+   "vo": "Speak in Telugu, Hindi or English. It answers in your language."
+  },
+  {
+   "type": "cta",
+   "title": "Try FieldOS free for 3 days",
+   "vo": "Try Field O S free for three days. Link in the description.",
+   "min": 5.5
+  }
+ ]
+}

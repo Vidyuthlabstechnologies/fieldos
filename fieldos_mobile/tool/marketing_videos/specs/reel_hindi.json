@@ -1,0 +1,68 @@
+{
+ "name": "fieldos-reel-6-hindi",
+ "width": 1080,
+ "height": 1920,
+ "mood": "drive",
+ "speed": 1.08,
+ "bug": true,
+ "caption_style": "bold",
+ "scenes": [
+  {
+   "type": "mitra",
+   "mood": "wave",
+   "lines": [
+    "आपकी साइट का ऐप",
+    "अब हिंदी में!"
+   ],
+   "min": 3.2
+  },
+  {
+   "type": "phone",
+   "shot": "hi/14_assistant",
+   "title": [
+    "बस बोलिए,",
+    "FieldOS कर देगा"
+   ],
+   "min": 4.2
+  },
+  {
+   "type": "phone",
+   "shot": "hi/01_home",
+   "title": [
+    "हर साइट,",
+    "एक फ़ोन में"
+   ],
+   "min": 3.4
+  },
+  {
+   "type": "phone",
+   "shot": "hi/15_brief",
+   "title": [
+    "आज किस साइट को",
+    "आपकी ज़रूरत है"
+   ],
+   "min": 3.4
+  },
+  {
+   "type": "phone",
+   "shot": "hi/11_wage_sheet",
+   "title": [
+    "शनिवार की मज़दूरी,",
+    "अपने आप जुड़ी"
+   ],
+   "min": 3.4,
+   "mitra": {
+    "mood": "thumbsUp",
+    "pos": "br",
+    "size": 240
+   }
+  },
+  {
+   "type": "cta",
+   "title": "3 दिन मुफ़्त आज़माइए",
+   "sub": "हर साइट, अपने फ़ोन से",
+   "foot": "हिंदी · తెలుగు · English",
+   "min": 4.5
+  }
+ ]
+}

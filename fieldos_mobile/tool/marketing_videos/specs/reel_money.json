@@ -1,9 +1,57 @@
-{"name":"fieldos-reel-3-site-money","width":1080,"height":1920,"mood":"drive","voice":"af_heart","speed":1.05,"bug":true,
-"scenes":[
- {"type":"hook","lines":["Where did the","site money go?"],"vo":"Bills on paper, cash in pockets, and no idea where the money went?","min":3.2},
- {"type":"phone","shot":"08_money","kicker":"Money","title":["In, out,","balance."],"vo":"Field O S shows what came in, what went out, and the balance, for every site.","highlights":[{"box":[32,378,1015,189],"at":1.0,"hold":2.2}]},
- {"type":"phone","shot":"06_stock","kicker":"Stock","title":["Check stock","before you order."],"vo":"Track cement, steel and sand as they arrive and get used.","highlights":[{"box":[30,500,1020,730],"at":1.0,"hold":2.0}]},
- {"type":"phone","shot":"02_dashboard","kicker":"Owner view","title":["Over budget?","Know today."],"vo":"The owner sees which site is close to its budget, or already over it.","highlights":[{"box":[24,715,1032,470],"at":1.2,"hold":1.4},{"box":[24,1195,1032,530],"at":2.7,"hold":1.8}]},
- {"type":"phone","shot":"12_approvals","kicker":"Approvals","title":["Big spends","need your yes."],"vo":"And big purchases wait for your approval, right on your phone.","taps":[{"at_xy":[892,522],"at":1.8}]},
- {"type":"cta","vo":"Try Field O S free for three days.","min":4.2,"title":"Know where every rupee went","sub":"Try FieldOS free for 3 days."}
-]}
+{
+ "name": "fieldos-reel-4-who-you-owe",
+ "width": 1080,
+ "height": 1920,
+ "mood": "drive",
+ "speed": 1.08,
+ "bug": true,
+ "caption_style": "bold",
+ "scenes": [
+  {
+   "type": "stat",
+   "label": "Owed to suppliers",
+   "value": 1268000,
+   "prefix": "₹",
+   "sub": "Do you know since when?",
+   "mood": "surprised",
+   "vo": "Twelve lakh owed to suppliers. Do you know since when?",
+   "min": 4
+  },
+  {
+   "type": "phone",
+   "shot": "en/16_owe",
+   "title": [
+    "Who you owe,",
+    "oldest first."
+   ],
+   "vo": "Field O S shows who you owe, oldest debts first, before a supplier stops your credit.",
+   "highlights": [
+    {
+     "box": [
+      42,
+      549,
+      996,
+      249
+     ],
+     "at": 1.6,
+     "hold": 2.4
+    }
+   ]
+  },
+  {
+   "type": "phone",
+   "shot": "en/08_money",
+   "title": [
+    "Every rupee,",
+    "every site."
+   ],
+   "vo": "Money in, money out, and the balance for every site."
+  },
+  {
+   "type": "cta",
+   "title": "Try FieldOS free for 3 days",
+   "vo": "Try Field O S free for three days. Link in bio.",
+   "min": 4.5
+  }
+ ]
+}

@@ -1,7 +1,6 @@
 """Builds one FieldOS marketing video as a HyperFrames project, then renders it.
 
 usage: python3 build_video.py spec.json [--no-render]
-(set up first: see README.md in this folder)
 
 1. Voiceover per scene with Kokoro (offline, Apache-2.0 weights).
 2. Scene timings from the voiceover lengths.
@@ -96,11 +95,40 @@ def helmet_svg(cls, size):
   <rect class="h-line" x="131" y="366" width="250" height="13" rx="6.5" fill="#fff"/>
 </svg>'''
 
+MITRA_META = json.load(open(os.path.join(ASSETS, 'mitra_sheets', 'meta.json')))
+MITRA_FPS = 20
+
+def mitra(mid, mood, size, st, du, extra_cls=''):
+    """Mitra, the app's mascot, playing one mood as a sprite sheet. The frame
+    is picked from the timeline time, so every render frame is deterministic."""
+    m = MITRA_META[mood]
+    os.makedirs(os.path.join(proj, 'assets', 'mitra'), exist_ok=True)
+    shutil.copy(os.path.join(ASSETS, 'mitra_sheets', f'{mood}.webp'), os.path.join(proj, 'assets', 'mitra', f'{mood}.webp'))
+    n, cols, rows = m['n'], m['cols'], m['rows']
+    js.append(f'''(function(){{const el=document.getElementById("{mid}");const o={{f:0}};
+tl.fromTo(o,{{f:0}},{{f:{du * MITRA_FPS:.1f},duration:{du:.3f},ease:"none",immediateRender:false,onUpdate:()=>{{const i=Math.floor(o.f)%{n};
+el.style.backgroundPosition=(-(i%{cols})*{size})+"px "+(-Math.floor(i/{cols})*{size})+"px";}}}},{st:.3f});}})();''')
+    return (f'<div class="mitra {extra_cls}" id="{mid}" style="width:{size}px;height:{size}px;'
+            f'background-image:url(assets/mitra/{mood}.webp);background-size:{cols * size}px {rows * size}px"></div>')
+
+def money_fmt_js():
+    return ('function inr(v){v=Math.round(v);const s=String(v);if(s.length<=3)return s;'
+            'const last=s.slice(-3);let rest=s.slice(0,-3);rest=rest.replace(/\\B(?=(\\d{2})+(?!\\d))/g,",");return rest+","+last;}')
+
+def stat_size(sc):
+    """Shrink the count-up number so its final value fits the frame width."""
+    v = str(int(sc['value']))
+    digits = v[-3:] if len(v) <= 3 else ','.join([v[:-3][::-1][i:i + 2][::-1] for i in range(0, len(v) - 3, 2)][::-1]) + ',' + v[-3:]
+    n = len(sc.get('prefix', '') + digits + sc.get('suffix', ''))
+    base = 230 if PORTRAIT else 220
+    return min(base, int((940 if PORTRAIT else 1500) / (0.6 * n)))
+
 def phone(shot, sid, screen_w):
     screen_h = screen_w * 2
     bez = round(screen_w * 0.035)
     status = round(screen_w * 0.075)
     copy = os.path.join(proj, 'assets', 'shots', f'{shot}.png')
+    os.makedirs(os.path.dirname(copy), exist_ok=True)
     shutil.copy(os.path.join(ASSETS, 'shots', f'{shot}.png'), copy)
     return f'''<div class="phone" id="{sid}-phone" style="width:{screen_w + 2 * bez}px;height:{screen_h + status + 2 * bez}px;padding:{bez}px;border-radius:{round(screen_w * 0.13)}px">
   <div class="screen" style="border-radius:{round(screen_w * 0.095)}px">
@@ -128,7 +156,7 @@ def chunks(text, maxlen):
 body = []
 js = []
 caps = []
-SCREEN_W = 500 if PORTRAIT else 410
+SCREEN_W = 470 if PORTRAIT else 410
 if spec.get('screen_w'): SCREEN_W = spec['screen_w']
 
 for i, sc in enumerate(scenes):
@@ -210,6 +238,121 @@ for i, sc in enumerate(scenes):
             f'tl.fromTo("#{sid}-c", {{opacity:0, y:40}}, {{opacity:1, y:0, duration:0.6, ease:"power3.out"}}, {st + 0.25:.3f});',
             f'tl.fromTo("#{sid}-u", {{scaleX:0}}, {{scaleX:1, duration:0.6, ease:"power2.inOut"}}, {st + 0.5:.3f});',
         ]
+    elif typ == 'mitra':
+        # Mitra big, with a speech bubble: an intro or a punchline.
+        size = sc.get('size', 520 if PORTRAIT else 460)
+        lines = ''.join(f'<div class="mline{" last" if k == len(sc["lines"]) - 1 else ""}" id="{sid}-m{k}">{esc(l)}</div>'
+                        for k, l in enumerate(sc['lines']))
+        inner = (f'<div class="mscene"><div class="mbub" id="{sid}-bub">{lines}</div>'
+                 f'<div class="mstage" id="{sid}-ms">{mitra(f"{sid}-mitra", sc.get("mood", "wave"), size, st, du)}'
+                 f'<div class="mshadow"></div></div></div>')
+        js += [
+            f'tl.fromTo("#{sid}-ms", {{y:{H * 0.35:.0f}, scale:0.7}}, {{y:0, scale:1, duration:0.7, ease:"back.out(1.5)"}}, {st + 0.05:.3f});',
+            f'tl.fromTo("#{sid}-bub", {{opacity:0, scale:0.6, transformOrigin:"{"50% 100%" if PORTRAIT else "100% 60%"}"}}, {{opacity:1, scale:1, duration:0.5, ease:"back.out(2)"}}, {st + 0.45:.3f});',
+        ]
+        for k in range(len(sc['lines'])):
+            js.append(f'tl.fromTo("#{sid}-m{k}", {{opacity:0, y:20}}, {{opacity:1, y:0, duration:0.4}}, {st + 0.6 + k * 0.3:.3f});')
+    elif typ == 'chaos':
+        # The problem: phone notifications piling up from every site.
+        notes = sc['notes']
+        cards = ''
+        import random
+        rnd = random.Random(7)
+        for k, (who, msg) in enumerate(notes):
+            x = rnd.uniform(0.04, 0.52) * W if not PORTRAIT else rnd.uniform(0.03, 0.30) * W
+            y = (0.10 + 0.78 * k / max(1, len(notes) - 1)) * H + rnd.uniform(-30, 30)
+            rot = rnd.uniform(-5, 5)
+            cards += (f'<div class="note" id="{sid}-n{k}" style="left:{x:.0f}px;top:{y:.0f}px;transform:rotate({rot:.1f}deg)">'
+                      f'<div class="nic"></div><div><b>{esc(who)}</b><span>{esc(msg)}</span></div></div>')
+        title = ''.join(f'<div class="tline{" last" if k == len(sc["title"]) - 1 else ""}"><span id="{sid}-t{k}">{esc(l)}</span></div>'
+                        for k, l in enumerate(sc['title']))
+        inner = f'<div class="chaos">{cards}<div class="chtitle" id="{sid}-ct">{title}</div></div>'
+        gap = min(0.32, max(0.12, (du * 0.55) / len(notes)))
+        for k in range(len(notes)):
+            js.append(f'tl.fromTo("#{sid}-n{k}", {{opacity:0, scale:1.4, x:{rnd.choice([-200, 200])}}}, {{opacity:1, scale:1, x:0, duration:0.35, ease:"back.out(1.6)"}}, {st + 0.1 + k * gap:.3f});')
+        t_title = st + 0.1 + len(notes) * gap
+        js.append(f'tl.to("#{sid} .note", {{opacity:0.25, filter:"blur(3px)", duration:0.4}}, {t_title:.3f});')
+        js.append(f'tl.fromTo("#{sid}-ct", {{opacity:0}}, {{opacity:1, duration:0.01}}, {t_title:.3f});')
+        for k in range(len(sc['title'])):
+            js.append(f'tl.fromTo("#{sid}-t{k}", {{yPercent:110}}, {{yPercent:0, duration:0.55, ease:"power3.out"}}, {t_title + 0.05 + k * 0.2:.3f});')
+    elif typ == 'stat':
+        # A number counting up: "₹26,000 of wages, added up in 0 seconds".
+        inner = (f'<div class="stat"><div class="slabel" id="{sid}-la">{esc(sc.get("label", ""))}</div>'
+                 f'<div class="snum" id="{sid}-num" style="font-size:{stat_size(sc)}px">{esc(sc.get("prefix", ""))}0{esc(sc.get("suffix", ""))}</div>'
+                 f'<div class="ssub" id="{sid}-su">{esc(sc.get("sub", ""))}</div>'
+                 + (f'<div class="smitra">{mitra(f"{sid}-mitra", sc["mood"], 300 if PORTRAIT else 260, st, du)}</div>' if sc.get('mood') else '')
+                 + '</div>')
+        js += [
+            money_fmt_js(),
+            f'(function(){{const el=document.getElementById("{sid}-num");const o={{v:0}};tl.fromTo(o,{{v:0}},{{v:{sc["value"]},duration:1.4,ease:"power2.out",immediateRender:false,'
+            f'onUpdate:()=>{{el.textContent={json.dumps(sc.get("prefix", ""))}+inr(o.v)+{json.dumps(sc.get("suffix", ""))};}}}},{st + 0.35:.3f});}})();',
+            f'tl.fromTo("#{sid}-la", {{opacity:0, y:-20}}, {{opacity:1, y:0, duration:0.5}}, {st + 0.1:.3f});',
+            f'tl.fromTo("#{sid}-num", {{scale:0.7}}, {{scale:1, duration:0.6, ease:"back.out(2)"}}, {st + 0.3:.3f});',
+            f'tl.fromTo("#{sid}-su", {{opacity:0, y:20}}, {{opacity:1, y:0, duration:0.5}}, {st + 1.6:.3f});',
+        ]
+    elif typ == 'chat':
+        # Ask FieldOS, live: the person types, Mitra answers, a confirm card, Save, Saved.
+        cw = SCREEN_W
+        kicker = f'<div class="kicker" id="{sid}-k">{esc(sc.get("kicker", ""))}</div>' if sc.get('kicker') else ''
+        title = ''.join(f'<div class="tline{" last" if k == len(sc["title"]) - 1 else ""}"><span id="{sid}-t{k}">{esc(l)}</span></div>' for k, l in enumerate(sc.get('title', [])))
+        sub = f'<div class="sub" id="{sid}-sub">{esc(sc.get("sub", ""))}</div>' if sc.get('sub') else ''
+        side = sc.get('side', 'left')
+        avatar_mood = 'talk'
+        fin_html = f'<div class="cb bot" id="{sid}-fin">{esc(sc["final"])}</div>' if sc.get('final') else ''
+        card_html = (f'''<div class="ccard" id="{sid}-card"><small>{esc(sc.get("card_q", "Save this?"))}</small><p>{esc(sc["card"])}</p>
+        <div class="cbtns"><span>{esc(sc.get("cancel", "Cancel"))}</span><em id="{sid}-save">✓ {esc(sc.get("save", "Save"))}</em><em class="done" id="{sid}-saved">✓ {esc(sc.get("saved", "Saved"))}</em></div></div>''' if sc.get('card') else '')
+        chat = f'''<div class="cphone" id="{sid}-phone" style="width:{cw + 36}px;height:{cw * 2 + 36}px">
+  <div class="cscr">
+    <div class="chead"><div class="cav">{mitra(f"{sid}-av", avatar_mood, 64, st, du)}</div><div><b>{esc(sc.get("head", "Ask FieldOS"))}</b><small id="{sid}-stat">{esc(sc.get("online", "Ready"))}</small></div></div>
+    <div class="cbody">
+      <div class="cb me" id="{sid}-ask"><span id="{sid}-askt"></span></div>
+      <div class="cdots" id="{sid}-dots"><i></i><i></i><i></i></div>
+      <div class="cb bot" id="{sid}-rep">{esc(sc["reply"])}</div>
+      {card_html}
+      {fin_html}
+    </div>
+    <div class="ccomp"><div class="cin">{esc(sc.get("hint", "Type or speak…"))}</div><div class="cmic">🎤</div></div>
+    <div class="tap" id="{sid}-tap"></div>
+  </div></div>'''
+        inner = f'<div class="pscene {side}"><div class="copy">{kicker}{title}{sub}</div><div class="stage">{chat}</div></div>'
+        ask = sc['ask']
+        t0 = st + 0.9
+        type_dur = min(1.8, 0.045 * len(ask))
+        js += [
+            f'tl.fromTo("#{sid}-phone", {{y:{H * 0.6:.0f}, rotate:{-6 if side == "left" else 6}}}, {{y:0, rotate:0, duration:0.9, ease:"power3.out"}}, {st + 0.05:.3f});',
+            f'tl.fromTo("#{sid}-ask", {{opacity:0, scale:0.8, transformOrigin:"100% 100%"}}, {{opacity:1, scale:1, duration:0.3}}, {t0:.3f});',
+            f'(function(){{const el=document.getElementById("{sid}-askt");const s={json.dumps(ask)};const o={{n:0}};tl.fromTo(o,{{n:0}},{{n:s.length,duration:{type_dur:.2f},ease:"none",immediateRender:false,onUpdate:()=>{{el.textContent=Array.from(s).slice(0,Math.round(o.n)).join("");}}}},{t0 + 0.05:.3f});}})();',
+            f'tl.fromTo("#{sid}-dots", {{opacity:0}}, {{opacity:1, duration:0.2}}, {t0 + type_dur + 0.25:.3f});',
+            f'tl.to("#{sid}-dots i", {{y:-8, duration:0.25, stagger:0.1, yoyo:true, repeat:3}}, {t0 + type_dur + 0.3:.3f});',
+            f'tl.to("#{sid}-dots", {{opacity:0, duration:0.15}}, {t0 + type_dur + 1.1:.3f});',
+            f'tl.set("#{sid}-dots", {{display:"none"}}, {t0 + type_dur + 1.27:.3f});',
+            f'tl.fromTo("#{sid}-rep", {{opacity:0, y:20}}, {{opacity:1, y:0, duration:0.4}}, {t0 + type_dur + 1.3:.3f});',
+        ]
+        t_save = t0 + type_dur + sc.get('save_after', 3.2)
+        if sc.get('card'):
+          js.append(f'tl.fromTo("#{sid}-card", {{opacity:0, scale:0.85}}, {{opacity:1, scale:1, duration:0.45, ease:"back.out(2)"}}, {t0 + type_dur + 1.8:.3f});')
+          js += [
+            f'tl.set("#{sid}-tap", {{left:"72%", top:"{sc.get("tap_top", "62%")}"}}, {t_save - 0.05:.3f});',
+            f'tl.fromTo("#{sid}-tap", {{opacity:0.9, scale:0.3}}, {{opacity:0, scale:1.6, duration:0.7, ease:"power2.out", immediateRender:false}}, {t_save:.3f});',
+            f'tl.to("#{sid}-save", {{opacity:0, duration:0.15}}, {t_save + 0.15:.3f});',
+            f'tl.fromTo("#{sid}-saved", {{opacity:0, scale:0.6}}, {{opacity:1, scale:1, duration:0.35, ease:"back.out(2.5)"}}, {t_save + 0.2:.3f});',
+        ]
+        if sc.get('final'):
+            t_fin = t_save + 0.6 if sc.get('card') else t0 + type_dur + 2.0
+            js.append(f'tl.fromTo("#{sid}-fin", {{opacity:0, y:20}}, {{opacity:1, y:0, duration:0.4}}, {t_fin:.3f});')
+        if sc.get('kicker'):
+            js.append(f'tl.fromTo("#{sid}-k", {{opacity:0, x:-30}}, {{opacity:1, x:0, duration:0.5}}, {st + 0.2:.3f});')
+        for k in range(len(sc.get('title', []))):
+            js.append(f'tl.fromTo("#{sid}-t{k}", {{yPercent:110}}, {{yPercent:0, duration:0.6, ease:"power3.out"}}, {st + 0.3 + k * 0.16:.3f});')
+        if sc.get('sub'):
+            js.append(f'tl.fromTo("#{sid}-sub", {{opacity:0, y:24}}, {{opacity:1, y:0, duration:0.6}}, {st + 0.75:.3f});')
+    # Mitra peeking in from a corner of any other scene
+    if sc.get('mitra') and typ not in ('mitra', 'chat'):
+        mm = sc['mitra']
+        msize = mm.get('size', 300 if PORTRAIT else 260)
+        pos = mm.get('pos', 'br')
+        inner += f'<div class="mpeek {pos}" id="{sid}-peek">{mitra(f"{sid}-pm", mm.get("mood", "point"), msize, st, du)}</div>'
+        js.append(f'tl.fromTo("#{sid}-peek", {{y:{msize}, opacity:0}}, {{y:0, opacity:1, duration:0.6, ease:"back.out(1.6)"}}, {st + mm.get("at", 0.8):.3f});')
     # scene-level in/out
     body.append(f'<section class="clip scene" id="{sid}" data-start="{st}" data-duration="{du}" data-track-index="1">{inner}</section>')
     if i > 0:
@@ -218,12 +361,14 @@ for i, sc in enumerate(scenes):
         js.append(f'tl.to("#{sid}", {{opacity:0, y:{-30 if PORTRAIT else 0}, duration:0.3}}, {st + du - 0.3:.3f});')
     # captions
     if spec.get('captions', True) and sc.get('vo') and sc.get('captions', True):
-        parts = chunks(sc['vo'].replace('Field O S', 'FieldOS').replace('D P R', 'DPR').replace('G P S', 'GPS'), 34 if PORTRAIT else 52)
+        bold = spec.get('caption_style') == 'bold'
+        parts = chunks(sc.get('cap', sc['vo']).replace('Field O S', 'FieldOS').replace('D P R', 'DPR').replace('G P S', 'GPS'),
+                       (16 if PORTRAIT else 26) if bold else (34 if PORTRAIT else 52))
         total_chars = sum(len(p) for p in parts)
         ct = sc['vo_start']
         for k, p in enumerate(parts):
             d = sc['vo_dur'] * len(p) / total_chars
-            caps.append(f'<div class="clip cap" data-start="{ct:.3f}" data-duration="{d:.3f}" data-track-index="3"><span>{esc(p)}</span></div>')
+            caps.append(f'<div class="clip cap{" bold" if bold else ""}" data-start="{ct:.3f}" data-duration="{d:.3f}" data-track-index="3"><span>{esc(p)}</span></div>')
             ct += d
 
 # progress bar for long-form video
@@ -293,6 +438,46 @@ html,body{{width:{W}px;height:{H}px;overflow:hidden;background:{NAVY_DEEP}}}
 .cap{{position:absolute;left:0;right:0;{'bottom:360px' if PORTRAIT else 'bottom:46px'};display:flex;justify-content:center;z-index:20}}
 .cap span{{background:rgba(6,14,26,.82);color:#fff;font-weight:600;font-size:{44 if PORTRAIT else 36}px;padding:12px 28px;border-radius:16px;max-width:{W - 120}px;text-align:center;line-height:1.25}}
 .progress{{position:absolute;left:0;bottom:0;height:8px;width:100%;background:{AMBER};transform-origin:0 50%;z-index:30}}
+.mitra{{background-repeat:no-repeat;flex:none}}
+.mscene{{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;{'flex-direction:column;gap:50px;padding-bottom:300px' if PORTRAIT else 'gap:60px'}}}
+.mstage{{position:relative;display:flex;flex-direction:column;align-items:center}}
+.mshadow{{width:60%;height:28px;border-radius:50%;background:rgba(0,0,0,.35);filter:blur(8px);margin-top:-36px}}
+.mbub{{position:relative;background:#fff;color:{NAVY_DEEP};border-radius:44px;padding:{'44px 54px' if PORTRAIT else '40px 54px'};max-width:{'920px' if PORTRAIT else '980px'};box-shadow:0 30px 80px rgba(0,0,0,.35)}}
+.mbub:after{{content:"";position:absolute;{'left:50%;bottom:-34px;margin-left:-30px;border-left:30px solid transparent;border-right:30px solid transparent;border-top:36px solid #fff' if PORTRAIT else 'right:-34px;top:50%;margin-top:-30px;border-top:30px solid transparent;border-bottom:30px solid transparent;border-left:36px solid #fff'}}}
+.mline{{font-weight:800;font-size:{70 if PORTRAIT else 66}px;letter-spacing:-.025em;line-height:1.15;text-align:{'center' if PORTRAIT else 'left'}}}
+.mline.last{{color:{AMBER_DARK}}}
+.mpeek{{position:absolute;bottom:{'230px' if PORTRAIT else '0'};z-index:15}} .mpeek.br{{right:{'20px' if PORTRAIT else '40px'}}} .mpeek.bl{{left:{'20px' if PORTRAIT else '40px'}}}
+.chaos{{position:absolute;inset:0}}
+.note{{position:absolute;display:flex;gap:20px;align-items:center;background:#fff;color:#111;border-radius:26px;padding:22px 30px 22px 22px;width:{'640px' if PORTRAIT else '600px'};box-shadow:0 20px 50px rgba(0,0,0,.4)}}
+.note .nic{{width:68px;height:68px;border-radius:50%;background:#25D366 radial-gradient(circle at 50% 50%,#fff 0 22%,transparent 23%);flex:none}}
+.note b{{display:block;font-size:30px;font-weight:700}} .note span{{display:block;font-size:30px;color:#444;margin-top:2px}}
+.chtitle{{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:5;opacity:0}}
+.chtitle .tline span{{font-size:{108 if PORTRAIT else 104}px;text-shadow:0 10px 40px rgba(0,0,0,.6)}}
+.stat{{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 60px}}
+.slabel{{font-size:{50 if PORTRAIT else 46}px;font-weight:600;color:#C9D6E8}}
+.snum{{font-weight:900;font-size:{230 if PORTRAIT else 220}px;letter-spacing:-.04em;color:{AMBER};line-height:1.05;margin:10px 0}}
+.ssub{{font-size:{56 if PORTRAIT else 52}px;font-weight:800;max-width:960px;line-height:1.15}}
+.smitra{{margin-top:30px}}
+.cphone{{background:#0A0F18;border-radius:72px;padding:18px;box-shadow:0 40px 120px rgba(0,0,0,.55),0 0 0 3px rgba(255,255,255,.08) inset;position:relative}}
+.cscr{{position:relative;height:100%;border-radius:56px;overflow:hidden;background:#F4F6F9;display:flex;flex-direction:column;color:#13233A}}
+.chead{{background:{NAVY};color:#fff;display:flex;align-items:center;gap:18px;padding:64px 28px 22px}}
+.cav{{width:64px;height:64px;border-radius:50%;background:#FFF3DC;overflow:hidden}}
+.chead b{{display:block;font-size:34px}} .chead small{{font-size:22px;color:#BFCCDD}}
+.cbody{{flex:1;padding:26px 22px;display:flex;flex-direction:column;gap:18px}}
+.cb{{max-width:84%;padding:20px 24px;border-radius:26px;font-size:30px;line-height:1.3;font-weight:500}}
+.cb.me{{align-self:flex-end;background:{NAVY};color:#fff;border-bottom-right-radius:8px;min-height:80px}}
+.cb.bot{{align-self:flex-start;background:#E4E9F0;border-bottom-left-radius:8px}}
+.cdots{{align-self:flex-start;display:flex;gap:10px;background:#E4E9F0;padding:22px 26px;border-radius:26px}} .cdots i{{width:14px;height:14px;border-radius:50%;background:#7A8AA0;display:block}}
+.ccard{{background:#fff;border:3px solid {AMBER};border-radius:26px;padding:22px 24px}}
+.ccard small{{color:{AMBER_DARK};font-weight:700;font-size:24px}} .ccard p{{font-size:30px;margin:10px 0 18px;line-height:1.3}}
+.cbtns{{display:flex;justify-content:flex-end;align-items:center;gap:26px;font-weight:700;font-size:26px;position:relative}}
+.cbtns em{{font-style:normal;background:{NAVY};color:#fff;padding:14px 30px;border-radius:999px}}
+.cbtns em.done{{position:absolute;right:0;background:#1E8E4E;opacity:0}}
+.ccomp{{display:flex;gap:14px;align-items:center;padding:18px 20px 30px;background:#fff}} .cin{{flex:1;background:#E9EDF2;border-radius:999px;padding:20px 26px;font-size:26px;color:#7A8AA0}}
+.cmic{{width:72px;height:72px;border-radius:50%;background:{AMBER};display:flex;align-items:center;justify-content:center;font-size:34px}}
+.cap.bold{{{'bottom:250px' if PORTRAIT else 'bottom:60px'}}}
+.cap.bold span{{background:none;font-weight:900;font-size:{66 if PORTRAIT else 54}px;line-height:1.1;letter-spacing:-.02em;text-transform:none;
+  -webkit-text-stroke:{'10px' if PORTRAIT else '8px'} #0B1D35;paint-order:stroke fill;text-shadow:0 8px 24px rgba(0,0,0,.5);padding:0}}
 .bug{{position:absolute;{'top:60px;left:60px' if PORTRAIT else 'top:40px;left:48px'};display:flex;align-items:center;gap:10px;font-weight:800;font-size:30px;z-index:25;opacity:.92}}
 '''
 
@@ -323,7 +508,7 @@ tl.seek(0);
 </body></html>'''
 open(os.path.join(proj, 'index.html'), 'w').write(doc)
 json.dump({'id': name, 'name': name}, open(os.path.join(proj, 'meta.json'), 'w'))
-json.dump({'paths': {'blocks': 'compositions', 'components': 'compositions/components', 'assets': 'assets'}, 'media': {'autoProxy': True}}, open(os.path.join(proj, 'hyperframes.json'), 'w'))
+json.dump({'$schema': 'https://hyperframes.heygen.com/schema/hyperframes.json', 'registry': 'https://raw.githubusercontent.com/heygen-com/hyperframes/main/registry', 'paths': {'blocks': 'compositions', 'components': 'compositions/components', 'assets': 'assets'}, 'media': {'autoProxy': True}}, open(os.path.join(proj, 'hyperframes.json'), 'w'))
 print(f'{name}: {TOTAL}s, {len(scenes)} scenes')
 for i, sc in enumerate(scenes):
     print(f'  {i:2d} {sc["type"]:7s} {sc["start"]:6.2f} +{sc["dur"]:5.2f}')

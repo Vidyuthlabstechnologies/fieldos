@@ -12,7 +12,7 @@ library;
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show Value, Variable;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -25,6 +25,12 @@ import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/estimation/estimation_calc.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
+import 'package:fieldos_mobile/features/assistant/assistant_screen.dart';
+import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
+import 'package:fieldos_mobile/features/procurement/payables_screen.dart';
+import 'package:fieldos_mobile/features/tour/app_tour.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/services/ai_backend.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
 import 'package:fieldos_mobile/features/home/home_screen.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet_screen.dart';
@@ -46,7 +52,54 @@ Future<void> _loadFont(String family, List<String> paths) async {
   await loader.load();
 }
 
+ThemeData _withIndicFallback(ThemeData t) {
+  const fallback = ['NotoDeva', 'NotoTelugu'];
+  TextTheme add(TextTheme x) => x.apply(fontFamilyFallback: fallback);
+  TextStyle? f(TextStyle? x) => x?.copyWith(fontFamilyFallback: fallback);
+  ButtonStyle? b(ButtonStyle? x) {
+    final ts = x?.textStyle?.resolve({});
+    return ts == null ? x : x!.copyWith(textStyle: WidgetStatePropertyAll(f(ts)));
+  }
+
+  return t.copyWith(
+    textTheme: add(t.textTheme),
+    primaryTextTheme: add(t.primaryTextTheme),
+    appBarTheme: t.appBarTheme.copyWith(titleTextStyle: f(t.appBarTheme.titleTextStyle)),
+    tabBarTheme: t.tabBarTheme.copyWith(
+        labelStyle: f(t.tabBarTheme.labelStyle), unselectedLabelStyle: f(t.tabBarTheme.unselectedLabelStyle)),
+    floatingActionButtonTheme:
+        t.floatingActionButtonTheme.copyWith(extendedTextStyle: f(t.floatingActionButtonTheme.extendedTextStyle)),
+    filledButtonTheme: FilledButtonThemeData(style: b(t.filledButtonTheme.style)),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: b(t.elevatedButtonTheme.style)),
+    outlinedButtonTheme: OutlinedButtonThemeData(style: b(t.outlinedButtonTheme.style)),
+    textButtonTheme: TextButtonThemeData(style: b(t.textButtonTheme.style)),
+    chipTheme: t.chipTheme.copyWith(
+        labelStyle: f(t.chipTheme.labelStyle), secondaryLabelStyle: f(t.chipTheme.secondaryLabelStyle)),
+    dialogTheme: t.dialogTheme.copyWith(titleTextStyle: f(t.dialogTheme.titleTextStyle)),
+    snackBarTheme: t.snackBarTheme.copyWith(contentTextStyle: f(t.snackBarTheme.contentTextStyle)),
+  );
+}
+
+/// Plays back canned assistant replies, so the chat screen can be shown
+/// without a server.
+class _ScriptedAi implements AiBackend {
+  _ScriptedAi(this.replies);
+  final List<AiReply> replies;
+  @override
+  bool get signedIn => true;
+  @override
+  Future<AiReply> chat(List<Map<String, dynamic>> messages) async => replies.removeAt(0);
+  @override
+  Future<String> transcribe(Uint8List wav, {String languageCode = 'unknown'}) async => '';
+}
+
 void main() {
+  // SHOTS_LANG=hi or te renders the app in Hindi or Telugu.
+  final lang = AppLanguage.fromCode(Platform.environment['SHOTS_LANG']) ?? AppLanguage.en;
+  setUp(() => setCurrentLanguage(lang));
+  tearDown(() => setCurrentLanguage(AppLanguage.en));
+  // SHOTS_TOUR_SEEN=1 hides the tour invite on Home.
+  final tourSeen = Platform.environment['SHOTS_TOUR_SEEN'] == '1';
   final outDir = Directory(Platform.environment['SHOTS_DIR'] ?? 'build/store_screenshots')..createSync(recursive: true);
   final flutterRoot = Platform.environment['FLUTTER_ROOT'] ?? '';
 
@@ -56,6 +109,14 @@ void main() {
     ]);
     final material = '$flutterRoot/bin/cache/artifacts/material_fonts';
     await _loadFont('MaterialIcons', ['$material/MaterialIcons-Regular.otf']);
+    // Hindi and Telugu glyphs: a phone has them as system fonts, the test
+    // engine does not. INDIC_FONTS_DIR holds Noto Sans Devanagari and Telugu TTFs.
+    final indic = Platform.environment['INDIC_FONTS_DIR'];
+    if (indic != null) {
+      final files = Directory(indic).listSync().map((f) => f.path).toList()..sort();
+      await _loadFont('NotoDeva', files.where((f) => f.contains('devanagari')).toList());
+      await _loadFont('NotoTelugu', files.where((f) => f.contains('telugu')).toList());
+    }
     await _loadFont('Roboto', ['$material/Roboto-Regular.ttf', '$material/Roboto-Medium.ttf', '$material/Roboto-Bold.ttf']);
   });
 
@@ -65,10 +126,11 @@ void main() {
   late String userId;
   late Project mainSite;
 
-  Future<void> seed(WidgetTester tester) async {
+  Future<void> seed(WidgetTester tester, {List<AiReply> Function()? ai}) async {
     db = AppDatabase.memory();
     container = ProviderContainer(overrides: [
       appDatabaseProvider.overrideWithValue(db),
+      if (ai != null) aiBackendProvider.overrideWith((ref) => _ScriptedAi(ai())),
       // Never signed in to the cloud here; no token-refresh timer either.
       cloudSyncClientProvider.overrideWith((ref) {
         final c = SupabaseClient(
@@ -118,6 +180,7 @@ void main() {
         ));
       }
       await _seedBusiness(db, companyId, userId, sites, now);
+      if (tourSeen) await db.settingsDao.set(tourSeenKey, '1');
     });
   }
 
@@ -134,7 +197,7 @@ void main() {
         key: key,
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: buildFieldOsTheme(Brightness.light),
+          theme: _withIndicFallback(buildFieldOsTheme(Brightness.light)),
           home: screen,
         ),
       ),
@@ -195,7 +258,7 @@ void main() {
   testWidgets('06 stock', (tester) async {
     await seed(tester);
     await shoot(tester, '06_stock', ProjectDetailScreen(project: mainSite, initialTab: 4), before: () async {
-      await tester.tap(find.text('Stock'));
+      await tester.tap(find.text(tr('Stock')));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
       await tester.pumpAndSettle();
     });
@@ -205,7 +268,61 @@ void main() {
     await seed(tester);
     await shoot(tester, '12_approvals', ApprovalsScreen(companyId: companyId));
   });
+
+  testWidgets('14 assistant: say it, it saves it', (tester) async {
+    late String siteId;
+    await seed(tester, ai: () => [
+          AiReply(content: [
+            {'type': 'text', 'text': _assistantSays[lang]!},
+            {
+              'type': 'tool_use',
+              'id': 't1',
+              'name': 'add_expense',
+              'input': {'project_id': siteId, 'amount': 5000, 'category': 'Material', 'note': 'cement'}
+            },
+          ], stopReason: 'tool_use'),
+        ]);
+    siteId = mainSite.id;
+    await shoot(tester, '14_assistant', const AssistantScreen(), before: () async {
+      await tester.enterText(find.byType(TextField), _assistantAsk[lang]!);
+      await tester.pump();
+      await tester.tap(find.byIcon(Icons.send));
+      for (var i = 0; i < 4; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 80)));
+        await tester.pump(const Duration(milliseconds: 400));
+      }
+    });
+  });
+
+  testWidgets('15 owner brief', (tester) async {
+    await seed(tester);
+    await shoot(tester, '15_brief', OwnerBriefScreen(companyId: companyId, companyName: 'Sri Sai Constructions'));
+  });
+
+  testWidgets('16 who you owe', (tester) async {
+    await seed(tester);
+    await shoot(tester, '16_owe', PayablesScreen(companyId: companyId));
+  });
+
+  for (final step in [0, 3, 5]) {
+    testWidgets('17 tour step $step', (tester) async {
+      await seed(tester);
+      await shoot(tester, '17_tour_$step', AppTourScreen(companyId: companyId, project: mainSite, initialStep: step));
+    });
+  }
 }
+
+const _assistantSays = {
+  AppLanguage.en: 'Sure, Ravi. Here it is for Kompally Villa. Tap Save and it is in the money book.',
+  AppLanguage.hi: 'ज़रूर, रवि। कोमपल्ली विला के लिए यह रहा। सेव दबाइए, खाते में जुड़ जाएगा।',
+  AppLanguage.te: 'సరే రవి. కొంపల్లి విల్లాకు ఇదిగో. సేవ్ నొక్కండి, లెక్కలో చేరిపోతుంది.',
+};
+
+const _assistantAsk = {
+  AppLanguage.en: 'Add ₹5,000 spent on cement at Kompally',
+  AppLanguage.hi: 'कोमपल्ली में सीमेंट पर ₹5,000 खर्च जोड़ो',
+  AppLanguage.te: 'కొంపల్లి సైట్‌లో సిమెంట్‌కు ₹5,000 ఖర్చు రాయి',
+};
 
 /// Budgets, spending, suppliers, stock, machines, checks and a week of
 /// labour, so every screen has something true-looking to show.
@@ -320,11 +437,43 @@ Future<void> _seedBusiness(
     }
   }
 
+  // Older deliveries still unpaid at the planned warehouse site, so "who you owe" has ageing.
+  for (final (material, qty, unit, amount, daysAgo) in [
+    ('Sand (river)', 8.0, 'loads', 72000.0, -95),
+    ('TMT steel 16mm', 1.2, 't', 84000.0, -64),
+    ('Cement (OPC 53)', 150.0, 'bags', 58500.0, -38),
+  ]) {
+    await db.materialDao.createReceipt(MaterialReceiptsCompanion.insert(
+      id: _uuid.v4(), projectId: shamshabad, materialName: material, quantity: qty, unit: Value(unit), amount: amount,
+      receivedBy: userId, receivedOn: d(daysAgo)));
+  }
   // Waiting for the owner: a purchase and a budget overrun.
   await db.approvalDao.create(ApprovalsCompanion.insert(
     id: _uuid.v4(), projectId: Value(kompally), entityType: 'purchase_request', entityId: _uuid.v4(),
     requestedBy: userId, decisionNote: const Value('40 bags cement (OPC 53) for column casting, \u20b915,600')));
   await raiseBudgetOverrunApproval(db, gachibowli, 26000, requestedBy: userId);
+
+  // Today on the other sites: a gang on each, a report from Miyapur, and spending.
+  for (final (site, names) in [
+    (miyapur, ['Suresh', 'Mallesh', 'Anjali', 'Raju', 'Venkat', 'Lakshmi']),
+    (gachibowli, ['Imran', 'Prakash', 'Sunitha']),
+  ]) {
+    for (final n in names) {
+      await db.attendanceDao.punchIn(LabourAttendanceCompanion.insert(
+          id: _uuid.v4(), projectId: site, workerName: n, recordedBy: userId,
+          punchIn: today.add(const Duration(hours: 9))));
+    }
+  }
+  await db.dprDao.create(DprEntriesCompanion.insert(
+      id: _uuid.v4(), projectId: miyapur, createdBy: userId, entryDate: today.add(const Duration(hours: 17)),
+      workSummary: '5th floor slab shuttering done, steel tying 60% complete. Pour planned for Thursday.',
+      manpowerCount: const Value(6), weather: const Value('Sunny')));
+  await db.expenseDao.create(SiteExpensesCompanion.insert(
+      id: _uuid.v4(), projectId: miyapur, category: 'Material', amount: 18500, incurredOn: iso(today),
+      recordedBy: userId, note: const Value('Binding wire and cover blocks')));
+  await db.expenseDao.create(SiteExpensesCompanion.insert(
+      id: _uuid.v4(), projectId: kompally, category: 'Fuel', amount: 1800, incurredOn: iso(today),
+      recordedBy: userId, note: const Value('Diesel for mixer')));
 
   // The rest of this week's labour at Kompally, punched in and out.
   final workers = await db.workerDao.forProject(kompally);
@@ -337,4 +486,31 @@ Future<void> _seedBusiness(
         punchOut: Value(d(day).add(Duration(hours: 17, minutes: w.name == 'Ramesh' ? 30 : 0)))));
     }
   }
+  // Every rupee goes to a BOQ line (bricks, tiles and boards to brick work, the rest
+  // to RCC), and every delivery to its supplier.
+  final supplierFor = {
+    for (final s in await db.supplierDao.forCompany(companyId)) s.category ?? '': s.id,
+  };
+  await db.customStatement(
+      "UPDATE material_receipts SET supplier_id = ? WHERE material_name LIKE 'Cement%' OR material_name LIKE 'Ready-mix%'",
+      [supplierFor['Cement']]);
+  await db.customStatement(
+      "UPDATE material_receipts SET supplier_id = ? WHERE material_name LIKE 'TMT%'", [supplierFor['Steel']]);
+  await db.customStatement(
+      "UPDATE material_receipts SET supplier_id = ? WHERE material_name LIKE 'Sand%'", [supplierFor['Sand and aggregate']]);
+  for (final site in sites.values) {
+    final heads = await db.customSelect(
+        'SELECT h.id, h.name FROM cost_heads h JOIN estimations e ON e.id = h.estimation_id WHERE e.project_id = ?',
+        variables: [Variable.withString(site)]).get();
+    String head(String prefix) => heads.firstWhere((r) => r.read<String>('name').startsWith(prefix)).read<String>('id');
+    final rcc = head('RCC'), brick = head('Brick');
+    await db.customStatement(
+        "UPDATE material_receipts SET cost_head_id = CASE WHEN material_name LIKE '%brick%' OR material_name LIKE '%tile%' "
+        "OR material_name LIKE '%board%' OR material_name LIKE '%block%' THEN ? ELSE ? END "
+        'WHERE project_id = ? AND cost_head_id IS NULL',
+        [brick, rcc, site]);
+    await db.customStatement(
+        'UPDATE site_expenses SET cost_head_id = ? WHERE project_id = ? AND cost_head_id IS NULL', [rcc, site]);
+  }
+
 }

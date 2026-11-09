@@ -1,0 +1,68 @@
+{
+ "name": "fieldos-reel-3-evening-brief",
+ "width": 1080,
+ "height": 1920,
+ "mood": "calm",
+ "speed": 1.08,
+ "bug": true,
+ "caption_style": "bold",
+ "scenes": [
+  {
+   "type": "hook",
+   "lines": [
+    "7:30 pm.",
+    "Which site",
+    "needs you?"
+   ],
+   "vo": "Seven thirty P M. Which site needs you?",
+   "min": 3.2
+  },
+  {
+   "type": "phone",
+   "shot": "en/15_brief",
+   "kicker": "Site brief",
+   "title": [
+    "Every site's day,",
+    "in one screen."
+   ],
+   "vo": "Every evening, one brief. People on site, money spent, reports, and the sites that need you first.",
+   "highlights": [
+    {
+     "box": [
+      45,
+      600,
+      990,
+      690
+     ],
+     "at": 2.0,
+     "hold": 2.4
+    }
+   ]
+  },
+  {
+   "type": "phone",
+   "shot": "en/02_dashboard",
+   "title": [
+    "Over budget?",
+    "You know today."
+   ],
+   "vo": "Over budget? You know today, not at month end."
+  },
+  {
+   "type": "mitra",
+   "mood": "chai",
+   "lines": [
+    "One look.",
+    "Then chai."
+   ],
+   "vo": "One look, then chai.",
+   "min": 2.6
+  },
+  {
+   "type": "cta",
+   "title": "Try FieldOS free for 3 days",
+   "vo": "Try Field O S free for three days. Link in bio.",
+   "min": 4.5
+  }
+ ]
+}

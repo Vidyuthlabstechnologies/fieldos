@@ -1,11 +1,105 @@
-{"name":"fieldos-play-promo-30s","width":1920,"height":1080,"mood":"drive","voice":"af_heart","speed":1.05,"bug":true,"captions":true,
-"scenes":[
- {"type":"hook","lines":["Still running your sites on","diaries and phone calls?"],"vo":"Still running your sites on diaries, WhatsApp and phone calls?","min":3.2},
- {"type":"logo","vo":"Meet Field O S. Run every site from your phone.","min":3.4},
- {"type":"phone","shot":"01_home","kicker":"Every site","title":["Every site.","One phone."],"sub":"All your sites on one screen, with late work flagged.","vo":"See every site on one screen, with late work flagged.","highlights":[{"box":[410,635,227,59],"at":1.4,"hold":1.6}]},
- {"type":"phone","shot":"08_money","side":"right","kicker":"Money","title":["Know where every","rupee went."],"sub":"Received, spent and balance for each site.","vo":"Know where every rupee went, on every site.","highlights":[{"box":[32,378,1015,189],"at":1.2,"hold":2.0}]},
- {"type":"phone","shot":"07_labour","kicker":"Labour","title":["Attendance in","10 seconds."],"sub":"GPS punch-in, or mark the whole gang at once.","vo":"Mark attendance with G P S in seconds, and the wage sheet is ready for Saturday.","highlights":[{"box":[32,596,1016,128],"at":1.0,"hold":1.6}],"taps":[{"at_xy":[796,660],"at":1.6}]},
- {"type":"phone","shot":"04_dpr","side":"right","kicker":"Daily report","title":["DPR to WhatsApp","in one tap."],"sub":"Speak the day's work in your language.","vo":"Speak the day's work, and share the D P R on WhatsApp.","highlights":[{"box":[24,380,1032,440],"at":1.0,"hold":1.6}],"taps":[{"at_xy":[822,2045],"at":2.2}]},
- {"type":"phone","shot":"12_approvals","kicker":"Approvals","title":["Approve from","anywhere."],"sub":"Works even with no network on site.","vo":"Approve purchases from anywhere. It even works with no network.","taps":[{"at_xy":[892,522],"at":1.8}]},
- {"type":"cta","vo":"Try Field O S free for three days. Get it on Google Play.","min":4.5,"title":"Try FieldOS free for 3 days","sub":"Run every site from your phone."}
-]}
+{
+ "name": "fieldos-play-promo",
+ "width": 1920,
+ "height": 1080,
+ "mood": "drive",
+ "speed": 1.05,
+ "bug": true,
+ "scenes": [
+  {
+   "type": "chat",
+   "kicker": "Ask FieldOS",
+   "title": [
+    "Just say it.",
+    "FieldOS does it."
+   ],
+   "ask": "Add ₹5,000 spent on cement at Kompally",
+   "reply": "Sure, Ravi. Here it is for Kompally Villa.",
+   "card": "Expense ₹5,000 for Material at Kompally Villa, Block B · cement",
+   "final": "Saved ₹5,000 for cement at Kompally Villa.",
+   "vo": "Just say it. Add five thousand rupees for cement at Kompally. Field O S fills it in. You tap save.",
+   "min": 8.2,
+   "save_after": 2.6
+  },
+  {
+   "type": "phone",
+   "shot": "en/01_home",
+   "side": "right",
+   "title": [
+    "Every site.",
+    "One phone."
+   ],
+   "sub": "Money, labour, stock and reports for every site.",
+   "vo": "Every site, with its money, labour and stock, on one phone."
+  },
+  {
+   "type": "phone",
+   "shot": "en/15_brief",
+   "kicker": "Every evening",
+   "title": [
+    "Which site",
+    "needs you?"
+   ],
+   "vo": "Every evening, one brief shows which site needs you, and why.",
+   "highlights": [
+    {
+     "box": [
+      285,
+      336,
+      750,
+      240
+     ],
+     "at": 1.4,
+     "hold": 2.2
+    }
+   ]
+  },
+  {
+   "type": "phone",
+   "shot": "en/11_wage_sheet",
+   "side": "right",
+   "title": [
+    "Saturday wages,",
+    "added up."
+   ],
+   "vo": "G P S attendance, and the wage sheet adds itself up."
+  },
+  {
+   "type": "phone",
+   "shot": "en/16_owe",
+   "title": [
+    "Who you owe,",
+    "and since when."
+   ],
+   "vo": "See who you owe, and since when.",
+   "highlights": [
+    {
+     "box": [
+      42,
+      549,
+      996,
+      249
+     ],
+     "at": 1.2,
+     "hold": 2
+    }
+   ]
+  },
+  {
+   "type": "mitra",
+   "mood": "thumbsUp",
+   "lines": [
+    "Telugu, Hindi or English.",
+    "Your sites, on your phone."
+   ],
+   "vo": "In Telugu, Hindi or English. Meet Mitra, your site buddy.",
+   "min": 3.6
+  },
+  {
+   "type": "cta",
+   "title": "Try FieldOS free for 3 days",
+   "vo": "Try Field O S free for three days. Search Field O S on Google Play.",
+   "min": 5.5
+  }
+ ]
+}
