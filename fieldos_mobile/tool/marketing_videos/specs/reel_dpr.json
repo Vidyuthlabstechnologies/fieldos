@@ -1,0 +1,9 @@
+{"name":"fieldos-reel-4-daily-report","width":1080,"height":1920,"mood":"drive","voice":"af_heart","speed":1.05,"bug":true,
+"scenes":[
+ {"type":"hook","lines":["\"What happened","on site today?\""],"vo":"The client calls. What happened on site today?","min":3.0},
+ {"type":"phone","shot":"03_tasks","kicker":"Tasks","title":["See what's","running late."],"vo":"Field O S shows every task's progress, and what is running late.","highlights":[{"box":[24,380,1032,250],"at":1.0,"hold":1.5},{"box":[24,832,1032,310],"at":2.6,"hold":1.6}]},
+ {"type":"phone","shot":"04_dpr","kicker":"Daily report","title":["Speak it.","Share it."],"vo":"Speak the day's work in Telugu, Hindi or English, and share a clean D P R on WhatsApp.","highlights":[{"box":[24,380,1032,440],"at":1.0,"hold":1.8}],"taps":[{"at_xy":[822,2045],"at":3.0}]},
+ {"type":"phone","shot":"05_issues","kicker":"Issues","title":["Problems don't","get lost."],"vo":"Problems from the report become issues, so nothing gets forgotten.","highlights":[{"box":[24,380,1032,330],"at":1.0,"hold":1.8}]},
+ {"type":"phone","shot":"09_inspections","kicker":"Quality","title":["Checklists","on site."],"vo":"Run quality and safety checklists right on site.","highlights":[{"box":[24,520,1032,700],"at":1.0,"hold":1.8}]},
+ {"type":"cta","vo":"Try Field O S free for three days.","min":4.2,"title":"Your DPR in one minute","sub":"Try FieldOS free for 3 days."}
+]}
