@@ -11,6 +11,9 @@ import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
+import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
+import 'package:fieldos_mobile/features/dashboard/project_cost_summary.dart';
+import 'package:fieldos_mobile/features/dashboard/value_summary.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
@@ -25,7 +28,13 @@ class DashboardScreen extends ConsumerWidget {
     final projectsAsync = ref.watch(projectsProvider(companyId));
 
     return Scaffold(
-      appBar: AppBar(title: Text(tr('Dashboard'))),
+      appBar: AppBar(title: Text(tr('Dashboard')), actions: [
+        IconButton(
+          icon: const Icon(Icons.wb_twilight_outlined),
+          tooltip: tr('Site brief'),
+          onPressed: () => openOwnerBrief(context, companyId: companyId, companyName: companyName),
+        ),
+      ]),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(projectsProvider(companyId).future),
         child: projectsAsync.when(
@@ -42,6 +51,7 @@ class DashboardScreen extends ConsumerWidget {
                       padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
                       child: Text(companyName, style: Theme.of(context).textTheme.titleLarge),
                     ),
+                    ValueCard(companyId: companyId),
                     for (final p in projects) _ProjectHealthCard(projectId: p.id, companyId: companyId),
                   ],
                 ),
@@ -105,6 +115,10 @@ class _ProjectHealthCard extends ConsumerWidget {
                       ),
                   ],
                 ),
+                if (s.forecast != null && s.status != 'no_budget') ...[
+                  const SizedBox(height: 10),
+                  _Forecast(summary: s),
+                ],
                 if (s.status == 'no_budget') ...[
                   const SizedBox(height: 8),
                   Text(tr('Add a priced BOQ under Estimation to compare spending with a budget.'),
@@ -211,6 +225,46 @@ class _Metric extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Where the job's cost is heading at today's rate of spending.
+class _Forecast extends StatelessWidget {
+  const _Forecast({required this.summary});
+  final ProjectCostSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final over = summary.forecastOver ?? 0;
+    final bad = over > summary.budget * 0.02;
+    final color = bad ? theme.colorScheme.error : toneColor(context, PillTone.ok);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(children: [
+        Icon(bad ? Icons.trending_up : Icons.trending_flat, size: 18, color: color),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            bad
+                ? trf('{pct}% done. At this rate the job costs {total}, {over} over budget.', {
+                    'pct': summary.progress,
+                    'total': rupees(summary.forecast!),
+                    'over': rupees(over),
+                  })
+                : trf('{pct}% done. At this rate the job finishes within budget ({total}).', {
+                    'pct': summary.progress,
+                    'total': rupees(summary.forecast!),
+                  }),
+            style: theme.textTheme.bodySmall?.copyWith(color: bad ? color : null),
+          ),
+        ),
+      ]),
     );
   }
 }

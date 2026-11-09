@@ -146,6 +146,26 @@ void main() {
     });
   });
 
+  test('owners get the 7:30 pm site brief while a site is running', () {
+    final now = DateTime(2026, 11, 10, 9);
+    List<PlannedReminder> plan({bool isOwner = true, int sites = 1, bool on = true}) => planReminders(
+          now: now,
+          settings: ReminderSettings(reportOn: false, tasksOn: false, briefOn: on),
+          runningSites: sites,
+          reportedToday: false,
+          openTasks: const [],
+          isOwner: isOwner,
+        );
+    final r = plan();
+    expect(r, hasLength(7));
+    expect(r.first.at, DateTime(2026, 11, 10, 19, 30));
+    expect(r.first.title, 'Your site brief is ready');
+    expect(plan(isOwner: false), isEmpty);
+    expect(plan(sites: 0), isEmpty);
+    expect(plan(on: false), isEmpty);
+    expect(ReminderSettings.fromJson(const ReminderSettings(briefOn: false).toJson()).briefOn, isFalse);
+  });
+
   test('settings round trip, with defaults for anything missing or broken', () {
     const s = ReminderSettings(reportOn: false, reportMinutes: 20 * 60, tasksOn: false);
     final back = ReminderSettings.fromJson(s.toJson());
@@ -238,7 +258,7 @@ void main() {
     });
 
     test('saving settings re-plans: everything off means nothing scheduled', () async {
-      await container.read(reminderSchedulerProvider).save(const ReminderSettings(reportOn: false, tasksOn: false));
+      await container.read(reminderSchedulerProvider).save(const ReminderSettings(reportOn: false, tasksOn: false, briefOn: false));
       expect(notifications.last, isEmpty);
       expect((await container.read(reminderSchedulerProvider).settings()).reportOn, isFalse);
     });

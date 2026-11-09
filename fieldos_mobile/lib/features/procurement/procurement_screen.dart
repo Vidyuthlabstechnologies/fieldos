@@ -17,6 +17,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/procurement/po_share.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_screens.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_tools.dart';
+import 'package:fieldos_mobile/features/procurement/rate_hint.dart';
 import 'package:fieldos_mobile/features/procurement/supplier_statement_screen.dart';
 import 'package:fieldos_mobile/features/procurement/stock_view.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -301,6 +302,7 @@ class _RfqTab extends ConsumerWidget {
             TextField(controller: qty, decoration: InputDecoration(labelText: tr('Qty')), keyboardType: TextInputType.number),
             TextField(controller: unit, decoration: InputDecoration(labelText: tr('Unit'))),
             TextField(controller: est, decoration: InputDecoration(labelText: tr('Est. amount')), keyboardType: TextInputType.number),
+            RateHint(companyId: companyId, material: name, unit: unit, qty: qty, amount: est),
           ],
         ),
         actions: [
@@ -331,8 +333,20 @@ class _RfqTab extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('Create PO')),
-        content: TextField(
-            controller: amount, decoration: InputDecoration(labelText: tr('PO amount')), keyboardType: TextInputType.number),
+        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          TextField(
+              controller: amount, decoration: InputDecoration(labelText: tr('PO amount')), keyboardType: TextInputType.number),
+          RateHint(
+            companyId: companyId,
+            material: null,
+            unit: null,
+            qty: null,
+            amount: amount,
+            fixedMaterial: r.materialName,
+            fixedUnit: r.unit,
+            fixedQty: r.quantity,
+          ),
+        ]),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
           FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Create'))),
@@ -480,6 +494,7 @@ class _PoTab extends ConsumerWidget {
               ),
               TextField(controller: unit, decoration: InputDecoration(labelText: tr('Unit'))),
               TextField(controller: amount, decoration: InputDecoration(labelText: tr('Invoice amount')), keyboardType: TextInputType.number),
+              RateHint(companyId: companyId, material: material, unit: unit, qty: qty, amount: amount),
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.photo_camera),

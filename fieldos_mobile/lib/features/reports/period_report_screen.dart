@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
+import 'package:fieldos_mobile/features/reports/client_update.dart';
 import 'package:fieldos_mobile/features/reports/period_report.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -41,13 +42,63 @@ class _PeriodReportScreenState extends ConsumerState<PeriodReportScreen> {
         _report = _load();
       });
 
+  Future<void> _clientPdf({required bool showMoney, required String company}) async {
+    final report = await _report;
+    if (!mounted) return;
+    if (report.isEmpty) {
+      showSnack(context, 'Nothing recorded in this period');
+      return;
+    }
+    var includeDues = false;
+    if (showMoney) {
+      final pick = await showModalBottomSheet<bool>(
+        context: context,
+        showDragHandle: true,
+        builder: (ctx) => SafeArea(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            ListTile(
+              leading: const Icon(Icons.request_quote_outlined),
+              title: Text(tr('With billed, received and balance due')),
+              onTap: () => Navigator.pop(ctx, true),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(tr('Progress and photos only')),
+              onTap: () => Navigator.pop(ctx, false),
+            ),
+          ]),
+        ),
+      );
+      if (pick == null) return;
+      includeDues = pick;
+    }
+    try {
+      await shareClientUpdate(
+        db: ref.read(appDatabaseProvider),
+        companyName: company,
+        report: report,
+        includeDues: includeDues,
+        now: _now,
+      );
+    } catch (e, st) {
+      if (mounted) showSnack(context, friendlyError(e, st), error: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final showMoney = canSeeMoneyIn(ref.watch(sessionProvider).role);
     final company = ref.watch(sessionProvider).activeCompany?.name ?? '';
     return Scaffold(
-      appBar: AppBar(title: Text(tr('Progress report'))),
+      appBar: AppBar(title: Text(tr('Progress report')), actions: [
+        IconButton(
+          key: const Key('client-update-pdf'),
+          tooltip: tr('PDF for the client'),
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+          onPressed: () => _clientPdf(showMoney: showMoney, company: company),
+        ),
+      ]),
       body: FutureBuilder<PeriodReport>(
         future: _report,
         builder: (context, snap) {
