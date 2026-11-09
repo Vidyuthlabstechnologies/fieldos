@@ -8,6 +8,7 @@ import 'package:fieldos_mobile/features/labour/wage_sheet.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
 /// Weekly wage sheet (Monday to Sunday) from GPS punches, with a Pay button
 /// per worker and a WhatsApp-ready summary to share with the contractor or
@@ -99,7 +100,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
               child: sheet == null
                   ? const Center(child: CircularProgressIndicator())
                   : sheet.lines.isEmpty
-                      ? Center(child: Text(tr('No workers or punches yet.')))
+                      ? MitraEmpty(tr('No workers or punches yet.'))
                       : ListView(children: [
                           for (final l in sheet.lines)
                             ListTile(

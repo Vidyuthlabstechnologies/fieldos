@@ -22,6 +22,7 @@ import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
 import 'package:fieldos_mobile/features/search/search_screen.dart';
+import 'package:fieldos_mobile/features/tour/app_tour.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -41,6 +42,23 @@ class HomeScreen extends ConsumerWidget {
     ref.invalidate(sampleProjectIdProvider(companyId));
     if (!context.mounted) return;
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen(project: project)));
+  }
+
+  Future<void> _tour(BuildContext context, WidgetRef ref, String companyId) async {
+    final exit = await openAppTour(context, ref, companyId: companyId);
+    if (!context.mounted) return;
+    switch (exit) {
+      case TourExit.explore:
+        final id = await sampleProjectId(ref.read(appDatabaseProvider), companyId);
+        final project = id == null ? null : await ref.read(appDatabaseProvider).projectDao.byId(id);
+        if (project != null && context.mounted) {
+          await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen(project: project)));
+        }
+      case TourExit.newProject:
+        await _newProject(context, ref, companyId);
+      case null:
+        break;
+    }
   }
 
   @override
@@ -63,7 +81,7 @@ class HomeScreen extends ConsumerWidget {
           Consumer(builder: (context, ref, _) {
             final count = ref.watch(pendingApprovalsProvider(company.id)).maybeWhen(data: (l) => l.length, orElse: () => 0);
             return IconButton(
-              tooltip: count > 0 ? 'Approvals ($count waiting)' : 'Approvals',
+              tooltip: count > 0 ? trf('Approvals ({n} waiting)', {'n': count}) : tr('Approvals'),
               icon: Badge.count(count: count, isLabelVisible: count > 0, child: const Icon(Icons.approval_outlined)),
               onPressed: () => Navigator.of(context)
                   .push(MaterialPageRoute(builder: (_) => ApprovalsScreen(companyId: company.id))),
@@ -96,6 +114,8 @@ class HomeScreen extends ConsumerWidget {
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
                 case 'subscription':
                   showMySubscription(context);
+                case 'tour':
+                  _tour(context, ref, company.id);
                 case 'bug':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BugReportScreen()));
                 case 'logout':
@@ -117,6 +137,9 @@ class HomeScreen extends ConsumerWidget {
               PopupMenuItem(
                   value: 'settings', child: ListTile(leading: Icon(Icons.settings_outlined), title: Text(tr('Settings')))),
               PopupMenuItem(
+                  value: 'tour',
+                  child: ListTile(leading: Icon(Icons.play_circle_outline), title: Text(tr('App tour')))),
+              PopupMenuItem(
                   value: 'bug', child: ListTile(leading: Icon(Icons.bug_report_outlined), title: Text(tr('Report a bug')))),
               PopupMenuItem(value: 'logout', child: ListTile(leading: Icon(Icons.logout), title: Text(tr('Log out')))),
             ],
@@ -133,17 +156,29 @@ class HomeScreen extends ConsumerWidget {
               onRefresh: () => ref.refresh(projectsProvider(company.id).future),
               child: projectsAsync.when(
                 data: (projects) => projects.isEmpty
-                    ? EmptyState(
-                        icon: Icons.domain_add_outlined,
-                        title: tr('Start your first project'),
-                        message: tr('A project is one site. Its daily reports, labour, materials, money and photos stay '
-                            'together, on this phone and offline.'),
-                        actionLabel: tr('New project'),
-                        onAction: () => _newProject(context, ref, company.id),
-                        secondaryLabel: tr('Try a sample site first'),
-                        onSecondary: () => _trySample(context, ref, company.id, session.user?.id ?? ''),
-                      )
-                    : _ProjectList(projects: projects, userName: session.user?.name),
+                    ? Column(children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                          child: TourInviteCard(onStart: () => _tour(context, ref, company.id)),
+                        ),
+                        Expanded(
+                          child: EmptyState(
+                            icon: Icons.domain_add_outlined,
+                            title: tr('Start your first project'),
+                            message: tr('A project is one site. Its daily reports, labour, materials, money and photos stay '
+                                'together, on this phone and offline.'),
+                            actionLabel: tr('New project'),
+                            onAction: () => _newProject(context, ref, company.id),
+                            secondaryLabel: tr('Try a sample site first'),
+                            onSecondary: () => _trySample(context, ref, company.id, session.user?.id ?? ''),
+                          ),
+                        ),
+                      ])
+                    : _ProjectList(
+                        projects: projects,
+                        userName: session.user?.name,
+                        onTour: () => _tour(context, ref, company.id),
+                      ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, st) => ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(projectsProvider(company.id))),
               ),
@@ -217,10 +252,11 @@ class _CompanyTitle extends ConsumerWidget {
 }
 
 class _ProjectList extends StatelessWidget {
-  const _ProjectList({required this.projects, required this.userName});
+  const _ProjectList({required this.projects, required this.userName, required this.onTour});
 
   final List<Project> projects;
   final String? userName;
+  final VoidCallback onTour;
 
   static const _weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -235,22 +271,25 @@ class _ProjectList extends StatelessWidget {
     final active = projects.where((p) => p.status == 'active').length;
     final firstName = (userName ?? '').trim().split(RegExp(r'\s+')).first;
     final greeting = now.hour < 12
-        ? 'Good morning'
+        ? tr('Good morning')
         : now.hour < 17
             ? tr('Good afternoon')
             : tr('Good evening');
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 96),
+      // Room at the bottom for the New project button and the phone's
+      // own navigation bar.
+      padding: EdgeInsets.fromLTRB(16, 20, 16, 96 + MediaQuery.paddingOf(context).bottom),
       children: [
+        TourInviteCard(onStart: onTour),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(firstName.isEmpty ? greeting : '$greeting, $firstName', style: theme.textTheme.headlineSmall),
             const SizedBox(height: 2),
             Text(
-              '${_weekdays[now.weekday - 1]}, ${fmtDate(now, short: true)} · '
-              '${active == 0 ? 'no active sites' : active == 1 ? '1 active site' : '$active active sites'}',
+              '${tr(_weekdays[now.weekday - 1])}, ${fmtDate(now, short: true)} · '
+              '${active == 0 ? tr('no active sites') : active == 1 ? tr('1 active site') : trf('{n} active sites', {'n': active})}',
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
           ]),

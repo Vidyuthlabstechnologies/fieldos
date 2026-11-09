@@ -11,6 +11,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
 class SubcontractorsScreen extends ConsumerWidget {
   const SubcontractorsScreen({super.key, required this.companyId});
@@ -23,7 +24,7 @@ class SubcontractorsScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(tr('Subcontractors'))),
       body: subs.when(
         data: (rows) => rows.isEmpty
-            ? Center(child: Text(tr('No subcontractors yet.')))
+            ? MitraEmpty(tr('No subcontractors yet.'))
             : ListView.builder(
                 padding: const EdgeInsets.all(12),
                 itemCount: rows.length,

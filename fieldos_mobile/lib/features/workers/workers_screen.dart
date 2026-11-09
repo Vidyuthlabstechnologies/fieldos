@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
 class WorkersView extends ConsumerStatefulWidget {
   const WorkersView({
@@ -63,7 +64,7 @@ class _WorkersViewState extends ConsumerState<WorkersView> {
         Expanded(
           child: workersList.when(
             data: (rows) {
-              if (rows.isEmpty) return Center(child: Text(tr('No workers yet.')));
+              if (rows.isEmpty) return MitraEmpty(tr('No workers yet.'));
               final roles = rolesOf(rows);
               final shown = filterWorkers(rows, query: _search.text, role: _role, activeOnly: _activeOnly);
               return ListView(

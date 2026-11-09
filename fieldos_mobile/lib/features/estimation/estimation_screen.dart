@@ -14,6 +14,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/estimation/estimation_calc.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
 class EstimationView extends ConsumerStatefulWidget {
   const EstimationView({
@@ -38,7 +39,7 @@ class _EstimationViewState extends ConsumerState<EstimationView> {
         Expanded(
           child: estimationsList.when(
             data: (rows) => rows.isEmpty
-                ? Center(child: Text(tr('No estimations yet.')))
+                ? MitraEmpty(tr('No estimations yet.'), mood: MitraMood.measure)
                 : ListView(
                     children: [
                       for (final e in rows)
@@ -168,7 +169,7 @@ class _CostHeadsScreenState extends ConsumerState<CostHeadsScreen> {
           Expanded(
             child: costHeadsList.when(
               data: (rows) => rows.isEmpty
-                  ? Center(child: Text(tr('No cost heads yet.')))
+                  ? MitraEmpty(tr('No cost heads yet.'), mood: MitraMood.measure)
                   : ListView(
                       children: [
                         for (final ch in rows)
@@ -313,7 +314,7 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
             child: isSteel
                 ? ref.watch(steelEntriesProvider(widget.costHead.id)).when(
                       data: (rows) => rows.isEmpty
-                          ? Center(child: Text(tr('No entries yet.')))
+                          ? MitraEmpty(tr('No entries yet.'), mood: MitraMood.measure)
                           : ListView(
                               children: [
                                 for (final e in rows)
@@ -329,7 +330,7 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
                     )
                 : ref.watch(measurementEntriesProvider(widget.costHead.id)).when(
                       data: (rows) => rows.isEmpty
-                          ? Center(child: Text(tr('No entries yet.')))
+                          ? MitraEmpty(tr('No entries yet.'), mood: MitraMood.measure)
                           : ListView(
                               children: [
                                 for (final e in rows)
