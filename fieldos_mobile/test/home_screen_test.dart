@@ -2,17 +2,33 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/home/home_screen.dart';
+import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/features/project/new_project_sheet.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
 void main() {
   Future<(ProviderContainer, AppDatabase, String)> setUpCompany(WidgetTester tester) async {
     final db = AppDatabase.memory();
-    final container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
+    final container = ProviderContainer(overrides: [
+      appDatabaseProvider.overrideWithValue(db),
+      // A cloud client that never starts its refresh timer, for screens
+      // that touch sync (a site opened from Home).
+      cloudSyncClientProvider.overrideWith((ref) {
+        final c = SupabaseClient(
+          'http://localhost:1',
+          'anon',
+          authOptions: const AuthClientOptions(autoRefreshToken: false, authFlowType: AuthFlowType.implicit),
+        );
+        ref.onDispose(c.dispose);
+        return c;
+      }),
+    ]);
     addTearDown(() async {
       container.dispose();
       await db.close();
@@ -64,7 +80,8 @@ void main() {
         ));
       }
     });
-    await pumpApp(tester, container, const HomeScreen());
+    // Tall enough that the picture buttons leave every project on screen.
+    await pumpApp(tester, container, const HomeScreen(), size: const Size(412, 1400));
     expect(find.textContaining('Ravi'), findsOneWidget);
     expect(find.textContaining('1 active site'), findsOneWidget);
     final towerY = tester.getTopLeft(find.text('Tower B')).dy;
@@ -77,6 +94,34 @@ void main() {
     expect(find.text('District office'), findsOneWidget);
     expect(find.widgetWithText(FloatingActionButton, 'New project'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('picture buttons open the running site on the right tab, or ask which site', (tester) async {
+    final (container, db, companyId) = await setUpCompany(tester);
+    await tester.runAsync(() async {
+      for (final (name, status) in [('Tower B', 'active'), ('Clinic', 'planning')]) {
+        await db.projectDao.create(ProjectsCompanion.insert(
+          id: name,
+          companyId: companyId,
+          name: name,
+          status: Value(status),
+        ));
+      }
+    });
+    await pumpApp(tester, container, const HomeScreen(), size: const Size(412, 1400));
+    for (final label in ['Attendance', 'Expense', 'Daily report', 'Material']) {
+      expect(find.bySemanticsLabel(label), findsOneWidget, reason: label);
+    }
+    // One running site: straight in, no question.
+    await tester.tap(find.bySemanticsLabel('Attendance'));
+    await tester.pumpAndSettle();
+    expect(find.text('Which site?'), findsNothing);
+    expect(find.byType(ProjectDetailScreen), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    // Close the site screen so its live queries stop before the test ends.
+    await tester.pumpWidget(const SizedBox());
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pump(const Duration(seconds: 1));
   });
 
   testWidgets('a new project needs a name, and an empty client is saved as none', (tester) async {

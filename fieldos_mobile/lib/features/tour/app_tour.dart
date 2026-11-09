@@ -20,6 +20,7 @@ import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/services/read_aloud.dart';
 
 /// Set once the tour has been started, so Home stops inviting to it.
 const tourSeenKey = 'app_tour_seen';
@@ -182,9 +183,27 @@ class AppTourScreen extends ConsumerStatefulWidget {
 class _AppTourScreenState extends ConsumerState<AppTourScreen> {
   late int _index = widget.initialStep;
 
+  /// Mitra reads each step aloud, for people who would rather listen than
+  /// read. Once switched on it carries on through the tour.
+  bool _voice = false;
+
   void _go(int to, int count) {
     if (to < 0 || to >= count) return;
     setState(() => _index = to);
+    if (_voice) _read(appTourSteps()[to]);
+  }
+
+  void _read(TourStep step) => ReadAloud.say('${step.title}. ${step.body}');
+
+  void _toggleVoice(TourStep step) {
+    setState(() => _voice = !_voice);
+    _voice ? _read(step) : ReadAloud.stop();
+  }
+
+  @override
+  void dispose() {
+    if (_voice) ReadAloud.stop();
+    super.dispose();
   }
 
   Widget _stage(TourStep step) {
@@ -238,6 +257,8 @@ class _AppTourScreenState extends ConsumerState<AppTourScreen> {
               index: _index,
               count: steps.length,
               bottomInset: media.viewPadding.bottom,
+              voice: _voice,
+              onVoice: () => _toggleVoice(step),
               onSkip: () => Navigator.of(context).pop(),
               onBack: _index == 0 ? null : () => _go(_index - 1, steps.length),
               onNext: last ? null : () => _go(_index + 1, steps.length),
@@ -258,6 +279,8 @@ class _GuideCard extends StatelessWidget {
     required this.count,
     required this.bottomInset,
     required this.onSkip,
+    this.voice = false,
+    this.onVoice,
     this.onBack,
     this.onNext,
     this.onExplore,
@@ -269,6 +292,8 @@ class _GuideCard extends StatelessWidget {
   final int count;
   final double bottomInset;
   final VoidCallback onSkip;
+  final bool voice;
+  final VoidCallback? onVoice;
   final VoidCallback? onBack;
   final VoidCallback? onNext;
   final VoidCallback? onExplore;
@@ -305,6 +330,14 @@ class _GuideCard extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(width: 6),
+                if (onVoice != null)
+                  IconButton(
+                    onPressed: onVoice,
+                    tooltip: voice ? tr('Stop') : tr('Read aloud'),
+                    isSelected: voice,
+                    icon: const Icon(Icons.volume_up_outlined),
+                    selectedIcon: const Icon(Icons.volume_up),
+                  ),
                 TextButton.icon(
                   onPressed: onSkip,
                   style: TextButton.styleFrom(minimumSize: const Size(48, 36), padding: const EdgeInsets.symmetric(horizontal: 8)),
@@ -318,7 +351,11 @@ class _GuideCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Mitra(mood: step.mood, size: 104),
+                  // Tapping Mitra reads the step aloud too.
+                  GestureDetector(
+                    onTap: () => ReadAloud.toggle('${step.title}. ${step.body}'),
+                    child: Mitra(mood: step.mood, size: 104),
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: AnimatedSwitcher(

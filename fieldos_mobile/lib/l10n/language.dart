@@ -1,10 +1,11 @@
-/// The app's own language: English, Hindi or Telugu. Every label goes
+/// The app's own language: English, Hindi, Telugu, Tamil, Kannada or
+/// Marathi. Every label goes
 /// through [tr], which looks the English text up in the chosen language's
 /// table and falls back to English for anything not yet translated, so a
 /// missing entry shows English rather than a blank or a key.
 ///
 /// The choice is kept on the phone (settings key [languageSettingKey]).
-/// Before anyone picks, a phone set to Hindi or Telugu starts in that
+/// Before anyone picks, a phone set to one of these starts in that
 /// language.
 library;
 
@@ -14,13 +15,19 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/l10n/strings_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_kn.dart';
+import 'package:fieldos_mobile/l10n/strings_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_te.dart';
 import 'package:fieldos_mobile/providers.dart';
 
 enum AppLanguage {
   en('en', 'English', 'English'),
   hi('hi', 'हिन्दी', 'Hindi'),
-  te('te', 'తెలుగు', 'Telugu');
+  te('te', 'తెలుగు', 'Telugu'),
+  ta('ta', 'தமிழ்', 'Tamil'),
+  kn('kn', 'ಕನ್ನಡ', 'Kannada'),
+  mr('mr', 'मराठी', 'Marathi');
 
   const AppLanguage(this.code, this.nativeName, this.englishName);
   final String code;
@@ -41,7 +48,17 @@ enum AppLanguage {
 
 const languageSettingKey = 'app_language';
 
-const Map<AppLanguage, Map<String, String>> _tables = {AppLanguage.hi: stringsHi, AppLanguage.te: stringsTe};
+const Map<AppLanguage, Map<String, String>> _tables = {
+  AppLanguage.hi: stringsHi,
+  AppLanguage.te: stringsTe,
+  AppLanguage.ta: stringsTa,
+  AppLanguage.kn: stringsKn,
+  AppLanguage.mr: stringsMr,
+};
+
+/// The speech code (BCP-47) for [l], for the phone's voice and its
+/// speech recognition: 'ta-IN'.
+String speechCodeFor(AppLanguage l) => '${l.code}-IN';
 
 AppLanguage _current = AppLanguage.en;
 
@@ -64,7 +81,7 @@ String trf(String english, Map<String, Object> args) {
   return s;
 }
 
-/// Hindi or Telugu when the phone is set to it, else English.
+/// The phone's own language when FieldOS has it, else English.
 AppLanguage languageFromDevice([List<Locale>? locales]) {
   for (final l in locales ?? PlatformDispatcher.instance.locales) {
     final found = AppLanguage.fromCode(l.languageCode);

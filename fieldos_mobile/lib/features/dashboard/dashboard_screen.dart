@@ -149,7 +149,7 @@ class _ProjectHealthCard extends ConsumerWidget {
                   if (s.alerts.length > 3)
                     Padding(
                       padding: const EdgeInsets.only(top: 4, left: 22),
-                      child: Text('and ${s.alerts.length - 3} more',
+                      child: Text(trf('and {n} more', {'n': s.alerts.length - 3}),
                           style: theme.textTheme.bodySmall?.copyWith(color: muted)),
                     ),
                 ],

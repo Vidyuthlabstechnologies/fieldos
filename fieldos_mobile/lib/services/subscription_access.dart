@@ -8,6 +8,7 @@
 library;
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class SubscriptionState {
   const SubscriptionState({
@@ -87,10 +88,15 @@ class FreeTrial {
   final TrialUnit unit;
 
   /// "3 days", "1 week".
-  String get length => '$count ${unit.name}${count == 1 ? '' : 's'}';
+  String get length => switch (unit) {
+        TrialUnit.day => count == 1 ? tr('1 day') : trf('{n} days', {'n': count}),
+        TrialUnit.week => count == 1 ? tr('1 week') : trf('{n} weeks', {'n': count}),
+        TrialUnit.month => count == 1 ? tr('1 month') : trf('{n} months', {'n': count}),
+        TrialUnit.year => count == 1 ? tr('1 year') : trf('{n} years', {'n': count}),
+      };
 
   /// "3-day", for "3-day free trial".
-  String get adjective => '$count-${unit.name}';
+  String get adjective => currentLanguage == AppLanguage.en ? '$count-${unit.name}' : length;
 
   @override
   bool operator ==(Object other) => other is FreeTrial && other.count == count && other.unit == unit;
@@ -124,28 +130,28 @@ class PlanOffer {
   final FreeTrial? trial;
 
   String get title => switch (period) {
-        PlanPeriod.week => 'Weekly',
-        PlanPeriod.month => 'Monthly',
-        PlanPeriod.threeMonths => 'Every 3 months',
-        PlanPeriod.sixMonths => 'Every 6 months',
-        PlanPeriod.year => 'Yearly',
+        PlanPeriod.week => tr('Weekly'),
+        PlanPeriod.month => tr('Monthly'),
+        PlanPeriod.threeMonths => tr('Every 3 months'),
+        PlanPeriod.sixMonths => tr('Every 6 months'),
+        PlanPeriod.year => tr('Yearly'),
       };
 
   /// "₹499.00 a month", "₹1,299.00 every 3 months".
   String get priceLine => switch (period) {
-        PlanPeriod.week => '$price a week',
-        PlanPeriod.month => '$price a month',
-        PlanPeriod.threeMonths => '$price every 3 months',
-        PlanPeriod.sixMonths => '$price every 6 months',
-        PlanPeriod.year => '$price a year',
+        PlanPeriod.week => trf('{price} a week', {'price': price}),
+        PlanPeriod.month => trf('{price} a month', {'price': price}),
+        PlanPeriod.threeMonths => trf('{price} every 3 months', {'price': price}),
+        PlanPeriod.sixMonths => trf('{price} every 6 months', {'price': price}),
+        PlanPeriod.year => trf('{price} a year', {'price': price}),
       };
 
   String get _renews => switch (period) {
-        PlanPeriod.week => 'every week',
-        PlanPeriod.month => 'every month',
-        PlanPeriod.threeMonths => 'every 3 months',
-        PlanPeriod.sixMonths => 'every 6 months',
-        PlanPeriod.year => 'every year',
+        PlanPeriod.week => tr('every week'),
+        PlanPeriod.month => tr('every month'),
+        PlanPeriod.threeMonths => tr('every 3 months'),
+        PlanPeriod.sixMonths => tr('every 6 months'),
+        PlanPeriod.year => tr('every year'),
       };
 
   /// What buying this plan means, in full, under the button. Both stores
@@ -155,14 +161,20 @@ class PlanOffer {
   /// people cancel ("Google Play › Subscriptions").
   String disclosure({required String store, required String cancelIn}) {
     if (trial != null) {
-      return '${trial!.length} free, then $priceLine. $store charges you when the trial ends unless you cancel at '
-          'least 24 hours before. It renews $_renews until you cancel in $cancelIn.';
+      return trf(
+          '{length} free, then {price}. {store} charges you when the trial ends unless you cancel at '
+          'least 24 hours before. It renews {renews} until you cancel in {cancelIn}.',
+          {'length': trial!.length, 'price': priceLine, 'store': store, 'renews': _renews, 'cancelIn': cancelIn});
     }
-    return '$priceLine, charged by $store today. It renews $_renews until you cancel in $cancelIn, at least '
-        '24 hours before the next payment.';
+    return trf(
+        '{price}, charged by {store} today. It renews {renews} until you cancel in {cancelIn}, at least '
+        '24 hours before the next payment.',
+        {'price': priceLine, 'store': store, 'renews': _renews, 'cancelIn': cancelIn});
   }
 
-  String get buttonLabel => trial != null ? 'Start ${trial!.adjective} free trial' : 'Subscribe for $priceLine';
+  String get buttonLabel => trial != null
+      ? trf('Start {length} free trial', {'length': trial!.adjective})
+      : trf('Subscribe for {price}', {'price': priceLine});
 }
 
 /// The trial a paywall headline should promise, if any plan has one.

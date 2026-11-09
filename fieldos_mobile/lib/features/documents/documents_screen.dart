@@ -211,7 +211,7 @@ class _DocumentTile extends ConsumerWidget {
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Versions — ${document.name}'),
+        title: Text(trf('Versions — {name}', {'name': document.name})),
         content: SizedBox(
           width: 400,
           child: versions.isEmpty

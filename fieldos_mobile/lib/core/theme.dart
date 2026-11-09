@@ -43,7 +43,7 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
     useMaterial3: true,
     brightness: brightness,
     colorScheme: scheme,
-    fontFamily: Brand.fontFamily,
+    fontFamily: Brand.fontFamily, fontFamilyFallback: Brand.fontFallback,
     visualDensity: VisualDensity.standard,
     materialTapTargetSize: MaterialTapTargetSize.padded,
     // A plain ripple: Material 3's sparkle reads as a gimmick on a work tool.
@@ -82,7 +82,7 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
       scrolledUnderElevation: 0,
       centerTitle: false,
       titleTextStyle: const TextStyle(
-        fontFamily: Brand.fontFamily,
+        fontFamily: Brand.fontFamily, fontFamilyFallback: Brand.fontFallback,
         fontSize: 19,
         fontWeight: FontWeight.w600,
         color: Colors.white,
@@ -99,8 +99,8 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
       indicatorColor: Brand.amber,
       indicatorSize: TabBarIndicatorSize.label,
       dividerColor: scheme.outlineVariant,
-      labelStyle: const TextStyle(fontFamily: Brand.fontFamily, fontWeight: FontWeight.w600, fontSize: 14),
-      unselectedLabelStyle: const TextStyle(fontFamily: Brand.fontFamily, fontWeight: FontWeight.w500, fontSize: 14),
+      labelStyle: const TextStyle(fontFamily: Brand.fontFamily, fontFamilyFallback: Brand.fontFallback, fontWeight: FontWeight.w600, fontSize: 14),
+      unselectedLabelStyle: const TextStyle(fontFamily: Brand.fontFamily, fontFamilyFallback: Brand.fontFallback, fontWeight: FontWeight.w500, fontSize: 14),
     ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: Brand.amber,
@@ -110,14 +110,14 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
       hoverElevation: 3,
       highlightElevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      extendedTextStyle: const TextStyle(fontFamily: Brand.fontFamily, fontWeight: FontWeight.w700, fontSize: 15),
+      extendedTextStyle: const TextStyle(fontFamily: Brand.fontFamily, fontFamilyFallback: Brand.fontFallback, fontWeight: FontWeight.w700, fontSize: 15),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size(64, 48),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: radius12),
-        textStyle: const TextStyle(fontFamily: Brand.fontFamily, fontWeight: FontWeight.w600, fontSize: 15),
+        textStyle: const TextStyle(fontFamily: Brand.fontFamily, fontFamilyFallback: Brand.fontFallback, fontWeight: FontWeight.w600, fontSize: 15),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -126,14 +126,14 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: radius12),
         side: BorderSide(color: scheme.outline),
-        textStyle: const TextStyle(fontFamily: Brand.fontFamily, fontWeight: FontWeight.w600, fontSize: 15),
+        textStyle: const TextStyle(fontFamily: Brand.fontFamily, fontFamilyFallback: Brand.fontFallback, fontWeight: FontWeight.w600, fontSize: 15),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         minimumSize: const Size(48, 44),
         shape: RoundedRectangleBorder(borderRadius: radius12),
-        textStyle: const TextStyle(fontFamily: Brand.fontFamily, fontWeight: FontWeight.w600, fontSize: 14),
+        textStyle: const TextStyle(fontFamily: Brand.fontFamily, fontFamilyFallback: Brand.fontFallback, fontWeight: FontWeight.w600, fontSize: 14),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -166,9 +166,9 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
       // A colour is required here: without one the label inherits white
       // and vanishes on the light chips (it did, on every filter chip row).
       labelStyle: TextStyle(
-          fontFamily: Brand.fontFamily, fontWeight: FontWeight.w500, fontSize: 13, color: scheme.onSurface),
+          fontFamily: Brand.fontFamily, fontFamilyFallback: Brand.fontFallback, fontWeight: FontWeight.w500, fontSize: 13, color: scheme.onSurface),
       secondaryLabelStyle: TextStyle(
-          fontFamily: Brand.fontFamily, fontWeight: FontWeight.w600, fontSize: 13, color: scheme.onSecondaryContainer),
+          fontFamily: Brand.fontFamily, fontFamilyFallback: Brand.fontFallback, fontWeight: FontWeight.w600, fontSize: 13, color: scheme.onSecondaryContainer),
       selectedColor: scheme.secondaryContainer,
       checkmarkColor: scheme.onSecondaryContainer,
     ),
@@ -177,7 +177,7 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       titleTextStyle: TextStyle(
-        fontFamily: Brand.fontFamily,
+        fontFamily: Brand.fontFamily, fontFamilyFallback: Brand.fontFallback,
         fontSize: 20,
         fontWeight: FontWeight.w700,
         color: scheme.onSurface,
@@ -192,7 +192,7 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       backgroundColor: dark ? const Color(0xFF223754) : Brand.navyDeep,
-      contentTextStyle: const TextStyle(fontFamily: Brand.fontFamily, color: Colors.white, fontSize: 14),
+      contentTextStyle: const TextStyle(fontFamily: Brand.fontFamily, fontFamilyFallback: Brand.fontFallback, color: Colors.white, fontSize: 14),
       actionTextColor: Brand.amber,
       shape: RoundedRectangleBorder(borderRadius: radius12),
     ),

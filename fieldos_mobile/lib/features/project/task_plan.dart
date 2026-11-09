@@ -5,6 +5,7 @@
 library;
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 const taskPriorities = {'high': 'High', 'normal': 'Normal', 'low': 'Low'};
 
@@ -53,9 +54,8 @@ String? lateLabel(Task t, DateTime now) {
   final overdue = daysOverdue(t, now);
   final late = daysLate(t, now);
   if (late <= 0) return null;
-  String days(int n) => n == 1 ? '1 day' : '$n days';
-  if (overdue >= late) return '${days(late)} late';
-  return 'Heading ${days(late)} late';
+  if (overdue >= late) return late == 1 ? tr('1 day late') : trf('{n} days late', {'n': late});
+  return late == 1 ? tr('Heading 1 day late') : trf('Heading {n} days late', {'n': late});
 }
 
 /// Open tasks that start or fall due within the next [days] days (today

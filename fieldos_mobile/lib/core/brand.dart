@@ -39,6 +39,11 @@ class Brand {
 
   static const fontFamily = 'Inter';
 
+  /// Inter has no Indian scripts. Phones fall back to their own fonts on
+  /// their own; naming the Noto families keeps Hindi, Telugu, Tamil,
+  /// Kannada and Marathi in one consistent face wherever they are present.
+  static const fontFallback = ['NotoSansDevanagari', 'NotoSansTelugu', 'NotoSansTamil', 'NotoSansKannada'];
+
   static const supportEmail = 'info@mldynamic.com';
   static const companyName = 'ML Dynamic Solutions Private Limited';
 

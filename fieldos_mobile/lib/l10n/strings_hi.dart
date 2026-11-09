@@ -1137,4 +1137,354 @@ const Map<String, String> stringsHi = {
   '{n} expenses': '{n} खर्च',
   '{pct}% done. At this rate the job costs {total}, {over} over budget.': '{pct}% पूरा। इसी रफ़्तार से काम {total} का पड़ेगा, बजट से {over} ज़्यादा।',
   '{pct}% done. At this rate the job finishes within budget ({total}).': '{pct}% पूरा। इसी रफ़्तार से काम बजट में पूरा होगा ({total})।',
+
+  // Read aloud
+  'Stop':
+      'रोकें',
+
+  // Home quick actions
+  'Attendance':
+      'हाज़िरी',
+  'Which site?':
+      'कौन सी साइट?',
+
+  // Home quick actions
+  'Expense':
+      'खर्च',
+
+  // Everyday screens: tasks, attendance, issues and status tags
+  '1 day late':
+      '1 दिन देर',
+  '1 issue':
+      '1 समस्या',
+  '1 person':
+      '1 व्यक्ति',
+  'Away from the site area':
+      'साइट क्षेत्र से बाहर',
+  'Broken down':
+      'खराब',
+  'Completed':
+      'पूरा',
+  'Could not get a GPS fix.':
+      'GPS लोकेशन नहीं मिली।',
+  'Due date':
+      'आखिरी तारीख',
+  'Due {date}':
+      'आखिरी तारीख {date}',
+  'Failed':
+      'फेल',
+  'Fixed {date}':
+      '{date} को ठीक हुआ',
+  'Forecast {date}':
+      'अनुमान {date}',
+  'From a daily report':
+      'दैनिक रिपोर्ट से',
+  'GPS fix, accurate to about {m} m':
+      'GPS मिला, लगभग {m} मीटर तक सही',
+  'Getting your location…':
+      'आपकी लोकेशन ली जा रही है…',
+  'Give the task a name.':
+      'काम का नाम लिखें।',
+  'Handed over':
+      'सौंप दिया',
+  'Heading 1 day late':
+      '1 दिन देर होने वाला है',
+  'Heading {n} days late':
+      '{n} दिन देर होने वाला है',
+  'In maintenance':
+      'मरम्मत में',
+  'In progress':
+      'चल रहा है',
+  'In {time}':
+      'आए {time}',
+  'Late ({n})':
+      'देर ({n})',
+  'No site area set, so punches are not checked. Set it while standing at the site.':
+      'साइट क्षेत्र तय नहीं है, इसलिए हाज़िरी की जगह जाँची नहीं जाती। साइट पर खड़े होकर इसे सेट करें।',
+  'Not active':
+      'चालू नहीं',
+  'Not checked':
+      'जाँचा नहीं',
+  'Not started yet':
+      'अभी शुरू नहीं हुआ',
+  'Nothing is late. Tasks show here when they pass their due date, or when their pace means they will finish after it.':
+      'कुछ भी देर से नहीं है। जब कोई काम आखिरी तारीख पार करे, या उसकी रफ़्तार से वह देर से खत्म होगा, तब वह यहाँ दिखेगा।',
+  'On hold':
+      'रुका हुआ',
+  'On site':
+      'साइट पर',
+  'Open':
+      'खुला',
+  'Partly passed':
+      'कुछ पास',
+  'Passed':
+      'पास',
+  'Planning':
+      'योजना में',
+  'Punch in {n} of {total}':
+      '{total} में से {n} की हाज़िरी लगाएँ',
+  'Raised {date}':
+      '{date} को उठाया',
+  'Report saved, and {n} problems raised as issues.':
+      'रिपोर्ट सेव हुई, और {n} समस्याएँ दर्ज हुईं।',
+  'Report saved.':
+      'रिपोर्ट सेव हुई।',
+  'Set when they left. Until then each counts as half a day.':
+      'वे कब गए, यह भरें। तब तक हर एक आधा दिन गिना जाएगा।',
+  'Show earlier days ({n} more)':
+      'पिछले दिन दिखाएँ ({n} और)',
+  'Site area: within {m} m of the point you set. Punches outside it are marked.':
+      'साइट क्षेत्र: आपके तय किए बिंदु से {m} मीटर तक। इसके बाहर की हाज़िरी पर निशान लगेगा।',
+  'Start date':
+      'शुरू की तारीख',
+  'Start {date}':
+      'शुरू {date}',
+  'The due date is before the start date.':
+      'आखिरी तारीख शुरू की तारीख से पहले है।',
+  'When did {name} leave on {date}?':
+      '{name} {date} को कब गए?',
+  'When does work start?':
+      'काम कब शुरू होगा?',
+  'When must it be finished?':
+      'कब तक पूरा होना चाहिए?',
+  'Work has stopped for now':
+      'काम अभी रुका है',
+  'Work is going on at the site':
+      'साइट पर काम चल रहा है',
+  'done {date}':
+      '{date} को हुआ',
+  'due {date}':
+      '{date} तक',
+  'not out yet':
+      'अभी गए नहीं',
+  'out {time}':
+      'गए {time}',
+  '{done} of {total} tasks done':
+      '{total} में से {done} काम पूरे',
+  '{n} days late':
+      '{n} दिन देर',
+  '{n} issues':
+      '{n} समस्याएँ',
+  '{n}% complete':
+      '{n}% पूरा',
+
+  // Task status and expense categories shown through tr() from data
+  'To do':
+      'करना है',
+  'Transport':
+      'ढुलाई',
+  'Equipment hire':
+      'मशीन किराया',
+  'Food & tea':
+      'खाना और चाय',
+  'Other':
+      'अन्य',
+
+  // Sign-in, company setup, plans page, sync and cloud error messages
+  '1 day':
+      '1 दिन',
+  '1 month':
+      '1 महीना',
+  '1 week':
+      '1 हफ़्ता',
+  '1 year':
+      '1 साल',
+  '{n} months':
+      '{n} महीने',
+  '{n} weeks':
+      '{n} हफ़्ते',
+  '{n} years':
+      '{n} साल',
+  'Access code':
+      'एक्सेस कोड',
+  'Approve it in your UPI or bank app. FieldOS opens by itself once {store} confirms the payment, usually within a few minutes.':
+      'अपने UPI या बैंक ऐप में इसे मंज़ूर करें। {store} के पेमेंट पक्का करते ही FieldOS अपने आप खुल जाएगा, आमतौर पर कुछ मिनटों में।',
+  'At least {n} characters':
+      'कम से कम {n} अक्षर',
+  'Check again':
+      'फिर से जाँचें',
+  'Choose a plan':
+      'प्लान चुनें',
+  'Choose your plan':
+      'अपना प्लान चुनें',
+  'Confirm your email first: open the link we sent you, then sign in here.':
+      'पहले अपना ईमेल पक्का करें: हमारा भेजा लिंक खोलें, फिर यहाँ साइन इन करें।',
+  'Copy last report ({day})':
+      'पिछली रिपोर्ट कॉपी करें ({day})',
+  'Could not check with {store} right now. Please try again in a minute.':
+      'अभी {store} से जाँच नहीं हो पाई। एक मिनट बाद फिर कोशिश करें।',
+  'Could not check your subscription with {store} right now. Please try again in a minute.':
+      'अभी {store} से आपकी सदस्यता जाँच नहीं हो पाई। एक मिनट बाद फिर कोशिश करें।',
+  'Could not load the plans from {store}. Please try again, or send a bug report from the menu.':
+      '{store} से प्लान नहीं आ पाए। फिर कोशिश करें, या मेन्यू से बग रिपोर्ट भेजें।',
+  'Could not open {store}. Open {path} yourself.':
+      '{store} नहीं खुला। खुद {path} खोलें।',
+  'Download {language} translation?':
+      '{language} अनुवाद डाउनलोड करें?',
+  'Enter access code':
+      'एक्सेस कोड डालें',
+  'Every 3 months':
+      'हर 3 महीने',
+  'Every 6 months':
+      'हर 6 महीने',
+  'For example ravi, or your phone number':
+      'जैसे ravi, या आपका फ़ोन नंबर',
+  'Heard in {language} by Sarvam. Check the words before saving.':
+      'Sarvam ने {language} में सुना। सेव करने से पहले शब्द जाँच लें।',
+  'Heard in {language} on this phone. Check the words before saving.':
+      'इस फ़ोन ने {language} में सुना। सेव करने से पहले शब्द जाँच लें।',
+  'Keep every site on track':
+      'हर साइट को सही रास्ते पर रखें',
+  'Last synced: {last} · Waiting to send: {n}':
+      'आखिरी सिंक: {last} · भेजना बाकी: {n}',
+  'Made in Hyderabad by {company}':
+      '{company} द्वारा हैदराबाद में बना',
+  'Manage or cancel':
+      'बदलें या रद्द करें',
+  'Monthly':
+      'मासिक',
+  'Need help? {email}':
+      'मदद चाहिए? {email}',
+  'New cloud accounts are switched off for now. Write to us at the support address and we will help.':
+      'नए क्लाउड खाते अभी बंद हैं। सपोर्ट पते पर हमें लिखें, हम मदद करेंगे।',
+  'No FieldOS subscription was found on this {store} account.':
+      'इस {store} खाते पर FieldOS सदस्यता नहीं मिली।',
+  'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.':
+      'इस {store} खाते पर FieldOS सदस्यता नहीं मिली। अगर दूसरे खाते से ली थी, तो {store} में उस पर जाएँ और फिर कोशिश करें।',
+  'No internet connection. Your work is saved on this phone; try again when you are online.':
+      'इंटरनेट नहीं है। आपका काम इस फ़ोन में सेव है; इंटरनेट आने पर फिर कोशिश करें।',
+  'Not {name}? Log out':
+      '{name} नहीं हैं? लॉग आउट करें',
+  'Only for people the FieldOS team gave a code to, such as app reviewers.':
+      'सिर्फ़ उन लोगों के लिए जिन्हें FieldOS टीम ने कोड दिया है, जैसे ऐप समीक्षक।',
+  'Only the company owner can change roles.':
+      'सिर्फ़ कंपनी मालिक भूमिका बदल सकते हैं।',
+  'Only the company owner can make a new join code.':
+      'सिर्फ़ कंपनी मालिक नया जॉइन कोड बना सकते हैं।',
+  'Only the company owner can remove people from the team.':
+      'सिर्फ़ कंपनी मालिक टीम से लोगों को हटा सकते हैं।',
+  'Payment waiting for approval':
+      'पेमेंट मंज़ूरी का इंतज़ार कर रहा है',
+  'Put {company} on the cloud':
+      '{company} को क्लाउड पर डालें',
+  'Restore purchase':
+      'खरीद वापस लाएँ',
+  'Sign in from Team & sync first.':
+      'पहले टीम और सिंक से साइन इन करें।',
+  'Signed in as {email}':
+      '{email} से साइन इन',
+  'Something went wrong. Please try again, or send a bug report from the menu.':
+      'कुछ गड़बड़ हो गई। फिर कोशिश करें, या मेन्यू से बग रिपोर्ट भेजें।',
+  'Start {length} free trial':
+      '{length} का मुफ़्त ट्रायल शुरू करें',
+  'Still waiting for the payment. It can take a few minutes after you approve it.':
+      'अभी पेमेंट का इंतज़ार है। मंज़ूरी के बाद कुछ मिनट लग सकते हैं।',
+  'Subscribe for {price}':
+      '{price} में सदस्यता लें',
+  'Terms':
+      'शर्तें',
+  'That code is not right, or it is too old. Check it, or send a new code.':
+      'यह कोड सही नहीं है, या पुराना हो गया है। जाँचें, या नया कोड भेजें।',
+  'That email address cannot be used. Check it, or try another.':
+      'यह ईमेल पता इस्तेमाल नहीं हो सकता। जाँचें, या दूसरा आज़माएँ।',
+  'That email already has a FieldOS cloud account. Sign in with its password.':
+      'इस ईमेल का FieldOS क्लाउड खाता पहले से है। उसके पासवर्ड से साइन इन करें।',
+  'That email and password do not match. Check them and try again.':
+      'ईमेल और पासवर्ड मेल नहीं खाते। जाँचकर फिर कोशिश करें।',
+  'That is already your password. Choose a different one, or sign in with it.':
+      'यह पहले से आपका पासवर्ड है। दूसरा चुनें, या इसी से साइन इन करें।',
+  'That join code is not right. Check it with the person who shared it: it is 10 letters and numbers.':
+      'यह जॉइन कोड सही नहीं है। भेजने वाले से जाँचें: इसमें 10 अक्षर और अंक होते हैं।',
+  'That took too long. Check your connection and try again.':
+      'बहुत देर लगी। अपना कनेक्शन जाँचें और फिर कोशिश करें।',
+  'The FieldOS cloud is not answering right now. Your work is saved on this phone; try again in a few minutes.':
+      'FieldOS क्लाउड अभी जवाब नहीं दे रहा। आपका काम इस फ़ोन में सेव है; कुछ मिनट बाद फिर कोशिश करें।',
+  'The FieldOS team gave you this access, so there is nothing to pay or cancel. When it ends, FieldOS asks you to choose a plan, and your records stay on this phone.':
+      'यह एक्सेस FieldOS टीम ने दिया है, इसलिए कुछ भरना या रद्द करना नहीं है। खत्म होने पर FieldOS प्लान चुनने को कहेगा, और आपके रिकॉर्ड इस फ़ोन में रहेंगे।',
+  'The company owner cannot be removed from the team.':
+      'कंपनी मालिक को टीम से हटाया नहीं जा सकता।',
+  'The purchase did not finish. Please try again.':
+      'खरीद पूरी नहीं हुई। फिर कोशिश करें।',
+  'The subscription is not on sale yet. Please try again later.':
+      'सदस्यता अभी बिक्री पर नहीं है। बाद में फिर कोशिश करें।',
+  'This company is already on the cloud under another account. Ask its owner for a join code.':
+      'यह कंपनी पहले से दूसरे खाते से क्लाउड पर है। इसके मालिक से जॉइन कोड माँगें।',
+  'This is a one-time download of about 30 MB. After that, {language} reports translate to English on this phone, with no internet and no cost.':
+      'यह लगभग 30 MB का एक बार का डाउनलोड है। उसके बाद {language} रिपोर्ट इसी फ़ोन पर अंग्रेज़ी में बदलेंगी, बिना इंटरनेट और बिना खर्च।',
+  'To cancel, open {path}. You keep FieldOS Pro until the end of the period you have paid for, and your records stay on this phone.':
+      'रद्द करने के लिए {path} खोलें। जितने समय का भुगतान किया है, उसके अंत तक FieldOS Pro रहेगा, और आपके रिकॉर्ड इस फ़ोन में रहेंगे।',
+  'Too many tries in a short time. Wait a few minutes, then try again.':
+      'थोड़े समय में बहुत कोशिशें हुईं। कुछ मिनट रुककर फिर कोशिश करें।',
+  'Too many wrong join codes. Wait an hour, then try again with the code from your company owner.':
+      'बहुत सारे गलत जॉइन कोड। एक घंटा रुकें, फिर कंपनी मालिक के कोड से कोशिश करें।',
+  'Translated from {language} on this phone':
+      'इस फ़ोन पर {language} से अनुवाद',
+  'Try it free for {length}':
+      '{length} मुफ़्त आज़माएँ',
+  'Unlock':
+      'खोलें',
+  'Update payment method':
+      'पेमेंट तरीका बदलें',
+  'Versions — {name}':
+      'संस्करण — {name}',
+  'Weekly':
+      'साप्ताहिक',
+  'Welcome to FieldOS':
+      'FieldOS में आपका स्वागत है',
+  'Welcome, {name}':
+      'स्वागत है, {name}',
+  'Which day is this report for?':
+      'यह रिपोर्ट किस दिन की है?',
+  'Works out to {price} a month':
+      'महीने के {price} पड़ते हैं',
+  'Yearly':
+      'सालाना',
+  'You are the owner, so your own role stays the same.':
+      'आप मालिक हैं, इसलिए आपकी भूमिका वही रहेगी।',
+  'Your cloud sign-in has ended. Sign in again from Team & sync.':
+      'आपका क्लाउड साइन-इन खत्म हो गया। टीम और सिंक से फिर साइन इन करें।',
+  'Your plan':
+      'आपका प्लान',
+  'Your role in this company does not allow that. Ask the owner.':
+      'इस कंपनी में आपकी भूमिका में इसकी अनुमति नहीं है। मालिक से पूछें।',
+  'Your subscription is on this phone.':
+      'आपकी सदस्यता इस फ़ोन पर है।',
+  'and {n} more':
+      'और {n}',
+  'every 3 months':
+      'हर 3 महीने',
+  'every 6 months':
+      'हर 6 महीने',
+  'every month':
+      'हर महीने',
+  'every week':
+      'हर हफ़्ते',
+  'every year':
+      'हर साल',
+  'the original':
+      'मूल भाषा',
+  '{amount} payable':
+      '{amount} देय',
+  '{length} free':
+      '{length} मुफ़्त',
+  '{length} free, then {price}. {store} charges you when the trial ends unless you cancel at least 24 hours before. It renews {renews} until you cancel in {cancelIn}.':
+      '{length} मुफ़्त, फिर {price}। ट्रायल खत्म होने पर {store} पैसे लेगा, जब तक आप कम से कम 24 घंटे पहले रद्द न करें। यह {renews} अपने आप नया होगा, जब तक आप {cancelIn} में रद्द न करें।',
+  '{name} placed here, with a 100 m attendance geofence.':
+      '{name} यहाँ रखा गया, 100 मीटर हाज़िरी क्षेत्र के साथ।',
+  '{n} changes could not be sent after several tries.':
+      'कई कोशिशों के बाद भी {n} बदलाव नहीं भेजे जा सके।',
+  '{n} projects without a site location':
+      '{n} प्रोजेक्ट की साइट लोकेशन नहीं है',
+  '{price} a month':
+      '{price} महीना',
+  '{price} a week':
+      '{price} हफ़्ता',
+  '{price} a year':
+      '{price} साल',
+  '{price} every 3 months':
+      'हर 3 महीने {price}',
+  '{price} every 6 months':
+      'हर 6 महीने {price}',
+  '{price}, charged by {store} today. It renews {renews} until you cancel in {cancelIn}, at least 24 hours before the next payment.':
+      '{price}, आज {store} लेगा। यह {renews} अपने आप नया होगा, जब तक आप अगले भुगतान से कम से कम 24 घंटे पहले {cancelIn} में रद्द न करें।',
 };

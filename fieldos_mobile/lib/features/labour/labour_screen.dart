@@ -225,7 +225,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, set) => AlertDialog(
-          title: Text('Punch in ${picked.length} of ${candidates.length}'),
+          title: Text(trf('Punch in {n} of {total}', {'n': picked.length, 'total': candidates.length})),
           content: SizedBox(
             width: double.maxFinite,
             child: ListView(shrinkWrap: true, children: [
@@ -283,7 +283,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
     final picked = await showTimePicker(
       context: context,
       initialTime: const TimeOfDay(hour: 18, minute: 0),
-      helpText: 'When did ${a.workerName} leave on ${fmtDate(inAt, short: true)}?',
+      helpText: trf('When did {name} leave on {date}?', {'name': a.workerName, 'date': fmtDate(inAt, short: true)}),
     );
     if (picked == null || !context.mounted) return;
     final outAt = DateTime(inAt.year, inAt.month, inAt.day, picked.hour, picked.minute);
@@ -348,8 +348,9 @@ class _GeofenceCard extends ConsumerWidget {
             Expanded(
               child: geofence.when(
                 data: (g) => Text(g == null
-                    ? 'No site area set, so punches are not checked. Set it while standing at the site.'
-                    : 'Site area: within ${g.radiusMeters.round()} m of the point you set. Punches outside it are marked.'),
+                    ? tr('No site area set, so punches are not checked. Set it while standing at the site.')
+                    : trf('Site area: within {m} m of the point you set. Punches outside it are marked.',
+                        {'m': g.radiusMeters.round()})),
                 loading: () => Text(tr('Checking the site area…')),
                 error: (e, st) => Text(friendlyError(e, st)),
               ),
@@ -422,7 +423,7 @@ class GpsFields extends ConsumerStatefulWidget {
 }
 
 class _GpsFieldsState extends ConsumerState<GpsFields> {
-  String _status = 'Getting your location…';
+  late String _status = tr('Getting your location…');
   bool _locating = true;
 
   @override
@@ -434,15 +435,15 @@ class _GpsFieldsState extends ConsumerState<GpsFields> {
   Future<void> _locate() async {
     setState(() {
       _locating = true;
-      _status = 'Getting your location…';
+      _status = tr('Getting your location…');
     });
     try {
       final fix = await ref.read(locationServiceProvider).currentFix();
       widget.lat.text = fix.lat.toStringAsFixed(6);
       widget.lng.text = fix.lng.toStringAsFixed(6);
-      if (mounted) setState(() => _status = 'GPS fix, accurate to about ${fix.accuracyM.round()} m');
+      if (mounted) setState(() => _status = trf('GPS fix, accurate to about {m} m', {'m': fix.accuracyM.round()}));
     } catch (e) {
-      if (mounted) setState(() => _status = e is LocationUnavailable ? e.message : 'Could not get a GPS fix.');
+      if (mounted) setState(() => _status = e is LocationUnavailable ? e.message : tr('Could not get a GPS fix.'));
     } finally {
       if (mounted) setState(() => _locating = false);
     }

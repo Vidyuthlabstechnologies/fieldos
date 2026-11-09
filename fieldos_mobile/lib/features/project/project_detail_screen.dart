@@ -374,7 +374,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
       final raised = draft.issues.length;
       showSnack(
         context,
-        raised == 0 ? 'Report saved.' : 'Report saved, and $raised problem${raised == 1 ? '' : 's'} raised as issues.',
+        raised == 0 ? tr('Report saved.') : trf('Report saved, and {n} problems raised as issues.', {'n': raised}),
         action: SnackBarAction(label: tr('Share'), onPressed: () => _share(dpr)),
       );
     } catch (e, st) {
@@ -573,9 +573,9 @@ class _DprFacts extends StatelessWidget {
       spacing: 6,
       runSpacing: 6,
       children: [
-        StatusPill(dpr.manpowerCount > 0 ? '${dpr.manpowerCount} people' : 'Headcount not given'),
+        StatusPill(dpr.manpowerCount > 0 ? trf('{n} people', {'n': dpr.manpowerCount}) : 'Headcount not given'),
         if (dpr.weather != null && dpr.weather!.isNotEmpty) StatusPill(dpr.weather!),
-        if (issueCount > 0) StatusPill('$issueCount issue${issueCount == 1 ? '' : 's'}', tone: PillTone.warn),
+        if (issueCount > 0) StatusPill(issueCount == 1 ? tr('1 issue') : trf('{n} issues', {'n': issueCount}), tone: PillTone.warn),
       ],
     );
   }
@@ -694,8 +694,8 @@ class _IssuesTab extends ConsumerWidget {
                             if (iss.dprEntryId != null) const StatusPill('From a daily report'),
                             Text(
                               resolved && iss.resolvedAt != null
-                                  ? 'Fixed ${fmtDate(iss.resolvedAt!, short: true)}'
-                                  : 'Raised ${fmtDate(iss.createdAt, short: true)}',
+                                  ? trf('Fixed {date}', {'date': fmtDate(iss.resolvedAt!, short: true)})
+                                  : trf('Raised {date}', {'date': fmtDate(iss.createdAt, short: true)}),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],

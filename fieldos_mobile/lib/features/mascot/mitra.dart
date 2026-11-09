@@ -11,6 +11,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:fieldos_mobile/core/brand.dart';
+import 'package:fieldos_mobile/services/read_aloud.dart';
 
 /// Mitra's moods, in the same order as the Rive scene's `mood` number.
 enum MitraMood {
@@ -104,7 +105,11 @@ class MitraSays extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Mitra(mood: mood, size: size),
+        // Tap Mitra to hear the words, for anyone who would rather listen.
+        GestureDetector(
+          onTap: () => ReadAloud.toggle([title, ?message].join('. ')),
+          child: Mitra(mood: mood, size: size),
+        ),
         Expanded(
           child: CustomPaint(
             painter: _BubbleTail(color: scheme.surfaceContainerHigh),
@@ -178,7 +183,10 @@ class MitraEmpty extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Mitra(mood: mood, size: c.maxHeight.isFinite && c.maxHeight < 260 ? 72 : 112),
+                    GestureDetector(
+                      onTap: () => ReadAloud.toggle([text, ?hint].join('. ')),
+                      child: Mitra(mood: mood, size: c.maxHeight.isFinite && c.maxHeight < 260 ? 72 : 112),
+                    ),
                     const SizedBox(height: 8),
                     Text(text, textAlign: TextAlign.center, style: theme.textTheme.titleSmall),
                     if (hint != null) ...[

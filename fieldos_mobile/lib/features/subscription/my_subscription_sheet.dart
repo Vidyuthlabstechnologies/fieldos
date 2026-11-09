@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/billing_service.dart';
 
@@ -55,7 +56,7 @@ class _MySubscriptionSheetState extends ConsumerState<MySubscriptionSheet> {
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication).catchError((_) => false);
     if (!ok && mounted) {
       setState(() {
-        _message = 'Could not open ${_billing.storeName}. Open ${_billing.cancelPath} yourself.';
+        _message = trf('Could not open {store}. Open {path} yourself.', {'store': _billing.storeName, 'path': _billing.cancelPath});
         _messageIsError = true;
       });
     }
@@ -73,8 +74,8 @@ class _MySubscriptionSheetState extends ConsumerState<MySubscriptionSheet> {
         _state = s;
         _messageIsError = !s.active;
         _message = s.active
-            ? 'Your subscription is on this phone.'
-            : 'No FieldOS subscription was found on this ${_billing.storeName} account.';
+            ? tr('Your subscription is on this phone.')
+            : trf('No FieldOS subscription was found on this {store} account.', {'store': _billing.storeName});
       });
     } catch (e, st) {
       if (mounted) {
@@ -109,7 +110,7 @@ class _MySubscriptionSheetState extends ConsumerState<MySubscriptionSheet> {
             if (_loading)
               const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))
             else if (s == null)
-              FormMessage('Could not check your subscription with ${_billing.storeName} right now. Please try again in a minute.')
+              FormMessage(trf('Could not check your subscription with {store} right now. Please try again in a minute.', {'store': _billing.storeName}))
             else
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Icon(
@@ -129,27 +130,27 @@ class _MySubscriptionSheetState extends ConsumerState<MySubscriptionSheet> {
             // own store account.
             if (s?.complimentary ?? false)
               Text(
-                'The FieldOS team gave you this access, so there is nothing to pay or cancel. When it ends, FieldOS '
-                'asks you to choose a plan, and your records stay on this phone.',
+                tr('The FieldOS team gave you this access, so there is nothing to pay or cancel. When it ends, FieldOS '
+                    'asks you to choose a plan, and your records stay on this phone.'),
                 style: muted,
               )
             else ...[
               FilledButton.icon(
                 onPressed: _busy ? null : _manage,
                 icon: const Icon(Icons.open_in_new),
-                label: Text(s?.billingIssue ?? false ? 'Update payment method' : 'Manage or cancel'),
+                label: Text(s?.billingIssue ?? false ? tr('Update payment method') : tr('Manage or cancel')),
               ),
               const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: _busy ? null : _restore,
                 child: _busy
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Restore purchase'),
+                    : Text(tr('Restore purchase')),
               ),
               const SizedBox(height: 16),
               Text(
-                'To cancel, open ${_billing.cancelPath}. You keep FieldOS Pro until the end of the period you have '
-                'paid for, and your records stay on this phone.',
+                trf('To cancel, open {path}. You keep FieldOS Pro until the end of the period you have '
+                    'paid for, and your records stay on this phone.', {'path': _billing.cancelPath}),
                 style: muted,
               ),
             ],

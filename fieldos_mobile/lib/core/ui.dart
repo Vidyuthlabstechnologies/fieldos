@@ -18,7 +18,7 @@ import 'package:fieldos_mobile/l10n/language.dart';
 String friendlyError(Object error, [StackTrace? stack]) {
   if (error is AuthException) return error.message;
   if (error is SocketException || error is HttpException || error is HandshakeException) return offlineMessage;
-  if (error is TimeoutException) return 'That took too long. Check your connection and try again.';
+  if (error is TimeoutException) return tr('That took too long. Check your connection and try again.');
   final known = switch (error) {
     sb.AuthException e => _cloudAuthMessage(e),
     sb.PostgrestException e => _cloudServerMessage(e),
@@ -33,13 +33,13 @@ String friendlyError(Object error, [StackTrace? stack]) {
     return offlineMessage;
   }
   RecentErrors.record(error, stack);
-  return 'Something went wrong. Please try again, or send a bug report from the menu.';
+  return tr('Something went wrong. Please try again, or send a bug report from the menu.');
 }
 
-const offlineMessage = 'No internet connection. Your work is saved on this phone; try again when you are online.';
-const _cloudDownMessage =
-    'The FieldOS cloud is not answering right now. Your work is saved on this phone; try again in a few minutes.';
-const _signInAgainMessage = 'Your cloud sign-in has ended. Sign in again from Team & sync.';
+String get offlineMessage => tr('No internet connection. Your work is saved on this phone; try again when you are online.');
+String get _cloudDownMessage =>
+    tr('The FieldOS cloud is not answering right now. Your work is saved on this phone; try again in a few minutes.');
+String get _signInAgainMessage => tr('Your cloud sign-in has ended. Sign in again from Team & sync.');
 
 /// Supabase Auth's errors, by their stable codes. A message the server
 /// wrote for people is passed on when it is short; anything else is null.
@@ -48,24 +48,24 @@ String? _cloudAuthMessage(sb.AuthException e) {
   // body may be a whole HTML page.
   if (e is sb.AuthRetryableFetchException) return e.statusCode == null ? offlineMessage : _cloudDownMessage;
   if (e is sb.AuthUnknownException) return _cloudDownMessage;
-  if (e is sb.AuthSessionMissingException) return 'Sign in from Team & sync first.';
+  if (e is sb.AuthSessionMissingException) return tr('Sign in from Team & sync first.');
   switch (e.code) {
     case 'invalid_credentials':
-      return 'That email and password do not match. Check them and try again.';
+      return tr('That email and password do not match. Check them and try again.');
     case 'email_not_confirmed':
-      return 'Confirm your email first: open the link we sent you, then sign in here.';
+      return tr('Confirm your email first: open the link we sent you, then sign in here.');
     case 'user_already_exists' || 'email_exists':
-      return 'That email already has a FieldOS cloud account. Sign in with its password.';
+      return tr('That email already has a FieldOS cloud account. Sign in with its password.');
     case 'otp_expired':
-      return 'That code is not right, or it is too old. Check it, or send a new code.';
+      return tr('That code is not right, or it is too old. Check it, or send a new code.');
     case 'same_password':
-      return 'That is already your password. Choose a different one, or sign in with it.';
+      return tr('That is already your password. Choose a different one, or sign in with it.');
     case 'over_email_send_rate_limit' || 'over_request_rate_limit' || 'over_sms_send_rate_limit':
-      return 'Too many tries in a short time. Wait a few minutes, then try again.';
+      return tr('Too many tries in a short time. Wait a few minutes, then try again.');
     case 'signup_disabled':
-      return 'New cloud accounts are switched off for now. Write to us at the support address and we will help.';
+      return tr('New cloud accounts are switched off for now. Write to us at the support address and we will help.');
     case 'email_address_invalid' || 'email_address_not_authorized':
-      return 'That email address cannot be used. Check it, or try another.';
+      return tr('That email address cannot be used. Check it, or try another.');
     case 'session_expired' || 'session_not_found' || 'refresh_token_not_found' || 'refresh_token_already_used':
     case 'bad_jwt' || 'user_not_found':
       return _signInAgainMessage;
@@ -78,29 +78,29 @@ String? _cloudAuthMessage(sb.AuthException e) {
 String? _cloudServerMessage(sb.PostgrestException e) {
   switch (e.message.trim().toLowerCase()) {
     case 'invalid join code':
-      return 'That join code is not right. Check it with the person who shared it: it is 10 letters and numbers.';
+      return tr('That join code is not right. Check it with the person who shared it: it is 10 letters and numbers.');
     case 'too many join attempts':
-      return 'Too many wrong join codes. Wait an hour, then try again with the code from your company owner.';
+      return tr('Too many wrong join codes. Wait an hour, then try again with the code from your company owner.');
     case 'this company is already registered to another account':
-      return 'This company is already on the cloud under another account. Ask its owner for a join code.';
+      return tr('This company is already on the cloud under another account. Ask its owner for a join code.');
     case 'not authenticated' || 'sign in first':
-      return 'Sign in from Team & sync first.';
+      return tr('Sign in from Team & sync first.');
     case 'only the company owner can change roles':
-      return 'Only the company owner can change roles.';
+      return tr('Only the company owner can change roles.');
     case 'owners cannot change their own role':
-      return 'You are the owner, so your own role stays the same.';
+      return tr('You are the owner, so your own role stays the same.');
     case 'only the company owner can reset the join code':
-      return 'Only the company owner can make a new join code.';
+      return tr('Only the company owner can make a new join code.');
     case 'only the company owner can remove people':
-      return 'Only the company owner can remove people from the team.';
+      return tr('Only the company owner can remove people from the team.');
     case 'the owner cannot be removed':
-      return 'The company owner cannot be removed from the team.';
+      return tr('The company owner cannot be removed from the team.');
   }
   switch (e.code) {
     case 'PGRST301' || 'PGRST302' || 'PGRST303' || '28000':
       return _signInAgainMessage;
     case '42501':
-      return 'Your role in this company does not allow that. Ask the owner.';
+      return tr('Your role in this company does not allow that. Ask the owner.');
   }
   return null;
 }
@@ -266,7 +266,7 @@ class StatusPill extends StatelessWidget {
           const SizedBox(width: 6),
         ],
         Flexible(
-          child: Text(label,
+          child: Text(tr(label),
               overflow: TextOverflow.ellipsis,
               style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600, height: 1.3)),
         ),

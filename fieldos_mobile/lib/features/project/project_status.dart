@@ -3,22 +3,23 @@
 library;
 
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 const projectStatuses = ['active', 'planning', 'on_hold', 'completed'];
 
 String projectStatusLabel(String status) => switch (status) {
-      'active' => 'Active',
-      'planning' => 'Planning',
-      'on_hold' => 'On hold',
-      'completed' => 'Completed',
+      'active' => tr('Active'),
+      'planning' => tr('Planning'),
+      'on_hold' => tr('On hold'),
+      'completed' => tr('Completed'),
       _ => status,
     };
 
 String projectStatusHint(String status) => switch (status) {
-      'active' => 'Work is going on at the site',
-      'planning' => 'Not started yet',
-      'on_hold' => 'Work has stopped for now',
-      'completed' => 'Handed over',
+      'active' => tr('Work is going on at the site'),
+      'planning' => tr('Not started yet'),
+      'on_hold' => tr('Work has stopped for now'),
+      'completed' => tr('Handed over'),
       _ => '',
     };
 
