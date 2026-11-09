@@ -11,6 +11,7 @@ import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
+import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
@@ -25,7 +26,13 @@ class DashboardScreen extends ConsumerWidget {
     final projectsAsync = ref.watch(projectsProvider(companyId));
 
     return Scaffold(
-      appBar: AppBar(title: Text(tr('Dashboard'))),
+      appBar: AppBar(title: Text(tr('Dashboard')), actions: [
+        IconButton(
+          icon: const Icon(Icons.wb_twilight_outlined),
+          tooltip: tr('Site brief'),
+          onPressed: () => openOwnerBrief(context, companyId: companyId, companyName: companyName),
+        ),
+      ]),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(projectsProvider(companyId).future),
         child: projectsAsync.when(

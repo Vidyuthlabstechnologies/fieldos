@@ -7,6 +7,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/assistant/assistant_screen.dart';
+import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
 import 'package:fieldos_mobile/features/map/site_map_screen.dart';
 import 'package:fieldos_mobile/features/project/new_project_sheet.dart';
@@ -103,6 +104,8 @@ class HomeScreen extends ConsumerWidget {
             tooltip: tr('More'),
             onSelected: (v) {
               switch (v) {
+                case 'brief':
+                  openOwnerBrief(context, companyId: company.id, companyName: company.name);
                 case 'tasks':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => MyTasksScreen(companyId: company.id)));
                 case 'map':
@@ -124,6 +127,9 @@ class HomeScreen extends ConsumerWidget {
               }
             },
             itemBuilder: (_) => [
+              PopupMenuItem(
+                  value: 'brief',
+                  child: ListTile(leading: Icon(Icons.wb_twilight_outlined), title: Text(tr('Site brief')))),
               PopupMenuItem(
                   value: 'tasks', child: ListTile(leading: Icon(Icons.task_alt), title: Text(tr('My tasks')))),
               PopupMenuItem(value: 'map', child: ListTile(leading: Icon(Icons.map_outlined), title: Text(tr('Site map')))),
@@ -175,6 +181,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ])
                     : _ProjectList(
+                        company: company,
                         projects: projects,
                         userName: session.user?.name,
                         onTour: () => _tour(context, ref, company.id),
@@ -252,8 +259,9 @@ class _CompanyTitle extends ConsumerWidget {
 }
 
 class _ProjectList extends StatelessWidget {
-  const _ProjectList({required this.projects, required this.userName, required this.onTour});
+  const _ProjectList({required this.company, required this.projects, required this.userName, required this.onTour});
 
+  final Company company;
   final List<Project> projects;
   final String? userName;
   final VoidCallback onTour;
@@ -294,6 +302,7 @@ class _ProjectList extends StatelessWidget {
             ),
           ]),
         ),
+        TodayBriefCard(companyId: company.id, companyName: company.name),
         const SectionHeader('Projects'),
         for (final p in sorted) ...[
           _ProjectCard(project: p),
@@ -326,6 +335,7 @@ class _ProjectCard extends ConsumerWidget {
         onTap: () async {
           await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectDetailScreen(project: project)));
           ref.invalidate(openTasksProvider(project.companyId));
+          ref.invalidate(todayBriefProvider(project.companyId));
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
