@@ -1,45 +1,33 @@
 import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
 import 'package:fieldos_mobile/agents/voice_dpr_agent.dart';
-import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/services/sarvam_service.dart';
-import 'package:fieldos_mobile/services/settings_service.dart';
+import 'package:fieldos_mobile/services/ai_backend.dart';
 import 'package:fieldos_mobile/services/voice_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // --- fakes ----------------------------------------------------------------
 
-class _FakeSettings extends SettingsService {
-  _FakeSettings(this.key) : super(AppDatabase.memory());
-  final String? key;
+/// FieldOS's server, answering speech requests with [text], or refusing.
+class _FakeAi implements AiBackend {
+  _FakeAi({this.signedIn = true, this.error});
+  @override
+  final bool signedIn;
+  final AiException? error;
+  final pieces = <(int bytes, String lang)>[];
 
   @override
-  Future<String?> getSarvamApiKey() async => key;
-}
-
-/// Answers every request with [body] and records what was sent.
-class _FakeAdapter implements HttpClientAdapter {
-  _FakeAdapter(this.body, {this.status = 200});
-  final String body;
-  final int status;
-  final requests = <RequestOptions>[];
+  Future<AiReply> chat(List<Map<String, dynamic>> messages) => throw UnimplementedError();
 
   @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<dynamic>? cancelFuture,
-  ) async {
-    requests.add(options);
-    return ResponseBody.fromString(body, status, headers: {
-      'content-type': ['application/json']
-    });
+  Future<String> transcribe(Uint8List wav, {String languageCode = 'unknown'}) async {
+    pieces.add((wav.length, languageCode));
+    if (error != null) throw error!;
+    return '12 masons on site';
   }
-
-  @override
-  void close({bool force = false}) {}
 }
+
+VoiceDprAgent _agent([_FakeAi? ai]) => VoiceDprAgent(sarvam: SarvamService(ai ?? _FakeAi()));
 
 /// [seconds] of 16 kHz mono 16-bit silence as a WAV file.
 Uint8List _wav(int seconds) {
@@ -76,7 +64,7 @@ List<int> _header(int dataLength) {
 void main() {
   group('reading a report on the phone', () {
     test('a typed or heard report becomes a draft with no network', () async {
-      final agent = VoiceDprAgent(sarvam: SarvamService(), settings: _FakeSettings(null));
+      final agent = _agent();
       final res = await agent.run({
         'transcript': 'second floor plastering done with 12 masons and 8 helpers. sunny. cement ran out at 3 pm',
       });
@@ -98,53 +86,44 @@ void main() {
     });
 
     test('nothing heard is a plain message, not a crash', () async {
-      final agent = VoiceDprAgent(sarvam: SarvamService(), settings: _FakeSettings('k'));
+      final agent = _agent();
       final res = await agent.run({'transcript': '  '});
       expect(res.ok, isFalse);
       expect(res.message, contains('No words were heard'));
     });
   });
 
-  group('Sarvam fallback', () {
-    test('only with a key', () async {
-      final agent = VoiceDprAgent(sarvam: SarvamService(), settings: _FakeSettings(null));
+  group('Sarvam fallback, through FieldOS\'s server', () {
+    test('needs a FieldOS sign-in, never a key', () async {
+      final agent = _agent(_FakeAi(signedIn: false));
       expect(await agent.canUseSarvam(), isFalse);
       final res = await agent.run({'audioBytes': _wav(2)});
       expect(res.ok, isFalse);
-      expect(res.message, contains('Sarvam key'));
+      expect(res.message, contains('Team & sync'));
+      expect(await _agent().canUseSarvam(), isTrue);
     });
 
     test('a long recording goes up in pieces under 30 seconds and is joined', () async {
-      final adapter = _FakeAdapter('{"transcript":"12 masons on site"}');
-      final sarvam = SarvamService(dio: Dio()..httpClientAdapter = adapter);
-      final agent = VoiceDprAgent(sarvam: sarvam, settings: _FakeSettings('sk_test'));
+      final ai = _FakeAi();
       final progress = <int>[];
-
-      final res = await agent.run({
+      final res = await _agent(ai).run({
         'audioBytes': _wav(70),
         'languageCode': 'hi-IN',
         'onProgress': (int done, int total) => progress.add(done),
       });
 
       expect(res.ok, isTrue);
-      expect(adapter.requests, hasLength(3)); // 25 + 25 + 20 seconds
+      expect(ai.pieces, hasLength(3)); // 25 + 25 + 20 seconds
+      expect(ai.pieces.every((p) => p.$1 <= 44 + 25 * 32000 && p.$2 == 'hi-IN'), isTrue);
       expect(res.data['transcript'], '12 masons on site 12 masons on site 12 masons on site');
       expect(progress.last, 3);
-      final form = adapter.requests.first.data as FormData;
-      final fields = {for (final f in form.fields) f.key: f.value};
-      expect(fields['model'], sarvamSttModel);
-      expect(fields['mode'], 'transcribe');
-      expect(fields['language_code'], 'hi-IN');
-      expect(adapter.requests.first.headers['api-subscription-key'], 'sk_test');
     });
 
-    test('a rejected key says so in plain words', () async {
-      final adapter = _FakeAdapter('{"error":"invalid key"}', status: 403);
-      final sarvam = SarvamService(dio: Dio()..httpClientAdapter = adapter);
-      final agent = VoiceDprAgent(sarvam: sarvam, settings: _FakeSettings('bad'));
-      final res = await agent.run({'audioBytes': _wav(3)});
+    test("the server's reason is shown in plain words", () async {
+      final ai = _FakeAi(error: AiException("Today's voice time is used up.", code: 'daily_limit'));
+      final res = await _agent(ai).run({'audioBytes': _wav(3)});
       expect(res.ok, isFalse);
-      expect(res.message, contains('not accepted'));
+      expect(res.message, "Today's voice time is used up.");
     });
   });
 

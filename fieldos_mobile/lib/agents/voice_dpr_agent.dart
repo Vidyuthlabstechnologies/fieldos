@@ -6,7 +6,7 @@
 /// agent reads it on the phone ([extractManpower], [extractWeather],
 /// [detectIssueEvidence]): free, offline, no account. Only when the phone
 /// can't recognise speech in the chosen language does a recording go to
-/// Sarvam for the words, and only with a key a company owner added.
+/// Sarvam for the words, through FieldOS's server and its shared key.
 library;
 
 import 'dart:typed_data';
@@ -15,7 +15,6 @@ import 'package:fieldos_mobile/agents/agent.dart';
 import 'package:fieldos_mobile/agents/dpr_intake.dart';
 import 'package:fieldos_mobile/agents/site_report_parser.dart';
 import 'package:fieldos_mobile/services/sarvam_service.dart';
-import 'package:fieldos_mobile/services/settings_service.dart';
 
 /// What a voice report says, ready for the draft screen.
 class DprDraft {
@@ -68,9 +67,8 @@ DprDraft draftFromTranscript(String transcript, {String? english}) {
 }
 
 class VoiceDprAgent implements Agent {
-  VoiceDprAgent({required this.sarvam, required this.settings});
+  VoiceDprAgent({required this.sarvam});
   final SarvamService sarvam;
-  final SettingsService settings;
 
   @override
   String get name => 'voice_dpr';
@@ -85,8 +83,9 @@ class VoiceDprAgent implements Agent {
         AgentTool(name: 'transcribe_fallback', description: 'Speech-to-text via Sarvam when the phone cannot.'),
       ];
 
-  /// Whether the Sarvam fallback can be used (an owner added a key).
-  Future<bool> canUseSarvam() async => (await settings.getSarvamApiKey())?.isNotEmpty ?? false;
+  /// Whether the Sarvam fallback can be used: it goes through FieldOS's
+  /// server, so the phone has to be signed in to Team & sync.
+  Future<bool> canUseSarvam() async => sarvam.available;
 
   /// `input` keys:
   ///  - `transcript` (String): what the phone heard. The usual path.
@@ -102,18 +101,16 @@ class VoiceDprAgent implements Agent {
       if (audio == null || audio.isEmpty) {
         return const AgentResult(ok: false, message: 'No words were heard. Try again, a little closer to the phone.');
       }
-      final apiKey = await settings.getSarvamApiKey();
-      if (apiKey == null || apiKey.isEmpty) {
+      if (!sarvam.available) {
         return const AgentResult(
           ok: false,
-          message: "This phone can't turn speech into text in this language. Type the report instead, "
-              'or ask a company owner to add a Sarvam key in Settings.',
+          message: "This phone can't turn speech into text in this language by itself. Type the report instead, "
+              'or sign in to Team & sync so FieldOS can do it over the internet.',
         );
       }
       try {
         transcript = await sarvam.transcribeWav(
           wav: audio,
-          apiKey: apiKey,
           languageCode: (input['languageCode'] as String?) ?? 'unknown',
           onProgress: input['onProgress'] as void Function(int, int)?,
         );

@@ -1,0 +1,16 @@
+{
+  "imports": {
+    "@anthropic-ai/sdk": "npm:@anthropic-ai/sdk@1.6.0",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.119.0",
+    "@std/assert": "jsr:@std/assert@1"
+  },
+  "nodeModulesDir": "none",
+  "fmt": {
+    "lineWidth": 120
+  },
+  "test": {
+    "include": [
+      "core_test.ts"
+    ]
+  }
+}

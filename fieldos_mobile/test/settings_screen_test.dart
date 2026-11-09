@@ -37,7 +37,7 @@ void main() {
     return container;
   }
 
-  testWidgets('a site engineer gets the account, voice, help and legal settings, but not the Sarvam key',
+  testWidgets('a site engineer gets the account, voice, help and legal settings',
       (tester) async {
     final container = await pump(tester, owner: false);
     expect(container.read(sessionProvider).role, Roles.member);
@@ -53,11 +53,11 @@ void main() {
     expect(find.text('Open-source licences'), findsOneWidget);
   });
 
-  testWidgets('an owner can set the Sarvam fallback key', (tester) async {
+  testWidgets('nobody is asked for a Sarvam or AI key, not even an owner', (tester) async {
     await pump(tester, owner: true);
-    await tester.scrollUntilVisible(find.text('Sarvam fallback key'), 200);
-    expect(find.text('Sarvam fallback key'), findsOneWidget);
-    expect(find.textContaining('free and offline'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Open-source licences'), 200);
+    expect(find.textContaining('Sarvam'), findsNothing);
+    expect(find.textContaining('API key'), findsNothing);
   });
 
   testWidgets('the voice language can be chosen here', (tester) async {

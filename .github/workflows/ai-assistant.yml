@@ -1,0 +1,71 @@
+name: ai-assistant
+
+# Tests the AI assistant's server side (supabase/functions/ai-assistant):
+#   unit  offline tests, lint and type check of the edge function
+#   db    the daily-allowance table and function, on a local database
+#   live  the real Anthropic, Sarvam and RevenueCat keys from the repo
+#         secrets: the real prompt and tools are accepted, Claude answers and
+#         picks the right action, each key works. A missing secret is listed
+#         and its test skipped. Costs a few paise per run.
+on:
+  push:
+    branches: [master]
+    paths: ['supabase/functions/**', 'supabase/migrations/**', 'supabase/tests/**', '.github/workflows/ai-assistant.yml']
+  pull_request:
+    paths: ['supabase/functions/**', 'supabase/migrations/**', 'supabase/tests/**', '.github/workflows/ai-assistant.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
+    defaults:
+      run:
+        working-directory: supabase/functions/ai-assistant
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno fmt --check
+      - run: deno lint
+      - run: deno check index.ts live_test.ts
+      - run: deno test core_test.ts
+
+  db:
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
+        with:
+          version: latest
+      - name: Start a local database with every migration
+        run: supabase start
+      - name: Allowance checks
+        run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -f supabase/tests/ai_usage_test.sql
+
+  live:
+    needs: unit
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
+      REVENUECAT_SECRET_KEY: ${{ secrets.REVENUECAT_SECRET_KEY }}
+      REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
+      AI_MODEL: ${{ vars.AI_MODEL }}
+    defaults:
+      run:
+        working-directory: supabase/functions/ai-assistant
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Which secrets are set
+        run: |
+          for name in ANTHROPIC_API_KEY SARVAM_API_KEY REVENUECAT_ANDROID_KEY; do
+            if [ -n "${!name}" ]; then echo "set      $name"; else echo "::warning::Repo secret $name is not set; its live test is skipped."; fi
+          done
+      - run: deno test --allow-env --allow-net live_test.ts
