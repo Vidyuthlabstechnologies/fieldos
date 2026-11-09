@@ -145,7 +145,14 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
     ),
     chipTheme: base.chipTheme.copyWith(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      labelStyle: const TextStyle(fontFamily: Brand.fontFamily, fontWeight: FontWeight.w500, fontSize: 13),
+      // A colour is required here: without one the label inherits white
+      // and vanishes on the light chips (it did, on every filter chip row).
+      labelStyle: TextStyle(
+          fontFamily: Brand.fontFamily, fontWeight: FontWeight.w500, fontSize: 13, color: scheme.onSurface),
+      secondaryLabelStyle: TextStyle(
+          fontFamily: Brand.fontFamily, fontWeight: FontWeight.w600, fontSize: 13, color: scheme.onSecondaryContainer),
+      selectedColor: scheme.secondaryContainer,
+      checkmarkColor: scheme.onSecondaryContainer,
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: dark ? const Color(0xFF132238) : Colors.white,

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FieldOS video guide</title>
+<meta name="description" content="A two-minute video tour of FieldOS: sites, tasks, voice DPR, attendance, wage sheet, money, stock, budgets and approvals.">
+<meta name="theme-color" content="#0b1d35">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FieldOS">
+<meta property="og:title" content="FieldOS video guide">
+<meta property="og:description" content="A two-minute video tour of FieldOS: sites, tasks, voice DPR, attendance, wage sheet, money, stock, budgets and approvals.">
+<meta property="og:image" content="assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" aria-label="FieldOS home"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M20 58a30 30 0 0 1 60 0z" fill="#f5a524"/><rect x="20" y="51" width="60" height="7" fill="#d6860e"/><rect x="46" y="27" width="8" height="31" rx="4" fill="#d6860e"/><rect x="10" y="57" width="80" height="9" rx="4.5" fill="#f5a524"/><rect x="24" y="73" width="52" height="4" rx="2" fill="#fff"/></svg><span>Field<span class="os">OS</span></span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="index.html#features">Features</a>
+      <a href="guide.html">Video guide</a>
+      <a href="index.html#pricing">Pricing</a>
+      <a href="index.html#faq">FAQ</a>
+      <a class="btn btn-amber btn-sm" href="https://play.google.com/store/apps/details?id=com.mldynamic.fieldos" rel="noopener">Start free trial</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-hero"><div class="wrap"><h1>Video guide</h1><p>Everything you need for your first site, in two minutes.</p></div></div>
+<section><div class="wrap">
+<div class="video-frame"><video id="guide" controls preload="metadata" playsinline poster="assets/video/guide-poster.jpg" width="1280" height="720">
+<source src="assets/video/fieldos-guide.mp4" type="video/mp4">
+Your browser can't play this video. <a href="assets/video/fieldos-guide.mp4">Download it</a>.
+</video></div>
+<ol class="chapters" aria-label="Chapters"><li><button type="button" data-t="0"><time>0:00</time>Welcome</button></li><li><button type="button" data-t="5.7"><time>0:05</time>1. Your sites</button></li><li><button type="button" data-t="18.6"><time>0:18</time>2. Tasks and daily reports</button></li><li><button type="button" data-t="49.6"><time>0:49</time>3. Labour and wages</button></li><li><button type="button" data-t="69.7"><time>1:09</time>4. Money and material</button></li><li><button type="button" data-t="87.5"><time>1:27</time>5. For the owner</button></li><li><button type="button" data-t="107.6"><time>1:47</time>Start your free trial</button></li></ol>
+<p style="margin-top:28px">Still stuck? Use <b>Report a bug</b> in the app, or email <a href="mailto:info@mldynamic.com?subject=FieldOS%20help">info@mldynamic.com</a>. See the <a href="support.html">support page</a>.</p>
+</div></section>
+<script>
+document.querySelectorAll('.chapters button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var v = document.getElementById('guide');
+    v.currentTime = parseFloat(b.dataset.t);
+    v.play();
+  });
+});
+</script>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <a class="logo" href="index.html"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M20 58a30 30 0 0 1 60 0z" fill="#f5a524"/><rect x="20" y="51" width="60" height="7" fill="#d6860e"/><rect x="46" y="27" width="8" height="31" rx="4" fill="#d6860e"/><rect x="10" y="57" width="80" height="9" rx="4.5" fill="#f5a524"/><rect x="24" y="73" width="52" height="4" rx="2" fill="#fff"/></svg><span>Field<span class="os">OS</span></span></a>
+        <p style="margin-top:14px;max-width:30em">The site diary, wage sheet and DPR app for Indian builders and contractors. Works offline. Speaks your language.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="index.html#features">Features</a></li>
+          <li><a href="index.html#pricing">Pricing</a></li>
+          <li><a href="index.html#faq">FAQ</a></li>
+          <li><a href="https://play.google.com/store/apps/details?id=com.mldynamic.fieldos" rel="noopener">Google Play</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Help &amp; legal</h4>
+        <ul>
+          <li><a href="support.html">Support</a></li>
+          <li><a href="privacy-policy.html">Privacy policy</a></li>
+          <li><a href="terms-of-use.html">Terms of use</a></li>
+          <li><a href="delete-account.html">Delete your account</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal">
+      <address>ML Dynamic Solutions Private Limited · 606, 6th Floor, Gowra Fountainhead, Patrika Nagar, Madhapur, Hi-Tech City, Hyderabad, Telangana 500081, India · <a href="mailto:info@mldynamic.com">info@mldynamic.com</a></address>
+      <span>© 2026 ML Dynamic Solutions Private Limited</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

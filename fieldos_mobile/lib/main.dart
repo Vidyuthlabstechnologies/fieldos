@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/app.dart';
 import 'package:fieldos_mobile/core/text_size.dart';
 import 'package:fieldos_mobile/core/theme.dart';
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/security/app_lock.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/services/bug_report_service.dart';
@@ -46,7 +47,7 @@ class AppWithMaterial extends ConsumerWidget {
         final media = MediaQuery.of(context);
         return MediaQuery(
           data: media.copyWith(textScaler: combinedTextScaler(media.textScaler, size)),
-          child: AppLockGate(child: child ?? const SizedBox.shrink()),
+          child: SystemNavBarSafeArea(child: AppLockGate(child: child ?? const SizedBox.shrink())),
         );
       },
       debugShowCheckedModeBanner: false,

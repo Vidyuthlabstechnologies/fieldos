@@ -21,6 +21,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
 import 'package:fieldos_mobile/features/map/site_map_screen.dart';
+import 'package:fieldos_mobile/features/mascot/mitra.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/features/project/voice_report_sheet.dart';
 import 'package:fieldos_mobile/features/search/search_screen.dart';
@@ -294,20 +295,26 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   }
 }
 
-/// The assistant's face: the FieldOS helmet-amber circle with a spark.
+/// The assistant's face: Mitra, the site buddy, in a soft amber circle.
+/// Small avatars hold still so a long chat doesn't animate every bubble.
 class _Avatar extends StatelessWidget {
   const _Avatar({this.size = 40});
   final double size;
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: size,
-        height: size,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(colors: [Brand.amber, Brand.amberDark], begin: Alignment.topLeft, end: Alignment.bottomRight),
+  Widget build(BuildContext context) => SizedBox.square(
+        dimension: size,
+        child: ClipOval(
+          child: ColoredBox(
+            color: Brand.amberSoft,
+            child: OverflowBox(
+              maxWidth: size * 1.5,
+              maxHeight: size * 1.5,
+              alignment: const Alignment(0, -0.35),
+              child: Mitra(mood: size >= 60 ? MitraMood.wave : MitraMood.talk, size: size * 1.5, still: size < 60),
+            ),
+          ),
         ),
-        child: Icon(Icons.auto_awesome, size: size * 0.55, color: Brand.navyDeep),
       );
 }
 
