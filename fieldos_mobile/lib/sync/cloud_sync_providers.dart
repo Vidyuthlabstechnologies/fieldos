@@ -12,6 +12,7 @@ import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/services/ai_backend.dart';
 import 'package:fieldos_mobile/services/bug_report_service.dart';
 import 'package:fieldos_mobile/services/message_report_service.dart';
 import 'cloud_sync_service.dart';
@@ -45,6 +46,13 @@ final cloudSyncClientProvider = Provider<SupabaseClient>((ref) {
   ref.onDispose(client.dispose);
   return client;
 });
+
+/// FieldOS's server-side AI (the assistant and the Sarvam fallback), signed
+/// in with the same FieldOS account as Team & sync.
+final aiBackendProvider = Provider<AiBackend>((ref) => SupabaseAiBackend(
+      client: ref.watch(cloudSyncAvailableProvider) ? ref.watch(cloudSyncClientProvider) : null,
+      subscriberId: () => ref.read(billingServiceProvider).customerId(),
+    ));
 
 final cloudSyncEngineProvider = Provider<SyncEngine>((ref) {
   final engine = SyncEngine(db: ref.watch(appDatabaseProvider), client: ref.watch(cloudSyncClientProvider));

@@ -17,6 +17,7 @@ import 'package:fieldos_mobile/services/sarvam_service.dart';
 import 'package:fieldos_mobile/services/settings_service.dart';
 import 'package:fieldos_mobile/services/translation_service.dart';
 import 'package:fieldos_mobile/services/voice_service.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -29,7 +30,8 @@ final authServiceProvider = Provider<AuthService>((ref) => AuthService(ref.watch
 final settingsServiceProvider =
     Provider<SettingsService>((ref) => SettingsService(ref.watch(appDatabaseProvider)));
 
-final sarvamServiceProvider = Provider<SarvamService>((ref) => SarvamService());
+/// Sarvam speech to text, through FieldOS's server (see [aiBackendProvider]).
+final sarvamServiceProvider = Provider<SarvamService>((ref) => SarvamService(ref.watch(aiBackendProvider)));
 
 /// A recorder for the Sarvam fallback; each voice sheet makes its own and
 /// disposes it.
@@ -38,10 +40,7 @@ final voiceServiceFactoryProvider = Provider<VoiceService Function()>((ref) => V
 final translationServiceProvider = Provider<TranslationService>((ref) => TranslationService());
 
 final voiceDprAgentProvider = Provider<VoiceDprAgent>(
-  (ref) => VoiceDprAgent(
-    sarvam: ref.watch(sarvamServiceProvider),
-    settings: ref.watch(settingsServiceProvider),
-  ),
+  (ref) => VoiceDprAgent(sarvam: ref.watch(sarvamServiceProvider)),
 );
 
 final dprIntakeAgentProvider = Provider<DprIntakeAgent>((ref) => const DprIntakeAgent());

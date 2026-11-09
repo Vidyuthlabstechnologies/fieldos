@@ -3,7 +3,9 @@
 /// recognition, so it's free and works offline once the language's speech
 /// pack is installed. Only if the phone can't recognise the chosen
 /// language at all does it record instead and send the recording to Sarvam
-/// (with an owner's key, and internet).
+/// through FieldOS's server (signed in to Team & sync, with internet).
+///
+/// The AI assistant uses the same sheet to hear a request ([forAssistant]).
 library;
 
 import 'dart:async';
@@ -33,18 +35,22 @@ class VoiceReport {
   final bool typeInstead;
 }
 
-Future<VoiceReport?> showVoiceReportSheet(BuildContext context) => showModalBottomSheet<VoiceReport>(
+Future<VoiceReport?> showVoiceReportSheet(BuildContext context, {bool forAssistant = false}) =>
+    showModalBottomSheet<VoiceReport>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       enableDrag: false,
-      builder: (_) => const VoiceReportSheet(),
+      builder: (_) => VoiceReportSheet(forAssistant: forAssistant),
     );
 
 enum _Mode { phone, sarvam }
 
 class VoiceReportSheet extends ConsumerStatefulWidget {
-  const VoiceReportSheet({super.key});
+  const VoiceReportSheet({super.key, this.forAssistant = false});
+
+  /// Hearing a request for the assistant rather than a site report.
+  final bool forAssistant;
 
   @override
   ConsumerState<VoiceReportSheet> createState() => _VoiceReportSheetState();
@@ -243,7 +249,9 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
         children: [
           Row(
             children: [
-              Expanded(child: Text(tr('Speak your report'), style: theme.textTheme.titleLarge)),
+              Expanded(
+                  child: Text(widget.forAssistant ? tr('Speak to FieldOS') : tr('Speak your report'),
+                      style: theme.textTheme.titleLarge)),
               ActionChip(
                 avatar: const Icon(Icons.translate, size: 18),
                 label: Text(_language.isEnglish ? 'English' : _language.name),
@@ -306,7 +314,16 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
     );
   }
 
-  String _hint() => switch (_language.code) {
+  String _hint() => widget.forAssistant ? _assistantHint() : _reportHint();
+
+  String _assistantHint() => switch (_language.code) {
+        'hi-IN' => 'जो काम करवाना है, आम बोली में बोलिए। जैसे: "नरपल्ली साइट पर सीमेंट के लिए 5000 रुपये खर्च लिखो"',
+        'te-IN' => 'మీకు ఏం కావాలో మామూలుగా చెప్పండి. ఉదా: "నరపల్లి సైట్‌లో సిమెంట్‌కి 5000 రూపాయల ఖర్చు రాయి"',
+        _ => 'Say what you need, the way you would tell a colleague. For example: '
+            '"Add 5,000 rupees for cement at the Narapally site."',
+      };
+
+  String _reportHint() => switch (_language.code) {
         'hi-IN' => 'आज क्या काम हुआ, कितने मजदूर थे, मौसम कैसा था और कोई समस्या बताइए। जैसे: "दूसरी मंजिल पर प्लास्टर पूरा हुआ। 12 मिस्त्री और 8 हेल्पर। धूप थी। 3 बजे सीमेंट खत्म हो गया।"',
         'te-IN' => 'ఈరోజు జరిగిన పని, ఎంత మంది పనిచేశారు, వాతావరణం, ఏమైనా సమస్యలు చెప్పండి. ఉదా: "రెండో అంతస్తులో ప్లాస్టరింగ్ పూర్తయింది. 12 మంది మేస్త్రీలు, 8 మంది హెల్పర్లు. ఎండగా ఉంది. 3 గంటలకు సిమెంట్ అయిపోయింది."',
         _ => 'Say what was done today, how many people worked, the weather and any problems. For example: '

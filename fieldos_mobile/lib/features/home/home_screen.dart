@@ -6,6 +6,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
+import 'package:fieldos_mobile/features/assistant/assistant_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
 import 'package:fieldos_mobile/features/map/site_map_screen.dart';
 import 'package:fieldos_mobile/features/project/new_project_sheet.dart';
@@ -145,34 +146,45 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => ref.refresh(projectsProvider(company.id).future),
-        child: projectsAsync.when(
-          data: (projects) => projects.isEmpty
-              ? Column(children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: TourInviteCard(onStart: () => _tour(context, ref, company.id)),
-                  ),
-                  Expanded(child: EmptyState(
-                  icon: Icons.domain_add_outlined,
-                  title: tr('Start your first project'),
-                  message: tr('A project is one site. Its daily reports, labour, materials, money and photos stay '
-                      'together, on this phone and offline.'),
-                  actionLabel: tr('New project'),
-                  onAction: () => _newProject(context, ref, company.id),
-                  secondaryLabel: tr('Try a sample site first'),
-                  onSecondary: () => _trySample(context, ref, company.id, session.user?.id ?? ''),
-                )),
-                ])
-              : _ProjectList(
-                  projects: projects,
-                  userName: session.user?.name,
-                  onTour: () => _tour(context, ref, company.id),
-                ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, st) => ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(projectsProvider(company.id))),
-        ),
+      body: Column(
+        children: [
+          // The assistant first: someone who has never learned the app can
+          // just say what they need.
+          const Padding(padding: EdgeInsets.fromLTRB(16, 12, 16, 0), child: AssistantEntry()),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () => ref.refresh(projectsProvider(company.id).future),
+              child: projectsAsync.when(
+                data: (projects) => projects.isEmpty
+                    ? Column(children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                          child: TourInviteCard(onStart: () => _tour(context, ref, company.id)),
+                        ),
+                        Expanded(
+                          child: EmptyState(
+                            icon: Icons.domain_add_outlined,
+                            title: tr('Start your first project'),
+                            message: tr('A project is one site. Its daily reports, labour, materials, money and photos stay '
+                                'together, on this phone and offline.'),
+                            actionLabel: tr('New project'),
+                            onAction: () => _newProject(context, ref, company.id),
+                            secondaryLabel: tr('Try a sample site first'),
+                            onSecondary: () => _trySample(context, ref, company.id, session.user?.id ?? ''),
+                          ),
+                        ),
+                      ])
+                    : _ProjectList(
+                        projects: projects,
+                        userName: session.user?.name,
+                        onTour: () => _tour(context, ref, company.id),
+                      ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, st) => ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(projectsProvider(company.id))),
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: hasProjects
           ? FloatingActionButton.extended(
