@@ -21,8 +21,9 @@ before assuming otherwise) with:
 - **AI assistant (mobile)**: "Ask FieldOS" on Home. Claude runs behind the
   `ai-assistant` edge function (`supabase/functions/ai-assistant/`, keys are
   function secrets, plan + a monthly ₹ cap per person checked there; Claude
-  Haiku, with DeepSeek on Sarvam as the backup); the actions run (`lib/agents/assistant_tools.dart`) and every change waits on a confirm
-  card. Tool names in `tools.ts` and `assistant_tools.dart` must
+  Haiku, with DeepSeek on Sarvam as the backup); the actions run on the
+  phone (`lib/agents/assistant_tools.dart`) and every change waits on a
+  confirm card. Tool names in `tools.ts` and `assistant_tools.dart` must
   match (a test checks). See `docs/AI_ASSISTANT.md`.
 
 ## Code Style Rules
