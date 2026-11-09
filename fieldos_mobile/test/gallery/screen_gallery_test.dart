@@ -27,6 +27,7 @@ import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/auth/login_screen.dart';
 import 'package:fieldos_mobile/features/company/company_setup_screen.dart';
 import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
+import 'package:fieldos_mobile/features/procurement/payables_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
 import 'package:fieldos_mobile/features/home/home_screen.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet_screen.dart';
@@ -209,6 +210,7 @@ void main() {
     '46_team_sync': (t, c, db, p) => shoot(t, c, '46_team_sync', const TeamSyncScreen()),
     '47_settings': (t, c, db, p) => shoot(t, c, '47_settings', const SettingsScreen()),
     '48_bug_report': (t, c, db, p) => shoot(t, c, '48_bug_report', const BugReportScreen()),
+    '51_who_you_owe': (t, c, db, p) => shoot(t, c, '51_who_you_owe', PayablesScreen(companyId: p.companyId)),
     '50_site_brief': (t, c, db, p) =>
         shoot(t, c, '50_site_brief', OwnerBriefScreen(companyId: p.companyId, companyName: 'Sri Sai Constructions')),
     '05_home_tour_invite': (t, c, db, p) => shoot(t, c, '05_home_tour_invite', const HomeScreen()),
