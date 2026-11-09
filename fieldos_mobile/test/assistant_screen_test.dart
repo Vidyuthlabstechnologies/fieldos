@@ -148,6 +148,45 @@ void main() {
     expect(find.text('नमस्ते, Ravi! मैं क्या करूँ?'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('the chat is still there when the assistant is opened again, with follow-ups under the answer',
+      (tester) async {
+    final ai = _FakeAi(replies: [
+      const AiReply(content: [
+        {'type': 'text', 'text': 'You have one site, Narapally Villa.'}
+      ], stopReason: 'end_turn'),
+    ]);
+    final (container, _, _) = await setUp(tester, ai);
+    await pump(tester, container, const AssistantScreen());
+
+    await tester.tap(find.text('Which tasks are late?'));
+    await settle(tester);
+    expect(find.text('You have one site, Narapally Villa.'), findsOneWidget);
+    expect(find.text('You might ask next'), findsOneWidget);
+    expect(find.widgetWithText(ActionChip, 'What happened on my sites today?'), findsOneWidget);
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200)));
+
+    // Leave and come back: the same chat opens.
+    await pump(tester, container, const SizedBox());
+    await pump(tester, container, const AssistantScreen());
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200)));
+    await settle(tester);
+    expect(find.text('You have one site, Narapally Villa.'), findsOneWidget);
+    expect(find.text('Which tasks are late?'), findsOneWidget, reason: 'the question, not a welcome idea');
+
+    // Past chats lists it; New chat starts fresh.
+    await tester.tap(find.byTooltip('Past chats'));
+    await settle(tester);
+    expect(find.text('Past chats'), findsOneWidget);
+    expect(find.widgetWithText(ListTile, 'Which tasks are late?'), findsOneWidget);
+    await tester.tapAt(const Offset(200, 40));
+    await settle(tester);
+    await tester.tap(find.byTooltip('New chat'));
+    await settle(tester);
+    expect(find.text('Namaste, Ravi! What should I do?'), findsOneWidget);
+    expect(ai.calls, 1);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Future<void> settle(WidgetTester tester) async {

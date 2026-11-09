@@ -1487,4 +1487,26 @@ const Map<String, String> stringsHi = {
       'हर 6 महीने {price}',
   '{price}, charged by {store} today. It renews {renews} until you cancel in {cancelIn}, at least 24 hours before the next payment.':
       '{price}, आज {store} लेगा। यह {renews} अपने आप नया होगा, जब तक आप अगले भुगतान से कम से कम 24 घंटे पहले {cancelIn} में रद्द न करें।',
+  'Show this week\'s expenses':
+      'इस हफ़्ते के खर्च दिखाओ',
+  'What is due this week?':
+      'इस हफ़्ते क्या-क्या करना है?',
+  'Who was absent today?':
+      'आज कौन नहीं आया?',
+  'How much did labour cost this week?':
+      'इस हफ़्ते मज़दूरी पर कितना खर्च हुआ?',
+  'Any open issues on site?':
+      'साइट पर कोई खुली समस्या है?',
+  'Which materials are running low?':
+      'कौन सा माल कम पड़ रहा है?',
+  'What needs my approval?':
+      'मेरी मंज़ूरी के लिए क्या बाकी है?',
+  'You might ask next':
+      'आगे आप यह पूछ सकते हैं',
+  'Past chats':
+      'पिछली बातचीत',
+  'Delete all':
+      'सब मिटाएँ',
+  'No earlier chats yet. Your chats are kept on this phone.':
+      'अभी कोई पिछली बातचीत नहीं है। आपकी बातचीत इसी फ़ोन पर रहती है।',
 };
