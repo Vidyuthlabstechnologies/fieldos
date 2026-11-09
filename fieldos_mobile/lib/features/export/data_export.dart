@@ -309,10 +309,41 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
           w.createdAt,
         ]),
     ]),
-    XlsxSheet('Equipment', h(['Name', 'Type', 'Model', 'Registration', 'Status', 'Daily rate (₹)', 'Note']), [
-      for (final e in equipment)
-        r(e.projectId, [e.name, e.equipmentType, e.model, e.registrationNumber, _word(e.status), e.dailyRate, e.notes]),
-    ]),
+    XlsxSheet(
+        'Equipment',
+        h([
+          'Name',
+          'Type',
+          'Model',
+          'Registration',
+          'Status',
+          'Daily rate (₹)',
+          'Rate per hour (₹)',
+          'Own or hired',
+          'Hired from',
+          'On site since',
+          'Goes back on',
+          'Returned on',
+          'Note',
+        ]),
+        [
+          for (final e in equipment)
+            r(e.projectId, [
+              e.name,
+              e.equipmentType,
+              e.model,
+              e.registrationNumber,
+              _word(e.status),
+              e.dailyRate,
+              e.hourlyRate,
+              e.ownership == 'hired' ? 'Hired' : 'Own',
+              e.hiredFrom,
+              e.hiredOn,
+              e.returnDueOn,
+              e.returnedOn,
+              e.notes,
+            ]),
+        ]),
     XlsxSheet('Equipment logs', h(['Date', 'Equipment', 'Type', 'Hours', 'Cost (₹)', 'Note']), [
       for (final l in equipmentLogs.toList()..sort((a, b) => newest(a.logDate, b.logDate)))
         r(equipmentSite[l.equipmentId] ?? '', [

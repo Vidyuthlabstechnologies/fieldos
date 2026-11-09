@@ -554,6 +554,17 @@ class Equipment extends Table {
   TextColumn get notes => text().withLength(max: 500).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
+  // v12 (Onsite review batch R4): machines charged by the hour, and the
+  // hire register for machines taken on rent.
+  RealColumn get hourlyRate => real().nullable()();
+
+  /// 'own' or 'hired'.
+  TextColumn get ownership => text().withLength(min: 1, max: 10).withDefault(const Constant('own'))();
+  TextColumn get hiredFrom => text().withLength(max: 120).nullable()();
+  DateTimeColumn get hiredOn => dateTime().nullable()();
+  DateTimeColumn get returnDueOn => dateTime().nullable()();
+  DateTimeColumn get returnedOn => dateTime().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }

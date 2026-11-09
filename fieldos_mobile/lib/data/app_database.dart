@@ -93,7 +93,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -189,6 +189,18 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 11) {
             await m.createTable(attendanceMarks);
+          }
+          if (from < 12) {
+            for (final c in [
+              equipment.hourlyRate,
+              equipment.ownership,
+              equipment.hiredFrom,
+              equipment.hiredOn,
+              equipment.returnDueOn,
+              equipment.returnedOn,
+            ]) {
+              await _addColumnIfMissing(m, equipment, c);
+            }
           }
         },
       );
@@ -1411,10 +1423,16 @@ class EquipmentDao extends DatabaseAccessor<AppDatabase> with _$EquipmentDaoMixi
     return (select(equipment)..where((e) => e.projectId.equals(projectId))).get();
   }
 
-  Future<void> updateStatus(String id, String status) {
+  Future<void> updateStatus(String id, String status) => edit(id, EquipmentCompanion(status: Value(status)));
+
+  /// Changes a machine's details. It stays on its site.
+  Future<EquipmentData> edit(String id, EquipmentCompanion changes) {
     return transaction(() async {
-      await (update(equipment)..where((e) => e.id.equals(id)))
-          .write(EquipmentCompanion(status: Value(status)));
+      await (update(equipment)..where((e) => e.id.equals(id))).write(changes.copyWith(
+        id: const Value.absent(),
+        projectId: const Value.absent(),
+        createdAt: const Value.absent(),
+      ));
       final row = await (select(equipment)..where((e) => e.id.equals(id))).getSingle();
       await db.syncOutboxDao.enqueue(
         targetTable: 'equipment',
@@ -1422,7 +1440,28 @@ class EquipmentDao extends DatabaseAccessor<AppDatabase> with _$EquipmentDaoMixi
         operation: 'update',
         payloadJson: jsonEncode(equipmentToSupabaseJson(row)),
       );
+      return row;
     });
+  }
+
+  /// A hired machine went back to its owner on [on]; it is no longer on
+  /// site, so it can't be "in use".
+  Future<EquipmentData> markReturned(String id, DateTime on) async {
+    final e = await (select(equipment)..where((x) => x.id.equals(id))).getSingle();
+    // The cloud refuses a return before the hire began.
+    final day = DateTime(on.year, on.month, on.day);
+    final hired = e.hiredOn;
+    return edit(id, EquipmentCompanion(
+      returnedOn: Value(hired != null && day.isBefore(hired) ? hired : day),
+      status: const Value('available'),
+    ));
+  }
+
+  /// Every usage log of the site's machines, for the hire register.
+  Future<List<EquipmentLog>> logsForProject(String projectId) {
+    final q = select(equipmentLogs).join([innerJoin(equipment, equipment.id.equalsExp(equipmentLogs.equipmentId))])
+      ..where(equipment.projectId.equals(projectId));
+    return q.map((r) => r.readTable(equipmentLogs)).get();
   }
 
   /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.

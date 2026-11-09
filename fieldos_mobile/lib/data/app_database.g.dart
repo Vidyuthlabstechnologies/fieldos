@@ -16625,6 +16625,78 @@ class $EquipmentTable extends Equipment
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _hourlyRateMeta = const VerificationMeta(
+    'hourlyRate',
+  );
+  @override
+  late final GeneratedColumn<double> hourlyRate = GeneratedColumn<double>(
+    'hourly_rate',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ownershipMeta = const VerificationMeta(
+    'ownership',
+  );
+  @override
+  late final GeneratedColumn<String> ownership = GeneratedColumn<String>(
+    'ownership',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('own'),
+  );
+  static const VerificationMeta _hiredFromMeta = const VerificationMeta(
+    'hiredFrom',
+  );
+  @override
+  late final GeneratedColumn<String> hiredFrom = GeneratedColumn<String>(
+    'hired_from',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _hiredOnMeta = const VerificationMeta(
+    'hiredOn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> hiredOn = GeneratedColumn<DateTime>(
+    'hired_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _returnDueOnMeta = const VerificationMeta(
+    'returnDueOn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> returnDueOn = GeneratedColumn<DateTime>(
+    'return_due_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _returnedOnMeta = const VerificationMeta(
+    'returnedOn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> returnedOn = GeneratedColumn<DateTime>(
+    'returned_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -16637,6 +16709,12 @@ class $EquipmentTable extends Equipment
     dailyRate,
     notes,
     createdAt,
+    hourlyRate,
+    ownership,
+    hiredFrom,
+    hiredOn,
+    returnDueOn,
+    returnedOn,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -16719,6 +16797,45 @@ class $EquipmentTable extends Equipment
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('hourly_rate')) {
+      context.handle(
+        _hourlyRateMeta,
+        hourlyRate.isAcceptableOrUnknown(data['hourly_rate']!, _hourlyRateMeta),
+      );
+    }
+    if (data.containsKey('ownership')) {
+      context.handle(
+        _ownershipMeta,
+        ownership.isAcceptableOrUnknown(data['ownership']!, _ownershipMeta),
+      );
+    }
+    if (data.containsKey('hired_from')) {
+      context.handle(
+        _hiredFromMeta,
+        hiredFrom.isAcceptableOrUnknown(data['hired_from']!, _hiredFromMeta),
+      );
+    }
+    if (data.containsKey('hired_on')) {
+      context.handle(
+        _hiredOnMeta,
+        hiredOn.isAcceptableOrUnknown(data['hired_on']!, _hiredOnMeta),
+      );
+    }
+    if (data.containsKey('return_due_on')) {
+      context.handle(
+        _returnDueOnMeta,
+        returnDueOn.isAcceptableOrUnknown(
+          data['return_due_on']!,
+          _returnDueOnMeta,
+        ),
+      );
+    }
+    if (data.containsKey('returned_on')) {
+      context.handle(
+        _returnedOnMeta,
+        returnedOn.isAcceptableOrUnknown(data['returned_on']!, _returnedOnMeta),
+      );
+    }
     return context;
   }
 
@@ -16768,6 +16885,30 @@ class $EquipmentTable extends Equipment
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      hourlyRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}hourly_rate'],
+      ),
+      ownership: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ownership'],
+      )!,
+      hiredFrom: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hired_from'],
+      ),
+      hiredOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}hired_on'],
+      ),
+      returnDueOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}return_due_on'],
+      ),
+      returnedOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}returned_on'],
+      ),
     );
   }
 
@@ -16788,6 +16929,14 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
   final double? dailyRate;
   final String? notes;
   final DateTime createdAt;
+  final double? hourlyRate;
+
+  /// 'own' or 'hired'.
+  final String ownership;
+  final String? hiredFrom;
+  final DateTime? hiredOn;
+  final DateTime? returnDueOn;
+  final DateTime? returnedOn;
   const EquipmentData({
     required this.id,
     required this.projectId,
@@ -16799,6 +16948,12 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
     this.dailyRate,
     this.notes,
     required this.createdAt,
+    this.hourlyRate,
+    required this.ownership,
+    this.hiredFrom,
+    this.hiredOn,
+    this.returnDueOn,
+    this.returnedOn,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -16823,6 +16978,22 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
       map['notes'] = Variable<String>(notes);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || hourlyRate != null) {
+      map['hourly_rate'] = Variable<double>(hourlyRate);
+    }
+    map['ownership'] = Variable<String>(ownership);
+    if (!nullToAbsent || hiredFrom != null) {
+      map['hired_from'] = Variable<String>(hiredFrom);
+    }
+    if (!nullToAbsent || hiredOn != null) {
+      map['hired_on'] = Variable<DateTime>(hiredOn);
+    }
+    if (!nullToAbsent || returnDueOn != null) {
+      map['return_due_on'] = Variable<DateTime>(returnDueOn);
+    }
+    if (!nullToAbsent || returnedOn != null) {
+      map['returned_on'] = Variable<DateTime>(returnedOn);
+    }
     return map;
   }
 
@@ -16848,6 +17019,22 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
           ? const Value.absent()
           : Value(notes),
       createdAt: Value(createdAt),
+      hourlyRate: hourlyRate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hourlyRate),
+      ownership: Value(ownership),
+      hiredFrom: hiredFrom == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hiredFrom),
+      hiredOn: hiredOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hiredOn),
+      returnDueOn: returnDueOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnDueOn),
+      returnedOn: returnedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(returnedOn),
     );
   }
 
@@ -16869,6 +17056,12 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
       dailyRate: serializer.fromJson<double?>(json['dailyRate']),
       notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      hourlyRate: serializer.fromJson<double?>(json['hourlyRate']),
+      ownership: serializer.fromJson<String>(json['ownership']),
+      hiredFrom: serializer.fromJson<String?>(json['hiredFrom']),
+      hiredOn: serializer.fromJson<DateTime?>(json['hiredOn']),
+      returnDueOn: serializer.fromJson<DateTime?>(json['returnDueOn']),
+      returnedOn: serializer.fromJson<DateTime?>(json['returnedOn']),
     );
   }
   @override
@@ -16885,6 +17078,12 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
       'dailyRate': serializer.toJson<double?>(dailyRate),
       'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'hourlyRate': serializer.toJson<double?>(hourlyRate),
+      'ownership': serializer.toJson<String>(ownership),
+      'hiredFrom': serializer.toJson<String?>(hiredFrom),
+      'hiredOn': serializer.toJson<DateTime?>(hiredOn),
+      'returnDueOn': serializer.toJson<DateTime?>(returnDueOn),
+      'returnedOn': serializer.toJson<DateTime?>(returnedOn),
     };
   }
 
@@ -16899,6 +17098,12 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
     Value<double?> dailyRate = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
+    Value<double?> hourlyRate = const Value.absent(),
+    String? ownership,
+    Value<String?> hiredFrom = const Value.absent(),
+    Value<DateTime?> hiredOn = const Value.absent(),
+    Value<DateTime?> returnDueOn = const Value.absent(),
+    Value<DateTime?> returnedOn = const Value.absent(),
   }) => EquipmentData(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -16914,6 +17119,12 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
     dailyRate: dailyRate.present ? dailyRate.value : this.dailyRate,
     notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
+    hourlyRate: hourlyRate.present ? hourlyRate.value : this.hourlyRate,
+    ownership: ownership ?? this.ownership,
+    hiredFrom: hiredFrom.present ? hiredFrom.value : this.hiredFrom,
+    hiredOn: hiredOn.present ? hiredOn.value : this.hiredOn,
+    returnDueOn: returnDueOn.present ? returnDueOn.value : this.returnDueOn,
+    returnedOn: returnedOn.present ? returnedOn.value : this.returnedOn,
   );
   EquipmentData copyWithCompanion(EquipmentCompanion data) {
     return EquipmentData(
@@ -16931,6 +17142,18 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
       dailyRate: data.dailyRate.present ? data.dailyRate.value : this.dailyRate,
       notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      hourlyRate: data.hourlyRate.present
+          ? data.hourlyRate.value
+          : this.hourlyRate,
+      ownership: data.ownership.present ? data.ownership.value : this.ownership,
+      hiredFrom: data.hiredFrom.present ? data.hiredFrom.value : this.hiredFrom,
+      hiredOn: data.hiredOn.present ? data.hiredOn.value : this.hiredOn,
+      returnDueOn: data.returnDueOn.present
+          ? data.returnDueOn.value
+          : this.returnDueOn,
+      returnedOn: data.returnedOn.present
+          ? data.returnedOn.value
+          : this.returnedOn,
     );
   }
 
@@ -16946,7 +17169,13 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
           ..write('status: $status, ')
           ..write('dailyRate: $dailyRate, ')
           ..write('notes: $notes, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('hourlyRate: $hourlyRate, ')
+          ..write('ownership: $ownership, ')
+          ..write('hiredFrom: $hiredFrom, ')
+          ..write('hiredOn: $hiredOn, ')
+          ..write('returnDueOn: $returnDueOn, ')
+          ..write('returnedOn: $returnedOn')
           ..write(')'))
         .toString();
   }
@@ -16963,6 +17192,12 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
     dailyRate,
     notes,
     createdAt,
+    hourlyRate,
+    ownership,
+    hiredFrom,
+    hiredOn,
+    returnDueOn,
+    returnedOn,
   );
   @override
   bool operator ==(Object other) =>
@@ -16977,7 +17212,13 @@ class EquipmentData extends DataClass implements Insertable<EquipmentData> {
           other.status == this.status &&
           other.dailyRate == this.dailyRate &&
           other.notes == this.notes &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.hourlyRate == this.hourlyRate &&
+          other.ownership == this.ownership &&
+          other.hiredFrom == this.hiredFrom &&
+          other.hiredOn == this.hiredOn &&
+          other.returnDueOn == this.returnDueOn &&
+          other.returnedOn == this.returnedOn);
 }
 
 class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
@@ -16991,6 +17232,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
   final Value<double?> dailyRate;
   final Value<String?> notes;
   final Value<DateTime> createdAt;
+  final Value<double?> hourlyRate;
+  final Value<String> ownership;
+  final Value<String?> hiredFrom;
+  final Value<DateTime?> hiredOn;
+  final Value<DateTime?> returnDueOn;
+  final Value<DateTime?> returnedOn;
   final Value<int> rowid;
   const EquipmentCompanion({
     this.id = const Value.absent(),
@@ -17003,6 +17250,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
     this.dailyRate = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.hourlyRate = const Value.absent(),
+    this.ownership = const Value.absent(),
+    this.hiredFrom = const Value.absent(),
+    this.hiredOn = const Value.absent(),
+    this.returnDueOn = const Value.absent(),
+    this.returnedOn = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   EquipmentCompanion.insert({
@@ -17016,6 +17269,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
     this.dailyRate = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.hourlyRate = const Value.absent(),
+    this.ownership = const Value.absent(),
+    this.hiredFrom = const Value.absent(),
+    this.hiredOn = const Value.absent(),
+    this.returnDueOn = const Value.absent(),
+    this.returnedOn = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        projectId = Value(projectId),
@@ -17031,6 +17290,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
     Expression<double>? dailyRate,
     Expression<String>? notes,
     Expression<DateTime>? createdAt,
+    Expression<double>? hourlyRate,
+    Expression<String>? ownership,
+    Expression<String>? hiredFrom,
+    Expression<DateTime>? hiredOn,
+    Expression<DateTime>? returnDueOn,
+    Expression<DateTime>? returnedOn,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -17044,6 +17309,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
       if (dailyRate != null) 'daily_rate': dailyRate,
       if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
+      if (hourlyRate != null) 'hourly_rate': hourlyRate,
+      if (ownership != null) 'ownership': ownership,
+      if (hiredFrom != null) 'hired_from': hiredFrom,
+      if (hiredOn != null) 'hired_on': hiredOn,
+      if (returnDueOn != null) 'return_due_on': returnDueOn,
+      if (returnedOn != null) 'returned_on': returnedOn,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -17059,6 +17330,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
     Value<double?>? dailyRate,
     Value<String?>? notes,
     Value<DateTime>? createdAt,
+    Value<double?>? hourlyRate,
+    Value<String>? ownership,
+    Value<String?>? hiredFrom,
+    Value<DateTime?>? hiredOn,
+    Value<DateTime?>? returnDueOn,
+    Value<DateTime?>? returnedOn,
     Value<int>? rowid,
   }) {
     return EquipmentCompanion(
@@ -17072,6 +17349,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
       dailyRate: dailyRate ?? this.dailyRate,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
+      hourlyRate: hourlyRate ?? this.hourlyRate,
+      ownership: ownership ?? this.ownership,
+      hiredFrom: hiredFrom ?? this.hiredFrom,
+      hiredOn: hiredOn ?? this.hiredOn,
+      returnDueOn: returnDueOn ?? this.returnDueOn,
+      returnedOn: returnedOn ?? this.returnedOn,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -17109,6 +17392,24 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (hourlyRate.present) {
+      map['hourly_rate'] = Variable<double>(hourlyRate.value);
+    }
+    if (ownership.present) {
+      map['ownership'] = Variable<String>(ownership.value);
+    }
+    if (hiredFrom.present) {
+      map['hired_from'] = Variable<String>(hiredFrom.value);
+    }
+    if (hiredOn.present) {
+      map['hired_on'] = Variable<DateTime>(hiredOn.value);
+    }
+    if (returnDueOn.present) {
+      map['return_due_on'] = Variable<DateTime>(returnDueOn.value);
+    }
+    if (returnedOn.present) {
+      map['returned_on'] = Variable<DateTime>(returnedOn.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -17128,6 +17429,12 @@ class EquipmentCompanion extends UpdateCompanion<EquipmentData> {
           ..write('dailyRate: $dailyRate, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
+          ..write('hourlyRate: $hourlyRate, ')
+          ..write('ownership: $ownership, ')
+          ..write('hiredFrom: $hiredFrom, ')
+          ..write('hiredOn: $hiredOn, ')
+          ..write('returnDueOn: $returnDueOn, ')
+          ..write('returnedOn: $returnedOn, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -29403,6 +29710,12 @@ typedef $$EquipmentTableCreateCompanionBuilder =
       Value<double?> dailyRate,
       Value<String?> notes,
       Value<DateTime> createdAt,
+      Value<double?> hourlyRate,
+      Value<String> ownership,
+      Value<String?> hiredFrom,
+      Value<DateTime?> hiredOn,
+      Value<DateTime?> returnDueOn,
+      Value<DateTime?> returnedOn,
       Value<int> rowid,
     });
 typedef $$EquipmentTableUpdateCompanionBuilder =
@@ -29417,6 +29730,12 @@ typedef $$EquipmentTableUpdateCompanionBuilder =
       Value<double?> dailyRate,
       Value<String?> notes,
       Value<DateTime> createdAt,
+      Value<double?> hourlyRate,
+      Value<String> ownership,
+      Value<String?> hiredFrom,
+      Value<DateTime?> hiredOn,
+      Value<DateTime?> returnDueOn,
+      Value<DateTime?> returnedOn,
       Value<int> rowid,
     });
 
@@ -29476,6 +29795,36 @@ class $$EquipmentTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get hourlyRate => $composableBuilder(
+    column: $table.hourlyRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownership => $composableBuilder(
+    column: $table.ownership,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hiredFrom => $composableBuilder(
+    column: $table.hiredFrom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get hiredOn => $composableBuilder(
+    column: $table.hiredOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get returnDueOn => $composableBuilder(
+    column: $table.returnDueOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get returnedOn => $composableBuilder(
+    column: $table.returnedOn,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -29538,6 +29887,36 @@ class $$EquipmentTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get hourlyRate => $composableBuilder(
+    column: $table.hourlyRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownership => $composableBuilder(
+    column: $table.ownership,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hiredFrom => $composableBuilder(
+    column: $table.hiredFrom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get hiredOn => $composableBuilder(
+    column: $table.hiredOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get returnDueOn => $composableBuilder(
+    column: $table.returnDueOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get returnedOn => $composableBuilder(
+    column: $table.returnedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$EquipmentTableAnnotationComposer
@@ -29582,6 +29961,30 @@ class $$EquipmentTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<double> get hourlyRate => $composableBuilder(
+    column: $table.hourlyRate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownership =>
+      $composableBuilder(column: $table.ownership, builder: (column) => column);
+
+  GeneratedColumn<String> get hiredFrom =>
+      $composableBuilder(column: $table.hiredFrom, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get hiredOn =>
+      $composableBuilder(column: $table.hiredOn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get returnDueOn => $composableBuilder(
+    column: $table.returnDueOn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get returnedOn => $composableBuilder(
+    column: $table.returnedOn,
+    builder: (column) => column,
+  );
 }
 
 class $$EquipmentTableTableManager
@@ -29625,6 +30028,12 @@ class $$EquipmentTableTableManager
                 Value<double?> dailyRate = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<double?> hourlyRate = const Value.absent(),
+                Value<String> ownership = const Value.absent(),
+                Value<String?> hiredFrom = const Value.absent(),
+                Value<DateTime?> hiredOn = const Value.absent(),
+                Value<DateTime?> returnDueOn = const Value.absent(),
+                Value<DateTime?> returnedOn = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => EquipmentCompanion(
                 id: id,
@@ -29637,6 +30046,12 @@ class $$EquipmentTableTableManager
                 dailyRate: dailyRate,
                 notes: notes,
                 createdAt: createdAt,
+                hourlyRate: hourlyRate,
+                ownership: ownership,
+                hiredFrom: hiredFrom,
+                hiredOn: hiredOn,
+                returnDueOn: returnDueOn,
+                returnedOn: returnedOn,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -29651,6 +30066,12 @@ class $$EquipmentTableTableManager
                 Value<double?> dailyRate = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<double?> hourlyRate = const Value.absent(),
+                Value<String> ownership = const Value.absent(),
+                Value<String?> hiredFrom = const Value.absent(),
+                Value<DateTime?> hiredOn = const Value.absent(),
+                Value<DateTime?> returnDueOn = const Value.absent(),
+                Value<DateTime?> returnedOn = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => EquipmentCompanion.insert(
                 id: id,
@@ -29663,6 +30084,12 @@ class $$EquipmentTableTableManager
                 dailyRate: dailyRate,
                 notes: notes,
                 createdAt: createdAt,
+                hourlyRate: hourlyRate,
+                ownership: ownership,
+                hiredFrom: hiredFrom,
+                hiredOn: hiredOn,
+                returnDueOn: returnDueOn,
+                returnedOn: returnedOn,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -11,12 +11,21 @@ enum StockStatus { ok, low, out, overused }
 /// Below this share of everything received, a material is flagged low.
 const lowStockShare = 0.15;
 
+/// The note that marks a receipt as stock already on site when FieldOS
+/// started being used (at no cost, so it never adds to the spending).
+const openingStockNote = 'Opening stock';
+
+bool isOpeningStock(MaterialReceipt r) => r.notes == openingStockNote && r.amount == 0 && r.poId == null;
+
 class StockLine {
   StockLine(this.name, this.unit);
   final String name;
   final String? unit;
   double received = 0;
   double used = 0;
+
+  /// Part of [received] that was opening stock.
+  double opening = 0;
   double get balance => received - used;
 
   StockStatus get status {
@@ -38,7 +47,8 @@ List<StockLine> buildSiteStock(List<MaterialReceipt> receipts, List<MaterialUsag
   }
 
   for (final r in receipts) {
-    lineFor(r.materialName, r.unit).received += r.quantity;
+    final line = lineFor(r.materialName, r.unit)..received += r.quantity;
+    if (isOpeningStock(r)) line.opening += r.quantity;
   }
   for (final u in usage) {
     lineFor(u.materialName, u.unit).used += u.quantity;

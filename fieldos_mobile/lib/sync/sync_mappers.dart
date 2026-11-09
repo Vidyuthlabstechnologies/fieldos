@@ -120,7 +120,25 @@ Map<String, dynamic> equipmentToSupabaseJson(EquipmentData e) => {
       'status': e.status,
       'daily_rate': e.dailyRate,
       'notes': e.notes,
+      // v12 hire columns go only when used, like the money book's.
+      if (e.hourlyRate != null || e.ownership != 'own') ...{
+        'hourly_rate': e.hourlyRate,
+        'ownership': e.ownership,
+        'hired_from': e.hiredFrom,
+        'hired_on': _isoDate(e.hiredOn),
+        'return_due_on': _isoDate(e.returnDueOn),
+        'returned_on': _isoDate(e.returnedOn),
+      },
     };
+
+String? _isoDate(DateTime? d) => d == null
+    ? null
+    : '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+DateTime? _readDate(Object? v) {
+  final d = v == null ? null : DateTime.tryParse(v as String);
+  return d == null ? null : DateTime(d.year, d.month, d.day);
+}
 
 Map<String, dynamic> inspectionToSupabaseJson(Inspection i) => {
       'id': i.id,
@@ -375,6 +393,12 @@ EquipmentCompanion equipmentFromSupabaseJson(Map<String, dynamic> row) => Equipm
       status: Value(row['status'] as String? ?? 'available'),
       dailyRate: Value((row['daily_rate'] as num?)?.toDouble()),
       notes: Value(row['notes'] as String?),
+      hourlyRate: _ifSent(row, 'hourly_rate', (v) => (v as num?)?.toDouble()),
+      ownership: _ifSent(row, 'ownership', (v) => v as String? ?? 'own'),
+      hiredFrom: _ifSent(row, 'hired_from', (v) => v as String?),
+      hiredOn: _ifSent(row, 'hired_on', _readDate),
+      returnDueOn: _ifSent(row, 'return_due_on', _readDate),
+      returnedOn: _ifSent(row, 'returned_on', _readDate),
     );
 
 InspectionsCompanion inspectionFromSupabaseJson(Map<String, dynamic> row) => InspectionsCompanion.insert(
