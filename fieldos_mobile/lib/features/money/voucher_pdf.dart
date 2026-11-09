@@ -19,6 +19,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/money/bill_pdf.dart' show pdfSafe;
+import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart' show rupeesInWords;
 import 'package:fieldos_mobile/features/money/money_book.dart';
 
@@ -41,6 +42,7 @@ Future<Uint8List> buildVoucherPdf({
   required String siteName,
   String? workerName,
   String? enteredBy,
+  PdfBranding branding = const PdfBranding(),
 }) async {
   final e = expense;
   final doc = pw.Document(title: 'Payment voucher ${voucherLabel(e.voucherNo)}', creator: 'FieldOS');
@@ -76,6 +78,10 @@ Future<Uint8List> buildVoucherPdf({
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
         pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          if (branding.logo != null) ...[
+            pw.Image(pw.MemoryImage(branding.logo!), height: 40, fit: pw.BoxFit.contain),
+            pw.SizedBox(width: 10),
+          ],
           pw.Expanded(
             child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
               t(companyName, size: 15, bold: true),
@@ -123,8 +129,10 @@ Future<Uint8List> buildVoucherPdf({
           pw.SizedBox(width: 28),
           signature('Approved by'),
         ]),
-        pw.SizedBox(height: 8),
-        t('Made with FieldOS', size: 7, color: _muted, align: pw.TextAlign.right),
+        if (branding.showFooter) ...[
+          pw.SizedBox(height: 8),
+          t('Made with FieldOS', size: 7, color: _muted, align: pw.TextAlign.right),
+        ],
       ],
     ),
   ));
@@ -140,9 +148,15 @@ Future<void> shareVoucher({
   required String siteName,
   String? workerName,
   String? enteredBy,
+  PdfBranding branding = const PdfBranding(),
 }) async {
   final bytes = await buildVoucherPdf(
-      expense: expense, companyName: companyName, siteName: siteName, workerName: workerName, enteredBy: enteredBy);
+      expense: expense,
+      companyName: companyName,
+      siteName: siteName,
+      workerName: workerName,
+      enteredBy: enteredBy,
+      branding: branding);
   final dir = await getTemporaryDirectory();
   final file = File('${dir.path}/Voucher_${voucherLabel(expense.voucherNo).replaceAll('-', '')}_'
       '${siteName.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '_')}.pdf');

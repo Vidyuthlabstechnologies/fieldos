@@ -93,7 +93,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -201,6 +201,9 @@ class AppDatabase extends _$AppDatabase {
             ]) {
               await _addColumnIfMissing(m, equipment, c);
             }
+          }
+          if (from < 13) {
+            await _addColumnIfMissing(m, suppliers, suppliers.openingBalance);
           }
         },
       );
@@ -794,6 +797,26 @@ class SupplierDao extends DatabaseAccessor<AppDatabase> with _$SupplierDaoMixin 
 
   Future<List<Supplier>> forCompany(String companyId) =>
       (select(suppliers)..where((s) => s.companyId.equals(companyId))).get();
+
+  /// Changes a supplier's details (the cloud lets owners and project
+  /// managers do this). It stays with its company.
+  Future<Supplier> edit(String id, SuppliersCompanion changes) {
+    return transaction(() async {
+      await (update(suppliers)..where((s) => s.id.equals(id))).write(changes.copyWith(
+        id: const Value.absent(),
+        companyId: const Value.absent(),
+        createdAt: const Value.absent(),
+      ));
+      final row = await (select(suppliers)..where((s) => s.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'vendors',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(supplierToSupabaseJson(row)),
+      );
+      return row;
+    });
+  }
 
   /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
   Future<void> upsertFromRemote(SuppliersCompanion companion) =>

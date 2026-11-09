@@ -378,9 +378,23 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
           d.notes,
         ]),
     ]),
-    XlsxSheet('Suppliers', ['Name', 'Contact person', 'Phone', 'Email', 'GSTIN', 'Category', 'Address'].toList(), [
-      for (final s in suppliers) [s.name, s.contactPerson, s.contactPhone, s.email, s.gstNumber, s.category, s.address],
-    ]),
+    XlsxSheet(
+        'Suppliers',
+        ['Name', 'Contact person', 'Phone', 'Email', 'GSTIN', 'Category', 'Address', if (showMoneyIn) 'Opening balance (₹)']
+            .toList(),
+        [
+          for (final s in suppliers)
+            [
+              s.name,
+              s.contactPerson,
+              s.contactPhone,
+              s.email,
+              s.gstNumber,
+              s.category,
+              s.address,
+              if (showMoneyIn) s.openingBalance,
+            ],
+        ]),
     XlsxSheet('Subcontractors', ['Name', 'Trade', 'Phone'].toList(), [
       for (final s in subcontractors) [s.name, s.trade, s.contactPhone],
     ]),

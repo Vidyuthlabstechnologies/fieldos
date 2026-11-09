@@ -27,6 +27,7 @@ import 'package:fieldos_mobile/features/export/data_export.dart' show exportFile
 import 'package:fieldos_mobile/features/export/xlsx_writer.dart';
 import 'package:fieldos_mobile/features/money/bills_view.dart';
 import 'package:fieldos_mobile/features/money/money_book.dart';
+import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/money/voucher_pdf.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
@@ -442,12 +443,13 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
         enteredBy: userName[e.recordedBy],
         editedBy: e.editedBy == null ? null : userName[e.editedBy],
         canCorrect: canCorrect(role: session.role, recordedBy: e.recordedBy, userId: widget.userId),
-        onVoucher: () => shareVoucher(
+        onVoucher: () async => shareVoucher(
           expense: e,
           companyName: session.activeCompany?.name ?? 'FieldOS',
           siteName: widget.project?.name ?? '',
           workerName: e.workerId == null ? null : workerName[e.workerId],
           enteredBy: userName[e.recordedBy],
+          branding: await loadBranding(ref.read(appDatabaseProvider), session.activeCompany?.id),
         ),
         onEdit: () async {
           Navigator.pop(ctx);
@@ -1005,6 +1007,7 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
     String? workerId,
     double? suggestedAmount,
     String? note,
+    String? paidTo,
     SiteExpense? existing}) async {
   final db = ref.read(appDatabaseProvider);
   final companyId = ref.read(sessionProvider).activeCompany?.id;
@@ -1015,7 +1018,11 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
               ? ''
               : _plain((suggestedAmount * 100).roundToDouble() / 100));
   final noteC = TextEditingController(text: existing?.note ?? note ?? '');
-  final paidToC = TextEditingController(text: existing?.paidTo ?? '');
+  final paidToC = TextEditingController(text: existing?.paidTo ?? paidTo ?? '');
+  // Suppliers to pick as "Paid to", so payments land on their statement.
+  final supplierNames = companyId == null
+      ? const <String>[]
+      : [for (final s in await db.supplierDao.forCompany(companyId)) s.name];
   var categories = await ref.read(expenseCategoriesProvider(projectId).future);
   var cat = existing?.category ?? category ?? categories.first;
   if (!categories.contains(cat)) categories = [cat, ...categories];
@@ -1110,10 +1117,28 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
                 TextField(
                   key: const Key('expense-paid-to'),
                   controller: paidToC,
+                  onChanged: (_) => set(() {}),
                   textCapitalization: TextCapitalization.words,
                   maxLength: 120,
                   decoration: InputDecoration(labelText: tr('Paid to (shop, driver, person)'), counterText: ''),
                 ),
+              if (!(cat == 'Labour' && worker != null))
+                () {
+                  final typed = paidToC.text.trim().toLowerCase();
+                  final matches = supplierNames
+                      .where((n) => n.toLowerCase() != typed && (typed.isEmpty || n.toLowerCase().contains(typed)))
+                      .take(4)
+                      .toList();
+                  if (matches.isEmpty || (typed.isEmpty && supplierNames.length > 6)) return const SizedBox.shrink();
+                  return Wrap(spacing: 6, children: [
+                    for (final n in matches)
+                      ActionChip(
+                        avatar: const Icon(Icons.storefront_outlined, size: 16),
+                        label: Text(n),
+                        onPressed: () => set(() => paidToC.text = n),
+                      ),
+                  ]);
+                }(),
               DropdownButtonFormField<String>(
                 initialValue: mode,
                 decoration: InputDecoration(labelText: tr('Paid by')),

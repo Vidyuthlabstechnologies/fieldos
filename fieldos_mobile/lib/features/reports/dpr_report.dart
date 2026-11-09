@@ -22,6 +22,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/company/branding.dart';
 
 const _navy = PdfColor.fromInt(0xFF112A4A);
 const _amber = PdfColor.fromInt(0xFFF5A524);
@@ -143,6 +144,7 @@ Future<Uint8List> buildDprPdf({
   List<String> photoPaths = const [],
   List<Issue> issues = const [],
   TextPicturePainter paintText = paintWithPhoneFonts,
+  PdfBranding branding = const PdfBranding(),
 }) async {
   final date = fmtDate(dpr.entryDate);
   // No company name (should not happen): the project heads the report.
@@ -252,7 +254,14 @@ Future<Uint8List> buildDprPdf({
             padding: const pw.EdgeInsets.fromLTRB(14, 12, 16, 12),
             decoration: pw.BoxDecoration(color: _navy, borderRadius: pw.BorderRadius.circular(8)),
             child: pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.center, children: [
-              pw.CustomPaint(size: const PdfPoint(34, 34), painter: (c, s) => _paintHat(c, s.x, line: PdfColors.white)),
+              if (branding.logo != null)
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(3),
+                  decoration: pw.BoxDecoration(color: PdfColors.white, borderRadius: pw.BorderRadius.circular(4)),
+                  child: pw.Image(pw.MemoryImage(branding.logo!), height: 34, fit: pw.BoxFit.contain),
+                )
+              else
+                pw.CustomPaint(size: const PdfPoint(34, 34), painter: (c, s) => _paintHat(c, s.x, line: PdfColors.white)),
               pw.SizedBox(width: 10),
               pw.Expanded(
                 child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
@@ -276,11 +285,14 @@ Future<Uint8List> buildDprPdf({
     footer: (ctx) => pw.Padding(
       padding: const pw.EdgeInsets.only(top: 8),
       child: pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-        pw.Row(children: [
-          pw.CustomPaint(size: const PdfPoint(11, 11), painter: (c, s) => _paintHat(c, s.x, line: _navy)),
-          pw.SizedBox(width: 4),
-          pw.Text('Made with FieldOS', style: const pw.TextStyle(fontSize: 8, color: _muted)),
-        ]),
+        if (branding.showFooter)
+          pw.Row(children: [
+            pw.CustomPaint(size: const PdfPoint(11, 11), painter: (c, s) => _paintHat(c, s.x, line: _navy)),
+            pw.SizedBox(width: 4),
+            pw.Text('Made with FieldOS', style: const pw.TextStyle(fontSize: 8, color: _muted)),
+          ])
+        else
+          pw.SizedBox(),
         pw.Text('Page ${ctx.pageNumber} of ${ctx.pagesCount}', style: const pw.TextStyle(fontSize: 8, color: _muted)),
       ]),
     ),
@@ -422,6 +434,7 @@ Future<void> shareDprReport({
     dpr: dpr,
     photoPaths: [for (final p in photos) p.photoPath],
     issues: issues,
+    branding: await loadBranding(db, project.companyId),
   );
   final dir = await getTemporaryDirectory();
   final safeProject = project.name.replaceAll(RegExp(r'[^\p{L}\p{M}\p{N}\-]+', unicode: true), '_');

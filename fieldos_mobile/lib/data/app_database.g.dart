@@ -7038,6 +7038,17 @@ class $SuppliersTable extends Suppliers
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _openingBalanceMeta = const VerificationMeta(
+    'openingBalance',
+  );
+  @override
+  late final GeneratedColumn<double> openingBalance = GeneratedColumn<double>(
+    'opening_balance',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -7051,6 +7062,7 @@ class $SuppliersTable extends Suppliers
     category,
     notes,
     createdAt,
+    openingBalance,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -7139,6 +7151,15 @@ class $SuppliersTable extends Suppliers
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('opening_balance')) {
+      context.handle(
+        _openingBalanceMeta,
+        openingBalance.isAcceptableOrUnknown(
+          data['opening_balance']!,
+          _openingBalanceMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -7192,6 +7213,10 @@ class $SuppliersTable extends Suppliers
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      openingBalance: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}opening_balance'],
+      ),
     );
   }
 
@@ -7213,6 +7238,10 @@ class Supplier extends DataClass implements Insertable<Supplier> {
   final String? category;
   final String? notes;
   final DateTime createdAt;
+
+  /// v13: what was owed to the supplier when the company started using
+  /// FieldOS (negative: an advance they still hold).
+  final double? openingBalance;
   const Supplier({
     required this.id,
     required this.companyId,
@@ -7225,6 +7254,7 @@ class Supplier extends DataClass implements Insertable<Supplier> {
     this.category,
     this.notes,
     required this.createdAt,
+    this.openingBalance,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -7254,6 +7284,9 @@ class Supplier extends DataClass implements Insertable<Supplier> {
       map['notes'] = Variable<String>(notes);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || openingBalance != null) {
+      map['opening_balance'] = Variable<double>(openingBalance);
+    }
     return map;
   }
 
@@ -7284,6 +7317,9 @@ class Supplier extends DataClass implements Insertable<Supplier> {
           ? const Value.absent()
           : Value(notes),
       createdAt: Value(createdAt),
+      openingBalance: openingBalance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(openingBalance),
     );
   }
 
@@ -7304,6 +7340,7 @@ class Supplier extends DataClass implements Insertable<Supplier> {
       category: serializer.fromJson<String?>(json['category']),
       notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      openingBalance: serializer.fromJson<double?>(json['openingBalance']),
     );
   }
   @override
@@ -7321,6 +7358,7 @@ class Supplier extends DataClass implements Insertable<Supplier> {
       'category': serializer.toJson<String?>(category),
       'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'openingBalance': serializer.toJson<double?>(openingBalance),
     };
   }
 
@@ -7336,6 +7374,7 @@ class Supplier extends DataClass implements Insertable<Supplier> {
     Value<String?> category = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
+    Value<double?> openingBalance = const Value.absent(),
   }) => Supplier(
     id: id ?? this.id,
     companyId: companyId ?? this.companyId,
@@ -7350,6 +7389,9 @@ class Supplier extends DataClass implements Insertable<Supplier> {
     category: category.present ? category.value : this.category,
     notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
+    openingBalance: openingBalance.present
+        ? openingBalance.value
+        : this.openingBalance,
   );
   Supplier copyWithCompanion(SuppliersCompanion data) {
     return Supplier(
@@ -7368,6 +7410,9 @@ class Supplier extends DataClass implements Insertable<Supplier> {
       category: data.category.present ? data.category.value : this.category,
       notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      openingBalance: data.openingBalance.present
+          ? data.openingBalance.value
+          : this.openingBalance,
     );
   }
 
@@ -7384,7 +7429,8 @@ class Supplier extends DataClass implements Insertable<Supplier> {
           ..write('gstNumber: $gstNumber, ')
           ..write('category: $category, ')
           ..write('notes: $notes, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('openingBalance: $openingBalance')
           ..write(')'))
         .toString();
   }
@@ -7402,6 +7448,7 @@ class Supplier extends DataClass implements Insertable<Supplier> {
     category,
     notes,
     createdAt,
+    openingBalance,
   );
   @override
   bool operator ==(Object other) =>
@@ -7417,7 +7464,8 @@ class Supplier extends DataClass implements Insertable<Supplier> {
           other.gstNumber == this.gstNumber &&
           other.category == this.category &&
           other.notes == this.notes &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.openingBalance == this.openingBalance);
 }
 
 class SuppliersCompanion extends UpdateCompanion<Supplier> {
@@ -7432,6 +7480,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
   final Value<String?> category;
   final Value<String?> notes;
   final Value<DateTime> createdAt;
+  final Value<double?> openingBalance;
   final Value<int> rowid;
   const SuppliersCompanion({
     this.id = const Value.absent(),
@@ -7445,6 +7494,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     this.category = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.openingBalance = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SuppliersCompanion.insert({
@@ -7459,6 +7509,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     this.category = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.openingBalance = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        companyId = Value(companyId),
@@ -7475,6 +7526,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     Expression<String>? category,
     Expression<String>? notes,
     Expression<DateTime>? createdAt,
+    Expression<double>? openingBalance,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -7489,6 +7541,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
       if (category != null) 'category': category,
       if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
+      if (openingBalance != null) 'opening_balance': openingBalance,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -7505,6 +7558,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     Value<String?>? category,
     Value<String?>? notes,
     Value<DateTime>? createdAt,
+    Value<double?>? openingBalance,
     Value<int>? rowid,
   }) {
     return SuppliersCompanion(
@@ -7519,6 +7573,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
       category: category ?? this.category,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
+      openingBalance: openingBalance ?? this.openingBalance,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -7559,6 +7614,9 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (openingBalance.present) {
+      map['opening_balance'] = Variable<double>(openingBalance.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -7579,6 +7637,7 @@ class SuppliersCompanion extends UpdateCompanion<Supplier> {
           ..write('category: $category, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
+          ..write('openingBalance: $openingBalance, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -25020,6 +25079,7 @@ typedef $$SuppliersTableCreateCompanionBuilder =
       Value<String?> category,
       Value<String?> notes,
       Value<DateTime> createdAt,
+      Value<double?> openingBalance,
       Value<int> rowid,
     });
 typedef $$SuppliersTableUpdateCompanionBuilder =
@@ -25035,6 +25095,7 @@ typedef $$SuppliersTableUpdateCompanionBuilder =
       Value<String?> category,
       Value<String?> notes,
       Value<DateTime> createdAt,
+      Value<double?> openingBalance,
       Value<int> rowid,
     });
 
@@ -25099,6 +25160,11 @@ class $$SuppliersTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get openingBalance => $composableBuilder(
+    column: $table.openingBalance,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -25166,6 +25232,11 @@ class $$SuppliersTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get openingBalance => $composableBuilder(
+    column: $table.openingBalance,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SuppliersTableAnnotationComposer
@@ -25213,6 +25284,11 @@ class $$SuppliersTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<double> get openingBalance => $composableBuilder(
+    column: $table.openingBalance,
+    builder: (column) => column,
+  );
 }
 
 class $$SuppliersTableTableManager
@@ -25254,6 +25330,7 @@ class $$SuppliersTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<double?> openingBalance = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SuppliersCompanion(
                 id: id,
@@ -25267,6 +25344,7 @@ class $$SuppliersTableTableManager
                 category: category,
                 notes: notes,
                 createdAt: createdAt,
+                openingBalance: openingBalance,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -25282,6 +25360,7 @@ class $$SuppliersTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<double?> openingBalance = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SuppliersCompanion.insert(
                 id: id,
@@ -25295,6 +25374,7 @@ class $$SuppliersTableTableManager
                 category: category,
                 notes: notes,
                 createdAt: createdAt,
+                openingBalance: openingBalance,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

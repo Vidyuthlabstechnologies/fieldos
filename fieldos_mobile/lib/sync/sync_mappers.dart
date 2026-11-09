@@ -214,6 +214,7 @@ Map<String, dynamic> supplierToSupabaseJson(Supplier s) => {
       'gst_number': s.gstNumber,
       'category': s.category,
       'notes': s.notes,
+      if (s.openingBalance != null) 'opening_balance': s.openingBalance,
     };
 
 Map<String, dynamic> estimationToSupabaseJson(Estimation e) => {
@@ -476,6 +477,7 @@ SuppliersCompanion supplierFromSupabaseJson(Map<String, dynamic> row) => Supplie
       gstNumber: Value(row['gst_number'] as String?),
       category: Value(row['category'] as String?),
       notes: Value(row['notes'] as String?),
+      openingBalance: _ifSent(row, 'opening_balance', (v) => (v as num?)?.toDouble()),
     );
 
 EstimationsCompanion estimationFromSupabaseJson(Map<String, dynamic> row) => EstimationsCompanion.insert(

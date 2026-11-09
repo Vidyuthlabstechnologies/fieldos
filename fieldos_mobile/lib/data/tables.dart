@@ -247,6 +247,10 @@ class Suppliers extends Table {
   TextColumn get notes => text().withLength(max: 500).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
+  /// v13: what was owed to the supplier when the company started using
+  /// FieldOS (negative: an advance they still hold).
+  RealColumn get openingBalance => real().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
