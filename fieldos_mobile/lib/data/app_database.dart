@@ -54,6 +54,8 @@ String? _clip(String? s, int max) {
   SiteExpenses,
   LabourAttendance,
   AttendanceMarks,
+  ExpenseAttachments,
+  ProjectNotes,
   Subcontractors,
   WorkOrders,
   Approvals,
@@ -93,7 +95,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -205,6 +207,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 13) {
             await _addColumnIfMissing(m, suppliers, suppliers.openingBalance);
           }
+          if (from < 14) {
+            await m.createTable(expenseAttachments);
+            await m.createTable(projectNotes);
+          }
         },
       );
 
@@ -276,6 +282,7 @@ class AppDatabase extends _$AppDatabase {
   MessageDao get messageDao => MessageDao(this);
   PaymentDao get paymentDao => PaymentDao(this);
   BillDao get billDao => BillDao(this);
+  NoteDao get noteDao => NoteDao(this);
 }
 
 /// Where DPR photos and other local media are stored, relative to the app's
@@ -627,6 +634,15 @@ class DprDao extends DatabaseAccessor<AppDatabase> with _$DprDaoMixin {
 
   Future<List<DprPhoto>> photosFor(String dprEntryId) =>
       (select(dprPhotos)..where((p) => p.dprEntryId.equals(dprEntryId))).get();
+
+  /// Takes a photo off its report and deletes the file from the phone.
+  /// Photos stay on the phone that took them, so there is nothing to sync.
+  Future<void> deletePhoto(String id) async {
+    final row = await (select(dprPhotos)..where((p) => p.id.equals(id))).getSingleOrNull();
+    if (row == null) return;
+    await (delete(dprPhotos)..where((p) => p.id.equals(id))).go();
+    await _deleteFileQuietly(row.photoPath);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1089,7 +1105,7 @@ class BillDao extends DatabaseAccessor<AppDatabase> with _$BillDaoMixin {
 // Finance actuals (expenses + work-order billing)
 // ---------------------------------------------------------------------------
 
-@DriftAccessor(tables: [SiteExpenses, WorkOrders])
+@DriftAccessor(tables: [SiteExpenses, WorkOrders, ExpenseAttachments])
 class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
   ExpenseDao(super.db);
 
@@ -1176,6 +1192,43 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
   }
 
   Future<void> upsertFromRemote(SiteExpensesCompanion c) => into(siteExpenses).insertOnConflictUpdate(c);
+
+  /// Keeps a bill photo or PDF with an expense, on this phone.
+  Future<ExpenseAttachment> attach(String expenseId, String filePath, {String? mimeType}) async {
+    final row = ExpenseAttachmentsCompanion.insert(
+      id: _uuid.v4(),
+      expenseId: expenseId,
+      filePath: filePath,
+      mimeType: mimeType ?? attachmentMimeType(filePath),
+    );
+    return into(expenseAttachments).insertReturning(row);
+  }
+
+  Future<List<ExpenseAttachment>> attachmentsFor(String expenseId) => (select(expenseAttachments)
+        ..where((a) => a.expenseId.equals(expenseId))
+        ..orderBy([(a) => OrderingTerm.asc(a.createdAt)]))
+      .get();
+
+  /// How many bills each of the site's expenses has, for the paperclip on
+  /// the money book's lines.
+  Future<Map<String, int>> attachmentCounts(String projectId) async {
+    final count = expenseAttachments.id.count();
+    final rows = await (selectOnly(expenseAttachments)
+          ..join([innerJoin(siteExpenses, siteExpenses.id.equalsExp(expenseAttachments.expenseId))])
+          ..addColumns([expenseAttachments.expenseId, count])
+          ..where(siteExpenses.projectId.equals(projectId))
+          ..groupBy([expenseAttachments.expenseId]))
+        .get();
+    return {for (final r in rows) r.read(expenseAttachments.expenseId)!: r.read(count) ?? 0};
+  }
+
+  /// Takes the bill off the expense and deletes its file from the phone.
+  Future<void> removeAttachment(String id) async {
+    final row = await (select(expenseAttachments)..where((a) => a.id.equals(id))).getSingleOrNull();
+    if (row == null) return;
+    await (delete(expenseAttachments)..where((a) => a.id.equals(id))).go();
+    await _deleteFileQuietly(row.filePath);
+  }
 
   Future<WorkOrder> createWorkOrder(WorkOrdersCompanion companion) {
     final id = companion.id.present ? companion.id.value : _uuid.v4();
@@ -1309,6 +1362,95 @@ class AttendanceDao extends DatabaseAccessor<AppDatabase> with _$AttendanceDaoMi
     final mine = await (select(attendanceMarks)..where((m) => m.id.equals(c.id.value))).getSingleOrNull();
     if (mine != null && c.updatedAt.present && mine.updatedAt.isAfter(c.updatedAt.value)) return;
     await into(attendanceMarks).insertOnConflictUpdate(c);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Site notes
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [ProjectNotes])
+class NoteDao extends DatabaseAccessor<AppDatabase> with _$NoteDaoMixin {
+  NoteDao(super.db);
+
+  /// The site's notes, pinned first, then the latest change first. Removed
+  /// notes are left out.
+  Future<List<ProjectNote>> forProject(String projectId) => (select(projectNotes)
+        ..where((n) => n.projectId.equals(projectId) & n.deleted.equals(false))
+        ..orderBy([
+          (n) => OrderingTerm.desc(n.pinned),
+          (n) => OrderingTerm.desc(n.updatedAt),
+        ]))
+      .get();
+
+  Future<ProjectNote> create({required String projectId, required String body, required String by, bool pinned = false, DateTime? now}) {
+    final at = now ?? DateTime.now();
+    return transaction(() async {
+      final row = await into(projectNotes).insertReturning(ProjectNotesCompanion.insert(
+        id: _uuid.v4(),
+        projectId: projectId,
+        body: _noteBody(body),
+        pinned: Value(pinned),
+        createdBy: by,
+        createdAt: Value(at),
+        updatedAt: Value(at),
+      ));
+      await _queue(row, 'insert');
+      return row;
+    });
+  }
+
+  /// Rewrites, pins or removes a note. The site and who wrote it stay.
+  Future<ProjectNote> change(String id, {String? body, bool? pinned, bool? deleted, DateTime? now}) {
+    return transaction(() async {
+      await (update(projectNotes)..where((n) => n.id.equals(id))).write(ProjectNotesCompanion(
+        body: body == null ? const Value.absent() : Value(_noteBody(body)),
+        pinned: pinned == null ? const Value.absent() : Value(pinned),
+        deleted: deleted == null ? const Value.absent() : Value(deleted),
+        updatedAt: Value(now ?? DateTime.now()),
+      ));
+      final row = await (select(projectNotes)..where((n) => n.id.equals(id))).getSingle();
+      await _queue(row, 'update');
+      return row;
+    });
+  }
+
+  Future<void> _queue(ProjectNote row, String operation) => db.syncOutboxDao.enqueue(
+        targetTable: 'site_notes',
+        recordId: row.id,
+        operation: operation,
+        payloadJson: jsonEncode(projectNoteToSupabaseJson(row)),
+      );
+
+  /// A teammate's copy replaces ours only when it is newer.
+  Future<void> upsertFromRemote(ProjectNotesCompanion c) async {
+    final mine = await (select(projectNotes)..where((n) => n.id.equals(c.id.value))).getSingleOrNull();
+    if (mine != null && c.updatedAt.present && mine.updatedAt.isAfter(c.updatedAt.value)) return;
+    await into(projectNotes).insertOnConflictUpdate(c);
+  }
+}
+
+String _noteBody(String body) {
+  final t = body.trim();
+  if (t.isEmpty) throw ArgumentError('A note needs some words');
+  return t.length > 4000 ? t.substring(0, 4000) : t;
+}
+
+/// What kind of file a bill is, from its name.
+String attachmentMimeType(String path) {
+  final lower = path.toLowerCase();
+  if (lower.endsWith('.pdf')) return 'application/pdf';
+  if (lower.endsWith('.png')) return 'image/png';
+  if (lower.endsWith('.webp')) return 'image/webp';
+  return 'image/jpeg';
+}
+
+Future<void> _deleteFileQuietly(String path) async {
+  try {
+    final f = File(path);
+    if (await f.exists()) await f.delete();
+  } catch (_) {
+    // The row is gone; a file the phone won't let us delete is harmless.
   }
 }
 

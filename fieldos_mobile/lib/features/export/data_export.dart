@@ -81,6 +81,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
       : await (db.select(db.equipmentLogs)..where((t) => t.equipmentId.isIn(equipmentIds))).get();
   final inspections = await rowsOf(db.inspections, (t) => t.projectId.isIn(ids));
   final documents = await rowsOf(db.documents, (t) => t.projectId.isIn(ids));
+  final notes = (await rowsOf(db.projectNotes, (t) => t.projectId.isIn(ids))).where((n) => !n.deleted).toList();
   final suppliers = companyId == null ? const <Supplier>[] : await db.supplierDao.forCompany(companyId);
   final subcontractors = companyId == null ? const <Subcontractor>[] : await db.subcontractorDao.forCompany(companyId);
 
@@ -378,6 +379,11 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
           d.notes,
         ]),
     ]),
+    if (notes.isNotEmpty)
+      XlsxSheet('Site notes', h(['Note', 'Pinned', 'Written by', 'Written', 'Last changed']), [
+        for (final n in notes..sort((a, b) => newest(a.updatedAt, b.updatedAt)))
+          r(n.projectId, [n.body, n.pinned ? 'Yes' : 'No', who(n.createdBy), n.createdAt, n.updatedAt]),
+      ]),
     XlsxSheet(
         'Suppliers',
         ['Name', 'Contact person', 'Phone', 'Email', 'GSTIN', 'Category', 'Address', if (showMoneyIn) 'Opening balance (₹)']

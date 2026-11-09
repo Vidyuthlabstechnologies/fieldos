@@ -28,7 +28,9 @@ import 'package:fieldos_mobile/features/export/xlsx_writer.dart';
 import 'package:fieldos_mobile/features/money/bills_view.dart';
 import 'package:fieldos_mobile/features/money/money_book.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
+import 'package:fieldos_mobile/features/money/expense_bills.dart';
 import 'package:fieldos_mobile/features/money/voucher_pdf.dart';
+import 'package:fieldos_mobile/features/shared/photo_capture.dart' show CapturedFile;
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
@@ -80,6 +82,7 @@ void _refreshMoney(WidgetRef ref, String projectId) {
   ref.invalidate(paymentsReceivedProvider(projectId));
   ref.invalidate(moneyBookPaymentsProvider(projectId));
   ref.invalidate(expenseCategoriesProvider(projectId));
+  ref.invalidate(expenseBillCountsProvider(projectId));
 }
 
 IconData _iconFor(String c) => switch (c) {
@@ -289,6 +292,7 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
           final shown = _filter.expenses(all, workerName: workerName);
           final total = totalOf(shown);
           final cancelled = shown.where((e) => e.voided).length;
+          final billCounts = ref.watch(expenseBillCountsProvider(widget.projectId)).valueOrNull ?? const {};
           return Column(children: [
             if (all.isNotEmpty) ...[
               Padding(
@@ -401,6 +405,7 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
                             for (final e in shown)
                               _ExpenseTile(
                                 expense: e,
+                                bills: billCounts[e.id] ?? 0,
                                 workerName: e.workerId == null ? null : workerName[e.workerId],
                                 onTap: () => _openExpense(context, e, workerName: workerName),
                               ),
@@ -500,8 +505,9 @@ class _FilterChip extends StatelessWidget {
 }
 
 class _ExpenseTile extends StatelessWidget {
-  const _ExpenseTile({required this.expense, required this.onTap, this.workerName});
+  const _ExpenseTile({required this.expense, required this.onTap, this.workerName, this.bills = 0});
   final SiteExpense expense;
+  final int bills;
   final String? workerName;
   final VoidCallback onTap;
 
@@ -522,12 +528,22 @@ class _ExpenseTile extends StatelessWidget {
         if (e.voided) tr('Cancelled'),
         if (e.note != null && e.note!.isNotEmpty) e.note!,
       ].join(' · ')),
-      trailing: Text(rupees(e.amount),
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            decoration: e.voided ? TextDecoration.lineThrough : null,
-            color: e.voided ? Theme.of(context).colorScheme.onSurfaceVariant : null,
-          )),
+      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+        if (bills > 0)
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: Semantics(
+              label: bills == 1 ? tr('1 bill attached') : trf('{n} bills attached', {'n': '$bills'}),
+              child: Icon(Icons.attach_file, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+          ),
+        Text(rupees(e.amount),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              decoration: e.voided ? TextDecoration.lineThrough : null,
+              color: e.voided ? Theme.of(context).colorScheme.onSurfaceVariant : null,
+            )),
+      ]),
     );
   }
 }
@@ -602,6 +618,12 @@ class _ExpenseSheet extends StatelessWidget {
           if (e.editedAt != null)
             row(tr('Last changed'), [fmtDateTime(e.editedAt!), ?editedBy].join(' · ')),
           if (e.voided && e.voidReason != null) row(tr('Why cancelled'), e.voidReason!),
+          ExpenseBills(
+            expense: e,
+            canChange: canCorrect && !e.voided,
+            shareText: [if (e.voucherNo != null) voucherLabel(e.voucherNo), tr(e.category), rupees(e.amount, paise: true)]
+                .join(' · '),
+          ),
           const SizedBox(height: 12),
           Wrap(spacing: 8, runSpacing: 8, children: [
             FilledButton.icon(
@@ -1032,6 +1054,8 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
   var gst = existing?.gstPct ?? 0.0;
   var interState = existing?.gstInterState ?? false;
   var includesGst = true;
+  // Bills picked before the expense exists; kept with it once saved.
+  final bills = <CapturedFile>[];
   final workers = (await ref.read(workersProvider(projectId).future))
       .where((w) => w.status == 'active' || w.id == worker)
       .toList();
@@ -1185,6 +1209,29 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
               ],
               _DateRow(value: on, onChanged: (d) => set(() => on = d)),
               TextField(controller: noteC, decoration: InputDecoration(labelText: tr('Note (optional)'))),
+              if (existing == null) ...[
+                const SizedBox(height: 8),
+                Wrap(spacing: 6, runSpacing: 4, children: [
+                  for (final b in bills)
+                    InputChip(
+                      avatar: Icon(b.isPdf ? Icons.picture_as_pdf_outlined : Icons.receipt_long_outlined, size: 18),
+                      label: Text(billFileName(b.path), overflow: TextOverflow.ellipsis),
+                      onDeleted: () {
+                        set(() => bills.remove(b));
+                        deleteFileQuietly(b.path);
+                      },
+                    ),
+                  ActionChip(
+                    key: const Key('expense-add-bill'),
+                    avatar: const Icon(Icons.attach_file, size: 18),
+                    label: Text(bills.isEmpty ? tr('Attach bill photo or PDF') : tr('Add another bill')),
+                    onPressed: () async {
+                      final picked = await pickBills(ctx);
+                      if (picked.isNotEmpty) set(() => bills.addAll(picked));
+                    },
+                  ),
+                ]),
+              ],
             ]),
           ),
           actions: [
@@ -1197,7 +1244,12 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
     ),
   );
   final typed = parseAmount(amount.text);
-  if (ok != true || typed == null || typed <= 0) return false;
+  if (ok != true || typed == null || typed <= 0) {
+    for (final b in bills) {
+      await deleteFileQuietly(b.path);
+    }
+    return false;
+  }
   final value = gst > 0 && !includesGst ? withGst(typed, gst) : typed;
   final n = noteC.text.trim();
   final payee = paidToC.text.trim();
@@ -1214,11 +1266,14 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
     gstInterState: Value(gst > 0 && interState),
   );
   if (existing == null) {
-    await db.expenseDao.create(fields.copyWith(
+    final saved = await db.expenseDao.create(fields.copyWith(
       id: Value(const Uuid().v4()),
       projectId: Value(projectId),
       recordedBy: Value(userId),
     ));
+    for (final b in bills) {
+      await db.expenseDao.attach(saved.id, b.path);
+    }
   } else {
     await db.expenseDao.edit(existing.id, fields, by: userId);
   }

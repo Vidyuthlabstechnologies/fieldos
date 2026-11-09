@@ -825,3 +825,31 @@ AttendanceMarksCompanion attendanceMarkFromSupabaseJson(Map<String, dynamic> row
           ? const Value.absent()
           : Value(DateTime.parse(row['updated_at'] as String).toLocal()),
     );
+
+// --- Site notes (app schema v14, 20261109040000_site_notes.sql)
+
+Map<String, dynamic> projectNoteToSupabaseJson(ProjectNote n) => {
+      'id': n.id,
+      'project_id': n.projectId,
+      'body': n.body,
+      'pinned': n.pinned,
+      'deleted': n.deleted,
+      'created_by': n.createdBy,
+      'created_at': _timestamp(n.createdAt.toUtc()),
+      'updated_at': _timestamp(n.updatedAt.toUtc()),
+    };
+
+ProjectNotesCompanion projectNoteFromSupabaseJson(Map<String, dynamic> row) => ProjectNotesCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      body: row['body'] as String,
+      pinned: Value(row['pinned'] as bool? ?? false),
+      deleted: Value(row['deleted'] as bool? ?? false),
+      createdBy: row['created_by'] as String,
+      createdAt: row['created_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['created_at'] as String).toLocal()),
+      updatedAt: row['updated_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['updated_at'] as String).toLocal()),
+    );

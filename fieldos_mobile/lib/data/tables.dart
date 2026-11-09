@@ -483,6 +483,38 @@ class AttendanceMarks extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+/// A bill, receipt or quotation kept with an expense: a photo or a PDF.
+/// The file stays on the phone that added it, like DPR photos (v14).
+class ExpenseAttachments extends Table {
+  TextColumn get id => text()();
+  TextColumn get expenseId => text().withLength(min: 1, max: 36)();
+  TextColumn get filePath => text().withLength(min: 1, max: 500)();
+  /// image/jpeg, image/png or application/pdf.
+  TextColumn get mimeType => text().withLength(max: 100)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// The site's notebook: what was agreed with the client, measurements to
+/// check, phone numbers, reminders (v14, synced as site_notes). A removed
+/// note is marked [deleted] rather than dropped, because pulls don't carry
+/// deletes.
+class ProjectNotes extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get body => text().withLength(min: 1, max: 4000)();
+  BoolColumn get pinned => boolean().withDefault(const Constant(false))();
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 /// Per-project GPS geofence. A punch is flagged `withinGeofence` when the
 /// captured coordinates fall within `radiusMeters` of (centerLat, centerLng).
 class ProjectGeofences extends Table {

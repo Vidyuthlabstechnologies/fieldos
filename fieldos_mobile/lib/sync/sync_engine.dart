@@ -226,6 +226,7 @@ class SyncEngine {
     await pull('site_client_bills', (r) => db.billDao.upsertFromRemote(clientBillFromSupabaseJson(r)));
     await pull('site_attendance_marks',
         (r) => db.attendanceDao.upsertMarkFromRemote(attendanceMarkFromSupabaseJson(r)));
+    await pull('site_notes', (r) => db.noteDao.upsertFromRemote(projectNoteFromSupabaseJson(r)));
     await pull('documents', (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');

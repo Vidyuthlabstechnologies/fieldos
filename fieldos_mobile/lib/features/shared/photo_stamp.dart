@@ -27,22 +27,31 @@ List<String> stampLines({required DateTime takenAt, String? place, double? lat, 
 
 /// Returns the JPEG with the stamp drawn along the bottom, or null if the
 /// bytes aren't an image the decoder understands (the original is kept).
-Uint8List? stampJpeg(Uint8List bytes, List<String> lines) {
+/// With [below] the stamp goes on a strip added under the photo instead of
+/// over it, so a bill's total at the bottom is never covered.
+Uint8List? stampJpeg(Uint8List bytes, List<String> lines, {bool below = false, int quality = 85}) {
   final decoded = img.decodeImage(bytes);
   if (decoded == null) return null;
-  final photo = img.bakeOrientation(decoded);
+  var photo = img.bakeOrientation(decoded);
   final font = photo.width >= 1200 ? img.arial48 : (photo.width >= 600 ? img.arial24 : img.arial14);
   final lineH = font.lineHeight + 6;
   final bandH = lineH * lines.length + 16;
-  img.fillRect(photo,
-      x1: 0, y1: photo.height - bandH, x2: photo.width, y2: photo.height, color: img.ColorRgba8(0, 0, 0, 150));
+  if (below) {
+    final taller = img.Image(width: photo.width, height: photo.height + bandH);
+    img.fill(taller, color: img.ColorRgb8(0, 0, 0));
+    img.compositeImage(taller, photo, dstX: 0, dstY: 0);
+    photo = taller;
+  } else {
+    img.fillRect(photo,
+        x1: 0, y1: photo.height - bandH, x2: photo.width, y2: photo.height, color: img.ColorRgba8(0, 0, 0, 150));
+  }
   for (var i = 0; i < lines.length; i++) {
     img.drawString(photo, lines[i],
         font: font, x: 14, y: photo.height - bandH + 8 + i * lineH, color: img.ColorRgb8(255, 255, 255));
   }
-  return img.encodeJpg(photo, quality: 85);
+  return img.encodeJpg(photo, quality: quality);
 }
 
 /// [stampJpeg] off the UI thread (decoding a 2048 px photo takes a moment).
-Future<Uint8List?> stampJpegInBackground(Uint8List bytes, List<String> lines) =>
-    Isolate.run(() => stampJpeg(bytes, lines));
+Future<Uint8List?> stampJpegInBackground(Uint8List bytes, List<String> lines, {bool below = false, int quality = 85}) =>
+    Isolate.run(() => stampJpeg(bytes, lines, below: below, quality: quality));

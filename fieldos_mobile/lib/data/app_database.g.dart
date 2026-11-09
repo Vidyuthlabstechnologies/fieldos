@@ -14586,6 +14586,896 @@ class AttendanceMarksCompanion extends UpdateCompanion<AttendanceMark> {
   }
 }
 
+class $ExpenseAttachmentsTable extends ExpenseAttachments
+    with TableInfo<$ExpenseAttachmentsTable, ExpenseAttachment> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExpenseAttachmentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _expenseIdMeta = const VerificationMeta(
+    'expenseId',
+  );
+  @override
+  late final GeneratedColumn<String> expenseId = GeneratedColumn<String>(
+    'expense_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _filePathMeta = const VerificationMeta(
+    'filePath',
+  );
+  @override
+  late final GeneratedColumn<String> filePath = GeneratedColumn<String>(
+    'file_path',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 500,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _mimeTypeMeta = const VerificationMeta(
+    'mimeType',
+  );
+  @override
+  late final GeneratedColumn<String> mimeType = GeneratedColumn<String>(
+    'mime_type',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    expenseId,
+    filePath,
+    mimeType,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'expense_attachments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExpenseAttachment> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('expense_id')) {
+      context.handle(
+        _expenseIdMeta,
+        expenseId.isAcceptableOrUnknown(data['expense_id']!, _expenseIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_expenseIdMeta);
+    }
+    if (data.containsKey('file_path')) {
+      context.handle(
+        _filePathMeta,
+        filePath.isAcceptableOrUnknown(data['file_path']!, _filePathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_filePathMeta);
+    }
+    if (data.containsKey('mime_type')) {
+      context.handle(
+        _mimeTypeMeta,
+        mimeType.isAcceptableOrUnknown(data['mime_type']!, _mimeTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_mimeTypeMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ExpenseAttachment map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExpenseAttachment(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      expenseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}expense_id'],
+      )!,
+      filePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_path'],
+      )!,
+      mimeType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mime_type'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ExpenseAttachmentsTable createAlias(String alias) {
+    return $ExpenseAttachmentsTable(attachedDatabase, alias);
+  }
+}
+
+class ExpenseAttachment extends DataClass
+    implements Insertable<ExpenseAttachment> {
+  final String id;
+  final String expenseId;
+  final String filePath;
+
+  /// image/jpeg, image/png or application/pdf.
+  final String mimeType;
+  final DateTime createdAt;
+  const ExpenseAttachment({
+    required this.id,
+    required this.expenseId,
+    required this.filePath,
+    required this.mimeType,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['expense_id'] = Variable<String>(expenseId);
+    map['file_path'] = Variable<String>(filePath);
+    map['mime_type'] = Variable<String>(mimeType);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ExpenseAttachmentsCompanion toCompanion(bool nullToAbsent) {
+    return ExpenseAttachmentsCompanion(
+      id: Value(id),
+      expenseId: Value(expenseId),
+      filePath: Value(filePath),
+      mimeType: Value(mimeType),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ExpenseAttachment.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExpenseAttachment(
+      id: serializer.fromJson<String>(json['id']),
+      expenseId: serializer.fromJson<String>(json['expenseId']),
+      filePath: serializer.fromJson<String>(json['filePath']),
+      mimeType: serializer.fromJson<String>(json['mimeType']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'expenseId': serializer.toJson<String>(expenseId),
+      'filePath': serializer.toJson<String>(filePath),
+      'mimeType': serializer.toJson<String>(mimeType),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ExpenseAttachment copyWith({
+    String? id,
+    String? expenseId,
+    String? filePath,
+    String? mimeType,
+    DateTime? createdAt,
+  }) => ExpenseAttachment(
+    id: id ?? this.id,
+    expenseId: expenseId ?? this.expenseId,
+    filePath: filePath ?? this.filePath,
+    mimeType: mimeType ?? this.mimeType,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  ExpenseAttachment copyWithCompanion(ExpenseAttachmentsCompanion data) {
+    return ExpenseAttachment(
+      id: data.id.present ? data.id.value : this.id,
+      expenseId: data.expenseId.present ? data.expenseId.value : this.expenseId,
+      filePath: data.filePath.present ? data.filePath.value : this.filePath,
+      mimeType: data.mimeType.present ? data.mimeType.value : this.mimeType,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpenseAttachment(')
+          ..write('id: $id, ')
+          ..write('expenseId: $expenseId, ')
+          ..write('filePath: $filePath, ')
+          ..write('mimeType: $mimeType, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, expenseId, filePath, mimeType, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExpenseAttachment &&
+          other.id == this.id &&
+          other.expenseId == this.expenseId &&
+          other.filePath == this.filePath &&
+          other.mimeType == this.mimeType &&
+          other.createdAt == this.createdAt);
+}
+
+class ExpenseAttachmentsCompanion extends UpdateCompanion<ExpenseAttachment> {
+  final Value<String> id;
+  final Value<String> expenseId;
+  final Value<String> filePath;
+  final Value<String> mimeType;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const ExpenseAttachmentsCompanion({
+    this.id = const Value.absent(),
+    this.expenseId = const Value.absent(),
+    this.filePath = const Value.absent(),
+    this.mimeType = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExpenseAttachmentsCompanion.insert({
+    required String id,
+    required String expenseId,
+    required String filePath,
+    required String mimeType,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       expenseId = Value(expenseId),
+       filePath = Value(filePath),
+       mimeType = Value(mimeType);
+  static Insertable<ExpenseAttachment> custom({
+    Expression<String>? id,
+    Expression<String>? expenseId,
+    Expression<String>? filePath,
+    Expression<String>? mimeType,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (expenseId != null) 'expense_id': expenseId,
+      if (filePath != null) 'file_path': filePath,
+      if (mimeType != null) 'mime_type': mimeType,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExpenseAttachmentsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? expenseId,
+    Value<String>? filePath,
+    Value<String>? mimeType,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return ExpenseAttachmentsCompanion(
+      id: id ?? this.id,
+      expenseId: expenseId ?? this.expenseId,
+      filePath: filePath ?? this.filePath,
+      mimeType: mimeType ?? this.mimeType,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (expenseId.present) {
+      map['expense_id'] = Variable<String>(expenseId.value);
+    }
+    if (filePath.present) {
+      map['file_path'] = Variable<String>(filePath.value);
+    }
+    if (mimeType.present) {
+      map['mime_type'] = Variable<String>(mimeType.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpenseAttachmentsCompanion(')
+          ..write('id: $id, ')
+          ..write('expenseId: $expenseId, ')
+          ..write('filePath: $filePath, ')
+          ..write('mimeType: $mimeType, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ProjectNotesTable extends ProjectNotes
+    with TableInfo<$ProjectNotesTable, ProjectNote> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProjectNotesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 4000,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
+  @override
+  late final GeneratedColumn<bool> pinned = GeneratedColumn<bool>(
+    'pinned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("pinned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _deletedMeta = const VerificationMeta(
+    'deleted',
+  );
+  @override
+  late final GeneratedColumn<bool> deleted = GeneratedColumn<bool>(
+    'deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    body,
+    pinned,
+    deleted,
+    createdBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'project_notes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProjectNote> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('pinned')) {
+      context.handle(
+        _pinnedMeta,
+        pinned.isAcceptableOrUnknown(data['pinned']!, _pinnedMeta),
+      );
+    }
+    if (data.containsKey('deleted')) {
+      context.handle(
+        _deletedMeta,
+        deleted.isAcceptableOrUnknown(data['deleted']!, _deletedMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProjectNote map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProjectNote(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+      pinned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}pinned'],
+      )!,
+      deleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}deleted'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ProjectNotesTable createAlias(String alias) {
+    return $ProjectNotesTable(attachedDatabase, alias);
+  }
+}
+
+class ProjectNote extends DataClass implements Insertable<ProjectNote> {
+  final String id;
+  final String projectId;
+  final String body;
+  final bool pinned;
+  final bool deleted;
+  final String createdBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const ProjectNote({
+    required this.id,
+    required this.projectId,
+    required this.body,
+    required this.pinned,
+    required this.deleted,
+    required this.createdBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['body'] = Variable<String>(body);
+    map['pinned'] = Variable<bool>(pinned);
+    map['deleted'] = Variable<bool>(deleted);
+    map['created_by'] = Variable<String>(createdBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ProjectNotesCompanion toCompanion(bool nullToAbsent) {
+    return ProjectNotesCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      body: Value(body),
+      pinned: Value(pinned),
+      deleted: Value(deleted),
+      createdBy: Value(createdBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ProjectNote.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProjectNote(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      body: serializer.fromJson<String>(json['body']),
+      pinned: serializer.fromJson<bool>(json['pinned']),
+      deleted: serializer.fromJson<bool>(json['deleted']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'body': serializer.toJson<String>(body),
+      'pinned': serializer.toJson<bool>(pinned),
+      'deleted': serializer.toJson<bool>(deleted),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ProjectNote copyWith({
+    String? id,
+    String? projectId,
+    String? body,
+    bool? pinned,
+    bool? deleted,
+    String? createdBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => ProjectNote(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    body: body ?? this.body,
+    pinned: pinned ?? this.pinned,
+    deleted: deleted ?? this.deleted,
+    createdBy: createdBy ?? this.createdBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ProjectNote copyWithCompanion(ProjectNotesCompanion data) {
+    return ProjectNote(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      body: data.body.present ? data.body.value : this.body,
+      pinned: data.pinned.present ? data.pinned.value : this.pinned,
+      deleted: data.deleted.present ? data.deleted.value : this.deleted,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProjectNote(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('body: $body, ')
+          ..write('pinned: $pinned, ')
+          ..write('deleted: $deleted, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    body,
+    pinned,
+    deleted,
+    createdBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProjectNote &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.body == this.body &&
+          other.pinned == this.pinned &&
+          other.deleted == this.deleted &&
+          other.createdBy == this.createdBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ProjectNotesCompanion extends UpdateCompanion<ProjectNote> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> body;
+  final Value<bool> pinned;
+  final Value<bool> deleted;
+  final Value<String> createdBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const ProjectNotesCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.body = const Value.absent(),
+    this.pinned = const Value.absent(),
+    this.deleted = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ProjectNotesCompanion.insert({
+    required String id,
+    required String projectId,
+    required String body,
+    this.pinned = const Value.absent(),
+    this.deleted = const Value.absent(),
+    required String createdBy,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       body = Value(body),
+       createdBy = Value(createdBy);
+  static Insertable<ProjectNote> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? body,
+    Expression<bool>? pinned,
+    Expression<bool>? deleted,
+    Expression<String>? createdBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (body != null) 'body': body,
+      if (pinned != null) 'pinned': pinned,
+      if (deleted != null) 'deleted': deleted,
+      if (createdBy != null) 'created_by': createdBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ProjectNotesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? body,
+    Value<bool>? pinned,
+    Value<bool>? deleted,
+    Value<String>? createdBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ProjectNotesCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      body: body ?? this.body,
+      pinned: pinned ?? this.pinned,
+      deleted: deleted ?? this.deleted,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (pinned.present) {
+      map['pinned'] = Variable<bool>(pinned.value);
+    }
+    if (deleted.present) {
+      map['deleted'] = Variable<bool>(deleted.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProjectNotesCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('body: $body, ')
+          ..write('pinned: $pinned, ')
+          ..write('deleted: $deleted, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SubcontractorsTable extends Subcontractors
     with TableInfo<$SubcontractorsTable, Subcontractor> {
   @override
@@ -21384,6 +22274,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AttendanceMarksTable attendanceMarks = $AttendanceMarksTable(
     this,
   );
+  late final $ExpenseAttachmentsTable expenseAttachments =
+      $ExpenseAttachmentsTable(this);
+  late final $ProjectNotesTable projectNotes = $ProjectNotesTable(this);
   late final $SubcontractorsTable subcontractors = $SubcontractorsTable(this);
   late final $WorkOrdersTable workOrders = $WorkOrdersTable(this);
   late final $ApprovalsTable approvals = $ApprovalsTable(this);
@@ -21432,6 +22325,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     siteExpenses,
     labourAttendance,
     attendanceMarks,
+    expenseAttachments,
+    projectNotes,
     subcontractors,
     workOrders,
     approvals,
@@ -28752,6 +29647,496 @@ typedef $$AttendanceMarksTableProcessedTableManager =
       AttendanceMark,
       PrefetchHooks Function()
     >;
+typedef $$ExpenseAttachmentsTableCreateCompanionBuilder =
+    ExpenseAttachmentsCompanion Function({
+      required String id,
+      required String expenseId,
+      required String filePath,
+      required String mimeType,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$ExpenseAttachmentsTableUpdateCompanionBuilder =
+    ExpenseAttachmentsCompanion Function({
+      Value<String> id,
+      Value<String> expenseId,
+      Value<String> filePath,
+      Value<String> mimeType,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$ExpenseAttachmentsTableFilterComposer
+    extends Composer<_$AppDatabase, $ExpenseAttachmentsTable> {
+  $$ExpenseAttachmentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get expenseId => $composableBuilder(
+    column: $table.expenseId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get filePath => $composableBuilder(
+    column: $table.filePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mimeType => $composableBuilder(
+    column: $table.mimeType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ExpenseAttachmentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExpenseAttachmentsTable> {
+  $$ExpenseAttachmentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get expenseId => $composableBuilder(
+    column: $table.expenseId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filePath => $composableBuilder(
+    column: $table.filePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mimeType => $composableBuilder(
+    column: $table.mimeType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ExpenseAttachmentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExpenseAttachmentsTable> {
+  $$ExpenseAttachmentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get expenseId =>
+      $composableBuilder(column: $table.expenseId, builder: (column) => column);
+
+  GeneratedColumn<String> get filePath =>
+      $composableBuilder(column: $table.filePath, builder: (column) => column);
+
+  GeneratedColumn<String> get mimeType =>
+      $composableBuilder(column: $table.mimeType, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$ExpenseAttachmentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExpenseAttachmentsTable,
+          ExpenseAttachment,
+          $$ExpenseAttachmentsTableFilterComposer,
+          $$ExpenseAttachmentsTableOrderingComposer,
+          $$ExpenseAttachmentsTableAnnotationComposer,
+          $$ExpenseAttachmentsTableCreateCompanionBuilder,
+          $$ExpenseAttachmentsTableUpdateCompanionBuilder,
+          (
+            ExpenseAttachment,
+            BaseReferences<
+              _$AppDatabase,
+              $ExpenseAttachmentsTable,
+              ExpenseAttachment
+            >,
+          ),
+          ExpenseAttachment,
+          PrefetchHooks Function()
+        > {
+  $$ExpenseAttachmentsTableTableManager(
+    _$AppDatabase db,
+    $ExpenseAttachmentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExpenseAttachmentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExpenseAttachmentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExpenseAttachmentsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> expenseId = const Value.absent(),
+                Value<String> filePath = const Value.absent(),
+                Value<String> mimeType = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExpenseAttachmentsCompanion(
+                id: id,
+                expenseId: expenseId,
+                filePath: filePath,
+                mimeType: mimeType,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String expenseId,
+                required String filePath,
+                required String mimeType,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExpenseAttachmentsCompanion.insert(
+                id: id,
+                expenseId: expenseId,
+                filePath: filePath,
+                mimeType: mimeType,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ExpenseAttachmentsTable, ExpenseAttachment>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ExpenseAttachmentsTable,
+                    ExpenseAttachment
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ExpenseAttachmentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExpenseAttachmentsTable,
+      ExpenseAttachment,
+      $$ExpenseAttachmentsTableFilterComposer,
+      $$ExpenseAttachmentsTableOrderingComposer,
+      $$ExpenseAttachmentsTableAnnotationComposer,
+      $$ExpenseAttachmentsTableCreateCompanionBuilder,
+      $$ExpenseAttachmentsTableUpdateCompanionBuilder,
+      (
+        ExpenseAttachment,
+        BaseReferences<
+          _$AppDatabase,
+          $ExpenseAttachmentsTable,
+          ExpenseAttachment
+        >,
+      ),
+      ExpenseAttachment,
+      PrefetchHooks Function()
+    >;
+typedef $$ProjectNotesTableCreateCompanionBuilder =
+    ProjectNotesCompanion Function({
+      required String id,
+      required String projectId,
+      required String body,
+      Value<bool> pinned,
+      Value<bool> deleted,
+      required String createdBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ProjectNotesTableUpdateCompanionBuilder =
+    ProjectNotesCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> body,
+      Value<bool> pinned,
+      Value<bool> deleted,
+      Value<String> createdBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$ProjectNotesTableFilterComposer
+    extends Composer<_$AppDatabase, $ProjectNotesTable> {
+  $$ProjectNotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get pinned => $composableBuilder(
+    column: $table.pinned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ProjectNotesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProjectNotesTable> {
+  $$ProjectNotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get pinned => $composableBuilder(
+    column: $table.pinned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deleted => $composableBuilder(
+    column: $table.deleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ProjectNotesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProjectNotesTable> {
+  $$ProjectNotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<bool> get pinned =>
+      $composableBuilder(column: $table.pinned, builder: (column) => column);
+
+  GeneratedColumn<bool> get deleted =>
+      $composableBuilder(column: $table.deleted, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ProjectNotesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProjectNotesTable,
+          ProjectNote,
+          $$ProjectNotesTableFilterComposer,
+          $$ProjectNotesTableOrderingComposer,
+          $$ProjectNotesTableAnnotationComposer,
+          $$ProjectNotesTableCreateCompanionBuilder,
+          $$ProjectNotesTableUpdateCompanionBuilder,
+          (
+            ProjectNote,
+            BaseReferences<_$AppDatabase, $ProjectNotesTable, ProjectNote>,
+          ),
+          ProjectNote,
+          PrefetchHooks Function()
+        > {
+  $$ProjectNotesTableTableManager(_$AppDatabase db, $ProjectNotesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProjectNotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProjectNotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ProjectNotesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> body = const Value.absent(),
+                Value<bool> pinned = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProjectNotesCompanion(
+                id: id,
+                projectId: projectId,
+                body: body,
+                pinned: pinned,
+                deleted: deleted,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String body,
+                Value<bool> pinned = const Value.absent(),
+                Value<bool> deleted = const Value.absent(),
+                required String createdBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProjectNotesCompanion.insert(
+                id: id,
+                projectId: projectId,
+                body: body,
+                pinned: pinned,
+                deleted: deleted,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ProjectNotesTable, ProjectNote>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ProjectNotesTable,
+                    ProjectNote
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ProjectNotesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProjectNotesTable,
+      ProjectNote,
+      $$ProjectNotesTableFilterComposer,
+      $$ProjectNotesTableOrderingComposer,
+      $$ProjectNotesTableAnnotationComposer,
+      $$ProjectNotesTableCreateCompanionBuilder,
+      $$ProjectNotesTableUpdateCompanionBuilder,
+      (
+        ProjectNote,
+        BaseReferences<_$AppDatabase, $ProjectNotesTable, ProjectNote>,
+      ),
+      ProjectNote,
+      PrefetchHooks Function()
+    >;
 typedef $$SubcontractorsTableCreateCompanionBuilder =
     SubcontractorsCompanion Function({
       required String id,
@@ -32199,6 +33584,10 @@ class $AppDatabaseManager {
       $$LabourAttendanceTableTableManager(_db, _db.labourAttendance);
   $$AttendanceMarksTableTableManager get attendanceMarks =>
       $$AttendanceMarksTableTableManager(_db, _db.attendanceMarks);
+  $$ExpenseAttachmentsTableTableManager get expenseAttachments =>
+      $$ExpenseAttachmentsTableTableManager(_db, _db.expenseAttachments);
+  $$ProjectNotesTableTableManager get projectNotes =>
+      $$ProjectNotesTableTableManager(_db, _db.projectNotes);
   $$SubcontractorsTableTableManager get subcontractors =>
       $$SubcontractorsTableTableManager(_db, _db.subcontractors);
   $$WorkOrdersTableTableManager get workOrders =>
@@ -32463,6 +33852,8 @@ class BillDaoManager {
 mixin _$ExpenseDaoMixin on DatabaseAccessor<AppDatabase> {
   $SiteExpensesTable get siteExpenses => attachedDatabase.siteExpenses;
   $WorkOrdersTable get workOrders => attachedDatabase.workOrders;
+  $ExpenseAttachmentsTable get expenseAttachments =>
+      attachedDatabase.expenseAttachments;
   ExpenseDaoManager get managers => ExpenseDaoManager(this);
 }
 
@@ -32473,6 +33864,11 @@ class ExpenseDaoManager {
       $$SiteExpensesTableTableManager(_db.attachedDatabase, _db.siteExpenses);
   $$WorkOrdersTableTableManager get workOrders =>
       $$WorkOrdersTableTableManager(_db.attachedDatabase, _db.workOrders);
+  $$ExpenseAttachmentsTableTableManager get expenseAttachments =>
+      $$ExpenseAttachmentsTableTableManager(
+        _db.attachedDatabase,
+        _db.expenseAttachments,
+      );
 }
 
 mixin _$AttendanceDaoMixin on DatabaseAccessor<AppDatabase> {
@@ -32495,6 +33891,18 @@ class AttendanceDaoManager {
         _db.attachedDatabase,
         _db.attendanceMarks,
       );
+}
+
+mixin _$NoteDaoMixin on DatabaseAccessor<AppDatabase> {
+  $ProjectNotesTable get projectNotes => attachedDatabase.projectNotes;
+  NoteDaoManager get managers => NoteDaoManager(this);
+}
+
+class NoteDaoManager {
+  final _$NoteDaoMixin _db;
+  NoteDaoManager(this._db);
+  $$ProjectNotesTableTableManager get projectNotes =>
+      $$ProjectNotesTableTableManager(_db.attachedDatabase, _db.projectNotes);
 }
 
 mixin _$GeofenceDaoMixin on DatabaseAccessor<AppDatabase> {
