@@ -1078,4 +1078,12 @@ const Map<String, String> stringsTe = {
   '{n} people on site': 'సైట్‌లో {n} మంది',
   '{n} serious issues open': '{n} తీవ్రమైన సమస్యలు తెరిచి ఉన్నాయి',
   '{n} sites need you': '{n} సైట్లకు మీ అవసరం ఉంది',
+
+  // Rate check on quotes and bills.
+  '{pct}% above your usual {usual} per {unit}': 'మీ సాధారణ {usual} ప్రతి {unit} కంటే {pct}% ఎక్కువ',
+  '{pct}% above your usual {usual} per {unit}: {extra} extra on this order': 'మీ సాధారణ {usual} ప్రతి {unit} కంటే {pct}% ఎక్కువ: ఈ ఆర్డర్‌పై {extra} అదనం',
+  '{pct}% below your usual {usual} per {unit}. A good price.': 'మీ సాధారణ {usual} ప్రతి {unit} కంటే {pct}% తక్కువ. మంచి ధర.',
+  'In line with your usual {usual} per {unit}': 'మీ సాధారణ {usual} ప్రతి {unit}కు సమానం',
+  'Lowest recent: {rate} on {date}': 'ఇటీవలి అతి తక్కువ: {date}న {rate}',
+  'Lowest recent: {rate} from {supplier} on {date}': 'ఇటీవలి అతి తక్కువ: {date}న {supplier} నుండి {rate}',
 };

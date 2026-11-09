@@ -1076,4 +1076,12 @@ const Map<String, String> stringsHi = {
   '{n} people on site': 'साइट पर {n} लोग',
   '{n} serious issues open': '{n} गंभीर समस्याएँ खुली हैं',
   '{n} sites need you': '{n} साइटों को आपकी ज़रूरत है',
+
+  // Rate check on quotes and bills.
+  '{pct}% above your usual {usual} per {unit}': 'आपके सामान्य {usual} प्रति {unit} से {pct}% ज़्यादा',
+  '{pct}% above your usual {usual} per {unit}: {extra} extra on this order': 'आपके सामान्य {usual} प्रति {unit} से {pct}% ज़्यादा: इस ऑर्डर पर {extra} अधिक',
+  '{pct}% below your usual {usual} per {unit}. A good price.': 'आपके सामान्य {usual} प्रति {unit} से {pct}% कम। अच्छा दाम।',
+  'In line with your usual {usual} per {unit}': 'आपके सामान्य {usual} प्रति {unit} के बराबर',
+  'Lowest recent: {rate} on {date}': 'हाल का सबसे कम: {date} को {rate}',
+  'Lowest recent: {rate} from {supplier} on {date}': 'हाल का सबसे कम: {date} को {supplier} से {rate}',
 };
