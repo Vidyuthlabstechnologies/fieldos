@@ -20,7 +20,7 @@ void main() {
 
   setUp(() async {
     db = AppDatabase.memory();
-    tools = AssistantTools(db: db, companyId: 'c1', userId: 'u1', clock: () => now);
+    tools = AssistantTools(db: db, companyId: 'c1', userId: 'u1', role: 'owner', clock: () => now);
     await db.projectDao.create(ProjectsCompanion.insert(id: 'p1', companyId: 'c1', name: 'Narapally Villa', status: const Value('active')));
     await db.projectDao.create(ProjectsCompanion.insert(id: 'other', companyId: 'c2', name: 'Not ours'));
     await db.workerDao.create(WorkersCompanion.insert(id: 'w1', projectId: 'p1', name: 'Ramesh', role: const Value('Mason')));
@@ -103,6 +103,20 @@ void main() {
     expect(o['spent_total'], 1000);
     expect(o['received_from_client'], 50000);
     expect(o['daily_report_done_today'], isTrue);
+  });
+
+  test('money received from the client is for the owner and managers only', () async {
+    await tools.run('record_payment_received', {'project_id': 'p1', 'amount': 50000, 'from_party': 'Client', 'mode': 'upi'});
+    final engineer = AssistantTools(db: db, companyId: 'c1', userId: 'u2', role: 'member', clock: () => now);
+    final overview = jsonDecode((await engineer.run('project_overview', {'project_id': 'p1'})).result) as Map;
+    expect(overview.containsKey('received_from_client'), isFalse);
+    final money = jsonDecode((await engineer.run('list_money', {'project_id': 'p1'})).result) as Map;
+    expect(money.containsKey('received'), isFalse);
+    expect(money.containsKey('payments'), isFalse);
+    final input = {'project_id': 'p1', 'amount': 100, 'from_party': 'Client', 'mode': 'cash'};
+    expect(() => engineer.describe('record_payment_received', input), throwsA(isA<ToolInputError>()));
+    expect((await engineer.run('record_payment_received', input)).isError, isTrue);
+    expect(await db.paymentDao.forProject('p1'), hasLength(1));
   });
 
   test('update_task marks done, or sets progress', () async {

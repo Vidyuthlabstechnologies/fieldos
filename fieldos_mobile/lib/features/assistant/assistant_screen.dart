@@ -65,7 +65,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     final db = ref.read(appDatabaseProvider);
     _chat = AssistantConversation(
       backend: ref.read(aiBackendProvider),
-      tools: AssistantTools(db: db, companyId: _company.id, userId: session.user?.id ?? ''),
+      tools: AssistantTools(db: db, companyId: _company.id, userId: session.user?.id ?? '', role: session.role),
       appState: _appState,
       onDataChanged: (projectId) {
         ref.invalidate(projectsProvider(_company.id));
