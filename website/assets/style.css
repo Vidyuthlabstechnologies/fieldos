@@ -212,3 +212,7 @@ section { padding: 88px 0; }
 .chapters button { width: 100%; text-align: left; font: inherit; border: 1px solid var(--line); background: var(--white); border-radius: 12px; padding: 12px 14px; cursor: pointer; color: var(--ink); }
 .chapters button:hover, .chapters button:focus-visible { border-color: var(--amber); outline: none; }
 .chapters time { display: block; color: var(--ink-muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
+
+.mitra-note{display:flex;gap:16px;align-items:center;margin-top:20px;padding:14px 18px;border-radius:16px;background:rgba(245,165,36,.12)}
+.mitra-note img{flex:none;width:96px;height:96px}
+.mitra-note p{margin:0}

@@ -1,21 +1,327 @@
-{"name":"fieldos-video-guide","width":1920,"height":1080,"mood":"calm","voice":"af_heart","speed":1.0,"bug":true,"progress":true,"music_db":-17,
-"scenes":[
- {"type":"logo","tag":"Getting started in two minutes","vo":"Welcome to Field O S. In the next two minutes, here's how to run your sites from your phone.","min":4.5},
- {"type":"chapter","num":"1","text":"Your sites","vo":"First, your sites.","min":2.4},
- {"type":"phone","shot":"01_home","kicker":"Home","title":["All your sites","in one list."],"bullets":["Tap New project to add a site","Red tag = tasks running late"],"vo":"When you open Field O S, you see all your sites. Tap New project to add one, with the client's name and dates. A red tag shows when tasks are running late.","highlights":[{"box":[621,1963,421,159],"at":2.6,"hold":2.2},{"box":[410,635,227,59],"at":6.8,"hold":2.2}]},
- {"type":"chapter","num":"2","text":"Plan and report","vo":"Next, planning and daily reports.","min":2.6},
- {"type":"phone","shot":"03_tasks","side":"right","kicker":"Tasks","title":["Know what's","on time."],"bullets":["Overall progress at the top","Late tasks show a finish forecast"],"vo":"Inside a site, the Tasks tab shows overall progress, and every task with its start and due dates. Late tasks are marked, with a forecast of when they'll finish.","highlights":[{"box":[24,380,1032,250],"at":2.2,"hold":2.2},{"box":[24,832,1032,310],"at":6.0,"hold":2.6}]},
- {"type":"phone","shot":"04_dpr","kicker":"Daily report","title":["Speak the","day's work."],"bullets":["Tap Speak report","Talk in Telugu, Hindi or English","Share the PDF on WhatsApp"],"vo":"At the end of the day, open D P R and tap Speak report. Say what happened in your own language, and Field O S writes the daily report. Then share it as a P D F on WhatsApp.","taps":[{"at_xy":[822,2045],"at":2.6}],"highlights":[{"box":[24,380,1032,440],"at":6.0,"hold":3.0}]},
- {"type":"phone","shot":"05_issues","side":"right","kicker":"Issues","title":["Problems get","fixed."],"vo":"Problems you mention become issues, with a priority, so they're fixed, not forgotten.","highlights":[{"box":[24,380,1032,330],"at":1.4,"hold":2.6}]},
- {"type":"chapter","num":"3","text":"Labour and wages","vo":"Now, labour and wages.","min":2.4},
- {"type":"phone","shot":"07_labour","kicker":"Labour","title":["Attendance in","seconds."],"bullets":["Punch in one worker","Mark many for the whole gang","GPS checks the site area"],"vo":"In Labour, tap Punch in for one worker, or Mark many for the whole gang. Set the site area once, and every punch is checked with G P S.","highlights":[{"box":[32,596,1016,128],"at":1.6,"hold":3.0},{"box":[32,400,1016,170],"at":5.6,"hold":2.6}]},
- {"type":"phone","shot":"11_wage_sheet","side":"right","kicker":"Wage sheet","title":["Saturday wages,","worked out."],"bullets":["Days, half days and overtime","What is still due to each worker"],"vo":"The wage sheet adds up days, half days and overtime for the week, and shows what's still due to each worker. Share it in one tap.","highlights":[{"box":[30,280,1020,70],"at":1.4,"hold":2.2},{"box":[24,400,1032,920],"at":4.0,"hold":2.8}]},
- {"type":"chapter","num":"4","text":"Money and material","vo":"Then, money and material.","min":2.4},
- {"type":"phone","shot":"08_money","kicker":"Money","title":["Received, spent,","balance."],"bullets":["Add expense in seconds","Client payments and bills"],"vo":"Money shows what the client paid, what the site spent, and the balance. Tap Add expense to record a bill in seconds.","highlights":[{"box":[32,378,1015,189],"at":1.2,"hold":2.8}],"taps":[{"at_xy":[824,2042],"at":5.4}]},
- {"type":"phone","shot":"06_stock","side":"right","kicker":"Stock","title":["See stock before","you order."],"vo":"Under Procure, the Stock tab shows each material received and used, so you know what's left before you order more.","taps":[{"at_xy":[920,405],"at":1.2}],"highlights":[{"box":[30,500,1020,730],"at":2.4,"hold":3.0}]},
- {"type":"chapter","num":"5","text":"For the owner","vo":"Finally, a few things for the owner.","min":2.6},
- {"type":"phone","shot":"02_dashboard","kicker":"Dashboard","title":["Every budget","at a glance."],"vo":"The dashboard compares each site's spending with its budget, and tells you which sites are close to budget, or already over it.","highlights":[{"box":[24,715,1032,470],"at":2.6,"hold":2.0},{"box":[24,1195,1032,530],"at":5.0,"hold":2.4}]},
- {"type":"phone","shot":"12_approvals","side":"right","kicker":"Approvals","title":["Approve from","anywhere."],"vo":"Purchases and overruns wait in Approvals. Approve or reject them from anywhere.","taps":[{"at_xy":[892,522],"at":2.8}]},
- {"type":"phone","shot":"09_inspections","kicker":"Inspections","title":["Checklists","on site."],"vo":"And run quality and safety checklists right on site.","highlights":[{"box":[24,520,1032,700],"at":1.2,"hold":2.4}]},
- {"type":"cta","vo":"Field O S works without network, in English, Hindi and Telugu. Start your free three-day trial today.","min":6.0,"title":"Start your free 3-day trial","sub":"Works offline. English, Hindi and Telugu.","foot":"Need help? info@mldynamic.com"}
-]}
+{
+ "name": "fieldos-video-guide",
+ "width": 1920,
+ "height": 1080,
+ "mood": "calm",
+ "speed": 1.0,
+ "bug": true,
+ "progress": true,
+ "music_db": -17,
+ "scenes": [
+  {
+   "type": "logo",
+   "tag": "Your 3-minute guide",
+   "vo": "Welcome to Field O S. Here's how to run your sites from your phone, in three minutes.",
+   "min": 4.5
+  },
+  {
+   "type": "mitra",
+   "mood": "wave",
+   "lines": [
+    "Namaste! I'm Mitra,",
+    "your site buddy."
+   ],
+   "vo": "Hi, I'm Mitra, your site buddy. Let me show you around.",
+   "min": 3.5
+  },
+  {
+   "type": "chapter",
+   "num": "1",
+   "text": "Your sites",
+   "vo": "First, your sites.",
+   "min": 2.2
+  },
+  {
+   "type": "phone",
+   "shot": "en/01_home",
+   "kicker": "Home",
+   "title": [
+    "All your sites",
+    "in one list."
+   ],
+   "bullets": [
+    "Ask FieldOS at the top",
+    "Today's brief in red when a site needs you",
+    "New project adds a site"
+   ],
+   "vo": "Home shows all your sites. Ask Field O S sits at the top. The red card is today's brief: it tells you when a site needs you. Tap New project to add a site.",
+   "highlights": [
+    {
+     "box": [
+      45,
+      180,
+      990,
+      210
+     ],
+     "at": 2.2,
+     "hold": 2.2
+    },
+    {
+     "box": [
+      45,
+      996,
+      990,
+      210
+     ],
+     "at": 5.6,
+     "hold": 2.6
+    }
+   ]
+  },
+  {
+   "type": "chapter",
+   "num": "2",
+   "text": "Ask FieldOS",
+   "vo": "Next, the assistant.",
+   "min": 2.2
+  },
+  {
+   "type": "chat",
+   "kicker": "Type or speak",
+   "title": [
+    "Say it.",
+    "It's saved."
+   ],
+   "ask": "Add ₹5,000 spent on cement at Kompally",
+   "reply": "Sure, Ravi. Here it is for Kompally Villa.",
+   "card": "Expense ₹5,000 for Material at Kompally Villa, Block B · cement",
+   "final": "Saved ₹5,000 for cement at Kompally Villa.",
+   "vo": "Type or speak what you need, in your own language. Field O S shows a card with what it will save. Nothing is saved until you tap Save.",
+   "min": 9,
+   "save_after": 3.6
+  },
+  {
+   "type": "chat",
+   "side": "right",
+   "kicker": "Ask anything",
+   "title": [
+    "Ask about",
+    "any site."
+   ],
+   "ask": "Who came to Kompally today?",
+   "reply": "4 people punched in at Kompally Villa today: Ramesh, Suresh, Anil and Venkat. Lakshmi is absent.",
+   "vo": "You can ask questions too. Who came to Kompally today? It answers from your own records.",
+   "min": 7.5
+  },
+  {
+   "type": "chapter",
+   "num": "3",
+   "text": "Tasks and daily reports",
+   "vo": "Tasks and daily reports.",
+   "min": 2.4
+  },
+  {
+   "type": "phone",
+   "shot": "en/03_tasks",
+   "kicker": "Tasks",
+   "title": [
+    "Know what's",
+    "running late."
+   ],
+   "bullets": [
+    "Overall progress at the top",
+    "Late tasks with a finish forecast"
+   ],
+   "vo": "The Tasks tab shows overall progress and every task. Late tasks are marked in red, with a forecast of when they will finish."
+  },
+  {
+   "type": "phone",
+   "shot": "en/04_dpr",
+   "side": "right",
+   "kicker": "Daily report",
+   "title": [
+    "Speak the",
+    "day's work."
+   ],
+   "bullets": [
+    "Tap Speak report",
+    "Share the PDF on WhatsApp"
+   ],
+   "vo": "In the D P R tab, tap Speak report and say what happened. Field O S writes the daily report, and you share it on WhatsApp."
+  },
+  {
+   "type": "chapter",
+   "num": "4",
+   "text": "Labour and wages",
+   "vo": "Labour and wages.",
+   "min": 2.2
+  },
+  {
+   "type": "phone",
+   "shot": "en/07_labour",
+   "kicker": "Attendance",
+   "title": [
+    "Punch in",
+    "with GPS."
+   ],
+   "bullets": [
+    "Each worker in one tap",
+    "Half days and overtime"
+   ],
+   "vo": "Mark attendance with G P S in one tap per worker, including half days and overtime."
+  },
+  {
+   "type": "phone",
+   "shot": "en/11_wage_sheet",
+   "side": "right",
+   "kicker": "Saturday",
+   "title": [
+    "The wage sheet",
+    "adds itself up."
+   ],
+   "vo": "On Saturday, the wage sheet shows what each worker earned, what was paid, and what is still due."
+  },
+  {
+   "type": "chapter",
+   "num": "5",
+   "text": "Money and material",
+   "vo": "Money and material.",
+   "min": 2.2
+  },
+  {
+   "type": "phone",
+   "shot": "en/08_money",
+   "kicker": "Money",
+   "title": [
+    "Money in,",
+    "money out."
+   ],
+   "vo": "The Money tab shows what came in, what went out, and the balance, for every site.",
+   "highlights": [
+    {
+     "box": [
+      30,
+      375,
+      1020,
+      195
+     ],
+     "at": 1.6,
+     "hold": 2.4
+    }
+   ]
+  },
+  {
+   "type": "phone",
+   "shot": "en/06_stock",
+   "side": "right",
+   "kicker": "Stock",
+   "title": [
+    "Check stock",
+    "before you order."
+   ],
+   "vo": "Stock shows what is left on site, so you order before work stops."
+  },
+  {
+   "type": "phone",
+   "shot": "en/16_owe",
+   "kicker": "Suppliers",
+   "title": [
+    "Who you owe,",
+    "oldest first."
+   ],
+   "vo": "Who you owe lists every supplier you still have to pay, with the oldest debts first.",
+   "highlights": [
+    {
+     "box": [
+      42,
+      549,
+      996,
+      249
+     ],
+     "at": 1.6,
+     "hold": 2.2
+    }
+   ]
+  },
+  {
+   "type": "chapter",
+   "num": "6",
+   "text": "For the owner",
+   "vo": "For the owner.",
+   "min": 2.2
+  },
+  {
+   "type": "phone",
+   "shot": "en/15_brief",
+   "kicker": "7:30 pm",
+   "title": [
+    "One brief",
+    "for every site."
+   ],
+   "vo": "Every evening at seven thirty, the site brief shows each site's day, with the ones that need you first. Send it to WhatsApp in one tap.",
+   "highlights": [
+    {
+     "box": [
+      285,
+      336,
+      750,
+      240
+     ],
+     "at": 2.0,
+     "hold": 2.4
+    }
+   ]
+  },
+  {
+   "type": "phone",
+   "shot": "en/02_dashboard",
+   "side": "right",
+   "kicker": "Dashboard",
+   "title": [
+    "Catch overspending",
+    "early."
+   ],
+   "vo": "The dashboard compares every site's spending with its budget, and forecasts the cost to finish.",
+   "highlights": [
+    {
+     "box": [
+      60,
+      876,
+      960,
+      132
+     ],
+     "at": 2.2,
+     "hold": 2.4
+    }
+   ]
+  },
+  {
+   "type": "phone",
+   "shot": "en/12_approvals",
+   "kicker": "Approvals",
+   "title": [
+    "Approve from",
+    "anywhere."
+   ],
+   "vo": "Purchases and budget overruns wait for your approval, wherever you are."
+  },
+  {
+   "type": "chapter",
+   "num": "7",
+   "text": "Take the tour",
+   "vo": "Last, take the tour.",
+   "min": 2.2
+  },
+  {
+   "type": "phone",
+   "shot": "en/17_tour_0",
+   "side": "right",
+   "title": [
+    "Mitra shows you",
+    "one full day."
+   ],
+   "sub": "Home, then the menu, then App tour.",
+   "vo": "Mitra's two-minute tour walks you through one full day on a sample site. Find it on Home, or in the menu under App tour.",
+   "mitra": {
+    "mood": "point",
+    "pos": "bl"
+   }
+  },
+  {
+   "type": "cta",
+   "title": "Start your free 3-day trial",
+   "vo": "That's it. Start your free three-day trial today.",
+   "min": 5
+  }
+ ]
+}

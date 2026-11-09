@@ -1,0 +1,91 @@
+{
+ "name": "fieldos-reel-1-just-say-it",
+ "width": 1080,
+ "height": 1920,
+ "mood": "drive",
+ "speed": 1.08,
+ "bug": true,
+ "caption_style": "bold",
+ "scenes": [
+  {
+   "type": "chaos",
+   "notes": [
+    [
+     "Site supervisor",
+     "Sir, cement is finished"
+    ],
+    [
+     "Ramesh (mason)",
+     "When is Saturday payment?"
+    ],
+    [
+     "Mr. Reddy (client)",
+     "What work happened today?"
+    ],
+    [
+     "Miyapur site",
+     "JCB did not come"
+    ],
+    [
+     "Accounts",
+     "Send the bill photo"
+    ],
+    [
+     "Kompally site",
+     "4 came, 2 absent"
+    ],
+    [
+     "Steel supplier",
+     "Payment pending 64 days"
+    ]
+   ],
+   "title": [
+    "4 sites.",
+    "40 calls a day."
+   ],
+   "vo": "Four sites. Forty calls a day. Sound familiar?",
+   "min": 4.4
+  },
+  {
+   "type": "mitra",
+   "mood": "wave",
+   "lines": [
+    "Stop typing.",
+    "Just say it."
+   ],
+   "vo": "Stop typing. Just tell Field O S.",
+   "min": 2.8
+  },
+  {
+   "type": "chat",
+   "title": [
+    "Say it.",
+    "It's saved."
+   ],
+   "ask": "Add ₹5,000 spent on cement at Kompally",
+   "reply": "Sure, Ravi. Here it is for Kompally Villa.",
+   "card": "Expense ₹5,000 for Material at Kompally Villa, Block B · cement",
+   "final": "Saved ₹5,000 for cement at Kompally Villa.",
+   "vo": "Add five thousand for cement at Kompally. It fills it in. You tap save. Done.",
+   "min": 8.2,
+   "save_after": 2.6
+  },
+  {
+   "type": "chat",
+   "title": [
+    "Ask it",
+    "anything."
+   ],
+   "ask": "Who came to Kompally today?",
+   "reply": "4 people punched in at Kompally Villa today: Ramesh, Suresh, Anil and Venkat. Lakshmi is absent.",
+   "vo": "Who came today? It answers from your own records.",
+   "min": 6.4
+  },
+  {
+   "type": "cta",
+   "title": "Try FieldOS free for 3 days",
+   "vo": "Try Field O S free for three days. Link in bio.",
+   "min": 4.5
+  }
+ ]
+}

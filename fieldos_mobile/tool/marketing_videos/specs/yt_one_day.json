@@ -1,0 +1,219 @@
+{
+ "name": "fieldos-youtube-one-day-four-sites",
+ "width": 1920,
+ "height": 1080,
+ "mood": "drive",
+ "speed": 1.03,
+ "bug": true,
+ "progress": true,
+ "caption_style": "bold",
+ "music_db": -15,
+ "scenes": [
+  {
+   "type": "chaos",
+   "notes": [
+    [
+     "Site supervisor",
+     "Sir, cement is finished"
+    ],
+    [
+     "Ramesh (mason)",
+     "When is Saturday payment?"
+    ],
+    [
+     "Mr. Reddy (client)",
+     "What work happened today?"
+    ],
+    [
+     "Miyapur site",
+     "JCB did not come"
+    ],
+    [
+     "Accounts",
+     "Send the bill photo"
+    ],
+    [
+     "Kompally site",
+     "4 came, 2 absent"
+    ],
+    [
+     "Steel supplier",
+     "Payment pending 64 days"
+    ]
+   ],
+   "title": [
+    "4 sites. 40 calls.",
+    "One phone."
+   ],
+   "vo": "Four construction sites. Forty phone calls a day. Here's how one contractor in Hyderabad runs all of it from one phone.",
+   "min": 6
+  },
+  {
+   "type": "mitra",
+   "mood": "wave",
+   "lines": [
+    "One day.",
+    "Four sites.",
+    "Let's go."
+   ],
+   "vo": "One full day, four sites. Let's go.",
+   "min": 3
+  },
+  {
+   "type": "phone",
+   "shot": "en/07_labour",
+   "kicker": "9:00 am",
+   "title": [
+    "Attendance,",
+    "done."
+   ],
+   "vo": "Nine A M. The supervisor punches in the gang with G P S. Ten seconds."
+  },
+  {
+   "type": "phone",
+   "shot": "en/06_stock",
+   "side": "right",
+   "kicker": "11:00 am",
+   "title": [
+    "Cement arrives.",
+    "Stock updates."
+   ],
+   "vo": "Eleven A M. Cement arrives. The delivery is checked against the order, and stock updates itself."
+  },
+  {
+   "type": "chat",
+   "kicker": "1:00 pm",
+   "title": [
+    "Too busy",
+    "to type?"
+   ],
+   "ask": "Add ₹5,000 spent on cement at Kompally",
+   "reply": "Sure, Ravi. Here it is for Kompally Villa.",
+   "card": "Expense ₹5,000 for Material at Kompally Villa, Block B · cement",
+   "final": "Saved ₹5,000 for cement at Kompally Villa.",
+   "vo": "One P M. No time to type. Just say it. Add five thousand for cement at Kompally. Tap save. Done.",
+   "min": 8.4,
+   "save_after": 2.8
+  },
+  {
+   "type": "chat",
+   "side": "right",
+   "kicker": "4:00 pm",
+   "title": [
+    "Plan",
+    "tomorrow."
+   ],
+   "ask": "Add a task: plaster the first floor by Friday",
+   "reply": "Here is the task for Kompally Villa.",
+   "card": "Task: Plaster first floor · due Fri 13 Nov · Kompally Villa",
+   "final": "Added. I will remind you on Friday morning.",
+   "vo": "Four P M. Plan tomorrow. Add a task, plaster the first floor by Friday.",
+   "min": 8,
+   "save_after": 2.6
+  },
+  {
+   "type": "phone",
+   "shot": "en/04_dpr",
+   "kicker": "6:00 pm",
+   "title": [
+    "Daily report,",
+    "spoken."
+   ],
+   "vo": "Six P M. The engineer speaks the day's report, and shares it on WhatsApp with the client."
+  },
+  {
+   "type": "phone",
+   "shot": "en/15_brief",
+   "side": "right",
+   "kicker": "7:30 pm",
+   "title": [
+    "The owner's",
+    "brief."
+   ],
+   "vo": "Seven thirty P M. The owner gets one brief. Two sites need attention: one has no report, one is over budget.",
+   "highlights": [
+    {
+     "box": [
+      45,
+      600,
+      990,
+      690
+     ],
+     "at": 2.6,
+     "hold": 3
+    }
+   ]
+  },
+  {
+   "type": "stat",
+   "label": "Saturday wages for 12 workers",
+   "value": 26000,
+   "prefix": "₹",
+   "sub": "Added up. No arguments.",
+   "mood": "money",
+   "vo": "Saturday. Wages for every worker, added up. Days, half days, overtime. No arguments.",
+   "min": 4.5
+  },
+  {
+   "type": "phone",
+   "shot": "en/16_owe",
+   "kicker": "Month end",
+   "title": [
+    "Who you owe,",
+    "oldest first."
+   ],
+   "vo": "Month end. Who you owe, oldest first, before a supplier stops your credit.",
+   "highlights": [
+    {
+     "box": [
+      42,
+      549,
+      996,
+      249
+     ],
+     "at": 2,
+     "hold": 2.4
+    }
+   ]
+  },
+  {
+   "type": "phone",
+   "shot": "en/02_dashboard",
+   "side": "right",
+   "kicker": "Every day",
+   "title": [
+    "Know before",
+    "it's too late."
+   ],
+   "vo": "And every day, the dashboard warns you before a site goes over budget.",
+   "highlights": [
+    {
+     "box": [
+      30,
+      276,
+      1020,
+      300
+     ],
+     "at": 1.8,
+     "hold": 2.4
+    }
+   ]
+  },
+  {
+   "type": "mitra",
+   "mood": "celebrate",
+   "lines": [
+    "In Telugu, Hindi",
+    "or English."
+   ],
+   "vo": "All of it in Telugu, Hindi or English. On a basic Android phone.",
+   "min": 3.6
+  },
+  {
+   "type": "cta",
+   "title": "Try FieldOS free for 3 days",
+   "vo": "Try Field O S free for three days. Link in the description.",
+   "min": 5.5
+  }
+ ]
+}

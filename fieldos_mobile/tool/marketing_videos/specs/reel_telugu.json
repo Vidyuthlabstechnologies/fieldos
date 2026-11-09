@@ -1,0 +1,68 @@
+{
+ "name": "fieldos-reel-5-telugu",
+ "width": 1080,
+ "height": 1920,
+ "mood": "drive",
+ "speed": 1.08,
+ "bug": true,
+ "caption_style": "bold",
+ "scenes": [
+  {
+   "type": "mitra",
+   "mood": "wave",
+   "lines": [
+    "మీ సైట్ యాప్",
+    "ఇప్పుడు తెలుగులో!"
+   ],
+   "min": 3.2
+  },
+  {
+   "type": "phone",
+   "shot": "te/14_assistant",
+   "title": [
+    "చెప్పండి చాలు,",
+    "FieldOS చేసేస్తుంది"
+   ],
+   "min": 4.2
+  },
+  {
+   "type": "phone",
+   "shot": "te/01_home",
+   "title": [
+    "ప్రతి సైట్,",
+    "ఒకే ఫోన్‌లో"
+   ],
+   "min": 3.4
+  },
+  {
+   "type": "phone",
+   "shot": "te/15_brief",
+   "title": [
+    "ఈ రోజు ఏ సైట్‌కు",
+    "మీరు అవసరం"
+   ],
+   "min": 3.4
+  },
+  {
+   "type": "phone",
+   "shot": "te/11_wage_sheet",
+   "title": [
+    "శనివారం కూలీ,",
+    "లెక్క సిద్ధం"
+   ],
+   "min": 3.4,
+   "mitra": {
+    "mood": "thumbsUp",
+    "pos": "br",
+    "size": 240
+   }
+  },
+  {
+   "type": "cta",
+   "title": "3 రోజులు ఉచితంగా ప్రయత్నించండి",
+   "sub": "ప్రతి సైట్, మీ ఫోన్ నుంచే",
+   "foot": "తెలుగు · हिंदी · English",
+   "min": 4.5
+  }
+ ]
+}
