@@ -5,6 +5,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:fieldos_mobile/features/money/money_view.dart' show canSeeMoneyIn;
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -270,6 +272,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             value: _reminders.tasksOn,
             onChanged: (v) => _saveReminders(_reminders.copyWith(tasksOn: v)),
           ),
+          if (canSeeMoneyIn(ref.watch(sessionProvider).role))
+            SwitchListTile(
+              secondary: const Icon(Icons.wb_twilight_outlined),
+              title: Text(tr('Evening site brief')),
+              subtitle: Text(tr('At 7:30 pm, which sites need you and why')),
+              value: _reminders.briefOn,
+              onChanged: (v) => _saveReminders(_reminders.copyWith(briefOn: v)),
+            ),
           const SectionHeader('Security', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           SwitchListTile(
             secondary: const Icon(Icons.lock_outline),
@@ -295,6 +305,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             subtitle: Text(tr('Every record on this phone, in one file you keep. Free, always.')),
             onTap: () => exportCompanyToExcel(context, ref),
           ),
+          if (canSeeMoneyIn(session.role))
+            ListTile(
+              key: const Key('settings-export-accounts'),
+              leading: const Icon(Icons.account_balance_outlined),
+              title: Text(tr('Send to your accountant')),
+              subtitle: Text(tr('Tally vouchers or a Zoho Books file, with GST split out')),
+              onTap: () => showAccountsExport(context, ref),
+            ),
           if (company != null && session.canManageSettings) ...[
             const SectionHeader('Bills and reports', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
             _BrandingTiles(companyId: company.id),

@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/money/money_view.dart' show canSeeMoneyIn;
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
@@ -21,21 +22,32 @@ const reminderIdBase = 1000;
 const reminderIdCount = 200;
 
 class ReminderSettings {
-  const ReminderSettings({this.reportOn = true, this.reportMinutes = 18 * 60 + 30, this.tasksOn = true});
+  const ReminderSettings({
+    this.reportOn = true,
+    this.reportMinutes = 18 * 60 + 30,
+    this.tasksOn = true,
+    this.briefOn = true,
+  });
 
   final bool reportOn;
+
+  /// The owner's evening site brief, at [briefMinutes]. Only for people
+  /// who can see the money (owners and managers).
+  final bool briefOn;
+  static const briefMinutes = 19 * 60 + 30;
 
   /// Minutes after midnight for the report reminder (default 6:30 pm).
   final int reportMinutes;
   final bool tasksOn;
 
-  ReminderSettings copyWith({bool? reportOn, int? reportMinutes, bool? tasksOn}) => ReminderSettings(
+  ReminderSettings copyWith({bool? reportOn, int? reportMinutes, bool? tasksOn, bool? briefOn}) => ReminderSettings(
     reportOn: reportOn ?? this.reportOn,
     reportMinutes: reportMinutes ?? this.reportMinutes,
     tasksOn: tasksOn ?? this.tasksOn,
+    briefOn: briefOn ?? this.briefOn,
   );
 
-  String toJson() => jsonEncode({'report': reportOn, 'at': reportMinutes, 'tasks': tasksOn});
+  String toJson() => jsonEncode({'report': reportOn, 'at': reportMinutes, 'tasks': tasksOn, 'brief': briefOn});
 
   static ReminderSettings fromJson(String? raw) {
     if (raw == null || raw.isEmpty) return const ReminderSettings();
@@ -46,6 +58,7 @@ class ReminderSettings {
         reportOn: j['report'] as bool? ?? true,
         reportMinutes: at.clamp(0, 24 * 60 - 1),
         tasksOn: j['tasks'] as bool? ?? true,
+        briefOn: j['brief'] as bool? ?? true,
       );
     } catch (_) {
       return const ReminderSettings();
@@ -74,6 +87,7 @@ List<PlannedReminder> planReminders({
   required int runningSites,
   required bool reportedToday,
   required List<Task> openTasks,
+  bool isOwner = false,
   int days = 7,
 }) {
   final out = <PlannedReminder>[];
@@ -89,6 +103,19 @@ List<PlannedReminder> planReminders({
             at: at,
             title: tr("Today's site report"),
             body: tr('Speak or type what happened on site today. It takes a minute.'),
+          ),
+        );
+      }
+    }
+    if (settings.briefOn && isOwner && runningSites > 0) {
+      final at = day.add(const Duration(minutes: ReminderSettings.briefMinutes));
+      if (at.isAfter(now)) {
+        out.add(
+          PlannedReminder(
+            id: reminderIdBase + 50 + i,
+            at: at,
+            title: tr('Your site brief is ready'),
+            body: tr('See which sites need you today: people, money, work and problems in one screen.'),
           ),
         );
       }
@@ -156,6 +183,7 @@ class ReminderScheduler {
         runningSites: running.length,
         reportedToday: reported,
         openTasks: s.tasksOn ? await _db.taskDao.openForCompany(company.id) : const [],
+        isOwner: canSeeMoneyIn(_ref.read(sessionProvider).role),
       );
       if (plan.isNotEmpty) await notifications.init();
       await notifications.replaceScheduled(plan);

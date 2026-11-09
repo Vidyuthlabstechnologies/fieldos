@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/export/accounts_export.dart';
 import 'package:fieldos_mobile/features/export/data_export.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart' show canSeeMoneyIn;
 import 'package:fieldos_mobile/l10n/language.dart';
@@ -59,6 +60,79 @@ Future<void> _export(BuildContext context, WidgetRef ref, ExportScope scope, {re
     );
   } catch (e, st) {
     if (nav.canPop()) nav.pop();
+    if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
+  }
+}
+
+/// "Send to your accountant": Tally vouchers or a Zoho Books CSV for a
+/// period, shared from the phone.
+Future<void> showAccountsExport(BuildContext context, WidgetRef ref) async {
+  final company = ref.read(sessionProvider).activeCompany;
+  if (company == null) return;
+  final now = DateTime.now();
+  final fy = financialYear(now);
+  final periods = <(String, DateTime?, DateTime?)>[
+    (tr('This month'), DateTime(now.year, now.month), DateTime(now.year, now.month + 1)),
+    (tr('Last month'), DateTime(now.year, now.month - 1), DateTime(now.year, now.month)),
+    (tr('This financial year'), fy.$1, fy.$2),
+    (tr('Everything'), null, null),
+  ];
+  var pick = 0;
+  final format = await showModalBottomSheet<AccountsFormat>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setSheet) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(tr('Send to your accountant'), style: Theme.of(ctx).textTheme.titleLarge),
+            const SizedBox(height: 4),
+            Text(tr('Every expense as a payment voucher and every client payment as a receipt, with GST split out.'),
+                style: Theme.of(ctx).textTheme.bodyMedium),
+            const SizedBox(height: 12),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              for (var i = 0; i < periods.length; i++)
+                ChoiceChip(label: Text(periods[i].$1), selected: pick == i, onSelected: (_) => setSheet(() => pick = i)),
+            ]),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              key: const Key('accounts-tally'),
+              icon: const Icon(Icons.account_balance_outlined),
+              label: Text(tr('Tally vouchers (XML)')),
+              onPressed: () => Navigator.pop(ctx, AccountsFormat.tally),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              key: const Key('accounts-zoho'),
+              icon: const Icon(Icons.table_rows_outlined),
+              label: Text(tr('Zoho Books expenses (CSV)')),
+              onPressed: () => Navigator.pop(ctx, AccountsFormat.zoho),
+            ),
+          ]),
+        ),
+      ),
+    ),
+  );
+  if (format == null || !context.mounted) return;
+  final (_, from, to) = periods[pick];
+  try {
+    final (file, export) = await writeAccountsExport(ref.read(appDatabaseProvider),
+        companyId: company.id, companyName: company.name, format: format, from: from, to: to);
+    if (export.vouchers == 0) {
+      if (context.mounted) showSnack(context, 'No money entries in this period.');
+      return;
+    }
+    final note = format == AccountsFormat.tally
+        ? '${company.name}: ${export.vouchers} vouchers for Tally (Gateway > Import > Vouchers).\n'
+            'Create these ledgers in Tally first if they are new: ${export.ledgers.join(', ')}.'
+        : '${company.name}: ${export.vouchers} expenses for Zoho Books (Purchases > Expenses > Import).';
+    await SharePlus.instance.share(ShareParams(
+      files: [XFile(file.path, mimeType: format == AccountsFormat.tally ? 'application/xml' : 'text/csv')],
+      text: note,
+      subject: note.split('\n').first,
+    ));
+  } catch (e, st) {
     if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
   }
 }

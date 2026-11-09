@@ -162,6 +162,64 @@ List<MaterialRate> materialRates(Iterable<MaterialReceipt> receipts) {
   return out;
 }
 
+// --- Quote check -----------------------------------------------------------
+
+/// How a new rate compares with what the company usually pays.
+class RateCheck {
+  const RateCheck({
+    required this.rate,
+    required this.usual,
+    required this.deliveries,
+    this.best,
+  });
+
+  /// Rate per unit of the quote or bill being entered.
+  final double rate;
+
+  /// Median of the recent deliveries' rates, so one odd bill doesn't skew it.
+  final double usual;
+  final int deliveries;
+
+  /// The cheapest recent delivery, to name who to call.
+  final RatePoint? best;
+
+  double get diffPct => usual == 0 ? 0 : (rate - usual) / usual * 100;
+
+  /// 5% either way is normal day-to-day movement.
+  bool get high => diffPct >= 5;
+  bool get low => diffPct <= -5;
+
+  /// What the difference costs on [qty] units.
+  double extraOn(double qty) => (rate - usual) * qty;
+}
+
+/// Compares [amount] for [qty] of [material] with the company's own recent
+/// deliveries of the same material in the same unit (any site). Null until
+/// there are two earlier deliveries to compare with, or when the entry has
+/// no quantity or amount yet.
+RateCheck? checkRate({
+  required String material,
+  required String? unit,
+  required double? qty,
+  required double? amount,
+  required Iterable<MaterialReceipt> history,
+  int recent = 6,
+  DateTime? now,
+}) {
+  if (qty == null || amount == null || qty <= 0 || amount <= 0 || material.trim().isEmpty) return null;
+  final key = '${_norm(material)}|${_norm(unit ?? '')}';
+  final match = materialRates(history).where((r) => '${_norm(r.name)}|${_norm(r.unit ?? '')}' == key).firstOrNull;
+  if (match == null || match.points.length < 2) return null;
+  final since = (now ?? DateTime.now()).subtract(const Duration(days: 180));
+  final pts = match.points.where((p) => p.on.isAfter(since)).toList();
+  final last = (pts.length >= 2 ? pts : match.points).reversed.take(recent).toList();
+  final sorted = [for (final p in last) p.rate]..sort();
+  final mid = sorted.length ~/ 2;
+  final usual = sorted.length.isOdd ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  final best = last.reduce((a, b) => b.rate < a.rate ? b : a);
+  return RateCheck(rate: amount / qty, usual: usual, deliveries: last.length, best: best);
+}
+
 // --- Site units -------------------------------------------------------------
 
 class SiteUnit {

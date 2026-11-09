@@ -162,3 +162,14 @@ final measurementEntriesProvider = FutureProvider.autoDispose.family<List<Measur
     (ref, costHeadId) => ref.watch(appDatabaseProvider).estimationDao.measurements(costHeadId));
 final steelEntriesProvider = FutureProvider.autoDispose.family<List<SteelEntry>, String>(
     (ref, costHeadId) => ref.watch(appDatabaseProvider).estimationDao.steel(costHeadId));
+
+/// Every delivery on every site of a company, for "is this a fair rate?"
+/// checks against what the company itself has paid before.
+final companyReceiptsProvider = FutureProvider.autoDispose.family<List<MaterialReceipt>, String>((ref, companyId) async {
+  final db = ref.watch(appDatabaseProvider);
+  final out = <MaterialReceipt>[];
+  for (final p in await db.projectDao.forCompany(companyId)) {
+    out.addAll(await db.materialDao.forProject(p.id));
+  }
+  return out;
+});
