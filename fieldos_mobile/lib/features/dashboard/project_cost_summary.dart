@@ -7,6 +7,14 @@ library;
 import 'package:fieldos_mobile/agents/cost_control_agent.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/estimation/project_boq.dart';
+import 'package:fieldos_mobile/features/project/task_plan.dart';
+
+/// Spent so far scaled up to the whole job by the share of work done.
+double? forecastAtCompletion(double spent, int progressPct) {
+  if (progressPct < 10 || spent <= 0) return null;
+  if (progressPct >= 100) return spent;
+  return spent * 100 / progressPct;
+}
 
 class ProjectCostSummary {
   const ProjectCostSummary({
@@ -19,6 +27,7 @@ class ProjectCostSummary {
     required this.openIssues,
     required this.dprCount,
     required this.alerts,
+    this.progress = 0,
   });
 
   final String projectId;
@@ -32,6 +41,17 @@ class ProjectCostSummary {
   final int openIssues;
   final int dprCount;
   final List<String> alerts;
+
+  /// Work done, 0-100, from the tasks.
+  final int progress;
+
+  /// What the whole job will cost at the rate money is going out: spent so
+  /// far divided by the share of work done. Null before 10% of the work
+  /// (too early to tell) or with nothing spent.
+  double? get forecast => forecastAtCompletion(actual, progress);
+
+  /// Forecast less budget; positive means heading over.
+  double? get forecastOver => forecast == null || budget <= 0 ? null : forecast! - budget;
 
   static Future<ProjectCostSummary> forProject(AppDatabase db, Project project) async {
     final boq = await buildProjectBoq(db.estimationDao, project.id);
@@ -57,6 +77,7 @@ class ProjectCostSummary {
     final issues = await db.issueDao.forProject(project.id);
     final open = issues.where((i) => i.status != 'resolved').length;
     final dprs = await db.dprDao.forProject(project.id);
+    final tasks = await db.taskDao.forProject(project.id);
 
     final budget = d['project_budget'] as double;
     final noBudget = budget <= 0;
@@ -70,6 +91,7 @@ class ProjectCostSummary {
       openIssues: open,
       dprCount: dprs.length,
       alerts: noBudget ? const [] : List<String>.from(d['alerts'] as List),
+      progress: projectProgress(tasks),
     );
   }
 }

@@ -1111,4 +1111,20 @@ const Map<String, String> stringsHi = {
   'PDF for the client': 'क्लाइंट के लिए PDF',
   'Progress and photos only': 'सिर्फ़ प्रगति और फ़ोटो',
   'With billed, received and balance due': 'बिल, मिली रकम और बाकी के साथ',
+
+  // Dashboard forecast and monthly value.
+  '1 daily report': '1 दैनिक रिपोर्ट',
+  'An estimate from what your team recorded.': 'आपकी टीम ने जो दर्ज किया, उससे अनुमान।',
+  'This month with FieldOS': 'इस महीने FieldOS के साथ',
+  'about 1 hour': 'लगभग 1 घंटा',
+  'about {n} hours': 'लगभग {n} घंटे',
+  'under an hour': 'एक घंटे से कम',
+  '{hours} of paperwork saved': '{hours} का कागज़ी काम बचा',
+  '{n} attendance entries': '{n} हाज़िरी एंट्री',
+  '{n} client bills': '{n} क्लाइंट बिल',
+  '{n} daily reports': '{n} दैनिक रिपोर्ट',
+  '{n} deliveries checked': '{n} डिलीवरी जाँची',
+  '{n} expenses': '{n} खर्च',
+  '{pct}% done. At this rate the job costs {total}, {over} over budget.': '{pct}% पूरा। इसी रफ़्तार से काम {total} का पड़ेगा, बजट से {over} ज़्यादा।',
+  '{pct}% done. At this rate the job finishes within budget ({total}).': '{pct}% पूरा। इसी रफ़्तार से काम बजट में पूरा होगा ({total})।',
 };

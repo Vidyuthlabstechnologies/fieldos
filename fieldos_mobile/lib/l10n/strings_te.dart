@@ -1113,4 +1113,20 @@ const Map<String, String> stringsTe = {
   'PDF for the client': 'క్లయింట్ కోసం PDF',
   'Progress and photos only': 'ప్రగతి, ఫోటోలు మాత్రమే',
   'With billed, received and balance due': 'బిల్లు, వచ్చిన మొత్తం, బాకీతో సహా',
+
+  // Dashboard forecast and monthly value.
+  '1 daily report': '1 రోజువారీ నివేదిక',
+  'An estimate from what your team recorded.': 'మీ టీమ్ నమోదు చేసిన దాని నుండి అంచనా.',
+  'This month with FieldOS': 'ఈ నెల FieldOSతో',
+  'about 1 hour': 'సుమారు 1 గంట',
+  'about {n} hours': 'సుమారు {n} గంటలు',
+  'under an hour': 'గంట కంటే తక్కువ',
+  '{hours} of paperwork saved': '{hours} కాగితం పని ఆదా',
+  '{n} attendance entries': '{n} హాజరు ఎంట్రీలు',
+  '{n} client bills': '{n} క్లయింట్ బిల్లులు',
+  '{n} daily reports': '{n} రోజువారీ నివేదికలు',
+  '{n} deliveries checked': '{n} డెలివరీలు తనిఖీ',
+  '{n} expenses': '{n} ఖర్చులు',
+  '{pct}% done. At this rate the job costs {total}, {over} over budget.': '{pct}% పూర్తి. ఇదే వేగంతో పని {total} అవుతుంది, బడ్జెట్ కంటే {over} ఎక్కువ.',
+  '{pct}% done. At this rate the job finishes within budget ({total}).': '{pct}% పూర్తి. ఇదే వేగంతో పని బడ్జెట్‌లోనే పూర్తవుతుంది ({total}).',
 };
