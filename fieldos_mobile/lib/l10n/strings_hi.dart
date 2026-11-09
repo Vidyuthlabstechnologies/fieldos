@@ -1116,6 +1116,10 @@ const Map<String, String> stringsHi = {
   'With billed, received and balance due': 'बिल, मिली रकम और बाकी के साथ',
 
   // Dashboard forecast and monthly value.
+  '1 attendance entry': '1 हाज़िरी एंट्री',
+  '1 expense': '1 खर्च',
+  '1 delivery checked': '1 डिलीवरी जाँची',
+  '1 client bill': '1 क्लाइंट बिल',
   '1 daily report': '1 दैनिक रिपोर्ट',
   'An estimate from what your team recorded.': 'आपकी टीम ने जो दर्ज किया, उससे अनुमान।',
   'This month with FieldOS': 'इस महीने FieldOS के साथ',

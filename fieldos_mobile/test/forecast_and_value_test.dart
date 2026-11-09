@@ -33,4 +33,11 @@ void main() {
     expect(hoursLabel(0.4), 'under an hour');
     await db.close();
   });
+
+  test('the count line says 1 expense, not 1 expenses', () {
+    expect(valueFacts(const ValueSummary(reports: 1, attendance: 1, vouchers: 1, deliveries: 1, bills: 1)),
+        '1 daily report · 1 attendance entry · 1 expense · 1 delivery checked · 1 client bill');
+    expect(valueFacts(const ValueSummary(reports: 0, attendance: 2, vouchers: 3, deliveries: 0, bills: 0)),
+        '2 attendance entries · 3 expenses');
+  });
 }

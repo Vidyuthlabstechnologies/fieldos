@@ -77,6 +77,17 @@ String hoursLabel(double h) {
   return r == 1 ? tr('about 1 hour') : trf('about {n} hours', {'n': r});
 }
 
+/// The card's count line, e.g. "1 expense · 3 daily reports".
+String valueFacts(ValueSummary v) => [
+      if (v.reports > 0) v.reports == 1 ? tr('1 daily report') : trf('{n} daily reports', {'n': v.reports}),
+      if (v.attendance > 0)
+        v.attendance == 1 ? tr('1 attendance entry') : trf('{n} attendance entries', {'n': v.attendance}),
+      if (v.vouchers > 0) v.vouchers == 1 ? tr('1 expense') : trf('{n} expenses', {'n': v.vouchers}),
+      if (v.deliveries > 0)
+        v.deliveries == 1 ? tr('1 delivery checked') : trf('{n} deliveries checked', {'n': v.deliveries}),
+      if (v.bills > 0) v.bills == 1 ? tr('1 client bill') : trf('{n} client bills', {'n': v.bills}),
+    ].join(' · ');
+
 class ValueCard extends ConsumerWidget {
   const ValueCard({super.key, required this.companyId});
   final String companyId;
@@ -86,13 +97,7 @@ class ValueCard extends ConsumerWidget {
     final v = ref.watch(valueSummaryProvider(companyId)).valueOrNull;
     if (v == null || v.records == 0) return const SizedBox.shrink();
     final theme = Theme.of(context);
-    final facts = [
-      if (v.reports > 0) v.reports == 1 ? tr('1 daily report') : trf('{n} daily reports', {'n': v.reports}),
-      if (v.attendance > 0) trf('{n} attendance entries', {'n': v.attendance}),
-      if (v.vouchers > 0) trf('{n} expenses', {'n': v.vouchers}),
-      if (v.deliveries > 0) trf('{n} deliveries checked', {'n': v.deliveries}),
-      if (v.bills > 0) trf('{n} client bills', {'n': v.bills}),
-    ].join(' · ');
+    final facts = valueFacts(v);
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       color: theme.colorScheme.secondaryContainer,

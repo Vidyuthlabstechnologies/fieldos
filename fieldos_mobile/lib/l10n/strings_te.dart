@@ -1118,6 +1118,10 @@ const Map<String, String> stringsTe = {
   'With billed, received and balance due': 'బిల్లు, వచ్చిన మొత్తం, బాకీతో సహా',
 
   // Dashboard forecast and monthly value.
+  '1 attendance entry': '1 హాజరు ఎంట్రీ',
+  '1 expense': '1 ఖర్చు',
+  '1 delivery checked': '1 డెలివరీ తనిఖీ',
+  '1 client bill': '1 క్లయింట్ బిల్లు',
   '1 daily report': '1 రోజువారీ నివేదిక',
   'An estimate from what your team recorded.': 'మీ టీమ్ నమోదు చేసిన దాని నుండి అంచనా.',
   'This month with FieldOS': 'ఈ నెల FieldOSతో',
