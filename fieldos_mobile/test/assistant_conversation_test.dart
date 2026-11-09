@@ -219,4 +219,64 @@ void main() {
     await first;
     expect(c.items.whereType<PersonSaid>().map((p) => p.text), ['one']);
   });
+
+  test('a chat saved as JSON comes back the same; a card still waiting comes back cancelled', () async {
+    final backend = _ScriptedBackend([
+      _tools([('t1', 'list_projects', {})]),
+      _text('You have one site, Villa.'),
+    ]);
+    final c = chat(backend);
+    await c.send('How many sites?');
+    c.items.add(ConfirmAction(toolName: 'add_task', summary: 'Task Curing at Villa'));
+    c.items.add(ScreenButton(const ScreenLink('money', projectId: 'p1')));
+    c.items.add(ChatNotice('No plan', code: 'no_plan'));
+
+    final saved = jsonDecode(jsonEncode(c.toJson())) as Map<String, dynamic>;
+    final back = chat(_ScriptedBackend([]))..restore(saved);
+    expect(back.history, c.history);
+    expect(back.followUps, c.followUps);
+    expect(back.items.whereType<PersonSaid>().single.text, 'How many sites?');
+    expect(back.items.whereType<AssistantSaid>().single.text, 'You have one site, Villa.');
+    final card = back.items.whereType<ConfirmAction>().single;
+    expect((card.summary, card.state), ('Task Curing at Villa', ConfirmState.cancelled));
+    expect(back.waitingForConfirm, isFalse);
+    final link = back.items.whereType<ScreenButton>().single.link;
+    expect((link.screen, link.projectId), ('money', 'p1'));
+    expect(back.items.whereType<ChatNotice>().single.code, 'no_plan');
+
+    // And the restored chat carries on from the same API history.
+    final next = _ScriptedBackend([_text('Still one.')]);
+    final more = chat(next)..restore(saved);
+    await more.send('And now?');
+    expect(next.sent.single.take(c.history.length).toList(), c.history);
+  });
+
+  test('a damaged saved chat starts fresh instead of failing', () {
+    final c = chat(_ScriptedBackend([]))..restore({'items': 'nonsense', 'history': 3});
+    expect(c.items, isEmpty);
+    expect(c.history, isEmpty);
+  });
+
+  test('follow-up questions fit what was just done and never repeat the question', () async {
+    final backend = _ScriptedBackend([
+      _tools([('t1', 'add_expense', {'project_id': 'p1', 'amount': 500, 'category': 'Material'})]),
+      _text('Saved.'),
+    ]);
+    final c = chat(backend);
+    final done = c.send("Show this week's expenses");
+    await pumpEventQueue();
+    c.decide(c.items.whereType<ConfirmAction>().single, true);
+    await done;
+    expect(c.followUps, ['How much did I spend this month?', 'What needs my approval?', 'What happened on my sites today?']);
+
+    expect(suggestFollowUps({}), ['What happened on my sites today?', 'Which tasks are late?', "Write today's daily report"]);
+    expect(suggestFollowUps({'pending_approvals'}, canApprove: false).contains('What needs my approval?'), isFalse);
+    expect(suggestFollowUps({'mark_attendance'}).take(2), ['Who was absent today?', 'How much did labour cost this week?']);
+  });
+
+  test('a failed message offers no follow-ups', () async {
+    final c = chat(_ScriptedBackend([AiException('Server is busy', code: 'busy')]));
+    await c.send('How many sites?');
+    expect(c.followUps, isEmpty);
+  });
 }

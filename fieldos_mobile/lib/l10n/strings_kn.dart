@@ -2404,4 +2404,26 @@ const Map<String, String> stringsKn = {
       'ಬಾಕಿ',
   '{from} to {to}':
       '{from} ರಿಂದ {to}',
+  'Show this week\'s expenses':
+      'ಈ ವಾರದ ಖರ್ಚುಗಳನ್ನು ತೋರಿಸು',
+  'What is due this week?':
+      'ಈ ವಾರ ಏನೆಲ್ಲಾ ಮುಗಿಸಬೇಕು?',
+  'Who was absent today?':
+      'ಇಂದು ಯಾರು ಬರಲಿಲ್ಲ?',
+  'How much did labour cost this week?':
+      'ಈ ವಾರ ಕೂಲಿಗೆ ಎಷ್ಟು ಖರ್ಚಾಯಿತು?',
+  'Any open issues on site?':
+      'ಸೈಟ್‌ನಲ್ಲಿ ಯಾವುದಾದರೂ ತೆರೆದ ಸಮಸ್ಯೆ ಇದೆಯೇ?',
+  'Which materials are running low?':
+      'ಯಾವ ಸಾಮಗ್ರಿ ಕಡಿಮೆಯಾಗುತ್ತಿದೆ?',
+  'What needs my approval?':
+      'ನನ್ನ ಅನುಮೋದನೆಗೆ ಏನು ಬಾಕಿ ಇದೆ?',
+  'You might ask next':
+      'ಮುಂದೆ ನೀವು ಇದನ್ನು ಕೇಳಬಹುದು',
+  'Past chats':
+      'ಹಳೆಯ ಸಂಭಾಷಣೆಗಳು',
+  'Delete all':
+      'ಎಲ್ಲವನ್ನೂ ಅಳಿಸು',
+  'No earlier chats yet. Your chats are kept on this phone.':
+      'ಇನ್ನೂ ಹಳೆಯ ಸಂಭಾಷಣೆಗಳಿಲ್ಲ. ನಿಮ್ಮ ಸಂಭಾಷಣೆಗಳು ಈ ಫೋನ್‌ನಲ್ಲೇ ಇರುತ್ತವೆ.',
 };
