@@ -69,7 +69,8 @@ class _DocumentsViewState extends ConsumerState<DocumentsView> {
     final newPath = p.join(docsDir.path, newFilename);
     await File(file.path!).copy(newPath);
 
-    final fileSize = file.size;
+    // The picker's own length when it reported one, else the copy's size.
+    final fileSize = file.lengthSync() ?? await File(newPath).length();
     final mimeType = _guessMimeType(extension);
 
     // Show dialog to confirm name and pick category
