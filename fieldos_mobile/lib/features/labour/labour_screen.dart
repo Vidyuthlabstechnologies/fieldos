@@ -15,6 +15,8 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/labour/attendance_list.dart';
+import 'package:fieldos_mobile/features/labour/day_register.dart';
+import 'package:fieldos_mobile/features/labour/day_register_screen.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
@@ -72,18 +74,37 @@ class _LabourViewState extends ConsumerState<LabourView> {
           ),
         ]),
         const SizedBox(height: 8),
-        OutlinedButton.icon(
-          icon: const Icon(Icons.payments),
-          label: Text(tr('Wage sheet')),
-          onPressed: () async {
-            final project = await ref.read(appDatabaseProvider).projectDao.byId(widget.projectId);
-            if (!context.mounted) return;
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => WageSheetScreen(
-                  projectId: widget.projectId, projectName: project?.name ?? 'Site', userId: widget.userId),
-            ));
-          },
-        ),
+        Row(children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              key: const Key('open-day-register'),
+              icon: const Icon(Icons.fact_check_outlined),
+              label: Text(tr('Day register')),
+              onPressed: () async {
+                await Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => DayRegisterScreen(projectId: widget.projectId, userId: widget.userId),
+                ));
+                ref.invalidate(attendanceMarksProvider(widget.projectId));
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.payments),
+              label: Text(tr('Wage sheet')),
+              onPressed: () async {
+                final project = await ref.read(appDatabaseProvider).projectDao.byId(widget.projectId);
+                if (!context.mounted) return;
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => WageSheetScreen(
+                      projectId: widget.projectId, projectName: project?.name ?? 'Site', userId: widget.userId),
+                ));
+              },
+            ),
+          ),
+        ]),
+        _TodayHeadcount(projectId: widget.projectId),
         const SizedBox(height: 12),
         attendance.when(
           data: (rows) => rows.isEmpty
@@ -454,6 +475,38 @@ class _GpsFieldsState extends ConsumerState<GpsFields> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
         ),
       ],
+    );
+  }
+}
+
+/// "Today: 14 on site · Mason 4 · Helper 8 · Carpenter 2", from punches and
+/// the day register together. Hidden until someone has come.
+class _TodayHeadcount extends ConsumerWidget {
+  const _TodayHeadcount({required this.projectId});
+  final String projectId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final workers = ref.watch(workersProvider(projectId)).valueOrNull;
+    final punches = ref.watch(attendanceProvider(projectId)).valueOrNull;
+    final marks = ref.watch(attendanceMarksProvider(projectId)).valueOrNull;
+    if (workers == null || punches == null || marks == null) return const SizedBox.shrink();
+    final today = DateTime.now();
+    final rows = buildRegister(workers: workers, punches: punches, marks: marks, day: today);
+    final extra = unlistedPunched(workers, punches, today);
+    final present = rows.where((r) => r.present).length + extra;
+    if (present == 0) return const SizedBox.shrink();
+    final parts = [
+      for (final t in headcountByTrade(rows)) '${tr(t.trade)} ${t.people}',
+      if (extra > 0) trf('{n} not in the worker list', {'n': extra}),
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Text(
+        key: const Key('today-headcount'),
+        [trf('Today: {n} on site', {'n': present}), ...parts].join(' · '),
+        style: Theme.of(context).textTheme.titleSmall,
+      ),
     );
   }
 }

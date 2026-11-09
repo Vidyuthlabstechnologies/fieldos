@@ -14,6 +14,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart';
+import 'package:fieldos_mobile/features/company/branding.dart';
 
 const _ink = PdfColor.fromInt(0xFF1B2733);
 const _muted = PdfColor.fromInt(0xFF5B6B80);
@@ -49,6 +50,7 @@ Future<Uint8List> buildBillPdf({
   required Project project,
   required BillingProfile profile,
   Map<String, double> previousQty = const {},
+  PdfBranding branding = const PdfBranding(),
 }) async {
   final lines = decodeLines(bill.linesJson);
   final totals = billTotals(lines,
@@ -110,8 +112,18 @@ Future<Uint8List> buildBillPdf({
   doc.addPage(pw.MultiPage(
     pageFormat: PdfPageFormat.a4,
     margin: const pw.EdgeInsets.all(32),
+    footer: branding.showFooter
+        ? (ctx) => pw.Align(
+              alignment: pw.Alignment.centerRight,
+              child: t('Made with FieldOS', size: 7, color: _muted),
+            )
+        : null,
     build: (_) => [
       pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+        if (branding.logo != null) ...[
+          pw.Image(pw.MemoryImage(branding.logo!), height: 48, fit: pw.BoxFit.contain),
+          pw.SizedBox(width: 12),
+        ],
         pw.Expanded(
           child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
             t(companyName, size: 16, bold: true),
@@ -214,9 +226,15 @@ Future<void> shareBill({
   required Project project,
   required BillingProfile profile,
   Map<String, double> previousQty = const {},
+  PdfBranding branding = const PdfBranding(),
 }) async {
   final bytes = await buildBillPdf(
-      bill: bill, companyName: companyName, project: project, profile: profile, previousQty: previousQty);
+      bill: bill,
+      companyName: companyName,
+      project: project,
+      profile: profile,
+      previousQty: previousQty,
+      branding: branding);
   final dir = await getTemporaryDirectory();
   final safe = bill.billNumber.replaceAll(RegExp(r'[^A-Za-z0-9\-]+'), '_');
   final file = File('${dir.path}/${bill.kind == 'ra' ? 'RA_bill' : 'Invoice'}_$safe.pdf');

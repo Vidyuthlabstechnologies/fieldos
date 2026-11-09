@@ -5,11 +5,14 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/features/company/branding.dart';
+import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
 import 'package:fieldos_mobile/features/subscription/my_subscription_sheet.dart';
 import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
@@ -309,6 +312,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: _sarvamKey,
             ),
 
+          const SectionHeader('Your data', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
+          ListTile(
+            key: const Key('settings-export-excel'),
+            leading: const Icon(Icons.table_view_outlined),
+            title: Text(tr('Export all sites to Excel')),
+            subtitle: Text(tr('Every record on this phone, in one file you keep. Free, always.')),
+            onTap: () => exportCompanyToExcel(context, ref),
+          ),
+          if (company != null && session.canManageSettings) ...[
+            const SectionHeader('Bills and reports', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
+            _BrandingTiles(companyId: company.id),
+          ],
           const SectionHeader('Help', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           ListTile(
             leading: const Icon(Icons.bug_report_outlined),
@@ -509,5 +524,89 @@ class _SarvamKeyDialogState extends ConsumerState<_SarvamKeyDialog> {
         ),
       ],
     );
+  }
+}
+
+/// The company's logo on its PDFs, and whether they say "Made with FieldOS".
+class _BrandingTiles extends ConsumerStatefulWidget {
+  const _BrandingTiles({required this.companyId});
+  final String companyId;
+
+  @override
+  ConsumerState<_BrandingTiles> createState() => _BrandingTilesState();
+}
+
+class _BrandingTilesState extends ConsumerState<_BrandingTiles> {
+  PdfBranding? _branding;
+
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
+
+  Future<void> _reload() async {
+    final b = await loadBranding(ref.read(appDatabaseProvider), widget.companyId);
+    if (mounted) setState(() => _branding = b);
+  }
+
+  Future<void> _pickLogo() async {
+    final XFile? file;
+    try {
+      file = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1200, maxHeight: 1200);
+    } catch (_) {
+      if (mounted) showSnack(context, 'Could not open the photos.', error: true);
+      return;
+    }
+    if (file == null) return;
+    final ok = await saveLogo(ref.read(appDatabaseProvider), widget.companyId, await file.readAsBytes());
+    if (!mounted) return;
+    if (!ok) {
+      showSnack(context, 'That file is not a picture. Pick a PNG or JPG.', error: true);
+      return;
+    }
+    showSnack(context, 'Logo saved. It goes on your bills, vouchers and daily reports.');
+    await _reload();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final b = _branding;
+    return Column(children: [
+      ListTile(
+        key: const Key('settings-logo'),
+        leading: b?.logo == null
+            ? const Icon(Icons.image_outlined)
+            : SizedBox(width: 40, height: 40, child: Image.memory(b!.logo!, fit: BoxFit.contain)),
+        title: Text(tr('Company logo')),
+        subtitle: Text(b?.logo == null
+            ? tr('Put your logo on bills, vouchers and daily reports')
+            : tr('On your bills, vouchers and daily reports. Tap to change.')),
+        trailing: b?.logo == null
+            ? null
+            : IconButton(
+                tooltip: tr('Remove logo'),
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () async {
+                  await removeLogo(ref.read(appDatabaseProvider), widget.companyId);
+                  await _reload();
+                },
+              ),
+        onTap: _pickLogo,
+      ),
+      SwitchListTile(
+        key: const Key('settings-footer'),
+        secondary: const Icon(Icons.short_text),
+        title: Text(tr('Print "Made with FieldOS"')),
+        subtitle: Text(tr('A small line at the foot of your PDFs')),
+        value: b?.showFooter ?? true,
+        onChanged: b == null
+            ? null
+            : (v) async {
+                await setShowFooter(ref.read(appDatabaseProvider), widget.companyId, v);
+                await _reload();
+              },
+      ),
+    ]);
   }
 }

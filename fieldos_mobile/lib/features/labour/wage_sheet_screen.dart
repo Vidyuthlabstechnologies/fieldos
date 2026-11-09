@@ -34,6 +34,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
       expenses: await db.expenseDao.forProject(widget.projectId),
       from: _from,
       to: _to,
+      marks: await db.attendanceDao.marksForProject(widget.projectId),
     );
   }
 
@@ -45,11 +46,11 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
     final b = StringBuffer('Wage sheet · ${widget.projectName}\n${_range()}\n\n');
     for (final l in s.lines.where((l) => l.days > 0 || l.paidInPeriod > 0 || l.balanceDue != 0)) {
       b.write('${l.name}: ${_days(l.days)} days');
-      if (l.dailyWage != null) b.write(' × ${rupees(l.dailyWage!)} = ${rupees(l.earned)}');
-      if (l.paidInPeriod > 0) b.write(', paid ${rupees(l.paidInPeriod)}');
-      b.write(', due ${rupees(l.balanceDue)}\n');
+      if (l.dailyWage != null) b.write(' × ${rupees(l.dailyWage!, paise: true)} = ${rupees(l.earned, paise: true)}');
+      if (l.paidInPeriod > 0) b.write(', paid ${rupees(l.paidInPeriod, paise: true)}');
+      b.write(', due ${rupees(l.balanceDue, paise: true)}\n');
     }
-    b.write('\nTotal earned ${rupees(s.totalEarned)} · paid ${rupees(s.totalPaid)} · due ${rupees(s.totalDue)}');
+    b.write('\nTotal earned ${rupees(s.totalEarned, paise: true)} · paid ${rupees(s.totalPaid, paise: true)} · due ${rupees(s.totalDue, paise: true)}');
     return b.toString();
   }
 
@@ -89,7 +90,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: Text(
-                  'Earned ${rupees(sheet.totalEarned)} · Paid ${rupees(sheet.totalPaid)} · Still due ${rupees(sheet.totalDue)}',
+                  'Earned ${rupees(sheet.totalEarned, paise: true)} · Paid ${rupees(sheet.totalPaid, paise: true)} · Still due ${rupees(sheet.totalDue, paise: true)}',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
@@ -106,15 +107,16 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                               subtitle: Text([
                                 '${_days(l.days)} days (${l.hours.toStringAsFixed(1)} h)',
                                 if (l.overtimeHours > 0) 'OT ${l.overtimeHours.toStringAsFixed(1)} h',
-                                if (l.dailyWage == null) 'no daily wage set' else '${rupees(l.dailyWage!)}/day',
+                                if (l.dailyWage == null) 'no daily wage set' else '${rupees(l.dailyWage!, paise: true)}/day',
                                 if (l.missingPunchOuts > 0) '${l.missingPunchOuts} missing punch-out (half day)',
-                                if (l.paidInPeriod > 0) 'paid ${rupees(l.paidInPeriod)}',
+                                if (l.markedDays > 0) trf('{n} marked by hand', {'n': l.markedDays}),
+                                if (l.paidInPeriod > 0) 'paid ${rupees(l.paidInPeriod, paise: true)}',
                               ].join(' · ')),
                               trailing: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Text(rupees(l.balanceDue),
+                                  Text(rupees(l.balanceDue, paise: true),
                                       style: TextStyle(
                                           fontWeight: FontWeight.w700,
                                           color: l.balanceDue < 0 ? toneColor(context, PillTone.warn) : null)),
@@ -138,7 +140,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
             ),
             Padding(
               padding: EdgeInsets.all(12),
-              child: Text(tr('A day counts as full at 7 hours on site and half at 3.5 hours. Tap a worker to pay wages or an advance.'),
+              child: Text(tr('A day counts as full at 7 hours on site and half at 3.5 hours, unless it was marked by hand on the day register. Tap a worker to pay wages or an advance.'),
                 style: TextStyle(fontSize: 12),
                 textAlign: TextAlign.center,
               ),

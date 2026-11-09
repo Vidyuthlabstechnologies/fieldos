@@ -14,6 +14,7 @@ import 'package:uuid/uuid.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/money/bill_pdf.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
@@ -150,6 +151,7 @@ class BillsView extends ConsumerWidget {
             project: project,
             profile: await ref.read(billingProfileProvider(project.companyId).future),
             previousQty: previousFor(b, all),
+            branding: await loadBranding(ref.read(appDatabaseProvider), project.companyId),
           );
         } catch (e, st) {
           if (context.mounted) showSnack(context, '${tr('Could not share the bill.')} ${friendlyError(e, st)}', error: true);

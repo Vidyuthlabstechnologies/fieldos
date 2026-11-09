@@ -20,7 +20,7 @@ LabourAttendanceData _punch(String? workerId, String name, DateTime inAt, double
 
 SiteExpense _paid(String workerId, String on, double amount) => SiteExpense(
     id: '$workerId$on$amount', projectId: 'p', category: 'Labour', amount: amount, incurredOn: on,
-    recordedBy: 'u', createdAt: DateTime(2026, 1, 1), workerId: workerId);
+    recordedBy: 'u', createdAt: DateTime(2026, 1, 1), workerId: workerId, gstInterState: false, voided: false);
 
 void main() {
   test('day credit: full, half, nothing, and a forgotten punch-out counts half', () {

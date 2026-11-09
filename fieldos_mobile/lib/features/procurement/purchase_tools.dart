@@ -59,13 +59,39 @@ class SupplierLedger {
 
   /// Ordered but not delivered yet, by value.
   double get toCome => ordered > received ? ordered - received : 0;
+
+  /// Owed when the company started using FieldOS (negative: an advance).
+  double opening = 0;
+
+  /// Paid to them from any site's money book.
+  double paid = 0;
+
+  /// Still owed to them; negative is an advance they hold.
+  double get balance => opening + received - paid;
 }
+
+String _party(String s) => s.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase();
+
+/// Whether an expense was paid to [supplier]: its "Paid to" names them.
+bool paidToSupplier(SiteExpense e, Supplier supplier) =>
+    !e.voided && e.paidTo != null && _party(e.paidTo!) == _party(supplier.name);
 
 /// Per supplier: value of POs, value of goods received (with or without a
 /// PO), and how many orders are open or late. Cancelled orders don't count.
+///
+/// With [suppliers] and [expenses], each ledger also carries the opening
+/// balance and what was paid, so [SupplierLedger.balance] is what is owed.
 Map<String, SupplierLedger> supplierLedgers(
-    Iterable<PurchaseOrder> orders, Iterable<MaterialReceipt> receipts, DateTime now) {
+    Iterable<PurchaseOrder> orders, Iterable<MaterialReceipt> receipts, DateTime now,
+    {Iterable<Supplier> suppliers = const [], Iterable<SiteExpense> expenses = const []}) {
   final out = <String, SupplierLedger>{};
+  for (final s in suppliers) {
+    final paid = expenses.where((e) => paidToSupplier(e, s)).fold<double>(0, (t, e) => t + e.amount);
+    if ((s.openingBalance ?? 0) == 0 && paid == 0) continue;
+    out.putIfAbsent(s.id, () => SupplierLedger(s.id))
+      ..opening = s.openingBalance ?? 0
+      ..paid = paid;
+  }
   final orderSupplier = <String, String>{};
   for (final o in orders) {
     orderSupplier[o.id] = o.supplierId;
