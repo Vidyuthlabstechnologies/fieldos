@@ -795,6 +795,9 @@ const Map<String, String> stringsHi = {
       'इस महीने की असिस्टेंट सीमा पूरी हो गई। यह 1 तारीख को फिर शुरू होगी। FieldOS का बाकी सब पहले जैसा चलता है।',
   'This month\'s voice allowance is used up. Please type, or use the phone\'s own voice typing.':
       'इस महीने का वॉइस समय पूरा हो गया। कृपया टाइप करें, या फ़ोन की अपनी वॉइस टाइपिंग इस्तेमाल करें।',
+  'Just ask FieldOS': 'बस FieldOS से पूछें',
+  'Not sure where something is? Tap Ask FieldOS at the top and type or speak, like "add 5000 for cement". It does the work and asks you to tap Save first.':
+      'पता नहीं कोई चीज़ कहाँ है? ऊपर FieldOS से पूछें दबाएँ और लिखें या बोलें, जैसे "सीमेंट के लिए 5000 जोड़ो"। यह काम कर देता है और पहले आपसे सेव दबाने को कहता है।',
   '{n}% of this month\'s assistant use is left': 'इस महीने की असिस्टेंट सीमा का {n}% बाकी है',
   'You\'ve used the assistant a lot today. It will be ready again tomorrow.':
       'आज आपने असिस्टेंट बहुत इस्तेमाल किया है। कल यह फिर तैयार होगा।',

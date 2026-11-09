@@ -797,6 +797,9 @@ const Map<String, String> stringsTe = {
       'ఈ నెల అసిస్టెంట్ పరిమితి అయిపోయింది. 1వ తేదీన మళ్ళీ మొదలవుతుంది. FieldOSలో మిగతావన్నీ మామూలుగానే పనిచేస్తాయి.',
   'This month\'s voice allowance is used up. Please type, or use the phone\'s own voice typing.':
       'ఈ నెల వాయిస్ సమయం అయిపోయింది. దయచేసి టైప్ చేయండి, లేదా ఫోన్ సొంత వాయిస్ టైపింగ్ వాడండి.',
+  'Just ask FieldOS': 'FieldOSని అడగండి చాలు',
+  'Not sure where something is? Tap Ask FieldOS at the top and type or speak, like "add 5000 for cement". It does the work and asks you to tap Save first.':
+      'ఏది ఎక్కడ ఉందో తెలియదా? పైన FieldOSని అడగండి నొక్కి టైప్ చేయండి లేదా మాట్లాడండి, ఉదా. "సిమెంట్‌కు 5000 జోడించు". అది పని చేసి, ముందు సేవ్ నొక్కమని అడుగుతుంది.',
   '{n}% of this month\'s assistant use is left': 'ఈ నెల అసిస్టెంట్ పరిమితిలో {n}% మిగిలి ఉంది',
   'You\'ve used the assistant a lot today. It will be ready again tomorrow.':
       'ఈరోజు మీరు అసిస్టెంట్‌ను చాలా వాడారు. రేపు మళ్ళీ సిద్ధంగా ఉంటుంది.',

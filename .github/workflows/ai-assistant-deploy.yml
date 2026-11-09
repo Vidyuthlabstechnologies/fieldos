@@ -67,11 +67,11 @@ jobs:
             AI_MODEL AI_MONTHLY_BUDGET_INR AI_DAILY_CHAT_CALLS AI_USD_INR; do
             [ -n "${!name}" ] && printf '%s=%s\n' "$name" "${!name}" >> "$f"
           done
-          supabase secrets set --project-ref "$PROJECT_REF" --env-file "$f"
+          supabase secrets set --project-ref "$PROJECT_REF" --env-file "$f" --yes
           rm -f "$f"
 
       - name: Deploy the function
-        run: supabase functions deploy ai-assistant --project-ref "$PROJECT_REF" --use-api
+        run: supabase functions deploy ai-assistant --project-ref "$PROJECT_REF" --use-api --yes
 
       - uses: denoland/setup-deno@v2
         with:

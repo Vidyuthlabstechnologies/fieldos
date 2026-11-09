@@ -73,6 +73,13 @@ List<TourStep> appTourSteps() => [
             'labour, money and reports.'),
       ),
       TourStep(
+        stage: TourStage.home,
+        mood: MitraMood.talk,
+        title: tr('Just ask FieldOS'),
+        body: tr('Not sure where something is? Tap Ask FieldOS at the top and type or speak, like '
+            '"add 5000 for cement". It does the work and asks you to tap Save first.'),
+      ),
+      TourStep(
         tab: 0,
         time: tr('8:00 AM'),
         mood: MitraMood.checklist,

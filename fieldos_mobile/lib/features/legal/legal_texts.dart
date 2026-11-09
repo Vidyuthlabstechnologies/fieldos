@@ -53,9 +53,10 @@ const privacyPolicy = LegalDocument(
       'When you use Ask FieldOS, what you type or say, and the site details the assistant needs to answer (such as '
           'project names, workers, tasks and amounts on this phone), go through FieldOS\'s server to Anthropic '
           '(anthropic.com), whose Claude model works out the reply. Anthropic\'s commercial terms do not let it use '
-          'this to train its models. FieldOS keeps only a daily count of how much each account uses the assistant, '
-          'not the conversation. Nothing is saved to your records until you tap Save on the card the assistant '
-          'shows.',
+          'this to train its models. If Anthropic is unavailable, the same goes instead to Sarvam AI (sarvam.ai), '
+          'which runs a DeepSeek model for the reply. FieldOS keeps only a count of how much each account uses the '
+          'assistant each day and month, not the conversation. Nothing is saved to your records until you tap Save '
+          'on the card the assistant shows.',
     ),
     LegalSection(
       'Maps',
