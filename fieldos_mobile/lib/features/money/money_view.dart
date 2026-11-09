@@ -134,8 +134,10 @@ class MoneyView extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  if (showIn) _Figure(tr('Received'), rupees(inTotal), toneColor(context, PillTone.ok)),
-                  _Figure(tr('Spent'), rupees(spent), toneColor(context, PillTone.danger)),
+                  // Plain ink for the figures; colour only when the balance
+                  // has gone below zero.
+                  if (showIn) _Figure(tr('Received'), rupees(inTotal), Theme.of(context).colorScheme.onSurface),
+                  _Figure(tr('Spent'), rupees(spent), Theme.of(context).colorScheme.onSurface),
                   if (showIn)
                     _Figure(tr('Balance'), rupees(inTotal - spent),
                         inTotal - spent < 0 ? toneColor(context, PillTone.danger) : Theme.of(context).colorScheme.primary),
@@ -1308,7 +1310,8 @@ class _Figure extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(children: [
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
+        Text(label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         const SizedBox(height: 4),
         Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: color)),
       ]);

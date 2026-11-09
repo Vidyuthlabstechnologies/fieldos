@@ -71,7 +71,8 @@ void main() {
     final clinicY = tester.getTopLeft(find.text('Clinic')).dy;
     final schoolY = tester.getTopLeft(find.text('Old school')).dy;
     expect(towerY < clinicY && clinicY < schoolY, isTrue, reason: 'active, then planning, then completed');
-    expect(find.text('Active'), findsOneWidget);
+    expect(find.text('Active'), findsNothing, reason: 'a running site needs no badge');
+    expect(find.text('Planning'), findsOneWidget);
     expect(find.text('Completed'), findsOneWidget);
     expect(find.text('District office'), findsOneWidget);
     expect(find.widgetWithText(FloatingActionButton, 'New project'), findsOneWidget);

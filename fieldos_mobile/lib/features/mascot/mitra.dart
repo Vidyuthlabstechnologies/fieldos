@@ -49,12 +49,15 @@ class Mitra extends StatelessWidget {
   Widget build(BuildContext context) {
     final calm = still || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
     final asset = calm ? stillAsset(mood) : animatedAsset(mood);
-    return ExcludeSemantics(
+    // Its own layer: the animated frames repaint only Mitra, never the
+    // list or card around it, so scrolling stays smooth.
+    return RepaintBoundary(
+      child: ExcludeSemantics(
       child: SizedBox.square(
         dimension: size,
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 220),
-          switchInCurve: Curves.easeOutBack,
+          switchInCurve: Curves.easeOutCubic,
           transitionBuilder: (child, a) => FadeTransition(
             opacity: a,
             child: ScaleTransition(scale: Tween(begin: 0.92, end: 1.0).animate(a), child: child),
@@ -71,6 +74,7 @@ class Mitra extends StatelessWidget {
             errorBuilder: (_, _, _) => Center(child: BrandMark(size: size * 0.7)),
           ),
         ),
+      ),
       ),
     );
   }

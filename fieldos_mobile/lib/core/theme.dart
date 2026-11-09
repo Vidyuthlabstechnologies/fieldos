@@ -2,6 +2,7 @@
 /// touch targets for gloved or dusty hands, and a dark theme for night shifts.
 library;
 
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
 import 'package:fieldos_mobile/core/brand.dart';
@@ -21,7 +22,11 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
     onSecondary: Brand.navyDeep,
     secondaryContainer: dark ? const Color(0xFF5A3D05) : Brand.amberSoft,
     onSecondaryContainer: dark ? Brand.amberSoft : const Color(0xFF4A3000),
-    error: dark ? const Color(0xFFFF8A80) : Brand.danger,
+    error: dark ? const Color(0xFFF0A08F) : Brand.danger,
+    onError: Colors.white,
+    errorContainer: dark ? const Color(0xFF3B231D) : Brand.dangerSoft,
+    onErrorContainer: dark ? const Color(0xFFF6CFC5) : const Color(0xFF6E2618),
+    tertiary: dark ? const Color(0xFF9CC9AE) : Brand.ok,
     surface: dark ? const Color(0xFF0F1B2D) : Colors.white,
     onSurface: dark ? const Color(0xFFE6ECF4) : Brand.ink,
     onSurfaceVariant: dark ? const Color(0xFFB4C0D0) : Brand.inkMuted,
@@ -41,6 +46,8 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
     fontFamily: Brand.fontFamily,
     visualDensity: VisualDensity.standard,
     materialTapTargetSize: MaterialTapTargetSize.padded,
+    // A plain ripple: Material 3's sparkle reads as a gimmick on a work tool.
+    splashFactory: InkRipple.splashFactory,
   );
 
   final text = base.textTheme.copyWith(
@@ -49,7 +56,15 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
     titleLarge: base.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600, letterSpacing: -0.2),
     titleMedium: base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
     titleSmall: base.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-    labelLarge: base.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600, letterSpacing: 0.1),
+    labelLarge: base.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600, letterSpacing: 0),
+    labelMedium: base.textTheme.labelMedium?.copyWith(letterSpacing: 0.1),
+    labelSmall: base.textTheme.labelSmall?.copyWith(letterSpacing: 0.1),
+    // Material's default tracking (0.25-0.5) is set for Roboto; on Inter it
+    // spreads every line apart and reads machine-made. Inter is drawn to sit
+    // at 0.
+    bodyLarge: base.textTheme.bodyLarge?.copyWith(letterSpacing: 0, height: 1.45),
+    bodyMedium: base.textTheme.bodyMedium?.copyWith(letterSpacing: 0, height: 1.45),
+    bodySmall: base.textTheme.bodySmall?.copyWith(letterSpacing: 0, height: 1.4),
   );
 
   final radius12 = BorderRadius.circular(12);
@@ -63,7 +78,8 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
       foregroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      scrolledUnderElevation: 2,
+      // No shadow pops in when a list scrolls under the bar.
+      scrolledUnderElevation: 0,
       centerTitle: false,
       titleTextStyle: const TextStyle(
         fontFamily: Brand.fontFamily,
@@ -89,8 +105,10 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: Brand.amber,
       foregroundColor: Brand.navyDeep,
-      elevation: 3,
-      highlightElevation: 6,
+      elevation: 2,
+      focusElevation: 2,
+      hoverElevation: 3,
+      highlightElevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       extendedTextStyle: const TextStyle(fontFamily: Brand.fontFamily, fontWeight: FontWeight.w700, fontSize: 15),
     ),
@@ -183,7 +201,18 @@ ThemeData buildFieldOsTheme(Brightness brightness) {
       surfaceTintColor: Colors.transparent,
       color: dark ? const Color(0xFF17283F) : Colors.white,
     ),
-    progressIndicatorTheme: ProgressIndicatorThemeData(color: dark ? Brand.amber : Brand.navy),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: dark ? Brand.amber : Brand.navy,
+      linearTrackColor: scheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(3),
+    ),
+    // One calm motion everywhere: the next page fades and slides in a
+    // little, the way Android's own screens move; iOS keeps its swipe.
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {
+      TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),
+    }),
     dividerTheme: DividerThemeData(color: scheme.outlineVariant, thickness: 1, space: 1),
     checkboxTheme: CheckboxThemeData(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
     segmentedButtonTheme: SegmentedButtonThemeData(

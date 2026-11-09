@@ -238,7 +238,10 @@ class ErrorState extends StatelessWidget {
   }
 }
 
-/// A small coloured label for statuses: "open", "paid", "late".
+/// A quiet status label: "open", "paid", "late". A soft grey tag with a
+/// small coloured dot for the status, so a list of them reads calmly and
+/// colour stays a hint, not a block of red or green. Problems
+/// ([PillTone.danger]) also colour the word, because those need acting on.
 class StatusPill extends StatelessWidget {
   const StatusPill(this.label, {super.key, this.tone = PillTone.neutral});
 
@@ -247,20 +250,27 @@ class StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final (bg, fg) = switch (tone) {
-      PillTone.ok => (dark ? const Color(0xFF173D2B) : Brand.okSoft, dark ? const Color(0xFF8FD9B0) : Brand.ok),
-      PillTone.warn => (dark ? const Color(0xFF4A3305) : Brand.warnSoft, dark ? Brand.amber : Brand.warn),
-      PillTone.danger => (dark ? const Color(0xFF4A1A1A) : Brand.dangerSoft, dark ? const Color(0xFFFF9C9C) : Brand.danger),
-      PillTone.neutral => (
-          Theme.of(context).colorScheme.surfaceContainerHighest,
-          Theme.of(context).colorScheme.onSurfaceVariant
-        ),
-    };
+    final scheme = Theme.of(context).colorScheme;
+    final dot = tone == PillTone.neutral ? null : toneColor(context, tone);
+    final fg = tone == PillTone.danger ? toneColor(context, tone) : scheme.onSurfaceVariant;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(label, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600)),
+      padding: EdgeInsets.fromLTRB(dot == null ? 9 : 7, 3, 9, 3),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.7)),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        if (dot != null) ...[
+          Container(width: 6, height: 6, decoration: BoxDecoration(color: dot, shape: BoxShape.circle)),
+          const SizedBox(width: 6),
+        ],
+        Flexible(
+          child: Text(label,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600, height: 1.3)),
+        ),
+      ]),
     );
   }
 }
@@ -271,9 +281,9 @@ enum PillTone { ok, warn, danger, neutral }
 Color toneColor(BuildContext context, PillTone tone) {
   final dark = Theme.of(context).brightness == Brightness.dark;
   return switch (tone) {
-    PillTone.ok => dark ? const Color(0xFF8FD9B0) : Brand.ok,
-    PillTone.warn => dark ? Brand.amber : Brand.warn,
-    PillTone.danger => dark ? const Color(0xFFFF9C9C) : Brand.danger,
+    PillTone.ok => dark ? const Color(0xFF9CC9AE) : Brand.ok,
+    PillTone.warn => dark ? const Color(0xFFE9B562) : Brand.warn,
+    PillTone.danger => dark ? const Color(0xFFF0A08F) : Brand.danger,
     PillTone.neutral => Theme.of(context).colorScheme.onSurfaceVariant,
   };
 }
@@ -290,11 +300,11 @@ class SectionHeader extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: padding,
-      child: Text(tr(title).toUpperCase(),
-          style: theme.textTheme.labelMedium?.copyWith(
+      // Sentence case and normal tracking: a quiet label, not a shouted one.
+      child: Text(tr(title),
+          style: theme.textTheme.titleSmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
-            letterSpacing: 0.8,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
           )),
     );
   }
@@ -312,7 +322,7 @@ class FormMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
-    final color = error ? theme.colorScheme.error : (dark ? const Color(0xFF8FD9B0) : Brand.ok);
+    final color = error ? theme.colorScheme.error : (dark ? const Color(0xFF9CC9AE) : Brand.ok);
     return Semantics(
       liveRegion: true,
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [

@@ -222,8 +222,15 @@ void main() {
   for (final entry in shots.entries) {
     testWidgets('render ${entry.key}', (tester) async {
       _withInvite = entry.key.contains('invite');
-      final (container, db, project) = await sampleCompany(tester);
-      await entry.value(tester, container, db, project);
+      // Real soft shadows, as on a phone. Tests draw them as solid black
+      // outlines by default, which made every button look heavy-rimmed.
+      debugDisableShadows = false;
+      try {
+        final (container, db, project) = await sampleCompany(tester);
+        await entry.value(tester, container, db, project);
+      } finally {
+        debugDisableShadows = true;
+      }
     }, skip: !_render || (_only != null && !entry.key.contains(_only!)));
   }
 }

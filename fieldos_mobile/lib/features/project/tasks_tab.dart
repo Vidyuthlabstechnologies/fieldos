@@ -173,7 +173,10 @@ class _ProgressHeader extends StatelessWidget {
           Row(children: [
             Text('$pct% complete', style: theme.textTheme.titleMedium),
             const Spacer(),
-            if (lateCount > 0) StatusPill(lateCount == 1 ? '1 late' : '$lateCount late', tone: PillTone.danger),
+            if (lateCount > 0)
+              Text(lateCount == 1 ? '1 late' : '$lateCount late',
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: toneColor(context, PillTone.danger), fontWeight: FontWeight.w600)),
           ]),
           const SizedBox(height: 8),
           ClipRRect(
@@ -181,7 +184,8 @@ class _ProgressHeader extends StatelessWidget {
             child: LinearProgressIndicator(value: pct / 100, minHeight: 8),
           ),
           const SizedBox(height: 6),
-          Text('$done of ${tasks.length} tasks done', style: theme.textTheme.bodySmall),
+          Text('$done of ${tasks.length} tasks done',
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
         ]),
       ),
     );
@@ -224,7 +228,7 @@ class TaskCard extends StatelessWidget {
               if (t.priority == 'high')
                 Padding(
                   padding: const EdgeInsets.only(right: 6, top: 2),
-                  child: Icon(Icons.priority_high, size: 18, color: toneColor(context, PillTone.danger)),
+                  child: Icon(Icons.flag_rounded, size: 16, color: toneColor(context, PillTone.warn)),
                 ),
               Expanded(
                 child: Text(
@@ -271,7 +275,10 @@ class TaskCard extends StatelessWidget {
               const SizedBox(height: 6),
               Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
                 if (dates.isNotEmpty) Text(dates, style: theme.textTheme.bodySmall),
-                if (lateText != null) StatusPill(lateText, tone: PillTone.danger),
+                if (lateText != null)
+                  Text(lateText,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: toneColor(context, PillTone.danger), fontWeight: FontWeight.w600)),
               ]),
             ],
           ]),
