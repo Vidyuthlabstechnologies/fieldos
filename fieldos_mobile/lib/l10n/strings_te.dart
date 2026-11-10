@@ -3,6 +3,8 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_commercial_te.dart';
+
 const Map<String, String> stringsTe = {
   'Try again': 'మళ్ళీ ప్రయత్నించండి',
   'Approvals': 'ఆమోదాలు',
@@ -2363,4 +2365,5 @@ const Map<String, String> stringsTe = {
       'ప్రతి ఆమోదం, రద్దు, చెల్లింపు, ఎవరు ఎప్పుడు చేశారో, ఒకే ఫైల్‌లో',
   'Nothing has been recorded yet.':
       'ఇంకా ఏదీ నమోదు కాలేదు.',
+  ...commercialTe,
 };

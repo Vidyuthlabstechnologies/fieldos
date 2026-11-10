@@ -18,7 +18,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:drift/drift.dart' show Variable;
+import 'package:drift/drift.dart' show Value, Variable;
 import 'package:http/http.dart' show ClientException;
 import 'package:supabase/supabase.dart';
 
@@ -129,7 +129,7 @@ class SyncEngine {
   static const userIdColumns = {
     'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
     'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by', 'edited_by',
-    'decided_by', 'measured_by',
+    'decided_by', 'submitted_by', 'certified_by', 'raised_by', 'owner_id', 'acted_by', 'measured_by',
   };
 
   Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>
@@ -203,6 +203,7 @@ class SyncEngine {
     'dpr_photos': 'photo_path',
     'expense_attachments': 'file_path',
     'site_receipt_attachments': 'file_path',
+    'commercial_attachments': 'file_path',
   };
 
   /// The Storage bucket every synced file lives in. Its policies key access
@@ -309,8 +310,32 @@ class SyncEngine {
           await _pullEverything(dirty, keep);
           await db.settingsDao.set(cursorKey, '$head');
         }
-        await _dropProjectsNoLongerShared(keep);
+        final portalSites = await _pullSubcontractorSites();
+        await _dropProjectsNoLongerShared({...keep, ...portalSites});
       });
+
+  /// A subcontractor can't read the projects table (it carries the client
+  /// and money columns), so the sites they work on come by name only.
+  /// Existing rows (an account that is also on the company) are left as
+  /// they are.
+  Future<Set<String>> _pullSubcontractorSites() async {
+    final List rows;
+    try {
+      rows = await client.rpc('subcontractor_sites') as List;
+    } on PostgrestException catch (e) {
+      if (_isMissingOnServer(e)) return const {};
+      rethrow;
+    }
+    final out = <String>{};
+    for (final r in rows.cast<Map>()) {
+      final id = r['id'] as String;
+      out.add(id);
+      if (await db.projectDao.byId(id) != null) continue;
+      await db.projectDao.upsertFromRemote(ProjectsCompanion.insert(
+          id: id, companyId: r['company_id'] as String, name: r['name'] as String, status: const Value('active')));
+    }
+    return out;
+  }
 
   /// How each pulled table lands in Drift, parents before children.
   late final Map<String, Future<void> Function(Map<String, dynamic> row)> _upserters = {
@@ -363,6 +388,21 @@ class SyncEngine {
       if (local != null) await db.materialDao.upsertSlipFromRemote(receiptAttachmentFromSupabaseJson(r, localPath: local));
     },
         'site_close_reviews': (r) => db.closeDao.upsertFromRemote(closeReviewFromSupabaseJson(r)),
+        'cost_codes': (r) => db.commercialDao.upsertCostCode(costCodeFromSupabaseJson(r)),
+        'work_claims': (r) => db.commercialDao.upsertClaim(workClaimFromSupabaseJson(r)),
+        'variations': (r) => db.commercialDao.upsertVariation(variationFromSupabaseJson(r)),
+        'variation_decisions': (r) => db.commercialDao.upsertDecision(variationDecisionFromSupabaseJson(r)),
+        'work_certifications': (r) => db.commercialDao.upsertCertification(workCertificationFromSupabaseJson(r)),
+        'commercial_exception_actions': (r) =>
+            db.commercialDao.upsertExceptionAction(exceptionActionFromSupabaseJson(r)),
+        'commercial_attachments': (r) async {
+      final mine = await db.commercialDao.attachmentById(r['id'] as String);
+      if (mine != null && File(mine.filePath).existsSync()) return;
+      final local = await _downloadFile(r['file_path'] as String, r['id'] as String);
+      if (local != null) {
+        await db.commercialDao.upsertAttachment(commercialAttachmentFromSupabaseJson(r, localPath: local));
+      }
+    },
         'site_work_measurements': (r) =>
             db.billingRecordsDao.upsertMeasurementFromRemote(workMeasurementFromSupabaseJson(r)),
         'site_work_measurement_decisions': (r) =>
@@ -574,6 +614,13 @@ class SyncEngine {
     'expense_attachments': 'expense_attachments',
     'site_receipt_attachments': 'receipt_attachments',
     'site_close_reviews': 'close_reviews',
+    'cost_codes': 'cost_codes',
+    'work_claims': 'work_claims',
+    'work_certifications': 'work_certifications',
+    'variations': 'variations',
+    'variation_decisions': 'variation_decisions',
+    'commercial_attachments': 'commercial_attachments',
+    'commercial_exception_actions': 'exception_actions',
     'project_members': 'project_members',
     'site_access': 'site_access',
     'site_work_measurements': 'work_measurements',
@@ -590,6 +637,8 @@ class SyncEngine {
     'estimations', 'purchase_requisitions', 'purchase_orders', 'project_messages', 'site_attendance',
     'site_expenses', 'site_material_receipts', 'site_material_usage', 'site_payments_received',
     'site_client_bills', 'site_attendance_marks', 'site_notes', 'documents', 'site_close_reviews',
+    'cost_codes', 'work_claims', 'work_certifications', 'variations', 'variation_decisions',
+    'commercial_attachments', 'commercial_exception_actions',
     'project_members', 'site_access', 'site_work_measurements', 'site_work_measurement_decisions',
     'site_bill_allocations', 'site_supplier_invoices', 'site_approval_steps',
   };
@@ -622,7 +671,10 @@ class SyncEngine {
             await drop(child, '$column = ?', [r.read<String>('id')]);
           }
         }
-        if (t == 'dpr_photos' || t == 'expense_attachments' || t == 'site_receipt_attachments') {
+        if (t == 'dpr_photos' ||
+            t == 'expense_attachments' ||
+            t == 'site_receipt_attachments' ||
+            t == 'commercial_attachments') {
           final column = t == 'dpr_photos' ? 'photo_path' : 'file_path';
           final files = await db
               .customSelect('SELECT $column AS f FROM $local WHERE $where',

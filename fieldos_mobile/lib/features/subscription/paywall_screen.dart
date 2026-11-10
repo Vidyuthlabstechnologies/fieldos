@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/branded_page.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/features/commercial/subcontractor_portal.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
 import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
@@ -227,6 +228,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               TextButton(
                   style: _linkStyle, onPressed: () => openPrivacyPolicy(context), child: Text(tr('Privacy policy'))),
             ],
+          ),
+          // Free for subcontractors, who only claim work against a builder's
+          // work orders.
+          TextButton.icon(
+            key: const Key('paywall-subcontractor'),
+            icon: const Icon(Icons.engineering_outlined),
+            label: Text(tr('Subcontractor? Join free with the builder\'s code')),
+            onPressed: () =>
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SubcontractorJoinScreen())),
           ),
           if (ref.watch(sessionProvider).activeCompany != null) ...[
             const SizedBox(height: 8),

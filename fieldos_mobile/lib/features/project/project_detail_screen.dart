@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart';
+import 'package:fieldos_mobile/features/commercial/commercial_screens.dart';
 import 'package:fieldos_mobile/features/team/site_team_screen.dart';
 import 'package:fieldos_mobile/features/money/measurement_book_screen.dart';
 import 'package:fieldos_mobile/features/procurement/supplier_invoices_screen.dart';
@@ -160,6 +161,10 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   builder: (_) => WeekCloseScreen(project: widget.project, weekOf: DateTime.now()),
                 ));
               }
+              if (v == 'commercial') {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => CommercialScreen(project: widget.project)));
+              }
               if (v == 'measure') {
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => MeasurementBookScreen(project: widget.project)));
               }
@@ -189,6 +194,13 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 child: ListTile(
                   leading: const Icon(Icons.fact_check_outlined),
                   title: Text(tr('Weekly close')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'commercial',
+                child: ListTile(
+                  leading: const Icon(Icons.handshake_outlined),
+                  title: Text(tr('Work orders, variations and cost')),
                 ),
               ),
               PopupMenuItem(

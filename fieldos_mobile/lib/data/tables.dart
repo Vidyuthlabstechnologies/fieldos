@@ -309,6 +309,8 @@ class PurchaseOrders extends Table {
       text().withLength(min: 1, max: 20).withDefault(const Constant('issued'))();
   TextColumn get notes => text().withLength(max: 500).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  /// v16: the budget line this order is committed against.
+  TextColumn get costCodeId => text().withLength(max: 36).nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -373,6 +375,8 @@ class SiteExpenses extends Table {
   TextColumn get voidReason => text().withLength(max: 200).nullable()();
   DateTimeColumn get editedAt => dateTime().nullable()();
   TextColumn get editedBy => text().withLength(max: 64).nullable()();
+  /// v16: the budget line this expense is an actual cost of.
+  TextColumn get costCodeId => text().withLength(max: 36).nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -555,6 +559,14 @@ class WorkOrders extends Table {
   TextColumn get status =>
       text().withLength(min: 1, max: 20).withDefault(const Constant('active'))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  // v16, commercial controls: the agreed quantity, unit and rate are the
+  // baseline. Approved variations add to the order; the baseline itself is
+  // never rewritten once work is certified (the server refuses it).
+  TextColumn get unit => text().withLength(max: 20).nullable()();
+  RealColumn get contractQty => real().nullable()();
+  RealColumn get rate => real().nullable()();
+  TextColumn get costCodeId => text().withLength(max: 36).nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -778,6 +790,30 @@ class CloseReviews extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+// --- v16: commercial controls (FOS-201 to FOS-204) --------------------------
+// See supabase/migrations/20261110100000_commercial_controls.sql. Claims,
+// certifications, variation decisions and exception actions are only ever
+// added, never changed, so a payment can be traced back to the agreement
+// and the site evidence as it happened.
+
+/// A budget line of one site (synced as cost_codes).
+class CostCodes extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get code => text().withLength(min: 1, max: 30)();
+  TextColumn get name => text().withLength(min: 1, max: 200)();
+  RealColumn get originalBudget => real().withDefault(const Constant(0))();
+
+  /// Still to be bought or let, beyond what is already committed.
+  RealColumn get uncommittedEstimate => real().withDefault(const Constant(0))();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 /// Whether a site is seen only by its team (v17, synced as site_access).
 /// [id] is the project's id. Sites without a row are open to the company.
 class SiteAccess extends Table {
@@ -785,6 +821,122 @@ class SiteAccess extends Table {
   TextColumn get projectId => text().withLength(min: 1, max: 36)();
   BoolColumn get membersOnly => boolean().withDefault(const Constant(false))();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Quantity a subcontractor says is complete against a work order.
+class WorkClaims extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get workOrderId => text().withLength(min: 1, max: 36)();
+  RealColumn get qty => real()();
+  TextColumn get location => text().withLength(max: 120).nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get submittedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// The engineer's decision on (part of) a claim.
+class WorkCertifications extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get workOrderId => text().withLength(min: 1, max: 36)();
+  TextColumn get claimId => text().withLength(min: 1, max: 36)();
+  RealColumn get acceptedQty => real().withDefault(const Constant(0))();
+  RealColumn get rejectedQty => real().withDefault(const Constant(0))();
+  TextColumn get variationId => text().withLength(max: 36).nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get certifiedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A scope change (change order). Pending until it has a decision.
+class Variations extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get workOrderId => text().withLength(max: 36).nullable()();
+  TextColumn get costCodeId => text().withLength(max: 36).nullable()();
+  TextColumn get title => text().withLength(min: 1, max: 200)();
+
+  /// claim_over_order | client_instruction | design_change | site_condition | other
+  TextColumn get origin => text().withLength(min: 1, max: 30)();
+  TextColumn get sourceClaimId => text().withLength(max: 36).nullable()();
+  RealColumn get qty => real().nullable()();
+  TextColumn get unit => text().withLength(max: 20).nullable()();
+  RealColumn get estimatedCost => real().withDefault(const Constant(0))();
+  IntColumn get scheduleDays => integer().withDefault(const Constant(0))();
+  TextColumn get ownerId => text().withLength(max: 64).nullable()();
+  TextColumn get note => text().withLength(max: 500).nullable()();
+  TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// The one decision on a variation.
+class VariationDecisions extends Table {
+  TextColumn get id => text()();
+  TextColumn get variationId => text().withLength(min: 1, max: 36)();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// approved | rejected
+  TextColumn get decision => text().withLength(min: 1, max: 20)();
+  RealColumn get approvedQty => real().nullable()();
+  RealColumn get approvedCost => real().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get decidedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+        {variationId},
+      ];
+}
+
+/// Site evidence (photos) for a claim, a certification or a variation.
+class CommercialAttachments extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// claim | certification | variation
+  TextColumn get parentKind => text().withLength(min: 1, max: 20)();
+  TextColumn get parentId => text().withLength(min: 1, max: 36)();
+  TextColumn get filePath => text().withLength(min: 1, max: 500)();
+  TextColumn get mimeType => text().withLength(max: 100)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Who owns a commercial exception, by when, and what was decided.
+class ExceptionActions extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get exceptionKey => text().withLength(min: 3, max: 120)();
+
+  /// assigned | resolved | reopened
+  TextColumn get action => text().withLength(min: 1, max: 20)();
+  TextColumn get ownerId => text().withLength(max: 64).nullable()();
+
+  /// yyyy-mm-dd
+  TextColumn get dueOn => text().withLength(max: 10).nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get fingerprint => text().withLength(max: 200).nullable()();
+  TextColumn get actedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column<Object>> get primaryKey => {id};

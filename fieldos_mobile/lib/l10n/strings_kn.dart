@@ -3,6 +3,8 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_commercial_kn.dart';
+
 const Map<String, String> stringsKn = {
   'Try again':
       'ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
@@ -3252,4 +3254,5 @@ const Map<String, String> stringsKn = {
       'ಪ್ರತಿ ಅನುಮೋದನೆ, ರದ್ದು, ಪಾವತಿ, ಯಾರು ಯಾವಾಗ ಮಾಡಿದರು ಎಂಬುದು ಒಂದೇ ಫೈಲ್‌ನಲ್ಲಿ',
   'Nothing has been recorded yet.':
       'ಇನ್ನೂ ಏನೂ ದಾಖಲಾಗಿಲ್ಲ.',
+  ...commercialKn,
 };
