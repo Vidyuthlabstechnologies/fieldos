@@ -270,10 +270,12 @@ class SyncEngine {
   Future<bool> _visibleOnServer(String table, String id) async =>
       (await client.from(table).select('id').eq('id', id).maybeSingle()) != null;
 
-  /// One-shot pull: fetches every row the current session's RLS allows and
-  /// merges into local Drift. Useful for an initial sync or a manual
-  /// "refresh" -- the Realtime subscriptions below are for ongoing live
-  /// updates after that. Serialized with pushPending (see _synchronized).
+  /// Pull: the first time (per account) every row the session's RLS
+  /// allows, after that only what the server's change log
+  /// (20261110020000_incremental_sync.sql) lists since the last pull,
+  /// including deletes. Sites no longer shared are removed from the phone.
+  /// The Realtime subscriptions below are for live updates in between.
+  /// Serialized with pushPending (see _synchronized).
   ///
   /// Two guarantees on top of a plain server-wins merge:
   ///  - A row this device has edited but not yet pushed (still in the
@@ -284,62 +286,68 @@ class SyncEngine {
   ///  - Every table is paged ([pullPageSize] rows per request). PostgREST
   ///    caps an unpaged select at 1,000 rows by default, so a company's
   ///    1,001st DPR or task simply never reached a second phone.
+  ///  - Unsent work and the local-only sample site are never removed.
   Future<void> pullAll() => _synchronized(() async {
-    final dirty = await db.syncOutboxDao.dirtyKeys();
+        final dirty = await db.syncOutboxDao.dirtyKeys();
+        final keep = {...dirty.map((k) => k.substring(k.indexOf(':') + 1)), ...await db.syncOutboxDao.localOnlyIds()};
+        final cursorKey = 'sync_cursor:${client.auth.currentUser?.id}';
+        final cursor = int.tryParse(await db.settingsDao.get(cursorKey) ?? '');
+        if (cursor != null && cursor >= await _rpcInt('sync_changes_floor')) {
+          final next = await _pullChanges(cursor, dirty, keep);
+          await db.settingsDao.set(cursorKey, '$next');
+        } else {
+          // Lines logged while the full pull runs are applied again next
+          // time, which is harmless (every apply is an upsert or a delete).
+          final head = await _rpcInt('sync_changes_head');
+          await _pullEverything(dirty, keep);
+          await db.settingsDao.set(cursorKey, '$head');
+        }
+        await _dropProjectsNoLongerShared(keep);
+      });
 
-    Future<void> pull(String table, Future<void> Function(Map<String, dynamic> row) upsert) async {
-      for (final row in await _fetchAll(table)) {
-        if (dirty.contains(SyncOutboxDao.key(table, row['id'] as String))) continue;
-        await _notifyIfNew(table, row);
-        await upsert(row);
-      }
-    }
-
-    await pull('projects', (r) => db.projectDao.upsertFromRemote(projectFromSupabaseJson(r)));
-    await pull('tasks', (r) => db.taskDao.upsertFromRemote(taskFromSupabaseJson(r)));
-    await pull('dpr_entries', (r) => db.dprDao.upsertFromRemote(dprEntryFromSupabaseJson(r)));
-    await pull('issues', (r) => db.issueDao.upsertFromRemote(issueFromSupabaseJson(r)));
-    await pull('workers', (r) => db.workerDao.upsertFromRemote(workerFromSupabaseJson(r)));
-    await pull('equipment', (r) => db.equipmentDao.upsertFromRemote(equipmentFromSupabaseJson(r)));
-    await pull('equipment_logs', (r) => db.equipmentDao.upsertLogFromRemote(equipmentLogFromSupabaseJson(r)));
-    await pull('inspections', (r) => db.inspectionDao.upsertFromRemote(inspectionFromSupabaseJson(r)));
-    await pull('inspection_items', (r) => db.inspectionDao.upsertItemFromRemote(inspectionItemFromSupabaseJson(r)));
-    await pull('subcontractors', (r) => db.subcontractorDao.upsertFromRemote(subcontractorFromSupabaseJson(r)));
-    await pull('work_orders', (r) => db.workOrderDao.upsertFromRemoteWorkOrder(workOrderFromSupabaseJson(r)));
-    await pull('approvals', (r) => db.approvalDao.upsertFromRemote(approvalFromSupabaseJson(r)));
-    await pull('vendors', (r) => db.supplierDao.upsertFromRemote(supplierFromSupabaseJson(r)));
-    await pull('estimations', (r) => db.estimationDao.upsertFromRemote(estimationFromSupabaseJson(r)));
-    await pull('cost_heads', (r) => db.estimationDao.upsertFromRemoteCostHead(costHeadFromSupabaseJson(r)));
-    await pull('measurement_entries',
-        (r) => db.estimationDao.upsertFromRemoteMeasurement(measurementEntryFromSupabaseJson(r)));
-    await pull('steel_entries', (r) => db.estimationDao.upsertFromRemoteSteel(steelEntryFromSupabaseJson(r)));
-    await pull('purchase_requisitions',
-        (r) => db.purchaseDao.upsertFromRemoteRequest(purchaseRequestFromSupabaseJson(r)));
-    await pull('purchase_orders', (r) => db.purchaseDao.upsertFromRemoteOrder(purchaseOrderFromSupabaseJson(r)));
-    await pull('project_messages', (r) => db.messageDao.upsertFromRemote(projectMessageFromSupabaseJson(r)));
-    await pull('site_attendance', (r) => db.attendanceDao.upsertFromRemote(attendanceFromSupabaseJson(r)));
-    await pull('site_expenses', (r) => db.expenseDao.upsertFromRemote(siteExpenseFromSupabaseJson(r)));
-    await pull('site_material_receipts',
-        (r) => db.materialDao.upsertReceiptFromRemote(materialReceiptFromSupabaseJson(r)));
-    await pull('site_material_usage', (r) => db.materialDao.upsertUsageFromRemote(materialUsageFromSupabaseJson(r)));
-    await pull('site_payments_received', (r) => db.paymentDao.upsertFromRemote(paymentReceivedFromSupabaseJson(r)));
-    await pull('site_client_bills', (r) => db.billDao.upsertFromRemote(clientBillFromSupabaseJson(r)));
-    await pull('site_attendance_marks',
-        (r) => db.attendanceDao.upsertMarkFromRemote(attendanceMarkFromSupabaseJson(r)));
-    await pull('site_notes', (r) => db.noteDao.upsertFromRemote(projectNoteFromSupabaseJson(r)));
-    await pull('dpr_photos', (r) async {
+  /// How each pulled table lands in Drift, parents before children.
+  late final Map<String, Future<void> Function(Map<String, dynamic> row)> _upserters = {
+        'projects': (r) => db.projectDao.upsertFromRemote(projectFromSupabaseJson(r)),
+        'tasks': (r) => db.taskDao.upsertFromRemote(taskFromSupabaseJson(r)),
+        'dpr_entries': (r) => db.dprDao.upsertFromRemote(dprEntryFromSupabaseJson(r)),
+        'issues': (r) => db.issueDao.upsertFromRemote(issueFromSupabaseJson(r)),
+        'workers': (r) => db.workerDao.upsertFromRemote(workerFromSupabaseJson(r)),
+        'equipment': (r) => db.equipmentDao.upsertFromRemote(equipmentFromSupabaseJson(r)),
+        'equipment_logs': (r) => db.equipmentDao.upsertLogFromRemote(equipmentLogFromSupabaseJson(r)),
+        'inspections': (r) => db.inspectionDao.upsertFromRemote(inspectionFromSupabaseJson(r)),
+        'inspection_items': (r) => db.inspectionDao.upsertItemFromRemote(inspectionItemFromSupabaseJson(r)),
+        'subcontractors': (r) => db.subcontractorDao.upsertFromRemote(subcontractorFromSupabaseJson(r)),
+        'work_orders': (r) => db.workOrderDao.upsertFromRemoteWorkOrder(workOrderFromSupabaseJson(r)),
+        'approvals': (r) => db.approvalDao.upsertFromRemote(approvalFromSupabaseJson(r)),
+        'vendors': (r) => db.supplierDao.upsertFromRemote(supplierFromSupabaseJson(r)),
+        'estimations': (r) => db.estimationDao.upsertFromRemote(estimationFromSupabaseJson(r)),
+        'cost_heads': (r) => db.estimationDao.upsertFromRemoteCostHead(costHeadFromSupabaseJson(r)),
+        'measurement_entries': (r) => db.estimationDao.upsertFromRemoteMeasurement(measurementEntryFromSupabaseJson(r)),
+        'steel_entries': (r) => db.estimationDao.upsertFromRemoteSteel(steelEntryFromSupabaseJson(r)),
+        'purchase_requisitions': (r) => db.purchaseDao.upsertFromRemoteRequest(purchaseRequestFromSupabaseJson(r)),
+        'purchase_orders': (r) => db.purchaseDao.upsertFromRemoteOrder(purchaseOrderFromSupabaseJson(r)),
+        'project_messages': (r) => db.messageDao.upsertFromRemote(projectMessageFromSupabaseJson(r)),
+        'site_attendance': (r) => db.attendanceDao.upsertFromRemote(attendanceFromSupabaseJson(r)),
+        'site_expenses': (r) => db.expenseDao.upsertFromRemote(siteExpenseFromSupabaseJson(r)),
+        'site_material_receipts': (r) => db.materialDao.upsertReceiptFromRemote(materialReceiptFromSupabaseJson(r)),
+        'site_material_usage': (r) => db.materialDao.upsertUsageFromRemote(materialUsageFromSupabaseJson(r)),
+        'site_payments_received': (r) => db.paymentDao.upsertFromRemote(paymentReceivedFromSupabaseJson(r)),
+        'site_client_bills': (r) => db.billDao.upsertFromRemote(clientBillFromSupabaseJson(r)),
+        'site_attendance_marks': (r) => db.attendanceDao.upsertMarkFromRemote(attendanceMarkFromSupabaseJson(r)),
+        'site_notes': (r) => db.noteDao.upsertFromRemote(projectNoteFromSupabaseJson(r)),
+        'dpr_photos': (r) async {
       final mine = await db.dprDao.photoById(r['id'] as String);
       if (mine != null && File(mine.photoPath).existsSync()) return;
       final local = await _downloadFile(r['photo_path'] as String, r['id'] as String);
       if (local != null) await db.dprDao.upsertPhotoFromRemote(dprPhotoFromSupabaseJson(r, localPath: local));
-    });
-    await pull('expense_attachments', (r) async {
+    },
+        'expense_attachments': (r) async {
       final mine = await db.expenseDao.attachmentById(r['id'] as String);
       if (mine != null && File(mine.filePath).existsSync()) return;
       final local = await _downloadFile(r['file_path'] as String, r['id'] as String);
       if (local != null) await db.expenseDao.upsertAttachmentFromRemote(expenseAttachmentFromSupabaseJson(r, localPath: local));
-    });
-    await pull('documents', (row) async {
+    },
+        'documents': (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
       final localFile = File('${docsDir.path}/${row['id']}_$safeName');
@@ -354,8 +362,231 @@ class SyncEngine {
         await localFile.writeAsBytes(bytes);
       }
       await db.documentDao.upsertFromRemote(documentFromSupabaseJson(row, localPath: localFile.path));
+    },
+      };
+
+  Future<int> _rpcInt(String fn) async => ((await client.rpc(fn)) as num).toInt();
+
+  Future<void> _apply(String table, Map<String, dynamic> row, Set<String> dirty) async {
+    if (dirty.contains(SyncOutboxDao.key(table, row['id'] as String))) return;
+    await _notifyIfNew(table, row);
+    await _upserters[table]!(row);
+  }
+
+  /// First sync on this phone (or for this account), or a cursor older than
+  /// the change log: every visible row, then local rows of those sites that
+  /// the server no longer has are removed.
+  Future<void> _pullEverything(Set<String> dirty, Set<String> keep) async {
+    final seen = <String, Set<String>>{};
+    for (final table in _upserters.keys) {
+      final rows = await _fetchAll(table);
+      seen[table] = {for (final r in rows) r['id'] as String};
+      for (final row in rows) {
+        await _apply(table, row, dirty);
+      }
+    }
+    final sites = seen['projects']!;
+    if (sites.isEmpty) return;
+    final marks = List.filled(sites.length, '?').join(',');
+    for (final MapEntry(key: remote, value: local) in localTableNames.entries) {
+      if (!_projectScoped.contains(remote)) continue;
+      final rows = await db
+          .customSelect('SELECT id FROM $local WHERE project_id IN ($marks)',
+              variables: [for (final s in sites) Variable<String>(s)])
+          .get();
+      for (final r in rows) {
+        final id = r.read<String>('id');
+        if (!seen[remote]!.contains(id) && !keep.contains(id)) await _deleteLocal(remote, id);
+      }
+    }
+  }
+
+  /// Only what changed since [cursor]: changed rows fetched by id, deleted
+  /// ones removed. Returns the new cursor.
+  Future<int> _pullChanges(int cursor, Set<String> dirty, Set<String> keep) async {
+    final last = <String, ({String table, String op})>{};
+    var next = cursor;
+    while (true) {
+      final page = await client
+          .from('sync_changes')
+          .select('seq, table_name, row_id, op')
+          .gt('seq', next)
+          .order('seq')
+          .limit(pullPageSize);
+      for (final c in page) {
+        next = (c['seq'] as num).toInt();
+        last['${c['table_name']}:${c['row_id']}'] = (table: c['table_name'] as String, op: c['op'] as String);
+      }
+      if (page.length < pullPageSize) break;
+    }
+    if (last.isEmpty) return next;
+
+    final changed = <String, List<String>>{};
+    final deleted = <({String table, String id})>[];
+    for (final MapEntry(:key, :value) in last.entries) {
+      final id = key.substring(key.indexOf(':') + 1);
+      if (!_upserters.containsKey(value.table)) continue;
+      if (value.op == 'd') {
+        deleted.add((table: value.table, id: id));
+      } else {
+        (changed[value.table] ??= []).add(id);
+      }
+    }
+    for (final table in _upserters.keys) {
+      final ids = changed[table];
+      if (ids == null) continue;
+      for (var i = 0; i < ids.length; i += 100) {
+        final chunk = ids.sublist(i, i + 100 > ids.length ? ids.length : i + 100);
+        final rows = (await client.from(table).select().inFilter('id', chunk)).map(_toLocalIds).toList();
+        final found = <String>{};
+        for (final row in rows) {
+          found.add(row['id'] as String);
+          await _apply(table, row, dirty);
+        }
+        // Changed, but not readable now: deleted since, or no longer
+        // shared with this account (e.g. money-in after a role change).
+        for (final id in chunk) {
+          if (!found.contains(id)) deleted.add((table: table, id: id));
+        }
+      }
+    }
+    // Children before parents.
+    final order = _upserters.keys.toList();
+    deleted.sort((a, b) => order.indexOf(b.table).compareTo(order.indexOf(a.table)));
+    for (final d in deleted) {
+      if (keep.contains(d.id) || dirty.contains(SyncOutboxDao.key(d.table, d.id))) continue;
+      await _deleteLocal(d.table, d.id);
+    }
+    return next;
+  }
+
+  /// A site this account can no longer see (taken off it, removed from the
+  /// company, or the site was deleted) is removed from the phone, with
+  /// everything under it. Only sites of companies this phone syncs, and
+  /// never one with unsent work or the local-only sample site.
+  Future<void> _dropProjectsNoLongerShared(Set<String> keep) async {
+    // Same setting as CloudLinks (cloud_sync_providers.dart).
+    final raw = await db.settingsDao.get('cloud_linked_companies');
+    if (raw == null || raw.isEmpty) return;
+    final linked = (jsonDecode(raw) as List).cast<String>();
+    if (linked.isEmpty) return;
+    final visible = {for (final r in await _fetchIds('projects')) r};
+    final marks = List.filled(linked.length, '?').join(',');
+    final local = await db
+        .customSelect('SELECT id FROM projects WHERE company_id IN ($marks)',
+            variables: [for (final c in linked) Variable<String>(c)])
+        .get();
+    for (final r in local) {
+      final id = r.read<String>('id');
+      if (!visible.contains(id) && !keep.contains(id)) await _deleteLocal('projects', id);
+    }
+  }
+
+  Future<List<String>> _fetchIds(String table) async {
+    final out = <String>[];
+    var from = 0;
+    while (true) {
+      final rows = await client.from(table).select('id').order('id').range(from, from + pullPageSize - 1);
+      out.addAll(rows.map((r) => r['id'] as String));
+      if (rows.length < pullPageSize) break;
+      from += pullPageSize;
+    }
+    return out;
+  }
+
+  /// Server table -> this phone's Drift table.
+  static const localTableNames = {
+    'projects': 'projects',
+    'tasks': 'tasks',
+    'dpr_entries': 'dpr_entries',
+    'dpr_photos': 'dpr_photos',
+    'issues': 'issues',
+    'workers': 'workers',
+    'equipment': 'equipment',
+    'equipment_logs': 'equipment_logs',
+    'inspections': 'inspections',
+    'inspection_items': 'inspection_items',
+    'subcontractors': 'subcontractors',
+    'work_orders': 'work_orders',
+    'approvals': 'approvals',
+    'vendors': 'suppliers',
+    'estimations': 'estimations',
+    'cost_heads': 'cost_heads',
+    'measurement_entries': 'measurement_entries',
+    'steel_entries': 'steel_entries',
+    'purchase_requisitions': 'purchase_requests',
+    'purchase_orders': 'purchase_orders',
+    'project_messages': 'project_messages',
+    'site_attendance': 'labour_attendance',
+    'site_expenses': 'site_expenses',
+    'site_material_receipts': 'material_receipts',
+    'site_material_usage': 'material_usage',
+    'site_payments_received': 'payments_received',
+    'site_client_bills': 'client_bills',
+    'site_attendance_marks': 'attendance_marks',
+    'site_notes': 'project_notes',
+    'documents': 'documents',
+    'expense_attachments': 'expense_attachments',
+  };
+
+  /// Tables whose rows carry project_id on the phone too.
+  static const _projectScoped = {
+    'tasks', 'dpr_entries', 'issues', 'workers', 'equipment', 'inspections', 'work_orders', 'approvals',
+    'estimations', 'purchase_requisitions', 'purchase_orders', 'project_messages', 'site_attendance',
+    'site_expenses', 'site_material_receipts', 'site_material_usage', 'site_payments_received',
+    'site_client_bills', 'site_attendance_marks', 'site_notes', 'documents',
+  };
+
+  /// Children found through their parent, for removing a whole site or
+  /// record: (child server table, its parent server table, link column).
+  static const _children = [
+    ('dpr_photos', 'dpr_entries', 'dpr_entry_id'),
+    ('equipment_logs', 'equipment', 'equipment_id'),
+    ('inspection_items', 'inspections', 'inspection_id'),
+    ('measurement_entries', 'cost_heads', 'cost_head_id'),
+    ('steel_entries', 'cost_heads', 'cost_head_id'),
+    ('cost_heads', 'estimations', 'estimation_id'),
+    ('expense_attachments', 'site_expenses', 'expense_id'),
+  ];
+
+  /// Removes a row from the phone, with what hangs off it (a site takes all
+  /// its records along), and the files of removed photos and bills.
+  Future<void> _deleteLocal(String table, String id) async {
+    await db.transaction(() async {
+      Future<void> drop(String t, String where, List<String> args) async {
+        final local = localTableNames[t]!;
+        for (final (child, parent, column) in _children) {
+          if (parent != t) continue;
+          final ids = await db
+              .customSelect('SELECT id FROM $local WHERE $where', variables: [for (final a in args) Variable<String>(a)])
+              .get();
+          for (final r in ids) {
+            await drop(child, '$column = ?', [r.read<String>('id')]);
+          }
+        }
+        if (t == 'dpr_photos' || t == 'expense_attachments') {
+          final column = t == 'dpr_photos' ? 'photo_path' : 'file_path';
+          final files = await db
+              .customSelect('SELECT $column AS f FROM $local WHERE $where',
+                  variables: [for (final a in args) Variable<String>(a)])
+              .get();
+          for (final f in files) {
+            try {
+              File(f.read<String>('f')).deleteSync();
+            } catch (_) {}
+          }
+        }
+        await db.customStatement('DELETE FROM $local WHERE $where', args);
+      }
+
+      if (table == 'projects') {
+        for (final t in _projectScoped) {
+          await drop(t, 'project_id = ?', [id]);
+        }
+      }
+      await drop(table, 'id = ?', [id]);
     });
-  });
+  }
 
   /// Saves a teammate's photo or bill on this phone. A file that can't be
   /// fetched right now (weak signal) is skipped, not fatal: the row is left
@@ -422,7 +653,10 @@ class SyncEngine {
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'project_id', value: projectId),
           callback: (payload) async {
             if (payload.eventType == PostgresChangeEvent.delete) {
-              return; // tasks have no local hard-delete path today; nothing to reconcile yet.
+              // Filtered channels get no usable delete payload (Realtime
+              // can't apply a filter or RLS to a deleted row). Deletes come
+              // through the change log on the next pull (_pullChanges).
+              return;
             }
             final row = _toLocalIds(payload.newRecord);
             if (!await _acceptRealtime('tasks', row)) return;
