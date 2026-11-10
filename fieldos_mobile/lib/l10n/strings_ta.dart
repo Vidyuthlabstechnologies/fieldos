@@ -2920,4 +2920,127 @@ const Map<String, String> stringsTa = {
       '{qty} ஏற்கப்பட்டது',
   '{qty} more than ordered':
       'ஆர்டரை விட {qty} அதிகம்',
+  // Site teams, templates, supplier import, all sites
+  'Above your approval limit of {amount}. The owner approves this.':
+      'உங்கள் ஒப்புதல் வரம்பு {amount}-ஐ விட அதிகம். இதை உரிமையாளர் ஒப்புதல் செய்வார்.',
+  'Accounts':
+      'கணக்குகள்',
+  'Add many suppliers':
+      'பல சப்ளையர்களைச் சேர்',
+  'Add person':
+      'நபரைச் சேர்',
+  'Add to this site':
+      'இந்தத் தளத்தில் சேர்',
+  'Added to the site team.':
+      'தளக் குழுவில் சேர்க்கப்பட்டது.',
+  'Added {n} suppliers.':
+      '{n} சப்ளையர்கள் சேர்க்கப்பட்டனர்.',
+  'Added {n} suppliers. {m} already on the list were left as they were.':
+      '{n} சப்ளையர்கள் சேர்க்கப்பட்டனர். ஏற்கனவே பட்டியலில் இருந்த {m} அப்படியே விடப்பட்டன.',
+  'All sites':
+      'அனைத்துத் தளங்கள்',
+  'All {n} sites are up to date.':
+      'அனைத்து {n} தளங்களும் புதுப்பித்த நிலையில் உள்ளன.',
+  'An empty site':
+      'வெற்றுத் தளம்',
+  'Approval limit (₹)':
+      'ஒப்புதல் வரம்பு (₹)',
+  'Approves up to {amount}':
+      '{amount} வரை ஒப்புதல் செய்வார்',
+  'Can see the site, changes nothing.':
+      'தளத்தைப் பார்க்கலாம், எதையும் மாற்ற முடியாது.',
+  'Copies the set-up only. Nothing that happened on that site comes across.':
+      'அமைப்பு மட்டுமே நகலெடுக்கப்படும். அந்தத் தளத்தில் நடந்தது எதுவும் வராது.',
+  'Enter the limit in rupees, or leave it empty for no limit.':
+      'வரம்பை ரூபாயில் உள்ளிடுங்கள், வரம்பு வேண்டாமெனில் காலியாக விடுங்கள்.',
+  'Estimate items and rates':
+      'மதிப்பீட்டு உருப்படிகள், விலைகள்',
+  'Everyone in the company is already on this site.':
+      'நிறுவனத்தில் உள்ள அனைவரும் ஏற்கனவே இந்தத் தளத்தில் உள்ளனர்.',
+  'Everyone in the company sees this site.':
+      'நிறுவனத்தில் அனைவரும் இந்தத் தளத்தைப் பார்ப்பார்கள்.',
+  'Everyone in the company works here with their company role. Add people to give them a site role or an approval limit.':
+      'நிறுவனத்தில் அனைவரும் இங்கே தங்கள் நிறுவனப் பங்கில் வேலை செய்கிறார்கள். தளப் பங்கு அல்லது ஒப்புதல் வரம்பு கொடுக்க நபர்களைச் சேர்க்கவும்.',
+  'Everything on this site.':
+      'இந்தத் தளத்தில் அனைத்தும்.',
+  'Hidden from the rest of the company. The company\'s owners and managers still see it.':
+      'நிறுவனத்தின் மற்றவர்களுக்குத் தெரியாது. நிறுவன உரிமையாளர்களும் மேலாளர்களும் பார்ப்பார்கள்.',
+  'In the weekly close they approve items up to this. Leave empty for no limit.':
+      'வார முடிவில் இதுவரை உள்ள உருப்படிகளை அவர்கள் ஒப்புதல் செய்வார்கள். வரம்பு வேண்டாமெனில் காலியாக விடுங்கள்.',
+  'Last week not closed':
+      'கடந்த வாரம் மூடப்படவில்லை',
+  'No approval limit':
+      'ஒப்புதல் வரம்பு இல்லை',
+  'No one is listed yet':
+      'இன்னும் யாரும் பட்டியலில் இல்லை',
+  'No report on {day}':
+      '{day} அன்று அறிக்கை இல்லை',
+  'No supplier names found. Put one supplier on each line.':
+      'சப்ளையர் பெயர்கள் இல்லை. ஒவ்வொரு வரியிலும் ஒரு சப்ளையர் எழுதுங்கள்.',
+  'On this site':
+      'இந்தத் தளத்தில்',
+  'One supplier per line: name, phone, GSTIN, what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.':
+      'ஒரு வரிக்கு ஒரு சப்ளையர்: பெயர், தொலைபேசி, GSTIN, இன்று நீங்கள் அவர்களுக்குத் தர வேண்டியது. பெயர் மட்டுமே தேவை. உங்கள் பணம் அவர்களிடம் இருந்தால் தொகைக்குப் பின் "advance" எழுதுங்கள்.',
+  'Only this team sees the site':
+      'இந்தக் குழு மட்டுமே தளத்தைப் பார்க்கும்',
+  'Paste a list':
+      'பட்டியலை ஒட்டு',
+  'Receives material and keeps the stock.':
+      'பொருளைப் பெற்று இருப்பைக் கவனிப்பார்.',
+  'Records the day: reports, labour, money, material.':
+      'நாளைப் பதிவு செய்வார்: அறிக்கைகள், தொழிலாளர், பணம், பொருள்.',
+  'Remove from this site?':
+      'இந்தத் தளத்திலிருந்து நீக்கவா?',
+  'Removed from the site team.':
+      'தளக் குழுவிலிருந்து நீக்கப்பட்டது.',
+  'Retention held by clients':
+      'வாடிக்கையாளர்களிடம் உள்ள தக்கவைப்புத் தொகை',
+  'Runs the site and approves up to their limit.':
+      'தளத்தை நடத்தி தங்கள் வரம்பு வரை ஒப்புதல் செய்வார்.',
+  'Saved.':
+      'சேமிக்கப்பட்டது.',
+  'Sees the money and sends packs to accounts.':
+      'பணத்தைப் பார்த்து கணக்குப் பிரிவுக்குத் தொகுப்பு அனுப்புவார்.',
+  'Site team':
+      'தளக் குழு',
+  'Site team and approval limits':
+      'தளக் குழு, ஒப்புதல் வரம்புகள்',
+  'Sites marked as running show here, the ones that need someone first.':
+      'இயங்கும் தளங்கள் இங்கே தெரியும், கவனம் தேவைப்படுபவை முதலில்.',
+  'Start from':
+      'எதிலிருந்து தொடங்க',
+  'Storekeeper':
+      'ஸ்டோர்கீப்பர்',
+  'Task list':
+      'பணிப் பட்டியல்',
+  'To come from clients':
+      'வாடிக்கையாளர்களிடமிருந்து வர வேண்டியது',
+  'Turn on Team & sync to add people. The team list comes from the company\'s accounts.':
+      'நபர்களைச் சேர்க்க Team & sync இயக்குங்கள். குழுப் பட்டியல் நிறுவனக் கணக்குகளிலிருந்து வரும்.',
+  'Up to date':
+      'புதுப்பித்த நிலையில்',
+  'Wages due this week':
+      'இந்த வாரம் தர வேண்டிய கூலி',
+  'Workers and wages':
+      'தொழிலாளர்கள், கூலி',
+  'Your role here: {role}.':
+      'இங்கே உங்கள் பங்கு: {role}.',
+  'client owes {amount}':
+      'வாடிக்கையாளர் தர வேண்டியது {amount}',
+  'suppliers {amount}':
+      'சப்ளையர்கள் {amount}',
+  'wages due {amount}':
+      'தர வேண்டிய கூலி {amount}',
+  '{m} of {n} sites need someone.':
+      '{n} தளங்களில் {m} கவனம் தேவை.',
+  '{name} will no longer be on this site\'s team.':
+      '{name} இனி இந்தத் தளக் குழுவில் இருக்க மாட்டார்.',
+  '{n} approvals waiting over 2 days':
+      '{n} ஒப்புதல்கள் 2 நாளுக்கு மேல் காத்திருக்கின்றன',
+  '{n} days without a report':
+      '{n} நாட்கள் அறிக்கை இல்லை',
+  '{n} sites with last week not closed':
+      '{n} தளங்களில் கடந்த வாரம் மூடப்படவில்லை',
+  '{n} to approve':
+      '{n} ஒப்புதல் தேவை',
 };

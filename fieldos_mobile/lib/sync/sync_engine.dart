@@ -315,6 +315,8 @@ class SyncEngine {
   /// How each pulled table lands in Drift, parents before children.
   late final Map<String, Future<void> Function(Map<String, dynamic> row)> _upserters = {
         'projects': (r) => db.projectDao.upsertFromRemote(projectFromSupabaseJson(r)),
+        'site_access': (r) => db.siteTeamDao.upsertAccessFromRemote(siteAccessFromSupabaseJson(r)),
+        'project_members': (r) => db.siteTeamDao.upsertMemberFromRemote(projectMemberFromSupabaseJson(r)),
         'tasks': (r) => db.taskDao.upsertFromRemote(taskFromSupabaseJson(r)),
         'dpr_entries': (r) => db.dprDao.upsertFromRemote(dprEntryFromSupabaseJson(r)),
         'issues': (r) => db.issueDao.upsertFromRemote(issueFromSupabaseJson(r)),
@@ -563,6 +565,8 @@ class SyncEngine {
     'expense_attachments': 'expense_attachments',
     'site_receipt_attachments': 'receipt_attachments',
     'site_close_reviews': 'close_reviews',
+    'project_members': 'project_members',
+    'site_access': 'site_access',
   };
 
   /// Tables whose rows carry project_id on the phone too.
@@ -571,6 +575,7 @@ class SyncEngine {
     'estimations', 'purchase_requisitions', 'purchase_orders', 'project_messages', 'site_attendance',
     'site_expenses', 'site_material_receipts', 'site_material_usage', 'site_payments_received',
     'site_client_bills', 'site_attendance_marks', 'site_notes', 'documents', 'site_close_reviews',
+    'project_members', 'site_access',
   };
 
   /// Children found through their parent, for removing a whole site or

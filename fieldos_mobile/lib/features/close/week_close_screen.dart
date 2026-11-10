@@ -19,6 +19,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/close/week_close.dart';
 import 'package:fieldos_mobile/features/close/week_close_data.dart';
 import 'package:fieldos_mobile/features/close/week_close_pack.dart';
+import 'package:fieldos_mobile/features/team/site_team_screen.dart' show mySiteAccessProvider;
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet.dart' show weekStart;
 import 'package:fieldos_mobile/features/money/money_view.dart' show provisionalVouchersProvider;
@@ -202,7 +203,8 @@ class _WeekCloseScreenState extends ConsumerState<WeekCloseScreen> {
 
   CloseActions _actions() {
     final s = ref.read(sessionProvider);
-    return CloseActions(ref.read(appDatabaseProvider), userId: s.user?.id ?? '', role: s.role ?? Roles.viewer);
+    return CloseActions(ref.read(appDatabaseProvider),
+        userId: s.user?.id ?? '', role: s.role ?? Roles.viewer, site: ref.read(mySiteAccessProvider(widget.project.id)).value);
   }
 
   Future<void> _run(Future<void> Function() job, {String? done}) async {
@@ -408,8 +410,11 @@ class _WeekCloseScreenState extends ConsumerState<WeekCloseScreen> {
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
-    final canDecide = Roles.canApprove(session.role);
-    final canFix = Roles.canWrite(session.role ?? Roles.viewer);
+    final site = ref.watch(mySiteAccessProvider(widget.project.id)).value;
+    final actions = CloseActions(ref.read(appDatabaseProvider),
+        userId: session.user?.id ?? '', role: session.role ?? Roles.viewer, site: site);
+    final canDecide = actions.canDecide;
+    final canFix = actions.canFix;
     final week = ref.watch(weekCloseProvider(_k));
     final names = ref.watch(closeNamesProvider(session.activeCompany?.id ?? widget.project.companyId)).value ?? const {};
 
@@ -477,13 +482,13 @@ class _WeekCloseScreenState extends ConsumerState<WeekCloseScreen> {
                           ),
                       ]),
                     ),
-                    if (canDecide && _show == _Show.review && w.waiting.any((i) => !i.hasFlags))
+                    if (canDecide && _show == _Show.review && w.waiting.any((i) => !i.hasFlags && actions.canApprove(i)))
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton.icon(
                           icon: const Icon(Icons.done_all),
                           label: Text(trf('Approve the {n} with no exceptions',
-                              {'n': w.waiting.where((i) => !i.hasFlags).length})),
+                              {'n': w.waiting.where((i) => !i.hasFlags && actions.canApprove(i)).length})),
                           onPressed: _busy
                               ? null
                               : () => _run(() => _actions().approveClean(w), done: tr('Approved')),
@@ -511,7 +516,10 @@ class _WeekCloseScreenState extends ConsumerState<WeekCloseScreen> {
                           item: i,
                           names: names,
                           busy: _busy,
-                          onApprove: canDecide && i.state != ItemState.approved ? () => _approve(w, i) : null,
+                          onApprove: actions.canApprove(i) && i.state != ItemState.approved ? () => _approve(w, i) : null,
+                          overLimit: canDecide && !actions.canApprove(i) && i.state != ItemState.approved
+                              ? site?.approvalLimit
+                              : null,
                           onSendBack: canDecide && i.state != ItemState.sentBack ? () => _sendBack(w, i) : null,
                           onFixed: canFix && i.state == ItemState.sentBack ? () => _markFixed(w, i) : null,
                           onEvidence: i.evidence > 0 ? () => _openEvidence(i) : null,
@@ -639,8 +647,11 @@ class _ItemCard extends StatelessWidget {
     this.onSendBack,
     this.onFixed,
     this.onEvidence,
+    this.overLimit,
   });
 
+  /// Set when the item is above the person's approval limit (the limit).
+  final double? overLimit;
   final CloseItem item;
   final Map<String, String> names;
   final bool busy;
@@ -700,6 +711,12 @@ class _ItemCard extends StatelessWidget {
               padding: const EdgeInsets.only(top: 6),
               child: Text(
                   '${decisionLabel(last.decision)} · ${names[last.decidedBy] ?? tr('Someone on the team')}: "${last.note!.trim()}"',
+                  style: muted),
+            ),
+          if (overLimit != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(trf('Above your approval limit of {amount}. The owner approves this.', {'amount': rupees(overLimit!)}),
                   style: muted),
             ),
           Wrap(alignment: WrapAlignment.end, spacing: 4, children: [

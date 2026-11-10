@@ -69,6 +69,7 @@ String? _clip(String? s, int max) {
   ProjectMessages,
   ReceiptAttachments,
   CloseReviews,
+  SiteAccess,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -97,7 +98,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 17;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -218,6 +219,19 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(closeReviews);
             await _moveSlipPhotosOutOfNotes();
           }
+          // v16 is commercial controls (PR #122). Each step checks what is
+          // there, so the two land in either order.
+          if (from < 17) {
+            await _addColumnIfMissing(m, projectMembers, projectMembers.approvalLimit);
+            // SQLite can't add a column whose default is the current time;
+            // existing rows take their created_at instead.
+            final cols = await customSelect('PRAGMA table_info(project_members)').get();
+            if (!cols.any((r) => r.read<String>('name') == 'updated_at')) {
+              await customStatement('ALTER TABLE project_members ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0');
+              await customStatement('UPDATE project_members SET updated_at = created_at');
+            }
+            await m.createTable(siteAccess);
+          }
         },
       );
 
@@ -305,6 +319,7 @@ class AppDatabase extends _$AppDatabase {
   BillDao get billDao => BillDao(this);
   NoteDao get noteDao => NoteDao(this);
   CloseDao get closeDao => CloseDao(this);
+  SiteTeamDao get siteTeamDao => SiteTeamDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -546,6 +561,23 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
         locationLng: Value(lng),
         geofenceRadiusM: Value(radiusM),
       ));
+      final row = await (select(projects)..where((p) => p.id.equals(projectId))).getSingleOrNull();
+      if (row == null) return;
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'projects',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(projectToSupabaseJson(row)),
+      );
+    });
+  }
+
+  /// The geofence radius alone, for a site whose location isn't set yet
+  /// (a new site made from a template).
+  Future<void> setGeofenceRadius(String projectId, int radiusM) {
+    if (radiusM <= 0) throw ArgumentError.value(radiusM, 'radiusM');
+    return transaction(() async {
+      await (update(projects)..where((p) => p.id.equals(projectId))).write(ProjectsCompanion(geofenceRadiusM: Value(radiusM)));
       final row = await (select(projects)..where((p) => p.id.equals(projectId))).getSingleOrNull();
       if (row == null) return;
       await db.syncOutboxDao.enqueue(
@@ -2352,3 +2384,123 @@ class CloseDao extends DatabaseAccessor<AppDatabase> with _$CloseDaoMixin {
 
   Future<void> upsertFromRemote(CloseReviewsCompanion c) => into(closeReviews).insertOnConflictUpdate(c);
 }
+
+// ---------------------------------------------------------------------------
+// Site team and access (v17)
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [ProjectMembers, SiteAccess])
+class SiteTeamDao extends DatabaseAccessor<AppDatabase> with _$SiteTeamDaoMixin {
+  SiteTeamDao(super.db);
+
+  Future<List<ProjectMember>> membersFor(String projectId) => (select(projectMembers)
+        ..where((m) => m.projectId.equals(projectId))
+        ..orderBy([(m) => OrderingTerm.asc(m.createdAt)]))
+      .get();
+
+  /// The person's row on the site, if they are on its team.
+  Future<ProjectMember?> memberOf(String projectId, String userId) =>
+      (select(projectMembers)..where((m) => m.projectId.equals(projectId) & m.userId.equals(userId)))
+          .getSingleOrNull();
+
+  /// Every site's team rows for a company's sites, by project id.
+  Future<Map<String, List<ProjectMember>>> membersByProject(Iterable<String> projectIds) async {
+    final ids = projectIds.toList();
+    if (ids.isEmpty) return const {};
+    final rows = await (select(projectMembers)..where((m) => m.projectId.isIn(ids))).get();
+    final out = <String, List<ProjectMember>>{};
+    for (final r in rows) {
+      (out[r.projectId] ??= []).add(r);
+    }
+    return out;
+  }
+
+  /// Adds someone to the site, or changes their role and limit if they
+  /// are on it already.
+  Future<ProjectMember> setMember(
+      {required String projectId, required String userId, required String role, double? approvalLimit, DateTime? now}) {
+    if (!siteRoleValues.contains(role)) throw ArgumentError.value(role, 'role');
+    if (approvalLimit != null && approvalLimit < 0) throw ArgumentError.value(approvalLimit, 'approvalLimit');
+    return transaction(() async {
+      final at = now ?? DateTime.now();
+      final mine = await memberOf(projectId, userId);
+      if (mine == null) {
+        final row = await into(projectMembers).insertReturning(ProjectMembersCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          userId: userId,
+          role: role,
+          approvalLimit: Value(approvalLimit),
+          createdAt: Value(at),
+          updatedAt: Value(at),
+        ));
+        await _queueMember(row, 'insert');
+        return row;
+      }
+      await (update(projectMembers)..where((m) => m.id.equals(mine.id))).write(ProjectMembersCompanion(
+        role: Value(role),
+        approvalLimit: Value(approvalLimit),
+        updatedAt: Value(at),
+      ));
+      final row = await (select(projectMembers)..where((m) => m.id.equals(mine.id))).getSingle();
+      await _queueMember(row, 'update');
+      return row;
+    });
+  }
+
+  Future<void> removeMember(String id) => transaction(() async {
+        final row = await (select(projectMembers)..where((m) => m.id.equals(id))).getSingleOrNull();
+        if (row == null) return;
+        await (delete(projectMembers)..where((m) => m.id.equals(id))).go();
+        await db.syncOutboxDao.enqueue(
+            targetTable: 'project_members', recordId: id, operation: 'delete', payloadJson: jsonEncode({'id': id}));
+      });
+
+  Future<void> _queueMember(ProjectMember row, String operation) => db.syncOutboxDao.enqueue(
+        targetTable: 'project_members',
+        recordId: row.id,
+        operation: operation,
+        payloadJson: jsonEncode(projectMemberToSupabaseJson(row)),
+      );
+
+  Future<bool> isMembersOnly(String projectId) async =>
+      (await (select(siteAccess)..where((a) => a.id.equals(projectId))).getSingleOrNull())?.membersOnly ?? false;
+
+  Future<Set<String>> membersOnlySites(Iterable<String> projectIds) async {
+    final ids = projectIds.toList();
+    if (ids.isEmpty) return const {};
+    final rows = await (select(siteAccess)..where((a) => a.id.isIn(ids) & a.membersOnly.equals(true))).get();
+    return {for (final r in rows) r.id};
+  }
+
+  Future<void> setMembersOnly(String projectId, bool membersOnly, {DateTime? now}) => transaction(() async {
+        final existed = await (select(siteAccess)..where((a) => a.id.equals(projectId))).getSingleOrNull();
+        await into(siteAccess).insertOnConflictUpdate(SiteAccessCompanion.insert(
+          id: projectId,
+          projectId: projectId,
+          membersOnly: Value(membersOnly),
+          updatedAt: Value(now ?? DateTime.now()),
+        ));
+        final row = await (select(siteAccess)..where((a) => a.id.equals(projectId))).getSingle();
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'site_access',
+          recordId: projectId,
+          operation: existed == null ? 'insert' : 'update',
+          payloadJson: jsonEncode(siteAccessToSupabaseJson(row)),
+        );
+      });
+
+  /// One row per person per site: a server row replaces a local one for
+  /// the same person made with another id (both phones added them).
+  Future<void> upsertMemberFromRemote(ProjectMembersCompanion c) => transaction(() async {
+        await (delete(projectMembers)
+              ..where((m) =>
+                  m.projectId.equals(c.projectId.value) & m.userId.equals(c.userId.value) & m.id.equals(c.id.value).not()))
+            .go();
+        await into(projectMembers).insertOnConflictUpdate(c);
+      });
+  Future<void> upsertAccessFromRemote(SiteAccessCompanion c) => into(siteAccess).insertOnConflictUpdate(c);
+}
+
+/// The roles a person can have on one site.
+const siteRoleValues = ['owner', 'project_manager', 'site_engineer', 'accounts', 'storekeeper', 'viewer'];

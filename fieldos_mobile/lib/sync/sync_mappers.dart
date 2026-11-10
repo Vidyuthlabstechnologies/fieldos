@@ -957,3 +957,39 @@ CloseReviewsCompanion closeReviewFromSupabaseJson(Map<String, dynamic> row) => C
           ? const Value.absent()
           : Value(DateTime.parse(row['created_at'] as String).toLocal()),
     );
+
+// --- Site team and access (app schema v17, 20261110210000_site_roles.sql)
+
+Map<String, dynamic> projectMemberToSupabaseJson(ProjectMember m) => {
+      'id': m.id,
+      'project_id': m.projectId,
+      'user_id': m.userId,
+      'role': m.role,
+      'approval_limit': m.approvalLimit,
+    };
+
+ProjectMembersCompanion projectMemberFromSupabaseJson(Map<String, dynamic> row) => ProjectMembersCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      userId: row['user_id'] as String,
+      role: row['role'] as String,
+      approvalLimit: Value((row['approval_limit'] as num?)?.toDouble()),
+      createdAt: row['created_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['created_at'] as String).toLocal()),
+      updatedAt: row['updated_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['updated_at'] as String).toLocal()),
+    );
+
+Map<String, dynamic> siteAccessToSupabaseJson(SiteAccessData a) => {
+      'id': a.id,
+      'project_id': a.projectId,
+      'members_only': a.membersOnly,
+    };
+
+SiteAccessCompanion siteAccessFromSupabaseJson(Map<String, dynamic> row) => SiteAccessCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      membersOnly: Value(row['members_only'] as bool? ?? false),
+    );

@@ -2920,4 +2920,127 @@ const Map<String, String> stringsKn = {
       '{qty} ಸ್ವೀಕರಿಸಲಾಗಿದೆ',
   '{qty} more than ordered':
       'ಆರ್ಡರ್‌ಗಿಂತ {qty} ಹೆಚ್ಚು',
+  // Site teams, templates, supplier import, all sites
+  'Above your approval limit of {amount}. The owner approves this.':
+      'ನಿಮ್ಮ ಅನುಮೋದನೆ ಮಿತಿ {amount} ಮೀರಿದೆ. ಇದನ್ನು ಮಾಲೀಕರು ಅನುಮೋದಿಸುತ್ತಾರೆ.',
+  'Accounts':
+      'ಅಕೌಂಟ್ಸ್',
+  'Add many suppliers':
+      'ಹಲವು ಸರಬರಾಜುದಾರರನ್ನು ಸೇರಿಸಿ',
+  'Add person':
+      'ವ್ಯಕ್ತಿಯನ್ನು ಸೇರಿಸಿ',
+  'Add to this site':
+      'ಈ ಸೈಟ್‌ಗೆ ಸೇರಿಸಿ',
+  'Added to the site team.':
+      'ಸೈಟ್ ತಂಡಕ್ಕೆ ಸೇರಿಸಲಾಗಿದೆ.',
+  'Added {n} suppliers.':
+      '{n} ಸರಬರಾಜುದಾರರನ್ನು ಸೇರಿಸಲಾಗಿದೆ.',
+  'Added {n} suppliers. {m} already on the list were left as they were.':
+      '{n} ಸರಬರಾಜುದಾರರನ್ನು ಸೇರಿಸಲಾಗಿದೆ. ಈಗಾಗಲೇ ಪಟ್ಟಿಯಲ್ಲಿದ್ದ {m} ಹಾಗೆಯೇ ಬಿಡಲಾಗಿದೆ.',
+  'All sites':
+      'ಎಲ್ಲಾ ಸೈಟ್‌ಗಳು',
+  'All {n} sites are up to date.':
+      'ಎಲ್ಲಾ {n} ಸೈಟ್‌ಗಳು ನವೀಕೃತವಾಗಿವೆ.',
+  'An empty site':
+      'ಖಾಲಿ ಸೈಟ್',
+  'Approval limit (₹)':
+      'ಅನುಮೋದನೆ ಮಿತಿ (₹)',
+  'Approves up to {amount}':
+      '{amount} ವರೆಗೆ ಅನುಮೋದಿಸುತ್ತಾರೆ',
+  'Can see the site, changes nothing.':
+      'ಸೈಟ್ ನೋಡಬಹುದು, ಏನೂ ಬದಲಿಸಲಾಗದು.',
+  'Copies the set-up only. Nothing that happened on that site comes across.':
+      'ಸೆಟಪ್ ಮಾತ್ರ ನಕಲಾಗುತ್ತದೆ. ಆ ಸೈಟ್‌ನಲ್ಲಿ ನಡೆದದ್ದು ಏನೂ ಬರುವುದಿಲ್ಲ.',
+  'Enter the limit in rupees, or leave it empty for no limit.':
+      'ಮಿತಿಯನ್ನು ರೂಪಾಯಿಗಳಲ್ಲಿ ನಮೂದಿಸಿ, ಅಥವಾ ಮಿತಿ ಬೇಡವಾದರೆ ಖಾಲಿ ಬಿಡಿ.',
+  'Estimate items and rates':
+      'ಎಸ್ಟಿಮೇಟ್ ಐಟಂಗಳು ಮತ್ತು ದರಗಳು',
+  'Everyone in the company is already on this site.':
+      'ಕಂಪನಿಯ ಎಲ್ಲರೂ ಈಗಾಗಲೇ ಈ ಸೈಟ್‌ನಲ್ಲಿದ್ದಾರೆ.',
+  'Everyone in the company sees this site.':
+      'ಕಂಪನಿಯಲ್ಲಿ ಎಲ್ಲರೂ ಈ ಸೈಟ್ ನೋಡುತ್ತಾರೆ.',
+  'Everyone in the company works here with their company role. Add people to give them a site role or an approval limit.':
+      'ಕಂಪನಿಯಲ್ಲಿ ಎಲ್ಲರೂ ಇಲ್ಲಿ ತಮ್ಮ ಕಂಪನಿ ಪಾತ್ರದೊಂದಿಗೆ ಕೆಲಸ ಮಾಡುತ್ತಾರೆ. ಸೈಟ್ ಪಾತ್ರ ಅಥವಾ ಅನುಮೋದನೆ ಮಿತಿ ನೀಡಲು ಜನರನ್ನು ಸೇರಿಸಿ.',
+  'Everything on this site.':
+      'ಈ ಸೈಟ್‌ನಲ್ಲಿ ಎಲ್ಲವೂ.',
+  'Hidden from the rest of the company. The company\'s owners and managers still see it.':
+      'ಕಂಪನಿಯ ಉಳಿದವರಿಗೆ ಕಾಣುವುದಿಲ್ಲ. ಕಂಪನಿಯ ಮಾಲೀಕರು ಮತ್ತು ಮ್ಯಾನೇಜರ್‌ಗಳು ನೋಡುತ್ತಾರೆ.',
+  'In the weekly close they approve items up to this. Leave empty for no limit.':
+      'ವಾರದ ಮುಕ್ತಾಯದಲ್ಲಿ ಇಷ್ಟರವರೆಗಿನ ಐಟಂಗಳನ್ನು ಅವರು ಅನುಮೋದಿಸುತ್ತಾರೆ. ಮಿತಿ ಬೇಡವಾದರೆ ಖಾಲಿ ಬಿಡಿ.',
+  'Last week not closed':
+      'ಕಳೆದ ವಾರ ಮುಚ್ಚಿಲ್ಲ',
+  'No approval limit':
+      'ಅನುಮೋದನೆ ಮಿತಿ ಇಲ್ಲ',
+  'No one is listed yet':
+      'ಇನ್ನೂ ಯಾರೂ ಪಟ್ಟಿಯಲ್ಲಿಲ್ಲ',
+  'No report on {day}':
+      '{day} ರಂದು ವರದಿ ಇಲ್ಲ',
+  'No supplier names found. Put one supplier on each line.':
+      'ಸರಬರಾಜುದಾರರ ಹೆಸರುಗಳು ಸಿಗಲಿಲ್ಲ. ಪ್ರತಿ ಸಾಲಿನಲ್ಲಿ ಒಬ್ಬರನ್ನು ಬರೆಯಿರಿ.',
+  'On this site':
+      'ಈ ಸೈಟ್‌ನಲ್ಲಿ',
+  'One supplier per line: name, phone, GSTIN, what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.':
+      'ಪ್ರತಿ ಸಾಲಿಗೆ ಒಬ್ಬ ಸರಬರಾಜುದಾರ: ಹೆಸರು, ಫೋನ್, GSTIN, ಇಂದು ನೀವು ಅವರಿಗೆ ಕೊಡಬೇಕಾದದ್ದು. ಹೆಸರು ಮಾತ್ರ ಬೇಕು. ನಿಮ್ಮ ಹಣ ಅವರ ಬಳಿ ಇದ್ದರೆ ಮೊತ್ತದ ನಂತರ "advance" ಬರೆಯಿರಿ.',
+  'Only this team sees the site':
+      'ಈ ತಂಡ ಮಾತ್ರ ಸೈಟ್ ನೋಡುತ್ತದೆ',
+  'Paste a list':
+      'ಪಟ್ಟಿ ಅಂಟಿಸಿ',
+  'Receives material and keeps the stock.':
+      'ಸಾಮಗ್ರಿ ಸ್ವೀಕರಿಸಿ ಸ್ಟಾಕ್ ನೋಡಿಕೊಳ್ಳುತ್ತಾರೆ.',
+  'Records the day: reports, labour, money, material.':
+      'ದಿನವನ್ನು ದಾಖಲಿಸುತ್ತಾರೆ: ವರದಿ, ಕಾರ್ಮಿಕರು, ಹಣ, ಸಾಮಗ್ರಿ.',
+  'Remove from this site?':
+      'ಈ ಸೈಟ್‌ನಿಂದ ತೆಗೆಯಬೇಕೆ?',
+  'Removed from the site team.':
+      'ಸೈಟ್ ತಂಡದಿಂದ ತೆಗೆಯಲಾಗಿದೆ.',
+  'Retention held by clients':
+      'ಕ್ಲೈಂಟ್‌ಗಳ ಬಳಿ ಇರುವ ರಿಟೆನ್ಷನ್',
+  'Runs the site and approves up to their limit.':
+      'ಸೈಟ್ ನಡೆಸುತ್ತಾರೆ ಮತ್ತು ತಮ್ಮ ಮಿತಿಯವರೆಗೆ ಅನುಮೋದಿಸುತ್ತಾರೆ.',
+  'Saved.':
+      'ಉಳಿಸಲಾಗಿದೆ.',
+  'Sees the money and sends packs to accounts.':
+      'ಹಣದ ಲೆಕ್ಕ ನೋಡಿ ಅಕೌಂಟ್ಸ್‌ಗೆ ಪ್ಯಾಕ್ ಕಳುಹಿಸುತ್ತಾರೆ.',
+  'Site team':
+      'ಸೈಟ್ ತಂಡ',
+  'Site team and approval limits':
+      'ಸೈಟ್ ತಂಡ ಮತ್ತು ಅನುಮೋದನೆ ಮಿತಿಗಳು',
+  'Sites marked as running show here, the ones that need someone first.':
+      'ನಡೆಯುತ್ತಿರುವ ಸೈಟ್‌ಗಳು ಇಲ್ಲಿ ಕಾಣುತ್ತವೆ, ಗಮನ ಬೇಕಾದವು ಮೊದಲು.',
+  'Start from':
+      'ಎಲ್ಲಿಂದ ಪ್ರಾರಂಭ',
+  'Storekeeper':
+      'ಸ್ಟೋರ್‌ಕೀಪರ್',
+  'Task list':
+      'ಕೆಲಸದ ಪಟ್ಟಿ',
+  'To come from clients':
+      'ಕ್ಲೈಂಟ್‌ಗಳಿಂದ ಬರಬೇಕಾದದ್ದು',
+  'Turn on Team & sync to add people. The team list comes from the company\'s accounts.':
+      'ಜನರನ್ನು ಸೇರಿಸಲು Team & sync ಆನ್ ಮಾಡಿ. ತಂಡದ ಪಟ್ಟಿ ಕಂಪನಿಯ ಖಾತೆಗಳಿಂದ ಬರುತ್ತದೆ.',
+  'Up to date':
+      'ನವೀಕೃತ',
+  'Wages due this week':
+      'ಈ ವಾರ ಬಾಕಿ ಕೂಲಿ',
+  'Workers and wages':
+      'ಕಾರ್ಮಿಕರು ಮತ್ತು ಕೂಲಿ',
+  'Your role here: {role}.':
+      'ಇಲ್ಲಿ ನಿಮ್ಮ ಪಾತ್ರ: {role}.',
+  'client owes {amount}':
+      'ಕ್ಲೈಂಟ್ ಬಾಕಿ {amount}',
+  'suppliers {amount}':
+      'ಸರಬರಾಜುದಾರರು {amount}',
+  'wages due {amount}':
+      'ಬಾಕಿ ಕೂಲಿ {amount}',
+  '{m} of {n} sites need someone.':
+      '{n} ಸೈಟ್‌ಗಳಲ್ಲಿ {m} ಗೆ ಗಮನ ಬೇಕು.',
+  '{name} will no longer be on this site\'s team.':
+      '{name} ಇನ್ನು ಈ ಸೈಟ್ ತಂಡದಲ್ಲಿ ಇರುವುದಿಲ್ಲ.',
+  '{n} approvals waiting over 2 days':
+      '{n} ಅನುಮೋದನೆಗಳು 2 ದಿನಕ್ಕಿಂತ ಹೆಚ್ಚು ಕಾಯುತ್ತಿವೆ',
+  '{n} days without a report':
+      '{n} ದಿನ ವರದಿ ಇಲ್ಲ',
+  '{n} sites with last week not closed':
+      '{n} ಸೈಟ್‌ಗಳಲ್ಲಿ ಕಳೆದ ವಾರ ಮುಚ್ಚಿಲ್ಲ',
+  '{n} to approve':
+      '{n} ಅನುಮೋದಿಸಬೇಕು',
 };

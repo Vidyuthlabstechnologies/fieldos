@@ -2029,4 +2029,127 @@ const Map<String, String> stringsHi = {
       '{qty} मंज़ूर',
   '{qty} more than ordered':
       'ऑर्डर से {qty} ज़्यादा',
+  // Site teams, templates, supplier import, all sites
+  'Above your approval limit of {amount}. The owner approves this.':
+      'आपकी मंज़ूरी सीमा {amount} से ज़्यादा। इसे मालिक मंज़ूर करेंगे।',
+  'Accounts':
+      'अकाउंट्स',
+  'Add many suppliers':
+      'कई सप्लायर जोड़ें',
+  'Add person':
+      'व्यक्ति जोड़ें',
+  'Add to this site':
+      'इस साइट में जोड़ें',
+  'Added to the site team.':
+      'साइट टीम में जोड़ा गया।',
+  'Added {n} suppliers.':
+      '{n} सप्लायर जोड़े गए।',
+  'Added {n} suppliers. {m} already on the list were left as they were.':
+      '{n} सप्लायर जोड़े गए। सूची में पहले से मौजूद {m} जैसे थे वैसे छोड़े गए।',
+  'All sites':
+      'सभी साइटें',
+  'All {n} sites are up to date.':
+      'सभी {n} साइटें अप-टू-डेट हैं।',
+  'An empty site':
+      'खाली साइट',
+  'Approval limit (₹)':
+      'मंज़ूरी सीमा (₹)',
+  'Approves up to {amount}':
+      '{amount} तक मंज़ूर करते हैं',
+  'Can see the site, changes nothing.':
+      'साइट देख सकते हैं, कुछ बदल नहीं सकते।',
+  'Copies the set-up only. Nothing that happened on that site comes across.':
+      'सिर्फ़ सेट-अप कॉपी होता है। उस साइट पर जो हुआ वह नहीं आता।',
+  'Enter the limit in rupees, or leave it empty for no limit.':
+      'सीमा रुपयों में डालें, या कोई सीमा न हो तो खाली छोड़ें।',
+  'Estimate items and rates':
+      'एस्टिमेट आइटम और रेट',
+  'Everyone in the company is already on this site.':
+      'कंपनी के सभी लोग पहले से इस साइट पर हैं।',
+  'Everyone in the company sees this site.':
+      'कंपनी में सभी यह साइट देखते हैं।',
+  'Everyone in the company works here with their company role. Add people to give them a site role or an approval limit.':
+      'कंपनी में सभी यहाँ अपनी कंपनी भूमिका के साथ काम करते हैं। साइट भूमिका या मंज़ूरी सीमा देने के लिए लोग जोड़ें।',
+  'Everything on this site.':
+      'इस साइट पर सब कुछ।',
+  'Hidden from the rest of the company. The company\'s owners and managers still see it.':
+      'कंपनी के बाकी लोगों से छिपी। कंपनी के मालिक और मैनेजर फिर भी देखते हैं।',
+  'In the weekly close they approve items up to this. Leave empty for no limit.':
+      'हफ़्ते के हिसाब में वे इतने तक के आइटम मंज़ूर करते हैं। कोई सीमा न हो तो खाली छोड़ें।',
+  'Last week not closed':
+      'पिछला हफ़्ता बंद नहीं हुआ',
+  'No approval limit':
+      'कोई मंज़ूरी सीमा नहीं',
+  'No one is listed yet':
+      'अभी कोई सूची में नहीं',
+  'No report on {day}':
+      '{day} को रिपोर्ट नहीं',
+  'No supplier names found. Put one supplier on each line.':
+      'कोई सप्लायर नाम नहीं मिला। हर लाइन पर एक सप्लायर लिखें।',
+  'On this site':
+      'इस साइट पर',
+  'One supplier per line: name, phone, GSTIN, what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.':
+      'हर लाइन पर एक सप्लायर: नाम, फ़ोन, GSTIN, आज आप पर उनका कितना बाकी है। सिर्फ़ नाम ज़रूरी है। अगर आपका पैसा उनके पास है तो रकम के बाद "advance" लिखें।',
+  'Only this team sees the site':
+      'सिर्फ़ यह टीम साइट देखे',
+  'Paste a list':
+      'सूची पेस्ट करें',
+  'Receives material and keeps the stock.':
+      'माल लेते हैं और स्टॉक रखते हैं।',
+  'Records the day: reports, labour, money, material.':
+      'दिन दर्ज करते हैं: रिपोर्ट, मज़दूर, पैसा, माल।',
+  'Remove from this site?':
+      'इस साइट से हटाएँ?',
+  'Removed from the site team.':
+      'साइट टीम से हटाया गया।',
+  'Retention held by clients':
+      'क्लाइंट के पास रुकी रिटेंशन',
+  'Runs the site and approves up to their limit.':
+      'साइट चलाते हैं और अपनी सीमा तक मंज़ूर करते हैं।',
+  'Saved.':
+      'सेव हो गया।',
+  'Sees the money and sends packs to accounts.':
+      'पैसे का हिसाब देखते हैं और अकाउंट्स को पैक भेजते हैं।',
+  'Site team':
+      'साइट टीम',
+  'Site team and approval limits':
+      'साइट टीम और मंज़ूरी सीमाएँ',
+  'Sites marked as running show here, the ones that need someone first.':
+      'चालू साइटें यहाँ दिखती हैं, जिन्हें ध्यान चाहिए वे पहले।',
+  'Start from':
+      'शुरुआत',
+  'Storekeeper':
+      'स्टोरकीपर',
+  'Task list':
+      'काम की सूची',
+  'To come from clients':
+      'क्लाइंट से आना बाकी',
+  'Turn on Team & sync to add people. The team list comes from the company\'s accounts.':
+      'लोग जोड़ने के लिए Team & sync चालू करें। टीम की सूची कंपनी के खातों से आती है।',
+  'Up to date':
+      'अप-टू-डेट',
+  'Wages due this week':
+      'इस हफ़्ते की बाकी मज़दूरी',
+  'Workers and wages':
+      'मज़दूर और मज़दूरी',
+  'Your role here: {role}.':
+      'यहाँ आपकी भूमिका: {role}।',
+  'client owes {amount}':
+      'क्लाइंट पर {amount} बाकी',
+  'suppliers {amount}':
+      'सप्लायर {amount}',
+  'wages due {amount}':
+      'बाकी मज़दूरी {amount}',
+  '{m} of {n} sites need someone.':
+      '{n} में से {m} साइटों को ध्यान चाहिए।',
+  '{name} will no longer be on this site\'s team.':
+      '{name} अब इस साइट की टीम में नहीं रहेंगे।',
+  '{n} approvals waiting over 2 days':
+      '{n} मंज़ूरियाँ 2 दिन से ज़्यादा रुकी',
+  '{n} days without a report':
+      '{n} दिन बिना रिपोर्ट',
+  '{n} sites with last week not closed':
+      '{n} साइटों का पिछला हफ़्ता बंद नहीं',
+  '{n} to approve':
+      '{n} मंज़ूर करने हैं',
 };

@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart';
+import 'package:fieldos_mobile/features/team/site_team_screen.dart';
 import 'package:fieldos_mobile/features/reports/period_report_screen.dart';
 import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
 import 'package:fieldos_mobile/features/project/dpr_draft_screen.dart';
@@ -157,6 +158,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   builder: (_) => WeekCloseScreen(project: widget.project, weekOf: DateTime.now()),
                 ));
               }
+              if (v == 'team') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => SiteTeamScreen(project: widget.project)));
+              }
               if (v == 'excel') exportProjectToExcel(context, ref, widget.project);
               if (v == 'notes') {
                 Navigator.of(context).push(MaterialPageRoute(
@@ -177,6 +181,13 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 child: ListTile(
                   leading: const Icon(Icons.fact_check_outlined),
                   title: Text(tr('Weekly close')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'team',
+                child: ListTile(
+                  leading: const Icon(Icons.groups_outlined),
+                  title: Text(tr('Site team')),
                 ),
               ),
               PopupMenuItem(

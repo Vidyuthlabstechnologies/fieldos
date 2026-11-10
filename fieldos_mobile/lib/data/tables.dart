@@ -88,12 +88,17 @@ class Projects extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+/// A site's team (v17, synced as project_members): who works on the site,
+/// in which site role (owner, project_manager, site_engineer, accounts,
+/// storekeeper, viewer), and a site manager's approval limit in rupees.
 class ProjectMembers extends Table {
   TextColumn get id => text()();
   TextColumn get projectId => text().withLength(min: 1, max: 36)();
   TextColumn get userId => text().withLength(min: 1, max: 64)();
   TextColumn get role => text().withLength(min: 1, max: 30)();
+  RealColumn get approvalLimit => real().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -768,6 +773,18 @@ class CloseReviews extends Table {
   RealColumn get acceptedQty => real().nullable()();
   TextColumn get decidedBy => text().withLength(min: 1, max: 64)();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Whether a site is seen only by its team (v17, synced as site_access).
+/// [id] is the project's id. Sites without a row are open to the company.
+class SiteAccess extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  BoolColumn get membersOnly => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
