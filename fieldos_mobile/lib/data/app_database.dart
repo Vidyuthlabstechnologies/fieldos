@@ -14,6 +14,9 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/format.dart' show fmtQty;
+import 'package:fieldos_mobile/features/commercial/commercial_rules.dart';
+import 'package:fieldos_mobile/l10n/language.dart' show trf;
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
 
 import 'tables.dart';
@@ -69,6 +72,13 @@ String? _clip(String? s, int max) {
   ProjectMessages,
   ReceiptAttachments,
   CloseReviews,
+  CostCodes,
+  WorkClaims,
+  WorkCertifications,
+  Variations,
+  VariationDecisions,
+  CommercialAttachments,
+  ExceptionActions,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -97,7 +107,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -218,6 +228,27 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(closeReviews);
             await _moveSlipPhotosOutOfNotes();
           }
+          if (from < 16) {
+            // Commercial controls: budget lines, claims, certificates,
+            // variations and the exceptions inbox, plus the links from
+            // work orders, POs and expenses to a budget line.
+            for (final TableInfo t in [
+              costCodes,
+              workClaims,
+              workCertifications,
+              variations,
+              variationDecisions,
+              commercialAttachments,
+              exceptionActions,
+            ]) {
+              await m.createTable(t);
+            }
+            for (final c in [workOrders.unit, workOrders.contractQty, workOrders.rate, workOrders.costCodeId]) {
+              await _addColumnIfMissing(m, workOrders, c);
+            }
+            await _addColumnIfMissing(m, purchaseOrders, purchaseOrders.costCodeId);
+            await _addColumnIfMissing(m, siteExpenses, siteExpenses.costCodeId);
+          }
         },
       );
 
@@ -305,6 +336,7 @@ class AppDatabase extends _$AppDatabase {
   BillDao get billDao => BillDao(this);
   NoteDao get noteDao => NoteDao(this);
   CloseDao get closeDao => CloseDao(this);
+  CommercialDao get commercialDao => CommercialDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -2352,3 +2384,427 @@ class CloseDao extends DatabaseAccessor<AppDatabase> with _$CloseDaoMixin {
 
   Future<void> upsertFromRemote(CloseReviewsCompanion c) => into(closeReviews).insertOnConflictUpdate(c);
 }
+
+// ---------------------------------------------------------------------------
+// Commercial controls (v16): budget lines, claims, certificates, variations,
+// exception actions. See features/commercial/commercial.dart for the rules
+// and supabase/migrations/20261110100000_commercial_controls.sql for the
+// server's copy of them.
+// ---------------------------------------------------------------------------
+
+/// A certification the rules refuse (the same quantity twice, or beyond
+/// the order). The message is shown as is.
+class CertificationRefused implements Exception {
+  CertificationRefused(this.message);
+  final String message;
+  @override
+  String toString() => message;
+}
+
+@DriftAccessor(tables: [
+  CostCodes,
+  WorkOrders,
+  WorkClaims,
+  WorkCertifications,
+  Variations,
+  VariationDecisions,
+  CommercialAttachments,
+  ExceptionActions,
+  PurchaseOrders,
+  SiteExpenses,
+])
+class CommercialDao extends DatabaseAccessor<AppDatabase> with _$CommercialDaoMixin {
+  CommercialDao(super.db);
+
+  Future<void> _queue(String table, String id, String op, Map<String, dynamic> json) =>
+      db.syncOutboxDao.enqueue(targetTable: table, recordId: id, operation: op, payloadJson: jsonEncode(json));
+
+  // --- Budget lines ---------------------------------------------------------
+
+  Future<List<CostCode>> costCodesFor(String projectId) => (select(costCodes)
+        ..where((c) => c.projectId.equals(projectId))
+        ..orderBy([(c) => OrderingTerm.asc(c.sortOrder), (c) => OrderingTerm.asc(c.code)]))
+      .get();
+
+  Future<CostCode> addCostCode({
+    required String projectId,
+    required String code,
+    required String name,
+    double originalBudget = 0,
+    double uncommittedEstimate = 0,
+  }) =>
+      transaction(() async {
+        final n = (await costCodesFor(projectId)).length;
+        final row = await into(costCodes).insertReturning(CostCodesCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          code: code.trim(),
+          name: name.trim(),
+          originalBudget: Value(originalBudget),
+          uncommittedEstimate: Value(uncommittedEstimate),
+          sortOrder: Value(n),
+        ));
+        await _queue('cost_codes', row.id, 'insert', costCodeToSupabaseJson(row));
+        return row;
+      });
+
+  /// The original budget changes only by an approved variation, so this
+  /// edits the name and what is still to be committed.
+  Future<void> updateCostCode(String id, {String? name, double? uncommittedEstimate, double? originalBudget}) =>
+      transaction(() async {
+        await (update(costCodes)..where((c) => c.id.equals(id))).write(CostCodesCompanion(
+          name: name == null ? const Value.absent() : Value(name.trim()),
+          uncommittedEstimate: uncommittedEstimate == null ? const Value.absent() : Value(uncommittedEstimate),
+          originalBudget: originalBudget == null ? const Value.absent() : Value(originalBudget),
+          updatedAt: Value(DateTime.now()),
+        ));
+        final row = await (select(costCodes)..where((c) => c.id.equals(id))).getSingle();
+        await _queue('cost_codes', id, 'update', costCodeToSupabaseJson(row));
+      });
+
+  Future<void> setOrderCostCode(String orderId, String? costCodeId) => transaction(() async {
+        await (update(purchaseOrders)..where((o) => o.id.equals(orderId)))
+            .write(PurchaseOrdersCompanion(costCodeId: Value(costCodeId)));
+        final row = await (select(purchaseOrders)..where((o) => o.id.equals(orderId))).getSingle();
+        await _queue('purchase_orders', orderId, 'update', purchaseOrderToSupabaseJson(row));
+      });
+
+  Future<void> setExpenseCostCode(String expenseId, String? costCodeId) => transaction(() async {
+        await (update(siteExpenses)..where((e) => e.id.equals(expenseId)))
+            .write(SiteExpensesCompanion(costCodeId: Value(costCodeId)));
+        final row = await (select(siteExpenses)..where((e) => e.id.equals(expenseId))).getSingle();
+        await _queue('site_expenses', expenseId, 'update', siteExpenseToSupabaseJson(row));
+      });
+
+  // --- Work orders ----------------------------------------------------------
+
+  Future<List<WorkOrder>> workOrdersFor(String projectId) => (select(workOrders)
+        ..where((w) => w.projectId.equals(projectId))
+        ..orderBy([(w) => OrderingTerm.asc(w.createdAt)]))
+      .get();
+
+  Future<List<WorkOrder>> workOrdersForSubcontractor(String subcontractorId) =>
+      (select(workOrders)..where((w) => w.subcontractorId.equals(subcontractorId))).get();
+
+  Future<WorkOrder?> workOrderById(String id) => (select(workOrders)..where((w) => w.id.equals(id))).getSingleOrNull();
+
+  /// A work order with its baseline: the agreed quantity, unit and rate.
+  Future<WorkOrder> createWorkOrder({
+    required String projectId,
+    required String subcontractorId,
+    required String description,
+    required String unit,
+    required double qty,
+    required double rate,
+    String? costCodeId,
+  }) =>
+      transaction(() async {
+        final row = await into(workOrders).insertReturning(WorkOrdersCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          subcontractorId: subcontractorId,
+          description: description.trim(),
+          agreedAmount: Value(_money(qty * rate)),
+          unit: Value(unit.trim()),
+          contractQty: Value(qty),
+          rate: Value(rate),
+          costCodeId: Value(costCodeId),
+        ));
+        await _queue('work_orders', row.id, 'insert', workOrderToSupabaseJson(row));
+        return row;
+      });
+
+  // --- Claims and certification ---------------------------------------------
+
+  Future<List<WorkClaim>> claimsFor(String workOrderId) => (select(workClaims)
+        ..where((c) => c.workOrderId.equals(workOrderId))
+        ..orderBy([(c) => OrderingTerm.asc(c.createdAt), (c) => OrderingTerm.asc(c.rowId)]))
+      .get();
+
+  Future<List<WorkClaim>> claimsForProject(String projectId) => (select(workClaims)
+        ..where((c) => c.projectId.equals(projectId))
+        ..orderBy([(c) => OrderingTerm.asc(c.createdAt), (c) => OrderingTerm.asc(c.rowId)]))
+      .get();
+
+  Future<WorkClaim?> claimById(String id) => (select(workClaims)..where((c) => c.id.equals(id))).getSingleOrNull();
+
+  Future<List<WorkCertification>> certificationsFor(String workOrderId) => (select(workCertifications)
+        ..where((c) => c.workOrderId.equals(workOrderId))
+        ..orderBy([(c) => OrderingTerm.asc(c.createdAt), (c) => OrderingTerm.asc(c.rowId)]))
+      .get();
+
+  Future<List<WorkCertification>> certificationsForProject(String projectId) => (select(workCertifications)
+        ..where((c) => c.projectId.equals(projectId))
+        ..orderBy([(c) => OrderingTerm.asc(c.createdAt), (c) => OrderingTerm.asc(c.rowId)]))
+      .get();
+
+  Future<WorkClaim> submitClaim({
+    required String workOrderId,
+    required double qty,
+    required String by,
+    String? location,
+    String? note,
+    List<String> photos = const [],
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final order = await workOrderById(workOrderId);
+        if (order == null) throw StateError('This work order is no longer on the phone.');
+        if (qty <= 0) throw CertificationRefused('Enter the quantity completed.');
+        final row = await into(workClaims).insertReturning(WorkClaimsCompanion.insert(
+          id: _uuid.v4(),
+          projectId: order.projectId,
+          workOrderId: workOrderId,
+          qty: qty,
+          location: Value(_clip(location, 120)),
+          note: Value(_clip(note, 300)),
+          submittedBy: by,
+          createdAt: Value(now ?? DateTime.now()),
+        ));
+        await _queue('work_claims', row.id, 'insert', workClaimToSupabaseJson(row));
+        for (final p in photos) {
+          await attach(projectId: order.projectId, parentKind: 'claim', parentId: row.id, filePath: p);
+        }
+        return row;
+      });
+
+  /// Accepted and rejected quantities on a claim; with [raiseVariation],
+  /// what is left of the claim (beyond the order) goes to the variation
+  /// register in the same step. With [againstVariationId], quantity held
+  /// for that (approved) variation is certified.
+  Future<WorkCertification> certify({
+    required String claimId,
+    required double accepted,
+    required double rejected,
+    required String by,
+    String? note,
+    bool raiseVariation = false,
+    String? againstVariationId,
+    List<String> photos = const [],
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final claim = await claimById(claimId);
+        if (claim == null) throw StateError('This claim is no longer on the phone.');
+        final order = (await workOrderById(claim.workOrderId))!;
+        final certs = await certificationsFor(order.id);
+        final vars = await variationsFor(order.projectId);
+        final decs = await decisionsFor(order.projectId);
+        final refusal = certificationRefusal(
+          order: order,
+          claim: claim,
+          certifications: certs,
+          variations: vars,
+          decisions: decs,
+          accepted: accepted,
+          rejected: rejected,
+        );
+        if (refusal != null) throw CertificationRefused(refusal);
+        final held = claimHeldAfter(claim, certs, accepted: accepted, rejected: rejected);
+        String? variationId = againstVariationId;
+        if (raiseVariation && held > 0.0005) {
+          final rate = workOrderRate(order) ?? 0;
+          final v = await raiseVariationRow(
+            projectId: order.projectId,
+            workOrderId: order.id,
+            costCodeId: order.costCodeId,
+            title: trf('{what}: {qty} {unit} beyond the order',
+                {'what': order.description, 'qty': fmtQty(held), 'unit': order.unit ?? ''}),
+            origin: 'claim_over_order',
+            sourceClaimId: claim.id,
+            qty: held,
+            unit: order.unit,
+            estimatedCost: _money(held * rate),
+            ownerId: null,
+            note: note,
+            by: by,
+            now: now,
+          );
+          variationId = v.id;
+          for (final p in photos) {
+            await attach(projectId: order.projectId, parentKind: 'variation', parentId: v.id, filePath: p);
+          }
+        }
+        if (accepted <= 0 && rejected <= 0 && variationId == null) {
+          throw CertificationRefused('Nothing to certify: enter an accepted or rejected quantity.');
+        }
+        final row = await into(workCertifications).insertReturning(WorkCertificationsCompanion.insert(
+          id: _uuid.v4(),
+          projectId: order.projectId,
+          workOrderId: order.id,
+          claimId: claim.id,
+          acceptedQty: Value(accepted),
+          rejectedQty: Value(rejected),
+          variationId: Value(variationId),
+          note: Value(_clip(note, 300)),
+          certifiedBy: by,
+          createdAt: Value(now ?? DateTime.now()),
+        ));
+        await _queue('work_certifications', row.id, 'insert', workCertificationToSupabaseJson(row));
+        for (final p in photos) {
+          await attach(projectId: order.projectId, parentKind: 'certification', parentId: row.id, filePath: p);
+        }
+        return row;
+      });
+
+  // --- Variations -------------------------------------------------------------
+
+  Future<List<Variation>> variationsFor(String projectId) => (select(variations)
+        ..where((v) => v.projectId.equals(projectId))
+        ..orderBy([(v) => OrderingTerm.asc(v.createdAt), (v) => OrderingTerm.asc(v.rowId)]))
+      .get();
+
+  Future<Variation?> variationById(String id) => (select(variations)..where((v) => v.id.equals(id))).getSingleOrNull();
+
+  Future<List<VariationDecision>> decisionsFor(String projectId) =>
+      (select(variationDecisions)..where((d) => d.projectId.equals(projectId))).get();
+
+  Future<Variation> raiseVariationRow({
+    required String projectId,
+    required String title,
+    required String origin,
+    required String by,
+    String? workOrderId,
+    String? costCodeId,
+    String? sourceClaimId,
+    double? qty,
+    String? unit,
+    double estimatedCost = 0,
+    int scheduleDays = 0,
+    String? ownerId,
+    String? note,
+    List<String> photos = const [],
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final row = await into(variations).insertReturning(VariationsCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          workOrderId: Value(workOrderId),
+          costCodeId: Value(costCodeId),
+          title: _clip(title, 200) ?? 'Variation',
+          origin: origin,
+          sourceClaimId: Value(sourceClaimId),
+          qty: Value(qty),
+          unit: Value(_clip(unit, 20)),
+          estimatedCost: Value(estimatedCost),
+          scheduleDays: Value(scheduleDays),
+          ownerId: Value(ownerId),
+          note: Value(_clip(note, 500)),
+          raisedBy: by,
+          createdAt: Value(now ?? DateTime.now()),
+        ));
+        await _queue('variations', row.id, 'insert', variationToSupabaseJson(row));
+        for (final p in photos) {
+          await attach(projectId: projectId, parentKind: 'variation', parentId: row.id, filePath: p);
+        }
+        return row;
+      });
+
+  /// The one decision on a variation. An approved one changes the work
+  /// order's quantity and value and the budget line it belongs to; the
+  /// baseline stays as it was for comparison.
+  Future<VariationDecision> decideVariation({
+    required String variationId,
+    required bool approve,
+    required String by,
+    double? approvedQty,
+    double? approvedCost,
+    String? note,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final v = await variationById(variationId);
+        if (v == null) throw StateError('This variation is no longer on the phone.');
+        final existing = await (select(variationDecisions)..where((d) => d.variationId.equals(variationId)))
+            .getSingleOrNull();
+        if (existing != null) throw CertificationRefused('This variation has already been decided.');
+        final row = await into(variationDecisions).insertReturning(VariationDecisionsCompanion.insert(
+          id: _uuid.v4(),
+          variationId: variationId,
+          projectId: v.projectId,
+          decision: approve ? 'approved' : 'rejected',
+          approvedQty: Value(approve ? (approvedQty ?? v.qty) : null),
+          approvedCost: Value(approve ? (approvedCost ?? v.estimatedCost) : null),
+          note: Value(_clip(note, 300)),
+          decidedBy: by,
+          createdAt: Value(now ?? DateTime.now()),
+        ));
+        await _queue('variation_decisions', row.id, 'insert', variationDecisionToSupabaseJson(row));
+        return row;
+      });
+
+  // --- Evidence -------------------------------------------------------------
+
+  Future<CommercialAttachment> attach({
+    required String projectId,
+    required String parentKind,
+    required String parentId,
+    required String filePath,
+  }) =>
+      transaction(() async {
+        final row = await into(commercialAttachments).insertReturning(CommercialAttachmentsCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          parentKind: parentKind,
+          parentId: parentId,
+          filePath: filePath,
+          mimeType: attachmentMimeType(filePath),
+        ));
+        await _queue('commercial_attachments', row.id, 'insert', commercialAttachmentToSupabaseJson(row));
+        return row;
+      });
+
+  Future<List<CommercialAttachment>> attachmentsFor(String projectId) =>
+      (select(commercialAttachments)..where((a) => a.projectId.equals(projectId))).get();
+
+  Future<CommercialAttachment?> attachmentById(String id) =>
+      (select(commercialAttachments)..where((a) => a.id.equals(id))).getSingleOrNull();
+
+  // --- Exceptions -------------------------------------------------------------
+
+  Future<List<ExceptionAction>> exceptionActionsFor(String projectId) => (select(exceptionActions)
+        ..where((a) => a.projectId.equals(projectId))
+        ..orderBy([(a) => OrderingTerm.asc(a.createdAt), (a) => OrderingTerm.asc(a.rowId)]))
+      .get();
+
+  Future<ExceptionAction> actOnException({
+    required String projectId,
+    required String exceptionKey,
+    required String action,
+    required String by,
+    String? ownerId,
+    String? dueOn,
+    String? note,
+    String? fingerprint,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final row = await into(exceptionActions).insertReturning(ExceptionActionsCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          exceptionKey: exceptionKey,
+          action: action,
+          ownerId: Value(ownerId),
+          dueOn: Value(dueOn),
+          note: Value(_clip(note, 300)),
+          fingerprint: Value(_clip(fingerprint, 200)),
+          actedBy: by,
+          createdAt: Value(now ?? DateTime.now()),
+        ));
+        await _queue('commercial_exception_actions', row.id, 'insert', exceptionActionToSupabaseJson(row));
+        return row;
+      });
+
+  // --- Pull -------------------------------------------------------------------
+
+  Future<void> upsertCostCode(CostCodesCompanion c) => into(costCodes).insertOnConflictUpdate(c);
+  Future<void> upsertClaim(WorkClaimsCompanion c) => into(workClaims).insertOnConflictUpdate(c);
+  Future<void> upsertCertification(WorkCertificationsCompanion c) => into(workCertifications).insertOnConflictUpdate(c);
+  Future<void> upsertVariation(VariationsCompanion c) => into(variations).insertOnConflictUpdate(c);
+  Future<void> upsertDecision(VariationDecisionsCompanion c) => into(variationDecisions).insertOnConflictUpdate(c);
+  Future<void> upsertAttachment(CommercialAttachmentsCompanion c) => into(commercialAttachments).insertOnConflictUpdate(c);
+  Future<void> upsertExceptionAction(ExceptionActionsCompanion c) => into(exceptionActions).insertOnConflictUpdate(c);
+}
+
+double _money(double v) => (v * 100).roundToDouble() / 100;
