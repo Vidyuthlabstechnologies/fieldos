@@ -606,6 +606,11 @@ Map<String, dynamic> attendanceToSupabaseJson(LabourAttendanceData a) => {
       'lat': a.lat,
       'lng': a.lng,
       'within_geofence': a.withinGeofence,
+      // Only when set, so punches without them still sync to a server
+      // that has not had the selfie attendance migration yet.
+      if (a.photoId != null) 'photo_id': a.photoId,
+      if (a.distanceM != null) 'distance_m': a.distanceM,
+      if (a.accuracyM != null) 'accuracy_m': a.accuracyM,
     };
 
 LabourAttendanceCompanion attendanceFromSupabaseJson(Map<String, dynamic> row) => LabourAttendanceCompanion(
@@ -619,6 +624,9 @@ LabourAttendanceCompanion attendanceFromSupabaseJson(Map<String, dynamic> row) =
       lat: Value((row['lat'] as num?)?.toDouble()),
       lng: Value((row['lng'] as num?)?.toDouble()),
       withinGeofence: Value(row['within_geofence'] as bool?),
+      photoId: Value(row['photo_id'] as String?),
+      distanceM: Value((row['distance_m'] as num?)?.toDouble()),
+      accuracyM: Value((row['accuracy_m'] as num?)?.toDouble()),
     );
 
 Map<String, dynamic> siteExpenseToSupabaseJson(SiteExpense e) => {
@@ -1570,6 +1578,7 @@ Map<String, dynamic> staffMemberToSupabaseJson(StaffMember s) => {
       'active': s.active,
       'created_at': _timestamp(s.createdAt.toUtc()),
       'updated_at': _timestamp(s.updatedAt.toUtc()),
+      if (s.userId != null) 'user_id': s.userId,
     };
 
 StaffMembersCompanion staffMemberFromSupabaseJson(Map<String, dynamic> row) => StaffMembersCompanion.insert(
@@ -1590,6 +1599,7 @@ StaffMembersCompanion staffMemberFromSupabaseJson(Map<String, dynamic> row) => S
       active: Value(row['active'] as bool? ?? true),
       createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
       updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
+      userId: Value(row['user_id'] as String?),
     );
 
 Map<String, dynamic> staffAdvanceToSupabaseJson(StaffAdvance a) => {
@@ -1707,5 +1717,88 @@ SupplierQuotesCompanion supplierQuoteFromSupabaseJson(Map<String, dynamic> row) 
       status: Value(row['status'] as String? ?? 'received'),
       poId: Value(row['po_id'] as String?),
       createdBy: row['created_by'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+// --- Selfie and geofence attendance ------------------------------------------
+
+/// {projectId}/attendance/{id}.jpg, so the site's storage policy covers it.
+String attendancePhotoStoragePath(AttendancePhoto p) => '${p.projectId}/attendance/${p.id}${_ext(p.filePath)}';
+
+Map<String, dynamic> attendancePhotoToSupabaseJson(AttendancePhoto p) => {
+      'id': p.id,
+      'project_id': p.projectId,
+      'file_path': attendancePhotoStoragePath(p),
+      'mime_type': p.mimeType,
+      'taken_by': p.takenBy,
+      'taken_at': _timestamp(p.takenAt.toUtc()),
+      'lat': p.lat,
+      'lng': p.lng,
+      '_local_file_path': p.filePath,
+    };
+
+AttendancePhotosCompanion attendancePhotoFromSupabaseJson(Map<String, dynamic> row, {required String localPath}) =>
+    AttendancePhotosCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      filePath: localPath,
+      mimeType: Value(row['mime_type'] as String? ?? 'image/jpeg'),
+      takenBy: row['taken_by'] as String,
+      takenAt: _localTs(row['taken_at'])!,
+      lat: Value(_dbl(row['lat'])),
+      lng: Value(_dbl(row['lng'])),
+    );
+
+Map<String, dynamic> staffAttendanceToSupabaseJson(StaffAttendanceData a) => {
+      'id': a.id,
+      'company_id': a.companyId,
+      'project_id': a.projectId,
+      'user_id': a.userId,
+      'day': a.day,
+      'check_in': _timestamp(a.checkIn.toUtc()),
+      'check_out': _timestamp(a.checkOut?.toUtc()),
+      'in_lat': a.inLat,
+      'in_lng': a.inLng,
+      'in_accuracy_m': a.inAccuracyM,
+      'in_distance_m': a.inDistanceM,
+      'in_photo_id': a.inPhotoId,
+      'within_geofence': a.withinGeofence,
+      'out_lat': a.outLat,
+      'out_lng': a.outLng,
+      'out_distance_m': a.outDistanceM,
+      'out_photo_id': a.outPhotoId,
+      'out_within': a.outWithin,
+      'status': a.status,
+      'reason': a.reason,
+      'reviewed_by': a.reviewedBy,
+      'reviewed_at': _timestamp(a.reviewedAt?.toUtc()),
+      'review_note': a.reviewNote,
+      'created_at': _timestamp(a.createdAt.toUtc()),
+    };
+
+StaffAttendanceCompanion staffAttendanceFromSupabaseJson(Map<String, dynamic> row) => StaffAttendanceCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      projectId: row['project_id'] as String,
+      userId: row['user_id'] as String,
+      day: (row['day'] as String).substring(0, 10),
+      checkIn: _localTs(row['check_in'])!,
+      checkOut: Value(_localTs(row['check_out'])),
+      inLat: Value(_dbl(row['in_lat'])),
+      inLng: Value(_dbl(row['in_lng'])),
+      inAccuracyM: Value(_dbl(row['in_accuracy_m'])),
+      inDistanceM: Value(_dbl(row['in_distance_m'])),
+      inPhotoId: Value(row['in_photo_id'] as String?),
+      withinGeofence: Value(row['within_geofence'] as bool?),
+      outLat: Value(_dbl(row['out_lat'])),
+      outLng: Value(_dbl(row['out_lng'])),
+      outDistanceM: Value(_dbl(row['out_distance_m'])),
+      outPhotoId: Value(row['out_photo_id'] as String?),
+      outWithin: Value(row['out_within'] as bool?),
+      status: Value(row['status'] as String? ?? 'pending'),
+      reason: Value(row['reason'] as String?),
+      reviewedBy: Value(row['reviewed_by'] as String?),
+      reviewedAt: Value(_localTs(row['reviewed_at'])),
+      reviewNote: Value(row['review_note'] as String?),
       createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
     );

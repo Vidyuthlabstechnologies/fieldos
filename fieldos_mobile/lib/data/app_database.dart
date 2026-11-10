@@ -15,6 +15,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/core/format.dart' show fmtQty;
+import 'package:fieldos_mobile/features/attendance/staff_attendance.dart';
 import 'package:fieldos_mobile/features/commercial/commercial_rules.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart';
 import 'package:fieldos_mobile/features/payroll/payroll_rules.dart';
@@ -101,6 +102,8 @@ String? _clip(String? s, int max) {
   WorkMeasurementDecisions,
   BillAllocations,
   SupplierInvoices,
+  AttendancePhotos,
+  StaffAttendance,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -129,7 +132,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 23;
+  int get schemaVersion => 24;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -308,6 +311,16 @@ class AppDatabase extends _$AppDatabase {
             // Supplier quotes compared against a purchase request.
             await m.createTable(supplierQuotes);
           }
+          if (from < 24) {
+            // Selfie and geofence attendance: photos on punches, staff
+            // checking themselves in, and their login on the salary list.
+            await m.createTable(attendancePhotos);
+            await m.createTable(staffAttendance);
+            for (final c in [labourAttendance.photoId, labourAttendance.distanceM, labourAttendance.accuracyM]) {
+              await _addColumnIfMissing(m, labourAttendance, c);
+            }
+            await _addColumnIfMissing(m, staffMembers, staffMembers.userId);
+          }
         },
       );
 
@@ -400,6 +413,7 @@ class AppDatabase extends _$AppDatabase {
   WarehouseDao get warehouseDao => WarehouseDao(this);
   PayrollDao get payrollDao => PayrollDao(this);
   SupplierQuoteDao get supplierQuoteDao => SupplierQuoteDao(this);
+  StaffAttendanceDao get staffAttendanceDao => StaffAttendanceDao(this);
   SiteTeamDao get siteTeamDao => SiteTeamDao(this);
   BillingRecordsDao get billingRecordsDao => BillingRecordsDao(this);
 
@@ -3927,9 +3941,11 @@ class PayrollDao extends DatabaseAccessor<AppDatabase> with _$PayrollDaoMixin {
     String? projectId,
     String? uan,
     DateTime? joinedOn,
+    String? userId,
   }) async {
     _checkPay(name, basic, hra, otherAllowance, ptState);
     return transaction(() async {
+      await _checkLogin(companyId, userId, null);
       final row = await into(staffMembers).insertReturning(StaffMembersCompanion.insert(
         id: _uuid.v4(),
         companyId: companyId,
@@ -3945,6 +3961,7 @@ class PayrollDao extends DatabaseAccessor<AppDatabase> with _$PayrollDaoMixin {
         ptState: Value(ptState),
         uan: Value(_blankW(uan, 20)),
         joinedOn: Value(joinedOn),
+        userId: Value(userId),
       ));
       await _queue('staff_members', row.id, 'insert', staffMemberToSupabaseJson(row));
       return row;
@@ -3966,9 +3983,14 @@ class PayrollDao extends DatabaseAccessor<AppDatabase> with _$PayrollDaoMixin {
     String? uan,
     DateTime? joinedOn,
     bool active = true,
+    Value<String?> userId = const Value.absent(),
   }) =>
       transaction(() async {
         _checkPay(name, basic, hra, otherAllowance, ptState);
+        if (userId.present) {
+          final s = await staffById(id);
+          if (s != null) await _checkLogin(s.companyId, userId.value, id);
+        }
         await (update(staffMembers)..where((s) => s.id.equals(id))).write(StaffMembersCompanion(
           name: Value(_clip(name, 120)!),
           phone: Value(_blankW(phone, 30)),
@@ -3983,11 +4005,22 @@ class PayrollDao extends DatabaseAccessor<AppDatabase> with _$PayrollDaoMixin {
           uan: Value(_blankW(uan, 20)),
           joinedOn: Value(joinedOn),
           active: Value(active),
+          userId: userId,
           updatedAt: Value(DateTime.now()),
         ));
         final row = await staffById(id);
         if (row != null) await _queue('staff_members', id, 'update', staffMemberToSupabaseJson(row));
       });
+
+  /// One salary per login.
+  Future<void> _checkLogin(String companyId, String? userId, String? exceptId) async {
+    if (userId == null) return;
+    for (final o in await staffFor(companyId)) {
+      if (o.userId == userId && o.id != exceptId) {
+        throw ArgumentError(trf('That login is already linked to {name}.', {'name': o.name}));
+      }
+    }
+  }
 
   Future<StaffAdvance> giveAdvance(
       {required String staffId, required double amount, required String by, String? note, DateTime? on}) async {
@@ -4286,4 +4319,189 @@ class SupplierQuoteDao extends DatabaseAccessor<AppDatabase> with _$SupplierQuot
       });
 
   Future<void> upsertFromRemote(SupplierQuotesCompanion c) => into(supplierQuotes).insertOnConflictUpdate(c);
+}
+
+// ---------------------------------------------------------------------------
+// Selfie and geofence attendance
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [StaffAttendance, AttendancePhotos])
+class StaffAttendanceDao extends DatabaseAccessor<AppDatabase> with _$StaffAttendanceDaoMixin {
+  StaffAttendanceDao(super.db);
+
+  Future<void> _queue(StaffAttendanceData row, String op) => db.syncOutboxDao.enqueue(
+      targetTable: 'staff_attendance', recordId: row.id, operation: op, payloadJson: jsonEncode(staffAttendanceToSupabaseJson(row)));
+
+  /// Keeps a punch or check-in photo (already on the phone) and queues it
+  /// for the cloud.
+  Future<AttendancePhoto> addPhoto({
+    required String projectId,
+    required String filePath,
+    required String by,
+    DateTime? takenAt,
+    double? lat,
+    double? lng,
+  }) =>
+      transaction(() async {
+        final row = await into(attendancePhotos).insertReturning(AttendancePhotosCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          filePath: filePath,
+          mimeType: Value(attachmentMimeType(filePath)),
+          takenBy: by,
+          takenAt: takenAt ?? DateTime.now(),
+          lat: Value(lat),
+          lng: Value(lng),
+        ));
+        await db.syncOutboxDao.enqueue(
+            targetTable: 'attendance_photos',
+            recordId: row.id,
+            operation: 'insert',
+            payloadJson: jsonEncode(attendancePhotoToSupabaseJson(row)));
+        return row;
+      });
+
+  Future<AttendancePhoto?> photoById(String? id) => id == null
+      ? Future.value(null)
+      : (select(attendancePhotos)..where((p) => p.id.equals(id))).getSingleOrNull();
+
+  Future<Map<String, AttendancePhoto>> photosFor(Iterable<String> ids) async {
+    final list = ids.toSet().toList();
+    if (list.isEmpty) return const {};
+    final rows = await (select(attendancePhotos)..where((p) => p.id.isIn(list))).get();
+    return {for (final r in rows) r.id: r};
+  }
+
+  Future<StaffAttendanceData?> byId(String id) =>
+      (select(staffAttendance)..where((a) => a.id.equals(id))).getSingleOrNull();
+
+  /// Checks [userId] in at [projectId] with a selfie. Inside the geofence
+  /// it counts at once; otherwise [reason] is needed and it waits for an OK.
+  Future<StaffAttendanceData> checkIn({
+    required String companyId,
+    required String projectId,
+    required String userId,
+    required String? selfiePath,
+    required ProjectGeofence? fence,
+    double? lat,
+    double? lng,
+    double? accuracyM,
+    String? reason,
+    DateTime? now,
+  }) {
+    if (selfiePath == null || selfiePath.isEmpty) throw ArgumentError('Take a selfie to check in.');
+    final at = now ?? DateTime.now();
+    final day = dayKey(at);
+    final geo = geoCheck(lat, lng, fence);
+    final why = _clip(reason, 300);
+    if (geo.within != true && why == null) {
+      throw ArgumentError(fence == null
+          ? 'This site has no location set. Say where you are, for your manager to approve.'
+          : lat == null
+              ? 'No GPS fix. Say where you are, for your manager to approve.'
+              : 'You are away from the site. Say why, for your manager to approve.');
+    }
+    return transaction(() async {
+      final same = await (select(staffAttendance)
+            ..where((a) => a.userId.equals(userId) & a.projectId.equals(projectId) & a.day.equals(day)))
+          .getSingleOrNull();
+      if (same != null) {
+        throw ArgumentError(same.checkOut == null
+            ? 'You are already checked in at this site.'
+            : 'You have checked in and out at this site today already.');
+      }
+      final photo = await addPhoto(projectId: projectId, filePath: selfiePath, by: userId, takenAt: at, lat: lat, lng: lng);
+      final row = await into(staffAttendance).insertReturning(StaffAttendanceCompanion.insert(
+        id: _uuid.v4(),
+        companyId: companyId,
+        projectId: projectId,
+        userId: userId,
+        day: day,
+        checkIn: at,
+        inLat: Value(lat),
+        inLng: Value(lng),
+        inAccuracyM: Value(accuracyM),
+        inDistanceM: Value(geo.distanceM),
+        inPhotoId: Value(photo.id),
+        withinGeofence: Value(geo.within),
+        status: Value(geo.within == true ? 'ok' : 'pending'),
+        reason: Value(why),
+        createdAt: Value(at),
+      ));
+      await _queue(row, 'insert');
+      return row;
+    });
+  }
+
+  /// Closes today's check-in, with a selfie and fix where there is one.
+  Future<StaffAttendanceData> checkOut(
+    String id, {
+    required ProjectGeofence? fence,
+    String? selfiePath,
+    double? lat,
+    double? lng,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final r = await byId(id);
+        if (r == null) throw ArgumentError('That check-in is no longer here.');
+        if (r.checkOut != null) throw ArgumentError('You have checked out already.');
+        final at = now ?? DateTime.now();
+        if (!at.isAfter(r.checkIn)) throw ArgumentError('Check-out is after check-in.');
+        final geo = geoCheck(lat, lng, fence);
+        final photo = selfiePath == null || selfiePath.isEmpty
+            ? null
+            : await addPhoto(projectId: r.projectId, filePath: selfiePath, by: r.userId, takenAt: at, lat: lat, lng: lng);
+        await (update(staffAttendance)..where((a) => a.id.equals(id))).write(StaffAttendanceCompanion(
+          checkOut: Value(at),
+          outLat: Value(lat),
+          outLng: Value(lng),
+          outDistanceM: Value(geo.distanceM),
+          outPhotoId: Value(photo?.id),
+          outWithin: Value(geo.within),
+        ));
+        final row = (await byId(id))!;
+        await _queue(row, 'update');
+        return row;
+      });
+
+  /// An owner or project manager approves or turns down a check-in.
+  Future<StaffAttendanceData> review(String id, {required bool approve, required String by, String? note, DateTime? now}) =>
+      transaction(() async {
+        final r = await byId(id);
+        if (r == null) throw ArgumentError('That check-in is no longer here.');
+        if (r.userId == by) throw ArgumentError('Someone else approves your own attendance.');
+        await (update(staffAttendance)..where((a) => a.id.equals(id))).write(StaffAttendanceCompanion(
+          status: Value(approve ? 'approved' : 'rejected'),
+          reviewedBy: Value(by),
+          reviewedAt: Value(now ?? DateTime.now()),
+          reviewNote: Value(_clip(note, 300)),
+        ));
+        final row = (await byId(id))!;
+        await _queue(row, 'update');
+        return row;
+      });
+
+  /// Newest first.
+  Future<List<StaffAttendanceData>> forUsers(Iterable<String> userIds, {String? fromDay, String? toDay}) {
+    final ids = userIds.toSet().toList();
+    if (ids.isEmpty) return Future.value(const []);
+    final q = select(staffAttendance)..where((a) => a.userId.isIn(ids));
+    if (fromDay != null) q.where((a) => a.day.isBiggerOrEqualValue(fromDay));
+    if (toDay != null) q.where((a) => a.day.isSmallerOrEqualValue(toDay));
+    q.orderBy([(a) => OrderingTerm.desc(a.checkIn)]);
+    return q.get();
+  }
+
+  /// Newest first.
+  Future<List<StaffAttendanceData>> forCompany(String companyId, {String? fromDay, String? toDay}) {
+    final q = select(staffAttendance)..where((a) => a.companyId.equals(companyId));
+    if (fromDay != null) q.where((a) => a.day.isBiggerOrEqualValue(fromDay));
+    if (toDay != null) q.where((a) => a.day.isSmallerOrEqualValue(toDay));
+    q.orderBy([(a) => OrderingTerm.desc(a.checkIn)]);
+    return q.get();
+  }
+
+  Future<void> upsertFromRemote(StaffAttendanceCompanion c) => into(staffAttendance).insertOnConflictUpdate(c);
+  Future<void> upsertPhotoFromRemote(AttendancePhotosCompanion c) => into(attendancePhotos).insertOnConflictUpdate(c);
 }

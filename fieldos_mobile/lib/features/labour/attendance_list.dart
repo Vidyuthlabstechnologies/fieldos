@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:fieldos_mobile/features/attendance/staff_attendance.dart' show distanceText;
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -179,8 +180,17 @@ class _PunchTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 6),
       child: ListTile(
         leading: Tooltip(message: place, child: Icon(icon, color: color)),
-        title: Text(punch.workerName, maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: Text('$times\n$place', maxLines: 2),
+        title: Row(children: [
+          Flexible(child: Text(punch.workerName, maxLines: 1, overflow: TextOverflow.ellipsis)),
+          if (punch.photoId != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: Icon(Icons.photo_camera_outlined, size: 16, semanticLabel: tr('Photo taken')),
+            ),
+        ]),
+        subtitle: Text(
+            '$times\n${punch.withinGeofence == false && punch.distanceM != null ? '$place · ${distanceText(punch.distanceM!)}' : place}',
+            maxLines: 2),
         isThreeLine: false,
         trailing: action,
       ),

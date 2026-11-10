@@ -13792,6 +13792,40 @@ class $LabourAttendanceTable extends LabourAttendance
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _photoIdMeta = const VerificationMeta(
+    'photoId',
+  );
+  @override
+  late final GeneratedColumn<String> photoId = GeneratedColumn<String>(
+    'photo_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 36),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _distanceMMeta = const VerificationMeta(
+    'distanceM',
+  );
+  @override
+  late final GeneratedColumn<double> distanceM = GeneratedColumn<double>(
+    'distance_m',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _accuracyMMeta = const VerificationMeta(
+    'accuracyM',
+  );
+  @override
+  late final GeneratedColumn<double> accuracyM = GeneratedColumn<double>(
+    'accuracy_m',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -13805,6 +13839,9 @@ class $LabourAttendanceTable extends LabourAttendance
     lng,
     withinGeofence,
     createdAt,
+    photoId,
+    distanceM,
+    accuracyM,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -13894,6 +13931,24 @@ class $LabourAttendanceTable extends LabourAttendance
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('photo_id')) {
+      context.handle(
+        _photoIdMeta,
+        photoId.isAcceptableOrUnknown(data['photo_id']!, _photoIdMeta),
+      );
+    }
+    if (data.containsKey('distance_m')) {
+      context.handle(
+        _distanceMMeta,
+        distanceM.isAcceptableOrUnknown(data['distance_m']!, _distanceMMeta),
+      );
+    }
+    if (data.containsKey('accuracy_m')) {
+      context.handle(
+        _accuracyMMeta,
+        accuracyM.isAcceptableOrUnknown(data['accuracy_m']!, _accuracyMMeta),
+      );
+    }
     return context;
   }
 
@@ -13947,6 +14002,18 @@ class $LabourAttendanceTable extends LabourAttendance
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      photoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_id'],
+      ),
+      distanceM: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}distance_m'],
+      ),
+      accuracyM: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}accuracy_m'],
+      ),
     );
   }
 
@@ -13972,6 +14039,15 @@ class LabourAttendanceData extends DataClass
   final double? lng;
   final bool? withinGeofence;
   final DateTime createdAt;
+
+  /// The photo taken at punch-in ([AttendancePhotos]); one roll-call photo
+  /// can stand for everyone punched in together.
+  final String? photoId;
+
+  /// How far from the site's centre the GPS put the punch, and how sure
+  /// the phone was of it.
+  final double? distanceM;
+  final double? accuracyM;
   const LabourAttendanceData({
     required this.id,
     required this.projectId,
@@ -13984,6 +14060,9 @@ class LabourAttendanceData extends DataClass
     this.lng,
     this.withinGeofence,
     required this.createdAt,
+    this.photoId,
+    this.distanceM,
+    this.accuracyM,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -14009,6 +14088,15 @@ class LabourAttendanceData extends DataClass
       map['within_geofence'] = Variable<bool>(withinGeofence);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || photoId != null) {
+      map['photo_id'] = Variable<String>(photoId);
+    }
+    if (!nullToAbsent || distanceM != null) {
+      map['distance_m'] = Variable<double>(distanceM);
+    }
+    if (!nullToAbsent || accuracyM != null) {
+      map['accuracy_m'] = Variable<double>(accuracyM);
+    }
     return map;
   }
 
@@ -14031,6 +14119,15 @@ class LabourAttendanceData extends DataClass
           ? const Value.absent()
           : Value(withinGeofence),
       createdAt: Value(createdAt),
+      photoId: photoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoId),
+      distanceM: distanceM == null && nullToAbsent
+          ? const Value.absent()
+          : Value(distanceM),
+      accuracyM: accuracyM == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accuracyM),
     );
   }
 
@@ -14051,6 +14148,9 @@ class LabourAttendanceData extends DataClass
       lng: serializer.fromJson<double?>(json['lng']),
       withinGeofence: serializer.fromJson<bool?>(json['withinGeofence']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      photoId: serializer.fromJson<String?>(json['photoId']),
+      distanceM: serializer.fromJson<double?>(json['distanceM']),
+      accuracyM: serializer.fromJson<double?>(json['accuracyM']),
     );
   }
   @override
@@ -14068,6 +14168,9 @@ class LabourAttendanceData extends DataClass
       'lng': serializer.toJson<double?>(lng),
       'withinGeofence': serializer.toJson<bool?>(withinGeofence),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'photoId': serializer.toJson<String?>(photoId),
+      'distanceM': serializer.toJson<double?>(distanceM),
+      'accuracyM': serializer.toJson<double?>(accuracyM),
     };
   }
 
@@ -14083,6 +14186,9 @@ class LabourAttendanceData extends DataClass
     Value<double?> lng = const Value.absent(),
     Value<bool?> withinGeofence = const Value.absent(),
     DateTime? createdAt,
+    Value<String?> photoId = const Value.absent(),
+    Value<double?> distanceM = const Value.absent(),
+    Value<double?> accuracyM = const Value.absent(),
   }) => LabourAttendanceData(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -14097,6 +14203,9 @@ class LabourAttendanceData extends DataClass
         ? withinGeofence.value
         : this.withinGeofence,
     createdAt: createdAt ?? this.createdAt,
+    photoId: photoId.present ? photoId.value : this.photoId,
+    distanceM: distanceM.present ? distanceM.value : this.distanceM,
+    accuracyM: accuracyM.present ? accuracyM.value : this.accuracyM,
   );
   LabourAttendanceData copyWithCompanion(LabourAttendanceCompanion data) {
     return LabourAttendanceData(
@@ -14117,6 +14226,9 @@ class LabourAttendanceData extends DataClass
           ? data.withinGeofence.value
           : this.withinGeofence,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      photoId: data.photoId.present ? data.photoId.value : this.photoId,
+      distanceM: data.distanceM.present ? data.distanceM.value : this.distanceM,
+      accuracyM: data.accuracyM.present ? data.accuracyM.value : this.accuracyM,
     );
   }
 
@@ -14133,7 +14245,10 @@ class LabourAttendanceData extends DataClass
           ..write('lat: $lat, ')
           ..write('lng: $lng, ')
           ..write('withinGeofence: $withinGeofence, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('photoId: $photoId, ')
+          ..write('distanceM: $distanceM, ')
+          ..write('accuracyM: $accuracyM')
           ..write(')'))
         .toString();
   }
@@ -14151,6 +14266,9 @@ class LabourAttendanceData extends DataClass
     lng,
     withinGeofence,
     createdAt,
+    photoId,
+    distanceM,
+    accuracyM,
   );
   @override
   bool operator ==(Object other) =>
@@ -14166,7 +14284,10 @@ class LabourAttendanceData extends DataClass
           other.lat == this.lat &&
           other.lng == this.lng &&
           other.withinGeofence == this.withinGeofence &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.photoId == this.photoId &&
+          other.distanceM == this.distanceM &&
+          other.accuracyM == this.accuracyM);
 }
 
 class LabourAttendanceCompanion extends UpdateCompanion<LabourAttendanceData> {
@@ -14181,6 +14302,9 @@ class LabourAttendanceCompanion extends UpdateCompanion<LabourAttendanceData> {
   final Value<double?> lng;
   final Value<bool?> withinGeofence;
   final Value<DateTime> createdAt;
+  final Value<String?> photoId;
+  final Value<double?> distanceM;
+  final Value<double?> accuracyM;
   final Value<int> rowid;
   const LabourAttendanceCompanion({
     this.id = const Value.absent(),
@@ -14194,6 +14318,9 @@ class LabourAttendanceCompanion extends UpdateCompanion<LabourAttendanceData> {
     this.lng = const Value.absent(),
     this.withinGeofence = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.photoId = const Value.absent(),
+    this.distanceM = const Value.absent(),
+    this.accuracyM = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LabourAttendanceCompanion.insert({
@@ -14208,6 +14335,9 @@ class LabourAttendanceCompanion extends UpdateCompanion<LabourAttendanceData> {
     this.lng = const Value.absent(),
     this.withinGeofence = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.photoId = const Value.absent(),
+    this.distanceM = const Value.absent(),
+    this.accuracyM = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        projectId = Value(projectId),
@@ -14226,6 +14356,9 @@ class LabourAttendanceCompanion extends UpdateCompanion<LabourAttendanceData> {
     Expression<double>? lng,
     Expression<bool>? withinGeofence,
     Expression<DateTime>? createdAt,
+    Expression<String>? photoId,
+    Expression<double>? distanceM,
+    Expression<double>? accuracyM,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -14240,6 +14373,9 @@ class LabourAttendanceCompanion extends UpdateCompanion<LabourAttendanceData> {
       if (lng != null) 'lng': lng,
       if (withinGeofence != null) 'within_geofence': withinGeofence,
       if (createdAt != null) 'created_at': createdAt,
+      if (photoId != null) 'photo_id': photoId,
+      if (distanceM != null) 'distance_m': distanceM,
+      if (accuracyM != null) 'accuracy_m': accuracyM,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -14256,6 +14392,9 @@ class LabourAttendanceCompanion extends UpdateCompanion<LabourAttendanceData> {
     Value<double?>? lng,
     Value<bool?>? withinGeofence,
     Value<DateTime>? createdAt,
+    Value<String?>? photoId,
+    Value<double?>? distanceM,
+    Value<double?>? accuracyM,
     Value<int>? rowid,
   }) {
     return LabourAttendanceCompanion(
@@ -14270,6 +14409,9 @@ class LabourAttendanceCompanion extends UpdateCompanion<LabourAttendanceData> {
       lng: lng ?? this.lng,
       withinGeofence: withinGeofence ?? this.withinGeofence,
       createdAt: createdAt ?? this.createdAt,
+      photoId: photoId ?? this.photoId,
+      distanceM: distanceM ?? this.distanceM,
+      accuracyM: accuracyM ?? this.accuracyM,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -14310,6 +14452,15 @@ class LabourAttendanceCompanion extends UpdateCompanion<LabourAttendanceData> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (photoId.present) {
+      map['photo_id'] = Variable<String>(photoId.value);
+    }
+    if (distanceM.present) {
+      map['distance_m'] = Variable<double>(distanceM.value);
+    }
+    if (accuracyM.present) {
+      map['accuracy_m'] = Variable<double>(accuracyM.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -14330,6 +14481,9 @@ class LabourAttendanceCompanion extends UpdateCompanion<LabourAttendanceData> {
           ..write('lng: $lng, ')
           ..write('withinGeofence: $withinGeofence, ')
           ..write('createdAt: $createdAt, ')
+          ..write('photoId: $photoId, ')
+          ..write('distanceM: $distanceM, ')
+          ..write('accuracyM: $accuracyM, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -33428,6 +33582,16 @@ class $StaffMembersTable extends StaffMembers
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -33469,6 +33633,7 @@ class $StaffMembersTable extends StaffMembers
     uan,
     joinedOn,
     active,
+    userId,
     createdAt,
     updatedAt,
   ];
@@ -33582,6 +33747,12 @@ class $StaffMembersTable extends StaffMembers
         active.isAcceptableOrUnknown(data['active']!, _activeMeta),
       );
     }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -33663,6 +33834,10 @@ class $StaffMembersTable extends StaffMembers
         DriftSqlType.bool,
         data['${effectivePrefix}active'],
       )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -33702,6 +33877,10 @@ class StaffMember extends DataClass implements Insertable<StaffMember> {
   final String? uan;
   final DateTime? joinedOn;
   final bool active;
+
+  /// Their FieldOS login, so the days they check in at a site show
+  /// beside their salary.
+  final String? userId;
   final DateTime createdAt;
   final DateTime updatedAt;
   const StaffMember({
@@ -33720,6 +33899,7 @@ class StaffMember extends DataClass implements Insertable<StaffMember> {
     this.uan,
     this.joinedOn,
     required this.active,
+    this.userId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -33751,6 +33931,9 @@ class StaffMember extends DataClass implements Insertable<StaffMember> {
       map['joined_on'] = Variable<DateTime>(joinedOn);
     }
     map['active'] = Variable<bool>(active);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -33781,6 +33964,9 @@ class StaffMember extends DataClass implements Insertable<StaffMember> {
           ? const Value.absent()
           : Value(joinedOn),
       active: Value(active),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -33807,6 +33993,7 @@ class StaffMember extends DataClass implements Insertable<StaffMember> {
       uan: serializer.fromJson<String?>(json['uan']),
       joinedOn: serializer.fromJson<DateTime?>(json['joinedOn']),
       active: serializer.fromJson<bool>(json['active']),
+      userId: serializer.fromJson<String?>(json['userId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -33830,6 +34017,7 @@ class StaffMember extends DataClass implements Insertable<StaffMember> {
       'uan': serializer.toJson<String?>(uan),
       'joinedOn': serializer.toJson<DateTime?>(joinedOn),
       'active': serializer.toJson<bool>(active),
+      'userId': serializer.toJson<String?>(userId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -33851,6 +34039,7 @@ class StaffMember extends DataClass implements Insertable<StaffMember> {
     Value<String?> uan = const Value.absent(),
     Value<DateTime?> joinedOn = const Value.absent(),
     bool? active,
+    Value<String?> userId = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => StaffMember(
@@ -33869,6 +34058,7 @@ class StaffMember extends DataClass implements Insertable<StaffMember> {
     uan: uan.present ? uan.value : this.uan,
     joinedOn: joinedOn.present ? joinedOn.value : this.joinedOn,
     active: active ?? this.active,
+    userId: userId.present ? userId.value : this.userId,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -33893,6 +34083,7 @@ class StaffMember extends DataClass implements Insertable<StaffMember> {
       uan: data.uan.present ? data.uan.value : this.uan,
       joinedOn: data.joinedOn.present ? data.joinedOn.value : this.joinedOn,
       active: data.active.present ? data.active.value : this.active,
+      userId: data.userId.present ? data.userId.value : this.userId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -33916,6 +34107,7 @@ class StaffMember extends DataClass implements Insertable<StaffMember> {
           ..write('uan: $uan, ')
           ..write('joinedOn: $joinedOn, ')
           ..write('active: $active, ')
+          ..write('userId: $userId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -33939,6 +34131,7 @@ class StaffMember extends DataClass implements Insertable<StaffMember> {
     uan,
     joinedOn,
     active,
+    userId,
     createdAt,
     updatedAt,
   );
@@ -33961,6 +34154,7 @@ class StaffMember extends DataClass implements Insertable<StaffMember> {
           other.uan == this.uan &&
           other.joinedOn == this.joinedOn &&
           other.active == this.active &&
+          other.userId == this.userId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -33981,6 +34175,7 @@ class StaffMembersCompanion extends UpdateCompanion<StaffMember> {
   final Value<String?> uan;
   final Value<DateTime?> joinedOn;
   final Value<bool> active;
+  final Value<String?> userId;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -34000,6 +34195,7 @@ class StaffMembersCompanion extends UpdateCompanion<StaffMember> {
     this.uan = const Value.absent(),
     this.joinedOn = const Value.absent(),
     this.active = const Value.absent(),
+    this.userId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -34020,6 +34216,7 @@ class StaffMembersCompanion extends UpdateCompanion<StaffMember> {
     this.uan = const Value.absent(),
     this.joinedOn = const Value.absent(),
     this.active = const Value.absent(),
+    this.userId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -34043,6 +34240,7 @@ class StaffMembersCompanion extends UpdateCompanion<StaffMember> {
     Expression<String>? uan,
     Expression<DateTime>? joinedOn,
     Expression<bool>? active,
+    Expression<String>? userId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -34063,6 +34261,7 @@ class StaffMembersCompanion extends UpdateCompanion<StaffMember> {
       if (uan != null) 'uan': uan,
       if (joinedOn != null) 'joined_on': joinedOn,
       if (active != null) 'active': active,
+      if (userId != null) 'user_id': userId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -34085,6 +34284,7 @@ class StaffMembersCompanion extends UpdateCompanion<StaffMember> {
     Value<String?>? uan,
     Value<DateTime?>? joinedOn,
     Value<bool>? active,
+    Value<String?>? userId,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -34105,6 +34305,7 @@ class StaffMembersCompanion extends UpdateCompanion<StaffMember> {
       uan: uan ?? this.uan,
       joinedOn: joinedOn ?? this.joinedOn,
       active: active ?? this.active,
+      userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -34159,6 +34360,9 @@ class StaffMembersCompanion extends UpdateCompanion<StaffMember> {
     if (active.present) {
       map['active'] = Variable<bool>(active.value);
     }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -34189,6 +34393,7 @@ class StaffMembersCompanion extends UpdateCompanion<StaffMember> {
           ..write('uan: $uan, ')
           ..write('joinedOn: $joinedOn, ')
           ..write('active: $active, ')
+          ..write('userId: $userId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -39990,6 +40195,1870 @@ class SupplierInvoicesCompanion extends UpdateCompanion<SupplierInvoice> {
   }
 }
 
+class $AttendancePhotosTable extends AttendancePhotos
+    with TableInfo<$AttendancePhotosTable, AttendancePhoto> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AttendancePhotosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _filePathMeta = const VerificationMeta(
+    'filePath',
+  );
+  @override
+  late final GeneratedColumn<String> filePath = GeneratedColumn<String>(
+    'file_path',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 500,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _mimeTypeMeta = const VerificationMeta(
+    'mimeType',
+  );
+  @override
+  late final GeneratedColumn<String> mimeType = GeneratedColumn<String>(
+    'mime_type',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('image/jpeg'),
+  );
+  static const VerificationMeta _takenByMeta = const VerificationMeta(
+    'takenBy',
+  );
+  @override
+  late final GeneratedColumn<String> takenBy = GeneratedColumn<String>(
+    'taken_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _takenAtMeta = const VerificationMeta(
+    'takenAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> takenAt = GeneratedColumn<DateTime>(
+    'taken_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _latMeta = const VerificationMeta('lat');
+  @override
+  late final GeneratedColumn<double> lat = GeneratedColumn<double>(
+    'lat',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lngMeta = const VerificationMeta('lng');
+  @override
+  late final GeneratedColumn<double> lng = GeneratedColumn<double>(
+    'lng',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    filePath,
+    mimeType,
+    takenBy,
+    takenAt,
+    lat,
+    lng,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'attendance_photos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AttendancePhoto> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('file_path')) {
+      context.handle(
+        _filePathMeta,
+        filePath.isAcceptableOrUnknown(data['file_path']!, _filePathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_filePathMeta);
+    }
+    if (data.containsKey('mime_type')) {
+      context.handle(
+        _mimeTypeMeta,
+        mimeType.isAcceptableOrUnknown(data['mime_type']!, _mimeTypeMeta),
+      );
+    }
+    if (data.containsKey('taken_by')) {
+      context.handle(
+        _takenByMeta,
+        takenBy.isAcceptableOrUnknown(data['taken_by']!, _takenByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_takenByMeta);
+    }
+    if (data.containsKey('taken_at')) {
+      context.handle(
+        _takenAtMeta,
+        takenAt.isAcceptableOrUnknown(data['taken_at']!, _takenAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_takenAtMeta);
+    }
+    if (data.containsKey('lat')) {
+      context.handle(
+        _latMeta,
+        lat.isAcceptableOrUnknown(data['lat']!, _latMeta),
+      );
+    }
+    if (data.containsKey('lng')) {
+      context.handle(
+        _lngMeta,
+        lng.isAcceptableOrUnknown(data['lng']!, _lngMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AttendancePhoto map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AttendancePhoto(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      filePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_path'],
+      )!,
+      mimeType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mime_type'],
+      )!,
+      takenBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}taken_by'],
+      )!,
+      takenAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}taken_at'],
+      )!,
+      lat: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}lat'],
+      ),
+      lng: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}lng'],
+      ),
+    );
+  }
+
+  @override
+  $AttendancePhotosTable createAlias(String alias) {
+    return $AttendancePhotosTable(attachedDatabase, alias);
+  }
+}
+
+class AttendancePhoto extends DataClass implements Insertable<AttendancePhoto> {
+  final String id;
+  final String projectId;
+  final String filePath;
+  final String mimeType;
+  final String takenBy;
+  final DateTime takenAt;
+  final double? lat;
+  final double? lng;
+  const AttendancePhoto({
+    required this.id,
+    required this.projectId,
+    required this.filePath,
+    required this.mimeType,
+    required this.takenBy,
+    required this.takenAt,
+    this.lat,
+    this.lng,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['file_path'] = Variable<String>(filePath);
+    map['mime_type'] = Variable<String>(mimeType);
+    map['taken_by'] = Variable<String>(takenBy);
+    map['taken_at'] = Variable<DateTime>(takenAt);
+    if (!nullToAbsent || lat != null) {
+      map['lat'] = Variable<double>(lat);
+    }
+    if (!nullToAbsent || lng != null) {
+      map['lng'] = Variable<double>(lng);
+    }
+    return map;
+  }
+
+  AttendancePhotosCompanion toCompanion(bool nullToAbsent) {
+    return AttendancePhotosCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      filePath: Value(filePath),
+      mimeType: Value(mimeType),
+      takenBy: Value(takenBy),
+      takenAt: Value(takenAt),
+      lat: lat == null && nullToAbsent ? const Value.absent() : Value(lat),
+      lng: lng == null && nullToAbsent ? const Value.absent() : Value(lng),
+    );
+  }
+
+  factory AttendancePhoto.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AttendancePhoto(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      filePath: serializer.fromJson<String>(json['filePath']),
+      mimeType: serializer.fromJson<String>(json['mimeType']),
+      takenBy: serializer.fromJson<String>(json['takenBy']),
+      takenAt: serializer.fromJson<DateTime>(json['takenAt']),
+      lat: serializer.fromJson<double?>(json['lat']),
+      lng: serializer.fromJson<double?>(json['lng']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'filePath': serializer.toJson<String>(filePath),
+      'mimeType': serializer.toJson<String>(mimeType),
+      'takenBy': serializer.toJson<String>(takenBy),
+      'takenAt': serializer.toJson<DateTime>(takenAt),
+      'lat': serializer.toJson<double?>(lat),
+      'lng': serializer.toJson<double?>(lng),
+    };
+  }
+
+  AttendancePhoto copyWith({
+    String? id,
+    String? projectId,
+    String? filePath,
+    String? mimeType,
+    String? takenBy,
+    DateTime? takenAt,
+    Value<double?> lat = const Value.absent(),
+    Value<double?> lng = const Value.absent(),
+  }) => AttendancePhoto(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    filePath: filePath ?? this.filePath,
+    mimeType: mimeType ?? this.mimeType,
+    takenBy: takenBy ?? this.takenBy,
+    takenAt: takenAt ?? this.takenAt,
+    lat: lat.present ? lat.value : this.lat,
+    lng: lng.present ? lng.value : this.lng,
+  );
+  AttendancePhoto copyWithCompanion(AttendancePhotosCompanion data) {
+    return AttendancePhoto(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      filePath: data.filePath.present ? data.filePath.value : this.filePath,
+      mimeType: data.mimeType.present ? data.mimeType.value : this.mimeType,
+      takenBy: data.takenBy.present ? data.takenBy.value : this.takenBy,
+      takenAt: data.takenAt.present ? data.takenAt.value : this.takenAt,
+      lat: data.lat.present ? data.lat.value : this.lat,
+      lng: data.lng.present ? data.lng.value : this.lng,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttendancePhoto(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('filePath: $filePath, ')
+          ..write('mimeType: $mimeType, ')
+          ..write('takenBy: $takenBy, ')
+          ..write('takenAt: $takenAt, ')
+          ..write('lat: $lat, ')
+          ..write('lng: $lng')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    filePath,
+    mimeType,
+    takenBy,
+    takenAt,
+    lat,
+    lng,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AttendancePhoto &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.filePath == this.filePath &&
+          other.mimeType == this.mimeType &&
+          other.takenBy == this.takenBy &&
+          other.takenAt == this.takenAt &&
+          other.lat == this.lat &&
+          other.lng == this.lng);
+}
+
+class AttendancePhotosCompanion extends UpdateCompanion<AttendancePhoto> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> filePath;
+  final Value<String> mimeType;
+  final Value<String> takenBy;
+  final Value<DateTime> takenAt;
+  final Value<double?> lat;
+  final Value<double?> lng;
+  final Value<int> rowid;
+  const AttendancePhotosCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.filePath = const Value.absent(),
+    this.mimeType = const Value.absent(),
+    this.takenBy = const Value.absent(),
+    this.takenAt = const Value.absent(),
+    this.lat = const Value.absent(),
+    this.lng = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AttendancePhotosCompanion.insert({
+    required String id,
+    required String projectId,
+    required String filePath,
+    this.mimeType = const Value.absent(),
+    required String takenBy,
+    required DateTime takenAt,
+    this.lat = const Value.absent(),
+    this.lng = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       filePath = Value(filePath),
+       takenBy = Value(takenBy),
+       takenAt = Value(takenAt);
+  static Insertable<AttendancePhoto> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? filePath,
+    Expression<String>? mimeType,
+    Expression<String>? takenBy,
+    Expression<DateTime>? takenAt,
+    Expression<double>? lat,
+    Expression<double>? lng,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (filePath != null) 'file_path': filePath,
+      if (mimeType != null) 'mime_type': mimeType,
+      if (takenBy != null) 'taken_by': takenBy,
+      if (takenAt != null) 'taken_at': takenAt,
+      if (lat != null) 'lat': lat,
+      if (lng != null) 'lng': lng,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AttendancePhotosCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? filePath,
+    Value<String>? mimeType,
+    Value<String>? takenBy,
+    Value<DateTime>? takenAt,
+    Value<double?>? lat,
+    Value<double?>? lng,
+    Value<int>? rowid,
+  }) {
+    return AttendancePhotosCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      filePath: filePath ?? this.filePath,
+      mimeType: mimeType ?? this.mimeType,
+      takenBy: takenBy ?? this.takenBy,
+      takenAt: takenAt ?? this.takenAt,
+      lat: lat ?? this.lat,
+      lng: lng ?? this.lng,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (filePath.present) {
+      map['file_path'] = Variable<String>(filePath.value);
+    }
+    if (mimeType.present) {
+      map['mime_type'] = Variable<String>(mimeType.value);
+    }
+    if (takenBy.present) {
+      map['taken_by'] = Variable<String>(takenBy.value);
+    }
+    if (takenAt.present) {
+      map['taken_at'] = Variable<DateTime>(takenAt.value);
+    }
+    if (lat.present) {
+      map['lat'] = Variable<double>(lat.value);
+    }
+    if (lng.present) {
+      map['lng'] = Variable<double>(lng.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttendancePhotosCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('filePath: $filePath, ')
+          ..write('mimeType: $mimeType, ')
+          ..write('takenBy: $takenBy, ')
+          ..write('takenAt: $takenAt, ')
+          ..write('lat: $lat, ')
+          ..write('lng: $lng, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $StaffAttendanceTable extends StaffAttendance
+    with TableInfo<$StaffAttendanceTable, StaffAttendanceData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StaffAttendanceTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dayMeta = const VerificationMeta('day');
+  @override
+  late final GeneratedColumn<String> day = GeneratedColumn<String>(
+    'day',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 10,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _checkInMeta = const VerificationMeta(
+    'checkIn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> checkIn = GeneratedColumn<DateTime>(
+    'check_in',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _checkOutMeta = const VerificationMeta(
+    'checkOut',
+  );
+  @override
+  late final GeneratedColumn<DateTime> checkOut = GeneratedColumn<DateTime>(
+    'check_out',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _inLatMeta = const VerificationMeta('inLat');
+  @override
+  late final GeneratedColumn<double> inLat = GeneratedColumn<double>(
+    'in_lat',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _inLngMeta = const VerificationMeta('inLng');
+  @override
+  late final GeneratedColumn<double> inLng = GeneratedColumn<double>(
+    'in_lng',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _inAccuracyMMeta = const VerificationMeta(
+    'inAccuracyM',
+  );
+  @override
+  late final GeneratedColumn<double> inAccuracyM = GeneratedColumn<double>(
+    'in_accuracy_m',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _inDistanceMMeta = const VerificationMeta(
+    'inDistanceM',
+  );
+  @override
+  late final GeneratedColumn<double> inDistanceM = GeneratedColumn<double>(
+    'in_distance_m',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _inPhotoIdMeta = const VerificationMeta(
+    'inPhotoId',
+  );
+  @override
+  late final GeneratedColumn<String> inPhotoId = GeneratedColumn<String>(
+    'in_photo_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 36),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _withinGeofenceMeta = const VerificationMeta(
+    'withinGeofence',
+  );
+  @override
+  late final GeneratedColumn<bool> withinGeofence = GeneratedColumn<bool>(
+    'within_geofence',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("within_geofence" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _outLatMeta = const VerificationMeta('outLat');
+  @override
+  late final GeneratedColumn<double> outLat = GeneratedColumn<double>(
+    'out_lat',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _outLngMeta = const VerificationMeta('outLng');
+  @override
+  late final GeneratedColumn<double> outLng = GeneratedColumn<double>(
+    'out_lng',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _outDistanceMMeta = const VerificationMeta(
+    'outDistanceM',
+  );
+  @override
+  late final GeneratedColumn<double> outDistanceM = GeneratedColumn<double>(
+    'out_distance_m',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _outPhotoIdMeta = const VerificationMeta(
+    'outPhotoId',
+  );
+  @override
+  late final GeneratedColumn<String> outPhotoId = GeneratedColumn<String>(
+    'out_photo_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 36),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _outWithinMeta = const VerificationMeta(
+    'outWithin',
+  );
+  @override
+  late final GeneratedColumn<bool> outWithin = GeneratedColumn<bool>(
+    'out_within',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("out_within" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pending'),
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewedByMeta = const VerificationMeta(
+    'reviewedBy',
+  );
+  @override
+  late final GeneratedColumn<String> reviewedBy = GeneratedColumn<String>(
+    'reviewed_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewedAtMeta = const VerificationMeta(
+    'reviewedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> reviewedAt = GeneratedColumn<DateTime>(
+    'reviewed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewNoteMeta = const VerificationMeta(
+    'reviewNote',
+  );
+  @override
+  late final GeneratedColumn<String> reviewNote = GeneratedColumn<String>(
+    'review_note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    companyId,
+    projectId,
+    userId,
+    day,
+    checkIn,
+    checkOut,
+    inLat,
+    inLng,
+    inAccuracyM,
+    inDistanceM,
+    inPhotoId,
+    withinGeofence,
+    outLat,
+    outLng,
+    outDistanceM,
+    outPhotoId,
+    outWithin,
+    status,
+    reason,
+    reviewedBy,
+    reviewedAt,
+    reviewNote,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'staff_attendance';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StaffAttendanceData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('day')) {
+      context.handle(
+        _dayMeta,
+        day.isAcceptableOrUnknown(data['day']!, _dayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dayMeta);
+    }
+    if (data.containsKey('check_in')) {
+      context.handle(
+        _checkInMeta,
+        checkIn.isAcceptableOrUnknown(data['check_in']!, _checkInMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_checkInMeta);
+    }
+    if (data.containsKey('check_out')) {
+      context.handle(
+        _checkOutMeta,
+        checkOut.isAcceptableOrUnknown(data['check_out']!, _checkOutMeta),
+      );
+    }
+    if (data.containsKey('in_lat')) {
+      context.handle(
+        _inLatMeta,
+        inLat.isAcceptableOrUnknown(data['in_lat']!, _inLatMeta),
+      );
+    }
+    if (data.containsKey('in_lng')) {
+      context.handle(
+        _inLngMeta,
+        inLng.isAcceptableOrUnknown(data['in_lng']!, _inLngMeta),
+      );
+    }
+    if (data.containsKey('in_accuracy_m')) {
+      context.handle(
+        _inAccuracyMMeta,
+        inAccuracyM.isAcceptableOrUnknown(
+          data['in_accuracy_m']!,
+          _inAccuracyMMeta,
+        ),
+      );
+    }
+    if (data.containsKey('in_distance_m')) {
+      context.handle(
+        _inDistanceMMeta,
+        inDistanceM.isAcceptableOrUnknown(
+          data['in_distance_m']!,
+          _inDistanceMMeta,
+        ),
+      );
+    }
+    if (data.containsKey('in_photo_id')) {
+      context.handle(
+        _inPhotoIdMeta,
+        inPhotoId.isAcceptableOrUnknown(data['in_photo_id']!, _inPhotoIdMeta),
+      );
+    }
+    if (data.containsKey('within_geofence')) {
+      context.handle(
+        _withinGeofenceMeta,
+        withinGeofence.isAcceptableOrUnknown(
+          data['within_geofence']!,
+          _withinGeofenceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('out_lat')) {
+      context.handle(
+        _outLatMeta,
+        outLat.isAcceptableOrUnknown(data['out_lat']!, _outLatMeta),
+      );
+    }
+    if (data.containsKey('out_lng')) {
+      context.handle(
+        _outLngMeta,
+        outLng.isAcceptableOrUnknown(data['out_lng']!, _outLngMeta),
+      );
+    }
+    if (data.containsKey('out_distance_m')) {
+      context.handle(
+        _outDistanceMMeta,
+        outDistanceM.isAcceptableOrUnknown(
+          data['out_distance_m']!,
+          _outDistanceMMeta,
+        ),
+      );
+    }
+    if (data.containsKey('out_photo_id')) {
+      context.handle(
+        _outPhotoIdMeta,
+        outPhotoId.isAcceptableOrUnknown(
+          data['out_photo_id']!,
+          _outPhotoIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('out_within')) {
+      context.handle(
+        _outWithinMeta,
+        outWithin.isAcceptableOrUnknown(data['out_within']!, _outWithinMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    if (data.containsKey('reviewed_by')) {
+      context.handle(
+        _reviewedByMeta,
+        reviewedBy.isAcceptableOrUnknown(data['reviewed_by']!, _reviewedByMeta),
+      );
+    }
+    if (data.containsKey('reviewed_at')) {
+      context.handle(
+        _reviewedAtMeta,
+        reviewedAt.isAcceptableOrUnknown(data['reviewed_at']!, _reviewedAtMeta),
+      );
+    }
+    if (data.containsKey('review_note')) {
+      context.handle(
+        _reviewNoteMeta,
+        reviewNote.isAcceptableOrUnknown(data['review_note']!, _reviewNoteMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StaffAttendanceData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StaffAttendanceData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      day: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}day'],
+      )!,
+      checkIn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}check_in'],
+      )!,
+      checkOut: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}check_out'],
+      ),
+      inLat: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}in_lat'],
+      ),
+      inLng: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}in_lng'],
+      ),
+      inAccuracyM: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}in_accuracy_m'],
+      ),
+      inDistanceM: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}in_distance_m'],
+      ),
+      inPhotoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}in_photo_id'],
+      ),
+      withinGeofence: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}within_geofence'],
+      ),
+      outLat: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}out_lat'],
+      ),
+      outLng: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}out_lng'],
+      ),
+      outDistanceM: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}out_distance_m'],
+      ),
+      outPhotoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}out_photo_id'],
+      ),
+      outWithin: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}out_within'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+      reviewedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reviewed_by'],
+      ),
+      reviewedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}reviewed_at'],
+      ),
+      reviewNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}review_note'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $StaffAttendanceTable createAlias(String alias) {
+    return $StaffAttendanceTable(attachedDatabase, alias);
+  }
+}
+
+class StaffAttendanceData extends DataClass
+    implements Insertable<StaffAttendanceData> {
+  final String id;
+  final String companyId;
+  final String projectId;
+  final String userId;
+
+  /// yyyy-MM-dd, the phone's local day of the check-in.
+  final String day;
+  final DateTime checkIn;
+  final DateTime? checkOut;
+  final double? inLat;
+  final double? inLng;
+  final double? inAccuracyM;
+  final double? inDistanceM;
+  final String? inPhotoId;
+  final bool? withinGeofence;
+  final double? outLat;
+  final double? outLng;
+  final double? outDistanceM;
+  final String? outPhotoId;
+  final bool? outWithin;
+
+  /// ok (inside the site) | pending (waits for a manager) | approved | rejected
+  final String status;
+
+  /// Why they checked in away from the site (meeting, supplier's yard...).
+  final String? reason;
+  final String? reviewedBy;
+  final DateTime? reviewedAt;
+  final String? reviewNote;
+  final DateTime createdAt;
+  const StaffAttendanceData({
+    required this.id,
+    required this.companyId,
+    required this.projectId,
+    required this.userId,
+    required this.day,
+    required this.checkIn,
+    this.checkOut,
+    this.inLat,
+    this.inLng,
+    this.inAccuracyM,
+    this.inDistanceM,
+    this.inPhotoId,
+    this.withinGeofence,
+    this.outLat,
+    this.outLng,
+    this.outDistanceM,
+    this.outPhotoId,
+    this.outWithin,
+    required this.status,
+    this.reason,
+    this.reviewedBy,
+    this.reviewedAt,
+    this.reviewNote,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['company_id'] = Variable<String>(companyId);
+    map['project_id'] = Variable<String>(projectId);
+    map['user_id'] = Variable<String>(userId);
+    map['day'] = Variable<String>(day);
+    map['check_in'] = Variable<DateTime>(checkIn);
+    if (!nullToAbsent || checkOut != null) {
+      map['check_out'] = Variable<DateTime>(checkOut);
+    }
+    if (!nullToAbsent || inLat != null) {
+      map['in_lat'] = Variable<double>(inLat);
+    }
+    if (!nullToAbsent || inLng != null) {
+      map['in_lng'] = Variable<double>(inLng);
+    }
+    if (!nullToAbsent || inAccuracyM != null) {
+      map['in_accuracy_m'] = Variable<double>(inAccuracyM);
+    }
+    if (!nullToAbsent || inDistanceM != null) {
+      map['in_distance_m'] = Variable<double>(inDistanceM);
+    }
+    if (!nullToAbsent || inPhotoId != null) {
+      map['in_photo_id'] = Variable<String>(inPhotoId);
+    }
+    if (!nullToAbsent || withinGeofence != null) {
+      map['within_geofence'] = Variable<bool>(withinGeofence);
+    }
+    if (!nullToAbsent || outLat != null) {
+      map['out_lat'] = Variable<double>(outLat);
+    }
+    if (!nullToAbsent || outLng != null) {
+      map['out_lng'] = Variable<double>(outLng);
+    }
+    if (!nullToAbsent || outDistanceM != null) {
+      map['out_distance_m'] = Variable<double>(outDistanceM);
+    }
+    if (!nullToAbsent || outPhotoId != null) {
+      map['out_photo_id'] = Variable<String>(outPhotoId);
+    }
+    if (!nullToAbsent || outWithin != null) {
+      map['out_within'] = Variable<bool>(outWithin);
+    }
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    if (!nullToAbsent || reviewedBy != null) {
+      map['reviewed_by'] = Variable<String>(reviewedBy);
+    }
+    if (!nullToAbsent || reviewedAt != null) {
+      map['reviewed_at'] = Variable<DateTime>(reviewedAt);
+    }
+    if (!nullToAbsent || reviewNote != null) {
+      map['review_note'] = Variable<String>(reviewNote);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  StaffAttendanceCompanion toCompanion(bool nullToAbsent) {
+    return StaffAttendanceCompanion(
+      id: Value(id),
+      companyId: Value(companyId),
+      projectId: Value(projectId),
+      userId: Value(userId),
+      day: Value(day),
+      checkIn: Value(checkIn),
+      checkOut: checkOut == null && nullToAbsent
+          ? const Value.absent()
+          : Value(checkOut),
+      inLat: inLat == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inLat),
+      inLng: inLng == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inLng),
+      inAccuracyM: inAccuracyM == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inAccuracyM),
+      inDistanceM: inDistanceM == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inDistanceM),
+      inPhotoId: inPhotoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inPhotoId),
+      withinGeofence: withinGeofence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(withinGeofence),
+      outLat: outLat == null && nullToAbsent
+          ? const Value.absent()
+          : Value(outLat),
+      outLng: outLng == null && nullToAbsent
+          ? const Value.absent()
+          : Value(outLng),
+      outDistanceM: outDistanceM == null && nullToAbsent
+          ? const Value.absent()
+          : Value(outDistanceM),
+      outPhotoId: outPhotoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(outPhotoId),
+      outWithin: outWithin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(outWithin),
+      status: Value(status),
+      reason: reason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reason),
+      reviewedBy: reviewedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewedBy),
+      reviewedAt: reviewedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewedAt),
+      reviewNote: reviewNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewNote),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory StaffAttendanceData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StaffAttendanceData(
+      id: serializer.fromJson<String>(json['id']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      userId: serializer.fromJson<String>(json['userId']),
+      day: serializer.fromJson<String>(json['day']),
+      checkIn: serializer.fromJson<DateTime>(json['checkIn']),
+      checkOut: serializer.fromJson<DateTime?>(json['checkOut']),
+      inLat: serializer.fromJson<double?>(json['inLat']),
+      inLng: serializer.fromJson<double?>(json['inLng']),
+      inAccuracyM: serializer.fromJson<double?>(json['inAccuracyM']),
+      inDistanceM: serializer.fromJson<double?>(json['inDistanceM']),
+      inPhotoId: serializer.fromJson<String?>(json['inPhotoId']),
+      withinGeofence: serializer.fromJson<bool?>(json['withinGeofence']),
+      outLat: serializer.fromJson<double?>(json['outLat']),
+      outLng: serializer.fromJson<double?>(json['outLng']),
+      outDistanceM: serializer.fromJson<double?>(json['outDistanceM']),
+      outPhotoId: serializer.fromJson<String?>(json['outPhotoId']),
+      outWithin: serializer.fromJson<bool?>(json['outWithin']),
+      status: serializer.fromJson<String>(json['status']),
+      reason: serializer.fromJson<String?>(json['reason']),
+      reviewedBy: serializer.fromJson<String?>(json['reviewedBy']),
+      reviewedAt: serializer.fromJson<DateTime?>(json['reviewedAt']),
+      reviewNote: serializer.fromJson<String?>(json['reviewNote']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'companyId': serializer.toJson<String>(companyId),
+      'projectId': serializer.toJson<String>(projectId),
+      'userId': serializer.toJson<String>(userId),
+      'day': serializer.toJson<String>(day),
+      'checkIn': serializer.toJson<DateTime>(checkIn),
+      'checkOut': serializer.toJson<DateTime?>(checkOut),
+      'inLat': serializer.toJson<double?>(inLat),
+      'inLng': serializer.toJson<double?>(inLng),
+      'inAccuracyM': serializer.toJson<double?>(inAccuracyM),
+      'inDistanceM': serializer.toJson<double?>(inDistanceM),
+      'inPhotoId': serializer.toJson<String?>(inPhotoId),
+      'withinGeofence': serializer.toJson<bool?>(withinGeofence),
+      'outLat': serializer.toJson<double?>(outLat),
+      'outLng': serializer.toJson<double?>(outLng),
+      'outDistanceM': serializer.toJson<double?>(outDistanceM),
+      'outPhotoId': serializer.toJson<String?>(outPhotoId),
+      'outWithin': serializer.toJson<bool?>(outWithin),
+      'status': serializer.toJson<String>(status),
+      'reason': serializer.toJson<String?>(reason),
+      'reviewedBy': serializer.toJson<String?>(reviewedBy),
+      'reviewedAt': serializer.toJson<DateTime?>(reviewedAt),
+      'reviewNote': serializer.toJson<String?>(reviewNote),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  StaffAttendanceData copyWith({
+    String? id,
+    String? companyId,
+    String? projectId,
+    String? userId,
+    String? day,
+    DateTime? checkIn,
+    Value<DateTime?> checkOut = const Value.absent(),
+    Value<double?> inLat = const Value.absent(),
+    Value<double?> inLng = const Value.absent(),
+    Value<double?> inAccuracyM = const Value.absent(),
+    Value<double?> inDistanceM = const Value.absent(),
+    Value<String?> inPhotoId = const Value.absent(),
+    Value<bool?> withinGeofence = const Value.absent(),
+    Value<double?> outLat = const Value.absent(),
+    Value<double?> outLng = const Value.absent(),
+    Value<double?> outDistanceM = const Value.absent(),
+    Value<String?> outPhotoId = const Value.absent(),
+    Value<bool?> outWithin = const Value.absent(),
+    String? status,
+    Value<String?> reason = const Value.absent(),
+    Value<String?> reviewedBy = const Value.absent(),
+    Value<DateTime?> reviewedAt = const Value.absent(),
+    Value<String?> reviewNote = const Value.absent(),
+    DateTime? createdAt,
+  }) => StaffAttendanceData(
+    id: id ?? this.id,
+    companyId: companyId ?? this.companyId,
+    projectId: projectId ?? this.projectId,
+    userId: userId ?? this.userId,
+    day: day ?? this.day,
+    checkIn: checkIn ?? this.checkIn,
+    checkOut: checkOut.present ? checkOut.value : this.checkOut,
+    inLat: inLat.present ? inLat.value : this.inLat,
+    inLng: inLng.present ? inLng.value : this.inLng,
+    inAccuracyM: inAccuracyM.present ? inAccuracyM.value : this.inAccuracyM,
+    inDistanceM: inDistanceM.present ? inDistanceM.value : this.inDistanceM,
+    inPhotoId: inPhotoId.present ? inPhotoId.value : this.inPhotoId,
+    withinGeofence: withinGeofence.present
+        ? withinGeofence.value
+        : this.withinGeofence,
+    outLat: outLat.present ? outLat.value : this.outLat,
+    outLng: outLng.present ? outLng.value : this.outLng,
+    outDistanceM: outDistanceM.present ? outDistanceM.value : this.outDistanceM,
+    outPhotoId: outPhotoId.present ? outPhotoId.value : this.outPhotoId,
+    outWithin: outWithin.present ? outWithin.value : this.outWithin,
+    status: status ?? this.status,
+    reason: reason.present ? reason.value : this.reason,
+    reviewedBy: reviewedBy.present ? reviewedBy.value : this.reviewedBy,
+    reviewedAt: reviewedAt.present ? reviewedAt.value : this.reviewedAt,
+    reviewNote: reviewNote.present ? reviewNote.value : this.reviewNote,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  StaffAttendanceData copyWithCompanion(StaffAttendanceCompanion data) {
+    return StaffAttendanceData(
+      id: data.id.present ? data.id.value : this.id,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      day: data.day.present ? data.day.value : this.day,
+      checkIn: data.checkIn.present ? data.checkIn.value : this.checkIn,
+      checkOut: data.checkOut.present ? data.checkOut.value : this.checkOut,
+      inLat: data.inLat.present ? data.inLat.value : this.inLat,
+      inLng: data.inLng.present ? data.inLng.value : this.inLng,
+      inAccuracyM: data.inAccuracyM.present
+          ? data.inAccuracyM.value
+          : this.inAccuracyM,
+      inDistanceM: data.inDistanceM.present
+          ? data.inDistanceM.value
+          : this.inDistanceM,
+      inPhotoId: data.inPhotoId.present ? data.inPhotoId.value : this.inPhotoId,
+      withinGeofence: data.withinGeofence.present
+          ? data.withinGeofence.value
+          : this.withinGeofence,
+      outLat: data.outLat.present ? data.outLat.value : this.outLat,
+      outLng: data.outLng.present ? data.outLng.value : this.outLng,
+      outDistanceM: data.outDistanceM.present
+          ? data.outDistanceM.value
+          : this.outDistanceM,
+      outPhotoId: data.outPhotoId.present
+          ? data.outPhotoId.value
+          : this.outPhotoId,
+      outWithin: data.outWithin.present ? data.outWithin.value : this.outWithin,
+      status: data.status.present ? data.status.value : this.status,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      reviewedBy: data.reviewedBy.present
+          ? data.reviewedBy.value
+          : this.reviewedBy,
+      reviewedAt: data.reviewedAt.present
+          ? data.reviewedAt.value
+          : this.reviewedAt,
+      reviewNote: data.reviewNote.present
+          ? data.reviewNote.value
+          : this.reviewNote,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StaffAttendanceData(')
+          ..write('id: $id, ')
+          ..write('companyId: $companyId, ')
+          ..write('projectId: $projectId, ')
+          ..write('userId: $userId, ')
+          ..write('day: $day, ')
+          ..write('checkIn: $checkIn, ')
+          ..write('checkOut: $checkOut, ')
+          ..write('inLat: $inLat, ')
+          ..write('inLng: $inLng, ')
+          ..write('inAccuracyM: $inAccuracyM, ')
+          ..write('inDistanceM: $inDistanceM, ')
+          ..write('inPhotoId: $inPhotoId, ')
+          ..write('withinGeofence: $withinGeofence, ')
+          ..write('outLat: $outLat, ')
+          ..write('outLng: $outLng, ')
+          ..write('outDistanceM: $outDistanceM, ')
+          ..write('outPhotoId: $outPhotoId, ')
+          ..write('outWithin: $outWithin, ')
+          ..write('status: $status, ')
+          ..write('reason: $reason, ')
+          ..write('reviewedBy: $reviewedBy, ')
+          ..write('reviewedAt: $reviewedAt, ')
+          ..write('reviewNote: $reviewNote, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    companyId,
+    projectId,
+    userId,
+    day,
+    checkIn,
+    checkOut,
+    inLat,
+    inLng,
+    inAccuracyM,
+    inDistanceM,
+    inPhotoId,
+    withinGeofence,
+    outLat,
+    outLng,
+    outDistanceM,
+    outPhotoId,
+    outWithin,
+    status,
+    reason,
+    reviewedBy,
+    reviewedAt,
+    reviewNote,
+    createdAt,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StaffAttendanceData &&
+          other.id == this.id &&
+          other.companyId == this.companyId &&
+          other.projectId == this.projectId &&
+          other.userId == this.userId &&
+          other.day == this.day &&
+          other.checkIn == this.checkIn &&
+          other.checkOut == this.checkOut &&
+          other.inLat == this.inLat &&
+          other.inLng == this.inLng &&
+          other.inAccuracyM == this.inAccuracyM &&
+          other.inDistanceM == this.inDistanceM &&
+          other.inPhotoId == this.inPhotoId &&
+          other.withinGeofence == this.withinGeofence &&
+          other.outLat == this.outLat &&
+          other.outLng == this.outLng &&
+          other.outDistanceM == this.outDistanceM &&
+          other.outPhotoId == this.outPhotoId &&
+          other.outWithin == this.outWithin &&
+          other.status == this.status &&
+          other.reason == this.reason &&
+          other.reviewedBy == this.reviewedBy &&
+          other.reviewedAt == this.reviewedAt &&
+          other.reviewNote == this.reviewNote &&
+          other.createdAt == this.createdAt);
+}
+
+class StaffAttendanceCompanion extends UpdateCompanion<StaffAttendanceData> {
+  final Value<String> id;
+  final Value<String> companyId;
+  final Value<String> projectId;
+  final Value<String> userId;
+  final Value<String> day;
+  final Value<DateTime> checkIn;
+  final Value<DateTime?> checkOut;
+  final Value<double?> inLat;
+  final Value<double?> inLng;
+  final Value<double?> inAccuracyM;
+  final Value<double?> inDistanceM;
+  final Value<String?> inPhotoId;
+  final Value<bool?> withinGeofence;
+  final Value<double?> outLat;
+  final Value<double?> outLng;
+  final Value<double?> outDistanceM;
+  final Value<String?> outPhotoId;
+  final Value<bool?> outWithin;
+  final Value<String> status;
+  final Value<String?> reason;
+  final Value<String?> reviewedBy;
+  final Value<DateTime?> reviewedAt;
+  final Value<String?> reviewNote;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const StaffAttendanceCompanion({
+    this.id = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.day = const Value.absent(),
+    this.checkIn = const Value.absent(),
+    this.checkOut = const Value.absent(),
+    this.inLat = const Value.absent(),
+    this.inLng = const Value.absent(),
+    this.inAccuracyM = const Value.absent(),
+    this.inDistanceM = const Value.absent(),
+    this.inPhotoId = const Value.absent(),
+    this.withinGeofence = const Value.absent(),
+    this.outLat = const Value.absent(),
+    this.outLng = const Value.absent(),
+    this.outDistanceM = const Value.absent(),
+    this.outPhotoId = const Value.absent(),
+    this.outWithin = const Value.absent(),
+    this.status = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.reviewedBy = const Value.absent(),
+    this.reviewedAt = const Value.absent(),
+    this.reviewNote = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StaffAttendanceCompanion.insert({
+    required String id,
+    required String companyId,
+    required String projectId,
+    required String userId,
+    required String day,
+    required DateTime checkIn,
+    this.checkOut = const Value.absent(),
+    this.inLat = const Value.absent(),
+    this.inLng = const Value.absent(),
+    this.inAccuracyM = const Value.absent(),
+    this.inDistanceM = const Value.absent(),
+    this.inPhotoId = const Value.absent(),
+    this.withinGeofence = const Value.absent(),
+    this.outLat = const Value.absent(),
+    this.outLng = const Value.absent(),
+    this.outDistanceM = const Value.absent(),
+    this.outPhotoId = const Value.absent(),
+    this.outWithin = const Value.absent(),
+    this.status = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.reviewedBy = const Value.absent(),
+    this.reviewedAt = const Value.absent(),
+    this.reviewNote = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       companyId = Value(companyId),
+       projectId = Value(projectId),
+       userId = Value(userId),
+       day = Value(day),
+       checkIn = Value(checkIn);
+  static Insertable<StaffAttendanceData> custom({
+    Expression<String>? id,
+    Expression<String>? companyId,
+    Expression<String>? projectId,
+    Expression<String>? userId,
+    Expression<String>? day,
+    Expression<DateTime>? checkIn,
+    Expression<DateTime>? checkOut,
+    Expression<double>? inLat,
+    Expression<double>? inLng,
+    Expression<double>? inAccuracyM,
+    Expression<double>? inDistanceM,
+    Expression<String>? inPhotoId,
+    Expression<bool>? withinGeofence,
+    Expression<double>? outLat,
+    Expression<double>? outLng,
+    Expression<double>? outDistanceM,
+    Expression<String>? outPhotoId,
+    Expression<bool>? outWithin,
+    Expression<String>? status,
+    Expression<String>? reason,
+    Expression<String>? reviewedBy,
+    Expression<DateTime>? reviewedAt,
+    Expression<String>? reviewNote,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (companyId != null) 'company_id': companyId,
+      if (projectId != null) 'project_id': projectId,
+      if (userId != null) 'user_id': userId,
+      if (day != null) 'day': day,
+      if (checkIn != null) 'check_in': checkIn,
+      if (checkOut != null) 'check_out': checkOut,
+      if (inLat != null) 'in_lat': inLat,
+      if (inLng != null) 'in_lng': inLng,
+      if (inAccuracyM != null) 'in_accuracy_m': inAccuracyM,
+      if (inDistanceM != null) 'in_distance_m': inDistanceM,
+      if (inPhotoId != null) 'in_photo_id': inPhotoId,
+      if (withinGeofence != null) 'within_geofence': withinGeofence,
+      if (outLat != null) 'out_lat': outLat,
+      if (outLng != null) 'out_lng': outLng,
+      if (outDistanceM != null) 'out_distance_m': outDistanceM,
+      if (outPhotoId != null) 'out_photo_id': outPhotoId,
+      if (outWithin != null) 'out_within': outWithin,
+      if (status != null) 'status': status,
+      if (reason != null) 'reason': reason,
+      if (reviewedBy != null) 'reviewed_by': reviewedBy,
+      if (reviewedAt != null) 'reviewed_at': reviewedAt,
+      if (reviewNote != null) 'review_note': reviewNote,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StaffAttendanceCompanion copyWith({
+    Value<String>? id,
+    Value<String>? companyId,
+    Value<String>? projectId,
+    Value<String>? userId,
+    Value<String>? day,
+    Value<DateTime>? checkIn,
+    Value<DateTime?>? checkOut,
+    Value<double?>? inLat,
+    Value<double?>? inLng,
+    Value<double?>? inAccuracyM,
+    Value<double?>? inDistanceM,
+    Value<String?>? inPhotoId,
+    Value<bool?>? withinGeofence,
+    Value<double?>? outLat,
+    Value<double?>? outLng,
+    Value<double?>? outDistanceM,
+    Value<String?>? outPhotoId,
+    Value<bool?>? outWithin,
+    Value<String>? status,
+    Value<String?>? reason,
+    Value<String?>? reviewedBy,
+    Value<DateTime?>? reviewedAt,
+    Value<String?>? reviewNote,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return StaffAttendanceCompanion(
+      id: id ?? this.id,
+      companyId: companyId ?? this.companyId,
+      projectId: projectId ?? this.projectId,
+      userId: userId ?? this.userId,
+      day: day ?? this.day,
+      checkIn: checkIn ?? this.checkIn,
+      checkOut: checkOut ?? this.checkOut,
+      inLat: inLat ?? this.inLat,
+      inLng: inLng ?? this.inLng,
+      inAccuracyM: inAccuracyM ?? this.inAccuracyM,
+      inDistanceM: inDistanceM ?? this.inDistanceM,
+      inPhotoId: inPhotoId ?? this.inPhotoId,
+      withinGeofence: withinGeofence ?? this.withinGeofence,
+      outLat: outLat ?? this.outLat,
+      outLng: outLng ?? this.outLng,
+      outDistanceM: outDistanceM ?? this.outDistanceM,
+      outPhotoId: outPhotoId ?? this.outPhotoId,
+      outWithin: outWithin ?? this.outWithin,
+      status: status ?? this.status,
+      reason: reason ?? this.reason,
+      reviewedBy: reviewedBy ?? this.reviewedBy,
+      reviewedAt: reviewedAt ?? this.reviewedAt,
+      reviewNote: reviewNote ?? this.reviewNote,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (day.present) {
+      map['day'] = Variable<String>(day.value);
+    }
+    if (checkIn.present) {
+      map['check_in'] = Variable<DateTime>(checkIn.value);
+    }
+    if (checkOut.present) {
+      map['check_out'] = Variable<DateTime>(checkOut.value);
+    }
+    if (inLat.present) {
+      map['in_lat'] = Variable<double>(inLat.value);
+    }
+    if (inLng.present) {
+      map['in_lng'] = Variable<double>(inLng.value);
+    }
+    if (inAccuracyM.present) {
+      map['in_accuracy_m'] = Variable<double>(inAccuracyM.value);
+    }
+    if (inDistanceM.present) {
+      map['in_distance_m'] = Variable<double>(inDistanceM.value);
+    }
+    if (inPhotoId.present) {
+      map['in_photo_id'] = Variable<String>(inPhotoId.value);
+    }
+    if (withinGeofence.present) {
+      map['within_geofence'] = Variable<bool>(withinGeofence.value);
+    }
+    if (outLat.present) {
+      map['out_lat'] = Variable<double>(outLat.value);
+    }
+    if (outLng.present) {
+      map['out_lng'] = Variable<double>(outLng.value);
+    }
+    if (outDistanceM.present) {
+      map['out_distance_m'] = Variable<double>(outDistanceM.value);
+    }
+    if (outPhotoId.present) {
+      map['out_photo_id'] = Variable<String>(outPhotoId.value);
+    }
+    if (outWithin.present) {
+      map['out_within'] = Variable<bool>(outWithin.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (reviewedBy.present) {
+      map['reviewed_by'] = Variable<String>(reviewedBy.value);
+    }
+    if (reviewedAt.present) {
+      map['reviewed_at'] = Variable<DateTime>(reviewedAt.value);
+    }
+    if (reviewNote.present) {
+      map['review_note'] = Variable<String>(reviewNote.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StaffAttendanceCompanion(')
+          ..write('id: $id, ')
+          ..write('companyId: $companyId, ')
+          ..write('projectId: $projectId, ')
+          ..write('userId: $userId, ')
+          ..write('day: $day, ')
+          ..write('checkIn: $checkIn, ')
+          ..write('checkOut: $checkOut, ')
+          ..write('inLat: $inLat, ')
+          ..write('inLng: $inLng, ')
+          ..write('inAccuracyM: $inAccuracyM, ')
+          ..write('inDistanceM: $inDistanceM, ')
+          ..write('inPhotoId: $inPhotoId, ')
+          ..write('withinGeofence: $withinGeofence, ')
+          ..write('outLat: $outLat, ')
+          ..write('outLng: $outLng, ')
+          ..write('outDistanceM: $outDistanceM, ')
+          ..write('outPhotoId: $outPhotoId, ')
+          ..write('outWithin: $outWithin, ')
+          ..write('status: $status, ')
+          ..write('reason: $reason, ')
+          ..write('reviewedBy: $reviewedBy, ')
+          ..write('reviewedAt: $reviewedAt, ')
+          ..write('reviewNote: $reviewNote, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -40605,6 +42674,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SupplierInvoicesTable supplierInvoices = $SupplierInvoicesTable(
     this,
   );
+  late final $AttendancePhotosTable attendancePhotos = $AttendancePhotosTable(
+    this,
+  );
+  late final $StaffAttendanceTable staffAttendance = $StaffAttendanceTable(
+    this,
+  );
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -40674,6 +42749,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     workMeasurementDecisions,
     billAllocations,
     supplierInvoices,
+    attendancePhotos,
+    staffAttendance,
     syncOutbox,
   ];
 }
@@ -47482,6 +49559,9 @@ typedef $$LabourAttendanceTableCreateCompanionBuilder =
       Value<double?> lng,
       Value<bool?> withinGeofence,
       Value<DateTime> createdAt,
+      Value<String?> photoId,
+      Value<double?> distanceM,
+      Value<double?> accuracyM,
       Value<int> rowid,
     });
 typedef $$LabourAttendanceTableUpdateCompanionBuilder =
@@ -47497,6 +49577,9 @@ typedef $$LabourAttendanceTableUpdateCompanionBuilder =
       Value<double?> lng,
       Value<bool?> withinGeofence,
       Value<DateTime> createdAt,
+      Value<String?> photoId,
+      Value<double?> distanceM,
+      Value<double?> accuracyM,
       Value<int> rowid,
     });
 
@@ -47561,6 +49644,21 @@ class $$LabourAttendanceTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoId => $composableBuilder(
+    column: $table.photoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get distanceM => $composableBuilder(
+    column: $table.distanceM,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get accuracyM => $composableBuilder(
+    column: $table.accuracyM,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -47628,6 +49726,21 @@ class $$LabourAttendanceTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get photoId => $composableBuilder(
+    column: $table.photoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get distanceM => $composableBuilder(
+    column: $table.distanceM,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get accuracyM => $composableBuilder(
+    column: $table.accuracyM,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LabourAttendanceTableAnnotationComposer
@@ -47677,6 +49790,15 @@ class $$LabourAttendanceTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get photoId =>
+      $composableBuilder(column: $table.photoId, builder: (column) => column);
+
+  GeneratedColumn<double> get distanceM =>
+      $composableBuilder(column: $table.distanceM, builder: (column) => column);
+
+  GeneratedColumn<double> get accuracyM =>
+      $composableBuilder(column: $table.accuracyM, builder: (column) => column);
 }
 
 class $$LabourAttendanceTableTableManager
@@ -47727,6 +49849,9 @@ class $$LabourAttendanceTableTableManager
                 Value<double?> lng = const Value.absent(),
                 Value<bool?> withinGeofence = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> photoId = const Value.absent(),
+                Value<double?> distanceM = const Value.absent(),
+                Value<double?> accuracyM = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LabourAttendanceCompanion(
                 id: id,
@@ -47740,6 +49865,9 @@ class $$LabourAttendanceTableTableManager
                 lng: lng,
                 withinGeofence: withinGeofence,
                 createdAt: createdAt,
+                photoId: photoId,
+                distanceM: distanceM,
+                accuracyM: accuracyM,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -47755,6 +49883,9 @@ class $$LabourAttendanceTableTableManager
                 Value<double?> lng = const Value.absent(),
                 Value<bool?> withinGeofence = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> photoId = const Value.absent(),
+                Value<double?> distanceM = const Value.absent(),
+                Value<double?> accuracyM = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LabourAttendanceCompanion.insert(
                 id: id,
@@ -47768,6 +49899,9 @@ class $$LabourAttendanceTableTableManager
                 lng: lng,
                 withinGeofence: withinGeofence,
                 createdAt: createdAt,
+                photoId: photoId,
+                distanceM: distanceM,
+                accuracyM: accuracyM,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -57133,6 +59267,7 @@ typedef $$StaffMembersTableCreateCompanionBuilder =
       Value<String?> uan,
       Value<DateTime?> joinedOn,
       Value<bool> active,
+      Value<String?> userId,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -57154,6 +59289,7 @@ typedef $$StaffMembersTableUpdateCompanionBuilder =
       Value<String?> uan,
       Value<DateTime?> joinedOn,
       Value<bool> active,
+      Value<String?> userId,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -57240,6 +59376,11 @@ class $$StaffMembersTableFilterComposer
 
   ColumnFilters<bool> get active => $composableBuilder(
     column: $table.active,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -57338,6 +59479,11 @@ class $$StaffMembersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -57407,6 +59553,9 @@ class $$StaffMembersTableAnnotationComposer
   GeneratedColumn<bool> get active =>
       $composableBuilder(column: $table.active, builder: (column) => column);
 
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -57460,6 +59609,7 @@ class $$StaffMembersTableTableManager
                 Value<String?> uan = const Value.absent(),
                 Value<DateTime?> joinedOn = const Value.absent(),
                 Value<bool> active = const Value.absent(),
+                Value<String?> userId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -57479,6 +59629,7 @@ class $$StaffMembersTableTableManager
                 uan: uan,
                 joinedOn: joinedOn,
                 active: active,
+                userId: userId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -57500,6 +59651,7 @@ class $$StaffMembersTableTableManager
                 Value<String?> uan = const Value.absent(),
                 Value<DateTime?> joinedOn = const Value.absent(),
                 Value<bool> active = const Value.absent(),
+                Value<String?> userId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -57519,6 +59671,7 @@ class $$StaffMembersTableTableManager
                 uan: uan,
                 joinedOn: joinedOn,
                 active: active,
+                userId: userId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -60383,6 +62536,876 @@ typedef $$SupplierInvoicesTableProcessedTableManager =
       SupplierInvoice,
       PrefetchHooks Function()
     >;
+typedef $$AttendancePhotosTableCreateCompanionBuilder =
+    AttendancePhotosCompanion Function({
+      required String id,
+      required String projectId,
+      required String filePath,
+      Value<String> mimeType,
+      required String takenBy,
+      required DateTime takenAt,
+      Value<double?> lat,
+      Value<double?> lng,
+      Value<int> rowid,
+    });
+typedef $$AttendancePhotosTableUpdateCompanionBuilder =
+    AttendancePhotosCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> filePath,
+      Value<String> mimeType,
+      Value<String> takenBy,
+      Value<DateTime> takenAt,
+      Value<double?> lat,
+      Value<double?> lng,
+      Value<int> rowid,
+    });
+
+class $$AttendancePhotosTableFilterComposer
+    extends Composer<_$AppDatabase, $AttendancePhotosTable> {
+  $$AttendancePhotosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get filePath => $composableBuilder(
+    column: $table.filePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mimeType => $composableBuilder(
+    column: $table.mimeType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get takenBy => $composableBuilder(
+    column: $table.takenBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get takenAt => $composableBuilder(
+    column: $table.takenAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get lat => $composableBuilder(
+    column: $table.lat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get lng => $composableBuilder(
+    column: $table.lng,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AttendancePhotosTableOrderingComposer
+    extends Composer<_$AppDatabase, $AttendancePhotosTable> {
+  $$AttendancePhotosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filePath => $composableBuilder(
+    column: $table.filePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mimeType => $composableBuilder(
+    column: $table.mimeType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get takenBy => $composableBuilder(
+    column: $table.takenBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get takenAt => $composableBuilder(
+    column: $table.takenAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get lat => $composableBuilder(
+    column: $table.lat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get lng => $composableBuilder(
+    column: $table.lng,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AttendancePhotosTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AttendancePhotosTable> {
+  $$AttendancePhotosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get filePath =>
+      $composableBuilder(column: $table.filePath, builder: (column) => column);
+
+  GeneratedColumn<String> get mimeType =>
+      $composableBuilder(column: $table.mimeType, builder: (column) => column);
+
+  GeneratedColumn<String> get takenBy =>
+      $composableBuilder(column: $table.takenBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get takenAt =>
+      $composableBuilder(column: $table.takenAt, builder: (column) => column);
+
+  GeneratedColumn<double> get lat =>
+      $composableBuilder(column: $table.lat, builder: (column) => column);
+
+  GeneratedColumn<double> get lng =>
+      $composableBuilder(column: $table.lng, builder: (column) => column);
+}
+
+class $$AttendancePhotosTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AttendancePhotosTable,
+          AttendancePhoto,
+          $$AttendancePhotosTableFilterComposer,
+          $$AttendancePhotosTableOrderingComposer,
+          $$AttendancePhotosTableAnnotationComposer,
+          $$AttendancePhotosTableCreateCompanionBuilder,
+          $$AttendancePhotosTableUpdateCompanionBuilder,
+          (
+            AttendancePhoto,
+            BaseReferences<
+              _$AppDatabase,
+              $AttendancePhotosTable,
+              AttendancePhoto
+            >,
+          ),
+          AttendancePhoto,
+          PrefetchHooks Function()
+        > {
+  $$AttendancePhotosTableTableManager(
+    _$AppDatabase db,
+    $AttendancePhotosTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AttendancePhotosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AttendancePhotosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AttendancePhotosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> filePath = const Value.absent(),
+                Value<String> mimeType = const Value.absent(),
+                Value<String> takenBy = const Value.absent(),
+                Value<DateTime> takenAt = const Value.absent(),
+                Value<double?> lat = const Value.absent(),
+                Value<double?> lng = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttendancePhotosCompanion(
+                id: id,
+                projectId: projectId,
+                filePath: filePath,
+                mimeType: mimeType,
+                takenBy: takenBy,
+                takenAt: takenAt,
+                lat: lat,
+                lng: lng,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String filePath,
+                Value<String> mimeType = const Value.absent(),
+                required String takenBy,
+                required DateTime takenAt,
+                Value<double?> lat = const Value.absent(),
+                Value<double?> lng = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AttendancePhotosCompanion.insert(
+                id: id,
+                projectId: projectId,
+                filePath: filePath,
+                mimeType: mimeType,
+                takenBy: takenBy,
+                takenAt: takenAt,
+                lat: lat,
+                lng: lng,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AttendancePhotosTable, AttendancePhoto>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $AttendancePhotosTable,
+                    AttendancePhoto
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AttendancePhotosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AttendancePhotosTable,
+      AttendancePhoto,
+      $$AttendancePhotosTableFilterComposer,
+      $$AttendancePhotosTableOrderingComposer,
+      $$AttendancePhotosTableAnnotationComposer,
+      $$AttendancePhotosTableCreateCompanionBuilder,
+      $$AttendancePhotosTableUpdateCompanionBuilder,
+      (
+        AttendancePhoto,
+        BaseReferences<_$AppDatabase, $AttendancePhotosTable, AttendancePhoto>,
+      ),
+      AttendancePhoto,
+      PrefetchHooks Function()
+    >;
+typedef $$StaffAttendanceTableCreateCompanionBuilder =
+    StaffAttendanceCompanion Function({
+      required String id,
+      required String companyId,
+      required String projectId,
+      required String userId,
+      required String day,
+      required DateTime checkIn,
+      Value<DateTime?> checkOut,
+      Value<double?> inLat,
+      Value<double?> inLng,
+      Value<double?> inAccuracyM,
+      Value<double?> inDistanceM,
+      Value<String?> inPhotoId,
+      Value<bool?> withinGeofence,
+      Value<double?> outLat,
+      Value<double?> outLng,
+      Value<double?> outDistanceM,
+      Value<String?> outPhotoId,
+      Value<bool?> outWithin,
+      Value<String> status,
+      Value<String?> reason,
+      Value<String?> reviewedBy,
+      Value<DateTime?> reviewedAt,
+      Value<String?> reviewNote,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$StaffAttendanceTableUpdateCompanionBuilder =
+    StaffAttendanceCompanion Function({
+      Value<String> id,
+      Value<String> companyId,
+      Value<String> projectId,
+      Value<String> userId,
+      Value<String> day,
+      Value<DateTime> checkIn,
+      Value<DateTime?> checkOut,
+      Value<double?> inLat,
+      Value<double?> inLng,
+      Value<double?> inAccuracyM,
+      Value<double?> inDistanceM,
+      Value<String?> inPhotoId,
+      Value<bool?> withinGeofence,
+      Value<double?> outLat,
+      Value<double?> outLng,
+      Value<double?> outDistanceM,
+      Value<String?> outPhotoId,
+      Value<bool?> outWithin,
+      Value<String> status,
+      Value<String?> reason,
+      Value<String?> reviewedBy,
+      Value<DateTime?> reviewedAt,
+      Value<String?> reviewNote,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$StaffAttendanceTableFilterComposer
+    extends Composer<_$AppDatabase, $StaffAttendanceTable> {
+  $$StaffAttendanceTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get day => $composableBuilder(
+    column: $table.day,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get checkIn => $composableBuilder(
+    column: $table.checkIn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get checkOut => $composableBuilder(
+    column: $table.checkOut,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get inLat => $composableBuilder(
+    column: $table.inLat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get inLng => $composableBuilder(
+    column: $table.inLng,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get inAccuracyM => $composableBuilder(
+    column: $table.inAccuracyM,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get inDistanceM => $composableBuilder(
+    column: $table.inDistanceM,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get inPhotoId => $composableBuilder(
+    column: $table.inPhotoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get withinGeofence => $composableBuilder(
+    column: $table.withinGeofence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get outLat => $composableBuilder(
+    column: $table.outLat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get outLng => $composableBuilder(
+    column: $table.outLng,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get outDistanceM => $composableBuilder(
+    column: $table.outDistanceM,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get outPhotoId => $composableBuilder(
+    column: $table.outPhotoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get outWithin => $composableBuilder(
+    column: $table.outWithin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewedBy => $composableBuilder(
+    column: $table.reviewedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewNote => $composableBuilder(
+    column: $table.reviewNote,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StaffAttendanceTableOrderingComposer
+    extends Composer<_$AppDatabase, $StaffAttendanceTable> {
+  $$StaffAttendanceTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get day => $composableBuilder(
+    column: $table.day,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get checkIn => $composableBuilder(
+    column: $table.checkIn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get checkOut => $composableBuilder(
+    column: $table.checkOut,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get inLat => $composableBuilder(
+    column: $table.inLat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get inLng => $composableBuilder(
+    column: $table.inLng,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get inAccuracyM => $composableBuilder(
+    column: $table.inAccuracyM,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get inDistanceM => $composableBuilder(
+    column: $table.inDistanceM,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get inPhotoId => $composableBuilder(
+    column: $table.inPhotoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get withinGeofence => $composableBuilder(
+    column: $table.withinGeofence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get outLat => $composableBuilder(
+    column: $table.outLat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get outLng => $composableBuilder(
+    column: $table.outLng,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get outDistanceM => $composableBuilder(
+    column: $table.outDistanceM,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get outPhotoId => $composableBuilder(
+    column: $table.outPhotoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get outWithin => $composableBuilder(
+    column: $table.outWithin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewedBy => $composableBuilder(
+    column: $table.reviewedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewNote => $composableBuilder(
+    column: $table.reviewNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StaffAttendanceTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StaffAttendanceTable> {
+  $$StaffAttendanceTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get day =>
+      $composableBuilder(column: $table.day, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get checkIn =>
+      $composableBuilder(column: $table.checkIn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get checkOut =>
+      $composableBuilder(column: $table.checkOut, builder: (column) => column);
+
+  GeneratedColumn<double> get inLat =>
+      $composableBuilder(column: $table.inLat, builder: (column) => column);
+
+  GeneratedColumn<double> get inLng =>
+      $composableBuilder(column: $table.inLng, builder: (column) => column);
+
+  GeneratedColumn<double> get inAccuracyM => $composableBuilder(
+    column: $table.inAccuracyM,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get inDistanceM => $composableBuilder(
+    column: $table.inDistanceM,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get inPhotoId =>
+      $composableBuilder(column: $table.inPhotoId, builder: (column) => column);
+
+  GeneratedColumn<bool> get withinGeofence => $composableBuilder(
+    column: $table.withinGeofence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get outLat =>
+      $composableBuilder(column: $table.outLat, builder: (column) => column);
+
+  GeneratedColumn<double> get outLng =>
+      $composableBuilder(column: $table.outLng, builder: (column) => column);
+
+  GeneratedColumn<double> get outDistanceM => $composableBuilder(
+    column: $table.outDistanceM,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get outPhotoId => $composableBuilder(
+    column: $table.outPhotoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get outWithin =>
+      $composableBuilder(column: $table.outWithin, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get reviewedBy => $composableBuilder(
+    column: $table.reviewedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reviewNote => $composableBuilder(
+    column: $table.reviewNote,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$StaffAttendanceTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StaffAttendanceTable,
+          StaffAttendanceData,
+          $$StaffAttendanceTableFilterComposer,
+          $$StaffAttendanceTableOrderingComposer,
+          $$StaffAttendanceTableAnnotationComposer,
+          $$StaffAttendanceTableCreateCompanionBuilder,
+          $$StaffAttendanceTableUpdateCompanionBuilder,
+          (
+            StaffAttendanceData,
+            BaseReferences<
+              _$AppDatabase,
+              $StaffAttendanceTable,
+              StaffAttendanceData
+            >,
+          ),
+          StaffAttendanceData,
+          PrefetchHooks Function()
+        > {
+  $$StaffAttendanceTableTableManager(
+    _$AppDatabase db,
+    $StaffAttendanceTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StaffAttendanceTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StaffAttendanceTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StaffAttendanceTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<String> day = const Value.absent(),
+                Value<DateTime> checkIn = const Value.absent(),
+                Value<DateTime?> checkOut = const Value.absent(),
+                Value<double?> inLat = const Value.absent(),
+                Value<double?> inLng = const Value.absent(),
+                Value<double?> inAccuracyM = const Value.absent(),
+                Value<double?> inDistanceM = const Value.absent(),
+                Value<String?> inPhotoId = const Value.absent(),
+                Value<bool?> withinGeofence = const Value.absent(),
+                Value<double?> outLat = const Value.absent(),
+                Value<double?> outLng = const Value.absent(),
+                Value<double?> outDistanceM = const Value.absent(),
+                Value<String?> outPhotoId = const Value.absent(),
+                Value<bool?> outWithin = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<String?> reviewedBy = const Value.absent(),
+                Value<DateTime?> reviewedAt = const Value.absent(),
+                Value<String?> reviewNote = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StaffAttendanceCompanion(
+                id: id,
+                companyId: companyId,
+                projectId: projectId,
+                userId: userId,
+                day: day,
+                checkIn: checkIn,
+                checkOut: checkOut,
+                inLat: inLat,
+                inLng: inLng,
+                inAccuracyM: inAccuracyM,
+                inDistanceM: inDistanceM,
+                inPhotoId: inPhotoId,
+                withinGeofence: withinGeofence,
+                outLat: outLat,
+                outLng: outLng,
+                outDistanceM: outDistanceM,
+                outPhotoId: outPhotoId,
+                outWithin: outWithin,
+                status: status,
+                reason: reason,
+                reviewedBy: reviewedBy,
+                reviewedAt: reviewedAt,
+                reviewNote: reviewNote,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String companyId,
+                required String projectId,
+                required String userId,
+                required String day,
+                required DateTime checkIn,
+                Value<DateTime?> checkOut = const Value.absent(),
+                Value<double?> inLat = const Value.absent(),
+                Value<double?> inLng = const Value.absent(),
+                Value<double?> inAccuracyM = const Value.absent(),
+                Value<double?> inDistanceM = const Value.absent(),
+                Value<String?> inPhotoId = const Value.absent(),
+                Value<bool?> withinGeofence = const Value.absent(),
+                Value<double?> outLat = const Value.absent(),
+                Value<double?> outLng = const Value.absent(),
+                Value<double?> outDistanceM = const Value.absent(),
+                Value<String?> outPhotoId = const Value.absent(),
+                Value<bool?> outWithin = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<String?> reviewedBy = const Value.absent(),
+                Value<DateTime?> reviewedAt = const Value.absent(),
+                Value<String?> reviewNote = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StaffAttendanceCompanion.insert(
+                id: id,
+                companyId: companyId,
+                projectId: projectId,
+                userId: userId,
+                day: day,
+                checkIn: checkIn,
+                checkOut: checkOut,
+                inLat: inLat,
+                inLng: inLng,
+                inAccuracyM: inAccuracyM,
+                inDistanceM: inDistanceM,
+                inPhotoId: inPhotoId,
+                withinGeofence: withinGeofence,
+                outLat: outLat,
+                outLng: outLng,
+                outDistanceM: outDistanceM,
+                outPhotoId: outPhotoId,
+                outWithin: outWithin,
+                status: status,
+                reason: reason,
+                reviewedBy: reviewedBy,
+                reviewedAt: reviewedAt,
+                reviewNote: reviewNote,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$StaffAttendanceTable, StaffAttendanceData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $StaffAttendanceTable,
+                    StaffAttendanceData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StaffAttendanceTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StaffAttendanceTable,
+      StaffAttendanceData,
+      $$StaffAttendanceTableFilterComposer,
+      $$StaffAttendanceTableOrderingComposer,
+      $$StaffAttendanceTableAnnotationComposer,
+      $$StaffAttendanceTableCreateCompanionBuilder,
+      $$StaffAttendanceTableUpdateCompanionBuilder,
+      (
+        StaffAttendanceData,
+        BaseReferences<
+          _$AppDatabase,
+          $StaffAttendanceTable,
+          StaffAttendanceData
+        >,
+      ),
+      StaffAttendanceData,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -60780,6 +63803,10 @@ class $AppDatabaseManager {
       $$BillAllocationsTableTableManager(_db, _db.billAllocations);
   $$SupplierInvoicesTableTableManager get supplierInvoices =>
       $$SupplierInvoicesTableTableManager(_db, _db.supplierInvoices);
+  $$AttendancePhotosTableTableManager get attendancePhotos =>
+      $$AttendancePhotosTableTableManager(_db, _db.attendancePhotos);
+  $$StaffAttendanceTableTableManager get staffAttendance =>
+      $$StaffAttendanceTableTableManager(_db, _db.staffAttendance);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }
@@ -61410,5 +64437,27 @@ class SupplierQuoteDaoManager {
       $$PurchaseOrdersTableTableManager(
         _db.attachedDatabase,
         _db.purchaseOrders,
+      );
+}
+
+mixin _$StaffAttendanceDaoMixin on DatabaseAccessor<AppDatabase> {
+  $StaffAttendanceTable get staffAttendance => attachedDatabase.staffAttendance;
+  $AttendancePhotosTable get attendancePhotos =>
+      attachedDatabase.attendancePhotos;
+  StaffAttendanceDaoManager get managers => StaffAttendanceDaoManager(this);
+}
+
+class StaffAttendanceDaoManager {
+  final _$StaffAttendanceDaoMixin _db;
+  StaffAttendanceDaoManager(this._db);
+  $$StaffAttendanceTableTableManager get staffAttendance =>
+      $$StaffAttendanceTableTableManager(
+        _db.attachedDatabase,
+        _db.staffAttendance,
+      );
+  $$AttendancePhotosTableTableManager get attendancePhotos =>
+      $$AttendancePhotosTableTableManager(
+        _db.attachedDatabase,
+        _db.attendancePhotos,
       );
 }

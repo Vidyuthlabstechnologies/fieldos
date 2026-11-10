@@ -7,6 +7,7 @@ library;
 
 import 'package:drift/drift.dart';
 
+import 'package:fieldos_mobile/features/attendance/staff_attendance.dart' show countsAsPresent, staffAttendanceStatusLabels;
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart' show isOpenStage, isFollowUpDue, leadValue;
 import 'package:fieldos_mobile/features/payroll/payroll_rules.dart' show advanceOwed, monthKey;
@@ -124,6 +125,7 @@ class ReportInput {
     this.payroll = const [],
     this.leads = const [],
     this.crmQuotes = const [],
+    this.staffAttendance = const [],
   });
 
   final List<Project> sites;
@@ -167,6 +169,14 @@ class ReportInput {
   final List<PayrollLine> payroll;
   final List<CrmLead> leads;
   final List<CrmQuote> crmQuotes;
+  final List<StaffAttendanceData> staffAttendance;
+
+  /// A login's name: their salary record's, else the phone's user list.
+  late final Map<String, String> staffLogin = {
+    for (final s in staff)
+      if (s.userId != null) s.userId!: s.name,
+  };
+  String person(String id) => staffLogin[id] ?? users[id] ?? '';
 
   late final Map<String, String> siteName = {for (final s in sites) s.id: s.name};
   late final Set<String> siteIds = siteName.keys.toSet();
@@ -414,9 +424,18 @@ final List<ReportDef> reportLibrary = [
       final xs = d.attendance.where((a) => d.inPeriod(a.punchIn) && a.withinGeofence == false).toList()
         ..sort((a, b) => _byDate(a.punchIn, b.punchIn));
       return ReportTable(
-        ['Date', 'Site', 'Worker', 'In', 'By'],
+        ['Date', 'Site', 'Worker', 'In', 'Away (m)', 'Photo', 'By'],
         [
-          for (final a in xs) [_day(a.punchIn), d.site(a.projectId), a.workerName, a.punchIn.toLocal(), d.user(a.recordedBy)],
+          for (final a in xs)
+            [
+              _day(a.punchIn),
+              d.site(a.projectId),
+              a.workerName,
+              a.punchIn.toLocal(),
+              a.distanceM?.roundToDouble(),
+              a.photoId == null ? 'No' : 'Yes',
+              d.user(a.recordedBy),
+            ],
         ],
       );
     },
@@ -1180,6 +1199,66 @@ final List<ReportDef> reportLibrary = [
     access: ReportAccess.managers,
   ),
   ReportDef(
+    'staff-checkins',
+    ReportGroup.staff,
+    'Staff check-ins',
+    'Each check-in with a selfie: where, when, how far from the site, and whether it counts.',
+    (d) {
+      final xs = d.staffAttendance.where((a) => d.siteIds.contains(a.projectId) && d.inPeriodDay(a.day)).toList()
+        ..sort((a, b) => _byDate(a.checkIn, b.checkIn));
+      return ReportTable(
+        ['Date', 'Person', 'Site', 'In', 'Out', 'Hours', 'Away (m)', 'Status', 'Reason'],
+        [
+          for (final a in xs)
+            [
+              parseDay(a.day),
+              d.person(a.userId),
+              d.site(a.projectId),
+              a.checkIn.toLocal(),
+              a.checkOut?.toLocal(),
+              a.checkOut == null ? null : _r2(a.checkOut!.difference(a.checkIn).inMinutes / 60),
+              a.inDistanceM?.roundToDouble(),
+              staffAttendanceStatusLabels[a.status] ?? a.status,
+              a.reason ?? '',
+            ],
+        ],
+        sumColumns: {5},
+      );
+    },
+    access: ReportAccess.managers,
+  ),
+  ReportDef(
+    'staff-days',
+    ReportGroup.staff,
+    'Staff days at work',
+    'Days each person checked in at a site, and days still waiting for an OK.',
+    (d) {
+      final present = <String, Set<String>>{}, waiting = <String, Set<String>>{};
+      for (final a in d.staffAttendance) {
+        if (!d.siteIds.contains(a.projectId) || !d.inPeriodDay(a.day)) continue;
+        if (countsAsPresent(a.status)) {
+          (present[a.userId] ??= {}).add(a.day);
+        } else if (a.status == 'pending') {
+          (waiting[a.userId] ??= {}).add(a.day);
+        }
+      }
+      final people = {...present.keys, ...waiting.keys}.toList()..sort((a, b) => d.person(a).compareTo(d.person(b)));
+      return ReportTable(
+        ['Person', 'Days at work', 'Waiting for OK'],
+        [
+          for (final u in people)
+            [
+              d.person(u),
+              (present[u] ?? const {}).length.toDouble(),
+              (waiting[u] ?? const {}).difference(present[u] ?? const {}).length.toDouble(),
+            ],
+        ],
+        sumColumns: {1, 2},
+      );
+    },
+    access: ReportAccess.managers,
+  ),
+  ReportDef(
     'pf-esi',
     ReportGroup.staff,
     'PF and ESI to deposit',
@@ -1465,5 +1544,6 @@ Future<ReportInput> loadReportInput(
     payroll: manager ? await co(db.payrollLines, (t) => t.companyId) : const [],
     leads: manager ? await co(db.crmLeads, (t) => t.companyId) : const [],
     crmQuotes: manager ? await co(db.crmQuotes, (t) => t.companyId) : const [],
+    staffAttendance: manager ? await co(db.staffAttendance, (t) => t.companyId) : const [],
   );
 }

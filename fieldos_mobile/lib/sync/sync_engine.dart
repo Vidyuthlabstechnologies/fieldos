@@ -130,7 +130,7 @@ class SyncEngine {
     'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
     'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by', 'edited_by',
     'decided_by', 'submitted_by', 'certified_by', 'raised_by', 'owner_id', 'acted_by', 'measured_by', 'by_user',
-    'sent_by', 'issued_by',
+    'sent_by', 'issued_by', 'taken_by', 'reviewed_by',
   };
 
   Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>
@@ -205,6 +205,7 @@ class SyncEngine {
     'expense_attachments': 'file_path',
     'site_receipt_attachments': 'file_path',
     'commercial_attachments': 'file_path',
+    'attendance_photos': 'file_path',
   };
 
   /// The Storage bucket every synced file lives in. Its policies key access
@@ -415,6 +416,15 @@ class SyncEngine {
         'staff_advances': (r) => db.payrollDao.upsertAdvanceFromRemote(staffAdvanceFromSupabaseJson(r)),
         'payroll_lines': (r) => db.payrollDao.upsertLineFromRemote(payrollLineFromSupabaseJson(r)),
         'site_supplier_quotes': (r) => db.supplierQuoteDao.upsertFromRemote(supplierQuoteFromSupabaseJson(r)),
+        'staff_attendance': (r) => db.staffAttendanceDao.upsertFromRemote(staffAttendanceFromSupabaseJson(r)),
+        'attendance_photos': (r) async {
+      final mine = await db.staffAttendanceDao.photoById(r['id'] as String);
+      if (mine != null && File(mine.filePath).existsSync()) return;
+      final local = await _downloadFile(r['file_path'] as String, r['id'] as String);
+      if (local != null) {
+        await db.staffAttendanceDao.upsertPhotoFromRemote(attendancePhotoFromSupabaseJson(r, localPath: local));
+      }
+    },
         'site_work_measurements': (r) =>
             db.billingRecordsDao.upsertMeasurementFromRemote(workMeasurementFromSupabaseJson(r)),
         'site_work_measurement_decisions': (r) =>
@@ -648,6 +658,8 @@ class SyncEngine {
     'site_work_measurement_decisions': 'work_measurement_decisions',
     'site_bill_allocations': 'bill_allocations',
     'site_supplier_invoices': 'supplier_invoices',
+    'attendance_photos': 'attendance_photos',
+    'staff_attendance': 'staff_attendance',
   };
 
   /// Tables whose rows carry project_id on the phone too.
@@ -659,7 +671,7 @@ class SyncEngine {
     'cost_codes', 'work_claims', 'work_certifications', 'variations', 'variation_decisions',
     'commercial_attachments', 'commercial_exception_actions', 'site_supplier_quotes',
     'project_members', 'site_access', 'site_work_measurements', 'site_work_measurement_decisions',
-    'site_bill_allocations', 'site_supplier_invoices',
+    'site_bill_allocations', 'site_supplier_invoices', 'attendance_photos', 'staff_attendance',
   };
 
   /// Children found through their parent, for removing a whole site or
@@ -698,7 +710,8 @@ class SyncEngine {
         if (t == 'dpr_photos' ||
             t == 'expense_attachments' ||
             t == 'site_receipt_attachments' ||
-            t == 'commercial_attachments') {
+            t == 'commercial_attachments' ||
+            t == 'attendance_photos') {
           final column = t == 'dpr_photos' ? 'photo_path' : 'file_path';
           final files = await db
               .customSelect('SELECT $column AS f FROM $local WHERE $where',

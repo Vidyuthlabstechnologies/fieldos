@@ -468,6 +468,71 @@ class LabourAttendance extends Table {
   BoolColumn get withinGeofence => boolean().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
+  /// The photo taken at punch-in ([AttendancePhotos]); one roll-call photo
+  /// can stand for everyone punched in together.
+  TextColumn get photoId => text().withLength(max: 36).nullable()();
+
+  /// How far from the site's centre the GPS put the punch, and how sure
+  /// the phone was of it.
+  RealColumn get distanceM => real().nullable()();
+  RealColumn get accuracyM => real().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A photo taken when someone is punched in or checks in: the worker or
+/// the morning roll call, or a staff member's selfie. Stamped with the
+/// time and GPS, and kept as evidence (never edited).
+class AttendancePhotos extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get filePath => text().withLength(min: 1, max: 500)();
+  TextColumn get mimeType => text().withLength(max: 100).withDefault(const Constant('image/jpeg'))();
+  TextColumn get takenBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get takenAt => dateTime()();
+  RealColumn get lat => real().nullable()();
+  RealColumn get lng => real().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A staff member marking their own day at a site: a selfie and a GPS fix
+/// at check-in and check-out. Inside the site's geofence the day counts
+/// at once; outside it (or with no fix) it waits for an owner or manager.
+class StaffAttendance extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get userId => text().withLength(min: 1, max: 64)();
+
+  /// yyyy-MM-dd, the phone's local day of the check-in.
+  TextColumn get day => text().withLength(min: 10, max: 10)();
+  DateTimeColumn get checkIn => dateTime()();
+  DateTimeColumn get checkOut => dateTime().nullable()();
+  RealColumn get inLat => real().nullable()();
+  RealColumn get inLng => real().nullable()();
+  RealColumn get inAccuracyM => real().nullable()();
+  RealColumn get inDistanceM => real().nullable()();
+  TextColumn get inPhotoId => text().withLength(max: 36).nullable()();
+  BoolColumn get withinGeofence => boolean().nullable()();
+  RealColumn get outLat => real().nullable()();
+  RealColumn get outLng => real().nullable()();
+  RealColumn get outDistanceM => real().nullable()();
+  TextColumn get outPhotoId => text().withLength(max: 36).nullable()();
+  BoolColumn get outWithin => boolean().nullable()();
+
+  /// ok (inside the site) | pending (waits for a manager) | approved | rejected
+  TextColumn get status => text().withLength(min: 1, max: 10).withDefault(const Constant('pending'))();
+
+  /// Why they checked in away from the site (meeting, supplier's yard...).
+  TextColumn get reason => text().withLength(max: 300).nullable()();
+  TextColumn get reviewedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get reviewedAt => dateTime().nullable()();
+  TextColumn get reviewNote => text().withLength(max: 300).nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -1246,6 +1311,10 @@ class StaffMembers extends Table {
   TextColumn get uan => text().withLength(max: 20).nullable()();
   DateTimeColumn get joinedOn => dateTime().nullable()();
   BoolColumn get active => boolean().withDefault(const Constant(true))();
+
+  /// Their FieldOS login, so the days they check in at a site show
+  /// beside their salary.
+  TextColumn get userId => text().withLength(max: 64).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 

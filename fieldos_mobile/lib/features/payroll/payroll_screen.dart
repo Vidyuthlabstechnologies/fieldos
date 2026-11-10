@@ -8,16 +8,20 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drift/drift.dart' show Value;
 
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/attendance/staff_attendance.dart' show StaffMonth, staffMonth;
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/money/bills_view.dart' show billingProfileProvider;
 import 'package:fieldos_mobile/features/payroll/payroll_rules.dart';
 import 'package:fieldos_mobile/features/payroll/payslip_pdf.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/features/tasks/team_roster.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_service.dart' show CloudMember;
 
 typedef PayrollData = ({
   List<StaffMember> staff,
@@ -254,8 +258,28 @@ class _PayslipSheetState extends ConsumerState<PayslipSheet> {
   late final _other = TextEditingController(text: fmtQty(widget.line.otherDeduction));
   String? _error;
   bool _busy = false;
+  StaffMonth? _attendance;
 
   bool get _paid => _line.status == 'paid';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAttendance();
+  }
+
+  /// Their check-ins this month, when the salary is linked to a login.
+  Future<void> _loadAttendance() async {
+    final login = widget.staff.userId;
+    if (login == null) return;
+    final rows = await ref.read(appDatabaseProvider).staffAttendanceDao.forUsers([login]);
+    final m = staffMonth(rows, widget.line.month, now: DateTime.now(), joinedOn: widget.staff.joinedOn);
+    if (mounted && m.hasAny) {
+      setState(() {
+        _attendance = m;
+      });
+    }
+  }
 
   double get _owed =>
       advanceOwed(widget.staff.id, widget.data.advances, widget.data.lines, exceptLineId: _line.id);
@@ -378,6 +402,24 @@ class _PayslipSheetState extends ConsumerState<PayslipSheet> {
           Text(widget.staff.name, style: theme.textTheme.titleLarge),
           Text(monthLabel(l.month), style: theme.textTheme.bodySmall),
           if (!_paid) ...[
+            if (_attendance case final a?)
+              Card(
+                margin: const EdgeInsets.only(top: 8),
+                child: ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.camera_front_outlined),
+                  title: Text(
+                      trf('From attendance: {n} days at work + {s} Sundays off', {'n': a.present, 's': a.weeklyOffs})),
+                  subtitle: a.waiting > 0 ? Text(trf('{w} days still waiting for your OK', {'w': a.waiting})) : null,
+                  trailing: TextButton(
+                    key: const Key('slip-use-attendance'),
+                    onPressed: () => setState(() {
+                      _daysCtl.text = _days(a.paidDays);
+                    }),
+                    child: Text(trf('Use {n}', {'n': _days(a.paidDays)})),
+                  ),
+                ),
+              ),
             const SizedBox(height: 8),
             Row(children: [
               Expanded(
@@ -596,6 +638,7 @@ class _StaffFormState extends ConsumerState<_StaffForm> {
   late String _pt = s?.ptState ?? 'TS';
   late bool _active = s?.active ?? true;
   late DateTime? _joined = s?.joinedOn;
+  late String? _login = s?.userId;
   String? _error;
 
   Future<void> _save() async {
@@ -620,6 +663,7 @@ class _StaffFormState extends ConsumerState<_StaffForm> {
           projectId: _site,
           uan: _uan.text,
           joinedOn: _joined,
+          userId: _login,
         );
       } else {
         await dao.updateStaff(s!.id,
@@ -635,7 +679,8 @@ class _StaffFormState extends ConsumerState<_StaffForm> {
             projectId: _site,
             uan: _uan.text,
             joinedOn: _joined,
-            active: _active);
+            active: _active,
+            userId: Value(_login));
         out = await dao.staffById(s!.id);
       }
       if (mounted) Navigator.pop(context, out);
@@ -728,6 +773,24 @@ class _StaffFormState extends ConsumerState<_StaffForm> {
               if (d != null) setState(() => _joined = d);
             },
           ),
+          Consumer(builder: (context, ref, _) {
+            final members = ref.watch(teamRosterProvider(widget.companyId)).value?.members ?? const <CloudMember>[];
+            if (members.isEmpty && _login == null) return const SizedBox.shrink();
+            return DropdownButtonFormField<String?>(
+              key: const Key('staff-login'),
+              initialValue: members.any((m) => m.userId == _login) || _login == null ? _login : null,
+              isExpanded: true,
+              decoration: InputDecoration(
+                  labelText: tr('Their FieldOS login'),
+                  helperText: tr('Their check-ins with a selfie show beside the salary.')),
+              items: [
+                DropdownMenuItem<String?>(value: null, child: Text(tr('Not linked'))),
+                for (final m in members)
+                  DropdownMenuItem<String?>(value: m.userId, child: Text(m.email, overflow: TextOverflow.ellipsis)),
+              ],
+              onChanged: (v) => setState(() => _login = v),
+            );
+          }),
           if (s != null)
             SwitchListTile(
                 contentPadding: EdgeInsets.zero,

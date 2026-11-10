@@ -5,6 +5,7 @@ import 'package:fieldos_mobile/auth/auth_service.dart' show Roles;
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/attendance/attendance_screens.dart';
 import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/portfolio/portfolio_screen.dart';
@@ -132,6 +133,12 @@ class HomeScreen extends ConsumerWidget {
                 case 'stores':
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) => WarehouseScreen(companyId: company.id, userId: session.user!.id)));
+                case 'my-attendance':
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => MyAttendanceScreen(companyId: company.id, userId: session.user!.id)));
+                case 'staff-attendance':
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => StaffAttendanceScreen(companyId: company.id, userId: session.user!.id)));
                 case 'salaries':
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) => StaffSalariesScreen(companyId: company.id, userId: session.user!.id)));
@@ -193,6 +200,20 @@ class HomeScreen extends ConsumerWidget {
                 PopupMenuItem(
                     value: 'stores',
                     child: ListTile(leading: const Icon(Icons.warehouse_outlined), title: Text(tr('Stores and tools')))),
+              PopupMenuItem(
+                  value: 'my-attendance',
+                  child: ListTile(leading: const Icon(Icons.camera_front_outlined), title: Text(tr('My attendance')))),
+              if (Roles.canApprove(session.role))
+                PopupMenuItem(
+                    value: 'staff-attendance',
+                    child: ListTile(
+                        leading: const Icon(Icons.how_to_reg_outlined),
+                        title: Text(tr('Staff attendance')),
+                        trailing: Consumer(builder: (context, ref, _) {
+                          final rows = ref.watch(companyAttendanceProvider(company.id)).value?.rows ?? const [];
+                          final waiting = rows.where((r) => r.status == 'pending').length;
+                          return waiting == 0 ? const SizedBox.shrink() : Badge.count(count: waiting);
+                        }))),
               // Salaries are private: owners and managers only, here and on
               // the server.
               if (Roles.canApprove(session.role))

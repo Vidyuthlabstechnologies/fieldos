@@ -7,6 +7,7 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fieldos_mobile/agents/assistant_tools.dart';
+import 'package:fieldos_mobile/features/attendance/staff_attendance.dart' show staffAttendanceStatusLabels;
 import 'package:fieldos_mobile/features/chat/project_chat_view.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart';
 import 'package:fieldos_mobile/features/dashboard/my_dashboard.dart' show kpiLibrary;
@@ -37,6 +38,7 @@ void main() {
   final labels = <String, Iterable<String>>{
     'paywall benefits': [for (final (_, t) in paywallBenefits) t],
     'weather': weatherChoices,
+    'staff attendance statuses': staffAttendanceStatusLabels.values,
     'lead stages': leadStageLabels.values,
     'lead sources': leadSourceLabels.values,
     'lead activities': activityKindLabels.values,
