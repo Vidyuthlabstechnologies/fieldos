@@ -43,6 +43,31 @@ class SyncNotAppliedException implements Exception {
   String toString() => 'Not applied on the server ($table $recordId): $reason';
 }
 
+/// The write's table is not on this backend yet: a newer migration adds
+/// it. The entry waits (it never counts toward parking) until it is.
+class SyncWaitingForServerException implements Exception {
+  const SyncWaitingForServerException(this.table);
+  final String table;
+  @override
+  String toString() => 'Waiting for a server update ($table is not on the server yet)';
+}
+
+class _NothingToSend implements Exception {
+  const _NothingToSend();
+}
+
+/// PostgREST: table/relation missing (PGRST205, or Postgres 42P01).
+bool isMissingTableError(PostgrestException e) => e.code == 'PGRST205' || e.code == '42P01';
+
+/// The column PostgREST says it cannot find (PGRST204: "Could not find
+/// the 'distance_m' column of 'site_attendance' in the schema cache"), or
+/// null for any other error.
+String? missingColumnOf(PostgrestException e) {
+  if (e.code != 'PGRST204' && e.code != '42703') return null;
+  return RegExp(r"'([^']+)' column").firstMatch(e.message)?.group(1) ??
+      RegExp(r'column "?([A-Za-z0-9_]+)"? (of relation \S+ )?does not exist').firstMatch(e.message)?.group(1);
+}
+
 /// No answer from the server at all (offline, timeout, TLS cut). Such a
 /// failure says nothing about the write, so it never counts toward parking.
 bool isTransientSyncError(Object e) =>
@@ -189,6 +214,14 @@ class SyncEngine {
               await db.syncOutboxDao.noteTransientFailure(entry.id, e.toString());
               break;
             }
+            if (e is SyncWaitingForServerException) {
+              // The table is not on this backend yet (its migration is still
+              // to be applied). Keep the write, never count it toward
+              // parking, and let unrelated work through.
+              await db.syncOutboxDao.noteTransientFailure(entry.id, e.toString());
+              blocked.add(entry.recordId);
+              continue;
+            }
             await db.syncOutboxDao.recordFailure(entry.id, e.toString());
             blocked.add(entry.recordId);
           }
@@ -212,7 +245,44 @@ class SyncEngine {
   /// off the object path's first folder (the project id).
   static const filesBucket = 'documents';
 
+  /// Tables this backend answered "does not exist" for, and until when
+  /// to stop trying them (so a waiting photo is not re-uploaded on every
+  /// sync). Cleared by time, so a migration applied later is picked up.
+  final Map<String, DateTime> _missingTablesUntil = {};
+  static const missingTableRecheck = Duration(minutes: 30);
+
   Future<void> _pushOne(SyncOutboxData entry, Map<String, dynamic> data) async {
+    final until = _missingTablesUntil[entry.targetTable];
+    if (until != null && DateTime.now().isBefore(until)) {
+      throw SyncWaitingForServerException(entry.targetTable);
+    }
+    try {
+      await _pushOneUnguarded(entry, data);
+    } on PostgrestException catch (e) {
+      if (!isMissingTableError(e)) rethrow;
+      _missingTablesUntil[entry.targetTable] = DateTime.now().add(missingTableRecheck);
+      throw SyncWaitingForServerException(entry.targetTable);
+    }
+  }
+
+  /// Runs [write] with [data]; when the backend lacks a column a newer
+  /// migration adds (PGRST204), drops that column and tries again. The
+  /// row's core fields still reach the team; the extra detail (a GPS
+  /// distance, a cost code) stays on the phone.
+  static Future<T> _dropMissingColumns<T>(
+      Map<String, dynamic> data, Future<T> Function(Map<String, dynamic> data) write) async {
+    for (var i = 0;; i++) {
+      try {
+        return await write(data);
+      } on PostgrestException catch (e) {
+        final column = missingColumnOf(e);
+        if (column == null || !data.containsKey(column) || column == 'id' || i >= 20) rethrow;
+        data = Map.of(data)..remove(column);
+      }
+    }
+  }
+
+  Future<void> _pushOneUnguarded(SyncOutboxData entry, Map<String, dynamic> data) async {
     final table = client.from(entry.targetTable);
     final fileColumn = fileColumns[entry.targetTable];
     final localPath = data.remove('_local_file_path') as String?;
@@ -231,15 +301,25 @@ class SyncEngine {
     switch (entry.operation) {
       case 'insert':
         try {
-          await table.insert(data);
+          await _dropMissingColumns(data, (d) => table.insert(d));
         } on PostgrestException catch (e) {
           if (e.code != '23505' || !await _visibleOnServer(entry.targetTable, entry.recordId)) rethrow;
         }
         if (entry.targetTable == 'site_expenses') await _takeServerVoucher(entry.recordId);
       case 'upsert':
-        await table.upsert(data);
+        await _dropMissingColumns(data, (d) => table.upsert(d));
       case 'update':
-        final touched = await table.update(data).eq('id', entry.recordId).select('id');
+        final List<dynamic> touched;
+        try {
+          touched = await _dropMissingColumns(data, (d) {
+            // Every changed column is one this backend does not have yet:
+            // nothing to send. The phone keeps the change.
+            if (d.keys.every((k) => k == 'id')) throw const _NothingToSend();
+            return table.update(d).eq('id', entry.recordId).select('id');
+          });
+        } on _NothingToSend {
+          return;
+        }
         if (touched.isEmpty) {
           throw SyncNotAppliedException(entry.targetTable, entry.recordId,
               await _visibleOnServer(entry.targetTable, entry.recordId)
@@ -504,7 +584,48 @@ class SyncEngine {
   Future<void> _apply(String table, Map<String, dynamic> row, Set<String> dirty) async {
     if (dirty.contains(SyncOutboxDao.key(table, row['id'] as String))) return;
     await _notifyIfNew(table, row);
+    final kept = await _keepLocalOnlyColumns(table, row);
+    if (kept != null) {
+      try {
+        return await _upserters[table]!(kept);
+      } catch (_) {
+        // A kept value the mapper cannot read: apply the server row as is.
+      }
+    }
     await _upserters[table]!(row);
+  }
+
+  /// Per table, this phone's columns the backend's rows do not carry (its
+  /// newer migrations are not applied yet), worked out from the first row.
+  final Map<String, Set<String>> _columnsServerLacks = {};
+
+  /// When the backend lacks some of this phone's columns (a GPS distance, a
+  /// selfie, a cost code), the server row would wipe them here on every
+  /// pull. Returns [row] with the phone's own values for those columns, or
+  /// null when there is nothing to keep.
+  Future<Map<String, dynamic>?> _keepLocalOnlyColumns(String table, Map<String, dynamic> row) async {
+    final local = localTableNames[table];
+    if (local == null) return null;
+    var lacks = _columnsServerLacks[table];
+    if (lacks == null) {
+      final columns = await db.customSelect('SELECT name FROM pragma_table_info(?)', variables: [Variable<String>(local)]).get();
+      lacks = _columnsServerLacks[table] = {
+        for (final c in columns)
+          if (!row.containsKey(c.read<String>('name'))) c.read<String>('name')
+      };
+    }
+    if (lacks.isEmpty) return null;
+    final mine = await db
+        .customSelect('SELECT * FROM $local WHERE id = ?', variables: [Variable<String>(row['id'] as String)])
+        .getSingleOrNull();
+    if (mine == null) return null;
+    Map<String, dynamic>? out;
+    for (final c in lacks) {
+      final v = mine.data[c];
+      if (v == null || row.containsKey(c)) continue;
+      (out ??= Map.of(row))[c] = v;
+    }
+    return out;
   }
 
   /// First sync on this phone (or for this account), or a cursor older than

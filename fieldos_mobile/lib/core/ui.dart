@@ -101,6 +101,8 @@ String? _cloudServerMessage(sb.PostgrestException e) {
       return _signInAgainMessage;
     case '42501':
       return tr('Your role in this company does not allow that. Ask the owner.');
+    case 'PGRST202' || 'PGRST205' || '42P01' || '42883':
+      return tr('This needs a FieldOS server update that is on its way. Your work is safe on the phone; try again in a day or two.');
   }
   return null;
 }

@@ -1450,6 +1450,8 @@ const Map<String, String> stringsHi = {
       'आपका क्लाउड साइन-इन खत्म हो गया। टीम और सिंक से फिर साइन इन करें।',
   'Your plan':
       'आपका प्लान',
+  'This needs a FieldOS server update that is on its way. Your work is safe on the phone; try again in a day or two.':
+      'FieldOS सर्वर अपडेट जल्द आ रहा है, यह उसके बाद चलेगा। आपका काम फ़ोन पर सुरक्षित है; एक-दो दिन में फिर कोशिश करें।',
   'Your role in this company does not allow that. Ask the owner.':
       'इस कंपनी में आपकी भूमिका में इसकी अनुमति नहीं है। मालिक से पूछें।',
   'Your subscription is on this phone.':
