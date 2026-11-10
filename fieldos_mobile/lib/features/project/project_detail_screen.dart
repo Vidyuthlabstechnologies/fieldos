@@ -38,6 +38,7 @@ import 'package:fieldos_mobile/features/estimation/estimation_screen.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/features/money/cash_book_screen.dart';
 import 'package:fieldos_mobile/features/reports/pilot_scorecard_screen.dart';
+import 'package:fieldos_mobile/features/reports/rera_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
@@ -184,6 +185,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
               if (v == 'pilot') {
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => PilotScorecardScreen(project: widget.project)));
               }
+              if (v == 'rera') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => ReraScreen(project: widget.project)));
+              }
               if (v == 'cash') {
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => CashBookScreen(project: widget.project)));
               }
@@ -202,6 +206,13 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                     title: Text(tr('Pilot scorecard')),
                   ),
                 ),
+              PopupMenuItem(
+                value: 'rera',
+                child: ListTile(
+                  leading: const Icon(Icons.apartment_outlined),
+                  title: Text(tr('RERA quarterly report')),
+                ),
+              ),
               PopupMenuItem(
                 value: 'cash',
                 child: ListTile(

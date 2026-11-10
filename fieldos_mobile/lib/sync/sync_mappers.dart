@@ -1954,3 +1954,33 @@ CashMovesCompanion cashMoveFromSupabaseJson(Map<String, dynamic> row) => CashMov
       voided: Value(row['voided'] as bool? ?? false),
       voidReason: Value(row['void_reason'] as String?),
     );
+
+// --- Floor progress for the RERA report (app schema v37, 20261111110000_floor_progress.sql)
+
+Map<String, dynamic> floorProgressToSupabaseJson(FloorProgressData f) => {
+      'id': f.id,
+      'project_id': f.projectId,
+      'block': f.block,
+      'floor': f.floor,
+      'stage': f.stage,
+      'pct': f.pct,
+      'as_of': f.asOf,
+      'note': f.note,
+      'recorded_by': f.recordedBy,
+      'created_at': _timestamp(f.createdAt.toUtc()),
+    };
+
+FloorProgressCompanion floorProgressFromSupabaseJson(Map<String, dynamic> row) => FloorProgressCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      block: row['block'] as String,
+      floor: row['floor'] as String,
+      stage: row['stage'] as String,
+      pct: (row['pct'] as num).toInt(),
+      asOf: (row['as_of'] as String).substring(0, 10),
+      note: Value(row['note'] as String?),
+      recordedBy: row['recorded_by'] as String,
+      createdAt: row['created_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['created_at'] as String).toLocal()),
+    );

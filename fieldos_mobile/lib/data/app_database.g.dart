@@ -45821,6 +45821,632 @@ class CashMovesCompanion extends UpdateCompanion<CashMove> {
   }
 }
 
+class $FloorProgressTable extends FloorProgress
+    with TableInfo<$FloorProgressTable, FloorProgressData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FloorProgressTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _blockMeta = const VerificationMeta('block');
+  @override
+  late final GeneratedColumn<String> block = GeneratedColumn<String>(
+    'block',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 60,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _floorMeta = const VerificationMeta('floor');
+  @override
+  late final GeneratedColumn<String> floor = GeneratedColumn<String>(
+    'floor',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 30,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stageMeta = const VerificationMeta('stage');
+  @override
+  late final GeneratedColumn<String> stage = GeneratedColumn<String>(
+    'stage',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pctMeta = const VerificationMeta('pct');
+  @override
+  late final GeneratedColumn<int> pct = GeneratedColumn<int>(
+    'pct',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _asOfMeta = const VerificationMeta('asOf');
+  @override
+  late final GeneratedColumn<String> asOf = GeneratedColumn<String>(
+    'as_of',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 10,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _recordedByMeta = const VerificationMeta(
+    'recordedBy',
+  );
+  @override
+  late final GeneratedColumn<String> recordedBy = GeneratedColumn<String>(
+    'recorded_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    block,
+    floor,
+    stage,
+    pct,
+    asOf,
+    note,
+    recordedBy,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'floor_progress';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FloorProgressData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('block')) {
+      context.handle(
+        _blockMeta,
+        block.isAcceptableOrUnknown(data['block']!, _blockMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_blockMeta);
+    }
+    if (data.containsKey('floor')) {
+      context.handle(
+        _floorMeta,
+        floor.isAcceptableOrUnknown(data['floor']!, _floorMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_floorMeta);
+    }
+    if (data.containsKey('stage')) {
+      context.handle(
+        _stageMeta,
+        stage.isAcceptableOrUnknown(data['stage']!, _stageMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stageMeta);
+    }
+    if (data.containsKey('pct')) {
+      context.handle(
+        _pctMeta,
+        pct.isAcceptableOrUnknown(data['pct']!, _pctMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pctMeta);
+    }
+    if (data.containsKey('as_of')) {
+      context.handle(
+        _asOfMeta,
+        asOf.isAcceptableOrUnknown(data['as_of']!, _asOfMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_asOfMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('recorded_by')) {
+      context.handle(
+        _recordedByMeta,
+        recordedBy.isAcceptableOrUnknown(data['recorded_by']!, _recordedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordedByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FloorProgressData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FloorProgressData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      block: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}block'],
+      )!,
+      floor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}floor'],
+      )!,
+      stage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stage'],
+      )!,
+      pct: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pct'],
+      )!,
+      asOf: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}as_of'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      recordedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recorded_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $FloorProgressTable createAlias(String alias) {
+    return $FloorProgressTable(attachedDatabase, alias);
+  }
+}
+
+class FloorProgressData extends DataClass
+    implements Insertable<FloorProgressData> {
+  final String id;
+  final String projectId;
+  final String block;
+  final String floor;
+
+  /// not_started | excavation | foundation | plinth | columns | slab |
+  /// masonry | plastering | flooring | finishing | complete
+  final String stage;
+  final int pct;
+
+  /// yyyy-mm-dd
+  final String asOf;
+  final String? note;
+  final String recordedBy;
+  final DateTime createdAt;
+  const FloorProgressData({
+    required this.id,
+    required this.projectId,
+    required this.block,
+    required this.floor,
+    required this.stage,
+    required this.pct,
+    required this.asOf,
+    this.note,
+    required this.recordedBy,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['block'] = Variable<String>(block);
+    map['floor'] = Variable<String>(floor);
+    map['stage'] = Variable<String>(stage);
+    map['pct'] = Variable<int>(pct);
+    map['as_of'] = Variable<String>(asOf);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['recorded_by'] = Variable<String>(recordedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  FloorProgressCompanion toCompanion(bool nullToAbsent) {
+    return FloorProgressCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      block: Value(block),
+      floor: Value(floor),
+      stage: Value(stage),
+      pct: Value(pct),
+      asOf: Value(asOf),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      recordedBy: Value(recordedBy),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory FloorProgressData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FloorProgressData(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      block: serializer.fromJson<String>(json['block']),
+      floor: serializer.fromJson<String>(json['floor']),
+      stage: serializer.fromJson<String>(json['stage']),
+      pct: serializer.fromJson<int>(json['pct']),
+      asOf: serializer.fromJson<String>(json['asOf']),
+      note: serializer.fromJson<String?>(json['note']),
+      recordedBy: serializer.fromJson<String>(json['recordedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'block': serializer.toJson<String>(block),
+      'floor': serializer.toJson<String>(floor),
+      'stage': serializer.toJson<String>(stage),
+      'pct': serializer.toJson<int>(pct),
+      'asOf': serializer.toJson<String>(asOf),
+      'note': serializer.toJson<String?>(note),
+      'recordedBy': serializer.toJson<String>(recordedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  FloorProgressData copyWith({
+    String? id,
+    String? projectId,
+    String? block,
+    String? floor,
+    String? stage,
+    int? pct,
+    String? asOf,
+    Value<String?> note = const Value.absent(),
+    String? recordedBy,
+    DateTime? createdAt,
+  }) => FloorProgressData(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    block: block ?? this.block,
+    floor: floor ?? this.floor,
+    stage: stage ?? this.stage,
+    pct: pct ?? this.pct,
+    asOf: asOf ?? this.asOf,
+    note: note.present ? note.value : this.note,
+    recordedBy: recordedBy ?? this.recordedBy,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  FloorProgressData copyWithCompanion(FloorProgressCompanion data) {
+    return FloorProgressData(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      block: data.block.present ? data.block.value : this.block,
+      floor: data.floor.present ? data.floor.value : this.floor,
+      stage: data.stage.present ? data.stage.value : this.stage,
+      pct: data.pct.present ? data.pct.value : this.pct,
+      asOf: data.asOf.present ? data.asOf.value : this.asOf,
+      note: data.note.present ? data.note.value : this.note,
+      recordedBy: data.recordedBy.present
+          ? data.recordedBy.value
+          : this.recordedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FloorProgressData(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('block: $block, ')
+          ..write('floor: $floor, ')
+          ..write('stage: $stage, ')
+          ..write('pct: $pct, ')
+          ..write('asOf: $asOf, ')
+          ..write('note: $note, ')
+          ..write('recordedBy: $recordedBy, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    block,
+    floor,
+    stage,
+    pct,
+    asOf,
+    note,
+    recordedBy,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FloorProgressData &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.block == this.block &&
+          other.floor == this.floor &&
+          other.stage == this.stage &&
+          other.pct == this.pct &&
+          other.asOf == this.asOf &&
+          other.note == this.note &&
+          other.recordedBy == this.recordedBy &&
+          other.createdAt == this.createdAt);
+}
+
+class FloorProgressCompanion extends UpdateCompanion<FloorProgressData> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> block;
+  final Value<String> floor;
+  final Value<String> stage;
+  final Value<int> pct;
+  final Value<String> asOf;
+  final Value<String?> note;
+  final Value<String> recordedBy;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const FloorProgressCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.block = const Value.absent(),
+    this.floor = const Value.absent(),
+    this.stage = const Value.absent(),
+    this.pct = const Value.absent(),
+    this.asOf = const Value.absent(),
+    this.note = const Value.absent(),
+    this.recordedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FloorProgressCompanion.insert({
+    required String id,
+    required String projectId,
+    required String block,
+    required String floor,
+    required String stage,
+    required int pct,
+    required String asOf,
+    this.note = const Value.absent(),
+    required String recordedBy,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       block = Value(block),
+       floor = Value(floor),
+       stage = Value(stage),
+       pct = Value(pct),
+       asOf = Value(asOf),
+       recordedBy = Value(recordedBy);
+  static Insertable<FloorProgressData> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? block,
+    Expression<String>? floor,
+    Expression<String>? stage,
+    Expression<int>? pct,
+    Expression<String>? asOf,
+    Expression<String>? note,
+    Expression<String>? recordedBy,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (block != null) 'block': block,
+      if (floor != null) 'floor': floor,
+      if (stage != null) 'stage': stage,
+      if (pct != null) 'pct': pct,
+      if (asOf != null) 'as_of': asOf,
+      if (note != null) 'note': note,
+      if (recordedBy != null) 'recorded_by': recordedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FloorProgressCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? block,
+    Value<String>? floor,
+    Value<String>? stage,
+    Value<int>? pct,
+    Value<String>? asOf,
+    Value<String?>? note,
+    Value<String>? recordedBy,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return FloorProgressCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      block: block ?? this.block,
+      floor: floor ?? this.floor,
+      stage: stage ?? this.stage,
+      pct: pct ?? this.pct,
+      asOf: asOf ?? this.asOf,
+      note: note ?? this.note,
+      recordedBy: recordedBy ?? this.recordedBy,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (block.present) {
+      map['block'] = Variable<String>(block.value);
+    }
+    if (floor.present) {
+      map['floor'] = Variable<String>(floor.value);
+    }
+    if (stage.present) {
+      map['stage'] = Variable<String>(stage.value);
+    }
+    if (pct.present) {
+      map['pct'] = Variable<int>(pct.value);
+    }
+    if (asOf.present) {
+      map['as_of'] = Variable<String>(asOf.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (recordedBy.present) {
+      map['recorded_by'] = Variable<String>(recordedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FloorProgressCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('block: $block, ')
+          ..write('floor: $floor, ')
+          ..write('stage: $stage, ')
+          ..write('pct: $pct, ')
+          ..write('asOf: $asOf, ')
+          ..write('note: $note, ')
+          ..write('recordedBy: $recordedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -46451,6 +47077,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $CashMovesTable cashMoves = $CashMovesTable(this);
+  late final $FloorProgressTable floorProgress = $FloorProgressTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -46528,6 +47155,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     attendancePhotos,
     staffAttendance,
     cashMoves,
+    floorProgress,
     syncOutbox,
   ];
 }
@@ -69037,6 +69665,316 @@ typedef $$CashMovesTableProcessedTableManager =
       CashMove,
       PrefetchHooks Function()
     >;
+typedef $$FloorProgressTableCreateCompanionBuilder =
+    FloorProgressCompanion Function({
+      required String id,
+      required String projectId,
+      required String block,
+      required String floor,
+      required String stage,
+      required int pct,
+      required String asOf,
+      Value<String?> note,
+      required String recordedBy,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$FloorProgressTableUpdateCompanionBuilder =
+    FloorProgressCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> block,
+      Value<String> floor,
+      Value<String> stage,
+      Value<int> pct,
+      Value<String> asOf,
+      Value<String?> note,
+      Value<String> recordedBy,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$FloorProgressTableFilterComposer
+    extends Composer<_$AppDatabase, $FloorProgressTable> {
+  $$FloorProgressTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get block => $composableBuilder(
+    column: $table.block,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get floor => $composableBuilder(
+    column: $table.floor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stage => $composableBuilder(
+    column: $table.stage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get pct => $composableBuilder(
+    column: $table.pct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get asOf => $composableBuilder(
+    column: $table.asOf,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FloorProgressTableOrderingComposer
+    extends Composer<_$AppDatabase, $FloorProgressTable> {
+  $$FloorProgressTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get block => $composableBuilder(
+    column: $table.block,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get floor => $composableBuilder(
+    column: $table.floor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stage => $composableBuilder(
+    column: $table.stage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get pct => $composableBuilder(
+    column: $table.pct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get asOf => $composableBuilder(
+    column: $table.asOf,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FloorProgressTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FloorProgressTable> {
+  $$FloorProgressTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get block =>
+      $composableBuilder(column: $table.block, builder: (column) => column);
+
+  GeneratedColumn<String> get floor =>
+      $composableBuilder(column: $table.floor, builder: (column) => column);
+
+  GeneratedColumn<String> get stage =>
+      $composableBuilder(column: $table.stage, builder: (column) => column);
+
+  GeneratedColumn<int> get pct =>
+      $composableBuilder(column: $table.pct, builder: (column) => column);
+
+  GeneratedColumn<String> get asOf =>
+      $composableBuilder(column: $table.asOf, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$FloorProgressTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FloorProgressTable,
+          FloorProgressData,
+          $$FloorProgressTableFilterComposer,
+          $$FloorProgressTableOrderingComposer,
+          $$FloorProgressTableAnnotationComposer,
+          $$FloorProgressTableCreateCompanionBuilder,
+          $$FloorProgressTableUpdateCompanionBuilder,
+          (
+            FloorProgressData,
+            BaseReferences<
+              _$AppDatabase,
+              $FloorProgressTable,
+              FloorProgressData
+            >,
+          ),
+          FloorProgressData,
+          PrefetchHooks Function()
+        > {
+  $$FloorProgressTableTableManager(_$AppDatabase db, $FloorProgressTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FloorProgressTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FloorProgressTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FloorProgressTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> block = const Value.absent(),
+                Value<String> floor = const Value.absent(),
+                Value<String> stage = const Value.absent(),
+                Value<int> pct = const Value.absent(),
+                Value<String> asOf = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> recordedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FloorProgressCompanion(
+                id: id,
+                projectId: projectId,
+                block: block,
+                floor: floor,
+                stage: stage,
+                pct: pct,
+                asOf: asOf,
+                note: note,
+                recordedBy: recordedBy,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String block,
+                required String floor,
+                required String stage,
+                required int pct,
+                required String asOf,
+                Value<String?> note = const Value.absent(),
+                required String recordedBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FloorProgressCompanion.insert(
+                id: id,
+                projectId: projectId,
+                block: block,
+                floor: floor,
+                stage: stage,
+                pct: pct,
+                asOf: asOf,
+                note: note,
+                recordedBy: recordedBy,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$FloorProgressTable, FloorProgressData>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $FloorProgressTable,
+                    FloorProgressData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FloorProgressTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FloorProgressTable,
+      FloorProgressData,
+      $$FloorProgressTableFilterComposer,
+      $$FloorProgressTableOrderingComposer,
+      $$FloorProgressTableAnnotationComposer,
+      $$FloorProgressTableCreateCompanionBuilder,
+      $$FloorProgressTableUpdateCompanionBuilder,
+      (
+        FloorProgressData,
+        BaseReferences<_$AppDatabase, $FloorProgressTable, FloorProgressData>,
+      ),
+      FloorProgressData,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -69450,6 +70388,8 @@ class $AppDatabaseManager {
       $$StaffAttendanceTableTableManager(_db, _db.staffAttendance);
   $$CashMovesTableTableManager get cashMoves =>
       $$CashMovesTableTableManager(_db, _db.cashMoves);
+  $$FloorProgressTableTableManager get floorProgress =>
+      $$FloorProgressTableTableManager(_db, _db.floorProgress);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }
@@ -70156,4 +71096,16 @@ class CashBookDaoManager {
   CashBookDaoManager(this._db);
   $$CashMovesTableTableManager get cashMoves =>
       $$CashMovesTableTableManager(_db.attachedDatabase, _db.cashMoves);
+}
+
+mixin _$FloorProgressDaoMixin on DatabaseAccessor<AppDatabase> {
+  $FloorProgressTable get floorProgress => attachedDatabase.floorProgress;
+  FloorProgressDaoManager get managers => FloorProgressDaoManager(this);
+}
+
+class FloorProgressDaoManager {
+  final _$FloorProgressDaoMixin _db;
+  FloorProgressDaoManager(this._db);
+  $$FloorProgressTableTableManager get floorProgress =>
+      $$FloorProgressTableTableManager(_db.attachedDatabase, _db.floorProgress);
 }

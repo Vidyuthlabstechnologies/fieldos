@@ -1556,3 +1556,27 @@ class CashMoves extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+/// v37, progress by block and floor for the RERA quarterly report. Each
+/// update is a new row; the latest on or before a date is the progress
+/// then. Synced as site_floor_progress (20261111110000_floor_progress.sql).
+class FloorProgress extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get block => text().withLength(min: 1, max: 60)();
+  TextColumn get floor => text().withLength(min: 1, max: 30)();
+
+  /// not_started | excavation | foundation | plinth | columns | slab |
+  /// masonry | plastering | flooring | finishing | complete
+  TextColumn get stage => text().withLength(min: 1, max: 20)();
+  IntColumn get pct => integer()();
+
+  /// yyyy-mm-dd
+  TextColumn get asOf => text().withLength(min: 10, max: 10)();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

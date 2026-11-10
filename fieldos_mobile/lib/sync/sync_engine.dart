@@ -431,6 +431,7 @@ class SyncEngine {
         'site_close_settings': (r) => db.dayCloseDao.upsertSettingsFromRemote(siteCloseSettingFromSupabaseJson(r)),
         'site_day_events': (r) => db.dayCloseDao.upsertEventFromRemote(siteDayEventFromSupabaseJson(r)),
         'site_cash_moves': (r) => db.cashBookDao.upsertFromRemote(cashMoveFromSupabaseJson(r)),
+        'site_floor_progress': (r) => db.floorProgressDao.upsertFromRemote(floorProgressFromSupabaseJson(r)),
         'commercial_attachments': (r) async {
       final mine = await db.commercialDao.attachmentById(r['id'] as String);
       if (mine != null && File(mine.filePath).existsSync()) return;
@@ -699,6 +700,7 @@ class SyncEngine {
     'site_close_settings': 'site_close_settings',
     'site_day_events': 'site_day_events',
     'site_cash_moves': 'cash_moves',
+    'site_floor_progress': 'floor_progress',
     'attendance_photos': 'attendance_photos',
     'staff_attendance': 'staff_attendance',
   };
@@ -713,7 +715,7 @@ class SyncEngine {
     'commercial_attachments', 'commercial_exception_actions', 'site_supplier_quotes',
     'project_members', 'site_access', 'site_work_measurements', 'site_work_measurement_decisions',
     'site_bill_allocations', 'site_supplier_invoices', 'site_approval_steps', 'site_close_settings', 'site_day_events',
-    'site_cash_moves',
+    'site_cash_moves', 'site_floor_progress',
     'attendance_photos', 'staff_attendance',
   };
 

@@ -111,6 +111,7 @@ String? _clip(String? s, int max) {
   AttendancePhotos,
   StaffAttendance,
   CashMoves,
+  FloorProgress,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -142,7 +143,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 36;
+  int get schemaVersion => 37;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -354,6 +355,10 @@ class AppDatabase extends _$AppDatabase {
             // The site cash book (imprest): cash given, returned, counted.
             await _createTableIfMissing(m, cashMoves);
           }
+          if (from < 37) {
+            // Progress by block and floor for the RERA quarterly report.
+            await _createTableIfMissing(m, floorProgress);
+          }
         },
       );
 
@@ -458,6 +463,7 @@ class AppDatabase extends _$AppDatabase {
   ApprovalChainDao get approvalChainDao => ApprovalChainDao(this);
   DayCloseDao get dayCloseDao => DayCloseDao(this);
   CashBookDao get cashBookDao => CashBookDao(this);
+  FloorProgressDao get floorProgressDao => FloorProgressDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -4829,4 +4835,64 @@ class CashBookDao extends DatabaseAccessor<AppDatabase> with _$CashBookDaoMixin 
       );
 
   Future<void> upsertFromRemote(CashMovesCompanion c) => into(cashMoves).insertOnConflictUpdate(c);
+}
+
+// ---------------------------------------------------------------------------
+// Floor progress for the RERA quarterly report (v37)
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [FloorProgress])
+class FloorProgressDao extends DatabaseAccessor<AppDatabase> with _$FloorProgressDaoMixin {
+  FloorProgressDao(super.db);
+
+  static const stages = [
+    'not_started', 'excavation', 'foundation', 'plinth', 'columns', 'slab',
+    'masonry', 'plastering', 'flooring', 'finishing', 'complete',
+  ];
+
+  /// Every update on a site, oldest first.
+  Future<List<FloorProgressData>> forProject(String projectId) => (select(floorProgress)
+        ..where((f) => f.projectId.equals(projectId))
+        ..orderBy([(f) => OrderingTerm.asc(f.asOf), (f) => OrderingTerm.asc(f.createdAt)]))
+      .get();
+
+  Future<FloorProgressData> record({
+    required String projectId,
+    required String block,
+    required String floor,
+    required String stage,
+    required int pct,
+    required String asOf,
+    required String by,
+    String? note,
+    DateTime? now,
+  }) {
+    final b = block.trim(), f = floor.trim();
+    if (b.isEmpty || f.isEmpty) throw ArgumentError('Name the block and the floor');
+    if (!stages.contains(stage)) throw ArgumentError('Unknown stage: $stage');
+    if (pct < 0 || pct > 100) throw ArgumentError('Progress is 0 to 100');
+    return transaction(() async {
+      final row = await into(floorProgress).insertReturning(FloorProgressCompanion.insert(
+        id: _uuid.v4(),
+        projectId: projectId,
+        block: b.length > 60 ? b.substring(0, 60) : b,
+        floor: f.length > 30 ? f.substring(0, 30) : f,
+        stage: stage,
+        pct: pct,
+        asOf: asOf,
+        note: Value(_clip(note, 300)),
+        recordedBy: by,
+        createdAt: Value(now ?? DateTime.now()),
+      ));
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'site_floor_progress',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(floorProgressToSupabaseJson(row)),
+      );
+      return row;
+    });
+  }
+
+  Future<void> upsertFromRemote(FloorProgressCompanion c) => into(floorProgress).insertOnConflictUpdate(c);
 }

@@ -52,3 +52,29 @@ Everything but office time is a count of what was recorded, so the owner
 can check any figure against the site's own entries. Code:
 `lib/features/reports/pilot_scorecard.dart`; tests:
 `test/pilot_scorecard_test.dart`.
+
+## RERA quarterly progress pack (Drift v37, `20261111110000_floor_progress.sql`)
+
+Site menu: **RERA quarterly report**. Every registered project in Telangana
+uploads a quarterly progress report to TS-RERA within 15 days of the
+quarter's end. The pack builds the progress part from what the site
+already records.
+
+- **Floors.** "Add a block" adds Ground and floors 1 to N. Tap a floor to
+  set its stage (excavation to complete); the stage suggests a % that can
+  be changed. Each update is a new row (`site_floor_progress`, insert-only,
+  schema v37), so last quarter's figures print again exactly as they were.
+- **The PDF** (pick the quarter, then "Make the progress PDF"): each floor
+  at the start and end of the quarter, block and overall %; the quarter's
+  confirmed daily reports; up to 12 site photos spread over the quarter;
+  and a checklist of what to attach before uploading (Forms 1, 2, 3 and the
+  booking register). It says plainly that the architect certifies the
+  stage of completion.
+- **Reminders.** Owners of sites with a RERA number saved get a reminder on
+  the 1st after a quarter ends and on the 10th (5 days before it is due).
+- **Who can do what.** Anyone recording on the site can update floors, as
+  themselves; a site viewer only reads (enforced by the server policy). The
+  owner or project manager saves the RERA number.
+
+The pack is the progress section only. It does not file anything with
+RERA and does not replace the architect's, engineer's or CA's forms.
