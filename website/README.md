@@ -32,3 +32,25 @@ for the Data safety account-deletion link.
 for the web; the full-quality masters are in the project's marketing files.
 Fonts are self-hosted (`assets/fonts/`, Inter, SIL OFL) so the site makes
 no third-party requests.
+
+## Owner dashboard (`owner.html`)
+
+A read-only page for owners and project managers: every running site's
+money in and out (30 days), last daily report, labour today, open issues,
+approvals waiting, construction progress and the week's corrections and
+deletes, with the sites that need attention first. No libraries and no
+build step: plain `fetch` against the FieldOS cloud's REST API, signed in
+as the person, so the server's row-level security decides what they see.
+It never writes. The session is kept for the browser tab only.
+
+To switch it on when deploying:
+
+1. Fill `assets/owner/config.js` with the Supabase project URL and its
+   **anon (public)** key, the same ones the app is built with. Never put
+   the service-role key here.
+2. In Supabase, Authentication, URL Configuration, add
+   `<site>/owner.html` to the redirect URLs so "Sign in with Google" can
+   come back to it.
+
+`robots.txt` keeps search engines off it. Without step 1 the page says it
+isn't connected yet.

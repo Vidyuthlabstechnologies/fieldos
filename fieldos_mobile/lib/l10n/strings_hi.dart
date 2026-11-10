@@ -7,6 +7,7 @@ import 'package:fieldos_mobile/l10n/strings_commercial_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_proof_hi.dart';
 
 const Map<String, String> stringsHi = {
   'Try again': 'फिर से कोशिश करें',
@@ -2386,4 +2387,5 @@ const Map<String, String> stringsHi = {
   ...crmHi,
   ...warehouseHi,
   ...dailyHi,
+  ...proofHi,
 };

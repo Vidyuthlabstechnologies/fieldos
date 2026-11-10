@@ -15,6 +15,7 @@ import 'package:fieldos_mobile/features/crm/crm_rules.dart' show isOpenStage;
 import 'package:fieldos_mobile/features/daily/day_close.dart';
 import 'package:fieldos_mobile/features/daily/day_close_data.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart' show canSeeMoneyIn;
+import 'package:fieldos_mobile/features/reports/rera_pack.dart' show reraNumberKey;
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
@@ -23,7 +24,7 @@ const reminderSettingsKey = 'reminders';
 
 /// Notification ids used for reminders, so they can all be replaced.
 const reminderIdBase = 1000;
-const reminderIdCount = 200;
+const reminderIdCount = 220;
 
 class ReminderSettings {
   const ReminderSettings({
@@ -125,6 +126,7 @@ List<PlannedReminder> planReminders({
   int days = 7,
   List<SiteCloseReminder> closeReminders = const [],
   bool dailyCloseInUse = false,
+  List<String> reraSites = const [],
 }) {
   final out = <PlannedReminder>[];
   final today = _day(now);
@@ -202,12 +204,30 @@ List<PlannedReminder> planReminders({
       final names = calls.take(3).map((f) => f.name).join(', ');
       out.add(
         PlannedReminder(
-          id: reminderIdBase + 150 + i,
+          id: reminderIdBase + 200 + i,
           at: callAt,
           title: calls.length == 1 ? tr('1 lead to follow up today') : trf('{n} leads to follow up today', {'n': calls.length}),
           body: calls.length > 3 ? trf('{names} and {n} more', {'names': names, 'n': calls.length - 3}) : names,
         ),
       );
+    }
+    // RERA's quarterly progress report, for owners of sites with a RERA
+    // number: the day after a quarter ends and 5 days before it is due.
+    if (isOwner && reraSites.isNotEmpty) {
+      final ended = day.month % 3 == 1 && day.day == 1;
+      final dueSoon = day.month % 3 == 1 && day.day == 10;
+      final at = day.add(const Duration(hours: 10));
+      if ((ended || dueSoon) && at.isAfter(now)) {
+        final names = reraSites.take(3).join(', ');
+        out.add(PlannedReminder(
+          id: reminderIdBase + 207 + i,
+          at: at,
+          title: ended ? tr('RERA quarterly report is due') : tr('RERA quarterly report: 5 days left'),
+          body: reraSites.length > 3
+              ? trf('{names} and {n} more. Update the floors and make the PDF.', {'names': names, 'n': reraSites.length - 3})
+              : trf('{names}. Update the floors and make the PDF.', {'names': names}),
+        ));
+      }
     }
   }
   return out..sort((a, b) => a.at.compareTo(b.at));
@@ -281,6 +301,10 @@ class ReminderScheduler {
         reportedToday: reported,
         closeReminders: close,
         dailyCloseInUse: closeInUse,
+        reraSites: [
+          for (final p in running)
+            if ((await _db.settingsDao.get(reraNumberKey(p.id)))?.trim().isNotEmpty == true) p.name,
+        ],
         openTasks: s.tasksOn ? await _db.taskDao.openForCompany(company.id) : const [],
         isOwner: canSeeMoneyIn(_ref.read(sessionProvider).role),
         followUps: Roles.canApprove(_ref.read(sessionProvider).role)

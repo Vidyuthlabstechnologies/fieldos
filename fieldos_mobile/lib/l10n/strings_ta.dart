@@ -7,6 +7,7 @@ import 'package:fieldos_mobile/l10n/strings_commercial_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_ta.dart';
+import 'package:fieldos_mobile/l10n/strings_proof_ta.dart';
 
 const Map<String, String> stringsTa = {
   'Try again':
@@ -3277,4 +3278,5 @@ const Map<String, String> stringsTa = {
   ...crmTa,
   ...warehouseTa,
   ...dailyTa,
+  ...proofTa,
 };

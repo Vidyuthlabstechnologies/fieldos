@@ -110,6 +110,9 @@ String? _clip(String? s, int max) {
   MemberSyncStatus,
   AttendancePhotos,
   StaffAttendance,
+  CashMoves,
+  FloorProgress,
+  EntryHistory,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -141,7 +144,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 32;
+  int get schemaVersion => 38;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -348,6 +351,19 @@ class AppDatabase extends _$AppDatabase {
               await _addColumnIfMissing(m, purchaseOrders, c);
             }
           }
+          // v33 to v35 are left for other work in flight.
+          if (from < 36) {
+            // The site cash book (imprest): cash given, returned, counted.
+            await _createTableIfMissing(m, cashMoves);
+          }
+          if (from < 37) {
+            // Progress by block and floor for the RERA quarterly report.
+            await _createTableIfMissing(m, floorProgress);
+          }
+          if (from < 38) {
+            // Change history on money and material entries, pulled only.
+            await _createTableIfMissing(m, entryHistory);
+          }
         },
       );
 
@@ -451,6 +467,9 @@ class AppDatabase extends _$AppDatabase {
   BillingRecordsDao get billingRecordsDao => BillingRecordsDao(this);
   ApprovalChainDao get approvalChainDao => ApprovalChainDao(this);
   DayCloseDao get dayCloseDao => DayCloseDao(this);
+  CashBookDao get cashBookDao => CashBookDao(this);
+  FloorProgressDao get floorProgressDao => FloorProgressDao(this);
+  EntryHistoryDao get entryHistoryDao => EntryHistoryDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -4749,4 +4768,172 @@ class DayCloseDao extends DatabaseAccessor<AppDatabase> with _$DayCloseDaoMixin 
   Future<void> upsertEventFromRemote(SiteDayEventsCompanion c) => into(siteDayEvents).insertOnConflictUpdate(c);
   Future<void> upsertSettingsFromRemote(SiteCloseSettingsCompanion c) =>
       into(siteCloseSettings).insertOnConflictUpdate(c);
+}
+
+// ---------------------------------------------------------------------------
+// The site cash book (v36)
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [CashMoves])
+class CashBookDao extends DatabaseAccessor<AppDatabase> with _$CashBookDaoMixin {
+  CashBookDao(super.db);
+
+  static const kinds = ['given', 'returned', 'counted'];
+
+  /// Every entry on a site, cancelled ones too, oldest first.
+  Future<List<CashMove>> forProject(String projectId) => (select(cashMoves)
+        ..where((c) => c.projectId.equals(projectId))
+        ..orderBy([(c) => OrderingTerm.asc(c.movedOn), (c) => OrderingTerm.asc(c.createdAt)]))
+      .get();
+
+  Future<List<CashMove>> forProjects(Iterable<String> projectIds) =>
+      (select(cashMoves)..where((c) => c.projectId.isIn(projectIds.toList()))).get();
+
+  Future<CashMove?> byId(String id) => (select(cashMoves)..where((c) => c.id.equals(id))).getSingleOrNull();
+
+  Future<CashMove> record({
+    required String projectId,
+    required String holderId,
+    required String kind,
+    required double amount,
+    required String movedOn,
+    required String by,
+    String? note,
+    DateTime? now,
+  }) {
+    if (!kinds.contains(kind)) throw ArgumentError('Unknown cash entry: $kind');
+    if (amount.isNaN || amount < 0 || (kind != 'counted' && amount <= 0)) {
+      throw ArgumentError('Enter an amount above zero');
+    }
+    return transaction(() async {
+      final row = await into(cashMoves).insertReturning(CashMovesCompanion.insert(
+        id: _uuid.v4(),
+        projectId: projectId,
+        holderId: holderId,
+        kind: kind,
+        amount: (amount * 100).roundToDouble() / 100,
+        movedOn: movedOn,
+        note: Value(_clip(note, 300)),
+        recordedBy: by,
+        createdAt: Value(now ?? DateTime.now()),
+      ));
+      await _queue(row, 'insert');
+      return row;
+    });
+  }
+
+  /// Cancels an entry. It stays in the book, struck through.
+  Future<CashMove> cancel(String id, {required String reason}) {
+    return transaction(() async {
+      await (update(cashMoves)..where((c) => c.id.equals(id)))
+          .write(CashMovesCompanion(voided: const Value(true), voidReason: Value(_clip(reason, 200))));
+      final row = await (select(cashMoves)..where((c) => c.id.equals(id))).getSingle();
+      await _queue(row, 'update');
+      return row;
+    });
+  }
+
+  Future<void> _queue(CashMove row, String operation) => db.syncOutboxDao.enqueue(
+        targetTable: 'site_cash_moves',
+        recordId: row.id,
+        operation: operation,
+        payloadJson: jsonEncode(cashMoveToSupabaseJson(row)),
+      );
+
+  Future<void> upsertFromRemote(CashMovesCompanion c) => into(cashMoves).insertOnConflictUpdate(c);
+}
+
+// ---------------------------------------------------------------------------
+// Floor progress for the RERA quarterly report (v37)
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [FloorProgress])
+class FloorProgressDao extends DatabaseAccessor<AppDatabase> with _$FloorProgressDaoMixin {
+  FloorProgressDao(super.db);
+
+  static const stages = [
+    'not_started', 'excavation', 'foundation', 'plinth', 'columns', 'slab',
+    'masonry', 'plastering', 'flooring', 'finishing', 'complete',
+  ];
+
+  /// Every update on a site, oldest first.
+  Future<List<FloorProgressData>> forProject(String projectId) => (select(floorProgress)
+        ..where((f) => f.projectId.equals(projectId))
+        ..orderBy([(f) => OrderingTerm.asc(f.asOf), (f) => OrderingTerm.asc(f.createdAt)]))
+      .get();
+
+  Future<FloorProgressData> record({
+    required String projectId,
+    required String block,
+    required String floor,
+    required String stage,
+    required int pct,
+    required String asOf,
+    required String by,
+    String? note,
+    DateTime? now,
+  }) {
+    final b = block.trim(), f = floor.trim();
+    if (b.isEmpty || f.isEmpty) throw ArgumentError('Name the block and the floor');
+    if (!stages.contains(stage)) throw ArgumentError('Unknown stage: $stage');
+    if (pct < 0 || pct > 100) throw ArgumentError('Progress is 0 to 100');
+    return transaction(() async {
+      final row = await into(floorProgress).insertReturning(FloorProgressCompanion.insert(
+        id: _uuid.v4(),
+        projectId: projectId,
+        block: b.length > 60 ? b.substring(0, 60) : b,
+        floor: f.length > 30 ? f.substring(0, 30) : f,
+        stage: stage,
+        pct: pct,
+        asOf: asOf,
+        note: Value(_clip(note, 300)),
+        recordedBy: by,
+        createdAt: Value(now ?? DateTime.now()),
+      ));
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'site_floor_progress',
+        recordId: row.id,
+        operation: 'insert',
+        payloadJson: jsonEncode(floorProgressToSupabaseJson(row)),
+      );
+      return row;
+    });
+  }
+
+  Future<void> upsertFromRemote(FloorProgressCompanion c) => into(floorProgress).insertOnConflictUpdate(c);
+}
+
+@DriftAccessor(tables: [EntryHistory])
+class EntryHistoryDao extends DatabaseAccessor<AppDatabase> with _$EntryHistoryDaoMixin {
+  EntryHistoryDao(super.db);
+
+  /// A site's changes, newest first.
+  Future<List<EntryHistoryData>> forProject(String projectId, {int limit = 500}) => (select(entryHistory)
+        ..where((h) => h.projectId.equals(projectId))
+        ..orderBy([(h) => OrderingTerm.desc(h.changedAt)])
+        ..limit(limit))
+      .get();
+
+  /// One entry's changes, oldest first.
+  Future<List<EntryHistoryData>> forRow(String rowId) => (select(entryHistory)
+        ..where((h) => h.rowId.equals(rowId))
+        ..orderBy([(h) => OrderingTerm.asc(h.changedAt)]))
+      .get();
+
+  /// Which of [rowIds] have been changed or deleted.
+  Future<Set<String>> changedRows(Iterable<String> rowIds) async {
+    final ids = rowIds.toList();
+    if (ids.isEmpty) return {};
+    final out = <String>{};
+    for (var i = 0; i < ids.length; i += 500) {
+      final chunk = ids.sublist(i, i + 500 > ids.length ? ids.length : i + 500);
+      final q = selectOnly(entryHistory, distinct: true)
+        ..addColumns([entryHistory.rowId])
+        ..where(entryHistory.rowId.isIn(chunk));
+      out.addAll((await q.get()).map((r) => r.read(entryHistory.rowId)!));
+    }
+    return out;
+  }
+
+  Future<void> upsertFromRemote(EntryHistoryCompanion c) => into(entryHistory).insertOnConflictUpdate(c);
 }
