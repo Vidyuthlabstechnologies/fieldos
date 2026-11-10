@@ -2344,6 +2344,12 @@ const Map<String, String> stringsKn = {
       'ನಿಮ್ಮ ಪ್ಲಾನ್',
   'This needs a FieldOS server update that is on its way. Your work is safe on the phone; try again in a day or two.':
       'ಇದಕ್ಕೆ FieldOS ಸರ್ವರ್ ಅಪ್‌ಡೇಟ್ ಬೇಕು, ಅದು ಶೀಘ್ರದಲ್ಲೇ ಬರುತ್ತದೆ. ನಿಮ್ಮ ಕೆಲಸ ಫೋನ್‌ನಲ್ಲಿ ಸುರಕ್ಷಿತವಾಗಿದೆ; ಒಂದೆರಡು ದಿನಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'Your company has a FieldOS plan?':
+      'ನಿಮ್ಮ ಕಂಪನಿಗೆ FieldOS ಪ್ಲಾನ್ ಇದೆಯೇ?',
+  'Sign in and join your company with the code from its owner. Everyone in the company is included.':
+      'ಸೈನ್ ಇನ್ ಮಾಡಿ, ಮಾಲೀಕರು ಕೊಟ್ಟ ಕೋಡ್‌ನೊಂದಿಗೆ ನಿಮ್ಮ ಕಂಪನಿಗೆ ಸೇರಿ. ಕಂಪನಿಯ ಎಲ್ಲರೂ ಇದರಲ್ಲಿ ಸೇರಿದ್ದಾರೆ.',
+  'Sign in to my company':
+      'ನನ್ನ ಕಂಪನಿಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ',
   'Your role in this company does not allow that. Ask the owner.':
       'ಈ ಕಂಪನಿಯಲ್ಲಿ ನಿಮ್ಮ ಪಾತ್ರಕ್ಕೆ ಇದಕ್ಕೆ ಅನುಮತಿ ಇಲ್ಲ. ಮಾಲೀಕರನ್ನು ಕೇಳಿ.',
   'Your subscription is on this phone.':
