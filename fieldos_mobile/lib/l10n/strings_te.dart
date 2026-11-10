@@ -2035,6 +2035,254 @@ const Map<String, String> stringsTe = {
       '{qty} అంగీకరించారు',
   '{qty} more than ordered':
       'ఆర్డర్ కంటే {qty} ఎక్కువ',
+  // Site teams, templates, supplier import, all sites
+  'Above your approval limit of {amount}. The owner approves this.':
+      'మీ ఆమోద పరిమితి {amount} కంటే ఎక్కువ. దీన్ని యజమాని ఆమోదిస్తారు.',
+  'Accounts':
+      'అకౌంట్స్',
+  'Add many suppliers':
+      'చాలా సప్లయర్లను చేర్చండి',
+  'Add person':
+      'వ్యక్తిని చేర్చండి',
+  'Add to this site':
+      'ఈ సైట్‌కు చేర్చండి',
+  'Added to the site team.':
+      'సైట్ టీమ్‌లో చేర్చారు.',
+  'Added {n} suppliers.':
+      '{n} సప్లయర్లను చేర్చారు.',
+  'Added {n} suppliers. {m} already on the list were left as they were.':
+      '{n} సప్లయర్లను చేర్చారు. జాబితాలో ఇప్పటికే ఉన్న {m} అలాగే ఉంచారు.',
+  'All sites':
+      'అన్ని సైట్లు',
+  'All {n} sites are up to date.':
+      'అన్ని {n} సైట్లు తాజాగా ఉన్నాయి.',
+  'An empty site':
+      'ఖాళీ సైట్',
+  'Approval limit (₹)':
+      'ఆమోద పరిమితి (₹)',
+  'Approves up to {amount}':
+      '{amount} వరకు ఆమోదిస్తారు',
+  'Can see the site, changes nothing.':
+      'సైట్ చూడగలరు, ఏదీ మార్చలేరు.',
+  'Copies the set-up only. Nothing that happened on that site comes across.':
+      'సెటప్ మాత్రమే కాపీ అవుతుంది. ఆ సైట్‌లో జరిగినది ఏదీ రాదు.',
+  'Enter the limit in rupees, or leave it empty for no limit.':
+      'పరిమితిని రూపాయల్లో నమోదు చేయండి, లేదా పరిమితి వద్దంటే ఖాళీగా ఉంచండి.',
+  'Estimate items and rates':
+      'ఎస్టిమేట్ ఐటమ్‌లు, రేట్లు',
+  'Everyone in the company is already on this site.':
+      'కంపెనీలోని అందరూ ఇప్పటికే ఈ సైట్‌లో ఉన్నారు.',
+  'Everyone in the company sees this site.':
+      'కంపెనీలో అందరూ ఈ సైట్ చూస్తారు.',
+  'Everyone in the company works here with their company role. Add people to give them a site role or an approval limit.':
+      'కంపెనీలో అందరూ ఇక్కడ తమ కంపెనీ పాత్రతో పనిచేస్తారు. సైట్ పాత్ర లేదా ఆమోద పరిమితి ఇవ్వడానికి వ్యక్తులను చేర్చండి.',
+  'Everything on this site.':
+      'ఈ సైట్‌లో అన్నీ.',
+  'Hidden from the rest of the company. The company\'s owners and managers still see it.':
+      'కంపెనీలోని మిగతావారికి కనిపించదు. కంపెనీ యజమానులు, మేనేజర్లు చూస్తారు.',
+  'In the weekly close they approve items up to this. Leave empty for no limit.':
+      'వారపు ముగింపులో వారు ఇంత వరకు ఐటమ్‌లు ఆమోదిస్తారు. పరిమితి వద్దంటే ఖాళీగా ఉంచండి.',
+  'Last week not closed':
+      'గత వారం మూసివేయలేదు',
+  'No approval limit':
+      'ఆమోద పరిమితి లేదు',
+  'No one is listed yet':
+      'ఇంకా ఎవరూ జాబితాలో లేరు',
+  'No report on {day}':
+      '{day} రిపోర్ట్ లేదు',
+  'No supplier names found. Put one supplier on each line.':
+      'సప్లయర్ పేర్లు కనబడలేదు. ప్రతి లైన్‌లో ఒక సప్లయర్ రాయండి.',
+  'On this site':
+      'ఈ సైట్‌లో',
+  'One supplier per line: name, phone, GSTIN, what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.':
+      'ప్రతి లైన్‌లో ఒక సప్లయర్: పేరు, ఫోన్, GSTIN, ఈరోజు మీరు వారికి ఎంత బాకీ. పేరు మాత్రమే అవసరం. మీ డబ్బు వారి వద్ద ఉంటే మొత్తం తర్వాత "advance" రాయండి.',
+  'Only this team sees the site':
+      'ఈ టీమ్ మాత్రమే సైట్ చూస్తుంది',
+  'Paste a list':
+      'జాబితా పేస్ట్ చేయండి',
+  'Receives material and keeps the stock.':
+      'సరుకు తీసుకుని స్టాక్ చూస్తారు.',
+  'Records the day: reports, labour, money, material.':
+      'రోజును నమోదు చేస్తారు: రిపోర్ట్‌లు, కూలీలు, డబ్బు, సరుకు.',
+  'Remove from this site?':
+      'ఈ సైట్ నుంచి తీసేయాలా?',
+  'Removed from the site team.':
+      'సైట్ టీమ్ నుంచి తీసేశారు.',
+  'Retention held by clients':
+      'క్లయింట్ల వద్ద ఉన్న రిటెన్షన్',
+  'Runs the site and approves up to their limit.':
+      'సైట్ నడుపుతారు, తమ పరిమితి వరకు ఆమోదిస్తారు.',
+  'Saved.':
+      'సేవ్ అయింది.',
+  'Sees the money and sends packs to accounts.':
+      'డబ్బు లెక్క చూసి అకౌంట్స్‌కు ప్యాక్ పంపుతారు.',
+  'Site team':
+      'సైట్ టీమ్',
+  'Site team and approval limits':
+      'సైట్ టీమ్, ఆమోద పరిమితులు',
+  'Sites marked as running show here, the ones that need someone first.':
+      'నడుస్తున్న సైట్లు ఇక్కడ కనిపిస్తాయి, శ్రద్ధ అవసరమైనవి ముందు.',
+  'Start from':
+      'ఎక్కడ నుంచి మొదలు',
+  'Storekeeper':
+      'స్టోర్‌కీపర్',
+  'Task list':
+      'పనుల జాబితా',
+  'To come from clients':
+      'క్లయింట్ల నుంచి రావాల్సింది',
+  'Turn on Team & sync to add people. The team list comes from the company\'s accounts.':
+      'వ్యక్తులను చేర్చడానికి Team & sync ఆన్ చేయండి. టీమ్ జాబితా కంపెనీ ఖాతాల నుంచి వస్తుంది.',
+  'Up to date':
+      'తాజాగా ఉంది',
+  'Wages due this week':
+      'ఈ వారం బాకీ కూలీ',
+  'Workers and wages':
+      'కూలీలు, కూలీ రేట్లు',
+  'Your role here: {role}.':
+      'ఇక్కడ మీ పాత్ర: {role}.',
+  'client owes {amount}':
+      'క్లయింట్ బాకీ {amount}',
+  'suppliers {amount}':
+      'సప్లయర్లు {amount}',
+  'wages due {amount}':
+      'బాకీ కూలీ {amount}',
+  '{m} of {n} sites need someone.':
+      '{n} లో {m} సైట్లకు శ్రద్ధ అవసరం.',
+  '{name} will no longer be on this site\'s team.':
+      '{name} ఇకపై ఈ సైట్ టీమ్‌లో ఉండరు.',
+  '{n} approvals waiting over 2 days':
+      '{n} ఆమోదాలు 2 రోజులకు పైగా ఆగాయి',
+  '{n} days without a report':
+      '{n} రోజులు రిపోర్ట్ లేదు',
+  '{n} sites with last week not closed':
+      '{n} సైట్లలో గత వారం మూసివేయలేదు',
+  '{n} to approve':
+      '{n} ఆమోదించాలి',
+  // Measurement book, bill payments, supplier invoices
+  'A minus quantity corrects an earlier one.':
+      'మైనస్ పరిమాణం ముందటిదాన్ని సరిచేస్తుంది.',
+  'Add invoice':
+      'ఇన్వాయిస్ చేర్చండి',
+  'Add the supplier first, under Procure > Suppliers.':
+      'ముందు Procure > Suppliers లో సప్లయర్‌ను చేర్చండి.',
+  'All {n} invoices match their orders and deliveries.':
+      'అన్ని {n} ఇన్వాయిస్‌లు ఆర్డర్లు, డెలివరీలతో సరిపోతున్నాయి.',
+  'Approved to date':
+      'ఇప్పటివరకు ఆమోదించినది',
+  'Approved {qty}':
+      '{qty} ఆమోదించారు',
+  'Approved.':
+      'ఆమోదించారు.',
+  'BOQ item':
+      'BOQ ఐటమ్',
+  'Cancel invoice':
+      'ఇన్వాయిస్ రద్దు చేయండి',
+  'Cancel this invoice?':
+      'ఈ ఇన్వాయిస్ రద్దు చేయాలా?',
+  'Cancelled: {why}':
+      'రద్దు: {why}',
+  'Decide':
+      'నిర్ణయించండి',
+  'Enter each invoice as it comes. It is checked against the purchase order and what was received.':
+      'ప్రతి ఇన్వాయిస్ వచ్చినప్పుడే నమోదు చేయండి. దాన్ని PO, వచ్చిన సరుకుతో సరిచూస్తారు.',
+  'Everything approved has been billed already.':
+      'ఆమోదించినదంతా ఇప్పటికే బిల్ చేశారు.',
+  'GST in it (₹, optional)':
+      'అందులో GST (₹, ఐచ్ఛికం)',
+  'Give the invoice number and its total.':
+      'ఇన్వాయిస్ నంబర్, మొత్తం ఇవ్వండి.',
+  'Give the item, its unit and a quantity.':
+      'ఐటమ్, దాని యూనిట్, పరిమాణం ఇవ్వండి.',
+  'Invoice number':
+      'ఇన్వాయిస్ నంబర్',
+  'Invoice total with GST (₹)':
+      'GST తో ఇన్వాయిస్ మొత్తం (₹)',
+  'Make the next RA bill':
+      'తదుపరి RA బిల్లు చేయండి',
+  'Matched':
+      'సరిపోయింది',
+  'Measure work':
+      'పని కొలవండి',
+  'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
+      'BOQ ప్రకారం చేసిన పనిని కొలవండి. ఆమోదించిన పరిమాణాలు తదుపరి RA బిల్లులోకి వెళ్తాయి.',
+  'Measured {qty} {unit}':
+      'కొలిచినది {qty} {unit}',
+  'Measurement book':
+      'కొలతల పుస్తకం',
+  'Measurement saved. It waits for approval.':
+      'కొలత సేవ్ అయింది. ఆమోదం కోసం వేచి ఉంది.',
+  'More quantity than was received':
+      'వచ్చినదానికంటే ఎక్కువ పరిమాణం',
+  'More than the purchase order':
+      'PO కంటే ఎక్కువ',
+  'More than what was received':
+      'వచ్చినదానికంటే ఎక్కువ',
+  'No measurements yet':
+      'ఇంకా కొలతలు లేవు',
+  'No purchase order':
+      'PO లేదు',
+  'No supplier invoices yet':
+      'ఇంకా సప్లయర్ ఇన్వాయిస్‌లు లేవు',
+  'Not in the BOQ':
+      'BOQ లో లేదు',
+  'Nothing received against it yet':
+      'దీనికి ఇంకా ఏమీ రాలేదు',
+  'PO {amount}':
+      'పీఓ {amount}',
+  'Part paid':
+      'పాక్షికంగా చెల్లించారు',
+  'Payment against this bill':
+      'ఈ బిల్లుకు చెల్లింపు',
+  'Put against bills':
+      'బిల్లులకు వేయండి',
+  'Put it against the oldest bills still due.':
+      'దీన్ని పాత బాకీ బిల్లులకు వేయండి.',
+  'Quantity approved':
+      'ఆమోదించిన పరిమాణం',
+  'Quantity invoiced (optional)':
+      'ఇన్వాయిస్ పరిమాణం (ఐచ్ఛికం)',
+  'Quantity measured':
+      'కొలిచిన పరిమాణం',
+  'Record the payment in the money book first. Every payment so far is already against a bill.':
+      'ముందు మనీ బుక్‌లో చెల్లింపు నమోదు చేయండి. ఇప్పటివరకు ప్రతి చెల్లింపు ఏదో బిల్లుకు వేశారు.',
+  'Rejected.':
+      'తిరస్కరించారు.',
+  'Release retention':
+      'రిటెన్షన్ విడుదల',
+  'Retention held by the client: {amount}':
+      'క్లయింట్ వద్ద ఉన్న రిటెన్షన్: {amount}',
+  'Same invoice number entered before':
+      'ఇదే ఇన్వాయిస్ నంబర్ ముందే నమోదైంది',
+  'Set a rate for {items} first.':
+      'ముందు {items} కి రేట్ పెట్టండి.',
+  'Supplier invoice':
+      'సప్లయర్ ఇన్వాయిస్',
+  'Supplier invoices':
+      'సప్లయర్ ఇన్వాయిస్‌లు',
+  'Waiting':
+      'వేచి ఉంది',
+  'Where (e.g. Block A, 2nd floor)':
+      'ఎక్కడ (ఉదా. Block A, 2వ అంతస్తు)',
+  'Why':
+      'ఎందుకు',
+  'received {amount}':
+      'వచ్చింది {amount}',
+  'retention held {amount}':
+      'రిటెన్షన్ {amount}',
+  '{amount} more than received':
+      'వచ్చినదానికంటే {amount} ఎక్కువ',
+  '{amount} received is not against a bill yet':
+      'వచ్చిన {amount} ఇంకా ఏ బిల్లుకూ వేయలేదు',
+  '{amount} still due':
+      '{amount} ఇంకా బాకీ',
+  '{m} of {n} invoices need checking before payment.':
+      '{n} లో {m} ఇన్వాయిస్‌లు చెల్లింపుకు ముందు చూడాలి.',
+  '{n} amounts put against bills.':
+      '{n} మొత్తాలు బిల్లులకు వేశారు.',
+  '{n} waiting for approval':
+      '{n} ఆమోదం కోసం వేచి ఉన్నాయి',
+  '{paid} received, {due} due':
+      '{paid} వచ్చింది, {due} బాకీ',
   ...commercialTe,
   ...crmTe,
   ...warehouseTe,

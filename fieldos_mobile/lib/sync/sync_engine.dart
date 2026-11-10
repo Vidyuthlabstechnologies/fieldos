@@ -129,7 +129,7 @@ class SyncEngine {
   static const userIdColumns = {
     'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
     'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by', 'edited_by',
-    'decided_by', 'submitted_by', 'certified_by', 'raised_by', 'owner_id', 'acted_by', 'by_user',
+    'decided_by', 'submitted_by', 'certified_by', 'raised_by', 'owner_id', 'acted_by', 'measured_by', 'by_user',
     'sent_by', 'issued_by',
   };
 
@@ -341,6 +341,8 @@ class SyncEngine {
   /// How each pulled table lands in Drift, parents before children.
   late final Map<String, Future<void> Function(Map<String, dynamic> row)> _upserters = {
         'projects': (r) => db.projectDao.upsertFromRemote(projectFromSupabaseJson(r)),
+        'site_access': (r) => db.siteTeamDao.upsertAccessFromRemote(siteAccessFromSupabaseJson(r)),
+        'project_members': (r) => db.siteTeamDao.upsertMemberFromRemote(projectMemberFromSupabaseJson(r)),
         'tasks': (r) => db.taskDao.upsertFromRemote(taskFromSupabaseJson(r)),
         'dpr_entries': (r) => db.dprDao.upsertFromRemote(dprEntryFromSupabaseJson(r)),
         'issues': (r) => db.issueDao.upsertFromRemote(issueFromSupabaseJson(r)),
@@ -413,6 +415,13 @@ class SyncEngine {
         'staff_advances': (r) => db.payrollDao.upsertAdvanceFromRemote(staffAdvanceFromSupabaseJson(r)),
         'payroll_lines': (r) => db.payrollDao.upsertLineFromRemote(payrollLineFromSupabaseJson(r)),
         'site_supplier_quotes': (r) => db.supplierQuoteDao.upsertFromRemote(supplierQuoteFromSupabaseJson(r)),
+        'site_work_measurements': (r) =>
+            db.billingRecordsDao.upsertMeasurementFromRemote(workMeasurementFromSupabaseJson(r)),
+        'site_work_measurement_decisions': (r) =>
+            db.billingRecordsDao.upsertDecisionFromRemote(measurementDecisionFromSupabaseJson(r)),
+        'site_bill_allocations': (r) => db.billingRecordsDao.upsertAllocationFromRemote(billAllocationFromSupabaseJson(r)),
+        'site_supplier_invoices': (r) =>
+            db.billingRecordsDao.upsertSupplierInvoiceFromRemote(supplierInvoiceFromSupabaseJson(r)),
         'documents': (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
@@ -633,6 +642,12 @@ class SyncEngine {
     'staff_advances': 'staff_advances',
     'payroll_lines': 'payroll_lines',
     'site_supplier_quotes': 'supplier_quotes',
+    'project_members': 'project_members',
+    'site_access': 'site_access',
+    'site_work_measurements': 'work_measurements',
+    'site_work_measurement_decisions': 'work_measurement_decisions',
+    'site_bill_allocations': 'bill_allocations',
+    'site_supplier_invoices': 'supplier_invoices',
   };
 
   /// Tables whose rows carry project_id on the phone too.
@@ -643,6 +658,8 @@ class SyncEngine {
     'site_client_bills', 'site_attendance_marks', 'site_notes', 'documents', 'site_close_reviews',
     'cost_codes', 'work_claims', 'work_certifications', 'variations', 'variation_decisions',
     'commercial_attachments', 'commercial_exception_actions', 'site_supplier_quotes',
+    'project_members', 'site_access', 'site_work_measurements', 'site_work_measurement_decisions',
+    'site_bill_allocations', 'site_supplier_invoices',
   };
 
   /// Children found through their parent, for removing a whole site or

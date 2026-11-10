@@ -181,4 +181,6 @@ const Map<String, String> commercialTe = {
   '{what}: {qty} {unit} beyond the order': '{what}: ఆర్డర్‌కు మించి {qty} {unit}',
   '{who} claims {claimed} {unit}; {left} {unit} left on the order': '{who} {claimed} {unit} క్లెయిమ్ చేశారు; ఆర్డర్‌లో {left} {unit} మిగిలింది',
   '{who}\'s claim of {qty} {unit} is waiting for certification': '{who} చేసిన {qty} {unit} క్లెయిమ్ ధృవీకరణ కోసం వేచి ఉంది',
+  'Approved variations to bill': 'బిల్ చేయాల్సిన ఆమోదించిన వేరియేషన్లు',
+  'Enter the client rate for each one to bill now. Leave a rate empty to leave it for a later bill.': 'ఇప్పుడు బిల్ చేయడానికి ప్రతిదానికి క్లయింట్ రేటు ఇవ్వండి. తర్వాతి బిల్‌కు వదిలేయాలంటే రేటు ఖాళీగా ఉంచండి.',
 };
