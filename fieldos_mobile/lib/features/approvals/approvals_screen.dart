@@ -12,6 +12,8 @@ import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/approvals/approval_chain_ui.dart';
+import 'package:fieldos_mobile/features/close/week_close_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
@@ -22,7 +24,7 @@ class ApprovalsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pending = ref.watch(pendingApprovalsProvider(companyId));
-    final projects = ref.watch(projectsProvider(companyId)).valueOrNull ?? const <Project>[];
+    final projects = ref.watch(projectsProvider(companyId)).value ?? const <Project>[];
     final names = {for (final p in projects) p.id: p.name};
     final canDecide = Roles.canApprove(ref.watch(sessionProvider).role);
 
@@ -32,20 +34,31 @@ class ApprovalsScreen extends ConsumerWidget {
         onRefresh: () => ref.refresh(pendingApprovalsProvider(companyId).future),
         child: pending.when(
           data: (items) => items.isEmpty
-              ? EmptyState(
-                  icon: Icons.task_alt,
-                  title: tr('Nothing waiting'),
-                  message: tr('When a site goes over its budget, or a purchase needs a yes, it waits here.'),
+              ? Column(
+                  children: [
+                    _WeeklyCloseLink(companyId: companyId),
+                    Expanded(
+                      child: EmptyState(
+                        icon: Icons.task_alt,
+                        title: tr('Nothing waiting'),
+                        message: tr('When a site goes over its budget, or a purchase needs a yes, it waits here.'),
+                      ),
+                    ),
+                  ],
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(12),
-                  itemCount: items.length + (canDecide ? 0 : 1),
+                  itemCount: items.length + (canDecide ? 1 : 2),
                   itemBuilder: (context, i) {
+                    if (i == 0) return _WeeklyCloseLink(companyId: companyId, padding: EdgeInsets.zero);
+                    i -= 1;
                     if (!canDecide && i == 0) {
-                      return const Padding(
-                        padding: EdgeInsets.fromLTRB(4, 0, 4, 12),
-                        child: FormMessage('The owner or a project manager decides these. You can see what is waiting.',
-                            error: false),
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
+                        child: FormMessage(
+                          tr('The owner or a project manager decides these. You can see what is waiting.'),
+                          error: false,
+                        ),
                       );
                     }
                     final a = items[canDecide ? i : i - 1];
@@ -59,22 +72,24 @@ class ApprovalsScreen extends ConsumerWidget {
                             Text(approvalLabel(a.entityType), style: Theme.of(context).textTheme.titleMedium),
                             const SizedBox(height: 2),
                             Text(
-                              '${names[a.projectId] ?? 'A project'} · raised ${_when(a.createdAt)}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                              '${names[a.projectId] ?? tr('A project')} · ${raisedWhen(a.createdAt)}',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                             ),
-                            if (note.isNotEmpty) ...[
-                              const SizedBox(height: 8),
-                              Text(note),
-                            ],
+                            if (note.isNotEmpty) ...[const SizedBox(height: 8), Text(note)],
                             if (canDecide)
-                              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                                TextButton(onPressed: () => _reject(context, ref, a), child: Text(tr('Reject'))),
-                                const SizedBox(width: 4),
-                                FilledButton(onPressed: () => _decide(context, ref, a, true, null), child: Text(tr('Approve'))),
-                              ]),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton(onPressed: () => _reject(context, ref, a), child: Text(tr('Reject'))),
+                                  const SizedBox(width: 4),
+                                  FilledButton(
+                                    onPressed: () => _decide(context, ref, a, true, null),
+                                    child: Text(tr('Approve')),
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
                       ),
@@ -82,8 +97,8 @@ class ApprovalsScreen extends ConsumerWidget {
                   },
                 ),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, st) => ErrorState(
-              error: e, stack: st, onRetry: () => ref.invalidate(pendingApprovalsProvider(companyId))),
+          error: (e, st) =>
+              ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(pendingApprovalsProvider(companyId))),
         ),
       ),
     );
@@ -128,34 +143,97 @@ class ApprovalsScreen extends ConsumerWidget {
   }
 }
 
-/// "today", "yesterday" or "on 3 Nov".
-String _when(DateTime t) {
-  final day = fmtDay(t);
-  return day == 'Today' || day == 'Yesterday' ? day.toLowerCase() : 'on $day';
+/// Wages, expenses and deliveries are approved a week at a time, in the
+/// weekly close; this card leads there from the approvals queue.
+class _WeeklyCloseLink extends StatelessWidget {
+  const _WeeklyCloseLink({required this.companyId, this.padding = const EdgeInsets.fromLTRB(12, 12, 12, 0)});
+  final String companyId;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: padding,
+    child: Column(children: [
+      _ChainQueueLink(companyId: companyId),
+      Card(
+      child: ListTile(
+        leading: const Icon(Icons.fact_check_outlined),
+        title: Text(tr('Weekly close')),
+        subtitle: Text(tr('Approve each site\'s wages, expenses and deliveries for the week.')),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => WeeklyCloseListScreen(companyId: companyId))),
+      ),
+    ),
+    ]),
+  );
+}
+
+/// Shown when the owner's approval rules leave something for this person
+/// to sign (requests, orders and expenses above the amounts).
+class _ChainQueueLink extends ConsumerWidget {
+  const _ChainQueueLink({required this.companyId});
+  final String companyId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final n = ref.watch(chainQueueProvider(companyId)).value?.length ?? 0;
+    if (n == 0) return const SizedBox.shrink();
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.approval_outlined),
+        title: Text(tr('Waiting for your approval')),
+        subtitle: Text(trf('{n} requests, orders or expenses above your approval amounts', {'n': n})),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => ChainQueueScreen(companyId: companyId))),
+      ),
+    );
+  }
+}
+
+/// "raised today", "raised yesterday" or "raised on 3 Nov", in the app's
+/// language. (It used to compare the already-translated day with the
+/// English word, so other languages read "raised on आज".)
+String raisedWhen(DateTime t, {DateTime? now}) {
+  final n = (now ?? DateTime.now()).toLocal();
+  final l = t.toLocal();
+  final days = DateTime(n.year, n.month, n.day).difference(DateTime(l.year, l.month, l.day)).inDays;
+  return switch (days) {
+    0 => tr('raised today'),
+    1 => tr('raised yesterday'),
+    _ => trf('raised on {date}', {'date': fmtDate(l, short: true, now: n)}),
+  };
 }
 
 String approvalLabel(String type) => switch (type) {
-      'budget_overrun' => tr('Site over budget'),
-      'purchase_order' => tr('Purchase order'),
-      'material_receipt' => tr('Material received'),
-      _ => '${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}',
-    };
+  'budget_overrun' => tr('Site over budget'),
+  'purchase_order' => tr('Purchase order'),
+  'material_receipt' => tr('Material received'),
+  _ => tr('${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}'),
+};
 
 /// Raise a budget-overrun approval for a project (the dashboard's "Ask for
 /// approval" on a site that is over budget). [requestedBy] is the person
 /// asking: the cloud only accepts a request raised by the signed-in user,
 /// and its requested_by column holds a user id.
-Future<void> raiseBudgetOverrunApproval(AppDatabase db, String projectId, double variance,
-    {required String requestedBy}) async {
-  await db.approvalDao.create(ApprovalsCompanion.insert(
-    id: const Uuid().v4(),
-    projectId: Value(projectId),
-    entityType: 'budget_overrun',
-    entityId: projectId,
-    requestedBy: requestedBy,
-    status: const Value('pending'),
-    decisionNote: Value('Spending is ${rupees(variance.abs())} over the BOQ budget.'),
-  ));
+Future<void> raiseBudgetOverrunApproval(
+  AppDatabase db,
+  String projectId,
+  double variance, {
+  required String requestedBy,
+}) async {
+  await db.approvalDao.create(
+    ApprovalsCompanion.insert(
+      id: const Uuid().v4(),
+      projectId: Value(projectId),
+      entityType: 'budget_overrun',
+      entityId: projectId,
+      requestedBy: requestedBy,
+      status: const Value('pending'),
+      decisionNote: Value('Spending is ${rupees(variance.abs())} over the BOQ budget.'),
+    ),
+  );
 }
 
 /// Whether this project already has a budget-overrun approval waiting, so

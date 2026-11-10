@@ -38,6 +38,7 @@ String voucherPayee(SiteExpense e, {String? workerName}) {
 
 Future<Uint8List> buildVoucherPdf({
   required SiteExpense expense,
+  bool provisional = false,
   required String companyName,
   required String siteName,
   String? workerName,
@@ -84,7 +85,7 @@ Future<Uint8List> buildVoucherPdf({
           ],
           pw.Expanded(
             child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-              t(companyName, size: 15, bold: true),
+              t(companyName, size: 15, bold: true, color: brandInk(branding)),
               pw.SizedBox(height: 2),
               t('Site: $siteName', color: _muted),
             ]),
@@ -93,6 +94,8 @@ Future<Uint8List> buildVoucherPdf({
             t(e.voided ? 'PAYMENT VOUCHER (CANCELLED)' : 'PAYMENT VOUCHER', size: 11, bold: true),
             pw.SizedBox(height: 2),
             t('No. ${voucherLabel(e.voucherNo)}', size: 12, bold: true),
+            // Not yet numbered by the server: this copy's number may change.
+            if (provisional) t('Provisional number', size: 9, color: _muted),
             t('Date: ${fmtDate(expenseDay(e))}', color: _muted),
           ]),
         ]),
@@ -129,9 +132,9 @@ Future<Uint8List> buildVoucherPdf({
           pw.SizedBox(width: 28),
           signature('Approved by'),
         ]),
-        if (branding.showFooter) ...[
+        if (branding.hasFooter) ...[
           pw.SizedBox(height: 8),
-          t('Made with FieldOS', size: 7, color: _muted, align: pw.TextAlign.right),
+          t(branding.footerLine, size: 7, color: _muted, align: pw.TextAlign.right),
         ],
       ],
     ),
@@ -144,6 +147,7 @@ String _pct(double v) => '${v == v.roundToDouble() ? v.toInt() : v}%';
 /// Builds the voucher and opens the share sheet (print, WhatsApp, Drive).
 Future<void> shareVoucher({
   required SiteExpense expense,
+  bool provisional = false,
   required String companyName,
   required String siteName,
   String? workerName,
@@ -152,6 +156,7 @@ Future<void> shareVoucher({
 }) async {
   final bytes = await buildVoucherPdf(
       expense: expense,
+      provisional: provisional,
       companyName: companyName,
       siteName: siteName,
       workerName: workerName,

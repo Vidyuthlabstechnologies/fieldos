@@ -32,6 +32,7 @@ import 'package:fieldos_mobile/features/money/expense_bills.dart';
 import 'package:fieldos_mobile/features/money/voucher_pdf.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart' show CapturedFile;
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart' show cloudLinksProvider;
 import 'package:fieldos_mobile/l10n/language.dart';
 
 const paymentModes = {'cash': 'Cash', 'upi': 'UPI', 'bank': 'Bank transfer', 'cheque': 'Cheque'};
@@ -46,6 +47,15 @@ final expensesProvider = FutureProvider.autoDispose.family<List<SiteExpense>, St
 });
 
 /// Every expense of the site, cancelled ones too, for the money book.
+/// Expenses whose voucher number the server has not confirmed yet. Only on
+/// a company linked to the cloud: a phone used alone numbers for good.
+final provisionalVouchersProvider = FutureProvider.autoDispose.family<Set<String>, String>((ref, projectId) async {
+  final db = ref.watch(appDatabaseProvider);
+  final companyId = ref.watch(sessionProvider).activeCompany?.id;
+  if (companyId == null || !await ref.watch(cloudLinksProvider).isLinked(companyId)) return const {};
+  return db.expenseDao.provisionalVoucherIds(projectId);
+});
+
 final moneyBookExpensesProvider = FutureProvider.autoDispose.family<List<SiteExpense>, String>(
     (ref, projectId) => ref.watch(appDatabaseProvider).expenseDao.allForProject(projectId));
 
@@ -83,6 +93,7 @@ void _refreshMoney(WidgetRef ref, String projectId) {
   ref.invalidate(moneyBookPaymentsProvider(projectId));
   ref.invalidate(expenseCategoriesProvider(projectId));
   ref.invalidate(expenseBillCountsProvider(projectId));
+  ref.invalidate(provisionalVouchersProvider(projectId));
 }
 
 IconData _iconFor(String c) => switch (c) {
@@ -120,8 +131,8 @@ class MoneyView extends ConsumerWidget {
     final expenses = ref.watch(expensesProvider(projectId));
     final received = showIn ? ref.watch(paymentsReceivedProvider(projectId)) : const AsyncValue.data(<PaymentsReceivedData>[]);
 
-    final spent = expenses.valueOrNull?.fold<double>(0, (s, e) => s + e.amount) ?? 0;
-    final inTotal = received.valueOrNull?.fold<double>(0, (s, p) => s + p.amount) ?? 0;
+    final spent = expenses.value?.fold<double>(0, (s, e) => s + e.amount) ?? 0;
+    final inTotal = received.value?.fold<double>(0, (s, p) => s + p.amount) ?? 0;
 
     return DefaultTabController(
       length: 1 + (showIn ? 1 : 0) + (showBills ? 1 : 0),
@@ -134,8 +145,10 @@ class MoneyView extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  if (showIn) _Figure(tr('Received'), rupees(inTotal), toneColor(context, PillTone.ok)),
-                  _Figure(tr('Spent'), rupees(spent), toneColor(context, PillTone.danger)),
+                  // Plain ink for the figures; colour only when the balance
+                  // has gone below zero.
+                  if (showIn) _Figure(tr('Received'), rupees(inTotal), Theme.of(context).colorScheme.onSurface),
+                  _Figure(tr('Spent'), rupees(spent), Theme.of(context).colorScheme.onSurface),
                   if (showIn)
                     _Figure(tr('Balance'), rupees(inTotal - spent),
                         inTotal - spent < 0 ? toneColor(context, PillTone.danger) : Theme.of(context).colorScheme.primary),
@@ -279,9 +292,9 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
   @override
   Widget build(BuildContext context) {
     final rows = ref.watch(moneyBookExpensesProvider(widget.projectId));
-    final workers = ref.watch(workersProvider(widget.projectId)).valueOrNull ?? const <Worker>[];
+    final workers = ref.watch(workersProvider(widget.projectId)).value ?? const <Worker>[];
     final workerName = {for (final w in workers) w.id: w.name};
-    final categories = ref.watch(expenseCategoriesProvider(widget.projectId)).valueOrNull ?? defaultExpenseCategories;
+    final categories = ref.watch(expenseCategoriesProvider(widget.projectId)).value ?? defaultExpenseCategories;
     final theme = Theme.of(context);
 
     return Stack(children: [
@@ -292,8 +305,12 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
           final shown = _filter.expenses(all, workerName: workerName);
           final total = totalOf(shown);
           final cancelled = shown.where((e) => e.voided).length;
-          final billCounts = ref.watch(expenseBillCountsProvider(widget.projectId)).valueOrNull ?? const {};
-          return Column(children: [
+          final billCounts = ref.watch(expenseBillCountsProvider(widget.projectId)).value ?? const {};
+          final provisional = ref.watch(provisionalVouchersProvider(widget.projectId)).value ?? const <String>{};
+          // In a short space (a landscape phone, or the tour's preview) the
+          // search, filters and total would leave no room for the list, so
+          // the whole view scrolls at a usable height instead of breaking.
+          return _MinHeight(height: 360, child: Column(children: [
             if (all.isNotEmpty) ...[
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -406,13 +423,15 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
                               _ExpenseTile(
                                 expense: e,
                                 bills: billCounts[e.id] ?? 0,
+                                provisional: provisional.contains(e.id),
                                 workerName: e.workerId == null ? null : workerName[e.workerId],
-                                onTap: () => _openExpense(context, e, workerName: workerName),
+                                onTap: () => _openExpense(context, e,
+                                    workerName: workerName, provisional: provisional.contains(e.id)),
                               ),
                           ],
                         ),
             ),
-          ]);
+          ]));
         },
       ),
       Positioned(
@@ -433,7 +452,8 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
         _filter = const MoneyFilter();
       });
 
-  Future<void> _openExpense(BuildContext context, SiteExpense e, {required Map<String, String> workerName}) async {
+  Future<void> _openExpense(BuildContext context, SiteExpense e,
+      {required Map<String, String> workerName, bool provisional = false}) async {
     final session = ref.read(sessionProvider);
     final users = await ref.read(appDatabaseProvider).select(ref.read(appDatabaseProvider).users).get();
     final userName = {for (final u in users) u.id: u.name};
@@ -444,12 +464,14 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
       showDragHandle: true,
       builder: (ctx) => _ExpenseSheet(
         expense: e,
+        provisional: provisional,
         workerName: e.workerId == null ? null : workerName[e.workerId],
         enteredBy: userName[e.recordedBy],
         editedBy: e.editedBy == null ? null : userName[e.editedBy],
         canCorrect: canCorrect(role: session.role, recordedBy: e.recordedBy, userId: widget.userId),
         onVoucher: () async => shareVoucher(
           expense: e,
+          provisional: provisional,
           companyName: session.activeCompany?.name ?? 'FieldOS',
           siteName: widget.project?.name ?? '',
           workerName: e.workerId == null ? null : workerName[e.workerId],
@@ -505,7 +527,10 @@ class _FilterChip extends StatelessWidget {
 }
 
 class _ExpenseTile extends StatelessWidget {
-  const _ExpenseTile({required this.expense, required this.onTap, this.workerName, this.bills = 0});
+  const _ExpenseTile(
+      {required this.expense, required this.onTap, this.workerName, this.bills = 0, this.provisional = false});
+
+  final bool provisional;
   final SiteExpense expense;
   final int bills;
   final String? workerName;
@@ -521,7 +546,7 @@ class _ExpenseTile extends StatelessWidget {
       leading: CircleAvatar(child: Icon(_iconFor(e.category), size: 20)),
       title: Text('${tr(e.category)}${who == null || who.isEmpty ? '' : ' · $who'}', style: strike),
       subtitle: Text([
-        if (e.voucherNo != null) voucherLabel(e.voucherNo),
+        if (e.voucherNo != null) voucherLabel(e.voucherNo, provisional: provisional),
         shortDay(expenseDay(e)),
         if (e.mode != null) tr(paymentModes[e.mode] ?? e.mode!),
         if ((e.gstPct ?? 0) > 0) 'GST ${_rate(e.gstPct!)}%',
@@ -560,9 +585,11 @@ class _ExpenseSheet extends StatelessWidget {
     this.workerName,
     this.enteredBy,
     this.editedBy,
+    this.provisional = false,
   });
 
   final SiteExpense expense;
+  final bool provisional;
   final String? workerName;
   final String? enteredBy;
   final String? editedBy;
@@ -591,7 +618,7 @@ class _ExpenseSheet extends StatelessWidget {
           Row(children: [
             Expanded(
               child: Text(
-                [if (e.voucherNo != null) voucherLabel(e.voucherNo), tr(e.category)].join(' · '),
+                [if (e.voucherNo != null) voucherLabel(e.voucherNo, provisional: provisional), tr(e.category)].join(' · '),
                 style: theme.textTheme.titleLarge,
               ),
             ),
@@ -1307,9 +1334,38 @@ class _Figure extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) => Column(children: [
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
-        const SizedBox(height: 4),
-        Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: color)),
-      ]);
+  // Each figure gets a third of the card and shrinks to fit it, so lakh
+  // amounts with large text never run into each other.
+  Widget build(BuildContext context) => Expanded(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: Column(children: [
+            Text(label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(value, maxLines: 1, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: color)),
+            ),
+          ]),
+        ),
+      );
+}
+
+/// Lays [child] out at least [height] tall, scrolling when the space is
+/// shorter than that.
+class _MinHeight extends StatelessWidget {
+  const _MinHeight({required this.height, required this.child});
+  final double height;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, box) => box.maxHeight >= height
+            ? child
+            : SingleChildScrollView(child: SizedBox(height: height, child: child)),
+      );
 }

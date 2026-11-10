@@ -12,6 +12,7 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
+import 'package:fieldos_mobile/features/dashboard/my_dashboard.dart';
 import 'package:fieldos_mobile/features/dashboard/project_cost_summary.dart';
 import 'package:fieldos_mobile/features/dashboard/value_summary.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
@@ -36,7 +37,10 @@ class DashboardScreen extends ConsumerWidget {
         ),
       ]),
       body: RefreshIndicator(
-        onRefresh: () => ref.refresh(projectsProvider(companyId).future),
+        onRefresh: () {
+          ref.invalidate(myKpisProvider(companyId));
+          return ref.refresh(projectsProvider(companyId).future);
+        },
         child: projectsAsync.when(
           data: (projects) => projects.isEmpty
               ? EmptyState(
@@ -51,6 +55,7 @@ class DashboardScreen extends ConsumerWidget {
                       padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
                       child: Text(companyName, style: Theme.of(context).textTheme.titleLarge),
                     ),
+                    MyKpiGrid(companyId: companyId),
                     ValueCard(companyId: companyId),
                     for (final p in projects) _ProjectHealthCard(projectId: p.id, companyId: companyId),
                   ],
@@ -99,13 +104,14 @@ class _ProjectHealthCard extends ConsumerWidget {
                         child: Text(s.projectName,
                             maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium)),
                     const SizedBox(width: 8),
-                    StatusPill(_statusLabel(s.status), tone: _statusTone(s.status)),
+                    // A long status (Tamil "no budget") shortens instead of pushing the row off.
+                    Flexible(child: StatusPill(_statusLabel(s.status), tone: _statusTone(s.status))),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _Metric(label: tr('Budget'), value: s.status == 'no_budget' ? 'Not set' : rupees(s.budget)),
+                    _Metric(label: tr('Budget'), value: s.status == 'no_budget' ? tr('Not set') : rupees(s.budget)),
                     _Metric(label: tr('Spent'), value: rupees(s.actual)),
                     if (s.status != 'no_budget')
                       _Metric(
@@ -127,8 +133,8 @@ class _ProjectHealthCard extends ConsumerWidget {
                 const SizedBox(height: 10),
                 Text(
                   [
-                    s.openIssues == 1 ? '1 open issue' : '${s.openIssues} open issues',
-                    s.dprCount == 1 ? '1 daily report' : '${s.dprCount} daily reports',
+                    s.openIssues == 1 ? tr('1 open issue') : trf('{n} open issues', {'n': s.openIssues}),
+                    s.dprCount == 1 ? tr('1 daily report') : trf('{n} daily reports', {'n': s.dprCount}),
                   ].join(' · '),
                   style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 ),
@@ -149,7 +155,7 @@ class _ProjectHealthCard extends ConsumerWidget {
                   if (s.alerts.length > 3)
                     Padding(
                       padding: const EdgeInsets.only(top: 4, left: 22),
-                      child: Text('and ${s.alerts.length - 3} more',
+                      child: Text(trf('and {n} more', {'n': s.alerts.length - 3}),
                           style: theme.textTheme.bodySmall?.copyWith(color: muted)),
                     ),
                 ],

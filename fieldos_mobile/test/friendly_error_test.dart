@@ -46,6 +46,14 @@ void main() {
       expect(sql, startsWith('Something went wrong'));
     });
 
+    test('a feature whose server part is not deployed yet says so, not "something went wrong"', () {
+      final m = friendlyError(const sb.PostgrestException(
+          message: 'Could not find the function public.client_portal without parameters in the schema cache',
+          code: 'PGRST202'));
+      expect(m, contains('server update'));
+      expect(m, isNot(contains('schema cache')));
+    });
+
     test('anything unexpected is a plain sentence and is kept for the bug report', () {
       final before = RecentErrors.dump();
       final m = friendlyError(StateError('Bad state: no element'), StackTrace.current);

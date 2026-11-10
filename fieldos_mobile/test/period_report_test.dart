@@ -156,7 +156,7 @@ void main() {
     expect(find.text('2 of 4 days reported'), findsOneWidget);
     expect(find.text('Footings'), findsOneWidget);
     expect(find.text('Share on WhatsApp'), findsOneWidget);
-    expect(find.text('MONEY'), findsNothing, reason: 'no owner signed in');
+    expect(find.text('Money'), findsNothing, reason: 'no owner signed in');
 
     await tester.tap(find.text('Last week'));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));

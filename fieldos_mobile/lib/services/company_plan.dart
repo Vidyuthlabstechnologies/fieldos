@@ -2,7 +2,7 @@
 /// GST invoice, outside the app stores. One plan covers everyone in the
 /// company (no limit on people) up to a number of active sites. The team
 /// switches it on in the backend once the invoice is paid (see
-/// supabase/migrations/20261110000000_company_plans.sql); nothing in the
+/// supabase/migrations/20261111130000_company_plans.sql); nothing in the
 /// app can buy, extend or change one.
 ///
 /// Store rules: the app never shows a company plan's price, and never links

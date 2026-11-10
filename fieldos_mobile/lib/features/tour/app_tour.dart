@@ -20,6 +20,7 @@ import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/services/read_aloud.dart';
 
 /// Set once the tour has been started, so Home stops inviting to it.
 const tourSeenKey = 'app_tour_seen';
@@ -182,9 +183,32 @@ class AppTourScreen extends ConsumerStatefulWidget {
 class _AppTourScreenState extends ConsumerState<AppTourScreen> {
   late int _index = widget.initialStep;
 
+  /// Mitra reads each step aloud, for people who would rather listen than
+  /// read. Once switched on it carries on through the tour.
+  bool _voice = false;
+
   void _go(int to, int count) {
     if (to < 0 || to >= count) return;
     setState(() => _index = to);
+    if (_voice) _read(to);
+  }
+
+  /// Mitra's recorded line for step [i] in the person's language, or the
+  /// step's own words when there is none.
+  void _read(int i) {
+    final step = appTourSteps()[i];
+    ReadAloud.guide('tour_$i', fallback: ReadAloud.spoken([step.title, step.body]));
+  }
+
+  void _toggleVoice() {
+    setState(() => _voice = !_voice);
+    _voice ? _read(_index) : ReadAloud.stop();
+  }
+
+  @override
+  void dispose() {
+    if (_voice) ReadAloud.stop();
+    super.dispose();
   }
 
   Widget _stage(TourStep step) {
@@ -224,9 +248,11 @@ class _AppTourScreenState extends ConsumerState<AppTourScreen> {
                   fit: StackFit.expand,
                   children: [
                     IgnorePointer(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 280),
-                        child: KeyedSubtree(key: ValueKey(_index), child: _stage(step)),
+                      child: TourStageFrame(
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 280),
+                          child: KeyedSubtree(key: ValueKey(_index), child: _stage(step)),
+                        ),
                       ),
                     ),
                   ],
@@ -238,6 +264,10 @@ class _AppTourScreenState extends ConsumerState<AppTourScreen> {
               index: _index,
               count: steps.length,
               bottomInset: media.viewPadding.bottom,
+              voice: _voice,
+              onVoice: _toggleVoice,
+              onMitra: () => ReadAloud.toggleGuide('tour_$_index',
+                  fallback: ReadAloud.spoken([step.title, step.body])),
               onSkip: () => Navigator.of(context).pop(),
               onBack: _index == 0 ? null : () => _go(_index - 1, steps.length),
               onNext: last ? null : () => _go(_index + 1, steps.length),
@@ -258,6 +288,9 @@ class _GuideCard extends StatelessWidget {
     required this.count,
     required this.bottomInset,
     required this.onSkip,
+    this.voice = false,
+    this.onVoice,
+    this.onMitra,
     this.onBack,
     this.onNext,
     this.onExplore,
@@ -269,6 +302,11 @@ class _GuideCard extends StatelessWidget {
   final int count;
   final double bottomInset;
   final VoidCallback onSkip;
+  final bool voice;
+  final VoidCallback? onVoice;
+
+  /// Tapping Mitra says this step once.
+  final VoidCallback? onMitra;
   final VoidCallback? onBack;
   final VoidCallback? onNext;
   final VoidCallback? onExplore;
@@ -278,6 +316,9 @@ class _GuideCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final height = MediaQuery.sizeOf(context).height;
+    final compact = height < 700;
+    final maxTextHeight = height * (compact ? 0.3 : 0.34);
     return Material(
       color: scheme.surface,
       elevation: 12,
@@ -305,11 +346,24 @@ class _GuideCard extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(width: 6),
-                TextButton.icon(
-                  onPressed: onSkip,
-                  style: TextButton.styleFrom(minimumSize: const Size(48, 36), padding: const EdgeInsets.symmetric(horizontal: 8)),
-                  icon: const Icon(Icons.close, size: 18),
-                  label: Text(tr('Skip tour')),
+                if (onVoice != null)
+                  IconButton(
+                    onPressed: onVoice,
+                    tooltip: voice ? tr('Stop') : tr('Read aloud'),
+                    isSelected: voice,
+                    icon: const Icon(Icons.volume_up_outlined),
+                    selectedIcon: const Icon(Icons.volume_up),
+                  ),
+                // A long "Skip tour" (Tamil) shrinks instead of pushing the
+                // row off a small phone.
+                Flexible(
+                  flex: count,
+                  child: TextButton.icon(
+                    onPressed: onSkip,
+                    style: TextButton.styleFrom(minimumSize: const Size(48, 36), padding: const EdgeInsets.symmetric(horizontal: 8)),
+                    icon: const Icon(Icons.close, size: 18),
+                    label: Text(tr('Skip tour'), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ),
                 ),
               ],
             ),
@@ -318,10 +372,19 @@ class _GuideCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Mitra(mood: step.mood, size: 104),
+                  // Tapping Mitra reads the step aloud too.
+                  GestureDetector(
+                    onTap: onMitra,
+                    child: Mitra(mood: step.mood, size: compact ? 72 : 104),
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: AnimatedSwitcher(
+                    // On a small phone, or with large text, the words scroll
+                    // inside the card so the live screen above stays in view.
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: maxTextHeight),
+                      child: SingleChildScrollView(
+                        child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 220),
                       child: Column(
                         key: ValueKey(index),
@@ -347,6 +410,8 @@ class _GuideCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -364,9 +429,13 @@ class _GuideCard extends StatelessWidget {
               ])
             else
               Row(children: [
-                Text(trf('{n} of {total}', {'n': index + 1, 'total': count}),
-                    style: theme.textTheme.labelLarge?.copyWith(color: scheme.onSurfaceVariant)),
-                const Spacer(),
+                // The step count gives way first, so Back and Next always fit.
+                Expanded(
+                  child: Text(trf('{n} of {total}', {'n': index + 1, 'total': count}),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelLarge?.copyWith(color: scheme.onSurfaceVariant)),
+                ),
                 if (onBack != null) TextButton(onPressed: onBack, child: Text(tr('Back'))),
                 const SizedBox(width: 6),
                 FilledButton.icon(
@@ -389,7 +458,7 @@ class TourInviteCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final seen = ref.watch(tourSeenProvider).valueOrNull ?? true;
+    final seen = ref.watch(tourSeenProvider).value ?? true;
     if (seen) return const SizedBox.shrink();
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -428,5 +497,31 @@ class TourInviteCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// The live screen above the guide card. On a small phone the card leaves
+/// it little room, so it is laid out at least [minHeight] tall and cut off
+/// at the bottom, the way a phone screen shows its top part, instead of
+/// squashing the screen until its own layout breaks.
+class TourStageFrame extends StatelessWidget {
+  const TourStageFrame({super.key, required this.child, this.minHeight = 640});
+
+  final Widget child;
+  final double minHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, box) {
+      if (box.maxHeight >= minHeight) return child;
+      return ClipRect(
+        child: OverflowBox(
+          alignment: Alignment.topCenter,
+          minHeight: minHeight,
+          maxHeight: minHeight,
+          child: child,
+        ),
+      );
+    });
   }
 }

@@ -49,11 +49,19 @@ class _WorkersViewState extends ConsumerState<WorkersView> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(tr('Workers'), style: Theme.of(context).textTheme.titleSmall),
+              // Long words (Tamil, large text) shrink the title, never the
+              // add buttons off the edge.
+              Expanded(
+                child: Text(tr('Workers'),
+                    style: Theme.of(context).textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
               Row(mainAxisSize: MainAxisSize.min, children: [
                 TextButton.icon(
                   icon: const Icon(Icons.playlist_add),
-                  label: Text(tr('Add many')),
+                  label: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.4),
+                    child: Text(tr('Add many'), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ),
                   onPressed: () => _addMany(context),
                 ),
                 IconButton(icon: const Icon(Icons.add), tooltip: tr('Add worker'), onPressed: () => _addWorker(context, ref)),
@@ -259,9 +267,9 @@ class _WorkerTile extends ConsumerWidget {
         onTap: () => openWorkerCalendar(context, worker),
         title: Text(worker.name),
         subtitle: Text([
-          worker.role ?? '',
+          worker.role == null ? '' : tr(worker.role!),
           worker.phone ?? '',
-          worker.dailyWage != null ? '${rupees(worker.dailyWage!)} a day' : '',
+          worker.dailyWage != null ? trf('{amount} a day', {'amount': rupees(worker.dailyWage!)}) : '',
         ].where((e) => e.isNotEmpty).join(' · ')),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

@@ -248,21 +248,23 @@ class SampleProjectBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final id = ref.watch(sampleProjectIdProvider(project.companyId)).valueOrNull;
+    final id = ref.watch(sampleProjectIdProvider(project.companyId)).value;
     if (id != project.id) return const SizedBox.shrink();
     final theme = Theme.of(context);
+    // A thin, quiet strip: it explains the demo without taking over the
+    // top of every tab.
     return Material(
-      color: theme.colorScheme.secondaryContainer,
+      color: theme.colorScheme.surfaceContainer,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+        padding: const EdgeInsets.fromLTRB(16, 2, 4, 2),
         child: Row(
           children: [
-            Icon(Icons.science_outlined, color: theme.colorScheme.onSecondaryContainer),
-            const SizedBox(width: 12),
+            Icon(Icons.science_outlined, size: 18, color: theme.colorScheme.onSurfaceVariant),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
                 tr('A sample site to try things on. It stays on this phone and your team never sees it.'),
-                style: TextStyle(color: theme.colorScheme.onSecondaryContainer),
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ),
             TextButton(onPressed: () => _remove(context, ref), child: Text(tr('Remove'))),

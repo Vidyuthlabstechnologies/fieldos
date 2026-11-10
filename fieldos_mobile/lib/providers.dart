@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/agents/dpr_intake.dart';
 import 'package:fieldos_mobile/agents/voice_dpr_agent.dart';
 import 'package:fieldos_mobile/auth/auth_provider.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/auth/site_roles.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/dashboard/project_cost_summary.dart';
 import 'package:fieldos_mobile/services/billing_service.dart';
@@ -59,14 +60,20 @@ final locationServiceProvider = Provider<LocationService>((ref) => LocationServi
 
 final billingServiceProvider = Provider<BillingService>((ref) => BillingService(ref.watch(appDatabaseProvider)));
 
-final sessionProvider = StateNotifierProvider<SessionNotifier, SessionState>(
-  (ref) => SessionNotifier(ref.watch(authServiceProvider), ref.watch(appDatabaseProvider)),
-);
+final sessionProvider = NotifierProvider<SessionNotifier, SessionState>(SessionNotifier.new);
 
 /// List providers, keyed by parent id, for the detail screens.
+///
+/// A members-only site this person isn't on is left out (the server stops
+/// sending it; this hides a copy the phone already had).
 final projectsProvider =
-    FutureProvider.autoDispose.family<List<Project>, String>((ref, companyId) {
-  return ref.watch(appDatabaseProvider).projectDao.forCompany(companyId);
+    FutureProvider.autoDispose.family<List<Project>, String>((ref, companyId) async {
+  final db = ref.watch(appDatabaseProvider);
+  final s = ref.watch(sessionProvider);
+  final all = await db.projectDao.forCompany(companyId);
+  final visible = await visibleSiteIds(db, companyId,
+      userId: s.user?.id, companyRole: s.role, cloudUserId: await db.settingsDao.get('cloud_user_id'));
+  return [for (final p in all) if (visible.contains(p.id)) p];
 });
 
 final tasksProvider = FutureProvider.autoDispose.family<List<Task>, String>((ref, projectId) {

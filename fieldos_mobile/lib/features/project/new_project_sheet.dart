@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/project/project_status.dart';
+import 'package:fieldos_mobile/features/project/site_template.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/company_plan.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
@@ -38,6 +39,13 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
   String? _error;
   bool _busy = false;
 
+  /// The site to copy from; null starts empty.
+  Project? _from;
+  bool _copyTasks = true;
+  bool _copyWorkers = true;
+  bool _copyEstimate = true;
+  bool _copyTeam = true;
+
   @override
   void dispose() {
     _name.dispose();
@@ -50,11 +58,11 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
     final name = _name.text.trim().replaceAll(RegExp(r'\s+'), ' ');
     final client = _client.text.trim().replaceAll(RegExp(r'\s+'), ' ');
     if (name.isEmpty) {
-      setState(() => _error = 'Give the project a name, such as the site or building.');
+      setState(() => _error = tr('Give the project a name, such as the site or building.'));
       return;
     }
     if (name.length > 200 || client.length > 200) {
-      setState(() => _error = 'Keep the names under 200 characters.');
+      setState(() => _error = tr('Keep the names under 200 characters.'));
       return;
     }
     setState(() {
@@ -70,14 +78,30 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
           return;
         }
       }
-      final project = await db.projectDao.create(ProjectsCompanion.insert(
-            id: const Uuid().v4(),
-            companyId: widget.companyId,
-            name: name,
-            // An empty client is no client, not a blank line on every card.
-            clientName: Value(client.isEmpty ? null : client),
-            status: Value(_status),
-          ));
+      final from = _from;
+      final Project project;
+      if (from != null) {
+        project = (await newSiteFromTemplate(
+          db,
+          source: from,
+          name: name,
+          clientName: client,
+          status: _status,
+          createdBy: ref.read(sessionProvider).user?.id ?? 'unknown',
+          copy: SiteTemplateParts(
+              tasks: _copyTasks, workers: _copyWorkers, estimate: _copyEstimate, team: _copyTeam, geofence: true),
+        ))
+            .project;
+      } else {
+        project = await db.projectDao.create(ProjectsCompanion.insert(
+          id: const Uuid().v4(),
+          companyId: widget.companyId,
+          name: name,
+          // An empty client is no client, not a blank line on every card.
+          clientName: Value(client.isEmpty ? null : client),
+          status: Value(_status),
+        ));
+      }
       if (mounted) Navigator.of(context).pop(project);
     } catch (e, st) {
       if (mounted) setState(() => _error = friendlyError(e, st));
@@ -89,6 +113,7 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final sites = ref.watch(projectsProvider(widget.companyId)).value ?? const <Project>[];
     return Padding(
       padding: EdgeInsets.fromLTRB(24, 0, 24, 24 + MediaQuery.viewInsetsOf(context).bottom),
       child: SingleChildScrollView(
@@ -99,7 +124,7 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
             Text(tr('New project'), style: theme.textTheme.titleLarge),
             const SizedBox(height: 4),
             Text(
-              "One project for each site. Its daily reports, labour, materials, money and photos stay together.",
+              tr("One project for each site. Its daily reports, labour, materials, money and photos stay together."),
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 20),
@@ -141,6 +166,51 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
             const SizedBox(height: 6),
             Text(projectStatusHint(_status),
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+            if (sites.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: _from?.id ?? '',
+                decoration: InputDecoration(
+                  labelText: tr('Start from'),
+                  prefixIcon: const Icon(Icons.copy_all_outlined),
+                ),
+                items: [
+                  DropdownMenuItem(value: '', child: Text(tr('An empty site'))),
+                  for (final p in sites)
+                    DropdownMenuItem(value: p.id, child: Text(p.name, overflow: TextOverflow.ellipsis)),
+                ],
+                onChanged: (v) => setState(() => _from = sites.where((p) => p.id == v).firstOrNull),
+              ),
+              if (_from != null) ...[
+                const SizedBox(height: 4),
+                Text(tr('Copies the set-up only. Nothing that happened on that site comes across.'),
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                CheckboxListTile(
+                  dense: true,
+                  value: _copyTasks,
+                  onChanged: (v) => setState(() => _copyTasks = v ?? true),
+                  title: Text(tr('Task list')),
+                ),
+                CheckboxListTile(
+                  dense: true,
+                  value: _copyWorkers,
+                  onChanged: (v) => setState(() => _copyWorkers = v ?? true),
+                  title: Text(tr('Workers and wages')),
+                ),
+                CheckboxListTile(
+                  dense: true,
+                  value: _copyEstimate,
+                  onChanged: (v) => setState(() => _copyEstimate = v ?? true),
+                  title: Text(tr('Estimate items and rates')),
+                ),
+                CheckboxListTile(
+                  dense: true,
+                  value: _copyTeam,
+                  onChanged: (v) => setState(() => _copyTeam = v ?? true),
+                  title: Text(tr('Site team and approval limits')),
+                ),
+              ],
+            ],
             if (_error != null) ...[
               const SizedBox(height: 12),
               FormMessage(_error!),

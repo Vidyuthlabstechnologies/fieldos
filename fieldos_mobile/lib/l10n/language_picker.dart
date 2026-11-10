@@ -24,18 +24,33 @@ Future<void> chooseLanguage(WidgetRef ref, AppLanguage l) async {
   rebuildAllWidgets();
 }
 
+/// Turns the screens' own language on or off ("Show screens in Telugu").
+Future<void> setScreensInLanguage(WidgetRef ref, bool on) async {
+  await ref.read(screensInLanguageProvider.notifier).set(on);
+  rebuildAllWidgets();
+}
+
 Future<void> showLanguagePicker(BuildContext context, WidgetRef ref) async {
   final current = ref.read(languageProvider);
   final picked = await showModalBottomSheet<AppLanguage>(
     context: context,
     showDragHandle: true,
+    isScrollControlled: true,
+    // Six languages: scroll on short phones and in landscape.
     builder: (ctx) => SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.8),
+        child: ListView(
+        shrinkWrap: true,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-            child: Text(tr('App language'), style: Theme.of(ctx).textTheme.titleLarge),
+            child: Text(tr('Your language'), style: Theme.of(ctx).textTheme.titleLarge),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+            child: Text(tr('Mitra talks with you in it, mixed with English, and voice input listens for it.'),
+                style: Theme.of(ctx).textTheme.bodySmall),
           ),
           for (final l in AppLanguage.values)
             ListTile(
@@ -47,12 +62,13 @@ Future<void> showLanguagePicker(BuildContext context, WidgetRef ref) async {
           const SizedBox(height: 8),
         ],
       ),
+      ),
     ),
   );
   if (picked != null && picked != current) await chooseLanguage(ref, picked);
 }
 
-/// English · हिन्दी · తెలుగు, the current one highlighted.
+/// Every language in its own script, the current one highlighted.
 class LanguageChooserRow extends ConsumerWidget {
   const LanguageChooserRow({super.key, this.color});
   final Color? color;

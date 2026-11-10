@@ -87,8 +87,11 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
     await _dictation.start(_language);
   }
 
-  /// The phone's own language when it's one we offer, else English.
+  /// The app's language when it is not English (someone who chose Tamil
+  /// will speak Tamil), else the phone's own language when we offer it,
+  /// else English.
   SpeechLanguage _defaultLanguage() {
+    if (spokenLanguage != AppLanguage.en) return speechLanguageFor(speechCodeFor(spokenLanguage));
     final tag = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
     return speechLanguages.firstWhere((l) => l.code.startsWith('$tag-'), orElse: () => speechLanguages.first);
   }
@@ -202,13 +205,16 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
     setState(() {
       _recording = false;
       _recLevel = 0;
-      _sending = 'Turning your recording into text…';
+      _sending = tr('Turning your recording into text…');
     });
     final result = await ref.read(voiceDprAgentProvider).run({
       'audioBytes': wav,
       'languageCode': _language.sarvamCode,
       'onProgress': (int done, int total) {
-        if (mounted && total > 1) setState(() => _sending = 'Turning your recording into text… ${done + 1 > total ? total : done + 1} of $total');
+        if (mounted && total > 1) {
+          setState(() => _sending = trf('Turning your recording into text… {n} of {total}',
+              {'n': done + 1 > total ? total : done + 1, 'total': total}));
+        }
       },
     });
     if (!mounted) return;
@@ -278,10 +284,10 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
     final finishing = d.state == DictationState.finishing;
     final status = switch (d.state) {
       DictationState.starting => tr('Starting the microphone…'),
-      DictationState.listening => 'Listening · ${fmtClock(d.elapsed)}',
+      DictationState.listening => trf('Listening · {time}', {'time': fmtClock(d.elapsed)}),
       DictationState.finishing => tr('Getting the last words…'),
       DictationState.paused => d.pausedForSilence ? tr('Paused after a long silence. Tap the mic to carry on.') : tr('Paused. Tap the mic to carry on.'),
-      _ => d.problem == null ? 'Tap the mic and speak' : '',
+      _ => d.problem == null ? tr('Tap the mic and speak') : '',
     };
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -319,6 +325,9 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
   String _assistantHint() => switch (_language.code) {
         'hi-IN' => 'जो काम करवाना है, आम बोली में बोलिए। जैसे: "नरपल्ली साइट पर सीमेंट के लिए 5000 रुपये खर्च लिखो"',
         'te-IN' => 'మీకు ఏం కావాలో మామూలుగా చెప్పండి. ఉదా: "నరపల్లి సైట్‌లో సిమెంట్‌కి 5000 రూపాయల ఖర్చు రాయి"',
+        'ta-IN' => 'என்ன வேண்டும் என்று சாதாரணமாகச் சொல்லுங்கள். உதா: "நரபள்ளி சைட்டில் சிமெண்டுக்கு 5000 ரூபாய் செலவு எழுது"',
+        'kn-IN' => 'ನಿಮಗೆ ಏನು ಬೇಕು ಎಂದು ಸಾಮಾನ್ಯವಾಗಿ ಹೇಳಿ. ಉದಾ: "ನರಪಲ್ಲಿ ಸೈಟ್‌ನಲ್ಲಿ ಸಿಮೆಂಟ್‌ಗೆ 5000 ರೂಪಾಯಿ ಖರ್ಚು ಬರೆಯಿರಿ"',
+        'mr-IN' => 'काय करायचे ते साध्या भाषेत सांगा. उदा: "नरपल्ली साइटवर सिमेंटसाठी 5000 रुपये खर्च लिहा"',
         _ => 'Say what you need, the way you would tell a colleague. For example: '
             '"Add 5,000 rupees for cement at the Narapally site."',
       };
@@ -326,6 +335,9 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
   String _reportHint() => switch (_language.code) {
         'hi-IN' => 'आज क्या काम हुआ, कितने मजदूर थे, मौसम कैसा था और कोई समस्या बताइए। जैसे: "दूसरी मंजिल पर प्लास्टर पूरा हुआ। 12 मिस्त्री और 8 हेल्पर। धूप थी। 3 बजे सीमेंट खत्म हो गया।"',
         'te-IN' => 'ఈరోజు జరిగిన పని, ఎంత మంది పనిచేశారు, వాతావరణం, ఏమైనా సమస్యలు చెప్పండి. ఉదా: "రెండో అంతస్తులో ప్లాస్టరింగ్ పూర్తయింది. 12 మంది మేస్త్రీలు, 8 మంది హెల్పర్లు. ఎండగా ఉంది. 3 గంటలకు సిమెంట్ అయిపోయింది."',
+        'ta-IN' => 'இன்று என்ன வேலை நடந்தது, எத்தனை பேர் வேலை செய்தனர், வானிலை, ஏதேனும் பிரச்சனை சொல்லுங்கள். உதா: "இரண்டாம் தளத்தில் பூச்சு வேலை முடிந்தது. 12 மேஸ்திரிகள், 8 உதவியாளர்கள். வெயில். 3 மணிக்கு சிமெண்ட் தீர்ந்தது."',
+        'kn-IN' => 'ಇಂದು ಏನು ಕೆಲಸ ಆಯಿತು, ಎಷ್ಟು ಜನ ಕೆಲಸ ಮಾಡಿದರು, ಹವಾಮಾನ, ಏನಾದರೂ ಸಮಸ್ಯೆ ಹೇಳಿ. ಉದಾ: "ಎರಡನೇ ಮಹಡಿಯಲ್ಲಿ ಪ್ಲಾಸ್ಟರಿಂಗ್ ಮುಗಿಯಿತು. 12 ಮೇಸ್ತ್ರಿಗಳು, 8 ಸಹಾಯಕರು. ಬಿಸಿಲು. 3 ಗಂಟೆಗೆ ಸಿಮೆಂಟ್ ಖಾಲಿಯಾಯಿತು."',
+        'mr-IN' => 'आज काय काम झाले, किती लोकांनी काम केले, हवामान कसे होते आणि काही अडचण असेल तर सांगा. उदा: "दुसऱ्या मजल्यावर प्लास्टर पूर्ण झाले. 12 मिस्त्री आणि 8 हेल्पर. ऊन होते. 3 वाजता सिमेंट संपले."',
         _ => 'Say what was done today, how many people worked, the weather and any problems. For example: '
             '"Second floor plastering done. 12 masons and 8 helpers. Sunny. Cement ran out at 3 pm."',
       };
@@ -340,8 +352,8 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(color: theme.colorScheme.secondaryContainer, borderRadius: BorderRadius.circular(12)),
           child: Text(
-            "This phone can't turn ${_language.englishName} speech into text itself, so FieldOS will record you and "
-            'send the recording to Sarvam when you stop. This needs internet.',
+            trf("This phone can't turn {language} speech into text itself, so FieldOS will record you and "
+                'send the recording to Sarvam when you stop. This needs internet.', {'language': _languageName(_language)}),
             style: TextStyle(color: theme.colorScheme.onSecondaryContainer),
           ),
         ),
@@ -359,8 +371,8 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
           sending
               ? _sending!
               : _recording
-                  ? 'Recording · ${fmtClock(_recElapsed)} · tap to stop and send'
-                  : 'Tap to start recording',
+                  ? trf('Recording · {time} · tap to stop and send', {'time': fmtClock(_recElapsed)})
+                  : tr('Tap to start recording'),
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
@@ -474,10 +486,10 @@ class _ProblemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final ios = Platform.isIOS;
-    final lang = language.englishName;
+    final lang = _languageName(language);
     final (String title, String body, List<Widget> actions) = switch (problem) {
       SpeechProblem.permissionDenied => (
-          'Microphone is off for FieldOS',
+          tr('Microphone is off for FieldOS'),
           ios
               ? tr('Allow the microphone and speech recognition for FieldOS in Settings, then come back.')
               : tr('Allow the microphone for FieldOS in Settings, then come back.'),
@@ -487,24 +499,30 @@ class _ProblemCard extends StatelessWidget {
           ],
         ),
       SpeechProblem.needsLanguagePack => (
-          ios ? 'This needs internet for $lang' : 'Get the $lang speech pack to work offline',
           ios
-              ? 'This iPhone needs internet to recognise $lang speech. Connect and try again, or type the report.'
-              : 'There is no internet, and the offline speech pack for $lang is not on this phone yet. '
-                  'Connect once, then download it: Google app › Settings › Voice › Offline speech recognition › $lang. '
-                  'After that, voice reports work anywhere on site.',
+              ? trf('This needs internet for {language}', {'language': lang})
+              : trf('Get the {language} speech pack to work offline', {'language': lang}),
+          ios
+              ? trf('This iPhone needs internet to recognise {language} speech. Connect and try again, or type the report.',
+                  {'language': lang})
+              : trf('There is no internet, and the offline speech pack for {language} is not on this phone yet. '
+                  'Connect once, then download it: Google app › Settings › Voice › Offline speech recognition › '
+                  '{englishName}. After that, voice reports work anywhere on site.',
+                  {'language': lang, 'englishName': language.englishName}),
           [TextButton(onPressed: onRetry, child: Text(tr('Try again')))],
         ),
       SpeechProblem.languageUnsupported || SpeechProblem.noRecognizer => (
-          problem == SpeechProblem.noRecognizer ? 'This phone has no speech recognition' : "This phone can't do $lang yet",
+          problem == SpeechProblem.noRecognizer
+              ? tr('This phone has no speech recognition')
+              : trf("This phone can't do {language} yet", {'language': lang}),
           problem == SpeechProblem.noRecognizer
               ? tr('Install or update the Google app from the Play Store, then try again. You can also type the report.')
               : tr('Update the Google app from the Play Store, pick another language above, or type the report.'),
           [TextButton(onPressed: onRetry, child: Text(tr('Try again')))],
         ),
       SpeechProblem.other => (
-          'Listening stopped',
-          'The phone stopped listening. Tap Try again, or type the report.',
+          tr('Listening stopped'),
+          tr('The phone stopped listening. Tap Try again, or type the report.'),
           [TextButton(onPressed: onRetry, child: Text(tr('Try again')))],
         ),
     };
@@ -526,3 +544,7 @@ class _ProblemCard extends StatelessWidget {
     );
   }
 }
+
+/// A speech language's name the way the app's language says it: its own
+/// script in an Indian-language app, the English name in English.
+String _languageName(SpeechLanguage l) => currentLanguage == AppLanguage.en ? l.englishName : l.name;

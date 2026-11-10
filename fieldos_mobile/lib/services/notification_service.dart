@@ -8,9 +8,11 @@
 /// minutes while open), not the instant a colleague acts.
 library;
 
+import 'package:flutter/widgets.dart' show GlobalKey, NavigatorState;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/features/reminders/reminders.dart';
 
 /// What to show for one newly-arrived row, or null to stay quiet. Kept a
@@ -35,18 +37,35 @@ import 'package:fieldos_mobile/features/reminders/reminders.dart';
       // already in its local database, so it never reaches here as "new".
       final severity = text(row['severity'], 20);
       return (
-        title: severity.isEmpty ? 'New issue' : 'New $severity-severity issue',
+        title: switch (severity.toLowerCase()) {
+          'low' => tr('New issue (low)'),
+          'medium' => tr('New issue (medium)'),
+          'high' => tr('New issue (high)'),
+          'critical' => tr('New issue (critical)'),
+          _ => tr('New issue'),
+        },
         body: text(row['description']),
       );
     case 'approvals':
       if (row['requested_by'] == myUserId) return null;
       if (row['status'] != null && row['status'] != 'pending') return null;
-      final kind = text(row['entity_type'], 40).replaceAll('_', ' ');
-      return (title: 'Approval requested', body: kind.isEmpty ? 'A request is waiting for a decision' : 'A $kind is waiting for a decision');
+      final kind = text(row['entity_type'], 40);
+      return (
+        title: tr('Approval requested'),
+        body: switch (kind) {
+          'budget_overrun' => tr('A site over budget is waiting for a decision'),
+          'purchase_order' => tr('A purchase order is waiting for a decision'),
+          'material_receipt' => tr('A material receipt is waiting for a decision'),
+          _ => tr('A request is waiting for a decision'),
+        },
+      );
     default:
       return null;
   }
 }
+
+/// The app's navigator, so a tapped reminder can open its screen.
+final appNavigatorKey = GlobalKey<NavigatorState>();
 
 class NotificationService {
   NotificationService([FlutterLocalNotificationsPlugin? plugin])
@@ -64,6 +83,10 @@ class NotificationService {
     priority: Priority.high,
   );
 
+  /// Called with a tapped reminder's payload (e.g. `today:<projectId>`),
+  /// also when the tap launched the app.
+  static void Function(String payload)? onTap;
+
   Future<void> init() async {
     if (_ready) return;
     await _plugin.initialize(
@@ -72,7 +95,14 @@ class NotificationService {
         // iOS asks for alert/badge/sound permission on initialise.
         iOS: DarwinInitializationSettings(),
       ),
+      onDidReceiveNotificationResponse: (r) {
+        final p = r.payload;
+        if (p != null && p.isNotEmpty) onTap?.call(p);
+      },
     );
+    final launch = await _plugin.getNotificationAppLaunchDetails();
+    final p = launch?.notificationResponse?.payload;
+    if ((launch?.didNotificationLaunchApp ?? false) && p != null && p.isNotEmpty) onTap?.call(p);
     await _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
@@ -116,6 +146,7 @@ class NotificationService {
         scheduledDate: tz.TZDateTime.from(r.at, location),
         notificationDetails: const NotificationDetails(android: _reminderChannel, iOS: DarwinNotificationDetails()),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        payload: r.payload,
       );
     }
   }

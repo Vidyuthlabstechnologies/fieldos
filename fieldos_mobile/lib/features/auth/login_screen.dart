@@ -279,7 +279,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               decoration: InputDecoration(
                 labelText: tr('Username'),
                 prefixIcon: const Icon(Icons.person_outline),
-                helperText: _registering ? 'For example ravi, or your phone number' : null,
+                helperText: _registering ? tr('For example ravi, or your phone number') : null,
                 helperMaxLines: 2,
               ),
             ),
@@ -294,7 +294,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               decoration: InputDecoration(
                 labelText: tr('Password'),
                 prefixIcon: const Icon(Icons.lock_outline),
-                helperText: _registering ? 'At least ${AuthService.minPasswordLength} characters' : null,
+                helperText: _registering ? trf('At least {n} characters', {'n': AuthService.minPasswordLength}) : null,
                 suffixIcon: IconButton(
                   tooltip: _showPassword ? tr('Hide password') : tr('Show password'),
                   icon: Icon(_showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined),

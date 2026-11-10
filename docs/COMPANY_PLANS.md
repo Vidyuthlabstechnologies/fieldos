@@ -71,7 +71,7 @@ it could never send); `company_plan_usage` shows any company over its limit.
 
 ## Pieces
 
-- `supabase/migrations/20261110000000_company_plans.sql`: table (no app access),
+- `supabase/migrations/20261111130000_company_plans.sql`: table (no app access),
   `my_company_plans()` for phones, `grant_company_plan` / `end_company_plan` /
   `company_plan_covers` / `company_plan_usage` for the service role only.
   Test: `supabase/tests/company_plans_test.sql`.

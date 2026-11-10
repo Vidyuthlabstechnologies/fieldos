@@ -121,7 +121,7 @@ class _ProjectChatViewState extends ConsumerState<ProjectChatView> {
     final me = ref.watch(sessionProvider).user?.id;
     final messages = ref.watch(projectMessagesProvider(widget.projectId));
     final signedIn = ref.watch(cloudSyncServiceProvider).isSignedIn;
-    final reported = ref.watch(reportedMessagesProvider).valueOrNull ?? const <String>{};
+    final reported = ref.watch(reportedMessagesProvider).value ?? const <String>{};
 
     return Column(
       children: [
@@ -239,13 +239,16 @@ class ReportMessageDialog extends ConsumerStatefulWidget {
   ConsumerState<ReportMessageDialog> createState() => _ReportMessageDialogState();
 }
 
+/// Why a message is reported, as English keys shown through tr().
+const reportReasonLabels = {
+  ReportReason.abuse: 'Abuse or threats',
+  ReportReason.spam: 'Spam or fraud',
+  ReportReason.inappropriate: 'Sexual or offensive content',
+  ReportReason.other: 'Something else',
+};
+
 class _ReportMessageDialogState extends ConsumerState<ReportMessageDialog> {
-  static const _labels = {
-    ReportReason.abuse: 'Abuse or threats',
-    ReportReason.spam: 'Spam or fraud',
-    ReportReason.inappropriate: 'Sexual or offensive content',
-    ReportReason.other: 'Something else',
-  };
+  static const _labels = reportReasonLabels;
   ReportReason? _reason;
   final _details = TextEditingController();
   bool _busy = false;

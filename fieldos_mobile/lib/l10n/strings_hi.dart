@@ -3,6 +3,11 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_commercial_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_crm_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_wh_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_daily_hi.dart';
+
 const Map<String, String> stringsHi = {
   'Try again': 'फिर से कोशिश करें',
   'Approvals': 'मंज़ूरियाँ',
@@ -1140,4 +1145,1248 @@ const Map<String, String> stringsHi = {
   'Your company has a FieldOS plan?': 'आपकी कंपनी के पास FieldOS प्लान है?',
   'Sign in and join your company with the code from its owner. Everyone in the company is included.': 'साइन इन करें और मालिक से मिले कोड से अपनी कंपनी से जुड़ें। कंपनी के सभी लोग इसमें शामिल हैं।',
   'Sign in to my company': 'मेरी कंपनी में साइन इन करें',
+
+  // Read aloud
+  'Stop':
+      'रोकें',
+
+  // Home quick actions
+  'Attendance':
+      'हाज़िरी',
+  'Which site?':
+      'कौन सी साइट?',
+
+  // Home quick actions
+  'Expense':
+      'खर्च',
+
+  // Everyday screens: tasks, attendance, issues and status tags
+  '1 day late':
+      '1 दिन देर',
+  '1 issue':
+      '1 समस्या',
+  '1 person':
+      '1 व्यक्ति',
+  'Away from the site area':
+      'साइट क्षेत्र से बाहर',
+  'Broken down':
+      'खराब',
+  'Completed':
+      'पूरा',
+  'Could not get a GPS fix.':
+      'GPS लोकेशन नहीं मिली।',
+  'Due date':
+      'आखिरी तारीख',
+  'Due {date}':
+      'आखिरी तारीख {date}',
+  'Failed':
+      'फेल',
+  'Fixed {date}':
+      '{date} को ठीक हुआ',
+  'Forecast {date}':
+      'अनुमान {date}',
+  'From a daily report':
+      'दैनिक रिपोर्ट से',
+  'GPS fix, accurate to about {m} m':
+      'GPS मिला, लगभग {m} मीटर तक सही',
+  'Getting your location…':
+      'आपकी लोकेशन ली जा रही है…',
+  'Give the task a name.':
+      'काम का नाम लिखें।',
+  'Handed over':
+      'सौंप दिया',
+  'Heading 1 day late':
+      '1 दिन देर होने वाला है',
+  'Heading {n} days late':
+      '{n} दिन देर होने वाला है',
+  'In maintenance':
+      'मरम्मत में',
+  'In progress':
+      'चल रहा है',
+  'In {time}':
+      'आए {time}',
+  'Late ({n})':
+      'देर ({n})',
+  'No site area set, so punches are not checked. Set it while standing at the site.':
+      'साइट क्षेत्र तय नहीं है, इसलिए हाज़िरी की जगह जाँची नहीं जाती। साइट पर खड़े होकर इसे सेट करें।',
+  'Not active':
+      'चालू नहीं',
+  'Not checked':
+      'जाँचा नहीं',
+  'Not started yet':
+      'अभी शुरू नहीं हुआ',
+  'Nothing is late. Tasks show here when they pass their due date, or when their pace means they will finish after it.':
+      'कुछ भी देर से नहीं है। जब कोई काम आखिरी तारीख पार करे, या उसकी रफ़्तार से वह देर से खत्म होगा, तब वह यहाँ दिखेगा।',
+  'On hold':
+      'रुका हुआ',
+  'On site':
+      'साइट पर',
+  'Open':
+      'खुला',
+  'Partly passed':
+      'कुछ पास',
+  'Passed':
+      'पास',
+  'Planning':
+      'योजना में',
+  'Punch in {n} of {total}':
+      '{total} में से {n} की हाज़िरी लगाएँ',
+  'Raised {date}':
+      '{date} को उठाया',
+  'Report saved, and {n} problems raised as issues.':
+      'रिपोर्ट सेव हुई, और {n} समस्याएँ दर्ज हुईं।',
+  'Report saved.':
+      'रिपोर्ट सेव हुई।',
+  'Set when they left. Until then each counts as half a day.':
+      'वे कब गए, यह भरें। तब तक हर एक आधा दिन गिना जाएगा।',
+  'Show earlier days ({n} more)':
+      'पिछले दिन दिखाएँ ({n} और)',
+  'Site area: within {m} m of the point you set. Punches outside it are marked.':
+      'साइट क्षेत्र: आपके तय किए बिंदु से {m} मीटर तक। इसके बाहर की हाज़िरी पर निशान लगेगा।',
+  'Start date':
+      'शुरू की तारीख',
+  'Start {date}':
+      'शुरू {date}',
+  'The due date is before the start date.':
+      'आखिरी तारीख शुरू की तारीख से पहले है।',
+  'When did {name} leave on {date}?':
+      '{name} {date} को कब गए?',
+  'When does work start?':
+      'काम कब शुरू होगा?',
+  'When must it be finished?':
+      'कब तक पूरा होना चाहिए?',
+  'Work has stopped for now':
+      'काम अभी रुका है',
+  'Work is going on at the site':
+      'साइट पर काम चल रहा है',
+  'done {date}':
+      '{date} को हुआ',
+  'due {date}':
+      '{date} तक',
+  'not out yet':
+      'अभी गए नहीं',
+  'out {time}':
+      'गए {time}',
+  '{done} of {total} tasks done':
+      '{total} में से {done} काम पूरे',
+  '{n} days late':
+      '{n} दिन देर',
+  '{n} issues':
+      '{n} समस्याएँ',
+  '{n}% complete':
+      '{n}% पूरा',
+
+  // Task status and expense categories shown through tr() from data
+  'To do':
+      'करना है',
+  'Transport':
+      'ढुलाई',
+  'Equipment hire':
+      'मशीन किराया',
+  'Food & tea':
+      'खाना और चाय',
+  'Other':
+      'अन्य',
+
+  // Sign-in, company setup, plans page, sync and cloud error messages
+  '1 day':
+      '1 दिन',
+  '1 month':
+      '1 महीना',
+  '1 week':
+      '1 हफ़्ता',
+  '1 year':
+      '1 साल',
+  '{n} months':
+      '{n} महीने',
+  '{n} weeks':
+      '{n} हफ़्ते',
+  '{n} years':
+      '{n} साल',
+  'Access code':
+      'एक्सेस कोड',
+  'Approve it in your UPI or bank app. FieldOS opens by itself once {store} confirms the payment, usually within a few minutes.':
+      'अपने UPI या बैंक ऐप में इसे मंज़ूर करें। {store} के पेमेंट पक्का करते ही FieldOS अपने आप खुल जाएगा, आमतौर पर कुछ मिनटों में।',
+  'At least {n} characters':
+      'कम से कम {n} अक्षर',
+  'Check again':
+      'फिर से जाँचें',
+  'Choose a plan':
+      'प्लान चुनें',
+  'Choose your plan':
+      'अपना प्लान चुनें',
+  'Confirm your email first: open the link we sent you, then sign in here.':
+      'पहले अपना ईमेल पक्का करें: हमारा भेजा लिंक खोलें, फिर यहाँ साइन इन करें।',
+  'Copy last report ({day})':
+      'पिछली रिपोर्ट कॉपी करें ({day})',
+  'Could not check with {store} right now. Please try again in a minute.':
+      'अभी {store} से जाँच नहीं हो पाई। एक मिनट बाद फिर कोशिश करें।',
+  'Could not check your subscription with {store} right now. Please try again in a minute.':
+      'अभी {store} से आपकी सदस्यता जाँच नहीं हो पाई। एक मिनट बाद फिर कोशिश करें।',
+  'Could not load the plans from {store}. Please try again, or send a bug report from the menu.':
+      '{store} से प्लान नहीं आ पाए। फिर कोशिश करें, या मेन्यू से बग रिपोर्ट भेजें।',
+  'Could not open {store}. Open {path} yourself.':
+      '{store} नहीं खुला। खुद {path} खोलें।',
+  'Download {language} translation?':
+      '{language} अनुवाद डाउनलोड करें?',
+  'Enter access code':
+      'एक्सेस कोड डालें',
+  'Every 3 months':
+      'हर 3 महीने',
+  'Every 6 months':
+      'हर 6 महीने',
+  'For example ravi, or your phone number':
+      'जैसे ravi, या आपका फ़ोन नंबर',
+  'Heard in {language} by Sarvam. Check the words before saving.':
+      'Sarvam ने {language} में सुना। सेव करने से पहले शब्द जाँच लें।',
+  'Heard in {language} on this phone. Check the words before saving.':
+      'इस फ़ोन ने {language} में सुना। सेव करने से पहले शब्द जाँच लें।',
+  'Keep every site on track':
+      'हर साइट को सही रास्ते पर रखें',
+  'Last synced: {last} · Waiting to send: {n}':
+      'आखिरी सिंक: {last} · भेजना बाकी: {n}',
+  'Made in Hyderabad by {company}':
+      '{company} द्वारा हैदराबाद में बना',
+  'Manage or cancel':
+      'बदलें या रद्द करें',
+  'Monthly':
+      'मासिक',
+  'Need help? {email}':
+      'मदद चाहिए? {email}',
+  'New cloud accounts are switched off for now. Write to us at the support address and we will help.':
+      'नए क्लाउड खाते अभी बंद हैं। सपोर्ट पते पर हमें लिखें, हम मदद करेंगे।',
+  'No FieldOS subscription was found on this {store} account.':
+      'इस {store} खाते पर FieldOS सदस्यता नहीं मिली।',
+  'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.':
+      'इस {store} खाते पर FieldOS सदस्यता नहीं मिली। अगर दूसरे खाते से ली थी, तो {store} में उस पर जाएँ और फिर कोशिश करें।',
+  'No internet connection. Your work is saved on this phone; try again when you are online.':
+      'इंटरनेट नहीं है। आपका काम इस फ़ोन में सेव है; इंटरनेट आने पर फिर कोशिश करें।',
+  'Not {name}? Log out':
+      '{name} नहीं हैं? लॉग आउट करें',
+  'Only for people the FieldOS team gave a code to, such as app reviewers.':
+      'सिर्फ़ उन लोगों के लिए जिन्हें FieldOS टीम ने कोड दिया है, जैसे ऐप समीक्षक।',
+  'Only the company owner can change roles.':
+      'सिर्फ़ कंपनी मालिक भूमिका बदल सकते हैं।',
+  'Only the company owner can make a new join code.':
+      'सिर्फ़ कंपनी मालिक नया जॉइन कोड बना सकते हैं।',
+  'Only the company owner can remove people from the team.':
+      'सिर्फ़ कंपनी मालिक टीम से लोगों को हटा सकते हैं।',
+  'Payment waiting for approval':
+      'पेमेंट मंज़ूरी का इंतज़ार कर रहा है',
+  'Put {company} on the cloud':
+      '{company} को क्लाउड पर डालें',
+  'Restore purchase':
+      'खरीद वापस लाएँ',
+  'Sign in from Team & sync first.':
+      'पहले टीम और सिंक से साइन इन करें।',
+  'Signed in as {email}':
+      '{email} से साइन इन',
+  'Something went wrong. Please try again, or send a bug report from the menu.':
+      'कुछ गड़बड़ हो गई। फिर कोशिश करें, या मेन्यू से बग रिपोर्ट भेजें।',
+  'Start {length} free trial':
+      '{length} का मुफ़्त ट्रायल शुरू करें',
+  'Still waiting for the payment. It can take a few minutes after you approve it.':
+      'अभी पेमेंट का इंतज़ार है। मंज़ूरी के बाद कुछ मिनट लग सकते हैं।',
+  'Subscribe for {price}':
+      '{price} में सदस्यता लें',
+  'Terms':
+      'शर्तें',
+  'That code is not right, or it is too old. Check it, or send a new code.':
+      'यह कोड सही नहीं है, या पुराना हो गया है। जाँचें, या नया कोड भेजें।',
+  'That email address cannot be used. Check it, or try another.':
+      'यह ईमेल पता इस्तेमाल नहीं हो सकता। जाँचें, या दूसरा आज़माएँ।',
+  'That email already has a FieldOS cloud account. Sign in with its password.':
+      'इस ईमेल का FieldOS क्लाउड खाता पहले से है। उसके पासवर्ड से साइन इन करें।',
+  'That email and password do not match. Check them and try again.':
+      'ईमेल और पासवर्ड मेल नहीं खाते। जाँचकर फिर कोशिश करें।',
+  'That is already your password. Choose a different one, or sign in with it.':
+      'यह पहले से आपका पासवर्ड है। दूसरा चुनें, या इसी से साइन इन करें।',
+  'That join code is not right. Check it with the person who shared it: it is 10 letters and numbers.':
+      'यह जॉइन कोड सही नहीं है। भेजने वाले से जाँचें: इसमें 10 अक्षर और अंक होते हैं।',
+  'That took too long. Check your connection and try again.':
+      'बहुत देर लगी। अपना कनेक्शन जाँचें और फिर कोशिश करें।',
+  'The FieldOS cloud is not answering right now. Your work is saved on this phone; try again in a few minutes.':
+      'FieldOS क्लाउड अभी जवाब नहीं दे रहा। आपका काम इस फ़ोन में सेव है; कुछ मिनट बाद फिर कोशिश करें।',
+  'The FieldOS team gave you this access, so there is nothing to pay or cancel. When it ends, FieldOS asks you to choose a plan, and your records stay on this phone.':
+      'यह एक्सेस FieldOS टीम ने दिया है, इसलिए कुछ भरना या रद्द करना नहीं है। खत्म होने पर FieldOS प्लान चुनने को कहेगा, और आपके रिकॉर्ड इस फ़ोन में रहेंगे।',
+  'The company owner cannot be removed from the team.':
+      'कंपनी मालिक को टीम से हटाया नहीं जा सकता।',
+  'The purchase did not finish. Please try again.':
+      'खरीद पूरी नहीं हुई। फिर कोशिश करें।',
+  'The subscription is not on sale yet. Please try again later.':
+      'सदस्यता अभी बिक्री पर नहीं है। बाद में फिर कोशिश करें।',
+  'This company is already on the cloud under another account. Ask its owner for a join code.':
+      'यह कंपनी पहले से दूसरे खाते से क्लाउड पर है। इसके मालिक से जॉइन कोड माँगें।',
+  'This is a one-time download of about 30 MB. After that, {language} reports translate to English on this phone, with no internet and no cost.':
+      'यह लगभग 30 MB का एक बार का डाउनलोड है। उसके बाद {language} रिपोर्ट इसी फ़ोन पर अंग्रेज़ी में बदलेंगी, बिना इंटरनेट और बिना खर्च।',
+  'To cancel, open {path}. You keep FieldOS Pro until the end of the period you have paid for, and your records stay on this phone.':
+      'रद्द करने के लिए {path} खोलें। जितने समय का भुगतान किया है, उसके अंत तक FieldOS Pro रहेगा, और आपके रिकॉर्ड इस फ़ोन में रहेंगे।',
+  'Too many tries in a short time. Wait a few minutes, then try again.':
+      'थोड़े समय में बहुत कोशिशें हुईं। कुछ मिनट रुककर फिर कोशिश करें।',
+  'Too many wrong join codes. Wait an hour, then try again with the code from your company owner.':
+      'बहुत सारे गलत जॉइन कोड। एक घंटा रुकें, फिर कंपनी मालिक के कोड से कोशिश करें।',
+  'Translated from {language} on this phone':
+      'इस फ़ोन पर {language} से अनुवाद',
+  'Try it free for {length}':
+      '{length} मुफ़्त आज़माएँ',
+  'Unlock':
+      'खोलें',
+  'Update payment method':
+      'पेमेंट तरीका बदलें',
+  'Versions — {name}':
+      'संस्करण — {name}',
+  'Weekly':
+      'साप्ताहिक',
+  'Welcome to FieldOS':
+      'FieldOS में आपका स्वागत है',
+  'Welcome, {name}':
+      'स्वागत है, {name}',
+  'Which day is this report for?':
+      'यह रिपोर्ट किस दिन की है?',
+  'Works out to {price} a month':
+      'महीने के {price} पड़ते हैं',
+  'Yearly':
+      'सालाना',
+  'You are the owner, so your own role stays the same.':
+      'आप मालिक हैं, इसलिए आपकी भूमिका वही रहेगी।',
+  'Your cloud sign-in has ended. Sign in again from Team & sync.':
+      'आपका क्लाउड साइन-इन खत्म हो गया। टीम और सिंक से फिर साइन इन करें।',
+  'Your plan':
+      'आपका प्लान',
+  'This needs a FieldOS server update that is on its way. Your work is safe on the phone; try again in a day or two.':
+      'FieldOS सर्वर अपडेट जल्द आ रहा है, यह उसके बाद चलेगा। आपका काम फ़ोन पर सुरक्षित है; एक-दो दिन में फिर कोशिश करें।',
+  'Your role in this company does not allow that. Ask the owner.':
+      'इस कंपनी में आपकी भूमिका में इसकी अनुमति नहीं है। मालिक से पूछें।',
+  'Your subscription is on this phone.':
+      'आपकी सदस्यता इस फ़ोन पर है।',
+  'and {n} more':
+      'और {n}',
+  'every 3 months':
+      'हर 3 महीने',
+  'every 6 months':
+      'हर 6 महीने',
+  'every month':
+      'हर महीने',
+  'every week':
+      'हर हफ़्ते',
+  'every year':
+      'हर साल',
+  'the original':
+      'मूल भाषा',
+  '{amount} payable':
+      '{amount} देय',
+  '{length} free':
+      '{length} मुफ़्त',
+  '{length} free, then {price}. {store} charges you when the trial ends unless you cancel at least 24 hours before. It renews {renews} until you cancel in {cancelIn}.':
+      '{length} मुफ़्त, फिर {price}। ट्रायल खत्म होने पर {store} पैसे लेगा, जब तक आप कम से कम 24 घंटे पहले रद्द न करें। यह {renews} अपने आप नया होगा, जब तक आप {cancelIn} में रद्द न करें।',
+  '{name} placed here, with a 100 m attendance geofence.':
+      '{name} यहाँ रखा गया, 100 मीटर हाज़िरी क्षेत्र के साथ।',
+  '{n} changes could not be sent after several tries.':
+      'कई कोशिशों के बाद भी {n} बदलाव नहीं भेजे जा सके।',
+  '{n} projects without a site location':
+      '{n} प्रोजेक्ट की साइट लोकेशन नहीं है',
+  '{price} a month':
+      '{price} महीना',
+  '{price} a week':
+      '{price} हफ़्ता',
+  '{price} a year':
+      '{price} साल',
+  '{price} every 3 months':
+      'हर 3 महीने {price}',
+  '{price} every 6 months':
+      'हर 6 महीने {price}',
+  '{price}, charged by {store} today. It renews {renews} until you cancel in {cancelIn}, at least 24 hours before the next payment.':
+      '{price}, आज {store} लेगा। यह {renews} अपने आप नया होगा, जब तक आप अगले भुगतान से कम से कम 24 घंटे पहले {cancelIn} में रद्द न करें।',
+
+  // Wage sheet
+  'Earned {earned} · Paid {paid} · Still due {due}':
+      'कमाई {earned} · दिया {paid} · बाकी {due}',
+  '{n} day ({h} h)':
+      '{n} दिन ({h} घंटे)',
+  '{n} days ({h} h)':
+      '{n} दिन ({h} घंटे)',
+  'OT {h} h':
+      'ओवरटाइम {h} घंटे',
+  'no daily wage set':
+      'रोज़ की मज़दूरी तय नहीं',
+  '{amount}/day':
+      '{amount}/दिन',
+  '1 missing punch-out (half day)':
+      '1 बार बाहर का पंच नहीं (आधा दिन)',
+  '{n} missing punch-outs (half days)':
+      '{n} बार बाहर का पंच नहीं (आधे दिन)',
+  'paid {amount}':
+      'दिया {amount}',
+  'advance':
+      'एडवांस',
+  'due':
+      'बाकी',
+  '{from} to {to}':
+      '{from} से {to}',
+
+  // Your language: voice language vs screen language
+  'Your language':
+      'आपकी भाषा',
+  'Mitra talks with you in it, mixed with English, and voice input listens for it.':
+      'Mitra आपसे इसी में, English मिलाकर बात करेगा, और बोलकर लिखना भी इसी को सुनेगा।',
+  'Show screens in {language}':
+      'स्क्रीन {language} में दिखाएँ',
+  'Off: screens stay in English. Mitra still talks in your language.':
+      'बंद: स्क्रीन English में रहेंगी। Mitra फिर भी आपकी भाषा में बोलेगा।',
+
+  // Settings section
+  'Language and voice':
+      'भाषा और आवाज़',
+  'Show this week\'s expenses':
+      'इस हफ़्ते के खर्च दिखाओ',
+  'What is due this week?':
+      'इस हफ़्ते क्या-क्या करना है?',
+  'Who was absent today?':
+      'आज कौन नहीं आया?',
+  'How much did labour cost this week?':
+      'इस हफ़्ते मज़दूरी पर कितना खर्च हुआ?',
+  'Any open issues on site?':
+      'साइट पर कोई खुली समस्या है?',
+  'Which materials are running low?':
+      'कौन सा माल कम पड़ रहा है?',
+  'What needs my approval?':
+      'मेरी मंज़ूरी के लिए क्या बाकी है?',
+  'You might ask next':
+      'आगे आप यह पूछ सकते हैं',
+  'Past chats':
+      'पिछली बातचीत',
+  'Delete all':
+      'सब मिटाएँ',
+  'No earlier chats yet. Your chats are kept on this phone.':
+      'अभी कोई पिछली बातचीत नहीं है। आपकी बातचीत इसी फ़ोन पर रहती है।',
+  // 1.7.1 bug-hunt: labels that used to stay in English.
+  '1 open issue':
+      '1 खुली समस्या',
+  '{n} open issues':
+      '{n} खुली समस्याएँ',
+  '1 worker punched in':
+      '1 मज़दूर पंच-इन हुआ',
+  '{n} workers punched in':
+      '{n} मज़दूर पंच-इन हुए',
+  'A material receipt is waiting for a decision':
+      'माल की रसीद फ़ैसले का इंतज़ार कर रही है',
+  'A purchase order is waiting for a decision':
+      'एक खरीद आदेश (PO) फ़ैसले का इंतज़ार कर रहा है',
+  'A request is waiting for a decision':
+      'एक अनुरोध फ़ैसले का इंतज़ार कर रहा है',
+  'A site over budget is waiting for a decision':
+      'बजट से ऊपर गई साइट फ़ैसले का इंतज़ार कर रही है',
+  'A new code is on its way to {email}. Codes stop working after an hour.':
+      '{email} पर नया कोड भेजा जा रहा है। कोड एक घंटे बाद काम नहीं करते।',
+  'A project':
+      'एक प्रोजेक्ट',
+  'A purchase is already in progress. Wait for it to finish.':
+      'एक खरीद पहले से चल रही है। उसके पूरा होने तक रुकें।',
+  'Access codes are 10 or more letters and numbers. Type it exactly as you got it.':
+      'एक्सेस कोड में 10 या ज़्यादा अक्षर और अंक होते हैं। जैसा मिला है, ठीक वैसा ही टाइप करें।',
+  'Account created for {email}.':
+      '{email} के लिए खाता बन गया।',
+  'Approval requested':
+      'मंज़ूरी माँगी गई',
+  'Choose a new password of at least 6 characters.':
+      'कम से कम 6 अक्षरों का नया पासवर्ड चुनें।',
+  'Companies where you are the only member are deleted from the cloud with all their records. Companies with other members keep their records, and ownership passes to another member.':
+      'जिन कंपनियों में आप अकेले सदस्य हैं, वे अपने सारे रिकॉर्ड के साथ क्लाउड से मिट जाती हैं। जिन कंपनियों में दूसरे सदस्य हैं, उनके रिकॉर्ड बने रहते हैं और मालिकाना हक़ किसी दूसरे सदस्य को मिल जाता है।',
+  'Could not sign in. Try again.':
+      'साइन इन नहीं हो पाया। फिर से कोशिश करें।',
+  'Data on this phone is not deleted. Uninstall the app to remove it.':
+      'इस फ़ोन का डेटा नहीं मिटता। उसे हटाने के लिए ऐप अनइंस्टॉल करें।',
+  'Edit item':
+      'आइटम बदलें',
+  'Enter the join code from your company owner.':
+      'अपनी कंपनी के मालिक से मिला जॉइन कोड डालें।',
+  'Enter your email and a password of at least 6 characters.':
+      'अपना ईमेल और कम से कम 6 अक्षरों का पासवर्ड डालें।',
+  'Free access from the FieldOS team':
+      'FieldOS टीम की ओर से मुफ़्त एक्सेस',
+  'Free access from the FieldOS team until {date}':
+      '{date} तक FieldOS टीम की ओर से मुफ़्त एक्सेस',
+  'Free trial (will not renew)':
+      'मुफ़्त ट्रायल (आगे नहीं बढ़ेगा)',
+  'Free trial until {date} (will not renew)':
+      '{date} तक मुफ़्त ट्रायल (आगे नहीं बढ़ेगा)',
+  'Free trial until {date}, then paid':
+      '{date} तक मुफ़्त ट्रायल, फिर पैसे लगेंगे',
+  'Free trial, then paid':
+      'मुफ़्त ट्रायल, फिर पैसे लगेंगे',
+  'Get the {language} speech pack to work offline':
+      'बिना इंटरनेट काम के लिए {language} स्पीच पैक लें',
+  'Give the project a name, such as the site or building.':
+      'प्रोजेक्ट को नाम दें, जैसे साइट या बिल्डिंग का नाम।',
+  'Headcount not given':
+      'गिनती नहीं दी',
+  'If {email} has an account, a code is on its way. Type it below with your new password.':
+      'अगर {email} का खाता है, तो कोड आ रहा है। उसे नीचे नए पासवर्ड के साथ टाइप करें।',
+  'Items':
+      'आइटम',
+  'Join company':
+      'कंपनी से जुड़ें',
+  'Joined {company}. Projects will appear after the first sync.':
+      '{company} से जुड़ गए। पहले सिंक के बाद प्रोजेक्ट दिखेंगे।',
+  'Keep the names under 200 characters.':
+      'नाम 200 अक्षरों से छोटे रखें।',
+  'Listening stopped':
+      'सुनना रुक गया',
+  'Listening · {time}':
+      'सुन रहा है · {time}',
+  'Location is blocked for FieldOS. Allow it in Android settings.':
+      'FieldOS के लिए लोकेशन बंद है। Android सेटिंग्स में इसकी अनुमति दें।',
+  'Location is turned off. Turn on GPS and try again.':
+      'लोकेशन बंद है। GPS चालू करके फिर कोशिश करें।',
+  'Location permission was not given.':
+      'लोकेशन की अनुमति नहीं मिली।',
+  'Mark as not paid':
+      'बकाया के रूप में चिह्नित करें',
+  'Mark as paid':
+      'भुगतान हुआ चिह्नित करें',
+  'Microphone is off for FieldOS':
+      'FieldOS के लिए माइक्रोफ़ोन बंद है',
+  'New issue (critical)':
+      'नई समस्या (बहुत गंभीर)',
+  'New issue (high)':
+      'नई समस्या (ज़्यादा)',
+  'New issue (low)':
+      'नई समस्या (कम)',
+  'New issue (medium)':
+      'नई समस्या (मध्यम)',
+  'New join code created. The old code no longer works.':
+      'नया जॉइन कोड बन गया। पुराना कोड अब काम नहीं करेगा।',
+  'New password saved. Signed in as {email}.':
+      'नया पासवर्ड सेव हो गया। {email} के रूप में साइन इन।',
+  'No active subscription':
+      'कोई चालू सब्सक्रिप्शन नहीं',
+  'No internet connection. Connect and try again.':
+      'इंटरनेट नहीं है। कनेक्ट करके फिर कोशिश करें।',
+  'Not set':
+      'तय नहीं',
+  'One project for each site. Its daily reports, labour, materials, money and photos stay together.':
+      'हर साइट के लिए एक प्रोजेक्ट। उसकी दैनिक रिपोर्ट, मज़दूर, माल, पैसा और फ़ोटो साथ रहते हैं।',
+  'Payment problem: update your payment method in the store':
+      'भुगतान में दिक्कत: स्टोर में अपना भुगतान तरीका अपडेट करें',
+  'Payment problem: update your payment method in the store before {date}':
+      'भुगतान में दिक्कत: {date} से पहले स्टोर में अपना भुगतान तरीका अपडेट करें',
+  'Photo is on the phone that took it':
+      'फ़ोटो उसी फ़ोन पर है जिससे ली गई थी',
+  'Pick a time after they punched in ({time}).':
+      'पंच-इन ({time}) के बाद का समय चुनें।',
+  'Put company on the cloud':
+      'कंपनी को क्लाउड पर रखें',
+  'Quantity this bill':
+      'इस बिल की मात्रा',
+  'Recording · {time} · tap to stop and send':
+      'रिकॉर्डिंग · {time} · रोककर भेजने के लिए टैप करें',
+  'Sign in':
+      'साइन इन करें',
+  'Signed in as {email}.':
+      '{email} के रूप में साइन इन।',
+  'Signed out. This phone keeps working offline.':
+      'साइन आउट हो गया। यह फ़ोन बिना इंटरनेट काम करता रहेगा।',
+  'Subscribed':
+      'सब्सक्राइब किया',
+  'Subscribed until {date} (cancelled)':
+      '{date} तक सब्सक्राइब (रद्द किया)',
+  'Subscribed, renews on {date}':
+      'सब्सक्राइब, {date} को फिर से चालू होगा',
+  'Sync now':
+      'अभी सिंक करें',
+  'Synced. 1 change sent, latest data received.':
+      'सिंक हो गया। 1 बदलाव भेजा, नया डेटा आ गया।',
+  'Synced. {n} changes sent, latest data received.':
+      'सिंक हो गया। {n} बदलाव भेजे, नया डेटा आ गया।',
+  'Tap the mic and speak':
+      'माइक दबाकर बोलें',
+  'Tap to start recording':
+      'रिकॉर्डिंग शुरू करने के लिए टैप करें',
+  'That code is not valid or has ended. Check it and try again, or ask whoever gave it to you.':
+      'यह कोड सही नहीं है या ख़त्म हो गया है। जाँचकर फिर कोशिश करें, या जिसने दिया उससे पूछें।',
+  'That plan is no longer on sale. Please pick again.':
+      'यह प्लान अब बिक्री पर नहीं है। फिर से चुनें।',
+  'The FieldOS plans are not on sale in {store} yet. Please try again later, or send a bug report from the menu.':
+      'FieldOS प्लान अभी {store} में बिक्री पर नहीं हैं। बाद में फिर कोशिश करें, या मेन्यू से बग रिपोर्ट भेजें।',
+  'The owner or a project manager decides these. You can see what is waiting.':
+      'इन पर मालिक या प्रोजेक्ट मैनेजर फ़ैसला करते हैं। आप देख सकते हैं कि क्या बाकी है।',
+  'The phone stopped listening. Tap Try again, or type the report.':
+      'फ़ोन ने सुनना बंद कर दिया। फिर कोशिश करें दबाएँ, या रिपोर्ट टाइप करें।',
+  'There is no internet, and the offline speech pack for {language} is not on this phone yet. Connect once, then download it: Google app › Settings › Voice › Offline speech recognition › {englishName}. After that, voice reports work anywhere on site.':
+      'इंटरनेट नहीं है, और {language} का ऑफ़लाइन स्पीच पैक अभी इस फ़ोन पर नहीं है। एक बार कनेक्ट करके उसे डाउनलोड करें: Google ऐप › Settings › Voice › Offline speech recognition › {englishName}। उसके बाद वॉइस रिपोर्ट साइट पर कहीं भी चलेगी।',
+  'This iPhone needs internet to recognise {language} speech. Connect and try again, or type the report.':
+      'इस iPhone को {language} बोली पहचानने के लिए इंटरनेट चाहिए। कनेक्ट करके फिर कोशिश करें, या रिपोर्ट टाइप करें।',
+  'This needs internet for {language}':
+      '{language} के लिए इंटरनेट चाहिए',
+  'This permanently deletes {email} from FieldOS cloud.':
+      'यह {email} को FieldOS क्लाउड से हमेशा के लिए मिटा देगा।',
+  'This phone can\'t do {language} yet':
+      'यह फ़ोन अभी {language} नहीं समझता',
+  'This phone can\'t turn {language} speech into text itself, so FieldOS will record you and send the recording to Sarvam when you stop. This needs internet.':
+      'यह फ़ोन {language} बोली को ख़ुद टेक्स्ट में नहीं बदल सकता, इसलिए FieldOS आपकी आवाज़ रिकॉर्ड करेगा और रुकने पर रिकॉर्डिंग Sarvam को भेजेगा। इसके लिए इंटरनेट चाहिए।',
+  'This phone has no speech recognition':
+      'इस फ़ोन में बोली पहचानने की सुविधा नहीं है',
+  'This phone is not allowed to make purchases. Check the payment settings or parental controls in {store}.':
+      'इस फ़ोन से ख़रीदारी की अनुमति नहीं है। {store} में भुगतान सेटिंग या पैरेंटल कंट्रोल देखें।',
+  'This plan is not on sale in your country right now.':
+      'यह प्लान अभी आपके देश में बिक्री पर नहीं है।',
+  'This {store} account already pays for FieldOS for someone else. Write to us and we will sort it out.':
+      'यह {store} खाता पहले से किसी और के लिए FieldOS का भुगतान करता है। हमें लिखें, हम सुलझा देंगे।',
+  'Turning your recording into text…':
+      'आपकी रिकॉर्डिंग को टेक्स्ट में बदल रहे हैं…',
+  'Turning your recording into text… {n} of {total}':
+      'आपकी रिकॉर्डिंग को टेक्स्ट में बदल रहे हैं… {total} में से {n}',
+  'Type the code from the email: it is 6 digits.':
+      'ईमेल में आया कोड टाइप करें: यह 6 अंकों का है।',
+  'Type the code we emailed to {email}, and the new password for your cloud account.':
+      '{email} पर भेजा गया कोड और अपने क्लाउड खाते का नया पासवर्ड टाइप करें।',
+  'Type the code we emailed to {email}. It can take a minute to arrive; look in spam too.':
+      '{email} पर भेजा गया कोड टाइप करें। आने में एक मिनट लग सकता है; स्पैम में भी देखें।',
+  'Type your email above first, then tap "Forgot password?" again.':
+      'पहले ऊपर अपना ईमेल टाइप करें, फिर "पासवर्ड भूल गए?" दोबारा दबाएँ।',
+  'We sent a code to {email}. Type it below to finish creating your account.':
+      'हमने {email} पर कोड भेजा है। खाता बनाना पूरा करने के लिए उसे नीचे टाइप करें।',
+  'Work measured this bill':
+      'इस बिल में नापा गया काम',
+  'Working for someone else\'s company?':
+      'किसी और की कंपनी के लिए काम करते हैं?',
+  'Your cloud account is deleted. This phone keeps working offline.':
+      'आपका क्लाउड खाता मिट गया। यह फ़ोन बिना इंटरनेट काम करता रहेगा।',
+  'Your payment is waiting for approval, for example in your UPI app. FieldOS opens by itself once {store} confirms it.':
+      'आपका भुगतान मंज़ूरी का इंतज़ार कर रहा है, जैसे आपके UPI ऐप में। {store} के पक्का करते ही FieldOS अपने आप खुल जाएगा।',
+  'about {amount}':
+      'लगभग {amount}',
+  'never':
+      'कभी नहीं',
+  'raised on {date}':
+      '{date} को उठाया',
+  'raised today':
+      'आज उठाया',
+  'raised yesterday':
+      'कल उठाया',
+  'this account':
+      'यह खाता',
+  'your company':
+      'आपकी कंपनी',
+  '{amount} a day':
+      '{amount} प्रति दिन',
+  '{company} is on the cloud. Share the join code with your team.':
+      '{company} क्लाउड पर है। अपनी टीम के साथ जॉइन कोड शेयर करें।',
+  '{day}, marked {mark}':
+      '{day}, {mark} लगाया',
+  '{day}, {h} h':
+      '{day}, {h} घंटे',
+  '{day}, {h} h, no punch-out':
+      '{day}, {h} घंटे, पंच-आउट नहीं',
+  '{email} already has an account, and that password is not right for it. Try again, or tap "Forgot password?" to choose a new one.':
+      '{email} का पहले से खाता है, और यह पासवर्ड उसका नहीं है। फिर कोशिश करें, या नया चुनने के लिए "पासवर्ड भूल गए?" दबाएँ।',
+  '{email} is no longer on the team.':
+      '{email} अब टीम में नहीं हैं।',
+  '{email} will stop getting this company\'s projects and cannot send anything new. Work they already recorded stays.':
+      '{email} को इस कंपनी के प्रोजेक्ट मिलना बंद हो जाएगा और वे कुछ नया नहीं भेज पाएँगे। उनका पहले दर्ज किया काम बना रहेगा।',
+  '{h} h {m} min':
+      '{h} घंटे {m} मिनट',
+  '{m} min':
+      '{m} मिनट',
+  '{m} min {s} s':
+      '{m} मिनट {s} सेकंड',
+  '{s} s':
+      '{s} सेकंड',
+  '{name} is ready':
+      '{name} तैयार है',
+  '{name}: out at {time} on {date}':
+      '{name}: {date} को {time} पर बाहर',
+  '{n} new updates from your team':
+      'आपकी टीम से {n} नए अपडेट',
+  '{sent} sent, {waiting} waiting. They will retry on the next sync.':
+      '{sent} भेजे, {waiting} बाकी। अगले सिंक पर फिर कोशिश होगी।',
+  '{store} could not complete that. Please try again, or send a bug report from the menu.':
+      '{store} यह पूरा नहीं कर पाया। फिर कोशिश करें, या मेन्यू से बग रिपोर्ट भेजें।',
+  '{store} had a problem with that. Please try again in a minute.':
+      '{store} में इसमें दिक्कत आई। एक मिनट बाद फिर कोशिश करें।',
+  '{store} is having a problem right now. Please try again in a minute.':
+      '{store} में अभी दिक्कत है। एक मिनट बाद फिर कोशिश करें।',
+  'Speak daily reports in your own language':
+      'अपनी भाषा में दैनिक रिपोर्ट बोलें',
+  'Labour, wages and materials in one place':
+      'मज़दूर, मज़दूरी और माल एक जगह',
+  'Photos, issues and team chat for every site':
+      'हर साइट के लिए फ़ोटो, समस्याएँ और टीम चैट',
+  'Works offline, syncs when you are back online':
+      'बिना इंटरनेट चलता है, इंटरनेट आने पर सिंक होता है',
+  'Sunny':
+      'धूप',
+  'Cloudy':
+      'बादल',
+  'Rain':
+      'बारिश',
+  'Heavy rain':
+      'तेज़ बारिश',
+  'Light rain':
+      'हल्की बारिश',
+  'Hot':
+      'गर्मी',
+  'Windy':
+      'तेज़ हवा',
+  'Cold':
+      'ठंड',
+  'Mason':
+      'मिस्त्री',
+  'Helper':
+      'हेल्पर',
+  'Carpenter':
+      'बढ़ई',
+  'Bar bender':
+      'सरिया बेंडर',
+  'Electrician':
+      'बिजली मिस्त्री',
+  'Plumber':
+      'प्लंबर',
+  'Painter':
+      'पेंटर',
+  'Welder':
+      'वेल्डर',
+  'Tiler':
+      'टाइल मिस्त्री',
+  'Labourer':
+      'मज़दूर',
+  'Supervisor':
+      'सुपरवाइज़र',
+  'Driver':
+      'ड्राइवर',
+  'Operator':
+      'ऑपरेटर',
+  'Fitter':
+      'फ़िटर',
+  'Cash':
+      'नकद',
+  'UPI':
+      'UPI',
+  'Bank transfer':
+      'बैंक ट्रांसफ़र',
+  'Cheque':
+      'चेक',
+  'Pass':
+      'ठीक',
+  'Fail':
+      'ग़लत',
+  'Not needed':
+      'ज़रूरी नहीं',
+  'Safety':
+      'सुरक्षा',
+  'Quality':
+      'गुणवत्ता',
+  'Structural':
+      'ढाँचा',
+  'Environmental':
+      'पर्यावरण',
+  'Final':
+      'अंतिम',
+  'V-{n} (provisional)':
+      'V-{n} (अस्थायी)',
+  // Weekly site close
+  'A removed entry':
+      'हटाई गई एंट्री',
+  'Advance of {amount} not worked off yet':
+      '{amount} एडवांस अभी काम से नहीं कटा',
+  'Advances not worked off':
+      'काम से न कटे एडवांस',
+  'Approve each site\'s wages, expenses and deliveries for the week.':
+      'हर साइट की हफ़्ते की मज़दूरी, खर्च और माल की डिलीवरी मंज़ूर करें।',
+  'Approve everything, and get back what was sent back, to close the week.':
+      'हफ़्ता बंद करने के लिए सब मंज़ूर करें, और जो वापस भेजा था वह ठीक होकर लौट आए।',
+  'Approve the {n} with no exceptions':
+      'बिना गड़बड़ी वाले {n} मंज़ूर करें',
+  'Approve this delivery':
+      'यह डिलीवरी मंज़ूर करें',
+  'Bill':
+      'बिल',
+  'Cancelled entry':
+      'रद्द की गई एंट्री',
+  'Changed after approval':
+      'मंज़ूरी के बाद बदला',
+  'Changed since close':
+      'बंद होने के बाद बदला',
+  'Close the week':
+      'हफ़्ता बंद करें',
+  'Close the week again':
+      'हफ़्ता फिर से बंद करें',
+  'Close this week?':
+      'यह हफ़्ता बंद करें?',
+  'Closed':
+      'बंद',
+  'Closed by {who}, {when}':
+      '{who} ने बंद किया, {when}',
+  'Corrected, review again':
+      'ठीक किया, फिर से देखें',
+  'Deliveries':
+      'माल की डिलीवरी',
+  'Delivery slip':
+      'डिलीवरी पर्ची',
+  'Each running site gets a weekly close here: wages, expenses and deliveries to approve.':
+      'हर चालू साइट का हफ़्ते का हिसाब यहाँ आता है: मंज़ूर करने के लिए मज़दूरी, खर्च और डिलीवरी।',
+  'Edited after it was entered':
+      'एंट्री के बाद बदला गया',
+  'Enter the quantity accepted.':
+      'मंज़ूर की गई मात्रा डालें।',
+  'Expenses':
+      'खर्च',
+  'Expenses {amount}':
+      'खर्च {amount}',
+  'History':
+      'इतिहास',
+  'Less than received if some was short or damaged.':
+      'अगर कुछ कम या खराब आया तो आए माल से कम।',
+  'Mark as fixed':
+      'ठीक हुआ बताएँ',
+  'Marked fixed':
+      'ठीक हुआ बताया',
+  'Material delivered':
+      'आया माल',
+  'No attendance recorded':
+      'कोई हाज़िरी दर्ज नहीं',
+  'No bill photo':
+      'बिल की फ़ोटो नहीं',
+  'No daily wage set, so wages can\'t be worked out':
+      'रोज़ की मज़दूरी तय नहीं, इसलिए हिसाब नहीं बन सकता',
+  'No decisions yet this week.':
+      'इस हफ़्ते अभी कोई फ़ैसला नहीं।',
+  'No delivery slip photo':
+      'डिलीवरी पर्ची की फ़ोटो नहीं',
+  'No invoice amount':
+      'बिल की रकम नहीं',
+  'Not against a purchase order':
+      'किसी PO के सामने नहीं',
+  'Nothing approved yet.':
+      'अभी कुछ मंज़ूर नहीं।',
+  'Nothing left to review.':
+      'देखने को कुछ बाकी नहीं।',
+  'Nothing recorded':
+      'कुछ दर्ज नहीं',
+  'Nothing sent back.':
+      'कुछ वापस नहीं भेजा।',
+  'Nothing was recorded on this site this week.':
+      'इस हफ़्ते इस साइट पर कुछ दर्ज नहीं हुआ।',
+  'Photograph the delivery slip':
+      'डिलीवरी पर्ची की फ़ोटो लें',
+  'Punch-out missing on 1 day':
+      '1 दिन पंच-आउट नहीं',
+  'Punch-out missing on {n} days':
+      '{n} दिन पंच-आउट नहीं',
+  'Quantity accepted':
+      'मंज़ूर मात्रा',
+  'Ready to close':
+      'बंद करने को तैयार',
+  'Reopen the week':
+      'हफ़्ता फिर खोलें',
+  'Reopen this week?':
+      'यह हफ़्ता फिर खोलें?',
+  'Report says {n} people, but no attendance':
+      'रिपोर्ट में {n} लोग, पर हाज़िरी नहीं',
+  'Send back':
+      'वापस भेजें',
+  'Send back to the site':
+      'साइट को वापस भेजें',
+  'Send the pack to accounts':
+      'हिसाब का पैक अकाउंट्स को भेजें',
+  'Sent back':
+      'वापस भेजा',
+  'Short by {qty} against the order':
+      'ऑर्डर से {qty} कम',
+  'Site expenses':
+      'साइट के खर्च',
+  'Slip':
+      'पर्ची',
+  'Slip photo attached':
+      'पर्ची की फ़ोटो लगी',
+  'The owner or a project manager approves the week. Fix what is sent back to you and mark it fixed.':
+      'मालिक या प्रोजेक्ट मैनेजर हफ़्ता मंज़ूर करते हैं। जो आपको वापस भेजा जाए उसे ठीक करें और ठीक हुआ बताएँ।',
+  'The photo has not reached this phone yet. Sync and try again.':
+      'फ़ोटो अभी इस फ़ोन पर नहीं आई। सिंक करके फिर कोशिश करें।',
+  'This week on site':
+      'इस हफ़्ते साइट पर',
+  'To review':
+      'देखना है',
+  'Voucher number not confirmed yet (not synced)':
+      'वाउचर नंबर अभी पक्का नहीं (सिंक नहीं हुआ)',
+  'Wages':
+      'मज़दूरी',
+  'Wages and advances paid':
+      'दी गई मज़दूरी और एडवांस',
+  'Wages earned':
+      'कमाई मज़दूरी',
+  'Wages still due':
+      'बाकी मज़दूरी',
+  'Wages {amount}':
+      'मज़दूरी {amount}',
+  'Week':
+      'हफ़्ता',
+  'Week closed':
+      'हफ़्ता बंद हुआ',
+  'Week reopened':
+      'हफ़्ता फिर खुला',
+  'Weekly close':
+      'हफ़्ते का हिसाब',
+  'What needs fixing?':
+      'क्या ठीक करना है?',
+  'What was done? (optional)':
+      'क्या किया गया? (वैकल्पिक)',
+  'Why?':
+      'क्यों?',
+  'due {amount}':
+      'बाकी {amount}',
+  'earned {amount}':
+      'कमाई {amount}',
+  'ordered {qty}':
+      'ऑर्डर {qty}',
+  '{n} exceptions':
+      '{n} गड़बड़ियाँ',
+  '{n} items approved, {amount} in all. Anything changed later comes back here to review.':
+      '{n} चीज़ें मंज़ूर, कुल {amount}। बाद में कुछ बदला तो वह फिर यहाँ देखने आएगा।',
+  '{n} items need a closer look':
+      '{n} चीज़ों को ध्यान से देखना है',
+  '{n} sent back':
+      '{n} वापस भेजे',
+  '{n} to review':
+      '{n} देखने हैं',
+  '{qty} accepted':
+      '{qty} मंज़ूर',
+  '{qty} more than ordered':
+      'ऑर्डर से {qty} ज़्यादा',
+  // Site teams, templates, supplier import, all sites
+  'Above your approval limit of {amount}. The owner approves this.':
+      'आपकी मंज़ूरी सीमा {amount} से ज़्यादा। इसे मालिक मंज़ूर करेंगे।',
+  'Accounts':
+      'अकाउंट्स',
+  'Add many suppliers':
+      'कई सप्लायर जोड़ें',
+  'Add person':
+      'व्यक्ति जोड़ें',
+  'Add to this site':
+      'इस साइट में जोड़ें',
+  'Added to the site team.':
+      'साइट टीम में जोड़ा गया।',
+  'Added {n} suppliers.':
+      '{n} सप्लायर जोड़े गए।',
+  'Added {n} suppliers. {m} already on the list were left as they were.':
+      '{n} सप्लायर जोड़े गए। सूची में पहले से मौजूद {m} जैसे थे वैसे छोड़े गए।',
+  'All sites':
+      'सभी साइटें',
+  'All {n} sites are up to date.':
+      'सभी {n} साइटें अप-टू-डेट हैं।',
+  'An empty site':
+      'खाली साइट',
+  'Approval limit (₹)':
+      'मंज़ूरी सीमा (₹)',
+  'Approves up to {amount}':
+      '{amount} तक मंज़ूर करते हैं',
+  'Can see the site, changes nothing.':
+      'साइट देख सकते हैं, कुछ बदल नहीं सकते।',
+  'Copies the set-up only. Nothing that happened on that site comes across.':
+      'सिर्फ़ सेट-अप कॉपी होता है। उस साइट पर जो हुआ वह नहीं आता।',
+  'Enter the limit in rupees, or leave it empty for no limit.':
+      'सीमा रुपयों में डालें, या कोई सीमा न हो तो खाली छोड़ें।',
+  'Estimate items and rates':
+      'एस्टिमेट आइटम और रेट',
+  'Everyone in the company is already on this site.':
+      'कंपनी के सभी लोग पहले से इस साइट पर हैं।',
+  'Everyone in the company sees this site.':
+      'कंपनी में सभी यह साइट देखते हैं।',
+  'Everyone in the company works here with their company role. Add people to give them a site role or an approval limit.':
+      'कंपनी में सभी यहाँ अपनी कंपनी भूमिका के साथ काम करते हैं। साइट भूमिका या मंज़ूरी सीमा देने के लिए लोग जोड़ें।',
+  'Everything on this site.':
+      'इस साइट पर सब कुछ।',
+  'Hidden from the rest of the company. The company\'s owners and managers still see it.':
+      'कंपनी के बाकी लोगों से छिपी। कंपनी के मालिक और मैनेजर फिर भी देखते हैं।',
+  'In the weekly close they approve items up to this. Leave empty for no limit.':
+      'हफ़्ते के हिसाब में वे इतने तक के आइटम मंज़ूर करते हैं। कोई सीमा न हो तो खाली छोड़ें।',
+  'Last week not closed':
+      'पिछला हफ़्ता बंद नहीं हुआ',
+  'No approval limit':
+      'कोई मंज़ूरी सीमा नहीं',
+  'No one is listed yet':
+      'अभी कोई सूची में नहीं',
+  'No report on {day}':
+      '{day} को रिपोर्ट नहीं',
+  'No supplier names found. Put one supplier on each line.':
+      'कोई सप्लायर नाम नहीं मिला। हर लाइन पर एक सप्लायर लिखें।',
+  'On this site':
+      'इस साइट पर',
+  'One supplier per line: name, phone, GSTIN, what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.':
+      'हर लाइन पर एक सप्लायर: नाम, फ़ोन, GSTIN, आज आप पर उनका कितना बाकी है। सिर्फ़ नाम ज़रूरी है। अगर आपका पैसा उनके पास है तो रकम के बाद "advance" लिखें।',
+  'Only this team sees the site':
+      'सिर्फ़ यह टीम साइट देखे',
+  'Paste a list':
+      'सूची पेस्ट करें',
+  'Receives material and keeps the stock.':
+      'माल लेते हैं और स्टॉक रखते हैं।',
+  'Records the day: reports, labour, money, material.':
+      'दिन दर्ज करते हैं: रिपोर्ट, मज़दूर, पैसा, माल।',
+  'Remove from this site?':
+      'इस साइट से हटाएँ?',
+  'Removed from the site team.':
+      'साइट टीम से हटाया गया।',
+  'Retention held by clients':
+      'क्लाइंट के पास रुकी रिटेंशन',
+  'Runs the site and approves up to their limit.':
+      'साइट चलाते हैं और अपनी सीमा तक मंज़ूर करते हैं।',
+  'Saved.':
+      'सेव हो गया।',
+  'Sees the money and sends packs to accounts.':
+      'पैसे का हिसाब देखते हैं और अकाउंट्स को पैक भेजते हैं।',
+  'Site team':
+      'साइट टीम',
+  'Site team and approval limits':
+      'साइट टीम और मंज़ूरी सीमाएँ',
+  'Sites marked as running show here, the ones that need someone first.':
+      'चालू साइटें यहाँ दिखती हैं, जिन्हें ध्यान चाहिए वे पहले।',
+  'Start from':
+      'शुरुआत',
+  'Storekeeper':
+      'स्टोरकीपर',
+  'Task list':
+      'काम की सूची',
+  'To come from clients':
+      'क्लाइंट से आना बाकी',
+  'Turn on Team & sync to add people. The team list comes from the company\'s accounts.':
+      'लोग जोड़ने के लिए Team & sync चालू करें। टीम की सूची कंपनी के खातों से आती है।',
+  'Up to date':
+      'अप-टू-डेट',
+  'Wages due this week':
+      'इस हफ़्ते की बाकी मज़दूरी',
+  'Workers and wages':
+      'मज़दूर और मज़दूरी',
+  'Your role here: {role}.':
+      'यहाँ आपकी भूमिका: {role}।',
+  'client owes {amount}':
+      'क्लाइंट पर {amount} बाकी',
+  'suppliers {amount}':
+      'सप्लायर {amount}',
+  'wages due {amount}':
+      'बाकी मज़दूरी {amount}',
+  '{m} of {n} sites need someone.':
+      '{n} में से {m} साइटों को ध्यान चाहिए।',
+  '{name} will no longer be on this site\'s team.':
+      '{name} अब इस साइट की टीम में नहीं रहेंगे।',
+  '{n} approvals waiting over 2 days':
+      '{n} मंज़ूरियाँ 2 दिन से ज़्यादा रुकी',
+  '{n} days without a report':
+      '{n} दिन बिना रिपोर्ट',
+  '{n} sites with last week not closed':
+      '{n} साइटों का पिछला हफ़्ता बंद नहीं',
+  '{n} to approve':
+      '{n} मंज़ूर करने हैं',
+  // Measurement book, bill payments, supplier invoices
+  'A minus quantity corrects an earlier one.':
+      'माइनस मात्रा पहले वाली को ठीक करती है।',
+  'Add invoice':
+      'इनवॉइस जोड़ें',
+  'Add the supplier first, under Procure > Suppliers.':
+      'पहले Procure > Suppliers में सप्लायर जोड़ें।',
+  'All {n} invoices match their orders and deliveries.':
+      'सभी {n} इनवॉइस अपने ऑर्डर और डिलीवरी से मेल खाते हैं।',
+  'Approved to date':
+      'अब तक मंज़ूर',
+  'Approved {qty}':
+      '{qty} मंज़ूर',
+  'Approved.':
+      'मंज़ूर किया।',
+  'BOQ item':
+      'BOQ आइटम',
+  'Cancel invoice':
+      'इनवॉइस रद्द करें',
+  'Cancel this invoice?':
+      'यह इनवॉइस रद्द करें?',
+  'Cancelled: {why}':
+      'रद्द: {why}',
+  'Decide':
+      'फ़ैसला करें',
+  'Enter each invoice as it comes. It is checked against the purchase order and what was received.':
+      'हर इनवॉइस आते ही दर्ज करें। उसे PO और आए माल से मिलाया जाता है।',
+  'Everything approved has been billed already.':
+      'जो मंज़ूर हुआ वह सब बिल हो चुका है।',
+  'GST in it (₹, optional)':
+      'उसमें GST (₹, वैकल्पिक)',
+  'Give the invoice number and its total.':
+      'इनवॉइस नंबर और कुल रकम दें।',
+  'Give the item, its unit and a quantity.':
+      'आइटम, उसकी यूनिट और मात्रा दें।',
+  'Invoice number':
+      'इनवॉइस नंबर',
+  'Invoice total with GST (₹)':
+      'GST सहित इनवॉइस कुल (₹)',
+  'Make the next RA bill':
+      'अगला RA बिल बनाएँ',
+  'Matched':
+      'मेल खाता',
+  'Measure work':
+      'काम नापें',
+  'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
+      'BOQ के सामने हुआ काम नापें। मंज़ूर मात्राएँ अगले RA बिल में जाती हैं।',
+  'Measured {qty} {unit}':
+      'नापा {qty} {unit}',
+  'Measurement book':
+      'मेज़रमेंट बुक',
+  'Measurement saved. It waits for approval.':
+      'नाप सेव हुआ। मंज़ूरी का इंतज़ार है।',
+  'More quantity than was received':
+      'आए माल से ज़्यादा मात्रा',
+  'More than the purchase order':
+      'PO से ज़्यादा',
+  'More than what was received':
+      'आए माल से ज़्यादा',
+  'No measurements yet':
+      'अभी कोई नाप नहीं',
+  'No purchase order':
+      'कोई PO नहीं',
+  'No supplier invoices yet':
+      'अभी कोई सप्लायर इनवॉइस नहीं',
+  'Not in the BOQ':
+      'BOQ में नहीं',
+  'Nothing received against it yet':
+      'इसके सामने अभी कुछ नहीं आया',
+  'PO {amount}':
+      'पीओ {amount}',
+  'Part paid':
+      'कुछ भुगतान',
+  'Payment against this bill':
+      'इस बिल के सामने भुगतान',
+  'Put against bills':
+      'बिलों के सामने रखें',
+  'Put it against the oldest bills still due.':
+      'इसे सबसे पुराने बाकी बिलों के सामने रखें।',
+  'Quantity approved':
+      'मंज़ूर मात्रा',
+  'Quantity invoiced (optional)':
+      'इनवॉइस की मात्रा (वैकल्पिक)',
+  'Quantity measured':
+      'नापी गई मात्रा',
+  'Record the payment in the money book first. Every payment so far is already against a bill.':
+      'पहले मनी बुक में भुगतान दर्ज करें। अब तक का हर भुगतान किसी बिल के सामने है।',
+  'Rejected.':
+      'नामंज़ूर किया।',
+  'Release retention':
+      'रिटेंशन छोड़ें',
+  'Retention held by the client: {amount}':
+      'क्लाइंट के पास रुकी रिटेंशन: {amount}',
+  'Same invoice number entered before':
+      'यही इनवॉइस नंबर पहले दर्ज हुआ',
+  'Set a rate for {items} first.':
+      'पहले {items} का रेट तय करें।',
+  'Supplier invoice':
+      'सप्लायर इनवॉइस',
+  'Supplier invoices':
+      'सप्लायर इनवॉइस',
+  'Waiting':
+      'रुका है',
+  'Where (e.g. Block A, 2nd floor)':
+      'कहाँ (जैसे Block A, दूसरी मंज़िल)',
+  'Why':
+      'क्यों',
+  'received {amount}':
+      'आया {amount}',
+  'retention held {amount}':
+      'रुकी रिटेंशन {amount}',
+  '{amount} more than received':
+      'आए माल से {amount} ज़्यादा',
+  '{amount} received is not against a bill yet':
+      'आए {amount} अभी किसी बिल के सामने नहीं',
+  '{amount} still due':
+      '{amount} अभी बाकी',
+  '{m} of {n} invoices need checking before payment.':
+      '{n} में से {m} इनवॉइस भुगतान से पहले जाँचने हैं।',
+  '{n} amounts put against bills.':
+      '{n} रकम बिलों के सामने रखी गईं।',
+  '{n} waiting for approval':
+      '{n} मंज़ूरी के इंतज़ार में',
+  '{paid} received, {due} due':
+      '{paid} आया, {due} बाकी',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'सारे रिकॉर्ड, फ़ोटो और बिल एक फ़ाइल में। इसे Drive या कंप्यूटर पर रखें।',
+  'Back up this phone':
+      'इस फ़ोन का बैकअप लें',
+  'Backup checked':
+      'बैकअप जाँच लिया',
+  'Backup failed: {error}':
+      'बैकअप नहीं हुआ: {error}',
+  'Checked before anything is replaced':
+      'कुछ भी बदलने से पहले जाँचा जाता है',
+  'Choose backup file':
+      'बैकअप फ़ाइल चुनें',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'अगली बार FieldOS खुलने पर इस फ़ोन का सब कुछ बैकअप से बदल जाएगा। अभी का डेटा फ़ोन पर अलग रखा जाता है, ताकि ज़रूरत हो तो वापस मिल सके।',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS बैकअप: {sites} साइट, {files} फ़ोटो और बिल',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} को बना: {sites} साइट, {files} फ़ोटो और बिल। रीस्टोर पूरा करने के लिए FieldOS पूरी तरह बंद करके फिर खोलें।',
+  'Restore a backup':
+      'बैकअप रीस्टोर करें',
+  'Restore a backup?':
+      'बैकअप रीस्टोर करें?',
+  'Restore failed: {error}':
+      'रीस्टोर नहीं हुआ: {error}',
+  'The backup is damaged and was not restored.':
+      'बैकअप खराब है, रीस्टोर नहीं किया।',
+  'The backup is incomplete and was not restored.':
+      'बैकअप अधूरा है, रीस्टोर नहीं किया।',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'यह बैकअप नए FieldOS से बना है। पहले ऐप अपडेट करें।',
+  'This is not a FieldOS backup file.':
+      'यह FieldOS बैकअप फ़ाइल नहीं है।',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'एक्सपोर्ट जाँच में पास नहीं हुआ, इसलिए नहीं भेजा: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'इन रकमों से ऊपर पहले प्रोजेक्ट मैनेजर मंज़ूरी देता है, फिर मालिक। मंज़ूरी न चाहिए तो खाना खाली छोड़ें। नियम अब से दर्ज होने वाली चीज़ों पर लागू होते हैं।',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'किस रकम से ऊपर पहले प्रोजेक्ट मैनेजर, फिर आप, रिक्वेस्ट, खर्च और ऑर्डर मंज़ूर करें',
+  'Approval rules':
+      'मंज़ूरी के नियम',
+  'Approval rules saved':
+      'मंज़ूरी के नियम सेव हुए',
+  'Enter amounts in rupees, or leave blank.':
+      'रकम रुपयों में डालें, या खाली छोड़ें।',
+  'Note (needed to reject)':
+      'नोट (रिजेक्ट करने के लिए ज़रूरी)',
+  'Owner also approves above (₹)':
+      'इससे ऊपर मालिक भी मंज़ूर करे (₹)',
+  'Project manager approves above (₹)':
+      'इससे ऊपर प्रोजेक्ट मैनेजर मंज़ूर करे (₹)',
+  'Purchase orders':
+      'खरीद ऑर्डर',
+  'Purchase requests':
+      'खरीद रिक्वेस्ट',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'आपकी मंज़ूरी की रकम से ऊपर की खरीद रिक्वेस्ट, ऑर्डर और खर्च यहाँ इंतज़ार करते हैं।',
+  'Say why it is rejected.':
+      'बताएँ कि क्यों रिजेक्ट किया।',
+  'Signed. It now waits for the owner\'s approval.':
+      'साइन हो गया। अब यह मालिक की मंज़ूरी का इंतज़ार कर रहा है।',
+  'The owner approves it after you.':
+      'आपके बाद मालिक इसे मंज़ूर करेगा।',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'मालिक की रकम प्रोजेक्ट मैनेजर की रकम से कम नहीं होनी चाहिए।',
+  'Waiting for a project manager\'s approval':
+      'प्रोजेक्ट मैनेजर की मंज़ूरी का इंतज़ार',
+  'Waiting for the owner\'s approval':
+      'मालिक की मंज़ूरी का इंतज़ार',
+  'Waiting for your approval':
+      'आपकी मंज़ूरी का इंतज़ार',
+  '{amount}. You sign as {level}.':
+      '{amount}। आप {level} के रूप में साइन करेंगे।',
+  '{n} requests, orders or expenses above your approval amounts':
+      'आपकी मंज़ूरी की रकम से ऊपर {n} रिक्वेस्ट, ऑर्डर या खर्च',
+  // Audit trail
+  'Audit trail':
+      'ऑडिट ट्रेल',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'हर मंज़ूरी, रद्द और भुगतान, किसने और कब किया, एक फ़ाइल में',
+  'Nothing has been recorded yet.':
+      'अभी तक कुछ दर्ज नहीं हुआ।',
+  ...commercialHi,
+  ...crmHi,
+  ...warehouseHi,
+  ...dailyHi,
 };

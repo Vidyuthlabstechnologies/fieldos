@@ -73,7 +73,7 @@ class _TasksTabState extends ConsumerState<TasksTab> {
   @override
   Widget build(BuildContext context) {
     final tasks = ref.watch(tasksProvider(_projectId));
-    final roster = ref.watch(teamRosterProvider(widget.project.companyId)).valueOrNull;
+    final roster = ref.watch(teamRosterProvider(widget.project.companyId)).value;
     final now = DateTime.now();
     return Stack(
       children: [
@@ -105,7 +105,7 @@ class _TasksTabState extends ConsumerState<TasksTab> {
                   SegmentedButton<TaskView>(
                     segments: [
                       ButtonSegment(value: TaskView.all, label: Text(tr('All'))),
-                      ButtonSegment(value: TaskView.late, label: Text(lateCount > 0 ? 'Late ($lateCount)' : 'Late')),
+                      ButtonSegment(value: TaskView.late, label: Text(lateCount > 0 ? trf('Late ({n})', {'n': lateCount}) : tr('Late'))),
                       ButtonSegment(value: TaskView.next14, label: Text(tr('Next 14 days'))),
                     ],
                     selected: {_view},
@@ -118,8 +118,8 @@ class _TasksTabState extends ConsumerState<TasksTab> {
                       padding: const EdgeInsets.all(24),
                       child: Text(
                         switch (_view) {
-                          TaskView.late => 'Nothing is late. Tasks show here when they pass their due date, '
-                              'or when their pace means they will finish after it.',
+                          TaskView.late => tr('Nothing is late. Tasks show here when they pass their due date, '
+                              'or when their pace means they will finish after it.'),
                           TaskView.next14 => tr('Nothing starts or falls due in the next 14 days.'),
                           TaskView.all => '',
                         },
@@ -171,9 +171,11 @@ class _ProgressHeader extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Text('$pct% complete', style: theme.textTheme.titleMedium),
-            const Spacer(),
-            if (lateCount > 0) StatusPill(lateCount == 1 ? '1 late' : '$lateCount late', tone: PillTone.danger),
+            Expanded(child: Text(trf('{n}% complete', {'n': pct}), style: theme.textTheme.titleMedium)),
+            if (lateCount > 0)
+              Text(trf('{n} late', {'n': lateCount}),
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: toneColor(context, PillTone.danger), fontWeight: FontWeight.w600)),
           ]),
           const SizedBox(height: 8),
           ClipRRect(
@@ -181,7 +183,8 @@ class _ProgressHeader extends StatelessWidget {
             child: LinearProgressIndicator(value: pct / 100, minHeight: 8),
           ),
           const SizedBox(height: 6),
-          Text('$done of ${tasks.length} tasks done', style: theme.textTheme.bodySmall),
+          Text(trf('{done} of {total} tasks done', {'done': done, 'total': tasks.length}),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
         ]),
       ),
     );
@@ -209,9 +212,9 @@ class TaskCard extends StatelessWidget {
     final forecast = forecastFinish(t, now);
     final pct = done ? 100 : t.progress;
     final dates = [
-      if (t.startDate != null) 'Start ${fmtDate(t.startDate!, short: true)}',
-      if (t.dueDate != null) 'Due ${fmtDate(t.dueDate!, short: true)}',
-      if (forecast != null && t.dueDate != null) 'Forecast ${fmtDate(forecast, short: true)}',
+      if (t.startDate != null) trf('Start {date}', {'date': fmtDate(t.startDate!, short: true)}),
+      if (t.dueDate != null) trf('Due {date}', {'date': fmtDate(t.dueDate!, short: true)}),
+      if (forecast != null && t.dueDate != null) trf('Forecast {date}', {'date': fmtDate(forecast, short: true)}),
     ].join(' · ');
     return Card(
       child: InkWell(
@@ -224,7 +227,7 @@ class TaskCard extends StatelessWidget {
               if (t.priority == 'high')
                 Padding(
                   padding: const EdgeInsets.only(right: 6, top: 2),
-                  child: Icon(Icons.priority_high, size: 18, color: toneColor(context, PillTone.danger)),
+                  child: Icon(Icons.flag_rounded, size: 16, color: toneColor(context, PillTone.warn)),
                 ),
               Expanded(
                 child: Text(
@@ -271,7 +274,10 @@ class TaskCard extends StatelessWidget {
               const SizedBox(height: 6),
               Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
                 if (dates.isNotEmpty) Text(dates, style: theme.textTheme.bodySmall),
-                if (lateText != null) StatusPill(lateText, tone: PillTone.danger),
+                if (lateText != null)
+                  Text(lateText,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: toneColor(context, PillTone.danger), fontWeight: FontWeight.w600)),
               ]),
             ],
           ]),
@@ -336,11 +342,11 @@ class _TaskSheetState extends State<_TaskSheet> {
   void _save() {
     final title = _title.text.trim();
     if (title.isEmpty) {
-      setState(() => _error = 'Give the task a name.');
+      setState(() => _error = tr('Give the task a name.'));
       return;
     }
     if (_start != null && _due != null && _due!.isBefore(_start!)) {
-      setState(() => _error = 'The due date is before the start date.');
+      setState(() => _error = tr('The due date is before the start date.'));
       return;
     }
     final progress = _progress.round();
@@ -392,9 +398,9 @@ class _TaskSheetState extends State<_TaskSheet> {
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.play_arrow_outlined),
-                  label: Text(_start == null ? 'Start date' : 'Start ${fmtDate(_start!, short: true)}'),
+                  label: Text(_start == null ? tr('Start date') : trf('Start {date}', {'date': fmtDate(_start!, short: true)})),
                   onPressed: () async {
-                    final d = await _pick(_start, 'When does work start?');
+                    final d = await _pick(_start, tr('When does work start?'));
                     if (d != null) setState(() => _start = d);
                   },
                 ),
@@ -403,9 +409,9 @@ class _TaskSheetState extends State<_TaskSheet> {
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.flag_outlined),
-                  label: Text(_due == null ? 'Due date' : 'Due ${fmtDate(_due!, short: true)}'),
+                  label: Text(_due == null ? tr('Due date') : trf('Due {date}', {'date': fmtDate(_due!, short: true)})),
                   onPressed: () async {
-                    final d = await _pick(_due, 'When must it be finished?');
+                    final d = await _pick(_due, tr('When must it be finished?'));
                     if (d != null) setState(() => _due = d);
                   },
                 ),

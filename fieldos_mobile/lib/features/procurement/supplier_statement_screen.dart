@@ -8,10 +8,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:share_plus/share_plus.dart';
 
+import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart' show addExpense, canSeeMoneyIn, parseAmount;
+import 'package:fieldos_mobile/features/portals/portal_share.dart';
 import 'package:fieldos_mobile/features/procurement/supplier_statement.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -72,6 +74,13 @@ class SupplierStatementScreen extends ConsumerWidget {
                 : (trf('Advance with them {amount}', {'amount': rupees(-balance, paise: true)}), PillTone.neutral);
         return Scaffold(
           appBar: AppBar(title: Text(d.supplier.name), actions: [
+            if (Roles.canApprove(session.role))
+              IconButton(
+                key: const Key('supplier-app-access'),
+                tooltip: tr('App access for the supplier'),
+                icon: const Icon(Icons.phonelink_lock_outlined),
+                onPressed: () => shareSupplierAccess(context, ref, d.supplier),
+              ),
             if (d.lines.isNotEmpty)
               IconButton(
                 tooltip: tr('Send statement'),

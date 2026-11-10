@@ -2,7 +2,7 @@ name: fieldos_mobile
 description: "FieldOS Mobile — offline-first agentic construction platform (Flutter)."
 publish_to: 'none'
 
-version: 1.6.6+14
+version: 1.7.2+17
 
 environment:
   sdk: ^3.12.2
@@ -16,11 +16,12 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # State management
-  flutter_riverpod: ^2.6.1
+  flutter_riverpod: ^3.5.0
 
   # Local, offline-first SQLite (works on Android, iOS, and desktop for tests)
   drift: ^2.34.3
   drift_flutter: ^0.3.1
+  sqlite3: ^3.5.2
   sqlite3_flutter_libs: ^0.6.0+eol
   path_provider: ^2.1.5
 
@@ -90,6 +91,7 @@ dependencies:
   pdf: ^3.13.1
   # .xlsx export (an xlsx is a zip of XML; already pulled in by image/pdf).
   archive: ^4.0.0
+  xml: ^7.0.1
   # Date/time/GPS stamp on site photos (pure Dart; already pulled in by pdf).
   image: ^4.12.0
   share_plus: ^13.3.1
@@ -107,12 +109,12 @@ dependencies:
   # The AI assistant reads its answers out loud with the phone's own voice
   # (Android/iOS text to speech): free and offline, no Sarvam needed.
   flutter_tts: ^4.2.5
+  audioplayers: ^6.8.1
+  # Already present through `supabase`; declared because the sync engine
+  # tells a network failure (http's ClientException) from a server refusal.
+  http: ^1.2.0
 
 dev_dependencies:
-  # Direct dependency: used by test/sync_engine_test.dart to check the local
-  # Supabase stack is reachable before running (already present transitively
-  # via `supabase`, declared explicitly per "depend on what you import").
-  http: ^1.2.0
   flutter_test:
     sdk: flutter
   integration_test:
@@ -130,6 +132,15 @@ flutter:
     # Mitra the mascot: one looping WebP and one still PNG per mood
     # (made by mascot/render_frames.py from the Rive scene).
     - assets/mascot/
+    # Mitra's recorded guide voice, one folder per language (made by
+    # tool/guide_voice/make_clips.py; manifest.json lists what is recorded).
+    - assets/voice/
+    - assets/voice/en/
+    - assets/voice/hi/
+    - assets/voice/te/
+    - assets/voice/ta/
+    - assets/voice/kn/
+    - assets/voice/mr/
 
   # Inter, the brand typeface (Latin subset, see tools/subset_fonts.sh).
   # Telugu, Hindi and other Indian scripts use the phone's own fonts.

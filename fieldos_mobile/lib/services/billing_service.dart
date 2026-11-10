@@ -28,7 +28,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
-import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/data/app_database.dart' hide Store;
+import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/services/subscription_access.dart';
 
 export 'package:fieldos_mobile/services/subscription_access.dart';
@@ -193,7 +194,7 @@ class BillingService {
   Future<SubscriptionState?> buy(String planId) async {
     await _configure();
     final package = _packages[planId];
-    if (package == null) throw BillingException('That plan is no longer on sale. Please pick again.');
+    if (package == null) throw BillingException(tr('That plan is no longer on sale. Please pick again.'));
     try {
       await _leaveAccessCode();
       final result = await Purchases.purchase(PurchaseParams.package(package));
@@ -228,7 +229,7 @@ class BillingService {
   Future<SubscriptionState> redeemAccessCode(String typed) async {
     final customer = accessCodeCustomerId(typed);
     if (customer == null) {
-      throw BillingException('Access codes are 10 or more letters and numbers. Type it exactly as you got it.');
+      throw BillingException(tr('Access codes are 10 or more letters and numbers. Type it exactly as you got it.'));
     }
     await _configure();
     try {
@@ -239,7 +240,7 @@ class BillingService {
       throw billingErrorFor(PurchasesErrorHelper.getErrorCode(e), store: storeName);
     }
     throw BillingException(
-        'That code is not valid or has ended. Check it and try again, or ask whoever gave it to you.');
+        tr('That code is not valid or has ended. Check it and try again, or ask whoever gave it to you.'));
   }
 
   /// Purchases and restores belong to this phone's own store account. A
@@ -348,39 +349,42 @@ PlanPeriod _planPeriod(PackageType type, String? iso) {
 @visibleForTesting
 BillingException plansErrorFor(PurchasesErrorCode code, {required String store}) => switch (code) {
       PurchasesErrorCode.networkError || PurchasesErrorCode.offlineConnectionError =>
-        BillingException('No internet connection. Connect and try again.'),
+        BillingException(tr('No internet connection. Connect and try again.')),
       PurchasesErrorCode.configurationError ||
       PurchasesErrorCode.productNotAvailableForPurchaseError ||
       PurchasesErrorCode.invalidCredentialsError =>
-        BillingException('The FieldOS plans are not on sale in $store yet. Please try again later, or send a bug '
-            'report from the menu.'),
+        BillingException(trf('The FieldOS plans are not on sale in {store} yet. Please try again later, or send a bug '
+            'report from the menu.', {'store': store})),
       PurchasesErrorCode.storeProblemError =>
-        BillingException('$store is having a problem right now. Please try again in a minute.'),
-      PurchasesErrorCode.purchaseNotAllowedError => BillingException(
-          'This phone is not allowed to make purchases. Check the payment settings or parental controls in $store.'),
-      _ => BillingException('Could not load the plans from $store. Please try again, or send a bug report from the '
-          'menu.'),
+        BillingException(trf('{store} is having a problem right now. Please try again in a minute.', {'store': store})),
+      PurchasesErrorCode.purchaseNotAllowedError => BillingException(trf(
+          'This phone is not allowed to make purchases. Check the payment settings or parental controls in {store}.',
+          {'store': store})),
+      _ => BillingException(trf('Could not load the plans from {store}. Please try again, or send a bug report from the '
+          'menu.', {'store': store})),
     };
 
 /// A store error as a message people can act on.
 @visibleForTesting
 BillingException billingErrorFor(PurchasesErrorCode code, {required String store}) => switch (code) {
       PurchasesErrorCode.paymentPendingError => BillingException(
-          'Your payment is waiting for approval, for example in your UPI app. FieldOS opens by itself once '
-          '$store confirms it.',
+          trf('Your payment is waiting for approval, for example in your UPI app. FieldOS opens by itself once '
+              '{store} confirms it.', {'store': store}),
           pending: true),
       PurchasesErrorCode.networkError || PurchasesErrorCode.offlineConnectionError =>
-        BillingException('No internet connection. Connect and try again.'),
-      PurchasesErrorCode.purchaseNotAllowedError => BillingException(
-          'This phone is not allowed to make purchases. Check the payment settings or parental controls in $store.'),
+        BillingException(tr('No internet connection. Connect and try again.')),
+      PurchasesErrorCode.purchaseNotAllowedError => BillingException(trf(
+          'This phone is not allowed to make purchases. Check the payment settings or parental controls in {store}.',
+          {'store': store})),
       PurchasesErrorCode.productNotAvailableForPurchaseError =>
-        BillingException('This plan is not on sale in your country right now.'),
+        BillingException(tr('This plan is not on sale in your country right now.')),
       PurchasesErrorCode.storeProblemError =>
-        BillingException('$store had a problem with that. Please try again in a minute.'),
+        BillingException(trf('{store} had a problem with that. Please try again in a minute.', {'store': store})),
       PurchasesErrorCode.operationAlreadyInProgressError =>
-        BillingException('A purchase is already in progress. Wait for it to finish.'),
+        BillingException(tr('A purchase is already in progress. Wait for it to finish.')),
       PurchasesErrorCode.receiptAlreadyInUseError || PurchasesErrorCode.receiptInUseByOtherSubscriberError =>
-        BillingException('This $store account already pays for FieldOS for someone else. Write to us and we will '
-            'sort it out.'),
-      _ => BillingException('$store could not complete that. Please try again, or send a bug report from the menu.'),
+        BillingException(trf('This {store} account already pays for FieldOS for someone else. Write to us and we will '
+            'sort it out.', {'store': store})),
+      _ => BillingException(
+          trf('{store} could not complete that. Please try again, or send a bug report from the menu.', {'store': store})),
     };

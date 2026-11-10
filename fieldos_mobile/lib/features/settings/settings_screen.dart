@@ -13,11 +13,13 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/features/approvals/approval_rules_screen.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
 import 'package:fieldos_mobile/features/subscription/my_subscription_sheet.dart';
 import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
+import 'package:fieldos_mobile/features/settings/backup_actions.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/speech_service.dart';
@@ -234,14 +236,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: () => showMySubscription(context),
             ),
 
-          const SectionHeader('App language', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
+          const SectionHeader('Language and voice', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           ListTile(
-            leading: const Icon(Icons.translate),
-            title: Text(tr('App language')),
+            leading: const Icon(Icons.record_voice_over_outlined),
+            title: Text(tr('Your language')),
             subtitle: Text(ref.watch(languageProvider).nativeName),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => showLanguagePicker(context, ref),
           ),
+          if (ref.watch(languageProvider) != AppLanguage.en)
+            SwitchListTile(
+              secondary: const Icon(Icons.translate),
+              title: Text(trf('Show screens in {language}', {'language': ref.watch(languageProvider).nativeName})),
+              subtitle: Text(tr('Off: screens stay in English. Mitra still talks in your language.')),
+              value: ref.watch(screensInLanguageProvider),
+              onChanged: (v) => setScreensInLanguage(ref, v),
+            ),
           ListTile(
             leading: const Icon(Icons.format_size),
             title: Text(tr('Text size')),
@@ -285,7 +295,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             secondary: const Icon(Icons.lock_outline),
             title: Text(tr('App lock')),
             subtitle: Text(tr('Ask for a 4-digit PIN when FieldOS opens or comes back after a minute')),
-            value: ref.watch(appLockOnProvider).valueOrNull ?? false,
+            value: ref.watch(appLockOnProvider).value ?? false,
             onChanged: _toggleLock,
           ),
           const SectionHeader('Voice reports', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
@@ -305,6 +315,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             subtitle: Text(tr('Every record on this phone, in one file you keep. Free, always.')),
             onTap: () => exportCompanyToExcel(context, ref),
           ),
+          ListTile(
+            key: const Key('settings-backup'),
+            leading: const Icon(Icons.backup_outlined),
+            title: Text(tr('Back up this phone')),
+            subtitle: Text(tr('All records, photos and bills in one file. Keep it on Drive or a computer.')),
+            onTap: () => backUpPhone(context, ref),
+          ),
+          ListTile(
+            key: const Key('settings-restore'),
+            leading: const Icon(Icons.settings_backup_restore_outlined),
+            title: Text(tr('Restore a backup')),
+            subtitle: Text(tr('Checked before anything is replaced')),
+            onTap: () => restoreBackup(context, ref),
+          ),
           if (canSeeMoneyIn(session.role))
             ListTile(
               key: const Key('settings-export-accounts'),
@@ -312,6 +336,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               title: Text(tr('Send to your accountant')),
               subtitle: Text(tr('Tally vouchers or a Zoho Books file, with GST split out')),
               onTap: () => showAccountsExport(context, ref),
+            ),
+          if (canSeeMoneyIn(session.role))
+            ListTile(
+              key: const Key('settings-audit-trail'),
+              leading: const Icon(Icons.history_edu_outlined),
+              title: Text(tr('Audit trail')),
+              subtitle: Text(tr('Every approval, cancellation and payment, who did it and when, in one file')),
+              onTap: () => shareAuditTrail(context, ref),
+            ),
+          if (company != null && session.role == Roles.owner)
+            ListTile(
+              key: const Key('settings-approval-rules'),
+              leading: const Icon(Icons.approval_outlined),
+              title: Text(tr('Approval rules')),
+              subtitle: Text(tr('Above what amount a project manager, then you, approve requests, expenses and orders')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => ApprovalRulesScreen(companyId: company.id))),
             ),
           if (company != null && session.canManageSettings) ...[
             const SectionHeader('Bills and reports', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
@@ -372,7 +414,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Text('Made in Hyderabad by ${Brand.companyName}',
+          Text(trf('Made in Hyderabad by {company}', {'company': Brand.companyName}),
               textAlign: TextAlign.center, style: theme.textTheme.bodySmall?.copyWith(color: muted.color)),
         ],
       ),
@@ -437,7 +479,7 @@ class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
           onSubmitted: (_) => _busy ? null : _save(),
           decoration: InputDecoration(
             labelText: tr('New password'),
-            helperText: 'At least ${AuthService.minPasswordLength} characters',
+            helperText: trf('At least {n} characters', {'n': AuthService.minPasswordLength}),
           ),
         ),
         if (_error != null) ...[const SizedBox(height: 12), FormMessage(_error!)],
@@ -492,6 +534,57 @@ class _BrandingTilesState extends ConsumerState<_BrandingTiles> {
     await _reload();
   }
 
+  Future<void> _editFooter() async {
+    final ctl = TextEditingController(text: _branding?.footerText ?? '');
+    final text = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('Your line at the foot of PDFs')),
+        content: TextField(
+          key: const Key('footer-text'),
+          controller: ctl,
+          maxLength: footerTextMax,
+          decoration: InputDecoration(hintText: tr('e.g. 98480 12345 | www.saibuilders.in')),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Cancel'))),
+          FilledButton(key: const Key('footer-save'), onPressed: () => Navigator.pop(ctx, ctl.text), child: Text(tr('Save'))),
+        ],
+      ),
+    );
+    ctl.dispose();
+    if (text == null) return;
+    await setFooterText(ref.read(appDatabaseProvider), widget.companyId, text);
+    await _reload();
+  }
+
+  Future<void> _pickAccent() async {
+    final picked = await showModalBottomSheet<int>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Wrap(spacing: 12, runSpacing: 12, children: [
+            for (final c in brandColours)
+              InkWell(
+                key: Key('accent-$c'),
+                customBorder: const CircleBorder(),
+                onTap: () => Navigator.pop(ctx, c),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Color(c),
+                  child: (_branding?.accent ?? brandColours.first) == c ? const Icon(Icons.check, color: Colors.white) : null,
+                ),
+              ),
+          ]),
+        ),
+      ),
+    );
+    if (picked == null) return;
+    await setAccent(ref.read(appDatabaseProvider), widget.companyId, picked == brandColours.first ? null : picked);
+    await _reload();
+  }
+
   @override
   Widget build(BuildContext context) {
     final b = _branding;
@@ -529,6 +622,20 @@ class _BrandingTilesState extends ConsumerState<_BrandingTiles> {
                 await setShowFooter(ref.read(appDatabaseProvider), widget.companyId, v);
                 await _reload();
               },
+      ),
+      ListTile(
+        key: const Key('settings-footer-text'),
+        leading: const Icon(Icons.notes_outlined),
+        title: Text(tr('Your line at the foot of PDFs')),
+        subtitle: Text((b?.footerText ?? '').isEmpty ? tr('Phone, website, registration or a tagline') : b!.footerText),
+        onTap: b == null ? null : _editFooter,
+      ),
+      ListTile(
+        key: const Key('settings-accent'),
+        leading: CircleAvatar(radius: 12, backgroundColor: Color(b?.accent ?? brandColours.first)),
+        title: Text(tr('Your colour on PDFs')),
+        subtitle: Text(tr('For the company name and headings')),
+        onTap: b == null ? null : _pickAccent,
       ),
     ]);
   }

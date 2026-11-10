@@ -15,6 +15,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/branded_page.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/features/commercial/subcontractor_portal.dart';
+import 'package:fieldos_mobile/features/portals/portal_screens.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
 import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
@@ -79,7 +81,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       RecentErrors.record(e, st);
       if (mounted) {
         setState(() => _loadError =
-            'Could not load the plans from ${_billing.storeName}. Please try again, or send a bug report from the menu.');
+            trf('Could not load the plans from {store}. Please try again, or send a bug report from the menu.',
+                {'store': _billing.storeName}));
       }
     }
   }
@@ -113,7 +116,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         if (s.active) {
           widget.onUnlocked();
         } else {
-          setState(() => _error = 'The purchase did not finish. Please try again.');
+          setState(() => _error = tr('The purchase did not finish. Please try again.'));
         }
       });
 
@@ -124,8 +127,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           widget.onUnlocked();
         } else {
           final store = _billing.storeName;
-          setState(() => _error = 'No FieldOS subscription was found on this $store account. If you subscribed '
-              'with another account, switch to it in $store and try again.');
+          setState(() => _error = trf(
+              'No FieldOS subscription was found on this {store} account. If you subscribed '
+              'with another account, switch to it in {store} and try again.',
+              {'store': store}));
         }
       });
 
@@ -154,8 +159,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           widget.onUnlocked();
         } else {
           setState(() => _error = s == null
-              ? 'Could not check with ${_billing.storeName} right now. Please try again in a minute.'
-              : 'Still waiting for the payment. It can take a few minutes after you approve it.');
+              ? trf('Could not check with {store} right now. Please try again in a minute.', {'store': _billing.storeName})
+              : tr('Still waiting for the payment. It can take a few minutes after you approve it.'));
         }
       });
 
@@ -179,7 +184,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         ),
         SizedBox(height: compact ? 8 : 12),
         Text(
-          trial != null ? 'Try it free for ${trial.length}' : 'Keep every site on track',
+          trial != null ? trf('Try it free for {length}', {'length': trial.length}) : tr('Keep every site on track'),
           textAlign: TextAlign.center,
           style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white),
         ),
@@ -194,15 +199,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           if (_loadError != null) ...[
             FormMessage(_loadError!),
             const SizedBox(height: 12),
-            OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Try again')),
+            OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: Text(tr('Try again'))),
           ] else if (plans == null)
             const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
           else if (plans.isEmpty) ...[
-            const FormMessage('The subscription is not on sale yet. Please try again later.'),
+            FormMessage(tr('The subscription is not on sale yet. Please try again later.')),
             const SizedBox(height: 12),
-            OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Try again')),
+            OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: Text(tr('Try again'))),
           ] else ...[
-            Text(plans.length > 1 ? 'Choose your plan' : 'Your plan', style: theme.textTheme.titleMedium),
+            Text(plans.length > 1 ? tr('Choose your plan') : tr('Your plan'), style: theme.textTheme.titleMedium),
             const SizedBox(height: 12),
             for (final p in plans) ...[
               _PlanCard(
@@ -227,7 +232,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(54)),
               child: _busy
                   ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(selected?.buttonLabel ?? 'Choose a plan'),
+                  : Text(selected?.buttonLabel ?? tr('Choose a plan')),
             ),
             if (selected != null) ...[
               const SizedBox(height: 10),
@@ -242,16 +247,31 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           Wrap(
             alignment: WrapAlignment.center,
             children: [
-              TextButton(style: _linkStyle, onPressed: _busy ? null : _restore, child: const Text('Restore purchase')),
-              TextButton(style: _linkStyle, onPressed: () => openTerms(context), child: const Text('Terms')),
+              TextButton(style: _linkStyle, onPressed: _busy ? null : _restore, child: Text(tr('Restore purchase'))),
+              TextButton(style: _linkStyle, onPressed: () => openTerms(context), child: Text(tr('Terms'))),
               TextButton(
-                  style: _linkStyle, onPressed: () => openPrivacyPolicy(context), child: const Text('Privacy policy')),
+                  style: _linkStyle, onPressed: () => openPrivacyPolicy(context), child: Text(tr('Privacy policy'))),
             ],
           ),
           if (widget.onCompanyLinked != null && ref.watch(cloudSyncAvailableProvider)) ...[
             const SizedBox(height: 8),
             _CompanyPlanCard(onSignIn: _busy ? null : _companySignIn),
           ],
+          // Free for subcontractors, who only claim work against a builder's
+          // work orders.
+          TextButton.icon(
+            key: const Key('paywall-subcontractor'),
+            icon: const Icon(Icons.engineering_outlined),
+            label: Text(tr('Subcontractor? Join free with the builder\'s code')),
+            onPressed: () =>
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SubcontractorJoinScreen())),
+          ),
+          TextButton.icon(
+            key: const Key('paywall-portal'),
+            icon: const Icon(Icons.storefront_outlined),
+            label: Text(tr('Supplier or client? Join free with the builder\'s code')),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PortalJoinScreen())),
+          ),
           if (ref.watch(sessionProvider).activeCompany != null) ...[
             const SizedBox(height: 8),
             const _YourDataCard(),
@@ -372,17 +392,20 @@ class _ProBadge extends StatelessWidget {
   }
 }
 
+/// What FieldOS Pro gives, as English keys shown through tr().
+const paywallBenefits = [
+  (Icons.mic_none_rounded, 'Speak daily reports in your own language'),
+  (Icons.groups_outlined, 'Labour, wages and materials in one place'),
+  (Icons.photo_camera_outlined, 'Photos, issues and team chat for every site'),
+  (Icons.cloud_off_outlined, 'Works offline, syncs when you are back online'),
+];
+
 class _Benefits extends StatelessWidget {
   const _Benefits({required this.count});
 
   final int count;
 
-  static const _items = [
-    (Icons.mic_none_rounded, 'Speak daily reports in your own language'),
-    (Icons.groups_outlined, 'Labour, wages and materials in one place'),
-    (Icons.photo_camera_outlined, 'Photos, issues and team chat for every site'),
-    (Icons.cloud_off_outlined, 'Works offline, syncs when you are back online'),
-  ];
+  static const _items = paywallBenefits;
 
   @override
   Widget build(BuildContext context) {
@@ -398,7 +421,7 @@ class _Benefits extends StatelessWidget {
               child: Row(children: [
                 Icon(icon, size: 20, color: Brand.amber),
                 const SizedBox(width: 12),
-                Expanded(child: Text(text, style: style)),
+                Expanded(child: Text(tr(text), style: style)),
               ]),
             ),
         ],
@@ -446,14 +469,14 @@ class _PlanCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(plan.priceLine, style: theme.textTheme.bodyMedium),
                       if (plan.pricePerMonth != null)
-                        Text('Works out to ${plan.pricePerMonth} a month',
+                        Text(trf('Works out to {price} a month', {'price': plan.pricePerMonth!}),
                             style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
                     ],
                   ),
                 ),
                 if (plan.trial != null) ...[
                   const SizedBox(width: 8),
-                  StatusPill('${plan.trial!.length} free', tone: PillTone.ok),
+                  StatusPill(trf('{length} free', {'length': plan.trial!.length}), tone: PillTone.ok),
                 ],
               ],
             ),
@@ -486,17 +509,19 @@ class _PendingCard extends StatelessWidget {
           Row(children: [
             Icon(Icons.hourglass_top_rounded, color: dark ? Brand.amber : Brand.warn, size: 20),
             const SizedBox(width: 8),
-            Expanded(child: Text('Payment waiting for approval', style: theme.textTheme.titleSmall)),
+            Expanded(child: Text(tr('Payment waiting for approval'), style: theme.textTheme.titleSmall)),
           ]),
           const SizedBox(height: 6),
           Text(
-            'Approve it in your UPI or bank app. FieldOS opens by itself once $store confirms the payment, '
-            'usually within a few minutes.',
+            trf(
+                'Approve it in your UPI or bank app. FieldOS opens by itself once {store} confirms the payment, '
+                'usually within a few minutes.',
+                {'store': store}),
             style: theme.textTheme.bodyMedium,
           ),
           Align(
             alignment: Alignment.centerRight,
-            child: TextButton(onPressed: onCheck, child: const Text('Check again')),
+            child: TextButton(onPressed: onCheck, child: Text(tr('Check again'))),
           ),
         ],
       ),
@@ -515,7 +540,7 @@ class _Menu extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<String>(
-      tooltip: 'More',
+      tooltip: tr('More'),
       enabled: !busy,
       icon: const Icon(Icons.more_vert, color: Colors.white),
       onSelected: (v) {
@@ -532,14 +557,14 @@ class _Menu extends ConsumerWidget {
         }
       },
       itemBuilder: (_) => [
-        const PopupMenuItem(
-            value: 'email', child: ListTile(leading: Icon(Icons.mail_outline), title: Text('Email support'))),
-        const PopupMenuItem(
-            value: 'bug', child: ListTile(leading: Icon(Icons.bug_report_outlined), title: Text('Report a bug'))),
+        PopupMenuItem(
+            value: 'email', child: ListTile(leading: const Icon(Icons.mail_outline), title: Text(tr('Email support')))),
+        PopupMenuItem(
+            value: 'bug', child: ListTile(leading: const Icon(Icons.bug_report_outlined), title: Text(tr('Report a bug')))),
         if (onAccessCode != null)
-          const PopupMenuItem(
-              value: 'code', child: ListTile(leading: Icon(Icons.key_outlined), title: Text('Enter access code'))),
-        const PopupMenuItem(value: 'logout', child: ListTile(leading: Icon(Icons.logout), title: Text('Log out'))),
+          PopupMenuItem(
+              value: 'code', child: ListTile(leading: const Icon(Icons.key_outlined), title: Text(tr('Enter access code')))),
+        PopupMenuItem(value: 'logout', child: ListTile(leading: const Icon(Icons.logout), title: Text(tr('Log out')))),
       ],
     );
   }
@@ -591,13 +616,13 @@ class _AccessCodeDialogState extends State<_AccessCodeDialog> {
     return PopScope(
       canPop: !_busy,
       child: AlertDialog(
-        title: const Text('Enter access code'),
+        title: Text(tr('Enter access code')),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Only for people the FieldOS team gave a code to, such as app reviewers.'),
+              Text(tr('Only for people the FieldOS team gave a code to, such as app reviewers.')),
               const SizedBox(height: 16),
               TextField(
                 key: const Key('access-code'),
@@ -609,18 +634,18 @@ class _AccessCodeDialogState extends State<_AccessCodeDialog> {
                 textCapitalization: TextCapitalization.characters,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _redeem(),
-                decoration: InputDecoration(labelText: 'Access code', errorText: _error, errorMaxLines: 4),
+                decoration: InputDecoration(labelText: tr('Access code'), errorText: _error, errorMaxLines: 4),
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: _busy ? null : () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+          TextButton(onPressed: _busy ? null : () => Navigator.of(context).pop(false), child: Text(tr('Cancel'))),
           FilledButton(
             onPressed: _busy ? null : _redeem,
             child: _busy
                 ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Unlock'),
+                : Text(tr('Unlock')),
           ),
         ],
       ),

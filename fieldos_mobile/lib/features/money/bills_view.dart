@@ -17,12 +17,17 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/money/bill_pdf.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart';
+import 'package:fieldos_mobile/features/money/billing_reconcile.dart';
+import 'package:fieldos_mobile/features/money/measurement_book_screen.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 final billsProvider = FutureProvider.autoDispose.family<List<ClientBill>, String>(
     (ref, projectId) => ref.watch(appDatabaseProvider).billDao.forProject(projectId));
+
+final billAllocationsProvider = FutureProvider.autoDispose.family<List<BillAllocation>, String>(
+    (ref, projectId) => ref.watch(appDatabaseProvider).billingRecordsDao.allocationsFor(projectId));
 
 String _profileKey(String companyId) => 'billing_profile:$companyId';
 
@@ -67,15 +72,50 @@ class BillsView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bills = ref.watch(billsProvider(project.id));
-    final received =
-        ref.watch(paymentsReceivedProvider(project.id)).valueOrNull?.fold<double>(0, (s, p) => s + p.amount) ?? 0;
-    final spent = ref.watch(costSummaryProvider(project.id)).valueOrNull?.actual ?? 0;
+    final payments = ref.watch(paymentsReceivedProvider(project.id)).value ?? const <PaymentsReceivedData>[];
+    final allocations = ref.watch(billAllocationsProvider(project.id)).value ?? const <BillAllocation>[];
+    final received = payments.fold<double>(0, (s, p) => s + p.amount);
+    final spent = ref.watch(costSummaryProvider(project.id)).value?.actual ?? 0;
     return Stack(children: [
       bills.when(
         data: (list) {
           final pnl = pnlFrom(bills: list, received: received, spent: spent);
+          final balances = billBalances(list, allocations);
+          final byId = {for (final b in balances) b.bill.id: b};
+          final free = unallocated(payments, allocations).values.where((v) => v > 0.005).fold<double>(0, (s, v) => s + v);
+          final due = balances.fold<double>(0, (s, b) => s + b.outstanding);
+          final held = balances.fold<double>(0, (s, b) => s + b.retentionHeld);
           return ListView(padding: const EdgeInsets.fromLTRB(12, 8, 12, 96), children: [
             _PnlCard(pnl: pnl),
+            Wrap(spacing: 8, children: [
+              ActionChip(
+                avatar: const Icon(Icons.straighten, size: 18),
+                label: Text(tr('Measurement book')),
+                onPressed: () async {
+                  await Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (_) => MeasurementBookScreen(project: project)));
+                  ref.invalidate(billsProvider(project.id));
+                },
+              ),
+            ]),
+            if (free > 0.005 && due > 0.005)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.account_balance_outlined),
+                  title: Text(trf('{amount} received is not against a bill yet', {'amount': rupees(free)})),
+                  subtitle: Text(tr('Put it against the oldest bills still due.')),
+                  trailing: FilledButton.tonal(
+                    onPressed: () => _autoAllocate(context, ref, payments, allocations, balances),
+                    child: Text(tr('Put against bills')),
+                  ),
+                ),
+              ),
+            if (held > 0.005)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
+                child: Text(trf('Retention held by the client: {amount}', {'amount': rupees(held)}),
+                    style: Theme.of(context).textTheme.bodySmall),
+              ),
             if (list.isEmpty)
               Padding(
                 padding: EdgeInsets.all(24),
@@ -89,9 +129,21 @@ class BillsView extends ConsumerWidget {
                 child: ListTile(
                   leading: CircleAvatar(child: Icon(b.kind == 'ra' ? Icons.request_quote_outlined : Icons.receipt_outlined)),
                   title: Text('${b.billNumber} · ${rupees(b.netPayable)}'),
-                  subtitle: Text('${billKinds[b.kind]} · ${fmtDate(b.billDate)} · ${b.clientName}'),
-                  trailing: StatusPill(b.status == 'paid' ? 'Paid' : 'Due', tone: b.status == 'paid' ? PillTone.ok : PillTone.warn),
-                  onTap: () => _openBill(context, ref, b, list),
+                  subtitle: Text([
+                    '${billKinds[b.kind]} · ${fmtDate(b.billDate)} · ${b.clientName}',
+                    if (byId[b.id] case final bal? when bal.paid > 0.005 && !bal.settled)
+                      trf('{paid} received, {due} due', {'paid': rupees(bal.paid), 'due': rupees(bal.outstanding)}),
+                    if (byId[b.id] case final bal? when bal.retentionHeld > 0.005)
+                      trf('retention held {amount}', {'amount': rupees(bal.retentionHeld)}),
+                  ].join(' · ')),
+                  trailing: StatusPill(
+                      b.status == 'paid'
+                          ? 'Paid'
+                          : (byId[b.id]?.paid ?? 0) > 0.005
+                              ? 'Part paid'
+                              : 'Due',
+                      tone: b.status == 'paid' ? PillTone.ok : PillTone.warn),
+                  onTap: () => _openBill(context, ref, b, list, byId[b.id], payments, allocations),
                 ),
               ),
           ]);
@@ -117,7 +169,102 @@ class BillsView extends ConsumerWidget {
     ]);
   }
 
-  Future<void> _openBill(BuildContext context, WidgetRef ref, ClientBill b, List<ClientBill> all) async {
+  void _refresh(WidgetRef ref) {
+    ref.invalidate(billsProvider(project.id));
+    ref.invalidate(billAllocationsProvider(project.id));
+  }
+
+  /// Every payment's unallocated part, oldest payment first, against the
+  /// oldest bills still due.
+  Future<void> _autoAllocate(BuildContext context, WidgetRef ref, List<PaymentsReceivedData> payments,
+      List<BillAllocation> allocations, List<BillBalance> balances) async {
+    final free = unallocated(payments, allocations);
+    final ordered = [...payments]..sort((a, b) => a.receivedOn.compareTo(b.receivedOn));
+    final dao = ref.read(appDatabaseProvider).billingRecordsDao;
+    var n = 0;
+    try {
+      for (final p in ordered) {
+        final left = free[p.id] ?? 0;
+        if (left <= 0.005) continue;
+        final current = billBalances(
+            balances.map((b) => b.bill).toList(), await dao.allocationsFor(project.id));
+        for (final (billId, amount) in planAllocation(left, current)) {
+          await dao.allocate(paymentId: p.id, billId: billId, amount: amount, by: userId);
+          n++;
+        }
+      }
+      if (context.mounted) showSnack(context, trf('{n} amounts put against bills.', {'n': n}));
+    } catch (e, st) {
+      if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
+    }
+    _refresh(ref);
+  }
+
+  /// Puts part of a payment against [bill] (its net amount or retention).
+  Future<void> _allocateTo(BuildContext context, WidgetRef ref, ClientBill bill, BillBalance bal, String kind,
+      List<PaymentsReceivedData> payments, List<BillAllocation> allocations) async {
+    final free = unallocated(payments, allocations);
+    final choices = [for (final p in payments) if ((free[p.id] ?? 0) > 0.005) p];
+    if (choices.isEmpty) {
+      showSnack(context, tr('Record the payment in the money book first. Every payment so far is already against a bill.'));
+      return;
+    }
+    final need = kind == 'bill' ? bal.outstanding : bal.retentionHeld;
+    var picked = choices.first;
+    final amount = TextEditingController(text: fmtQty(need < free[picked.id]! ? need : free[picked.id]!));
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: Text(kind == 'bill' ? tr('Payment against this bill') : tr('Release retention')),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            DropdownButtonFormField<String>(
+              initialValue: picked.id,
+              isExpanded: true,
+              decoration: InputDecoration(labelText: tr('Payment received')),
+              items: [
+                for (final p in choices)
+                  DropdownMenuItem(
+                    value: p.id,
+                    child: Text('${fmtDate(p.receivedOn, short: true)} · ${p.fromParty} · ${rupees(free[p.id]!)}',
+                        overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: (v) => setLocal(() {
+                picked = choices.firstWhere((p) => p.id == v);
+                final f = free[picked.id]!;
+                amount.text = fmtQty(need < f ? need : f);
+              }),
+            ),
+            TextField(
+              controller: amount,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(labelText: tr('Amount (₹)')),
+            ),
+          ]),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Save'))),
+          ],
+        ),
+      ),
+    );
+    if (ok != true) return;
+    final a = double.tryParse(amount.text.trim().replaceAll(',', ''));
+    if (a == null || a <= 0) return;
+    try {
+      await ref
+          .read(appDatabaseProvider)
+          .billingRecordsDao
+          .allocate(paymentId: picked.id, billId: bill.id, kind: kind, amount: a, by: userId);
+    } catch (e, st) {
+      if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
+    }
+    _refresh(ref);
+  }
+
+  Future<void> _openBill(BuildContext context, WidgetRef ref, ClientBill b, List<ClientBill> all, BillBalance? bal,
+      List<PaymentsReceivedData> payments, List<BillAllocation> allocations) async {
     final action = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
@@ -125,16 +272,33 @@ class BillsView extends ConsumerWidget {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           ListTile(
             title: Text('${billKinds[b.kind]} ${b.billNumber}'),
-            subtitle: Text('${rupees(b.netPayable, paise: true)} payable · ${rupeesInWords(b.netPayable)}'),
+            subtitle: Text([
+              trf('{amount} payable', {'amount': rupees(b.netPayable, paise: true)}),
+              if (currentLanguage == AppLanguage.en) rupeesInWords(b.netPayable),
+            ].join(' · ')),
           ),
           ListTile(
             leading: const Icon(Icons.ios_share),
             title: Text(tr('Share PDF')),
             onTap: () => Navigator.pop(ctx, 'share'),
           ),
+          if (bal != null && bal.outstanding > 0.005)
+            ListTile(
+              leading: const Icon(Icons.payments_outlined),
+              title: Text(tr('Payment against this bill')),
+              subtitle: Text(trf('{amount} still due', {'amount': rupees(bal.outstanding)})),
+              onTap: () => Navigator.pop(ctx, 'allocate'),
+            ),
+          if (bal != null && bal.retentionHeld > 0.005)
+            ListTile(
+              leading: const Icon(Icons.lock_open_outlined),
+              title: Text(tr('Release retention')),
+              subtitle: Text(trf('retention held {amount}', {'amount': rupees(bal.retentionHeld)})),
+              onTap: () => Navigator.pop(ctx, 'retention'),
+            ),
           ListTile(
             leading: Icon(b.status == 'paid' ? Icons.undo : Icons.check_circle_outline),
-            title: Text(b.status == 'paid' ? 'Mark as not paid' : 'Mark as paid'),
+            title: Text(b.status == 'paid' ? tr('Mark as not paid') : tr('Mark as paid')),
             onTap: () => Navigator.pop(ctx, 'paid'),
           ),
           const SizedBox(height: 8),
@@ -159,6 +323,10 @@ class BillsView extends ConsumerWidget {
       case 'paid':
         await ref.read(appDatabaseProvider).billDao.setStatus(b.id, b.status == 'paid' ? 'issued' : 'paid');
         ref.invalidate(billsProvider(project.id));
+      case 'allocate' when bal != null:
+        await _allocateTo(context, ref, b, bal, 'bill', payments, allocations);
+      case 'retention' when bal != null:
+        await _allocateTo(context, ref, b, bal, 'retention', payments, allocations);
     }
   }
 }
@@ -205,9 +373,12 @@ class _PnlCard extends StatelessWidget {
 }
 
 class NewBillScreen extends ConsumerStatefulWidget {
-  const NewBillScreen({super.key, required this.project, required this.userId});
+  const NewBillScreen({super.key, required this.project, required this.userId, this.initialLines = const []});
   final Project project;
   final String userId;
+
+  /// An RA bill's lines worked out from the approved measurements.
+  final List<BillLine> initialLines;
 
   @override
   ConsumerState<NewBillScreen> createState() => _NewBillScreenState();
@@ -233,6 +404,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
   @override
   void initState() {
     super.initState();
+    _lines.addAll(widget.initialLines);
     _clientGstin.addListener(_gstinChanged);
   }
 
@@ -246,7 +418,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
 
   void _gstinChanged() {
     if (_interStateTouched) return;
-    final ours = ref.read(billingProfileProvider(widget.project.companyId)).valueOrNull?.gstin;
+    final ours = ref.read(billingProfileProvider(widget.project.companyId)).value?.gstin;
     final inter = isInterState(ours, _clientGstin.text);
     if (inter != _interState) setState(() => _interState = inter);
   }
@@ -265,7 +437,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     final result = await showDialog<BillLine>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(index == null ? 'Add item' : 'Edit item'),
+        title: Text(index == null ? tr('Add item') : tr('Edit item')),
         content: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             TextField(
@@ -285,7 +457,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               controller: qty,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-              decoration: InputDecoration(labelText: _kind == 'ra' ? 'Quantity this bill' : 'Quantity'),
+              decoration: InputDecoration(labelText: _kind == 'ra' ? tr('Quantity this bill') : tr('Quantity')),
             ),
           ]),
         ),
@@ -417,8 +589,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bills = ref.watch(billsProvider(widget.project.id)).valueOrNull ?? const <ClientBill>[];
-    final profile = ref.watch(billingProfileProvider(widget.project.companyId)).valueOrNull ?? const BillingProfile();
+    final bills = ref.watch(billsProvider(widget.project.id)).value ?? const <ClientBill>[];
+    final profile = ref.watch(billingProfileProvider(widget.project.companyId)).value ?? const BillingProfile();
     final previous = _previous(bills);
     final totals = billTotals(_lines,
         gstRate: _gstRate, interState: _interState, retentionPct: _pct(_retention), tdsPct: _pct(_tds));
@@ -528,7 +700,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               ),
             ),
           ]),
-          SectionHeader(_kind == 'ra' ? 'Work measured this bill' : 'Items'),
+          SectionHeader(_kind == 'ra' ? tr('Work measured this bill') : tr('Items')),
           if (_lines.isEmpty && hasEarlier)
             OutlinedButton.icon(
               icon: const Icon(Icons.content_copy_outlined),

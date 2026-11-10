@@ -5,6 +5,8 @@ import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/branded_page.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/features/commercial/subcontractor_portal.dart';
+import 'package:fieldos_mobile/features/portals/portal_screens.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
@@ -59,7 +61,7 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
         const BrandMark(size: 64, onDark: true),
         const SizedBox(height: 10),
         Text(
-          firstName.isEmpty ? 'Welcome to FieldOS' : 'Welcome, $firstName',
+          firstName.isEmpty ? tr('Welcome to FieldOS') : trf('Welcome, {name}', {'name': firstName}),
           style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white),
         ),
         const SizedBox(height: 6),
@@ -113,7 +115,7 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
               const Expanded(child: Divider()),
             ]),
             const SizedBox(height: 20),
-            Text("Working for someone else's company?", style: theme.textTheme.titleSmall),
+            Text(tr("Working for someone else's company?"), style: theme.textTheme.titleSmall),
             const SizedBox(height: 4),
             Text(tr('Ask the owner for the join code. You will see their projects once you join.'), style: muted),
             const SizedBox(height: 12),
@@ -124,16 +126,31 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
                   ? null
                   : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeamSyncScreen())),
             ),
+            TextButton.icon(
+              icon: const Icon(Icons.engineering_outlined),
+              label: Text(tr('Subcontractor? Join free with the builder\'s code')),
+              onPressed: _busy
+                  ? null
+                  : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SubcontractorJoinScreen())),
+            ),
+            TextButton.icon(
+              key: const Key('setup-portal'),
+              icon: const Icon(Icons.storefront_outlined),
+              label: Text(tr('Supplier or client? Join free with the builder\'s code')),
+              onPressed: _busy
+                  ? null
+                  : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PortalJoinScreen())),
+            ),
           ],
           const SizedBox(height: 24),
           TextButton(
             onPressed: _busy ? null : () => ref.read(sessionProvider.notifier).logout(),
             style: TextButton.styleFrom(foregroundColor: theme.colorScheme.onSurfaceVariant),
-            child: Text(user == null ? 'Log out' : 'Not ${user.name}? Log out'),
+            child: Text(user == null ? tr('Log out') : trf('Not {name}? Log out', {'name': user.name})),
           ),
           const SizedBox(height: 8),
           Text(
-            'Need help? ${Brand.supportEmail}',
+            trf('Need help? {email}', {'email': Brand.supportEmail}),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),

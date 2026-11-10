@@ -1,4 +1,4 @@
--- Company plans (supabase/migrations/20261110000000_company_plans.sql): only
+-- Company plans (supabase/migrations/20261111130000_company_plans.sql): only
 -- the service role grants them, a plan covers every member of its company
 -- for its dates, a plan granted by email reaches the owner only with a
 -- confirmed email and attaches to the company they own, and active sites

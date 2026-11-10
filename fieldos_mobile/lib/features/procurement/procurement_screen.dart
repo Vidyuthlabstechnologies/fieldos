@@ -5,6 +5,8 @@
 /// moment goods hit the site.
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -13,16 +15,21 @@ import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/features/approvals/approval_chain.dart';
+import 'package:fieldos_mobile/features/approvals/approval_chain_ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/procurement/po_share.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_screens.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_tools.dart';
+import 'package:fieldos_mobile/features/procurement/quote_compare_screen.dart';
 import 'package:fieldos_mobile/features/procurement/rate_hint.dart';
 import 'package:fieldos_mobile/features/procurement/supplier_statement_screen.dart';
+import 'package:fieldos_mobile/features/procurement/supplier_import.dart';
 import 'package:fieldos_mobile/features/procurement/stock_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
+import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
@@ -124,12 +131,14 @@ class _ProcurementViewState extends ConsumerState<ProcurementView>
       );
 }
 
-Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd) => Padding(
+Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd, {VoidCallback? onPaste}) => Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleSmall),
+          Expanded(child: Text(title, style: Theme.of(context).textTheme.titleSmall)),
+          if (onPaste != null)
+            IconButton(icon: const Icon(Icons.playlist_add), tooltip: tr('Paste a list'), onPressed: onPaste),
           IconButton(icon: const Icon(Icons.add), tooltip: tr('Add'), onPressed: onAdd),
         ],
       ),
@@ -159,10 +168,10 @@ class _SuppliersTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final suppliers = ref.watch(suppliersProvider(companyId));
-    final ledgers = ref.watch(supplierLedgerProvider(companyId)).valueOrNull ?? const <String, SupplierLedger>{};
+    final ledgers = ref.watch(supplierLedgerProvider(companyId)).value ?? const <String, SupplierLedger>{};
     return Column(
       children: [
-        _sectionHeader(context, tr('Suppliers'), () => _add(context, ref)),
+        _sectionHeader(context, tr('Suppliers'), () => _add(context, ref), onPaste: () => _paste(context, ref)),
         Expanded(
           child: suppliers.when(
             data: (rows) => rows.isEmpty
@@ -205,6 +214,57 @@ class _SuppliersTab extends ConsumerWidget {
     );
   }
 
+  /// Many suppliers at once, with opening balances (supplier_import.dart).
+  Future<void> _paste(BuildContext context, WidgetRef ref) async {
+    final text = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('Add many suppliers')),
+        content: SizedBox(
+          width: 400,
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(
+                tr('One supplier per line: name, phone, GSTIN, what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.'),
+                style: Theme.of(ctx).textTheme.bodySmall),
+            const SizedBox(height: 8),
+            TextField(
+              controller: text,
+              minLines: 5,
+              maxLines: 12,
+              decoration: const InputDecoration(
+                  hintText: 'Sri Balaji Cement, 9848012345, 36ABCDE1234F1Z5, 1,25,000\nRaju Sand, 15000 advance'),
+            ),
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Add'))),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    final rows = parseSupplierLines(text.text);
+    if (rows.isEmpty) {
+      showSnack(context, tr('No supplier names found. Put one supplier on each line.'), error: true);
+      return;
+    }
+    try {
+      final r = await importSuppliers(ref.read(appDatabaseProvider), companyId, rows);
+      ref.invalidate(suppliersProvider(companyId));
+      ref.invalidate(supplierLedgerProvider(companyId));
+      if (!context.mounted) return;
+      showSnack(
+          context,
+          r.skipped.isEmpty
+              ? trf('Added {n} suppliers.', {'n': r.added.length})
+              : trf('Added {n} suppliers. {m} already on the list were left as they were.',
+                  {'n': r.added.length, 'm': r.skipped.length}));
+    } catch (e, st) {
+      if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
+    }
+  }
+
   Future<void> _add(BuildContext context, WidgetRef ref) async {
     final name = TextEditingController();
     final phone = TextEditingController();
@@ -241,6 +301,15 @@ class _SuppliersTab extends ConsumerWidget {
 
 // --- RFQ ------------------------------------------------------------------
 
+/// Quotes entered for each purchase request of a site.
+final supplierQuoteCountsProvider = FutureProvider.autoDispose.family<Map<String, int>, String>((ref, projectId) async {
+  final out = <String, int>{};
+  for (final q in await ref.watch(appDatabaseProvider).supplierQuoteDao.forProject(projectId)) {
+    out[q.requestId] = (out[q.requestId] ?? 0) + 1;
+  }
+  return out;
+});
+
 class _RfqTab extends ConsumerWidget {
   const _RfqTab(
       {required this.projectId, required this.companyId, required this.userId});
@@ -252,6 +321,7 @@ class _RfqTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final requests = ref.watch(requestsProvider(projectId));
     final suppliers = ref.watch(suppliersProvider(companyId));
+    final quoteCounts = ref.watch(supplierQuoteCountsProvider(projectId)).value ?? const <String, int>{};
     return Column(
       children: [
         _sectionHeader(context, tr('Purchase requests (RFQ)'), () => _add(context, ref)),
@@ -261,21 +331,7 @@ class _RfqTab extends ConsumerWidget {
                 ? MitraEmpty(tr('No RFQs yet.'))
                 : ListView(
                     children: [
-                      for (final r in rows)
-                        ListTile(
-                          title: Text(r.materialName),
-                          subtitle: Text([
-                            '${fmtQty(r.quantity)} ${r.unit}',
-                            if (r.estimatedAmount != null) 'about ${rupees(r.estimatedAmount!)}',
-                            _statusLabel(r.status),
-                          ].join(' · ')),
-                          trailing: r.status == 'pending'
-                              ? FilledButton(
-                                  child: Text(tr('Make PO')),
-                                  onPressed: () => _makePo(context, ref, r, suppliers),
-                                )
-                              : null,
-                        ),
+                      for (final r in rows) _requestTile(context, ref, r, suppliers, quoteCounts),
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -283,6 +339,63 @@ class _RfqTab extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  /// A request over the owner's approval amounts waits for its approvals
+  /// before it can become a PO.
+  Widget _requestTile(BuildContext context, WidgetRef ref, PurchaseRequest r, AsyncValue<List<Supplier>> suppliers,
+      Map<String, int> quoteCounts) {
+    final chain = r.status == 'pending'
+        ? chainViewFor(ref,
+            companyId: companyId,
+            projectId: projectId,
+            kind: ApprovalKind.purchaseRequest,
+            itemId: r.id,
+            amount: r.estimatedAmount ?? 0,
+            createdAt: r.createdAt)
+        : null;
+    final waiting = chain != null && !chain.status.complete;
+    return ListTile(
+      key: Key('request-${r.id}'),
+      onTap: () async {
+        await Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => QuoteCompareScreen(requestId: r.id, companyId: companyId, userId: userId)));
+        ref.invalidate(requestsProvider(projectId));
+        ref.invalidate(supplierQuoteCountsProvider(projectId));
+      },
+      title: Text(r.materialName),
+      subtitle: Text([
+        '${fmtQty(r.quantity)} ${r.unit}',
+        if (r.estimatedAmount != null) trf('about {amount}', {'amount': rupees(r.estimatedAmount!)}),
+        waiting ? chain.status.label : _statusLabel(r.status),
+        if ((quoteCounts[r.id] ?? 0) > 0)
+          (quoteCounts[r.id] == 1 ? tr('1 quote') : trf('{n} quotes', {'n': quoteCounts[r.id]!})),
+      ].join(' · ')),
+      trailing: r.status != 'pending' || chain == null
+          ? null
+          : !waiting
+              ? FilledButton(
+                  child: Text(tr('Make PO')),
+                  onPressed: () => _makePo(context, ref, r, suppliers),
+                )
+              : chain.signAs != null
+                  ? FilledButton.tonal(
+                      child: Text(tr('Approve')),
+                      onPressed: () async {
+                        final ok = await signApproval(context, ref,
+                            projectId: projectId,
+                            kind: ApprovalKind.purchaseRequest,
+                            itemId: r.id,
+                            what: r.materialName,
+                            view: chain);
+                        if (ok == false) {
+                          await ref.read(appDatabaseProvider).purchaseDao.setRequestStatus(r.id, 'rejected');
+                          ref.invalidate(requestsProvider(projectId));
+                        }
+                      },
+                    )
+                  : null,
     );
   }
 
@@ -355,21 +468,21 @@ class _RfqTab extends ConsumerWidget {
     );
     if (ok != true) return;
     final db = ref.read(appDatabaseProvider);
-    await db.purchaseDao.createOrder(PurchaseOrdersCompanion.insert(
+    await db.purchaseDao.orderFromRequest(
+        r.id,
+        PurchaseOrdersCompanion.insert(
           id: const Uuid().v4(),
           projectId: projectId,
           supplierId: supplierId,
-          requestId: Value(r.id),
           raisedBy: userId,
           totalAmount: Value(double.tryParse(amount.text)),
         ));
-    await db.purchaseDao.setRequestStatus(r.id, 'ordered');
     ref.invalidate(requestsProvider(projectId));
     ref.invalidate(ordersProvider(projectId));
   }
 
   Future<String?> _pickSupplier(BuildContext context, AsyncValue<List<Supplier>> suppliers) async {
-    final rows = suppliers.valueOrNull ?? [];
+    final rows = suppliers.value ?? [];
     if (rows.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Add a supplier first.'))));
       return null;
@@ -399,8 +512,8 @@ class _PoTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final orders = ref.watch(ordersProvider(projectId));
     final suppliers = ref.watch(suppliersProvider(companyId));
-    final requests = ref.watch(requestsProvider(projectId)).valueOrNull ?? const <PurchaseRequest>[];
-    final receipts = ref.watch(receiptsProvider(projectId)).valueOrNull ?? const <MaterialReceipt>[];
+    final requests = ref.watch(requestsProvider(projectId)).value ?? const <PurchaseRequest>[];
+    final receipts = ref.watch(receiptsProvider(projectId)).value ?? const <MaterialReceipt>[];
     final now = DateTime.now();
     return Column(
       children: [
@@ -410,28 +523,7 @@ class _PoTab extends ConsumerWidget {
                 ? MitraEmpty(tr('No purchase orders yet.'))
                 : ListView(
                     children: [
-                      for (final o in rows)
-                        ListTile(
-                          title: Text(_poTitle(o, requests.where((r) => r.id == o.requestId).firstOrNull)),
-                          subtitle: Text([
-                            _supName(suppliers, o.supplierId),
-                            _poStage(o, poProgress(o, requests.where((r) => r.id == o.requestId).firstOrNull, receipts)),
-                            if (poIsLate(o, now)) trf('late since {date}', {'date': fmtDate(o.deliveryDate!, short: true)}),
-                          ].join(' · ')),
-                          trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                            IconButton(
-                              tooltip: tr('Send to supplier'),
-                              icon: const Icon(Icons.share_outlined),
-                              onPressed: () => _sharePo(ref, o, suppliers),
-                            ),
-                            if (o.status == 'issued')
-                              FilledButton(
-                                child: Text(tr('Receive')),
-                                onPressed: () => _receive(context, ref, o, requests.where((r) => r.id == o.requestId).firstOrNull,
-                                    poProgress(o, requests.where((r) => r.id == o.requestId).firstOrNull, receipts)),
-                              ),
-                          ]),
-                        ),
+                      for (final o in rows) _orderTile(context, ref, o, suppliers, requests, receipts, now),
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -442,14 +534,70 @@ class _PoTab extends ConsumerWidget {
     );
   }
 
+  /// A PO over the owner's approval amounts goes to the supplier only
+  /// once it is approved.
+  Widget _orderTile(BuildContext context, WidgetRef ref, PurchaseOrder o, AsyncValue<List<Supplier>> suppliers,
+      List<PurchaseRequest> requests, List<MaterialReceipt> receipts, DateTime now) {
+    final chain = o.status == 'cancelled'
+        ? null
+        : chainViewFor(ref,
+            companyId: companyId,
+            projectId: projectId,
+            kind: ApprovalKind.purchaseOrder,
+            itemId: o.id,
+            amount: o.totalAmount ?? 0,
+            createdAt: o.createdAt);
+    final waiting = chain != null && !chain.status.complete;
+    return ListTile(
+      title: Text(_poTitle(o, requests.where((r) => r.id == o.requestId).firstOrNull)),
+      subtitle: Text([
+        _supName(suppliers, o.supplierId),
+        _poStage(o, poProgress(o, requests.where((r) => r.id == o.requestId).firstOrNull, receipts)),
+        if (chain != null && chain.status.required.isNotEmpty) chain.status.label,
+        if (poIsLate(o, now)) trf('late since {date}', {'date': fmtDate(o.deliveryDate!, short: true)}),
+        if (o.status == 'acknowledged' && o.dispatchedOn != null) _onTheWay(o),
+      ].join(' · ')),
+      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+        if (waiting && chain.signAs != null)
+          TextButton(
+            child: Text(tr('Approve')),
+            onPressed: () async {
+              final ok = await signApproval(context, ref,
+                  projectId: projectId,
+                  kind: ApprovalKind.purchaseOrder,
+                  itemId: o.id,
+                  what: _poTitle(o, requests.where((r) => r.id == o.requestId).firstOrNull),
+                  view: chain);
+              if (ok == false) {
+                await ref.read(appDatabaseProvider).purchaseDao.setOrderStatus(o.id, 'cancelled');
+                ref.invalidate(ordersProvider(projectId));
+              }
+            },
+          ),
+        if (!waiting)
+          IconButton(
+            tooltip: tr('Send to supplier'),
+            icon: const Icon(Icons.share_outlined),
+            onPressed: () => _sharePo(ref, o, suppliers),
+          ),
+        if (o.status == 'issued' || o.status == 'acknowledged')
+          FilledButton(
+            child: Text(tr('Receive')),
+            onPressed: () => _receive(context, ref, o, requests.where((r) => r.id == o.requestId).firstOrNull,
+                poProgress(o, requests.where((r) => r.id == o.requestId).firstOrNull, receipts)),
+          ),
+      ]),
+    );
+  }
+
   Future<void> _sharePo(WidgetRef ref, PurchaseOrder o, AsyncValue<List<Supplier>> suppliers) async {
-    final requests = ref.read(requestsProvider(projectId)).valueOrNull ?? const <PurchaseRequest>[];
-    final projects = ref.read(projectsProvider(companyId)).valueOrNull ?? const <Project>[];
+    final requests = ref.read(requestsProvider(projectId)).value ?? const <PurchaseRequest>[];
+    final projects = ref.read(projectsProvider(companyId)).value ?? const <Project>[];
     final text = poShareText(
       order: o,
       companyName: ref.read(sessionProvider).activeCompany?.name ?? '',
       projectName: projects.where((p) => p.id == projectId).firstOrNull?.name,
-      supplierName: (suppliers.valueOrNull ?? const <Supplier>[]).where((s) => s.id == o.supplierId).firstOrNull?.name,
+      supplierName: (suppliers.value ?? const <Supplier>[]).where((s) => s.id == o.supplierId).firstOrNull?.name,
       request: requests.where((r) => r.id == o.requestId).firstOrNull,
     );
     await SharePlus.instance.share(ShareParams(text: text));
@@ -498,7 +646,7 @@ class _PoTab extends ConsumerWidget {
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.photo_camera),
-                label: Text(photoPath.value == null ? tr('Attach delivery photo') : tr('Photo attached')),
+                label: Text(photoPath.value == null ? tr('Photograph the delivery slip') : tr('Slip photo attached')),
                 onPressed: () async {
                   final path = await captureCameraFirst(ctx, prefix: 'grn');
                   if (path != null) {
@@ -525,11 +673,7 @@ class _PoTab extends ConsumerWidget {
     );
     if (ok != true) return;
     final db = ref.read(appDatabaseProvider);
-    
-    // Store photo path in notes field for now (material_receipts table doesn't have a dedicated photo_path column)
-    final notes = photoPath.value != null ? 'Photo: ${photoPath.value}' : null;
-    
-    await db.materialDao.createReceipt(MaterialReceiptsCompanion.insert(
+    await db.purchaseDao.receiveAgainstOrder(o.id, closeOrder: closeOrder, slipPath: photoPath.value, MaterialReceiptsCompanion.insert(
           id: const Uuid().v4(),
           projectId: projectId,
           poId: Value(o.id),
@@ -541,18 +685,17 @@ class _PoTab extends ConsumerWidget {
           amount: double.tryParse(amount.text.trim()) ?? 0,
           receivedBy: userId,
           receivedOn: DateTime.now(),
-          notes: Value(notes),
         ));
-    if (closeOrder) await db.purchaseDao.setOrderStatus(o.id, 'delivered');
     ref.invalidate(ordersProvider(projectId));
     ref.invalidate(receiptsProvider(projectId));
+    ref.invalidate(receiptSlipsProvider(projectId));
     ref.invalidate(siteStockProvider(projectId));
     ref.invalidate(costSummaryProvider(projectId));
   }
 }
 
 String _supName(AsyncValue<List<Supplier>> suppliers, String id) {
-  for (final s in suppliers.valueOrNull ?? const <Supplier>[]) {
+  for (final s in suppliers.value ?? const <Supplier>[]) {
     if (s.id == id) return s.name;
   }
   return tr('Supplier not on this phone');
@@ -563,6 +706,18 @@ String _poTitle(PurchaseOrder o, PurchaseRequest? request) {
       ? tr('Purchase order')
       : [request.materialName.trim(), fmtQty(request.quantity), request.unit.trim()].where((e) => e.isNotEmpty).join(' ');
   return o.totalAmount == null ? what : '$what · ${rupees(o.totalAmount!)}';
+}
+
+/// What the supplier said from their free portal when they sent it.
+String _onTheWay(PurchaseOrder o) {
+  final vehicle = o.dispatchVehicle?.trim() ?? '';
+  final note = o.supplierNote?.trim() ?? '';
+  return [
+    vehicle.isEmpty
+        ? trf('on the way since {date}', {'date': fmtDate(o.dispatchedOn!, short: true)})
+        : trf('on the way in {vehicle} since {date}', {'vehicle': vehicle, 'date': fmtDate(o.dispatchedOn!, short: true)}),
+    if (note.isNotEmpty) note,
+  ].join(' · ');
 }
 
 /// "Sent to supplier", or how much of it has come when it came in parts.
@@ -589,6 +744,10 @@ String _statusLabel(String status) => switch (status) {
 
 // --- GRN ------------------------------------------------------------------
 
+/// The delivery slips of the site's receipts, by receipt id.
+final receiptSlipsProvider = FutureProvider.autoDispose.family<Map<String, List<ReceiptAttachment>>, String>(
+    (ref, projectId) => ref.watch(appDatabaseProvider).materialDao.slipsForProject(projectId));
+
 class _GrnTab extends ConsumerWidget {
   const _GrnTab({required this.projectId, required this.companyId, required this.userId});
   final String projectId;
@@ -598,6 +757,7 @@ class _GrnTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final receipts = ref.watch(receiptsProvider(projectId));
+    final slips = ref.watch(receiptSlipsProvider(projectId)).value ?? const {};
     return receipts.when(
       data: (rows) => rows.isEmpty
           ? MitraEmpty(tr('No goods receipts yet.'))
@@ -623,6 +783,23 @@ class _GrnTab extends ConsumerWidget {
                       rupees(m.amount),
                       trf('received {date}', {'date': fmtDate(m.receivedOn, short: true)}),
                     ].join(' · ')),
+                    trailing: (slips[m.id] ?? const []).isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: tr('Delivery slip'),
+                            icon: const Icon(Icons.receipt_long_outlined),
+                            onPressed: () {
+                              final paths = [
+                                for (final a in slips[m.id]!)
+                                  if (File(a.filePath).existsSync()) a.filePath,
+                              ];
+                              if (paths.isEmpty) {
+                                showSnack(context, tr('The photo has not reached this phone yet. Sync and try again.'));
+                              } else {
+                                showPhotoViewer(context, paths, shareText: m.materialName);
+                              }
+                            },
+                          ),
                   ),
               ],
             ),

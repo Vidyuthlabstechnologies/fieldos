@@ -5,6 +5,7 @@
 library;
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart' show siteMoveTotals;
 
 enum StockStatus { ok, low, out, overused }
 
@@ -26,20 +27,28 @@ class StockLine {
 
   /// Part of [received] that was opening stock.
   double opening = 0;
-  double get balance => received - used;
+
+  /// Came from a store or another site, and sent away from here.
+  double transferredIn = 0;
+  double transferredOut = 0;
+  double get balance => received + transferredIn - used - transferredOut;
 
   StockStatus get status {
     const eps = 1e-9;
     if (balance < -eps) return StockStatus.overused;
     if (balance.abs() <= eps) return StockStatus.out;
-    if (received > 0 && balance <= received * lowStockShare) return StockStatus.low;
+    final had = received + transferredIn;
+    if (had > 0 && balance <= had * lowStockShare) return StockStatus.low;
     return StockStatus.ok;
   }
 }
 
 String _norm(String s) => s.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase();
 
-List<StockLine> buildSiteStock(List<MaterialReceipt> receipts, List<MaterialUsageData> usage) {
+/// With [moves] and [projectId], transfers in (once counted at the site)
+/// and out (once sent) count too.
+List<StockLine> buildSiteStock(List<MaterialReceipt> receipts, List<MaterialUsageData> usage,
+    {List<StockMove> moves = const [], String? projectId}) {
   final lines = <String, StockLine>{};
   StockLine lineFor(String name, String? unit) {
     final u = (unit == null || unit.trim().isEmpty) ? null : unit.trim();
@@ -52,6 +61,17 @@ List<StockLine> buildSiteStock(List<MaterialReceipt> receipts, List<MaterialUsag
   }
   for (final u in usage) {
     lineFor(u.materialName, u.unit).used += u.quantity;
+  }
+  if (projectId != null && moves.isNotEmpty) {
+    final names = <String, ({String name, String? unit})>{
+      for (final m in moves) '${_norm(m.materialName)}|${_norm(m.unit?.trim() ?? '')}': (name: m.materialName, unit: m.unit),
+    };
+    for (final MapEntry(:key, :value) in siteMoveTotals(moves, projectId).entries) {
+      final n = names[key]!;
+      lineFor(n.name, n.unit)
+        ..transferredIn += value.inQty
+        ..transferredOut += value.outQty;
+    }
   }
   final out = lines.values.toList()
     ..sort((a, b) {

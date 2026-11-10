@@ -14,6 +14,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import 'package:fieldos_mobile/agents/assistant_tools.dart';
+import 'package:fieldos_mobile/auth/auth_service.dart' show Roles;
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/services/ai_backend.dart';
 
@@ -60,8 +61,13 @@ class AssistantConversation extends ChangeNotifier {
     required this.tools,
     required this.appState,
     this.onDataChanged,
+    this.onSettled,
     this.maxSteps = 10,
   });
+
+  /// Called whenever the chat comes to rest (an answer finished, or the chat
+  /// was cleared), so the screen can save it.
+  final void Function()? onSettled;
 
   final AiBackend backend;
   final AssistantTools tools;
@@ -87,6 +93,12 @@ class AssistantConversation extends ChangeNotifier {
   /// Share of this month's allowance left (0-100), as the server last said.
   int? allowanceLeft;
 
+  /// Questions the person might ask next, shown under the last answer.
+  /// Picked on the phone from what this turn did, so they cost nothing.
+  List<String> followUps = const [];
+
+  final _usedTools = <String>{};
+
   bool get waitingForConfirm => items.any((i) => i is ConfirmAction && i.state == ConfirmState.waiting);
 
   Future<void> send(String text) async {
@@ -94,6 +106,8 @@ class AssistantConversation extends ChangeNotifier {
     if (words.isEmpty || busy) return;
     busy = true;
     lastReply = null;
+    followUps = const [];
+    _usedTools.clear();
     items.add(PersonSaid(words));
     notifyListeners();
     final before = history.length;
@@ -106,6 +120,7 @@ class AssistantConversation extends ChangeNotifier {
         ],
       });
       await _run();
+      followUps = suggestFollowUps(_usedTools, asked: words, canApprove: Roles.canApprove(tools.role));
     } on AiException catch (e) {
       // Back to the last complete exchange, so the next message is accepted.
       history.removeRange(before, history.length);
@@ -118,6 +133,7 @@ class AssistantConversation extends ChangeNotifier {
     } finally {
       busy = false;
       notifyListeners();
+      onSettled?.call();
     }
   }
 
@@ -133,7 +149,70 @@ class AssistantConversation extends ChangeNotifier {
     items.clear();
     history.clear();
     lastReply = null;
+    followUps = const [];
     notifyListeners();
+    onSettled?.call();
+  }
+
+  /// The chat as JSON, to keep on the phone. A card still waiting for a tap
+  /// can't be resumed later, so it is kept as cancelled.
+  Map<String, dynamic> toJson() => {
+        'v': 1,
+        'items': [for (final i in items) _itemJson(i)],
+        'history': history,
+        'follow_ups': followUps,
+      };
+
+  /// Puts back a chat saved with [toJson]. Anything unreadable starts fresh.
+  void restore(Map<String, dynamic> json) {
+    if (busy) return;
+    try {
+      final restored = [for (final i in (json['items'] as List? ?? const [])) _itemFrom(Map<String, dynamic>.from(i as Map))];
+      final hist = [for (final h in (json['history'] as List? ?? const [])) Map<String, dynamic>.from(h as Map)];
+      items
+        ..clear()
+        ..addAll(restored.whereType<ChatItem>());
+      history
+        ..clear()
+        ..addAll(hist);
+      followUps = [for (final f in (json['follow_ups'] as List? ?? const [])) '$f'];
+      lastReply = null;
+    } catch (_) {
+      items.clear();
+      history.clear();
+      followUps = const [];
+    }
+    notifyListeners();
+  }
+
+  static Map<String, dynamic> _itemJson(ChatItem i) => switch (i) {
+        PersonSaid(:final text) => {'t': 'person', 'text': text},
+        AssistantSaid(:final text) => {'t': 'assistant', 'text': text},
+        final ConfirmAction a => {
+            't': 'confirm',
+            'tool': a.toolName,
+            'summary': a.summary,
+            'state': (a.state == ConfirmState.waiting ? ConfirmState.cancelled : a.state).name,
+          },
+        ScreenButton(:final link) => {'t': 'screen', 'screen': link.screen, 'project_id': link.projectId},
+        ChatNotice(:final text, :final code) => {'t': 'notice', 'text': text, 'code': code},
+      };
+
+  static ChatItem? _itemFrom(Map<String, dynamic> j) {
+    switch (j['t']) {
+      case 'person':
+        return PersonSaid('${j['text']}');
+      case 'assistant':
+        return AssistantSaid('${j['text']}');
+      case 'confirm':
+        return ConfirmAction(toolName: '${j['tool']}', summary: '${j['summary']}')
+          ..state = ConfirmState.values.asNameMap()[j['state']] ?? ConfirmState.cancelled;
+      case 'screen':
+        return ScreenButton(ScreenLink('${j['screen']}', projectId: j['project_id'] as String?));
+      case 'notice':
+        return ChatNotice('${j['text']}', code: j['code'] as String?);
+    }
+    return null;
   }
 
   void _cancelWaiting() {
@@ -180,6 +259,7 @@ class AssistantConversation extends ChangeNotifier {
     for (var n = 0; n < uses.length; n++) {
       final u = uses[n];
       final name = u['name'] as String? ?? '';
+      _usedTools.add(name);
       final input = Map<String, dynamic>.from((u['input'] as Map?) ?? const {});
       if (writeTools.contains(name)) {
         try {
@@ -219,5 +299,42 @@ class AssistantConversation extends ChangeNotifier {
         'content': content.length > 15000 ? '${content.substring(0, 15000)}…' : content,
         if (isError) 'is_error': true,
       };
+}
 
+/// Up to three questions that follow naturally from what the assistant just
+/// did ([used] are the tool names of the turn), in the app's language and
+/// never the one just [asked].
+List<String> suggestFollowUps(Set<String> used, {String asked = '', bool canApprove = true}) {
+  final siteToday = tr('What happened on my sites today?');
+  final spend = tr('How much did I spend this month?');
+  final weekSpend = tr("Show this week's expenses");
+  final late = tr('Which tasks are late?');
+  final dueWeek = tr('What is due this week?');
+  final absent = tr('Who was absent today?');
+  final labour = tr('How much did labour cost this week?');
+  final report = tr("Write today's daily report");
+  final issues = tr('Any open issues on site?');
+  final stock = tr('Which materials are running low?');
+  final approvals = canApprove ? tr('What needs my approval?') : late;
+  final cement = tr('Add ₹5,000 spent on cement');
+
+  bool any(Iterable<String> names) => names.any(used.contains);
+  final out = <String>[
+    if (any(['add_expense', 'list_money', 'record_payment_received'])) ...[weekSpend, spend, approvals],
+    if (any(['mark_attendance', 'add_worker', 'list_workers'])) ...[absent, labour],
+    if (any(['add_task', 'update_task', 'list_tasks'])) ...[late, dueWeek],
+    if (any(['add_daily_report'])) ...[issues, siteToday],
+    if (any(['report_issue', 'list_issues'])) ...[issues, report],
+    if (any(['record_material_received', 'record_material_used', 'stock_summary'])) ...[stock, cement],
+    if (any(['pending_approvals'])) ...[approvals, spend],
+    ...[siteToday, late, report, spend],
+  ];
+  final said = asked.trim().toLowerCase();
+  final picked = <String>[];
+  for (final q in out) {
+    if (picked.length == 3) break;
+    if (q.toLowerCase() == said || picked.contains(q)) continue;
+    picked.add(q);
+  }
+  return picked;
 }

@@ -76,7 +76,7 @@ class ExpenseBills extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final all = ref.watch(expenseBillsProvider(expense.id)).valueOrNull ?? const <ExpenseAttachment>[];
+    final all = ref.watch(expenseBillsProvider(expense.id)).value ?? const <ExpenseAttachment>[];
     final here = [for (final b in all) if (File(b.filePath).existsSync()) b];
     final photos = [for (final b in here) if (!b.mimeType.endsWith('pdf')) b.filePath];
     final pdfs = [for (final b in here) if (b.mimeType.endsWith('pdf')) b];

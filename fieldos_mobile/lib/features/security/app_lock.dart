@@ -214,7 +214,7 @@ class _PinPadState extends State<PinPad> {
                 ),
                 const SizedBox(height: 12),
                 Semantics(
-                  label: '${_pin.length} of 4',
+                  label: trf('{n} of {total}', {'n': _pin.length, 'total': 4}),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

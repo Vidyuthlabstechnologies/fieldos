@@ -13,6 +13,18 @@ class Roles {
   static const member = 'member';
   static const viewer = 'viewer';
 
+  /// A subcontractor's own phone (free, restricted): not a company member
+  /// on the server, sees only their firm's work orders and claims.
+  static const subcontractor = 'subcontractor';
+
+  /// A supplier's or a site client's own phone (free, online only): not a
+  /// company member; they see only what the builder shares with them.
+  static const supplier = 'supplier';
+  static const client = 'client';
+
+  /// The free outside parties: no subscription, no sync, no recording.
+  static bool isOutside(String? role) => role == subcontractor || role == supplier || role == client;
+
   /// Only an owner may configure installation-wide settings (e.g. the Sarvam
   /// API key) — matching the desktop app's authorization gap fix.
   static bool canManageSettings(String role) => role == owner;
@@ -28,6 +40,9 @@ class Roles {
   static String fromCloud(String cloudRole) => switch (cloudRole) {
         'owner' => owner,
         'project_manager' => manager,
+        'subcontractor' => subcontractor,
+        'supplier' => supplier,
+        'client' => client,
         _ => member,
       };
 

@@ -24,7 +24,7 @@ void main() {
 
     test('new issue shows severity and description', () {
       final a = describeRemoteRow('issues', {'severity': 'high', 'description': 'Crack in column C4'}, myUserId: 'me');
-      expect(a?.title, 'New high-severity issue');
+      expect(a?.title, 'New issue (high)');
       expect(a?.body, 'Crack in column C4');
     });
 

@@ -1,11 +1,13 @@
-/// The app's own language: English, Hindi or Telugu. Every label goes
-/// through [tr], which looks the English text up in the chosen language's
-/// table and falls back to English for anything not yet translated, so a
-/// missing entry shows English rather than a blank or a key.
+/// The person's language: English, Hindi, Telugu, Tamil, Kannada or
+/// Marathi. It is theirs to pick (the app asks on first launch, and
+/// Settings can change it), never guessed and forced on them.
 ///
-/// The choice is kept on the phone (settings key [languageSettingKey]).
-/// Before anyone picks, a phone set to Hindi or Telugu starts in that
-/// language.
+/// Picking a language changes how FieldOS talks and listens: Mitra's
+/// guide, read-aloud and voice input use it, mixed with English the way
+/// people really speak. Screens stay in English unless the person also
+/// switches on "Show screens in Telugu" (and so on) ([screensInLanguageKey]);
+/// then every label goes through [tr], which looks the English text up in
+/// that language's table and falls back to English for anything missing.
 library;
 
 import 'dart:ui' show PlatformDispatcher;
@@ -14,13 +16,19 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/l10n/strings_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_kn.dart';
+import 'package:fieldos_mobile/l10n/strings_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_te.dart';
 import 'package:fieldos_mobile/providers.dart';
 
 enum AppLanguage {
   en('en', 'English', 'English'),
   hi('hi', 'हिन्दी', 'Hindi'),
-  te('te', 'తెలుగు', 'Telugu');
+  te('te', 'తెలుగు', 'Telugu'),
+  ta('ta', 'தமிழ்', 'Tamil'),
+  kn('kn', 'ಕನ್ನಡ', 'Kannada'),
+  mr('mr', 'मराठी', 'Marathi');
 
   const AppLanguage(this.code, this.nativeName, this.englishName);
   final String code;
@@ -41,16 +49,54 @@ enum AppLanguage {
 
 const languageSettingKey = 'app_language';
 
-const Map<AppLanguage, Map<String, String>> _tables = {AppLanguage.hi: stringsHi, AppLanguage.te: stringsTe};
+/// '1' when the person wants every screen in their language too.
+const screensInLanguageKey = 'screens_in_language';
+
+const Map<AppLanguage, Map<String, String>> _tables = {
+  AppLanguage.hi: stringsHi,
+  AppLanguage.te: stringsTe,
+  AppLanguage.ta: stringsTa,
+  AppLanguage.kn: stringsKn,
+  AppLanguage.mr: stringsMr,
+};
+
+/// The speech code (BCP-47) for [l], for the phone's voice and its
+/// speech recognition: 'ta-IN'.
+String speechCodeFor(AppLanguage l) => '${l.code}-IN';
 
 AppLanguage _current = AppLanguage.en;
+AppLanguage _spoken = AppLanguage.en;
+bool _screensOn = false;
 
-/// The language [tr] is using now.
+/// The language the screens are in now, the one [tr] uses.
 AppLanguage get currentLanguage => _current;
 
 /// Sets the language for [tr]. The app calls this through
 /// [languageProvider]; tests call it directly.
 void setCurrentLanguage(AppLanguage l) => _current = l;
+
+/// The language the person picked: Mitra speaks it and voice input listens
+/// for it, whatever language the screens are in.
+AppLanguage get spokenLanguage => _spoken;
+
+/// Sets the spoken language directly; the app goes through
+/// [languageProvider], tests call this.
+void setSpokenLanguage(AppLanguage l) => _spoken = l;
+
+/// Whether the screens follow [spokenLanguage] (otherwise English).
+bool get screensInLanguage => _screensOn;
+
+void _apply(AppLanguage spoken, bool screens) {
+  _spoken = spoken;
+  _screensOn = screens;
+  _current = screens ? spoken : AppLanguage.en;
+}
+
+/// [english] in language [l], or [english] when there is no translation.
+String trIn(AppLanguage l, String english) => _tables[l]?[english] ?? english;
+
+/// [english] in the person's spoken language, for words read aloud.
+String trSpoken(String english) => trIn(_spoken, english);
 
 /// [english] in the current language, or [english] itself when there is
 /// no translation.
@@ -64,7 +110,8 @@ String trf(String english, Map<String, Object> args) {
   return s;
 }
 
-/// Hindi or Telugu when the phone is set to it, else English.
+/// The phone's own language when FieldOS has it, else English: the first
+/// launch offers it first, but nothing changes until the person taps.
 AppLanguage languageFromDevice([List<Locale>? locales]) {
   for (final l in locales ?? PlatformDispatcher.instance.locales) {
     final found = AppLanguage.fromCode(l.languageCode);
@@ -73,25 +120,57 @@ AppLanguage languageFromDevice([List<Locale>? locales]) {
   return AppLanguage.en;
 }
 
-class LanguageController extends StateNotifier<AppLanguage> {
-  LanguageController(this._ref) : super(_current) {
+class LanguageController extends Notifier<AppLanguage> {
+  /// Set once the person picks, so a slower load of the saved setting
+  /// can't undo their choice.
+  bool _picked = false;
+
+  @override
+  AppLanguage build() {
     _load();
+    return _spoken;
   }
-  final Ref _ref;
 
   Future<void> _load() async {
-    final saved = AppLanguage.fromCode(await _ref.read(appDatabaseProvider).settingsDao.get(languageSettingKey));
-    final l = saved ?? languageFromDevice();
-    if (!mounted) return;
-    setCurrentLanguage(l);
-    state = l;
+    final settings = ref.read(appDatabaseProvider).settingsDao;
+    final saved = AppLanguage.fromCode(await settings.get(languageSettingKey));
+    final screens = await settings.get(screensInLanguageKey) == '1';
+    if (!ref.mounted || _picked) return;
+    _apply(saved ?? AppLanguage.en, screens);
+    state = _spoken;
+    ref.read(screensInLanguageProvider.notifier).sync();
   }
 
   Future<void> choose(AppLanguage l) async {
-    setCurrentLanguage(l);
+    _picked = true;
+    _apply(l, _screensOn);
     state = l;
-    await _ref.read(appDatabaseProvider).settingsDao.set(languageSettingKey, l.code);
+    ref.read(screensInLanguageProvider.notifier).sync();
+    await ref.read(appDatabaseProvider).settingsDao.set(languageSettingKey, l.code);
+    ref.invalidate(languageChosenProvider);
   }
 }
 
-final languageProvider = StateNotifierProvider<LanguageController, AppLanguage>((ref) => LanguageController(ref));
+final languageProvider = NotifierProvider<LanguageController, AppLanguage>(LanguageController.new);
+
+/// Whether the screens are in the person's language too (off: English).
+class ScreensInLanguageController extends Notifier<bool> {
+  @override
+  bool build() => _screensOn;
+
+  /// Picks up a change made through [LanguageController].
+  void sync() => state = _screensOn;
+
+  Future<void> set(bool on) async {
+    _apply(_spoken, on);
+    state = on;
+    await ref.read(appDatabaseProvider).settingsDao.set(screensInLanguageKey, on ? '1' : '0');
+  }
+}
+
+final screensInLanguageProvider =
+    NotifierProvider<ScreensInLanguageController, bool>(ScreensInLanguageController.new);
+
+/// False until the person has picked a language, so the first launch asks.
+final languageChosenProvider = FutureProvider<bool>(
+    (ref) async => await ref.read(appDatabaseProvider).settingsDao.get(languageSettingKey) != null);
