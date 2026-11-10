@@ -1204,3 +1204,34 @@ class PayrollLines extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+// --- v23: supplier quotes against a purchase request ------------------------
+
+/// A supplier's price for a purchase request, so several can be compared
+/// side by side and the best one turned into the PO.
+class SupplierQuotes extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get requestId => text().withLength(min: 1, max: 36)();
+  TextColumn get supplierId => text().withLength(min: 1, max: 36)();
+
+  /// Rupees a unit of the request, before GST.
+  RealColumn get rate => real()();
+  RealColumn get gstPct => real().withDefault(const Constant(18))();
+
+  /// Freight and unloading, as quoted.
+  RealColumn get transport => real().withDefault(const Constant(0))();
+  IntColumn get deliveryDays => integer().nullable()();
+  TextColumn get paymentTerms => text().withLength(max: 120).nullable()();
+  DateTimeColumn get validUntil => dateTime().nullable()();
+  TextColumn get notes => text().withLength(max: 300).nullable()();
+
+  /// received | accepted | rejected
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('received'))();
+  TextColumn get poId => text().withLength(max: 36).nullable()();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

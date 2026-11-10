@@ -36023,6 +36023,882 @@ class PayrollLinesCompanion extends UpdateCompanion<PayrollLine> {
   }
 }
 
+class $SupplierQuotesTable extends SupplierQuotes
+    with TableInfo<$SupplierQuotesTable, SupplierQuote> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SupplierQuotesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _requestIdMeta = const VerificationMeta(
+    'requestId',
+  );
+  @override
+  late final GeneratedColumn<String> requestId = GeneratedColumn<String>(
+    'request_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _supplierIdMeta = const VerificationMeta(
+    'supplierId',
+  );
+  @override
+  late final GeneratedColumn<String> supplierId = GeneratedColumn<String>(
+    'supplier_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rateMeta = const VerificationMeta('rate');
+  @override
+  late final GeneratedColumn<double> rate = GeneratedColumn<double>(
+    'rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _gstPctMeta = const VerificationMeta('gstPct');
+  @override
+  late final GeneratedColumn<double> gstPct = GeneratedColumn<double>(
+    'gst_pct',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(18),
+  );
+  static const VerificationMeta _transportMeta = const VerificationMeta(
+    'transport',
+  );
+  @override
+  late final GeneratedColumn<double> transport = GeneratedColumn<double>(
+    'transport',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _deliveryDaysMeta = const VerificationMeta(
+    'deliveryDays',
+  );
+  @override
+  late final GeneratedColumn<int> deliveryDays = GeneratedColumn<int>(
+    'delivery_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _paymentTermsMeta = const VerificationMeta(
+    'paymentTerms',
+  );
+  @override
+  late final GeneratedColumn<String> paymentTerms = GeneratedColumn<String>(
+    'payment_terms',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _validUntilMeta = const VerificationMeta(
+    'validUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> validUntil = GeneratedColumn<DateTime>(
+    'valid_until',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('received'),
+  );
+  static const VerificationMeta _poIdMeta = const VerificationMeta('poId');
+  @override
+  late final GeneratedColumn<String> poId = GeneratedColumn<String>(
+    'po_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 36),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    requestId,
+    supplierId,
+    rate,
+    gstPct,
+    transport,
+    deliveryDays,
+    paymentTerms,
+    validUntil,
+    notes,
+    status,
+    poId,
+    createdBy,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'supplier_quotes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SupplierQuote> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('request_id')) {
+      context.handle(
+        _requestIdMeta,
+        requestId.isAcceptableOrUnknown(data['request_id']!, _requestIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_requestIdMeta);
+    }
+    if (data.containsKey('supplier_id')) {
+      context.handle(
+        _supplierIdMeta,
+        supplierId.isAcceptableOrUnknown(data['supplier_id']!, _supplierIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_supplierIdMeta);
+    }
+    if (data.containsKey('rate')) {
+      context.handle(
+        _rateMeta,
+        rate.isAcceptableOrUnknown(data['rate']!, _rateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rateMeta);
+    }
+    if (data.containsKey('gst_pct')) {
+      context.handle(
+        _gstPctMeta,
+        gstPct.isAcceptableOrUnknown(data['gst_pct']!, _gstPctMeta),
+      );
+    }
+    if (data.containsKey('transport')) {
+      context.handle(
+        _transportMeta,
+        transport.isAcceptableOrUnknown(data['transport']!, _transportMeta),
+      );
+    }
+    if (data.containsKey('delivery_days')) {
+      context.handle(
+        _deliveryDaysMeta,
+        deliveryDays.isAcceptableOrUnknown(
+          data['delivery_days']!,
+          _deliveryDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('payment_terms')) {
+      context.handle(
+        _paymentTermsMeta,
+        paymentTerms.isAcceptableOrUnknown(
+          data['payment_terms']!,
+          _paymentTermsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('valid_until')) {
+      context.handle(
+        _validUntilMeta,
+        validUntil.isAcceptableOrUnknown(data['valid_until']!, _validUntilMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('po_id')) {
+      context.handle(
+        _poIdMeta,
+        poId.isAcceptableOrUnknown(data['po_id']!, _poIdMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SupplierQuote map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SupplierQuote(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      requestId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}request_id'],
+      )!,
+      supplierId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supplier_id'],
+      )!,
+      rate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}rate'],
+      )!,
+      gstPct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gst_pct'],
+      )!,
+      transport: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}transport'],
+      )!,
+      deliveryDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}delivery_days'],
+      ),
+      paymentTerms: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_terms'],
+      ),
+      validUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}valid_until'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      poId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}po_id'],
+      ),
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SupplierQuotesTable createAlias(String alias) {
+    return $SupplierQuotesTable(attachedDatabase, alias);
+  }
+}
+
+class SupplierQuote extends DataClass implements Insertable<SupplierQuote> {
+  final String id;
+  final String projectId;
+  final String requestId;
+  final String supplierId;
+
+  /// Rupees a unit of the request, before GST.
+  final double rate;
+  final double gstPct;
+
+  /// Freight and unloading, as quoted.
+  final double transport;
+  final int? deliveryDays;
+  final String? paymentTerms;
+  final DateTime? validUntil;
+  final String? notes;
+
+  /// received | accepted | rejected
+  final String status;
+  final String? poId;
+  final String createdBy;
+  final DateTime createdAt;
+  const SupplierQuote({
+    required this.id,
+    required this.projectId,
+    required this.requestId,
+    required this.supplierId,
+    required this.rate,
+    required this.gstPct,
+    required this.transport,
+    this.deliveryDays,
+    this.paymentTerms,
+    this.validUntil,
+    this.notes,
+    required this.status,
+    this.poId,
+    required this.createdBy,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['request_id'] = Variable<String>(requestId);
+    map['supplier_id'] = Variable<String>(supplierId);
+    map['rate'] = Variable<double>(rate);
+    map['gst_pct'] = Variable<double>(gstPct);
+    map['transport'] = Variable<double>(transport);
+    if (!nullToAbsent || deliveryDays != null) {
+      map['delivery_days'] = Variable<int>(deliveryDays);
+    }
+    if (!nullToAbsent || paymentTerms != null) {
+      map['payment_terms'] = Variable<String>(paymentTerms);
+    }
+    if (!nullToAbsent || validUntil != null) {
+      map['valid_until'] = Variable<DateTime>(validUntil);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || poId != null) {
+      map['po_id'] = Variable<String>(poId);
+    }
+    map['created_by'] = Variable<String>(createdBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  SupplierQuotesCompanion toCompanion(bool nullToAbsent) {
+    return SupplierQuotesCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      requestId: Value(requestId),
+      supplierId: Value(supplierId),
+      rate: Value(rate),
+      gstPct: Value(gstPct),
+      transport: Value(transport),
+      deliveryDays: deliveryDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deliveryDays),
+      paymentTerms: paymentTerms == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentTerms),
+      validUntil: validUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(validUntil),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      status: Value(status),
+      poId: poId == null && nullToAbsent ? const Value.absent() : Value(poId),
+      createdBy: Value(createdBy),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SupplierQuote.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SupplierQuote(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      requestId: serializer.fromJson<String>(json['requestId']),
+      supplierId: serializer.fromJson<String>(json['supplierId']),
+      rate: serializer.fromJson<double>(json['rate']),
+      gstPct: serializer.fromJson<double>(json['gstPct']),
+      transport: serializer.fromJson<double>(json['transport']),
+      deliveryDays: serializer.fromJson<int?>(json['deliveryDays']),
+      paymentTerms: serializer.fromJson<String?>(json['paymentTerms']),
+      validUntil: serializer.fromJson<DateTime?>(json['validUntil']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      status: serializer.fromJson<String>(json['status']),
+      poId: serializer.fromJson<String?>(json['poId']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'requestId': serializer.toJson<String>(requestId),
+      'supplierId': serializer.toJson<String>(supplierId),
+      'rate': serializer.toJson<double>(rate),
+      'gstPct': serializer.toJson<double>(gstPct),
+      'transport': serializer.toJson<double>(transport),
+      'deliveryDays': serializer.toJson<int?>(deliveryDays),
+      'paymentTerms': serializer.toJson<String?>(paymentTerms),
+      'validUntil': serializer.toJson<DateTime?>(validUntil),
+      'notes': serializer.toJson<String?>(notes),
+      'status': serializer.toJson<String>(status),
+      'poId': serializer.toJson<String?>(poId),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  SupplierQuote copyWith({
+    String? id,
+    String? projectId,
+    String? requestId,
+    String? supplierId,
+    double? rate,
+    double? gstPct,
+    double? transport,
+    Value<int?> deliveryDays = const Value.absent(),
+    Value<String?> paymentTerms = const Value.absent(),
+    Value<DateTime?> validUntil = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
+    String? status,
+    Value<String?> poId = const Value.absent(),
+    String? createdBy,
+    DateTime? createdAt,
+  }) => SupplierQuote(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    requestId: requestId ?? this.requestId,
+    supplierId: supplierId ?? this.supplierId,
+    rate: rate ?? this.rate,
+    gstPct: gstPct ?? this.gstPct,
+    transport: transport ?? this.transport,
+    deliveryDays: deliveryDays.present ? deliveryDays.value : this.deliveryDays,
+    paymentTerms: paymentTerms.present ? paymentTerms.value : this.paymentTerms,
+    validUntil: validUntil.present ? validUntil.value : this.validUntil,
+    notes: notes.present ? notes.value : this.notes,
+    status: status ?? this.status,
+    poId: poId.present ? poId.value : this.poId,
+    createdBy: createdBy ?? this.createdBy,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  SupplierQuote copyWithCompanion(SupplierQuotesCompanion data) {
+    return SupplierQuote(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      requestId: data.requestId.present ? data.requestId.value : this.requestId,
+      supplierId: data.supplierId.present
+          ? data.supplierId.value
+          : this.supplierId,
+      rate: data.rate.present ? data.rate.value : this.rate,
+      gstPct: data.gstPct.present ? data.gstPct.value : this.gstPct,
+      transport: data.transport.present ? data.transport.value : this.transport,
+      deliveryDays: data.deliveryDays.present
+          ? data.deliveryDays.value
+          : this.deliveryDays,
+      paymentTerms: data.paymentTerms.present
+          ? data.paymentTerms.value
+          : this.paymentTerms,
+      validUntil: data.validUntil.present
+          ? data.validUntil.value
+          : this.validUntil,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      status: data.status.present ? data.status.value : this.status,
+      poId: data.poId.present ? data.poId.value : this.poId,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SupplierQuote(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('requestId: $requestId, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('rate: $rate, ')
+          ..write('gstPct: $gstPct, ')
+          ..write('transport: $transport, ')
+          ..write('deliveryDays: $deliveryDays, ')
+          ..write('paymentTerms: $paymentTerms, ')
+          ..write('validUntil: $validUntil, ')
+          ..write('notes: $notes, ')
+          ..write('status: $status, ')
+          ..write('poId: $poId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    requestId,
+    supplierId,
+    rate,
+    gstPct,
+    transport,
+    deliveryDays,
+    paymentTerms,
+    validUntil,
+    notes,
+    status,
+    poId,
+    createdBy,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SupplierQuote &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.requestId == this.requestId &&
+          other.supplierId == this.supplierId &&
+          other.rate == this.rate &&
+          other.gstPct == this.gstPct &&
+          other.transport == this.transport &&
+          other.deliveryDays == this.deliveryDays &&
+          other.paymentTerms == this.paymentTerms &&
+          other.validUntil == this.validUntil &&
+          other.notes == this.notes &&
+          other.status == this.status &&
+          other.poId == this.poId &&
+          other.createdBy == this.createdBy &&
+          other.createdAt == this.createdAt);
+}
+
+class SupplierQuotesCompanion extends UpdateCompanion<SupplierQuote> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> requestId;
+  final Value<String> supplierId;
+  final Value<double> rate;
+  final Value<double> gstPct;
+  final Value<double> transport;
+  final Value<int?> deliveryDays;
+  final Value<String?> paymentTerms;
+  final Value<DateTime?> validUntil;
+  final Value<String?> notes;
+  final Value<String> status;
+  final Value<String?> poId;
+  final Value<String> createdBy;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const SupplierQuotesCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.requestId = const Value.absent(),
+    this.supplierId = const Value.absent(),
+    this.rate = const Value.absent(),
+    this.gstPct = const Value.absent(),
+    this.transport = const Value.absent(),
+    this.deliveryDays = const Value.absent(),
+    this.paymentTerms = const Value.absent(),
+    this.validUntil = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.status = const Value.absent(),
+    this.poId = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SupplierQuotesCompanion.insert({
+    required String id,
+    required String projectId,
+    required String requestId,
+    required String supplierId,
+    required double rate,
+    this.gstPct = const Value.absent(),
+    this.transport = const Value.absent(),
+    this.deliveryDays = const Value.absent(),
+    this.paymentTerms = const Value.absent(),
+    this.validUntil = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.status = const Value.absent(),
+    this.poId = const Value.absent(),
+    required String createdBy,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       requestId = Value(requestId),
+       supplierId = Value(supplierId),
+       rate = Value(rate),
+       createdBy = Value(createdBy);
+  static Insertable<SupplierQuote> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? requestId,
+    Expression<String>? supplierId,
+    Expression<double>? rate,
+    Expression<double>? gstPct,
+    Expression<double>? transport,
+    Expression<int>? deliveryDays,
+    Expression<String>? paymentTerms,
+    Expression<DateTime>? validUntil,
+    Expression<String>? notes,
+    Expression<String>? status,
+    Expression<String>? poId,
+    Expression<String>? createdBy,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (requestId != null) 'request_id': requestId,
+      if (supplierId != null) 'supplier_id': supplierId,
+      if (rate != null) 'rate': rate,
+      if (gstPct != null) 'gst_pct': gstPct,
+      if (transport != null) 'transport': transport,
+      if (deliveryDays != null) 'delivery_days': deliveryDays,
+      if (paymentTerms != null) 'payment_terms': paymentTerms,
+      if (validUntil != null) 'valid_until': validUntil,
+      if (notes != null) 'notes': notes,
+      if (status != null) 'status': status,
+      if (poId != null) 'po_id': poId,
+      if (createdBy != null) 'created_by': createdBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SupplierQuotesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? requestId,
+    Value<String>? supplierId,
+    Value<double>? rate,
+    Value<double>? gstPct,
+    Value<double>? transport,
+    Value<int?>? deliveryDays,
+    Value<String?>? paymentTerms,
+    Value<DateTime?>? validUntil,
+    Value<String?>? notes,
+    Value<String>? status,
+    Value<String?>? poId,
+    Value<String>? createdBy,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return SupplierQuotesCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      requestId: requestId ?? this.requestId,
+      supplierId: supplierId ?? this.supplierId,
+      rate: rate ?? this.rate,
+      gstPct: gstPct ?? this.gstPct,
+      transport: transport ?? this.transport,
+      deliveryDays: deliveryDays ?? this.deliveryDays,
+      paymentTerms: paymentTerms ?? this.paymentTerms,
+      validUntil: validUntil ?? this.validUntil,
+      notes: notes ?? this.notes,
+      status: status ?? this.status,
+      poId: poId ?? this.poId,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (requestId.present) {
+      map['request_id'] = Variable<String>(requestId.value);
+    }
+    if (supplierId.present) {
+      map['supplier_id'] = Variable<String>(supplierId.value);
+    }
+    if (rate.present) {
+      map['rate'] = Variable<double>(rate.value);
+    }
+    if (gstPct.present) {
+      map['gst_pct'] = Variable<double>(gstPct.value);
+    }
+    if (transport.present) {
+      map['transport'] = Variable<double>(transport.value);
+    }
+    if (deliveryDays.present) {
+      map['delivery_days'] = Variable<int>(deliveryDays.value);
+    }
+    if (paymentTerms.present) {
+      map['payment_terms'] = Variable<String>(paymentTerms.value);
+    }
+    if (validUntil.present) {
+      map['valid_until'] = Variable<DateTime>(validUntil.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (poId.present) {
+      map['po_id'] = Variable<String>(poId.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SupplierQuotesCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('requestId: $requestId, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('rate: $rate, ')
+          ..write('gstPct: $gstPct, ')
+          ..write('transport: $transport, ')
+          ..write('deliveryDays: $deliveryDays, ')
+          ..write('paymentTerms: $paymentTerms, ')
+          ..write('validUntil: $validUntil, ')
+          ..write('notes: $notes, ')
+          ..write('status: $status, ')
+          ..write('poId: $poId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -36625,6 +37501,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $StaffMembersTable staffMembers = $StaffMembersTable(this);
   late final $StaffAdvancesTable staffAdvances = $StaffAdvancesTable(this);
   late final $PayrollLinesTable payrollLines = $PayrollLinesTable(this);
+  late final $SupplierQuotesTable supplierQuotes = $SupplierQuotesTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -36688,6 +37565,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     staffMembers,
     staffAdvances,
     payrollLines,
+    supplierQuotes,
     syncOutbox,
   ];
 }
@@ -54421,6 +55299,415 @@ typedef $$PayrollLinesTableProcessedTableManager =
       PayrollLine,
       PrefetchHooks Function()
     >;
+typedef $$SupplierQuotesTableCreateCompanionBuilder =
+    SupplierQuotesCompanion Function({
+      required String id,
+      required String projectId,
+      required String requestId,
+      required String supplierId,
+      required double rate,
+      Value<double> gstPct,
+      Value<double> transport,
+      Value<int?> deliveryDays,
+      Value<String?> paymentTerms,
+      Value<DateTime?> validUntil,
+      Value<String?> notes,
+      Value<String> status,
+      Value<String?> poId,
+      required String createdBy,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$SupplierQuotesTableUpdateCompanionBuilder =
+    SupplierQuotesCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> requestId,
+      Value<String> supplierId,
+      Value<double> rate,
+      Value<double> gstPct,
+      Value<double> transport,
+      Value<int?> deliveryDays,
+      Value<String?> paymentTerms,
+      Value<DateTime?> validUntil,
+      Value<String?> notes,
+      Value<String> status,
+      Value<String?> poId,
+      Value<String> createdBy,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$SupplierQuotesTableFilterComposer
+    extends Composer<_$AppDatabase, $SupplierQuotesTable> {
+  $$SupplierQuotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get requestId => $composableBuilder(
+    column: $table.requestId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get rate => $composableBuilder(
+    column: $table.rate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get gstPct => $composableBuilder(
+    column: $table.gstPct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get transport => $composableBuilder(
+    column: $table.transport,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deliveryDays => $composableBuilder(
+    column: $table.deliveryDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentTerms => $composableBuilder(
+    column: $table.paymentTerms,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get validUntil => $composableBuilder(
+    column: $table.validUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get poId => $composableBuilder(
+    column: $table.poId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SupplierQuotesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SupplierQuotesTable> {
+  $$SupplierQuotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get requestId => $composableBuilder(
+    column: $table.requestId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get rate => $composableBuilder(
+    column: $table.rate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get gstPct => $composableBuilder(
+    column: $table.gstPct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get transport => $composableBuilder(
+    column: $table.transport,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deliveryDays => $composableBuilder(
+    column: $table.deliveryDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paymentTerms => $composableBuilder(
+    column: $table.paymentTerms,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get validUntil => $composableBuilder(
+    column: $table.validUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get poId => $composableBuilder(
+    column: $table.poId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SupplierQuotesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SupplierQuotesTable> {
+  $$SupplierQuotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get requestId =>
+      $composableBuilder(column: $table.requestId, builder: (column) => column);
+
+  GeneratedColumn<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get rate =>
+      $composableBuilder(column: $table.rate, builder: (column) => column);
+
+  GeneratedColumn<double> get gstPct =>
+      $composableBuilder(column: $table.gstPct, builder: (column) => column);
+
+  GeneratedColumn<double> get transport =>
+      $composableBuilder(column: $table.transport, builder: (column) => column);
+
+  GeneratedColumn<int> get deliveryDays => $composableBuilder(
+    column: $table.deliveryDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get paymentTerms => $composableBuilder(
+    column: $table.paymentTerms,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get validUntil => $composableBuilder(
+    column: $table.validUntil,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get poId =>
+      $composableBuilder(column: $table.poId, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$SupplierQuotesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SupplierQuotesTable,
+          SupplierQuote,
+          $$SupplierQuotesTableFilterComposer,
+          $$SupplierQuotesTableOrderingComposer,
+          $$SupplierQuotesTableAnnotationComposer,
+          $$SupplierQuotesTableCreateCompanionBuilder,
+          $$SupplierQuotesTableUpdateCompanionBuilder,
+          (
+            SupplierQuote,
+            BaseReferences<_$AppDatabase, $SupplierQuotesTable, SupplierQuote>,
+          ),
+          SupplierQuote,
+          PrefetchHooks Function()
+        > {
+  $$SupplierQuotesTableTableManager(
+    _$AppDatabase db,
+    $SupplierQuotesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SupplierQuotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SupplierQuotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SupplierQuotesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> requestId = const Value.absent(),
+                Value<String> supplierId = const Value.absent(),
+                Value<double> rate = const Value.absent(),
+                Value<double> gstPct = const Value.absent(),
+                Value<double> transport = const Value.absent(),
+                Value<int?> deliveryDays = const Value.absent(),
+                Value<String?> paymentTerms = const Value.absent(),
+                Value<DateTime?> validUntil = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> poId = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SupplierQuotesCompanion(
+                id: id,
+                projectId: projectId,
+                requestId: requestId,
+                supplierId: supplierId,
+                rate: rate,
+                gstPct: gstPct,
+                transport: transport,
+                deliveryDays: deliveryDays,
+                paymentTerms: paymentTerms,
+                validUntil: validUntil,
+                notes: notes,
+                status: status,
+                poId: poId,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String requestId,
+                required String supplierId,
+                required double rate,
+                Value<double> gstPct = const Value.absent(),
+                Value<double> transport = const Value.absent(),
+                Value<int?> deliveryDays = const Value.absent(),
+                Value<String?> paymentTerms = const Value.absent(),
+                Value<DateTime?> validUntil = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> poId = const Value.absent(),
+                required String createdBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SupplierQuotesCompanion.insert(
+                id: id,
+                projectId: projectId,
+                requestId: requestId,
+                supplierId: supplierId,
+                rate: rate,
+                gstPct: gstPct,
+                transport: transport,
+                deliveryDays: deliveryDays,
+                paymentTerms: paymentTerms,
+                validUntil: validUntil,
+                notes: notes,
+                status: status,
+                poId: poId,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SupplierQuotesTable, SupplierQuote>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SupplierQuotesTable,
+                    SupplierQuote
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SupplierQuotesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SupplierQuotesTable,
+      SupplierQuote,
+      $$SupplierQuotesTableFilterComposer,
+      $$SupplierQuotesTableOrderingComposer,
+      $$SupplierQuotesTableAnnotationComposer,
+      $$SupplierQuotesTableCreateCompanionBuilder,
+      $$SupplierQuotesTableUpdateCompanionBuilder,
+      (
+        SupplierQuote,
+        BaseReferences<_$AppDatabase, $SupplierQuotesTable, SupplierQuote>,
+      ),
+      SupplierQuote,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -54803,6 +56090,8 @@ class $AppDatabaseManager {
       $$StaffAdvancesTableTableManager(_db, _db.staffAdvances);
   $$PayrollLinesTableTableManager get payrollLines =>
       $$PayrollLinesTableTableManager(_db, _db.payrollLines);
+  $$SupplierQuotesTableTableManager get supplierQuotes =>
+      $$SupplierQuotesTableTableManager(_db, _db.supplierQuotes);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }
@@ -55342,4 +56631,32 @@ class PayrollDaoManager {
       $$StaffAdvancesTableTableManager(_db.attachedDatabase, _db.staffAdvances);
   $$PayrollLinesTableTableManager get payrollLines =>
       $$PayrollLinesTableTableManager(_db.attachedDatabase, _db.payrollLines);
+}
+
+mixin _$SupplierQuoteDaoMixin on DatabaseAccessor<AppDatabase> {
+  $SupplierQuotesTable get supplierQuotes => attachedDatabase.supplierQuotes;
+  $PurchaseRequestsTable get purchaseRequests =>
+      attachedDatabase.purchaseRequests;
+  $PurchaseOrdersTable get purchaseOrders => attachedDatabase.purchaseOrders;
+  SupplierQuoteDaoManager get managers => SupplierQuoteDaoManager(this);
+}
+
+class SupplierQuoteDaoManager {
+  final _$SupplierQuoteDaoMixin _db;
+  SupplierQuoteDaoManager(this._db);
+  $$SupplierQuotesTableTableManager get supplierQuotes =>
+      $$SupplierQuotesTableTableManager(
+        _db.attachedDatabase,
+        _db.supplierQuotes,
+      );
+  $$PurchaseRequestsTableTableManager get purchaseRequests =>
+      $$PurchaseRequestsTableTableManager(
+        _db.attachedDatabase,
+        _db.purchaseRequests,
+      );
+  $$PurchaseOrdersTableTableManager get purchaseOrders =>
+      $$PurchaseOrdersTableTableManager(
+        _db.attachedDatabase,
+        _db.purchaseOrders,
+      );
 }

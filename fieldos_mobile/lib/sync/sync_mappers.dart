@@ -1517,3 +1517,41 @@ PayrollLinesCompanion payrollLineFromSupabaseJson(Map<String, dynamic> row) => P
       createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
       updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
     );
+
+// --- v23: supplier quotes -----------------------------------------------------
+
+Map<String, dynamic> supplierQuoteToSupabaseJson(SupplierQuote q) => {
+      'id': q.id,
+      'project_id': q.projectId,
+      'request_id': q.requestId,
+      'vendor_id': q.supplierId,
+      'rate': q.rate,
+      'gst_pct': q.gstPct,
+      'transport': q.transport,
+      'delivery_days': q.deliveryDays,
+      'payment_terms': q.paymentTerms,
+      'valid_until': _timestamp(q.validUntil?.toUtc()),
+      'notes': q.notes,
+      'status': q.status,
+      'po_id': q.poId,
+      'created_by': q.createdBy,
+      'created_at': _timestamp(q.createdAt.toUtc()),
+    };
+
+SupplierQuotesCompanion supplierQuoteFromSupabaseJson(Map<String, dynamic> row) => SupplierQuotesCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      requestId: row['request_id'] as String,
+      supplierId: row['vendor_id'] as String,
+      rate: _dbl(row['rate'])!,
+      gstPct: Value(_dbl(row['gst_pct']) ?? 18),
+      transport: Value(_dbl(row['transport']) ?? 0),
+      deliveryDays: Value((row['delivery_days'] as num?)?.toInt()),
+      paymentTerms: Value(row['payment_terms'] as String?),
+      validUntil: Value(_localTs(row['valid_until'])),
+      notes: Value(row['notes'] as String?),
+      status: Value(row['status'] as String? ?? 'received'),
+      poId: Value(row['po_id'] as String?),
+      createdBy: row['created_by'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );

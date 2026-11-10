@@ -19,6 +19,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/procurement/po_share.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_screens.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_tools.dart';
+import 'package:fieldos_mobile/features/procurement/quote_compare_screen.dart';
 import 'package:fieldos_mobile/features/procurement/rate_hint.dart';
 import 'package:fieldos_mobile/features/procurement/supplier_statement_screen.dart';
 import 'package:fieldos_mobile/features/procurement/stock_view.dart';
@@ -244,6 +245,15 @@ class _SuppliersTab extends ConsumerWidget {
 
 // --- RFQ ------------------------------------------------------------------
 
+/// Quotes entered for each purchase request of a site.
+final supplierQuoteCountsProvider = FutureProvider.autoDispose.family<Map<String, int>, String>((ref, projectId) async {
+  final out = <String, int>{};
+  for (final q in await ref.watch(appDatabaseProvider).supplierQuoteDao.forProject(projectId)) {
+    out[q.requestId] = (out[q.requestId] ?? 0) + 1;
+  }
+  return out;
+});
+
 class _RfqTab extends ConsumerWidget {
   const _RfqTab(
       {required this.projectId, required this.companyId, required this.userId});
@@ -255,6 +265,7 @@ class _RfqTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final requests = ref.watch(requestsProvider(projectId));
     final suppliers = ref.watch(suppliersProvider(companyId));
+    final quoteCounts = ref.watch(supplierQuoteCountsProvider(projectId)).value ?? const <String, int>{};
     return Column(
       children: [
         _sectionHeader(context, tr('Purchase requests (RFQ)'), () => _add(context, ref)),
@@ -266,11 +277,20 @@ class _RfqTab extends ConsumerWidget {
                     children: [
                       for (final r in rows)
                         ListTile(
+                          key: Key('request-${r.id}'),
+                          onTap: () async {
+                            await Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => QuoteCompareScreen(requestId: r.id, companyId: companyId, userId: userId)));
+                            ref.invalidate(requestsProvider(projectId));
+                            ref.invalidate(supplierQuoteCountsProvider(projectId));
+                          },
                           title: Text(r.materialName),
                           subtitle: Text([
                             '${fmtQty(r.quantity)} ${r.unit}',
                             if (r.estimatedAmount != null) trf('about {amount}', {'amount': rupees(r.estimatedAmount!)}),
                             _statusLabel(r.status),
+                            if ((quoteCounts[r.id] ?? 0) > 0)
+                              (quoteCounts[r.id] == 1 ? tr('1 quote') : trf('{n} quotes', {'n': quoteCounts[r.id]!})),
                           ].join(' · ')),
                           trailing: r.status == 'pending'
                               ? FilledButton(

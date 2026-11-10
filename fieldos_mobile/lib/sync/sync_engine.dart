@@ -412,6 +412,7 @@ class SyncEngine {
         'staff_members': (r) => db.payrollDao.upsertStaffFromRemote(staffMemberFromSupabaseJson(r)),
         'staff_advances': (r) => db.payrollDao.upsertAdvanceFromRemote(staffAdvanceFromSupabaseJson(r)),
         'payroll_lines': (r) => db.payrollDao.upsertLineFromRemote(payrollLineFromSupabaseJson(r)),
+        'site_supplier_quotes': (r) => db.supplierQuoteDao.upsertFromRemote(supplierQuoteFromSupabaseJson(r)),
         'documents': (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
@@ -631,6 +632,7 @@ class SyncEngine {
     'staff_members': 'staff_members',
     'staff_advances': 'staff_advances',
     'payroll_lines': 'payroll_lines',
+    'site_supplier_quotes': 'supplier_quotes',
   };
 
   /// Tables whose rows carry project_id on the phone too.
@@ -640,7 +642,7 @@ class SyncEngine {
     'site_expenses', 'site_material_receipts', 'site_material_usage', 'site_payments_received',
     'site_client_bills', 'site_attendance_marks', 'site_notes', 'documents', 'site_close_reviews',
     'cost_codes', 'work_claims', 'work_certifications', 'variations', 'variation_decisions',
-    'commercial_attachments', 'commercial_exception_actions',
+    'commercial_attachments', 'commercial_exception_actions', 'site_supplier_quotes',
   };
 
   /// Children found through their parent, for removing a whole site or

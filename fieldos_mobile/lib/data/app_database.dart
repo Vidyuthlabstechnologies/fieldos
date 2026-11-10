@@ -18,6 +18,7 @@ import 'package:fieldos_mobile/core/format.dart' show fmtQty;
 import 'package:fieldos_mobile/features/commercial/commercial_rules.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart';
 import 'package:fieldos_mobile/features/payroll/payroll_rules.dart';
+import 'package:fieldos_mobile/features/procurement/quote_compare.dart' show awardNote, compareQuotes;
 import 'package:fieldos_mobile/features/warehouse/tools_rules.dart';
 import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart' show BillLine, encodeLines;
@@ -94,6 +95,7 @@ String? _clip(String? s, int max) {
   StaffMembers,
   StaffAdvances,
   PayrollLines,
+  SupplierQuotes,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -122,7 +124,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -278,6 +280,10 @@ class AppDatabase extends _$AppDatabase {
               await m.createTable(t);
             }
           }
+          if (from < 23) {
+            // Supplier quotes compared against a purchase request.
+            await m.createTable(supplierQuotes);
+          }
         },
       );
 
@@ -369,6 +375,7 @@ class AppDatabase extends _$AppDatabase {
   CrmDao get crmDao => CrmDao(this);
   WarehouseDao get warehouseDao => WarehouseDao(this);
   PayrollDao get payrollDao => PayrollDao(this);
+  SupplierQuoteDao get supplierQuoteDao => SupplierQuoteDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -3807,4 +3814,119 @@ const staffSalaryCategory = 'Staff salary';
 String? _blankW(String? s, int max) {
   final t = s?.trim() ?? '';
   return t.isEmpty ? null : _clip(t, max);
+}
+
+/// Supplier quotes for a purchase request, and turning the chosen one into
+/// the PO.
+@DriftAccessor(tables: [SupplierQuotes, PurchaseRequests, PurchaseOrders])
+class SupplierQuoteDao extends DatabaseAccessor<AppDatabase> with _$SupplierQuoteDaoMixin {
+  SupplierQuoteDao(super.db);
+
+  Future<void> _queue(String id, String op, SupplierQuote row) => db.syncOutboxDao.enqueue(
+      targetTable: 'site_supplier_quotes', recordId: id, operation: op, payloadJson: jsonEncode(supplierQuoteToSupabaseJson(row)));
+
+  Future<List<SupplierQuote>> forRequest(String requestId) => (select(supplierQuotes)
+        ..where((q) => q.requestId.equals(requestId))
+        ..orderBy([(q) => OrderingTerm.asc(q.createdAt)]))
+      .get();
+
+  Future<List<SupplierQuote>> forProject(String projectId) =>
+      (select(supplierQuotes)..where((q) => q.projectId.equals(projectId))).get();
+
+  Future<SupplierQuote?> byId(String id) => (select(supplierQuotes)..where((q) => q.id.equals(id))).getSingleOrNull();
+
+  static void _check(double rate, double gstPct, double transport, int? days) {
+    if (!(rate > 0)) throw ArgumentError('Enter the rate a unit.');
+    if (gstPct < 0 || gstPct > 28) throw ArgumentError('GST is 0 to 28%.');
+    if (transport < 0) throw ArgumentError('An amount is not below zero.');
+    if (days != null && days < 0) throw ArgumentError('Delivery days are not below zero.');
+  }
+
+  /// A supplier's price. A second quote from the same supplier replaces
+  /// their first while neither has been decided.
+  Future<SupplierQuote> addQuote({
+    required String requestId,
+    required String supplierId,
+    required double rate,
+    required String by,
+    double gstPct = 18,
+    double transport = 0,
+    int? deliveryDays,
+    String? paymentTerms,
+    DateTime? validUntil,
+    String? notes,
+  }) async {
+    _check(rate, gstPct, transport, deliveryDays);
+    return transaction(() async {
+      final r = await (select(purchaseRequests)..where((x) => x.id.equals(requestId))).getSingleOrNull();
+      if (r == null) throw ArgumentError('That purchase request is no longer here.');
+      if (r.status != 'pending') throw ArgumentError('This request already has a PO.');
+      final same = (await forRequest(requestId)).where((q) => q.supplierId == supplierId && q.status == 'received');
+      final values = SupplierQuotesCompanion(
+        rate: Value(rate),
+        gstPct: Value(gstPct),
+        transport: Value(transport),
+        deliveryDays: Value(deliveryDays),
+        paymentTerms: Value(_blankW(paymentTerms, 120)),
+        validUntil: Value(validUntil),
+        notes: Value(_blankW(notes, 300)),
+      );
+      if (same.isNotEmpty) {
+        final id = same.first.id;
+        await (update(supplierQuotes)..where((q) => q.id.equals(id))).write(values);
+        final row = (await byId(id))!;
+        await _queue(id, 'update', row);
+        return row;
+      }
+      final row = await into(supplierQuotes).insertReturning(values.copyWith(
+        id: Value(_uuid.v4()),
+        projectId: Value(r.projectId),
+        requestId: Value(requestId),
+        supplierId: Value(supplierId),
+        createdBy: Value(by),
+      ));
+      await _queue(row.id, 'insert', row);
+      return row;
+    });
+  }
+
+  Future<void> reject(String quoteId) => transaction(() async {
+        final q = await byId(quoteId);
+        if (q == null || q.status != 'received') return;
+        await (update(supplierQuotes)..where((x) => x.id.equals(quoteId))).write(const SupplierQuotesCompanion(status: Value('rejected')));
+        await _queue(quoteId, 'update', (await byId(quoteId))!);
+      });
+
+  /// Gives the order to [quoteId]'s supplier: the PO for the request at the
+  /// quote's landed total, the quote accepted, the others turned down. A
+  /// second tap returns the same PO.
+  Future<PurchaseOrder> award(String quoteId, {required String by, DateTime? deliveryDate}) => transaction(() async {
+        final q = await byId(quoteId);
+        if (q == null) throw ArgumentError('That quote is no longer here.');
+        if (q.status == 'rejected') throw ArgumentError('This quote was turned down.');
+        final r = await (select(purchaseRequests)..where((x) => x.id.equals(q.requestId))).getSingle();
+        final landed = compareQuotes(r, [q], DateTime.now()).lines.single.landed;
+        final po = await db.purchaseDao.orderFromRequest(
+            r.id,
+            PurchaseOrdersCompanion.insert(
+              id: _uuid.v4(),
+              projectId: r.projectId,
+              supplierId: q.supplierId,
+              raisedBy: by,
+              totalAmount: Value((landed * 100).roundToDouble() / 100),
+              deliveryDate: Value(deliveryDate ?? (q.deliveryDays == null ? null : DateTime.now().add(Duration(days: q.deliveryDays!)))),
+              notes: Value(_clip(awardNote(q), 500)),
+            ));
+        for (final other in await forRequest(r.id)) {
+          final status = other.id == quoteId ? 'accepted' : (other.status == 'received' ? 'rejected' : other.status);
+          final poId = other.id == quoteId ? po.id : other.poId;
+          if (status == other.status && poId == other.poId) continue;
+          await (update(supplierQuotes)..where((x) => x.id.equals(other.id)))
+              .write(SupplierQuotesCompanion(status: Value(status), poId: Value(poId)));
+          await _queue(other.id, 'update', (await byId(other.id))!);
+        }
+        return po;
+      });
+
+  Future<void> upsertFromRemote(SupplierQuotesCompanion c) => into(supplierQuotes).insertOnConflictUpdate(c);
 }
