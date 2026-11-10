@@ -5,6 +5,7 @@ library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_ta.dart';
+import 'package:fieldos_mobile/l10n/strings_wh_ta.dart';
 
 const Map<String, String> stringsTa = {
   'Try again':
@@ -2925,4 +2926,5 @@ const Map<String, String> stringsTa = {
       'ஆர்டரை விட {qty} அதிகம்',
   ...commercialTa,
   ...crmTa,
+  ...warehouseTa,
 };

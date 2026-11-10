@@ -5,6 +5,7 @@ library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_kn.dart';
+import 'package:fieldos_mobile/l10n/strings_wh_kn.dart';
 
 const Map<String, String> stringsKn = {
   'Try again':
@@ -2925,4 +2926,5 @@ const Map<String, String> stringsKn = {
       'ಆರ್ಡರ್‌ಗಿಂತ {qty} ಹೆಚ್ಚು',
   ...commercialKn,
   ...crmKn,
+  ...warehouseKn,
 };

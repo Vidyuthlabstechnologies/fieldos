@@ -7,12 +7,24 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_screens.dart';
 import 'package:fieldos_mobile/features/procurement/site_stock.dart';
+import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart' show onTheWayTo;
+import 'package:fieldos_mobile/features/warehouse/warehouse_screen.dart' show showMoveForm, showReceiveDialog, moveRouteText;
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 final siteStockProvider = FutureProvider.autoDispose.family<List<StockLine>, String>((ref, projectId) async {
   final db = ref.watch(appDatabaseProvider);
-  return buildSiteStock(await db.materialDao.forProject(projectId), await db.materialDao.usageForProject(projectId));
+  return buildSiteStock(await db.materialDao.forProject(projectId), await db.materialDao.usageForProject(projectId),
+      moves: await db.warehouseDao.movesForSite(projectId), projectId: projectId);
+});
+
+/// Transfers on their way to this site, and the site's company (to pick
+/// where to send material).
+final siteIncomingProvider =
+    FutureProvider.autoDispose.family<({List<StockMove> moves, String? companyId}), String>((ref, projectId) async {
+  final db = ref.watch(appDatabaseProvider);
+  final project = await db.projectDao.byId(projectId);
+  return (moves: onTheWayTo(await db.warehouseDao.movesForSite(projectId), projectId: projectId), companyId: project?.companyId);
 });
 
 String _qty(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
@@ -26,9 +38,11 @@ class StockView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stock = ref.watch(siteStockProvider(projectId));
+    final incoming = ref.watch(siteIncomingProvider(projectId)).value;
+    final coming = incoming?.moves ?? const <StockMove>[];
     return Stack(children: [
       stock.when(
-        data: (lines) => lines.isEmpty
+        data: (lines) => lines.isEmpty && coming.isEmpty
             ? Center(
                 child: Padding(
                 padding: EdgeInsets.all(24),
@@ -44,9 +58,37 @@ class StockView extends ConsumerWidget {
                 ]),
               ))
             : ListView(padding: const EdgeInsets.only(bottom: 80), children: [
+                if (coming.isNotEmpty) ...[
+                  const Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: SectionHeader('On the way here')),
+                  for (final m in coming)
+                    ListTile(
+                      key: Key('incoming-${m.id}'),
+                      leading: const Icon(Icons.local_shipping_outlined),
+                      title: Text('${m.materialName} · ${_qty(m.quantity)} ${m.unit ?? ''}'.trim()),
+                      subtitle: Text(moveRouteText(m, null)),
+                      trailing: FilledButton.tonal(
+                        key: Key('receive-${m.id}'),
+                        onPressed: () async {
+                          if (await showReceiveDialog(context, ref, m, userId) != null) _refresh(ref);
+                        },
+                        child: Text(tr('Receive')),
+                      ),
+                    ),
+                ],
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
-                  child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  child: Wrap(alignment: WrapAlignment.end, children: [
+                    if (incoming?.companyId != null)
+                      TextButton.icon(
+                        key: const Key('send-material'),
+                        icon: const Icon(Icons.local_shipping_outlined),
+                        label: Text(tr('Send')),
+                        onPressed: () async {
+                          final m = await showMoveForm(context, ref,
+                              companyId: incoming!.companyId!, userId: userId, kind: 'transfer', fromProjectId: projectId);
+                          if (m != null) _refresh(ref);
+                        },
+                      ),
                     TextButton.icon(
                       key: const Key('add-opening-stock'),
                       icon: const Icon(Icons.inventory_outlined),
@@ -64,13 +106,17 @@ class StockView extends ConsumerWidget {
                   ListTile(
                     leading: _badge(context, l.status),
                     title: Text(l.name),
-                    subtitle: Text(l.opening > 0
-                        ? trf('Opening {opening} · Received {got} · Used {used}', {
-                            'opening': _qty(l.opening),
-                            'got': _qty(l.received - l.opening),
-                            'used': _qty(l.used),
-                          })
-                        : trf('Received {got} · Used {used}', {'got': _qty(l.received), 'used': _qty(l.used)})),
+                    subtitle: Text([
+                      l.opening > 0
+                          ? trf('Opening {opening} · Received {got} · Used {used}', {
+                              'opening': _qty(l.opening),
+                              'got': _qty(l.received - l.opening),
+                              'used': _qty(l.used),
+                            })
+                          : trf('Received {got} · Used {used}', {'got': _qty(l.received), 'used': _qty(l.used)}),
+                      if (l.transferredIn > 0) trf('Came in {qty}', {'qty': _qty(l.transferredIn)}),
+                      if (l.transferredOut > 0) trf('Sent {qty}', {'qty': _qty(l.transferredOut)}),
+                    ].join(' · ')),
                     trailing: Text('${_qty(l.balance)} ${l.unit ?? ''}'.trim(),
                         style: TextStyle(fontWeight: FontWeight.w700, color: _color(context, l.status))),
                     onTap: () => _recordUsage(context, ref, preset: l),
@@ -90,6 +136,11 @@ class StockView extends ConsumerWidget {
         ),
       ),
     ]);
+  }
+
+  void _refresh(WidgetRef ref) {
+    ref.invalidate(siteStockProvider(projectId));
+    ref.invalidate(siteIncomingProvider(projectId));
   }
 
   static Color? _color(BuildContext context, StockStatus s) => switch (s) {

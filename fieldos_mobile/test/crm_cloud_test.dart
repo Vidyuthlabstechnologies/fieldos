@@ -10,7 +10,6 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase/supabase.dart';
 
-import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart';
 
 import 'support/cloud_phone.dart';

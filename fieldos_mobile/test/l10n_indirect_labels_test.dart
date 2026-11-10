@@ -13,11 +13,15 @@ import 'package:fieldos_mobile/features/inspections/inspections_screen.dart';
 import 'package:fieldos_mobile/features/labour/day_register.dart';
 import 'package:fieldos_mobile/features/money/money_book.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
+import 'package:fieldos_mobile/features/payroll/payroll_rules.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_tools.dart';
 import 'package:fieldos_mobile/features/project/dpr_draft_screen.dart';
 import 'package:fieldos_mobile/features/reports/period_report.dart';
 import 'package:fieldos_mobile/features/subscription/paywall_screen.dart';
 import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
+import 'package:fieldos_mobile/features/warehouse/tools_rules.dart';
+import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart';
+import 'package:fieldos_mobile/data/app_database.dart' show staffSalaryCategory;
 import 'package:fieldos_mobile/l10n/strings_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_mr.dart';
@@ -36,6 +40,12 @@ void main() {
     'quote statuses': quoteStatusLabels.values,
     'lost reasons': lostReasonChoices,
     'follow-up choices': [for (final (_, l) in followUpChoices) l],
+    'stock move statuses': moveStatusLabels.values,
+    'count correction reasons': adjustReasonChoices,
+    'tool states': toolStateLabels.values,
+    'tool return conditions': returnConditionLabels.values,
+    'professional tax states': ptStateLabels.values,
+    'salary pay modes': [...payModes.values, staffSalaryCategory],
     'trades': commonTrades,
     'payment modes': paymentModes.values,
     'expense categories': {...defaultExpenseCategories, ...expenseCategories},

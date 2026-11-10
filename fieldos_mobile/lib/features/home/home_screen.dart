@@ -10,6 +10,8 @@ import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart';
 import 'package:fieldos_mobile/features/commercial/exceptions_screen.dart';
 import 'package:fieldos_mobile/features/crm/crm_screen.dart';
+import 'package:fieldos_mobile/features/payroll/payroll_screen.dart';
+import 'package:fieldos_mobile/features/warehouse/warehouse_screen.dart';
 import 'package:fieldos_mobile/features/assistant/assistant_screen.dart';
 import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
@@ -121,6 +123,12 @@ class HomeScreen extends ConsumerWidget {
                       .push(MaterialPageRoute(builder: (_) => CommercialExceptionsScreen(companyId: company.id)));
                 case 'leads':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => LeadsScreen(companyId: company.id)));
+                case 'stores':
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => WarehouseScreen(companyId: company.id, userId: session.user!.id)));
+                case 'salaries':
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => StaffSalariesScreen(companyId: company.id, userId: session.user!.id)));
                 case 'brief':
                   openOwnerBrief(context, companyId: company.id, companyName: company.name);
                 case 'payables':
@@ -169,6 +177,16 @@ class HomeScreen extends ConsumerWidget {
                           final due = ref.watch(crmDueProvider(company.id)).value ?? 0;
                           return due == 0 ? const SizedBox.shrink() : Badge.count(count: due);
                         }))),
+              if (Roles.canApprove(session.role))
+                PopupMenuItem(
+                    value: 'stores',
+                    child: ListTile(leading: const Icon(Icons.warehouse_outlined), title: Text(tr('Stores and tools')))),
+              // Salaries are private: owners and managers only, here and on
+              // the server.
+              if (Roles.canApprove(session.role))
+                PopupMenuItem(
+                    value: 'salaries',
+                    child: ListTile(leading: const Icon(Icons.badge_outlined), title: Text(tr('Staff salaries')))),
               PopupMenuItem(
                   value: 'brief',
                   child: ListTile(leading: Icon(Icons.wb_twilight_outlined), title: Text(tr('Site brief')))),

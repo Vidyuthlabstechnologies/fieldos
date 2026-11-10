@@ -17,6 +17,9 @@ import 'package:uuid/uuid.dart';
 import 'package:fieldos_mobile/core/format.dart' show fmtQty;
 import 'package:fieldos_mobile/features/commercial/commercial_rules.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart';
+import 'package:fieldos_mobile/features/payroll/payroll_rules.dart';
+import 'package:fieldos_mobile/features/warehouse/tools_rules.dart';
+import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart' show BillLine, encodeLines;
 import 'package:fieldos_mobile/l10n/language.dart' show trf;
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
@@ -84,6 +87,13 @@ String? _clip(String? s, int max) {
   CrmLeads,
   CrmActivities,
   CrmQuotes,
+  Stores,
+  StockMoves,
+  Tools,
+  ToolIssues,
+  StaffMembers,
+  StaffAdvances,
+  PayrollLines,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -112,7 +122,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -262,6 +272,12 @@ class AppDatabase extends _$AppDatabase {
               await m.createTable(t);
             }
           }
+          if (from < 22) {
+            // Central stores and transfers, tools register, staff salaries.
+            for (final TableInfo t in [stores, stockMoves, tools, toolIssues, staffMembers, staffAdvances, payrollLines]) {
+              await m.createTable(t);
+            }
+          }
         },
       );
 
@@ -351,6 +367,8 @@ class AppDatabase extends _$AppDatabase {
   CloseDao get closeDao => CloseDao(this);
   CommercialDao get commercialDao => CommercialDao(this);
   CrmDao get crmDao => CrmDao(this);
+  WarehouseDao get warehouseDao => WarehouseDao(this);
+  PayrollDao get payrollDao => PayrollDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -3170,6 +3188,623 @@ class CrmDao extends DatabaseAccessor<AppDatabase> with _$CrmDaoMixin {
 }
 
 String? _blank(String? s, int max) {
+  final t = s?.trim() ?? '';
+  return t.isEmpty ? null : _clip(t, max);
+}
+
+/// Company stores, stock moves between stores and sites, and the tools
+/// register.
+@DriftAccessor(tables: [Stores, StockMoves, Tools, ToolIssues])
+class WarehouseDao extends DatabaseAccessor<AppDatabase> with _$WarehouseDaoMixin {
+  WarehouseDao(super.db);
+
+  Future<void> _queue(String table, String id, String op, Map<String, dynamic> json) =>
+      db.syncOutboxDao.enqueue(targetTable: table, recordId: id, operation: op, payloadJson: jsonEncode(json));
+
+  // --- Stores -----------------------------------------------------------------
+
+  Future<List<Store>> storesFor(String companyId, {bool includeArchived = false}) => (select(stores)
+        ..where((s) => s.companyId.equals(companyId) & (includeArchived ? const Constant(true) : s.archived.equals(false)))
+        ..orderBy([(s) => OrderingTerm.asc(s.name)]))
+      .get();
+
+  Future<Store?> storeById(String id) => (select(stores)..where((s) => s.id.equals(id))).getSingleOrNull();
+
+  Future<Store> addStore({required String companyId, required String name, required String by, String? location}) async {
+    if (name.trim().isEmpty) throw ArgumentError('Enter the store name.');
+    return transaction(() async {
+      final row = await into(stores).insertReturning(StoresCompanion.insert(
+        id: _uuid.v4(),
+        companyId: companyId,
+        name: _clip(name, 120)!,
+        location: Value(_blankW(location, 300)),
+        createdBy: by,
+      ));
+      await _queue('stores', row.id, 'insert', storeToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  Future<void> updateStore(String id, {required String name, String? location, bool? archived}) =>
+      transaction(() async {
+        if (name.trim().isEmpty) throw ArgumentError('Enter the store name.');
+        await (update(stores)..where((s) => s.id.equals(id))).write(StoresCompanion(
+          name: Value(_clip(name, 120)!),
+          location: Value(_blankW(location, 300)),
+          archived: archived == null ? const Value.absent() : Value(archived),
+        ));
+        final row = await storeById(id);
+        if (row != null) await _queue('stores', id, 'update', storeToSupabaseJson(row));
+      });
+
+  // --- Stock moves --------------------------------------------------------------
+
+  Future<List<StockMove>> movesFor(String companyId) => (select(stockMoves)
+        ..where((m) => m.companyId.equals(companyId))
+        ..orderBy([(m) => OrderingTerm.desc(m.sentOn), (m) => OrderingTerm.desc(m.createdAt)]))
+      .get();
+
+  /// Moves into or out of one site, for its stock tab.
+  Future<List<StockMove>> movesForSite(String projectId) => (select(stockMoves)
+        ..where((m) => m.fromProjectId.equals(projectId) | m.toProjectId.equals(projectId))
+        ..orderBy([(m) => OrderingTerm.desc(m.sentOn), (m) => OrderingTerm.desc(m.createdAt)]))
+      .get();
+
+  Future<StockMove?> moveById(String id) => (select(stockMoves)..where((m) => m.id.equals(id))).getSingleOrNull();
+
+  /// Saves a move after [checkMove]. Material bought into a store and count
+  /// corrections are done at once; a transfer is on the way until counted
+  /// at the other end. A transfer out of a store is priced at the store's
+  /// average rate when no rate is given, and cannot send more than the
+  /// store holds.
+  Future<StockMove> addMove({
+    required String companyId,
+    required String kind,
+    required String materialName,
+    required double quantity,
+    required String by,
+    String? unit,
+    String? fromStoreId,
+    String? fromProjectId,
+    String? toStoreId,
+    String? toProjectId,
+    String? supplierName,
+    double? rate,
+    String? vehicle,
+    String? note,
+    DateTime? on,
+  }) async {
+    final problem = checkMove(
+      kind: kind,
+      fromStoreId: fromStoreId,
+      fromProjectId: fromProjectId,
+      toStoreId: toStoreId,
+      toProjectId: toProjectId,
+      materialName: materialName,
+      quantity: quantity,
+      note: note,
+    );
+    if (problem != null) throw ArgumentError(problem);
+    if (rate != null && rate < 0) throw ArgumentError('A rate is not below zero.');
+    return transaction(() async {
+      var r = rate;
+      if (fromStoreId != null) {
+        final all = await movesFor(companyId);
+        final have = storeBalance(all, fromStoreId, materialName, unit);
+        if (quantity > have + 1e-9) {
+          throw ArgumentError(trf('The store has only {qty} of this.', {'qty': fmtQty(have < 0 ? 0 : have)}));
+        }
+        r ??= storeRate(all, fromStoreId, materialName, unit);
+      }
+      final now = on ?? DateTime.now();
+      final row = await into(stockMoves).insertReturning(StockMovesCompanion.insert(
+        id: _uuid.v4(),
+        companyId: companyId,
+        kind: kind,
+        fromStoreId: Value(fromStoreId),
+        fromProjectId: Value(fromProjectId),
+        toStoreId: Value(toStoreId),
+        toProjectId: Value(toProjectId),
+        supplierName: Value(kind == 'inward' ? _blankW(supplierName, 120) : null),
+        materialName: _clip(materialName, 200)!,
+        unit: Value(_blankW(unit, 20)),
+        quantity: quantity,
+        rate: Value(r == null ? null : (r * 100).roundToDouble() / 100),
+        status: Value(kind == 'transfer' ? 'in_transit' : 'received'),
+        receivedQty: Value(kind == 'transfer' ? null : quantity),
+        vehicle: Value(_blankW(vehicle, 40)),
+        note: Value(_blankW(note, 300)),
+        sentBy: by,
+        sentOn: now,
+        receivedBy: Value(kind == 'transfer' ? null : by),
+        receivedOn: Value(kind == 'transfer' ? null : now),
+      ));
+      await _queue('stock_moves', row.id, 'insert', stockMoveToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  /// The receiving end counts what arrived. [arrived] defaults to all of it;
+  /// less is a shortage, kept on the move.
+  Future<StockMove> receive(String id, {required String by, double? arrived, String? note, DateTime? on}) =>
+      transaction(() async {
+        final m = await moveById(id);
+        if (m == null) throw ArgumentError('That transfer is no longer here.');
+        if (m.status != 'in_transit') throw ArgumentError('This transfer was already closed.');
+        final qty = arrived ?? m.quantity;
+        if (qty < 0 || qty > m.quantity + 1e-9) throw ArgumentError('Enter what arrived, up to what was sent.');
+        final extra = _blankW(note, 300);
+        await (update(stockMoves)..where((x) => x.id.equals(id))).write(StockMovesCompanion(
+          status: const Value('received'),
+          receivedQty: Value(qty),
+          receivedBy: Value(by),
+          receivedOn: Value(on ?? DateTime.now()),
+          note: extra == null ? const Value.absent() : Value(_clip([m.note, extra].whereType<String>().join(' / '), 300)),
+        ));
+        final row = (await moveById(id))!;
+        await _queue('stock_moves', id, 'update', stockMoveToSupabaseJson(row));
+        return row;
+      });
+
+  /// Calls back a transfer that has not been received. The material is back
+  /// with the sender.
+  Future<void> cancelMove(String id, {String? reason}) => transaction(() async {
+        final m = await moveById(id);
+        if (m == null) return;
+        if (m.status != 'in_transit') throw ArgumentError('Only a transfer still on the way can be called back.');
+        final why = _blankW(reason, 300);
+        await (update(stockMoves)..where((x) => x.id.equals(id))).write(StockMovesCompanion(
+          status: const Value('cancelled'),
+          note: why == null ? const Value.absent() : Value(_clip([m.note, why].whereType<String>().join(' / '), 300)),
+        ));
+        final row = (await moveById(id))!;
+        await _queue('stock_moves', id, 'update', stockMoveToSupabaseJson(row));
+      });
+
+  // --- Tools ------------------------------------------------------------------
+
+  Future<List<Tool>> toolsFor(String companyId) => (select(tools)
+        ..where((t) => t.companyId.equals(companyId))
+        ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+      .get();
+
+  Future<Tool?> toolById(String id) => (select(tools)..where((t) => t.id.equals(id))).getSingleOrNull();
+
+  Future<List<ToolIssue>> issuesFor(String companyId) => (select(toolIssues)
+        ..where((i) => i.companyId.equals(companyId))
+        ..orderBy([(i) => OrderingTerm.desc(i.issuedOn), (i) => OrderingTerm.desc(i.createdAt)]))
+      .get();
+
+  Future<List<ToolIssue>> issuesForTool(String toolId) => (select(toolIssues)
+        ..where((i) => i.toolId.equals(toolId))
+        ..orderBy([(i) => OrderingTerm.desc(i.issuedOn), (i) => OrderingTerm.desc(i.createdAt)]))
+      .get();
+
+  Future<ToolIssue?> issueById(String id) => (select(toolIssues)..where((i) => i.id.equals(id))).getSingleOrNull();
+
+  /// Adds a tool; with no code it gets the next asset tag (T-001 ...).
+  Future<Tool> addTool({
+    required String companyId,
+    required String name,
+    required String by,
+    String? code,
+    String? category,
+    double? value,
+    String? storeId,
+    String? notes,
+  }) async {
+    if (name.trim().isEmpty) throw ArgumentError('Enter the tool name.');
+    if (value != null && value < 0) throw ArgumentError('A value is not below zero.');
+    return transaction(() async {
+      final tag = _blankW(code, 40) ?? nextToolCode(await toolsFor(companyId));
+      final row = await into(tools).insertReturning(ToolsCompanion.insert(
+        id: _uuid.v4(),
+        companyId: companyId,
+        name: _clip(name, 120)!,
+        code: Value(tag),
+        category: Value(_blankW(category, 60)),
+        value: Value(value),
+        storeId: Value(storeId),
+        notes: Value(_blankW(notes, 300)),
+        createdBy: by,
+      ));
+      await _queue('tools', row.id, 'insert', toolToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  Future<void> updateTool(
+    String id, {
+    required String name,
+    String? code,
+    String? category,
+    double? value,
+    String? storeId,
+    String? condition,
+    String? notes,
+  }) =>
+      transaction(() async {
+        if (name.trim().isEmpty) throw ArgumentError('Enter the tool name.');
+        if (condition != null && !toolConditions.contains(condition)) throw ArgumentError('Unknown condition.');
+        await (update(tools)..where((t) => t.id.equals(id))).write(ToolsCompanion(
+          name: Value(_clip(name, 120)!),
+          code: Value(_blankW(code, 40)),
+          category: Value(_blankW(category, 60)),
+          value: Value(value),
+          storeId: Value(storeId),
+          condition: condition == null ? const Value.absent() : Value(condition),
+          notes: Value(_blankW(notes, 300)),
+          updatedAt: Value(DateTime.now()),
+        ));
+        final row = await toolById(id);
+        if (row != null) await _queue('tools', id, 'update', toolToSupabaseJson(row));
+      });
+
+  /// Hands a tool to someone, at a site or from the store. A tool already
+  /// out, lost or retired is not issued again.
+  Future<ToolIssue> issueTool({
+    required String toolId,
+    required String issuedTo,
+    required String by,
+    String? projectId,
+    String? workerId,
+    DateTime? dueBack,
+    String? note,
+    DateTime? on,
+  }) =>
+      transaction(() async {
+        final t = await toolById(toolId);
+        if (t == null) throw ArgumentError('That tool is no longer here.');
+        if (issuedTo.trim().isEmpty) throw ArgumentError('Enter who is taking it.');
+        final now = on ?? DateTime.now();
+        final state = toolState(t, await issuesForTool(toolId), now);
+        if (state == ToolState.issued || state == ToolState.overdue) {
+          throw ArgumentError('This tool is already out. Take it back first.');
+        }
+        if (state == ToolState.lost || state == ToolState.retired) throw ArgumentError('This tool is not in use.');
+        final row = await into(toolIssues).insertReturning(ToolIssuesCompanion.insert(
+          id: _uuid.v4(),
+          companyId: t.companyId,
+          toolId: toolId,
+          projectId: Value(projectId),
+          issuedTo: _clip(issuedTo, 120)!,
+          workerId: Value(workerId),
+          issuedBy: by,
+          issuedOn: now,
+          dueBack: Value(dueBack),
+          note: Value(_blankW(note, 300)),
+        ));
+        await _queue('tool_issues', row.id, 'insert', toolIssueToSupabaseJson(row));
+        return row;
+      });
+
+  /// Takes a tool back: fine, damaged (with what to recover) or lost.
+  Future<ToolIssue> returnTool(String issueId,
+          {required String condition, double? recoverAmount, String? note, DateTime? on}) =>
+      transaction(() async {
+        final i = await issueById(issueId);
+        if (i == null) throw ArgumentError('That issue is no longer here.');
+        if (!isOpenIssue(i)) throw ArgumentError('This tool was already taken back.');
+        if (!returnConditions.contains(condition)) throw ArgumentError('Unknown condition.');
+        if (recoverAmount != null && recoverAmount < 0) throw ArgumentError('An amount is not below zero.');
+        final extra = _blankW(note, 300);
+        await (update(toolIssues)..where((x) => x.id.equals(issueId))).write(ToolIssuesCompanion(
+          returnedOn: Value(condition == 'lost' ? null : (on ?? DateTime.now())),
+          returnCondition: Value(condition),
+          recoverAmount: Value(condition == 'ok' ? null : recoverAmount),
+          note: extra == null ? const Value.absent() : Value(_clip([i.note, extra].whereType<String>().join(' / '), 300)),
+        ));
+        if (condition == 'damaged') {
+          // The server does the same when the return arrives (a site
+          // engineer cannot edit the register itself), so nothing is sent.
+          await (update(tools)..where((t) => t.id.equals(i.toolId) & t.condition.equals('in_use')))
+              .write(ToolsCompanion(condition: const Value('repair'), updatedAt: Value(DateTime.now())));
+        }
+        final row = (await issueById(issueId))!;
+        await _queue('tool_issues', issueId, 'update', toolIssueToSupabaseJson(row));
+        return row;
+      });
+
+  Future<void> upsertStoreFromRemote(StoresCompanion c) => into(stores).insertOnConflictUpdate(c);
+  Future<void> upsertMoveFromRemote(StockMovesCompanion c) => into(stockMoves).insertOnConflictUpdate(c);
+  Future<void> upsertToolFromRemote(ToolsCompanion c) => into(tools).insertOnConflictUpdate(c);
+  Future<void> upsertIssueFromRemote(ToolIssuesCompanion c) => into(toolIssues).insertOnConflictUpdate(c);
+}
+
+/// Monthly salaried staff, their advances and payslips.
+@DriftAccessor(tables: [StaffMembers, StaffAdvances, PayrollLines])
+class PayrollDao extends DatabaseAccessor<AppDatabase> with _$PayrollDaoMixin {
+  PayrollDao(super.db);
+
+  Future<void> _queue(String table, String id, String op, Map<String, dynamic> json) =>
+      db.syncOutboxDao.enqueue(targetTable: table, recordId: id, operation: op, payloadJson: jsonEncode(json));
+
+  Future<List<StaffMember>> staffFor(String companyId) => (select(staffMembers)
+        ..where((s) => s.companyId.equals(companyId))
+        ..orderBy([(s) => OrderingTerm.desc(s.active), (s) => OrderingTerm.asc(s.name)]))
+      .get();
+
+  Future<StaffMember?> staffById(String id) => (select(staffMembers)..where((s) => s.id.equals(id))).getSingleOrNull();
+
+  Future<List<StaffAdvance>> advancesFor(String companyId) => (select(staffAdvances)
+        ..where((a) => a.companyId.equals(companyId))
+        ..orderBy([(a) => OrderingTerm.desc(a.givenOn)]))
+      .get();
+
+  Future<List<PayrollLine>> linesFor(String companyId) => (select(payrollLines)
+        ..where((l) => l.companyId.equals(companyId))
+        ..orderBy([(l) => OrderingTerm.desc(l.month)]))
+      .get();
+
+  Future<List<PayrollLine>> linesForMonth(String companyId, String month) => (select(payrollLines)
+        ..where((l) => l.companyId.equals(companyId) & l.month.equals(month)))
+      .get();
+
+  Future<PayrollLine?> lineById(String id) => (select(payrollLines)..where((l) => l.id.equals(id))).getSingleOrNull();
+
+  static void _checkPay(String name, double basic, double hra, double other, String ptState) {
+    if (name.trim().isEmpty) throw ArgumentError('Enter the name.');
+    if (!(basic > 0)) throw ArgumentError('Enter the monthly basic pay.');
+    if (hra < 0 || other < 0) throw ArgumentError('An allowance is not below zero.');
+    if (!ptStates.contains(ptState)) throw ArgumentError('Unknown professional tax state.');
+  }
+
+  Future<StaffMember> addStaff({
+    required String companyId,
+    required String name,
+    required double basic,
+    double hra = 0,
+    double otherAllowance = 0,
+    bool pf = true,
+    bool esi = true,
+    String ptState = 'TS',
+    String? phone,
+    String? designation,
+    String? projectId,
+    String? uan,
+    DateTime? joinedOn,
+  }) async {
+    _checkPay(name, basic, hra, otherAllowance, ptState);
+    return transaction(() async {
+      final row = await into(staffMembers).insertReturning(StaffMembersCompanion.insert(
+        id: _uuid.v4(),
+        companyId: companyId,
+        name: _clip(name, 120)!,
+        phone: Value(_blankW(phone, 30)),
+        designation: Value(_blankW(designation, 80)),
+        projectId: Value(projectId),
+        basic: basic,
+        hra: Value(hra),
+        otherAllowance: Value(otherAllowance),
+        pf: Value(pf),
+        esi: Value(esi),
+        ptState: Value(ptState),
+        uan: Value(_blankW(uan, 20)),
+        joinedOn: Value(joinedOn),
+      ));
+      await _queue('staff_members', row.id, 'insert', staffMemberToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  Future<void> updateStaff(
+    String id, {
+    required String name,
+    required double basic,
+    double hra = 0,
+    double otherAllowance = 0,
+    bool pf = true,
+    bool esi = true,
+    String ptState = 'TS',
+    String? phone,
+    String? designation,
+    String? projectId,
+    String? uan,
+    DateTime? joinedOn,
+    bool active = true,
+  }) =>
+      transaction(() async {
+        _checkPay(name, basic, hra, otherAllowance, ptState);
+        await (update(staffMembers)..where((s) => s.id.equals(id))).write(StaffMembersCompanion(
+          name: Value(_clip(name, 120)!),
+          phone: Value(_blankW(phone, 30)),
+          designation: Value(_blankW(designation, 80)),
+          projectId: Value(projectId),
+          basic: Value(basic),
+          hra: Value(hra),
+          otherAllowance: Value(otherAllowance),
+          pf: Value(pf),
+          esi: Value(esi),
+          ptState: Value(ptState),
+          uan: Value(_blankW(uan, 20)),
+          joinedOn: Value(joinedOn),
+          active: Value(active),
+          updatedAt: Value(DateTime.now()),
+        ));
+        final row = await staffById(id);
+        if (row != null) await _queue('staff_members', id, 'update', staffMemberToSupabaseJson(row));
+      });
+
+  Future<StaffAdvance> giveAdvance(
+      {required String staffId, required double amount, required String by, String? note, DateTime? on}) async {
+    if (!(amount > 0)) throw ArgumentError('Enter the amount given.');
+    return transaction(() async {
+      final s = await staffById(staffId);
+      if (s == null) throw ArgumentError('That person is no longer here.');
+      final row = await into(staffAdvances).insertReturning(StaffAdvancesCompanion.insert(
+        id: _uuid.v4(),
+        companyId: s.companyId,
+        staffId: staffId,
+        amount: amount,
+        givenOn: on ?? DateTime.now(),
+        note: Value(_blankW(note, 200)),
+        createdBy: by,
+      ));
+      await _queue('staff_advances', row.id, 'insert', staffAdvanceToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  Future<double> owedBy(String staffId, {String? exceptLineId}) async {
+    final s = await staffById(staffId);
+    if (s == null) return 0;
+    return advanceOwed(staffId, await advancesFor(s.companyId), await linesFor(s.companyId),
+        exceptLineId: exceptLineId);
+  }
+
+  /// Makes the month's payslips for every active staff member who has none
+  /// yet: the full month paid, and up to the whole advance owed recovered.
+  /// Returns how many were made.
+  Future<int> makeMonth(String companyId, String month, {required String by}) => transaction(() async {
+        final days = daysInMonth(month);
+        final have = {for (final l in await linesForMonth(companyId, month)) l.staffId};
+        final advances = await advancesFor(companyId);
+        final lines = await linesFor(companyId);
+        var made = 0;
+        for (final s in await staffFor(companyId)) {
+          if (!s.active || have.contains(s.id)) continue;
+          final joined = s.joinedOn;
+          final start = monthStart(month);
+          if (joined != null && !joined.isBefore(DateTime(start.year, start.month + 1))) continue;
+          // Joined in the month: paid from the day they joined.
+          final paidDays = joined != null && joined.year == start.year && joined.month == start.month
+              ? (days - joined.day + 1).toDouble()
+              : days.toDouble();
+          final owed = advanceOwed(s.id, advances, lines);
+          final calc = computePay(s, days: days, paidDays: paidDays, advanceWanted: owed, advanceOwed: owed);
+          await _insertLine(s, month, calc, by);
+          made++;
+        }
+        return made;
+      });
+
+  Future<PayrollLine> _insertLine(StaffMember s, String month, PayCalc c, String by) async {
+    final row = await into(payrollLines).insertReturning(PayrollLinesCompanion.insert(
+      id: _uuid.v4(),
+      companyId: s.companyId,
+      staffId: s.id,
+      month: month,
+      daysInMonth: c.daysInMonth,
+      paidDays: c.paidDays,
+      basic: c.basic,
+      hra: c.hra,
+      otherAllowance: c.otherAllowance,
+      gross: c.gross,
+      pfEmployee: c.pfEmployee,
+      esiEmployee: c.esiEmployee,
+      pt: c.pt,
+      advanceRecovery: c.advanceRecovery,
+      otherDeduction: c.otherDeduction,
+      net: c.net,
+      pfEmployer: c.pfEmployer,
+      esiEmployer: c.esiEmployer,
+      projectId: Value(s.projectId),
+      createdBy: by,
+    ));
+    await _queue('payroll_lines', row.id, 'insert', payrollLineToSupabaseJson(row));
+    return row;
+  }
+
+  /// Works a draft payslip out again with new days, recovery or other
+  /// deduction (and the person's current salary). A paid one is kept.
+  Future<PayrollLine> recalculate(String lineId,
+          {required double paidDays, required double advanceRecovery, double otherDeduction = 0}) =>
+      transaction(() async {
+        final l = await lineById(lineId);
+        if (l == null) throw ArgumentError('That payslip is no longer here.');
+        if (l.status == 'paid') throw ArgumentError('A paid salary is kept as it was paid.');
+        final s = await staffById(l.staffId);
+        if (s == null) throw ArgumentError('That person is no longer here.');
+        if (paidDays < 0 || paidDays > l.daysInMonth) {
+          throw ArgumentError(trf('Paid days are 0 to {n}.', {'n': l.daysInMonth}));
+        }
+        final owed = await owedBy(s.id, exceptLineId: l.id);
+        final c = computePay(s,
+            days: l.daysInMonth,
+            paidDays: paidDays,
+            advanceWanted: advanceRecovery,
+            advanceOwed: owed,
+            otherDeduction: otherDeduction);
+        await (update(payrollLines)..where((x) => x.id.equals(lineId))).write(PayrollLinesCompanion(
+          paidDays: Value(c.paidDays),
+          basic: Value(c.basic),
+          hra: Value(c.hra),
+          otherAllowance: Value(c.otherAllowance),
+          gross: Value(c.gross),
+          pfEmployee: Value(c.pfEmployee),
+          esiEmployee: Value(c.esiEmployee),
+          pt: Value(c.pt),
+          advanceRecovery: Value(c.advanceRecovery),
+          otherDeduction: Value(c.otherDeduction),
+          net: Value(c.net),
+          pfEmployer: Value(c.pfEmployer),
+          esiEmployer: Value(c.esiEmployer),
+          projectId: Value(s.projectId),
+          updatedAt: Value(DateTime.now()),
+        ));
+        final row = (await lineById(lineId))!;
+        await _queue('payroll_lines', lineId, 'update', payrollLineToSupabaseJson(row));
+        return row;
+      });
+
+  /// Marks a payslip paid. When the person is posted at a site and
+  /// [addSiteExpense] is set, the net pay goes in that site's money book
+  /// as a salary expense, so the site's spending includes it.
+  Future<PayrollLine> markPaid(String lineId,
+          {required String mode, required String by, bool addSiteExpense = true, DateTime? on}) =>
+      transaction(() async {
+        final l = await lineById(lineId);
+        if (l == null) throw ArgumentError('That payslip is no longer here.');
+        if (l.status == 'paid') return l;
+        if (!payModes.containsKey(mode)) throw ArgumentError('Pick how it was paid.');
+        final s = await staffById(l.staffId);
+        final when = on ?? DateTime.now();
+        String? expenseId;
+        if (addSiteExpense && l.projectId != null && l.net > 0) {
+          final e = await db.expenseDao.create(SiteExpensesCompanion.insert(
+            id: _uuid.v4(),
+            projectId: l.projectId!,
+            category: staffSalaryCategory,
+            amount: l.net,
+            incurredOn: when.toIso8601String().substring(0, 10),
+            recordedBy: by,
+            note: Value(_clip(trf('Salary {month}', {'month': l.month}), 300)),
+            paidTo: Value(_clip(s?.name, 120)),
+            mode: Value(mode),
+          ));
+          expenseId = e.id;
+        }
+        await (update(payrollLines)..where((x) => x.id.equals(lineId))).write(PayrollLinesCompanion(
+          status: const Value('paid'),
+          paidOn: Value(when),
+          paidMode: Value(mode),
+          expenseId: Value(expenseId),
+          updatedAt: Value(DateTime.now()),
+        ));
+        final row = (await lineById(lineId))!;
+        await _queue('payroll_lines', lineId, 'update', payrollLineToSupabaseJson(row));
+        return row;
+      });
+
+  /// Removes a draft payslip (made by mistake, or the person left). A paid
+  /// one is kept.
+  Future<void> deleteDraft(String lineId) => transaction(() async {
+        final l = await lineById(lineId);
+        if (l == null) return;
+        if (l.status == 'paid') throw ArgumentError('A paid salary is kept as it was paid.');
+        await (delete(payrollLines)..where((x) => x.id.equals(lineId))).go();
+        await _queue('payroll_lines', lineId, 'delete', {'id': lineId});
+      });
+
+  Future<void> upsertStaffFromRemote(StaffMembersCompanion c) => into(staffMembers).insertOnConflictUpdate(c);
+  Future<void> upsertAdvanceFromRemote(StaffAdvancesCompanion c) => into(staffAdvances).insertOnConflictUpdate(c);
+  Future<void> upsertLineFromRemote(PayrollLinesCompanion c) => into(payrollLines).insertOnConflictUpdate(c);
+}
+
+/// The money-book category for salaries paid from a site.
+const staffSalaryCategory = 'Staff salary';
+
+String? _blankW(String? s, int max) {
   final t = s?.trim() ?? '';
   return t.isEmpty ? null : _clip(t, max);
 }

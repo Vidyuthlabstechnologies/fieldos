@@ -1016,3 +1016,191 @@ class CrmQuotes extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+// --- v22: central stores, tools register, monthly staff salaries ----------
+
+/// A company store or warehouse that holds material between purchase and
+/// the sites (the yard, the godown behind the office).
+class Stores extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  TextColumn get name => text().withLength(min: 1, max: 120)();
+  TextColumn get location => text().withLength(max: 300).nullable()();
+  BoolColumn get archived => boolean().withDefault(const Constant(false))();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Material moving into a store, between stores and sites, or written off.
+/// Each place is a store or a site, never both. A transfer is on the way
+/// until the receiving end counts what arrived.
+class StockMoves extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+
+  /// inward (bought into a store) | transfer | adjust (count correction).
+  TextColumn get kind => text().withLength(min: 1, max: 20)();
+  TextColumn get fromStoreId => text().withLength(max: 36).nullable()();
+  TextColumn get fromProjectId => text().withLength(max: 36).nullable()();
+  TextColumn get toStoreId => text().withLength(max: 36).nullable()();
+  TextColumn get toProjectId => text().withLength(max: 36).nullable()();
+  TextColumn get supplierName => text().withLength(max: 120).nullable()();
+  TextColumn get materialName => text().withLength(min: 1, max: 200)();
+  TextColumn get unit => text().withLength(max: 20).nullable()();
+  RealColumn get quantity => real()();
+
+  /// Rupees a unit, for the value of what moved.
+  RealColumn get rate => real().nullable()();
+
+  /// in_transit | received | cancelled
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('received'))();
+
+  /// What the receiving end counted; less than [quantity] is a shortage.
+  RealColumn get receivedQty => real().nullable()();
+  TextColumn get vehicle => text().withLength(max: 40).nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get sentBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get sentOn => dateTime()();
+  TextColumn get receivedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get receivedOn => dateTime().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A tool or small machine the company owns (drill, vibrator, level).
+/// Where it is and who has it come from its issues.
+class Tools extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  TextColumn get name => text().withLength(min: 1, max: 120)();
+
+  /// Asset tag painted on it.
+  TextColumn get code => text().withLength(max: 40).nullable()();
+  TextColumn get category => text().withLength(max: 60).nullable()();
+  RealColumn get value => real().nullable()();
+  TextColumn get storeId => text().withLength(max: 36).nullable()();
+
+  /// in_use (normal) | repair | retired. Issued and lost come from issues.
+  TextColumn get condition => text().withLength(min: 1, max: 20).withDefault(const Constant('in_use'))();
+  TextColumn get notes => text().withLength(max: 300).nullable()();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A tool handed to a person, and how it came back.
+class ToolIssues extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  TextColumn get toolId => text().withLength(min: 1, max: 36)();
+  TextColumn get projectId => text().withLength(max: 36).nullable()();
+  TextColumn get issuedTo => text().withLength(min: 1, max: 120)();
+  TextColumn get workerId => text().withLength(max: 36).nullable()();
+  TextColumn get issuedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get issuedOn => dateTime()();
+  DateTimeColumn get dueBack => dateTime().nullable()();
+  DateTimeColumn get returnedOn => dateTime().nullable()();
+
+  /// ok | damaged | lost, once it is back (or known lost).
+  TextColumn get returnCondition => text().withLength(max: 20).nullable()();
+
+  /// To be recovered from the person for a damaged or lost tool.
+  RealColumn get recoverAmount => real().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Monthly salaried staff (engineers, supervisors, accounts, drivers), as
+/// opposed to daily-wage workers on the wage sheet.
+class StaffMembers extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  TextColumn get name => text().withLength(min: 1, max: 120)();
+  TextColumn get phone => text().withLength(max: 30).nullable()();
+  TextColumn get designation => text().withLength(max: 80).nullable()();
+
+  /// The site whose costs the salary is charged to, if any.
+  TextColumn get projectId => text().withLength(max: 36).nullable()();
+
+  /// Monthly salary parts, for a full month.
+  RealColumn get basic => real()();
+  RealColumn get hra => real().withDefault(const Constant(0))();
+  RealColumn get otherAllowance => real().withDefault(const Constant(0))();
+  BoolColumn get pf => boolean().withDefault(const Constant(true))();
+  BoolColumn get esi => boolean().withDefault(const Constant(true))();
+
+  /// Professional tax slabs: TS | AP | none.
+  TextColumn get ptState => text().withLength(min: 1, max: 10).withDefault(const Constant('TS'))();
+  TextColumn get uan => text().withLength(max: 20).nullable()();
+  DateTimeColumn get joinedOn => dateTime().nullable()();
+  BoolColumn get active => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Money given to a staff member ahead of salary, recovered from payslips.
+class StaffAdvances extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  TextColumn get staffId => text().withLength(min: 1, max: 36)();
+  RealColumn get amount => real()();
+  DateTimeColumn get givenOn => dateTime()();
+  TextColumn get note => text().withLength(max: 200).nullable()();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// One staff member's salary for one month: days, earnings, deductions,
+/// what was paid. One row per person per month.
+class PayrollLines extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  TextColumn get staffId => text().withLength(min: 1, max: 36)();
+
+  /// 2026-11
+  TextColumn get month => text().withLength(min: 7, max: 7)();
+  IntColumn get daysInMonth => integer()();
+  RealColumn get paidDays => real()();
+  RealColumn get basic => real()();
+  RealColumn get hra => real()();
+  RealColumn get otherAllowance => real()();
+  RealColumn get gross => real()();
+  RealColumn get pfEmployee => real()();
+  RealColumn get esiEmployee => real()();
+  RealColumn get pt => real()();
+  RealColumn get advanceRecovery => real()();
+  RealColumn get otherDeduction => real()();
+  RealColumn get net => real()();
+  RealColumn get pfEmployer => real()();
+  RealColumn get esiEmployer => real()();
+
+  /// draft | paid
+  TextColumn get status => text().withLength(min: 1, max: 10).withDefault(const Constant('draft'))();
+  DateTimeColumn get paidOn => dateTime().nullable()();
+  TextColumn get paidMode => text().withLength(max: 20).nullable()();
+  TextColumn get projectId => text().withLength(max: 36).nullable()();
+  TextColumn get expenseId => text().withLength(max: 36).nullable()();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

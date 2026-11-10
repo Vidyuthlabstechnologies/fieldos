@@ -130,6 +130,7 @@ class SyncEngine {
     'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
     'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by', 'edited_by',
     'decided_by', 'submitted_by', 'certified_by', 'raised_by', 'owner_id', 'acted_by', 'by_user',
+    'sent_by', 'issued_by',
   };
 
   Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>
@@ -404,6 +405,13 @@ class SyncEngine {
         'crm_leads': (r) => db.crmDao.upsertLeadFromRemote(crmLeadFromSupabaseJson(r)),
         'crm_activities': (r) => db.crmDao.upsertActivityFromRemote(crmActivityFromSupabaseJson(r)),
         'crm_quotes': (r) => db.crmDao.upsertQuoteFromRemote(crmQuoteFromSupabaseJson(r)),
+        'stores': (r) => db.warehouseDao.upsertStoreFromRemote(storeFromSupabaseJson(r)),
+        'stock_moves': (r) => db.warehouseDao.upsertMoveFromRemote(stockMoveFromSupabaseJson(r)),
+        'tools': (r) => db.warehouseDao.upsertToolFromRemote(toolFromSupabaseJson(r)),
+        'tool_issues': (r) => db.warehouseDao.upsertIssueFromRemote(toolIssueFromSupabaseJson(r)),
+        'staff_members': (r) => db.payrollDao.upsertStaffFromRemote(staffMemberFromSupabaseJson(r)),
+        'staff_advances': (r) => db.payrollDao.upsertAdvanceFromRemote(staffAdvanceFromSupabaseJson(r)),
+        'payroll_lines': (r) => db.payrollDao.upsertLineFromRemote(payrollLineFromSupabaseJson(r)),
         'documents': (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
@@ -616,6 +624,13 @@ class SyncEngine {
     'crm_leads': 'crm_leads',
     'crm_activities': 'crm_activities',
     'crm_quotes': 'crm_quotes',
+    'stores': 'stores',
+    'stock_moves': 'stock_moves',
+    'tools': 'tools',
+    'tool_issues': 'tool_issues',
+    'staff_members': 'staff_members',
+    'staff_advances': 'staff_advances',
+    'payroll_lines': 'payroll_lines',
   };
 
   /// Tables whose rows carry project_id on the phone too.
@@ -641,6 +656,9 @@ class SyncEngine {
     ('site_receipt_attachments', 'site_material_receipts', 'receipt_id'),
     ('crm_activities', 'crm_leads', 'lead_id'),
     ('crm_quotes', 'crm_leads', 'lead_id'),
+    ('tool_issues', 'tools', 'tool_id'),
+    ('staff_advances', 'staff_members', 'staff_id'),
+    ('payroll_lines', 'staff_members', 'staff_id'),
   ];
 
   /// Removes a row from the phone, with what hangs off it (a site takes all
