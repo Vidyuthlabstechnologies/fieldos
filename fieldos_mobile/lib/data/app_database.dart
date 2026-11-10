@@ -1141,7 +1141,11 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
   Future<SiteExpense?> byId(String id) => (select(siteExpenses)..where((e) => e.id.equals(id))).getSingleOrNull();
 
   /// One more than the highest voucher number this phone knows for the
-  /// site (its own entries and everything synced from the team).
+  /// site (its own entries and everything synced from the team). On a
+  /// phone linked to the cloud this is only provisional: the server gives
+  /// the final number when the expense reaches it
+  /// (20261110000000_server_voucher_numbers.sql), because two phones
+  /// offline on one site would otherwise both issue the same number.
   Future<int> nextVoucherNo(String projectId) async {
     final max = siteExpenses.voucherNo.max();
     final row = await (selectOnly(siteExpenses)
@@ -1153,6 +1157,24 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
 
   /// Corrects an entry. The voucher number, site and who first wrote it
   /// stay; who changed it and when are kept on the row.
+  /// Expenses of the site whose insert is still waiting in the outbox:
+  /// their voucher number is this phone's guess until the server answers.
+  Future<Set<String>> provisionalVoucherIds(String projectId) async {
+    final rows = await (select(db.syncOutbox).join([
+      innerJoin(siteExpenses, siteExpenses.id.equalsExp(db.syncOutbox.recordId)),
+    ])
+          ..where(db.syncOutbox.targetTable.equals('site_expenses') &
+              db.syncOutbox.operation.equals('insert') &
+              siteExpenses.projectId.equals(projectId)))
+        .get();
+    return {for (final r in rows) r.readTable(siteExpenses).id};
+  }
+
+  /// The final number the server gave an expense. Not queued: it came from
+  /// the server.
+  Future<void> setServerVoucher(String id, int voucherNo) =>
+      (update(siteExpenses)..where((e) => e.id.equals(id))).write(SiteExpensesCompanion(voucherNo: Value(voucherNo)));
+
   Future<SiteExpense> edit(String id, SiteExpensesCompanion changes, {required String by, DateTime? now}) {
     return transaction(() async {
       await (update(siteExpenses)..where((e) => e.id.equals(id))).write(changes.copyWith(
@@ -1977,6 +1999,12 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
       lastError: Value(error),
     ));
   }
+
+  /// The server could not be reached: keep the reason for the status
+  /// screen but do not count a try, so a phone that is offline for hours
+  /// never parks its writes.
+  Future<void> noteTransientFailure(int id, String error) =>
+      (update(syncOutbox)..where((o) => o.id.equals(id))).write(SyncOutboxCompanion(lastError: Value(error)));
 
   Future<int> pendingCount() async {
     final rows = await pending();

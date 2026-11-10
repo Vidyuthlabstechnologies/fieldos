@@ -19,6 +19,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart' show Variable;
+import 'package:http/http.dart' show ClientException;
 import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -29,6 +30,29 @@ class SyncPushResult {
   final int succeeded;
   final int failed;
 }
+
+/// The server answered, but the write changed nothing: an update or delete
+/// that matched zero rows. Kept in the outbox (and shown in Team & sync once
+/// parked) instead of being marked sent.
+class SyncNotAppliedException implements Exception {
+  SyncNotAppliedException(this.table, this.recordId, this.reason);
+  final String table;
+  final String recordId;
+  final String reason;
+  @override
+  String toString() => 'Not applied on the server ($table $recordId): $reason';
+}
+
+/// No answer from the server at all (offline, timeout, TLS cut). Such a
+/// failure says nothing about the write, so it never counts toward parking.
+bool isTransientSyncError(Object e) =>
+    e is SocketException ||
+    e is TimeoutException ||
+    e is HandshakeException ||
+    e is HttpException ||
+    e is ClientException ||
+    (e is StorageException && (e.statusCode == null || (int.tryParse(e.statusCode!) ?? 0) >= 500)) ||
+    (e is PostgrestException && e.code != null && RegExp(r'^5\d\d$').hasMatch(e.code!));
 
 class SyncEngine {
   /// Where downloaded document files are written. Injectable so Dart-VM
@@ -122,53 +146,122 @@ class SyncEngine {
     return out;
   }
 
-  /// Drains the outbox in order. Stops (does not skip past) on the first
-  /// failure within a run, to preserve per-record write ordering -- a
-  /// later run will retry it. Each entry gets its own failure handling so
-  /// one bad row doesn't lose track of how many others succeeded first.
+  /// Drains the outbox, oldest first.
+  ///
+  /// Every write is safe to replay. A response lost after the server
+  /// committed used to leave the entry queued; the replayed insert then hit
+  /// a duplicate id and failed forever, so a write the server had accepted
+  /// looked unsent. Now:
+  ///  - insert: a duplicate-id answer is checked against the server; if the
+  ///    row with this id is there, the write had already landed and the
+  ///    entry is done. Any other unique clash is a real rejection.
+  ///  - update/delete: the server says which rows it touched. Zero rows is
+  ///    NOT success (row-level security hides a row the caller may no
+  ///    longer change, e.g. after a role was taken away); the entry stays
+  ///    queued with the reason, and is parked after [syncOutboxMaxRetries]
+  ///    so Team & sync shows it. A delete of a row that is already gone is
+  ///    done.
+  ///
+  /// A rejected entry no longer stops the drain. Later writes to the same
+  /// record, and writes whose payload points at it (a task of a project
+  /// the server refused), wait for the next run so per-record order holds;
+  /// unrelated work goes through. A network failure stops the run without
+  /// counting against the entry: being offline must never park a write.
   Future<SyncPushResult> pushPending() => _synchronized(() async {
         final entries = await db.syncOutboxDao.pending();
         var succeeded = 0;
+        final blocked = <String>{};
         for (final entry in entries) {
-          try {
-            final data = _toRemoteIds(jsonDecode(entry.payload) as Map<String, dynamic>);
-            final table = client.from(entry.targetTable);
-        if (entry.targetTable == 'documents' && entry.operation == 'insert') {
-          // The file itself goes to Storage first; only after that upload
-          // succeeds does the metadata row land in Postgres, so a visible
-          // row always has a downloadable object behind it.
-          final localPath = data.remove('_local_file_path') as String?;
-          if (localPath == null) {
-            throw StateError('documents outbox payload missing _local_file_path');
+          final payload = jsonDecode(entry.payload) as Map<String, dynamic>;
+          if (blocked.contains(entry.recordId) ||
+              payload.values.any((v) => v is String && v != entry.recordId && blocked.contains(v))) {
+            blocked.add(entry.recordId);
+            continue;
           }
-          await client.storage
-              .from('documents')
-              .uploadBinary(data['file_path'] as String, File(localPath).readAsBytesSync(),
-                  fileOptions: const FileOptions(upsert: true));
-          await table.insert(data);
-        } else {
-          switch (entry.operation) {
-            case 'insert':
-              await table.insert(data);
-            case 'update':
-              await table.update(data).eq('id', entry.recordId);
-            case 'upsert':
-              await table.upsert(data);
-            case 'delete':
-              await table.delete().eq('id', entry.recordId);
-            default:
-              throw StateError('Unknown outbox operation: ${entry.operation}');
+          try {
+            await _pushOne(entry, _toRemoteIds(payload));
+            await db.syncOutboxDao.markSynced(entry.id);
+            succeeded++;
+          } catch (e) {
+            if (isTransientSyncError(e)) {
+              await db.syncOutboxDao.noteTransientFailure(entry.id, e.toString());
+              break;
+            }
+            await db.syncOutboxDao.recordFailure(entry.id, e.toString());
+            blocked.add(entry.recordId);
           }
         }
-        await db.syncOutboxDao.markSynced(entry.id);
-        succeeded++;
-      } catch (e) {
-        await db.syncOutboxDao.recordFailure(entry.id, e.toString());
         return SyncPushResult(succeeded: succeeded, failed: entries.length - succeeded);
+      });
+
+  /// Tables whose rows carry a file in Storage, and the column holding its
+  /// object path ({projectId}/...). Push uploads the file before the row,
+  /// so a visible row always has a downloadable object behind it.
+  static const fileColumns = {
+    'documents': 'file_path',
+    'dpr_photos': 'photo_path',
+    'expense_attachments': 'file_path',
+  };
+
+  /// The Storage bucket every synced file lives in. Its policies key access
+  /// off the object path's first folder (the project id).
+  static const filesBucket = 'documents';
+
+  Future<void> _pushOne(SyncOutboxData entry, Map<String, dynamic> data) async {
+    final table = client.from(entry.targetTable);
+    final fileColumn = fileColumns[entry.targetTable];
+    final localPath = data.remove('_local_file_path') as String?;
+    if (fileColumn != null && entry.operation == 'insert') {
+      if (localPath == null) throw StateError('${entry.targetTable} outbox payload missing _local_file_path');
+      final file = File(localPath);
+      if (!file.existsSync()) {
+        throw StateError('The file for this ${entry.targetTable} row is no longer on the phone: $localPath');
       }
+      // upsert: a replay after a lost response re-sends the same bytes to
+      // the same path instead of failing on "already exists".
+      await client.storage
+          .from(filesBucket)
+          .uploadBinary(data[fileColumn] as String, file.readAsBytesSync(), fileOptions: const FileOptions(upsert: true));
     }
-    return SyncPushResult(succeeded: succeeded, failed: 0);
-  });
+    switch (entry.operation) {
+      case 'insert':
+        try {
+          await table.insert(data);
+        } on PostgrestException catch (e) {
+          if (e.code != '23505' || !await _visibleOnServer(entry.targetTable, entry.recordId)) rethrow;
+        }
+        if (entry.targetTable == 'site_expenses') await _takeServerVoucher(entry.recordId);
+      case 'upsert':
+        await table.upsert(data);
+      case 'update':
+        final touched = await table.update(data).eq('id', entry.recordId).select('id');
+        if (touched.isEmpty) {
+          throw SyncNotAppliedException(entry.targetTable, entry.recordId,
+              await _visibleOnServer(entry.targetTable, entry.recordId)
+                  ? 'the server refused the change (no permission to edit it any more)'
+                  : 'the record is gone from the server or no longer shared with you');
+        }
+      case 'delete':
+        final touched = await table.delete().eq('id', entry.recordId).select('id');
+        if (touched.isEmpty && await _visibleOnServer(entry.targetTable, entry.recordId)) {
+          throw SyncNotAppliedException(
+              entry.targetTable, entry.recordId, 'the server refused to delete it (no permission)');
+        }
+      default:
+        throw StateError('Unknown outbox operation: ${entry.operation}');
+    }
+  }
+
+  /// The server numbers vouchers (20261110000000_server_voucher_numbers.sql);
+  /// show its number straight away instead of the phone's provisional one.
+  Future<void> _takeServerVoucher(String expenseId) async {
+    final row = await client.from('site_expenses').select('voucher_no').eq('id', expenseId).maybeSingle();
+    final n = row?['voucher_no'];
+    if (n is num) await db.expenseDao.setServerVoucher(expenseId, n.toInt());
+  }
+
+  Future<bool> _visibleOnServer(String table, String id) async =>
+      (await client.from(table).select('id').eq('id', id).maybeSingle()) != null;
 
   /// One-shot pull: fetches every row the current session's RLS allows and
   /// merges into local Drift. Useful for an initial sync or a manual
