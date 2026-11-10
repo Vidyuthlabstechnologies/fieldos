@@ -36,6 +36,7 @@ import 'package:fieldos_mobile/features/documents/documents_screen.dart';
 import 'package:fieldos_mobile/features/workers/workers_screen.dart';
 import 'package:fieldos_mobile/features/estimation/estimation_screen.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
+import 'package:fieldos_mobile/features/money/cash_book_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
@@ -179,6 +180,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
               }
               if (v == 'excel') exportProjectToExcel(context, ref, widget.project);
               if (v == 'client') shareClientAccess(context, ref, widget.project);
+              if (v == 'cash') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => CashBookScreen(project: widget.project)));
+              }
               if (v == 'notes') {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => SiteNotesScreen(projectId: widget.project.id, siteName: widget.project.name),
@@ -186,6 +190,13 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
               }
             },
             itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'cash',
+                child: ListTile(
+                  leading: const Icon(Icons.account_balance_wallet_outlined),
+                  title: Text(tr('Cash book')),
+                ),
+              ),
               PopupMenuItem(
                 value: 'notes',
                 child: ListTile(

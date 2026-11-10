@@ -1922,3 +1922,35 @@ MemberSyncStatusCompanion memberSyncStatusFromSupabaseJson(Map<String, dynamic> 
       lastSyncedAt: _localTs(row['last_synced_at'])!,
       pending: Value((row['pending_count'] as num?)?.toInt() ?? 0),
     );
+
+// --- Site cash book (app schema v36, 20261111100000_site_cash_book.sql)
+
+Map<String, dynamic> cashMoveToSupabaseJson(CashMove c) => {
+      'id': c.id,
+      'project_id': c.projectId,
+      'holder_id': c.holderId,
+      'kind': c.kind,
+      'amount': c.amount,
+      'moved_on': c.movedOn,
+      'note': c.note,
+      'recorded_by': c.recordedBy,
+      'created_at': _timestamp(c.createdAt.toUtc()),
+      'voided': c.voided,
+      'void_reason': c.voidReason,
+    };
+
+CashMovesCompanion cashMoveFromSupabaseJson(Map<String, dynamic> row) => CashMovesCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      holderId: row['holder_id'] as String,
+      kind: row['kind'] as String,
+      amount: (row['amount'] as num).toDouble(),
+      movedOn: (row['moved_on'] as String).substring(0, 10),
+      note: Value(row['note'] as String?),
+      recordedBy: row['recorded_by'] as String,
+      createdAt: row['created_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['created_at'] as String).toLocal()),
+      voided: Value(row['voided'] as bool? ?? false),
+      voidReason: Value(row['void_reason'] as String?),
+    );

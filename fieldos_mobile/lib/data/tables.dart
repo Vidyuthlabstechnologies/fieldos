@@ -1526,3 +1526,33 @@ class MemberSyncStatus extends Table {
   @override
   Set<Column<Object>> get primaryKey => {companyId, userId};
 }
+
+/// v36, the site cash book: cash handed to someone on site ([kind] given),
+/// handed back (returned) and counted in their hand (counted). What they
+/// spent is their own cash expenses on the site, so it is never stored
+/// twice. Entries are only cancelled ([voided]), never changed. Synced as
+/// site_cash_moves (20261111100000_site_cash_book.sql).
+class CashMoves extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// The person holding the cash (a user id, like recordedBy).
+  TextColumn get holderId => text().withLength(min: 1, max: 64)();
+
+  /// given | returned | counted
+  TextColumn get kind => text().withLength(min: 1, max: 10)();
+
+  /// For a count, the cash found in hand (may be 0).
+  RealColumn get amount => real()();
+
+  /// yyyy-mm-dd
+  TextColumn get movedOn => text().withLength(min: 10, max: 10)();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get voided => boolean().withDefault(const Constant(false))();
+  TextColumn get voidReason => text().withLength(max: 200).nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

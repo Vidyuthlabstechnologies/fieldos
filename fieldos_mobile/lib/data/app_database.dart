@@ -110,6 +110,7 @@ String? _clip(String? s, int max) {
   MemberSyncStatus,
   AttendancePhotos,
   StaffAttendance,
+  CashMoves,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -141,7 +142,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 32;
+  int get schemaVersion => 36;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -348,6 +349,11 @@ class AppDatabase extends _$AppDatabase {
               await _addColumnIfMissing(m, purchaseOrders, c);
             }
           }
+          // v33 to v35 are left for other work in flight.
+          if (from < 36) {
+            // The site cash book (imprest): cash given, returned, counted.
+            await _createTableIfMissing(m, cashMoves);
+          }
         },
       );
 
@@ -451,6 +457,7 @@ class AppDatabase extends _$AppDatabase {
   BillingRecordsDao get billingRecordsDao => BillingRecordsDao(this);
   ApprovalChainDao get approvalChainDao => ApprovalChainDao(this);
   DayCloseDao get dayCloseDao => DayCloseDao(this);
+  CashBookDao get cashBookDao => CashBookDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -4749,4 +4756,77 @@ class DayCloseDao extends DatabaseAccessor<AppDatabase> with _$DayCloseDaoMixin 
   Future<void> upsertEventFromRemote(SiteDayEventsCompanion c) => into(siteDayEvents).insertOnConflictUpdate(c);
   Future<void> upsertSettingsFromRemote(SiteCloseSettingsCompanion c) =>
       into(siteCloseSettings).insertOnConflictUpdate(c);
+}
+
+// ---------------------------------------------------------------------------
+// The site cash book (v36)
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [CashMoves])
+class CashBookDao extends DatabaseAccessor<AppDatabase> with _$CashBookDaoMixin {
+  CashBookDao(super.db);
+
+  static const kinds = ['given', 'returned', 'counted'];
+
+  /// Every entry on a site, cancelled ones too, oldest first.
+  Future<List<CashMove>> forProject(String projectId) => (select(cashMoves)
+        ..where((c) => c.projectId.equals(projectId))
+        ..orderBy([(c) => OrderingTerm.asc(c.movedOn), (c) => OrderingTerm.asc(c.createdAt)]))
+      .get();
+
+  Future<List<CashMove>> forProjects(Iterable<String> projectIds) =>
+      (select(cashMoves)..where((c) => c.projectId.isIn(projectIds.toList()))).get();
+
+  Future<CashMove?> byId(String id) => (select(cashMoves)..where((c) => c.id.equals(id))).getSingleOrNull();
+
+  Future<CashMove> record({
+    required String projectId,
+    required String holderId,
+    required String kind,
+    required double amount,
+    required String movedOn,
+    required String by,
+    String? note,
+    DateTime? now,
+  }) {
+    if (!kinds.contains(kind)) throw ArgumentError('Unknown cash entry: $kind');
+    if (amount.isNaN || amount < 0 || (kind != 'counted' && amount <= 0)) {
+      throw ArgumentError('Enter an amount above zero');
+    }
+    return transaction(() async {
+      final row = await into(cashMoves).insertReturning(CashMovesCompanion.insert(
+        id: _uuid.v4(),
+        projectId: projectId,
+        holderId: holderId,
+        kind: kind,
+        amount: (amount * 100).roundToDouble() / 100,
+        movedOn: movedOn,
+        note: Value(_clip(note, 300)),
+        recordedBy: by,
+        createdAt: Value(now ?? DateTime.now()),
+      ));
+      await _queue(row, 'insert');
+      return row;
+    });
+  }
+
+  /// Cancels an entry. It stays in the book, struck through.
+  Future<CashMove> cancel(String id, {required String reason}) {
+    return transaction(() async {
+      await (update(cashMoves)..where((c) => c.id.equals(id)))
+          .write(CashMovesCompanion(voided: const Value(true), voidReason: Value(_clip(reason, 200))));
+      final row = await (select(cashMoves)..where((c) => c.id.equals(id))).getSingle();
+      await _queue(row, 'update');
+      return row;
+    });
+  }
+
+  Future<void> _queue(CashMove row, String operation) => db.syncOutboxDao.enqueue(
+        targetTable: 'site_cash_moves',
+        recordId: row.id,
+        operation: operation,
+        payloadJson: jsonEncode(cashMoveToSupabaseJson(row)),
+      );
+
+  Future<void> upsertFromRemote(CashMovesCompanion c) => into(cashMoves).insertOnConflictUpdate(c);
 }

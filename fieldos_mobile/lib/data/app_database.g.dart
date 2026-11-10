@@ -45140,6 +45140,687 @@ class StaffAttendanceCompanion extends UpdateCompanion<StaffAttendanceData> {
   }
 }
 
+class $CashMovesTable extends CashMoves
+    with TableInfo<$CashMovesTable, CashMove> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CashMovesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _holderIdMeta = const VerificationMeta(
+    'holderId',
+  );
+  @override
+  late final GeneratedColumn<String> holderId = GeneratedColumn<String>(
+    'holder_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _movedOnMeta = const VerificationMeta(
+    'movedOn',
+  );
+  @override
+  late final GeneratedColumn<String> movedOn = GeneratedColumn<String>(
+    'moved_on',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 10,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _recordedByMeta = const VerificationMeta(
+    'recordedBy',
+  );
+  @override
+  late final GeneratedColumn<String> recordedBy = GeneratedColumn<String>(
+    'recorded_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _voidedMeta = const VerificationMeta('voided');
+  @override
+  late final GeneratedColumn<bool> voided = GeneratedColumn<bool>(
+    'voided',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("voided" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _voidReasonMeta = const VerificationMeta(
+    'voidReason',
+  );
+  @override
+  late final GeneratedColumn<String> voidReason = GeneratedColumn<String>(
+    'void_reason',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    holderId,
+    kind,
+    amount,
+    movedOn,
+    note,
+    recordedBy,
+    createdAt,
+    voided,
+    voidReason,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'cash_moves';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CashMove> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('holder_id')) {
+      context.handle(
+        _holderIdMeta,
+        holderId.isAcceptableOrUnknown(data['holder_id']!, _holderIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_holderIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('moved_on')) {
+      context.handle(
+        _movedOnMeta,
+        movedOn.isAcceptableOrUnknown(data['moved_on']!, _movedOnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_movedOnMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('recorded_by')) {
+      context.handle(
+        _recordedByMeta,
+        recordedBy.isAcceptableOrUnknown(data['recorded_by']!, _recordedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordedByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('voided')) {
+      context.handle(
+        _voidedMeta,
+        voided.isAcceptableOrUnknown(data['voided']!, _voidedMeta),
+      );
+    }
+    if (data.containsKey('void_reason')) {
+      context.handle(
+        _voidReasonMeta,
+        voidReason.isAcceptableOrUnknown(data['void_reason']!, _voidReasonMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CashMove map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CashMove(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      holderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}holder_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount'],
+      )!,
+      movedOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}moved_on'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      recordedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recorded_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      voided: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}voided'],
+      )!,
+      voidReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}void_reason'],
+      ),
+    );
+  }
+
+  @override
+  $CashMovesTable createAlias(String alias) {
+    return $CashMovesTable(attachedDatabase, alias);
+  }
+}
+
+class CashMove extends DataClass implements Insertable<CashMove> {
+  final String id;
+  final String projectId;
+
+  /// The person holding the cash (a user id, like recordedBy).
+  final String holderId;
+
+  /// given | returned | counted
+  final String kind;
+
+  /// For a count, the cash found in hand (may be 0).
+  final double amount;
+
+  /// yyyy-mm-dd
+  final String movedOn;
+  final String? note;
+  final String recordedBy;
+  final DateTime createdAt;
+  final bool voided;
+  final String? voidReason;
+  const CashMove({
+    required this.id,
+    required this.projectId,
+    required this.holderId,
+    required this.kind,
+    required this.amount,
+    required this.movedOn,
+    this.note,
+    required this.recordedBy,
+    required this.createdAt,
+    required this.voided,
+    this.voidReason,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['holder_id'] = Variable<String>(holderId);
+    map['kind'] = Variable<String>(kind);
+    map['amount'] = Variable<double>(amount);
+    map['moved_on'] = Variable<String>(movedOn);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['recorded_by'] = Variable<String>(recordedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['voided'] = Variable<bool>(voided);
+    if (!nullToAbsent || voidReason != null) {
+      map['void_reason'] = Variable<String>(voidReason);
+    }
+    return map;
+  }
+
+  CashMovesCompanion toCompanion(bool nullToAbsent) {
+    return CashMovesCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      holderId: Value(holderId),
+      kind: Value(kind),
+      amount: Value(amount),
+      movedOn: Value(movedOn),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      recordedBy: Value(recordedBy),
+      createdAt: Value(createdAt),
+      voided: Value(voided),
+      voidReason: voidReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voidReason),
+    );
+  }
+
+  factory CashMove.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CashMove(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      holderId: serializer.fromJson<String>(json['holderId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      amount: serializer.fromJson<double>(json['amount']),
+      movedOn: serializer.fromJson<String>(json['movedOn']),
+      note: serializer.fromJson<String?>(json['note']),
+      recordedBy: serializer.fromJson<String>(json['recordedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      voided: serializer.fromJson<bool>(json['voided']),
+      voidReason: serializer.fromJson<String?>(json['voidReason']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'holderId': serializer.toJson<String>(holderId),
+      'kind': serializer.toJson<String>(kind),
+      'amount': serializer.toJson<double>(amount),
+      'movedOn': serializer.toJson<String>(movedOn),
+      'note': serializer.toJson<String?>(note),
+      'recordedBy': serializer.toJson<String>(recordedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'voided': serializer.toJson<bool>(voided),
+      'voidReason': serializer.toJson<String?>(voidReason),
+    };
+  }
+
+  CashMove copyWith({
+    String? id,
+    String? projectId,
+    String? holderId,
+    String? kind,
+    double? amount,
+    String? movedOn,
+    Value<String?> note = const Value.absent(),
+    String? recordedBy,
+    DateTime? createdAt,
+    bool? voided,
+    Value<String?> voidReason = const Value.absent(),
+  }) => CashMove(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    holderId: holderId ?? this.holderId,
+    kind: kind ?? this.kind,
+    amount: amount ?? this.amount,
+    movedOn: movedOn ?? this.movedOn,
+    note: note.present ? note.value : this.note,
+    recordedBy: recordedBy ?? this.recordedBy,
+    createdAt: createdAt ?? this.createdAt,
+    voided: voided ?? this.voided,
+    voidReason: voidReason.present ? voidReason.value : this.voidReason,
+  );
+  CashMove copyWithCompanion(CashMovesCompanion data) {
+    return CashMove(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      holderId: data.holderId.present ? data.holderId.value : this.holderId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      movedOn: data.movedOn.present ? data.movedOn.value : this.movedOn,
+      note: data.note.present ? data.note.value : this.note,
+      recordedBy: data.recordedBy.present
+          ? data.recordedBy.value
+          : this.recordedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      voided: data.voided.present ? data.voided.value : this.voided,
+      voidReason: data.voidReason.present
+          ? data.voidReason.value
+          : this.voidReason,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashMove(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('holderId: $holderId, ')
+          ..write('kind: $kind, ')
+          ..write('amount: $amount, ')
+          ..write('movedOn: $movedOn, ')
+          ..write('note: $note, ')
+          ..write('recordedBy: $recordedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('voided: $voided, ')
+          ..write('voidReason: $voidReason')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    holderId,
+    kind,
+    amount,
+    movedOn,
+    note,
+    recordedBy,
+    createdAt,
+    voided,
+    voidReason,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CashMove &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.holderId == this.holderId &&
+          other.kind == this.kind &&
+          other.amount == this.amount &&
+          other.movedOn == this.movedOn &&
+          other.note == this.note &&
+          other.recordedBy == this.recordedBy &&
+          other.createdAt == this.createdAt &&
+          other.voided == this.voided &&
+          other.voidReason == this.voidReason);
+}
+
+class CashMovesCompanion extends UpdateCompanion<CashMove> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> holderId;
+  final Value<String> kind;
+  final Value<double> amount;
+  final Value<String> movedOn;
+  final Value<String?> note;
+  final Value<String> recordedBy;
+  final Value<DateTime> createdAt;
+  final Value<bool> voided;
+  final Value<String?> voidReason;
+  final Value<int> rowid;
+  const CashMovesCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.holderId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.movedOn = const Value.absent(),
+    this.note = const Value.absent(),
+    this.recordedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.voided = const Value.absent(),
+    this.voidReason = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CashMovesCompanion.insert({
+    required String id,
+    required String projectId,
+    required String holderId,
+    required String kind,
+    required double amount,
+    required String movedOn,
+    this.note = const Value.absent(),
+    required String recordedBy,
+    this.createdAt = const Value.absent(),
+    this.voided = const Value.absent(),
+    this.voidReason = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       holderId = Value(holderId),
+       kind = Value(kind),
+       amount = Value(amount),
+       movedOn = Value(movedOn),
+       recordedBy = Value(recordedBy);
+  static Insertable<CashMove> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? holderId,
+    Expression<String>? kind,
+    Expression<double>? amount,
+    Expression<String>? movedOn,
+    Expression<String>? note,
+    Expression<String>? recordedBy,
+    Expression<DateTime>? createdAt,
+    Expression<bool>? voided,
+    Expression<String>? voidReason,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (holderId != null) 'holder_id': holderId,
+      if (kind != null) 'kind': kind,
+      if (amount != null) 'amount': amount,
+      if (movedOn != null) 'moved_on': movedOn,
+      if (note != null) 'note': note,
+      if (recordedBy != null) 'recorded_by': recordedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (voided != null) 'voided': voided,
+      if (voidReason != null) 'void_reason': voidReason,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CashMovesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? holderId,
+    Value<String>? kind,
+    Value<double>? amount,
+    Value<String>? movedOn,
+    Value<String?>? note,
+    Value<String>? recordedBy,
+    Value<DateTime>? createdAt,
+    Value<bool>? voided,
+    Value<String?>? voidReason,
+    Value<int>? rowid,
+  }) {
+    return CashMovesCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      holderId: holderId ?? this.holderId,
+      kind: kind ?? this.kind,
+      amount: amount ?? this.amount,
+      movedOn: movedOn ?? this.movedOn,
+      note: note ?? this.note,
+      recordedBy: recordedBy ?? this.recordedBy,
+      createdAt: createdAt ?? this.createdAt,
+      voided: voided ?? this.voided,
+      voidReason: voidReason ?? this.voidReason,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (holderId.present) {
+      map['holder_id'] = Variable<String>(holderId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (movedOn.present) {
+      map['moved_on'] = Variable<String>(movedOn.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (recordedBy.present) {
+      map['recorded_by'] = Variable<String>(recordedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (voided.present) {
+      map['voided'] = Variable<bool>(voided.value);
+    }
+    if (voidReason.present) {
+      map['void_reason'] = Variable<String>(voidReason.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CashMovesCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('holderId: $holderId, ')
+          ..write('kind: $kind, ')
+          ..write('amount: $amount, ')
+          ..write('movedOn: $movedOn, ')
+          ..write('note: $note, ')
+          ..write('recordedBy: $recordedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('voided: $voided, ')
+          ..write('voidReason: $voidReason, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -45769,6 +46450,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $StaffAttendanceTable staffAttendance = $StaffAttendanceTable(
     this,
   );
+  late final $CashMovesTable cashMoves = $CashMovesTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -45845,6 +46527,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     memberSyncStatus,
     attendancePhotos,
     staffAttendance,
+    cashMoves,
     syncOutbox,
   ];
 }
@@ -68033,6 +68716,327 @@ typedef $$StaffAttendanceTableProcessedTableManager =
       StaffAttendanceData,
       PrefetchHooks Function()
     >;
+typedef $$CashMovesTableCreateCompanionBuilder =
+    CashMovesCompanion Function({
+      required String id,
+      required String projectId,
+      required String holderId,
+      required String kind,
+      required double amount,
+      required String movedOn,
+      Value<String?> note,
+      required String recordedBy,
+      Value<DateTime> createdAt,
+      Value<bool> voided,
+      Value<String?> voidReason,
+      Value<int> rowid,
+    });
+typedef $$CashMovesTableUpdateCompanionBuilder =
+    CashMovesCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> holderId,
+      Value<String> kind,
+      Value<double> amount,
+      Value<String> movedOn,
+      Value<String?> note,
+      Value<String> recordedBy,
+      Value<DateTime> createdAt,
+      Value<bool> voided,
+      Value<String?> voidReason,
+      Value<int> rowid,
+    });
+
+class $$CashMovesTableFilterComposer
+    extends Composer<_$AppDatabase, $CashMovesTable> {
+  $$CashMovesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get holderId => $composableBuilder(
+    column: $table.holderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get movedOn => $composableBuilder(
+    column: $table.movedOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get voided => $composableBuilder(
+    column: $table.voided,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CashMovesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CashMovesTable> {
+  $$CashMovesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get holderId => $composableBuilder(
+    column: $table.holderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get movedOn => $composableBuilder(
+    column: $table.movedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get voided => $composableBuilder(
+    column: $table.voided,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CashMovesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CashMovesTable> {
+  $$CashMovesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get holderId =>
+      $composableBuilder(column: $table.holderId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get movedOn =>
+      $composableBuilder(column: $table.movedOn, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get voided =>
+      $composableBuilder(column: $table.voided, builder: (column) => column);
+
+  GeneratedColumn<String> get voidReason => $composableBuilder(
+    column: $table.voidReason,
+    builder: (column) => column,
+  );
+}
+
+class $$CashMovesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CashMovesTable,
+          CashMove,
+          $$CashMovesTableFilterComposer,
+          $$CashMovesTableOrderingComposer,
+          $$CashMovesTableAnnotationComposer,
+          $$CashMovesTableCreateCompanionBuilder,
+          $$CashMovesTableUpdateCompanionBuilder,
+          (CashMove, BaseReferences<_$AppDatabase, $CashMovesTable, CashMove>),
+          CashMove,
+          PrefetchHooks Function()
+        > {
+  $$CashMovesTableTableManager(_$AppDatabase db, $CashMovesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CashMovesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CashMovesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CashMovesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> holderId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<double> amount = const Value.absent(),
+                Value<String> movedOn = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> recordedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> voided = const Value.absent(),
+                Value<String?> voidReason = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CashMovesCompanion(
+                id: id,
+                projectId: projectId,
+                holderId: holderId,
+                kind: kind,
+                amount: amount,
+                movedOn: movedOn,
+                note: note,
+                recordedBy: recordedBy,
+                createdAt: createdAt,
+                voided: voided,
+                voidReason: voidReason,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String holderId,
+                required String kind,
+                required double amount,
+                required String movedOn,
+                Value<String?> note = const Value.absent(),
+                required String recordedBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> voided = const Value.absent(),
+                Value<String?> voidReason = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CashMovesCompanion.insert(
+                id: id,
+                projectId: projectId,
+                holderId: holderId,
+                kind: kind,
+                amount: amount,
+                movedOn: movedOn,
+                note: note,
+                recordedBy: recordedBy,
+                createdAt: createdAt,
+                voided: voided,
+                voidReason: voidReason,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CashMovesTable, CashMove>(table),
+                  BaseReferences<_$AppDatabase, $CashMovesTable, CashMove>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CashMovesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CashMovesTable,
+      CashMove,
+      $$CashMovesTableFilterComposer,
+      $$CashMovesTableOrderingComposer,
+      $$CashMovesTableAnnotationComposer,
+      $$CashMovesTableCreateCompanionBuilder,
+      $$CashMovesTableUpdateCompanionBuilder,
+      (CashMove, BaseReferences<_$AppDatabase, $CashMovesTable, CashMove>),
+      CashMove,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -68444,6 +69448,8 @@ class $AppDatabaseManager {
       $$AttendancePhotosTableTableManager(_db, _db.attendancePhotos);
   $$StaffAttendanceTableTableManager get staffAttendance =>
       $$StaffAttendanceTableTableManager(_db, _db.staffAttendance);
+  $$CashMovesTableTableManager get cashMoves =>
+      $$CashMovesTableTableManager(_db, _db.cashMoves);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }
@@ -69138,4 +70144,16 @@ class DayCloseDaoManager {
         _db.attachedDatabase,
         _db.memberSyncStatus,
       );
+}
+
+mixin _$CashBookDaoMixin on DatabaseAccessor<AppDatabase> {
+  $CashMovesTable get cashMoves => attachedDatabase.cashMoves;
+  CashBookDaoManager get managers => CashBookDaoManager(this);
+}
+
+class CashBookDaoManager {
+  final _$CashBookDaoMixin _db;
+  CashBookDaoManager(this._db);
+  $$CashMovesTableTableManager get cashMoves =>
+      $$CashMovesTableTableManager(_db.attachedDatabase, _db.cashMoves);
 }
