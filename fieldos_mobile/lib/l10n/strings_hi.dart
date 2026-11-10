@@ -2154,5 +2154,130 @@ const Map<String, String> stringsHi = {
       '{n} साइटों का पिछला हफ़्ता बंद नहीं',
   '{n} to approve':
       '{n} मंज़ूर करने हैं',
+  // Measurement book, bill payments, supplier invoices
+  'A minus quantity corrects an earlier one.':
+      'माइनस मात्रा पहले वाली को ठीक करती है।',
+  'Add invoice':
+      'इनवॉइस जोड़ें',
+  'Add the supplier first, under Procure > Suppliers.':
+      'पहले Procure > Suppliers में सप्लायर जोड़ें।',
+  'All {n} invoices match their orders and deliveries.':
+      'सभी {n} इनवॉइस अपने ऑर्डर और डिलीवरी से मेल खाते हैं।',
+  'Approved to date':
+      'अब तक मंज़ूर',
+  'Approved {qty}':
+      '{qty} मंज़ूर',
+  'Approved.':
+      'मंज़ूर किया।',
+  'BOQ item':
+      'BOQ आइटम',
+  'Cancel invoice':
+      'इनवॉइस रद्द करें',
+  'Cancel this invoice?':
+      'यह इनवॉइस रद्द करें?',
+  'Cancelled: {why}':
+      'रद्द: {why}',
+  'Decide':
+      'फ़ैसला करें',
+  'Enter each invoice as it comes. It is checked against the purchase order and what was received.':
+      'हर इनवॉइस आते ही दर्ज करें। उसे PO और आए माल से मिलाया जाता है।',
+  'Everything approved has been billed already.':
+      'जो मंज़ूर हुआ वह सब बिल हो चुका है।',
+  'GST in it (₹, optional)':
+      'उसमें GST (₹, वैकल्पिक)',
+  'Give the invoice number and its total.':
+      'इनवॉइस नंबर और कुल रकम दें।',
+  'Give the item, its unit and a quantity.':
+      'आइटम, उसकी यूनिट और मात्रा दें।',
+  'Invoice number':
+      'इनवॉइस नंबर',
+  'Invoice total with GST (₹)':
+      'GST सहित इनवॉइस कुल (₹)',
+  'Make the next RA bill':
+      'अगला RA बिल बनाएँ',
+  'Matched':
+      'मेल खाता',
+  'Measure work':
+      'काम नापें',
+  'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
+      'BOQ के सामने हुआ काम नापें। मंज़ूर मात्राएँ अगले RA बिल में जाती हैं।',
+  'Measured {qty} {unit}':
+      'नापा {qty} {unit}',
+  'Measurement book':
+      'मेज़रमेंट बुक',
+  'Measurement saved. It waits for approval.':
+      'नाप सेव हुआ। मंज़ूरी का इंतज़ार है।',
+  'More quantity than was received':
+      'आए माल से ज़्यादा मात्रा',
+  'More than the purchase order':
+      'PO से ज़्यादा',
+  'More than what was received':
+      'आए माल से ज़्यादा',
+  'No measurements yet':
+      'अभी कोई नाप नहीं',
+  'No purchase order':
+      'कोई PO नहीं',
+  'No supplier invoices yet':
+      'अभी कोई सप्लायर इनवॉइस नहीं',
+  'Not in the BOQ':
+      'BOQ में नहीं',
+  'Nothing received against it yet':
+      'इसके सामने अभी कुछ नहीं आया',
+  'PO {amount}':
+      'पीओ {amount}',
+  'Part paid':
+      'कुछ भुगतान',
+  'Payment against this bill':
+      'इस बिल के सामने भुगतान',
+  'Put against bills':
+      'बिलों के सामने रखें',
+  'Put it against the oldest bills still due.':
+      'इसे सबसे पुराने बाकी बिलों के सामने रखें।',
+  'Quantity approved':
+      'मंज़ूर मात्रा',
+  'Quantity invoiced (optional)':
+      'इनवॉइस की मात्रा (वैकल्पिक)',
+  'Quantity measured':
+      'नापी गई मात्रा',
+  'Record the payment in the money book first. Every payment so far is already against a bill.':
+      'पहले मनी बुक में भुगतान दर्ज करें। अब तक का हर भुगतान किसी बिल के सामने है।',
+  'Rejected.':
+      'नामंज़ूर किया।',
+  'Release retention':
+      'रिटेंशन छोड़ें',
+  'Retention held by the client: {amount}':
+      'क्लाइंट के पास रुकी रिटेंशन: {amount}',
+  'Same invoice number entered before':
+      'यही इनवॉइस नंबर पहले दर्ज हुआ',
+  'Set a rate for {items} first.':
+      'पहले {items} का रेट तय करें।',
+  'Supplier invoice':
+      'सप्लायर इनवॉइस',
+  'Supplier invoices':
+      'सप्लायर इनवॉइस',
+  'Waiting':
+      'रुका है',
+  'Where (e.g. Block A, 2nd floor)':
+      'कहाँ (जैसे Block A, दूसरी मंज़िल)',
+  'Why':
+      'क्यों',
+  'received {amount}':
+      'आया {amount}',
+  'retention held {amount}':
+      'रुकी रिटेंशन {amount}',
+  '{amount} more than received':
+      'आए माल से {amount} ज़्यादा',
+  '{amount} received is not against a bill yet':
+      'आए {amount} अभी किसी बिल के सामने नहीं',
+  '{amount} still due':
+      '{amount} अभी बाकी',
+  '{m} of {n} invoices need checking before payment.':
+      '{n} में से {m} इनवॉइस भुगतान से पहले जाँचने हैं।',
+  '{n} amounts put against bills.':
+      '{n} रकम बिलों के सामने रखी गईं।',
+  '{n} waiting for approval':
+      '{n} मंज़ूरी के इंतज़ार में',
+  '{paid} received, {due} due':
+      '{paid} आया, {due} बाकी',
   ...commercialHi,
 };

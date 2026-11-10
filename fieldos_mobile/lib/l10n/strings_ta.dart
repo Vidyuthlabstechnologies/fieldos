@@ -3045,5 +3045,130 @@ const Map<String, String> stringsTa = {
       '{n} தளங்களில் கடந்த வாரம் மூடப்படவில்லை',
   '{n} to approve':
       '{n} ஒப்புதல் தேவை',
+  // Measurement book, bill payments, supplier invoices
+  'A minus quantity corrects an earlier one.':
+      'கழித்தல் அளவு முந்தையதைத் திருத்தும்.',
+  'Add invoice':
+      'இன்வாய்ஸ் சேர்',
+  'Add the supplier first, under Procure > Suppliers.':
+      'முதலில் Procure > Suppliers-ல் சப்ளையரைச் சேர்க்கவும்.',
+  'All {n} invoices match their orders and deliveries.':
+      'அனைத்து {n} இன்வாய்ஸ்களும் ஆர்டர், வரவுகளுடன் பொருந்துகின்றன.',
+  'Approved to date':
+      'இதுவரை ஒப்புதல்',
+  'Approved {qty}':
+      '{qty} ஒப்புதல்',
+  'Approved.':
+      'ஒப்புதல் செய்யப்பட்டது.',
+  'BOQ item':
+      'BOQ உருப்படி',
+  'Cancel invoice':
+      'இன்வாய்ஸை ரத்து செய்',
+  'Cancel this invoice?':
+      'இந்த இன்வாய்ஸை ரத்து செய்யவா?',
+  'Cancelled: {why}':
+      'ரத்து: {why}',
+  'Decide':
+      'முடிவு செய்',
+  'Enter each invoice as it comes. It is checked against the purchase order and what was received.':
+      'ஒவ்வொரு இன்வாய்ஸையும் வந்தவுடன் பதிவு செய்யுங்கள். அது PO மற்றும் வந்த பொருளுடன் சரிபார்க்கப்படும்.',
+  'Everything approved has been billed already.':
+      'ஒப்புதலானவை அனைத்தும் ஏற்கனவே பில் செய்யப்பட்டன.',
+  'GST in it (₹, optional)':
+      'அதில் GST (₹, விருப்பம்)',
+  'Give the invoice number and its total.':
+      'இன்வாய்ஸ் எண்ணும் மொத்தமும் தாருங்கள்.',
+  'Give the item, its unit and a quantity.':
+      'உருப்படி, அலகு, அளவு தாருங்கள்.',
+  'Invoice number':
+      'இன்வாய்ஸ் எண்',
+  'Invoice total with GST (₹)':
+      'GST உடன் இன்வாய்ஸ் மொத்தம் (₹)',
+  'Make the next RA bill':
+      'அடுத்த RA பில் தயாரி',
+  'Matched':
+      'பொருந்தியது',
+  'Measure work':
+      'வேலையை அளவிடு',
+  'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
+      'BOQ-க்கு எதிராக முடிந்த வேலையை அளவிடுங்கள். ஒப்புதலான அளவுகள் அடுத்த RA பில்லில் சேரும்.',
+  'Measured {qty} {unit}':
+      'அளந்தது {qty} {unit}',
+  'Measurement book':
+      'அளவீட்டுப் புத்தகம்',
+  'Measurement saved. It waits for approval.':
+      'அளவீடு சேமிக்கப்பட்டது. ஒப்புதலுக்குக் காத்திருக்கிறது.',
+  'More quantity than was received':
+      'வந்ததை விட அதிக அளவு',
+  'More than the purchase order':
+      'PO-ஐ விட அதிகம்',
+  'More than what was received':
+      'வந்ததை விட அதிகம்',
+  'No measurements yet':
+      'இன்னும் அளவீடுகள் இல்லை',
+  'No purchase order':
+      'PO இல்லை',
+  'No supplier invoices yet':
+      'இன்னும் சப்ளையர் இன்வாய்ஸ் இல்லை',
+  'Not in the BOQ':
+      'BOQ-ல் இல்லை',
+  'Nothing received against it yet':
+      'இதற்கு எதிராக இன்னும் எதுவும் வரவில்லை',
+  'PO {amount}':
+      'பிஓ {amount}',
+  'Part paid':
+      'பகுதி செலுத்தப்பட்டது',
+  'Payment against this bill':
+      'இந்த பில்லுக்கு எதிரான செலுத்துகை',
+  'Put against bills':
+      'பில்களுக்கு எதிராக வை',
+  'Put it against the oldest bills still due.':
+      'இதை மிகப் பழைய நிலுவை பில்களுக்கு எதிராக வையுங்கள்.',
+  'Quantity approved':
+      'ஒப்புதல் அளவு',
+  'Quantity invoiced (optional)':
+      'இன்வாய்ஸ் அளவு (விருப்பம்)',
+  'Quantity measured':
+      'அளந்த அளவு',
+  'Record the payment in the money book first. Every payment so far is already against a bill.':
+      'முதலில் பணப் புத்தகத்தில் செலுத்துகையைப் பதிவு செய்யுங்கள். இதுவரை ஒவ்வொன்றும் ஒரு பில்லுக்கு எதிராக உள்ளது.',
+  'Rejected.':
+      'நிராகரிக்கப்பட்டது.',
+  'Release retention':
+      'தக்கவைப்பை விடுவி',
+  'Retention held by the client: {amount}':
+      'வாடிக்கையாளரிடம் உள்ள தக்கவைப்பு: {amount}',
+  'Same invoice number entered before':
+      'இதே இன்வாய்ஸ் எண் முன்பே பதிவானது',
+  'Set a rate for {items} first.':
+      'முதலில் {items}-க்கு விலை அமைக்கவும்.',
+  'Supplier invoice':
+      'சப்ளையர் இன்வாய்ஸ்',
+  'Supplier invoices':
+      'சப்ளையர் இன்வாய்ஸ்கள்',
+  'Waiting':
+      'காத்திருக்கிறது',
+  'Where (e.g. Block A, 2nd floor)':
+      'எங்கே (எ.கா. Block A, 2வது தளம்)',
+  'Why':
+      'ஏன்',
+  'received {amount}':
+      'வந்தது {amount}',
+  'retention held {amount}':
+      'தக்கவைப்பு {amount}',
+  '{amount} more than received':
+      'வந்ததை விட {amount} அதிகம்',
+  '{amount} received is not against a bill yet':
+      'வந்த {amount} இன்னும் எந்த பில்லுக்கும் எதிராக இல்லை',
+  '{amount} still due':
+      '{amount} இன்னும் நிலுவை',
+  '{m} of {n} invoices need checking before payment.':
+      '{n}-ல் {m} இன்வாய்ஸ்களைச் செலுத்தும் முன் சரிபார்க்க வேண்டும்.',
+  '{n} amounts put against bills.':
+      '{n} தொகைகள் பில்களுக்கு எதிராக வைக்கப்பட்டன.',
+  '{n} waiting for approval':
+      '{n} ஒப்புதலுக்குக் காத்திருக்கின்றன',
+  '{paid} received, {due} due':
+      '{paid} வந்தது, {due} நிலுவை',
   ...commercialTa,
 };

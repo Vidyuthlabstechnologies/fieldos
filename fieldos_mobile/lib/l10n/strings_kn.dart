@@ -3045,5 +3045,130 @@ const Map<String, String> stringsKn = {
       '{n} ಸೈಟ್‌ಗಳಲ್ಲಿ ಕಳೆದ ವಾರ ಮುಚ್ಚಿಲ್ಲ',
   '{n} to approve':
       '{n} ಅನುಮೋದಿಸಬೇಕು',
+  // Measurement book, bill payments, supplier invoices
+  'A minus quantity corrects an earlier one.':
+      'ಮೈನಸ್ ಪ್ರಮಾಣ ಹಿಂದಿನದನ್ನು ಸರಿಪಡಿಸುತ್ತದೆ.',
+  'Add invoice':
+      'ಇನ್‌ವಾಯ್ಸ್ ಸೇರಿಸಿ',
+  'Add the supplier first, under Procure > Suppliers.':
+      'ಮೊದಲು Procure > Suppliers ನಲ್ಲಿ ಸರಬರಾಜುದಾರರನ್ನು ಸೇರಿಸಿ.',
+  'All {n} invoices match their orders and deliveries.':
+      'ಎಲ್ಲಾ {n} ಇನ್‌ವಾಯ್ಸ್‌ಗಳು ಆರ್ಡರ್ ಮತ್ತು ವಿತರಣೆಗೆ ಹೊಂದುತ್ತವೆ.',
+  'Approved to date':
+      'ಇಲ್ಲಿಯವರೆಗೆ ಅನುಮೋದಿತ',
+  'Approved {qty}':
+      '{qty} ಅನುಮೋದಿತ',
+  'Approved.':
+      'ಅನುಮೋದಿಸಲಾಗಿದೆ.',
+  'BOQ item':
+      'BOQ ಐಟಂ',
+  'Cancel invoice':
+      'ಇನ್‌ವಾಯ್ಸ್ ರದ್ದುಮಾಡಿ',
+  'Cancel this invoice?':
+      'ಈ ಇನ್‌ವಾಯ್ಸ್ ರದ್ದುಮಾಡಬೇಕೆ?',
+  'Cancelled: {why}':
+      'ರದ್ದು: {why}',
+  'Decide':
+      'ನಿರ್ಧರಿಸಿ',
+  'Enter each invoice as it comes. It is checked against the purchase order and what was received.':
+      'ಪ್ರತಿ ಇನ್‌ವಾಯ್ಸ್ ಬಂದಾಗಲೇ ನಮೂದಿಸಿ. ಅದನ್ನು PO ಮತ್ತು ಬಂದ ಸಾಮಗ್ರಿಯೊಂದಿಗೆ ಹೋಲಿಸಲಾಗುತ್ತದೆ.',
+  'Everything approved has been billed already.':
+      'ಅನುಮೋದಿತವಾದ ಎಲ್ಲವೂ ಈಗಾಗಲೇ ಬಿಲ್ ಆಗಿದೆ.',
+  'GST in it (₹, optional)':
+      'ಅದರಲ್ಲಿ GST (₹, ಐಚ್ಛಿಕ)',
+  'Give the invoice number and its total.':
+      'ಇನ್‌ವಾಯ್ಸ್ ಸಂಖ್ಯೆ ಮತ್ತು ಒಟ್ಟು ನೀಡಿ.',
+  'Give the item, its unit and a quantity.':
+      'ಐಟಂ, ಅದರ ಘಟಕ ಮತ್ತು ಪ್ರಮಾಣ ನೀಡಿ.',
+  'Invoice number':
+      'ಇನ್‌ವಾಯ್ಸ್ ಸಂಖ್ಯೆ',
+  'Invoice total with GST (₹)':
+      'GST ಸಹಿತ ಇನ್‌ವಾಯ್ಸ್ ಒಟ್ಟು (₹)',
+  'Make the next RA bill':
+      'ಮುಂದಿನ RA ಬಿಲ್ ಮಾಡಿ',
+  'Matched':
+      'ಹೊಂದಿದೆ',
+  'Measure work':
+      'ಕೆಲಸ ಅಳೆಯಿರಿ',
+  'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
+      'BOQ ವಿರುದ್ಧ ಮಾಡಿದ ಕೆಲಸ ಅಳೆಯಿರಿ. ಅನುಮೋದಿತ ಪ್ರಮಾಣಗಳು ಮುಂದಿನ RA ಬಿಲ್‌ಗೆ ಹೋಗುತ್ತವೆ.',
+  'Measured {qty} {unit}':
+      'ಅಳೆದದ್ದು {qty} {unit}',
+  'Measurement book':
+      'ಅಳತೆ ಪುಸ್ತಕ',
+  'Measurement saved. It waits for approval.':
+      'ಅಳತೆ ಉಳಿಸಲಾಗಿದೆ. ಅನುಮೋದನೆಗೆ ಕಾಯುತ್ತಿದೆ.',
+  'More quantity than was received':
+      'ಬಂದದ್ದಕ್ಕಿಂತ ಹೆಚ್ಚು ಪ್ರಮಾಣ',
+  'More than the purchase order':
+      'PO ಗಿಂತ ಹೆಚ್ಚು',
+  'More than what was received':
+      'ಬಂದದ್ದಕ್ಕಿಂತ ಹೆಚ್ಚು',
+  'No measurements yet':
+      'ಇನ್ನೂ ಅಳತೆಗಳಿಲ್ಲ',
+  'No purchase order':
+      'PO ಇಲ್ಲ',
+  'No supplier invoices yet':
+      'ಇನ್ನೂ ಸರಬರಾಜುದಾರರ ಇನ್‌ವಾಯ್ಸ್ ಇಲ್ಲ',
+  'Not in the BOQ':
+      'BOQ ನಲ್ಲಿ ಇಲ್ಲ',
+  'Nothing received against it yet':
+      'ಇದರ ವಿರುದ್ಧ ಇನ್ನೂ ಏನೂ ಬಂದಿಲ್ಲ',
+  'PO {amount}':
+      'ಪಿಒ {amount}',
+  'Part paid':
+      'ಭಾಗಶಃ ಪಾವತಿ',
+  'Payment against this bill':
+      'ಈ ಬಿಲ್ ವಿರುದ್ಧ ಪಾವತಿ',
+  'Put against bills':
+      'ಬಿಲ್‌ಗಳ ವಿರುದ್ಧ ಹಾಕಿ',
+  'Put it against the oldest bills still due.':
+      'ಇದನ್ನು ಹಳೆಯ ಬಾಕಿ ಬಿಲ್‌ಗಳ ವಿರುದ್ಧ ಹಾಕಿ.',
+  'Quantity approved':
+      'ಅನುಮೋದಿತ ಪ್ರಮಾಣ',
+  'Quantity invoiced (optional)':
+      'ಇನ್‌ವಾಯ್ಸ್ ಪ್ರಮಾಣ (ಐಚ್ಛಿಕ)',
+  'Quantity measured':
+      'ಅಳೆದ ಪ್ರಮಾಣ',
+  'Record the payment in the money book first. Every payment so far is already against a bill.':
+      'ಮೊದಲು ಹಣದ ಪುಸ್ತಕದಲ್ಲಿ ಪಾವತಿ ನಮೂದಿಸಿ. ಇಲ್ಲಿಯವರೆಗಿನ ಪ್ರತಿ ಪಾವತಿ ಯಾವುದೋ ಬಿಲ್ ವಿರುದ್ಧ ಇದೆ.',
+  'Rejected.':
+      'ತಿರಸ್ಕರಿಸಲಾಗಿದೆ.',
+  'Release retention':
+      'ರಿಟೆನ್ಷನ್ ಬಿಡುಗಡೆ',
+  'Retention held by the client: {amount}':
+      'ಕ್ಲೈಂಟ್ ಬಳಿ ಇರುವ ರಿಟೆನ್ಷನ್: {amount}',
+  'Same invoice number entered before':
+      'ಇದೇ ಇನ್‌ವಾಯ್ಸ್ ಸಂಖ್ಯೆ ಹಿಂದೆ ನಮೂದಾಗಿದೆ',
+  'Set a rate for {items} first.':
+      'ಮೊದಲು {items} ಗೆ ದರ ಹಾಕಿ.',
+  'Supplier invoice':
+      'ಸರಬರಾಜುದಾರರ ಇನ್‌ವಾಯ್ಸ್',
+  'Supplier invoices':
+      'ಸರಬರಾಜುದಾರರ ಇನ್‌ವಾಯ್ಸ್‌ಗಳು',
+  'Waiting':
+      'ಕಾಯುತ್ತಿದೆ',
+  'Where (e.g. Block A, 2nd floor)':
+      'ಎಲ್ಲಿ (ಉದಾ. Block A, 2ನೇ ಮಹಡಿ)',
+  'Why':
+      'ಏಕೆ',
+  'received {amount}':
+      'ಬಂದದ್ದು {amount}',
+  'retention held {amount}':
+      'ರಿಟೆನ್ಷನ್ {amount}',
+  '{amount} more than received':
+      'ಬಂದದ್ದಕ್ಕಿಂತ {amount} ಹೆಚ್ಚು',
+  '{amount} received is not against a bill yet':
+      'ಬಂದ {amount} ಇನ್ನೂ ಯಾವ ಬಿಲ್‌ಗೂ ಹಾಕಿಲ್ಲ',
+  '{amount} still due':
+      '{amount} ಇನ್ನೂ ಬಾಕಿ',
+  '{m} of {n} invoices need checking before payment.':
+      '{n} ರಲ್ಲಿ {m} ಇನ್‌ವಾಯ್ಸ್‌ಗಳನ್ನು ಪಾವತಿಗೆ ಮುನ್ನ ಪರಿಶೀಲಿಸಬೇಕು.',
+  '{n} amounts put against bills.':
+      '{n} ಮೊತ್ತಗಳನ್ನು ಬಿಲ್‌ಗಳ ವಿರುದ್ಧ ಹಾಕಲಾಗಿದೆ.',
+  '{n} waiting for approval':
+      '{n} ಅನುಮೋದನೆಗೆ ಕಾಯುತ್ತಿವೆ',
+  '{paid} received, {due} due':
+      '{paid} ಬಂದಿದೆ, {due} ಬಾಕಿ',
   ...commercialKn,
 };

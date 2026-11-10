@@ -941,3 +941,87 @@ class ExceptionActions extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+/// The measurement book for the client (v18, synced as
+/// site_work_measurements): work measured against a BOQ item. Never
+/// edited; a negative quantity corrects an earlier one.
+class WorkMeasurements extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get costHeadId => text().withLength(max: 36).nullable()();
+  TextColumn get description => text().withLength(min: 1, max: 200)();
+  TextColumn get unit => text().withLength(min: 1, max: 20)();
+  RealColumn get rate => real().nullable()();
+  RealColumn get qty => real()();
+  DateTimeColumn get measuredOn => dateTime()();
+  TextColumn get location => text().withLength(max: 200).nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get measuredBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// The owner's or PM's decision on a measurement, one each (v18).
+class WorkMeasurementDecisions extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get measurementId => text().withLength(min: 1, max: 36)();
+
+  /// approved | rejected
+  TextColumn get decision => text().withLength(min: 1, max: 20)();
+  RealColumn get approvedQty => real().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get decidedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+        {measurementId},
+      ];
+}
+
+/// Part of a payment received put against a bill, or against its
+/// retention (v18, synced as site_bill_allocations).
+class BillAllocations extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get paymentId => text().withLength(min: 1, max: 36)();
+  TextColumn get billId => text().withLength(min: 1, max: 36)();
+
+  /// bill | retention
+  TextColumn get kind => text().withLength(min: 1, max: 20).withDefault(const Constant('bill'))();
+  RealColumn get amount => real()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A supplier's invoice, matched against its PO and the GRNs (v18,
+/// synced as site_supplier_invoices). Only ever cancelled, never edited.
+class SupplierInvoices extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get supplierId => text().withLength(min: 1, max: 36)();
+  TextColumn get poId => text().withLength(max: 36).nullable()();
+  TextColumn get invoiceNumber => text().withLength(min: 1, max: 40)();
+  DateTimeColumn get invoiceDate => dateTime()();
+  RealColumn get amount => real()();
+  RealColumn get gstAmount => real().withDefault(const Constant(0))();
+  RealColumn get qty => real().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  BoolColumn get voided => boolean().withDefault(const Constant(false))();
+  TextColumn get voidReason => text().withLength(max: 200).nullable()();
+  TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
