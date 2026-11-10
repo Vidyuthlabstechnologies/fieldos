@@ -1004,6 +1004,42 @@ class PurchaseDao extends DatabaseAccessor<AppDatabase> with _$PurchaseDaoMixin 
         );
       });
 
+  /// Raises a PO for a request and marks the request ordered, as one step
+  /// (audit P1, 2026-11-10). These used to be two writes from the screen,
+  /// so a crash or a killed app between them left an order whose request
+  /// still said "Waiting for a PO" and could be ordered twice. A second tap
+  /// (or a retry after an interruption) returns the order already made.
+  Future<PurchaseOrder> orderFromRequest(String requestId, PurchaseOrdersCompanion order) => transaction(() async {
+        final existing = await (select(purchaseOrders)
+              ..where((o) => o.requestId.equals(requestId) & o.status.isNotValue('cancelled')))
+            .get();
+        if (existing.isNotEmpty) {
+          final request = await (select(purchaseRequests)..where((r) => r.id.equals(requestId))).getSingleOrNull();
+          if (request != null && request.status != 'ordered') await setRequestStatus(requestId, 'ordered');
+          return existing.first;
+        }
+        final row = await createOrder(order.copyWith(requestId: Value(requestId)));
+        await setRequestStatus(requestId, 'ordered');
+        return row;
+      });
+
+  /// Records goods received against an order and, when everything has come,
+  /// closes it, as one step (audit P1): a receipt without its closure left
+  /// a delivered order showing as still due. Idempotent on the receipt id,
+  /// so a repeated submit doesn't count the delivery twice.
+  Future<MaterialReceipt> receiveAgainstOrder(String orderId, MaterialReceiptsCompanion receipt,
+          {required bool closeOrder}) =>
+      transaction(() async {
+        final id = receipt.id.present ? receipt.id.value : _uuid.v4();
+        final already = await (select(db.materialReceipts)..where((m) => m.id.equals(id))).getSingleOrNull();
+        final row = already ?? await db.materialDao.createReceipt(receipt.copyWith(id: Value(id), poId: Value(orderId)));
+        if (closeOrder) {
+          final order = await (select(purchaseOrders)..where((o) => o.id.equals(orderId))).getSingleOrNull();
+          if (order != null && order.status != 'delivered') await setOrderStatus(orderId, 'delivered');
+        }
+        return row;
+      });
+
   /// See ProjectDao.upsertFromRemote -- same server-wins merge pattern.
   Future<void> upsertFromRemoteRequest(PurchaseRequestsCompanion companion) =>
       into(purchaseRequests).insertOnConflictUpdate(companion);
