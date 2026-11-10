@@ -21,6 +21,7 @@ dependencies:
   # Local, offline-first SQLite (works on Android, iOS, and desktop for tests)
   drift: ^2.34.3
   drift_flutter: ^0.3.1
+  sqlite3: ^3.5.2
   sqlite3_flutter_libs: ^0.6.0+eol
   path_provider: ^2.1.5
 
@@ -90,6 +91,7 @@ dependencies:
   pdf: ^3.13.1
   # .xlsx export (an xlsx is a zip of XML; already pulled in by image/pdf).
   archive: ^4.0.0
+  xml: ^7.0.1
   # Date/time/GPS stamp on site photos (pure Dart; already pulled in by pdf).
   image: ^4.12.0
   share_plus: ^13.3.1

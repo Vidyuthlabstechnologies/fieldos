@@ -2765,4 +2765,505 @@ const Map<String, String> stringsKn = {
       'ಅಂತಿಮ',
   'V-{n} (provisional)':
       'V-{n} (ತಾತ್ಕಾಲಿಕ)',
+  // Weekly site close
+  'A removed entry':
+      'ತೆಗೆದುಹಾಕಿದ ನಮೂದು',
+  'Advance of {amount} not worked off yet':
+      '{amount} ಮುಂಗಡ ಇನ್ನೂ ಕೆಲಸದಲ್ಲಿ ತೀರಿಲ್ಲ',
+  'Advances not worked off':
+      'ತೀರದ ಮುಂಗಡಗಳು',
+  'Approve each site\'s wages, expenses and deliveries for the week.':
+      'ಪ್ರತಿ ಸೈಟ್‌ನ ವಾರದ ಕೂಲಿ, ಖರ್ಚು ಮತ್ತು ಸಾಮಗ್ರಿ ವಿತರಣೆಗಳನ್ನು ಅನುಮೋದಿಸಿ.',
+  'Approve everything, and get back what was sent back, to close the week.':
+      'ವಾರ ಮುಚ್ಚಲು ಎಲ್ಲವನ್ನೂ ಅನುಮೋದಿಸಿ; ಹಿಂದಿರುಗಿಸಿದವು ಸರಿಯಾಗಿ ಬರಬೇಕು.',
+  'Approve the {n} with no exceptions':
+      'ಸಮಸ್ಯೆ ಇಲ್ಲದ {n} ಅನುಮೋದಿಸಿ',
+  'Approve this delivery':
+      'ಈ ವಿತರಣೆಯನ್ನು ಅನುಮೋದಿಸಿ',
+  'Bill':
+      'ಬಿಲ್',
+  'Cancelled entry':
+      'ರದ್ದಾದ ನಮೂದು',
+  'Changed after approval':
+      'ಅನುಮೋದನೆಯ ನಂತರ ಬದಲಾಗಿದೆ',
+  'Changed since close':
+      'ಮುಚ್ಚಿದ ನಂತರ ಬದಲಾಗಿದೆ',
+  'Close the week':
+      'ವಾರ ಮುಚ್ಚಿ',
+  'Close the week again':
+      'ವಾರವನ್ನು ಮತ್ತೆ ಮುಚ್ಚಿ',
+  'Close this week?':
+      'ಈ ವಾರ ಮುಚ್ಚಬೇಕೆ?',
+  'Closed':
+      'ಮುಚ್ಚಲಾಗಿದೆ',
+  'Closed by {who}, {when}':
+      '{who} ಮುಚ್ಚಿದರು, {when}',
+  'Corrected, review again':
+      'ಸರಿಪಡಿಸಲಾಗಿದೆ, ಮತ್ತೆ ನೋಡಿ',
+  'Deliveries':
+      'ಸಾಮಗ್ರಿ ವಿತರಣೆಗಳು',
+  'Delivery slip':
+      'ಡೆಲಿವರಿ ಚೀಟಿ',
+  'Each running site gets a weekly close here: wages, expenses and deliveries to approve.':
+      'ಪ್ರತಿ ನಡೆಯುತ್ತಿರುವ ಸೈಟ್‌ನ ವಾರದ ಮುಕ್ತಾಯ ಇಲ್ಲಿ: ಅನುಮೋದಿಸಬೇಕಾದ ಕೂಲಿ, ಖರ್ಚು, ವಿತರಣೆಗಳು.',
+  'Edited after it was entered':
+      'ನಮೂದಿಸಿದ ನಂತರ ತಿದ್ದಲಾಗಿದೆ',
+  'Enter the quantity accepted.':
+      'ಸ್ವೀಕರಿಸಿದ ಪ್ರಮಾಣ ನಮೂದಿಸಿ.',
+  'Expenses':
+      'ಖರ್ಚುಗಳು',
+  'Expenses {amount}':
+      'ಖರ್ಚು {amount}',
+  'History':
+      'ಇತಿಹಾಸ',
+  'Less than received if some was short or damaged.':
+      'ಕೆಲವು ಕಡಿಮೆ ಅಥವಾ ಹಾಳಾಗಿದ್ದರೆ ಬಂದದ್ದಕ್ಕಿಂತ ಕಡಿಮೆ.',
+  'Mark as fixed':
+      'ಸರಿಪಡಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿ',
+  'Marked fixed':
+      'ಸರಿಪಡಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ',
+  'Material delivered':
+      'ಬಂದ ಸಾಮಗ್ರಿ',
+  'No attendance recorded':
+      'ಹಾಜರಾತಿ ದಾಖಲಾಗಿಲ್ಲ',
+  'No bill photo':
+      'ಬಿಲ್ ಫೋಟೋ ಇಲ್ಲ',
+  'No daily wage set, so wages can\'t be worked out':
+      'ದಿನದ ಕೂಲಿ ಹಾಕಿಲ್ಲ, ಆದ್ದರಿಂದ ಲೆಕ್ಕ ಮಾಡಲಾಗದು',
+  'No decisions yet this week.':
+      'ಈ ವಾರ ಇನ್ನೂ ನಿರ್ಧಾರಗಳಿಲ್ಲ.',
+  'No delivery slip photo':
+      'ಡೆಲಿವರಿ ಚೀಟಿ ಫೋಟೋ ಇಲ್ಲ',
+  'No invoice amount':
+      'ಇನ್‌ವಾಯ್ಸ್ ಮೊತ್ತ ಇಲ್ಲ',
+  'Not against a purchase order':
+      'ಯಾವುದೇ PO ವಿರುದ್ಧ ಅಲ್ಲ',
+  'Nothing approved yet.':
+      'ಇನ್ನೂ ಏನೂ ಅನುಮೋದಿಸಿಲ್ಲ.',
+  'Nothing left to review.':
+      'ನೋಡಲು ಏನೂ ಉಳಿದಿಲ್ಲ.',
+  'Nothing recorded':
+      'ಏನೂ ದಾಖಲಾಗಿಲ್ಲ',
+  'Nothing sent back.':
+      'ಏನೂ ಹಿಂದಿರುಗಿಸಿಲ್ಲ.',
+  'Nothing was recorded on this site this week.':
+      'ಈ ವಾರ ಈ ಸೈಟ್‌ನಲ್ಲಿ ಏನೂ ದಾಖಲಾಗಿಲ್ಲ.',
+  'Photograph the delivery slip':
+      'ಡೆಲಿವರಿ ಚೀಟಿಯ ಫೋಟೋ ತೆಗೆಯಿರಿ',
+  'Punch-out missing on 1 day':
+      '1 ದಿನ ಪಂಚ್-ಔಟ್ ಇಲ್ಲ',
+  'Punch-out missing on {n} days':
+      '{n} ದಿನ ಪಂಚ್-ಔಟ್ ಇಲ್ಲ',
+  'Quantity accepted':
+      'ಸ್ವೀಕರಿಸಿದ ಪ್ರಮಾಣ',
+  'Ready to close':
+      'ಮುಚ್ಚಲು ಸಿದ್ಧ',
+  'Reopen the week':
+      'ವಾರವನ್ನು ಮತ್ತೆ ತೆರೆಯಿರಿ',
+  'Reopen this week?':
+      'ಈ ವಾರ ಮತ್ತೆ ತೆರೆಯಬೇಕೆ?',
+  'Report says {n} people, but no attendance':
+      'ವರದಿಯಲ್ಲಿ {n} ಜನ, ಆದರೆ ಹಾಜರಾತಿ ಇಲ್ಲ',
+  'Send back':
+      'ಹಿಂದಿರುಗಿಸಿ',
+  'Send back to the site':
+      'ಸೈಟ್‌ಗೆ ಹಿಂದಿರುಗಿಸಿ',
+  'Send the pack to accounts':
+      'ಪ್ಯಾಕ್ ಅನ್ನು ಅಕೌಂಟ್ಸ್‌ಗೆ ಕಳುಹಿಸಿ',
+  'Sent back':
+      'ಹಿಂದಿರುಗಿಸಲಾಗಿದೆ',
+  'Short by {qty} against the order':
+      'ಆರ್ಡರ್‌ಗಿಂತ {qty} ಕಡಿಮೆ',
+  'Site expenses':
+      'ಸೈಟ್ ಖರ್ಚುಗಳು',
+  'Slip':
+      'ಚೀಟಿ',
+  'Slip photo attached':
+      'ಚೀಟಿ ಫೋಟೋ ಸೇರಿಸಲಾಗಿದೆ',
+  'The owner or a project manager approves the week. Fix what is sent back to you and mark it fixed.':
+      'ಮಾಲೀಕರು ಅಥವಾ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್ ವಾರವನ್ನು ಅನುಮೋದಿಸುತ್ತಾರೆ. ನಿಮಗೆ ಹಿಂದಿರುಗಿಸಿದ್ದನ್ನು ಸರಿಪಡಿಸಿ ಗುರುತಿಸಿ.',
+  'The photo has not reached this phone yet. Sync and try again.':
+      'ಫೋಟೋ ಇನ್ನೂ ಈ ಫೋನ್‌ಗೆ ಬಂದಿಲ್ಲ. ಸಿಂಕ್ ಮಾಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'This week on site':
+      'ಈ ವಾರ ಸೈಟ್‌ನಲ್ಲಿ',
+  'To review':
+      'ನೋಡಬೇಕು',
+  'Voucher number not confirmed yet (not synced)':
+      'ವೋಚರ್ ಸಂಖ್ಯೆ ಇನ್ನೂ ಖಚಿತವಾಗಿಲ್ಲ (ಸಿಂಕ್ ಆಗಿಲ್ಲ)',
+  'Wages':
+      'ಕೂಲಿ',
+  'Wages and advances paid':
+      'ಪಾವತಿಸಿದ ಕೂಲಿ ಮತ್ತು ಮುಂಗಡ',
+  'Wages earned':
+      'ಗಳಿಸಿದ ಕೂಲಿ',
+  'Wages still due':
+      'ಇನ್ನೂ ಬಾಕಿ ಕೂಲಿ',
+  'Wages {amount}':
+      'ಕೂಲಿ {amount}',
+  'Week':
+      'ವಾರ',
+  'Week closed':
+      'ವಾರ ಮುಚ್ಚಲಾಗಿದೆ',
+  'Week reopened':
+      'ವಾರ ಮತ್ತೆ ತೆರೆಯಲಾಗಿದೆ',
+  'Weekly close':
+      'ವಾರದ ಮುಕ್ತಾಯ',
+  'What needs fixing?':
+      'ಏನು ಸರಿಪಡಿಸಬೇಕು?',
+  'What was done? (optional)':
+      'ಏನು ಮಾಡಲಾಯಿತು? (ಐಚ್ಛಿಕ)',
+  'Why?':
+      'ಏಕೆ?',
+  'due {amount}':
+      'ಬಾಕಿ {amount}',
+  'earned {amount}':
+      'ಗಳಿಕೆ {amount}',
+  'ordered {qty}':
+      'ಆರ್ಡರ್ {qty}',
+  '{n} exceptions':
+      '{n} ಸಮಸ್ಯೆಗಳು',
+  '{n} items approved, {amount} in all. Anything changed later comes back here to review.':
+      '{n} ಅಂಶಗಳು ಅನುಮೋದಿತ, ಒಟ್ಟು {amount}. ನಂತರ ಬದಲಾದರೆ ಮತ್ತೆ ಇಲ್ಲಿಗೆ ಬರುತ್ತದೆ.',
+  '{n} items need a closer look':
+      '{n} ಅಂಶಗಳನ್ನು ಗಮನವಿಟ್ಟು ನೋಡಬೇಕು',
+  '{n} sent back':
+      '{n} ಹಿಂದಿರುಗಿಸಲಾಗಿದೆ',
+  '{n} to review':
+      '{n} ನೋಡಬೇಕು',
+  '{qty} accepted':
+      '{qty} ಸ್ವೀಕರಿಸಲಾಗಿದೆ',
+  '{qty} more than ordered':
+      'ಆರ್ಡರ್‌ಗಿಂತ {qty} ಹೆಚ್ಚು',
+  // Site teams, templates, supplier import, all sites
+  'Above your approval limit of {amount}. The owner approves this.':
+      'ನಿಮ್ಮ ಅನುಮೋದನೆ ಮಿತಿ {amount} ಮೀರಿದೆ. ಇದನ್ನು ಮಾಲೀಕರು ಅನುಮೋದಿಸುತ್ತಾರೆ.',
+  'Accounts':
+      'ಅಕೌಂಟ್ಸ್',
+  'Add many suppliers':
+      'ಹಲವು ಸರಬರಾಜುದಾರರನ್ನು ಸೇರಿಸಿ',
+  'Add person':
+      'ವ್ಯಕ್ತಿಯನ್ನು ಸೇರಿಸಿ',
+  'Add to this site':
+      'ಈ ಸೈಟ್‌ಗೆ ಸೇರಿಸಿ',
+  'Added to the site team.':
+      'ಸೈಟ್ ತಂಡಕ್ಕೆ ಸೇರಿಸಲಾಗಿದೆ.',
+  'Added {n} suppliers.':
+      '{n} ಸರಬರಾಜುದಾರರನ್ನು ಸೇರಿಸಲಾಗಿದೆ.',
+  'Added {n} suppliers. {m} already on the list were left as they were.':
+      '{n} ಸರಬರಾಜುದಾರರನ್ನು ಸೇರಿಸಲಾಗಿದೆ. ಈಗಾಗಲೇ ಪಟ್ಟಿಯಲ್ಲಿದ್ದ {m} ಹಾಗೆಯೇ ಬಿಡಲಾಗಿದೆ.',
+  'All sites':
+      'ಎಲ್ಲಾ ಸೈಟ್‌ಗಳು',
+  'All {n} sites are up to date.':
+      'ಎಲ್ಲಾ {n} ಸೈಟ್‌ಗಳು ನವೀಕೃತವಾಗಿವೆ.',
+  'An empty site':
+      'ಖಾಲಿ ಸೈಟ್',
+  'Approval limit (₹)':
+      'ಅನುಮೋದನೆ ಮಿತಿ (₹)',
+  'Approves up to {amount}':
+      '{amount} ವರೆಗೆ ಅನುಮೋದಿಸುತ್ತಾರೆ',
+  'Can see the site, changes nothing.':
+      'ಸೈಟ್ ನೋಡಬಹುದು, ಏನೂ ಬದಲಿಸಲಾಗದು.',
+  'Copies the set-up only. Nothing that happened on that site comes across.':
+      'ಸೆಟಪ್ ಮಾತ್ರ ನಕಲಾಗುತ್ತದೆ. ಆ ಸೈಟ್‌ನಲ್ಲಿ ನಡೆದದ್ದು ಏನೂ ಬರುವುದಿಲ್ಲ.',
+  'Enter the limit in rupees, or leave it empty for no limit.':
+      'ಮಿತಿಯನ್ನು ರೂಪಾಯಿಗಳಲ್ಲಿ ನಮೂದಿಸಿ, ಅಥವಾ ಮಿತಿ ಬೇಡವಾದರೆ ಖಾಲಿ ಬಿಡಿ.',
+  'Estimate items and rates':
+      'ಎಸ್ಟಿಮೇಟ್ ಐಟಂಗಳು ಮತ್ತು ದರಗಳು',
+  'Everyone in the company is already on this site.':
+      'ಕಂಪನಿಯ ಎಲ್ಲರೂ ಈಗಾಗಲೇ ಈ ಸೈಟ್‌ನಲ್ಲಿದ್ದಾರೆ.',
+  'Everyone in the company sees this site.':
+      'ಕಂಪನಿಯಲ್ಲಿ ಎಲ್ಲರೂ ಈ ಸೈಟ್ ನೋಡುತ್ತಾರೆ.',
+  'Everyone in the company works here with their company role. Add people to give them a site role or an approval limit.':
+      'ಕಂಪನಿಯಲ್ಲಿ ಎಲ್ಲರೂ ಇಲ್ಲಿ ತಮ್ಮ ಕಂಪನಿ ಪಾತ್ರದೊಂದಿಗೆ ಕೆಲಸ ಮಾಡುತ್ತಾರೆ. ಸೈಟ್ ಪಾತ್ರ ಅಥವಾ ಅನುಮೋದನೆ ಮಿತಿ ನೀಡಲು ಜನರನ್ನು ಸೇರಿಸಿ.',
+  'Everything on this site.':
+      'ಈ ಸೈಟ್‌ನಲ್ಲಿ ಎಲ್ಲವೂ.',
+  'Hidden from the rest of the company. The company\'s owners and managers still see it.':
+      'ಕಂಪನಿಯ ಉಳಿದವರಿಗೆ ಕಾಣುವುದಿಲ್ಲ. ಕಂಪನಿಯ ಮಾಲೀಕರು ಮತ್ತು ಮ್ಯಾನೇಜರ್‌ಗಳು ನೋಡುತ್ತಾರೆ.',
+  'In the weekly close they approve items up to this. Leave empty for no limit.':
+      'ವಾರದ ಮುಕ್ತಾಯದಲ್ಲಿ ಇಷ್ಟರವರೆಗಿನ ಐಟಂಗಳನ್ನು ಅವರು ಅನುಮೋದಿಸುತ್ತಾರೆ. ಮಿತಿ ಬೇಡವಾದರೆ ಖಾಲಿ ಬಿಡಿ.',
+  'Last week not closed':
+      'ಕಳೆದ ವಾರ ಮುಚ್ಚಿಲ್ಲ',
+  'No approval limit':
+      'ಅನುಮೋದನೆ ಮಿತಿ ಇಲ್ಲ',
+  'No one is listed yet':
+      'ಇನ್ನೂ ಯಾರೂ ಪಟ್ಟಿಯಲ್ಲಿಲ್ಲ',
+  'No report on {day}':
+      '{day} ರಂದು ವರದಿ ಇಲ್ಲ',
+  'No supplier names found. Put one supplier on each line.':
+      'ಸರಬರಾಜುದಾರರ ಹೆಸರುಗಳು ಸಿಗಲಿಲ್ಲ. ಪ್ರತಿ ಸಾಲಿನಲ್ಲಿ ಒಬ್ಬರನ್ನು ಬರೆಯಿರಿ.',
+  'On this site':
+      'ಈ ಸೈಟ್‌ನಲ್ಲಿ',
+  'One supplier per line: name, phone, GSTIN, what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.':
+      'ಪ್ರತಿ ಸಾಲಿಗೆ ಒಬ್ಬ ಸರಬರಾಜುದಾರ: ಹೆಸರು, ಫೋನ್, GSTIN, ಇಂದು ನೀವು ಅವರಿಗೆ ಕೊಡಬೇಕಾದದ್ದು. ಹೆಸರು ಮಾತ್ರ ಬೇಕು. ನಿಮ್ಮ ಹಣ ಅವರ ಬಳಿ ಇದ್ದರೆ ಮೊತ್ತದ ನಂತರ "advance" ಬರೆಯಿರಿ.',
+  'Only this team sees the site':
+      'ಈ ತಂಡ ಮಾತ್ರ ಸೈಟ್ ನೋಡುತ್ತದೆ',
+  'Paste a list':
+      'ಪಟ್ಟಿ ಅಂಟಿಸಿ',
+  'Receives material and keeps the stock.':
+      'ಸಾಮಗ್ರಿ ಸ್ವೀಕರಿಸಿ ಸ್ಟಾಕ್ ನೋಡಿಕೊಳ್ಳುತ್ತಾರೆ.',
+  'Records the day: reports, labour, money, material.':
+      'ದಿನವನ್ನು ದಾಖಲಿಸುತ್ತಾರೆ: ವರದಿ, ಕಾರ್ಮಿಕರು, ಹಣ, ಸಾಮಗ್ರಿ.',
+  'Remove from this site?':
+      'ಈ ಸೈಟ್‌ನಿಂದ ತೆಗೆಯಬೇಕೆ?',
+  'Removed from the site team.':
+      'ಸೈಟ್ ತಂಡದಿಂದ ತೆಗೆಯಲಾಗಿದೆ.',
+  'Retention held by clients':
+      'ಕ್ಲೈಂಟ್‌ಗಳ ಬಳಿ ಇರುವ ರಿಟೆನ್ಷನ್',
+  'Runs the site and approves up to their limit.':
+      'ಸೈಟ್ ನಡೆಸುತ್ತಾರೆ ಮತ್ತು ತಮ್ಮ ಮಿತಿಯವರೆಗೆ ಅನುಮೋದಿಸುತ್ತಾರೆ.',
+  'Saved.':
+      'ಉಳಿಸಲಾಗಿದೆ.',
+  'Sees the money and sends packs to accounts.':
+      'ಹಣದ ಲೆಕ್ಕ ನೋಡಿ ಅಕೌಂಟ್ಸ್‌ಗೆ ಪ್ಯಾಕ್ ಕಳುಹಿಸುತ್ತಾರೆ.',
+  'Site team':
+      'ಸೈಟ್ ತಂಡ',
+  'Site team and approval limits':
+      'ಸೈಟ್ ತಂಡ ಮತ್ತು ಅನುಮೋದನೆ ಮಿತಿಗಳು',
+  'Sites marked as running show here, the ones that need someone first.':
+      'ನಡೆಯುತ್ತಿರುವ ಸೈಟ್‌ಗಳು ಇಲ್ಲಿ ಕಾಣುತ್ತವೆ, ಗಮನ ಬೇಕಾದವು ಮೊದಲು.',
+  'Start from':
+      'ಎಲ್ಲಿಂದ ಪ್ರಾರಂಭ',
+  'Storekeeper':
+      'ಸ್ಟೋರ್‌ಕೀಪರ್',
+  'Task list':
+      'ಕೆಲಸದ ಪಟ್ಟಿ',
+  'To come from clients':
+      'ಕ್ಲೈಂಟ್‌ಗಳಿಂದ ಬರಬೇಕಾದದ್ದು',
+  'Turn on Team & sync to add people. The team list comes from the company\'s accounts.':
+      'ಜನರನ್ನು ಸೇರಿಸಲು Team & sync ಆನ್ ಮಾಡಿ. ತಂಡದ ಪಟ್ಟಿ ಕಂಪನಿಯ ಖಾತೆಗಳಿಂದ ಬರುತ್ತದೆ.',
+  'Up to date':
+      'ನವೀಕೃತ',
+  'Wages due this week':
+      'ಈ ವಾರ ಬಾಕಿ ಕೂಲಿ',
+  'Workers and wages':
+      'ಕಾರ್ಮಿಕರು ಮತ್ತು ಕೂಲಿ',
+  'Your role here: {role}.':
+      'ಇಲ್ಲಿ ನಿಮ್ಮ ಪಾತ್ರ: {role}.',
+  'client owes {amount}':
+      'ಕ್ಲೈಂಟ್ ಬಾಕಿ {amount}',
+  'suppliers {amount}':
+      'ಸರಬರಾಜುದಾರರು {amount}',
+  'wages due {amount}':
+      'ಬಾಕಿ ಕೂಲಿ {amount}',
+  '{m} of {n} sites need someone.':
+      '{n} ಸೈಟ್‌ಗಳಲ್ಲಿ {m} ಗೆ ಗಮನ ಬೇಕು.',
+  '{name} will no longer be on this site\'s team.':
+      '{name} ಇನ್ನು ಈ ಸೈಟ್ ತಂಡದಲ್ಲಿ ಇರುವುದಿಲ್ಲ.',
+  '{n} approvals waiting over 2 days':
+      '{n} ಅನುಮೋದನೆಗಳು 2 ದಿನಕ್ಕಿಂತ ಹೆಚ್ಚು ಕಾಯುತ್ತಿವೆ',
+  '{n} days without a report':
+      '{n} ದಿನ ವರದಿ ಇಲ್ಲ',
+  '{n} sites with last week not closed':
+      '{n} ಸೈಟ್‌ಗಳಲ್ಲಿ ಕಳೆದ ವಾರ ಮುಚ್ಚಿಲ್ಲ',
+  '{n} to approve':
+      '{n} ಅನುಮೋದಿಸಬೇಕು',
+  // Measurement book, bill payments, supplier invoices
+  'A minus quantity corrects an earlier one.':
+      'ಮೈನಸ್ ಪ್ರಮಾಣ ಹಿಂದಿನದನ್ನು ಸರಿಪಡಿಸುತ್ತದೆ.',
+  'Add invoice':
+      'ಇನ್‌ವಾಯ್ಸ್ ಸೇರಿಸಿ',
+  'Add the supplier first, under Procure > Suppliers.':
+      'ಮೊದಲು Procure > Suppliers ನಲ್ಲಿ ಸರಬರಾಜುದಾರರನ್ನು ಸೇರಿಸಿ.',
+  'All {n} invoices match their orders and deliveries.':
+      'ಎಲ್ಲಾ {n} ಇನ್‌ವಾಯ್ಸ್‌ಗಳು ಆರ್ಡರ್ ಮತ್ತು ವಿತರಣೆಗೆ ಹೊಂದುತ್ತವೆ.',
+  'Approved to date':
+      'ಇಲ್ಲಿಯವರೆಗೆ ಅನುಮೋದಿತ',
+  'Approved {qty}':
+      '{qty} ಅನುಮೋದಿತ',
+  'Approved.':
+      'ಅನುಮೋದಿಸಲಾಗಿದೆ.',
+  'BOQ item':
+      'BOQ ಐಟಂ',
+  'Cancel invoice':
+      'ಇನ್‌ವಾಯ್ಸ್ ರದ್ದುಮಾಡಿ',
+  'Cancel this invoice?':
+      'ಈ ಇನ್‌ವಾಯ್ಸ್ ರದ್ದುಮಾಡಬೇಕೆ?',
+  'Cancelled: {why}':
+      'ರದ್ದು: {why}',
+  'Decide':
+      'ನಿರ್ಧರಿಸಿ',
+  'Enter each invoice as it comes. It is checked against the purchase order and what was received.':
+      'ಪ್ರತಿ ಇನ್‌ವಾಯ್ಸ್ ಬಂದಾಗಲೇ ನಮೂದಿಸಿ. ಅದನ್ನು PO ಮತ್ತು ಬಂದ ಸಾಮಗ್ರಿಯೊಂದಿಗೆ ಹೋಲಿಸಲಾಗುತ್ತದೆ.',
+  'Everything approved has been billed already.':
+      'ಅನುಮೋದಿತವಾದ ಎಲ್ಲವೂ ಈಗಾಗಲೇ ಬಿಲ್ ಆಗಿದೆ.',
+  'GST in it (₹, optional)':
+      'ಅದರಲ್ಲಿ GST (₹, ಐಚ್ಛಿಕ)',
+  'Give the invoice number and its total.':
+      'ಇನ್‌ವಾಯ್ಸ್ ಸಂಖ್ಯೆ ಮತ್ತು ಒಟ್ಟು ನೀಡಿ.',
+  'Give the item, its unit and a quantity.':
+      'ಐಟಂ, ಅದರ ಘಟಕ ಮತ್ತು ಪ್ರಮಾಣ ನೀಡಿ.',
+  'Invoice number':
+      'ಇನ್‌ವಾಯ್ಸ್ ಸಂಖ್ಯೆ',
+  'Invoice total with GST (₹)':
+      'GST ಸಹಿತ ಇನ್‌ವಾಯ್ಸ್ ಒಟ್ಟು (₹)',
+  'Make the next RA bill':
+      'ಮುಂದಿನ RA ಬಿಲ್ ಮಾಡಿ',
+  'Matched':
+      'ಹೊಂದಿದೆ',
+  'Measure work':
+      'ಕೆಲಸ ಅಳೆಯಿರಿ',
+  'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
+      'BOQ ವಿರುದ್ಧ ಮಾಡಿದ ಕೆಲಸ ಅಳೆಯಿರಿ. ಅನುಮೋದಿತ ಪ್ರಮಾಣಗಳು ಮುಂದಿನ RA ಬಿಲ್‌ಗೆ ಹೋಗುತ್ತವೆ.',
+  'Measured {qty} {unit}':
+      'ಅಳೆದದ್ದು {qty} {unit}',
+  'Measurement book':
+      'ಅಳತೆ ಪುಸ್ತಕ',
+  'Measurement saved. It waits for approval.':
+      'ಅಳತೆ ಉಳಿಸಲಾಗಿದೆ. ಅನುಮೋದನೆಗೆ ಕಾಯುತ್ತಿದೆ.',
+  'More quantity than was received':
+      'ಬಂದದ್ದಕ್ಕಿಂತ ಹೆಚ್ಚು ಪ್ರಮಾಣ',
+  'More than the purchase order':
+      'PO ಗಿಂತ ಹೆಚ್ಚು',
+  'More than what was received':
+      'ಬಂದದ್ದಕ್ಕಿಂತ ಹೆಚ್ಚು',
+  'No measurements yet':
+      'ಇನ್ನೂ ಅಳತೆಗಳಿಲ್ಲ',
+  'No purchase order':
+      'PO ಇಲ್ಲ',
+  'No supplier invoices yet':
+      'ಇನ್ನೂ ಸರಬರಾಜುದಾರರ ಇನ್‌ವಾಯ್ಸ್ ಇಲ್ಲ',
+  'Not in the BOQ':
+      'BOQ ನಲ್ಲಿ ಇಲ್ಲ',
+  'Nothing received against it yet':
+      'ಇದರ ವಿರುದ್ಧ ಇನ್ನೂ ಏನೂ ಬಂದಿಲ್ಲ',
+  'PO {amount}':
+      'ಪಿಒ {amount}',
+  'Part paid':
+      'ಭಾಗಶಃ ಪಾವತಿ',
+  'Payment against this bill':
+      'ಈ ಬಿಲ್ ವಿರುದ್ಧ ಪಾವತಿ',
+  'Put against bills':
+      'ಬಿಲ್‌ಗಳ ವಿರುದ್ಧ ಹಾಕಿ',
+  'Put it against the oldest bills still due.':
+      'ಇದನ್ನು ಹಳೆಯ ಬಾಕಿ ಬಿಲ್‌ಗಳ ವಿರುದ್ಧ ಹಾಕಿ.',
+  'Quantity approved':
+      'ಅನುಮೋದಿತ ಪ್ರಮಾಣ',
+  'Quantity invoiced (optional)':
+      'ಇನ್‌ವಾಯ್ಸ್ ಪ್ರಮಾಣ (ಐಚ್ಛಿಕ)',
+  'Quantity measured':
+      'ಅಳೆದ ಪ್ರಮಾಣ',
+  'Record the payment in the money book first. Every payment so far is already against a bill.':
+      'ಮೊದಲು ಹಣದ ಪುಸ್ತಕದಲ್ಲಿ ಪಾವತಿ ನಮೂದಿಸಿ. ಇಲ್ಲಿಯವರೆಗಿನ ಪ್ರತಿ ಪಾವತಿ ಯಾವುದೋ ಬಿಲ್ ವಿರುದ್ಧ ಇದೆ.',
+  'Rejected.':
+      'ತಿರಸ್ಕರಿಸಲಾಗಿದೆ.',
+  'Release retention':
+      'ರಿಟೆನ್ಷನ್ ಬಿಡುಗಡೆ',
+  'Retention held by the client: {amount}':
+      'ಕ್ಲೈಂಟ್ ಬಳಿ ಇರುವ ರಿಟೆನ್ಷನ್: {amount}',
+  'Same invoice number entered before':
+      'ಇದೇ ಇನ್‌ವಾಯ್ಸ್ ಸಂಖ್ಯೆ ಹಿಂದೆ ನಮೂದಾಗಿದೆ',
+  'Set a rate for {items} first.':
+      'ಮೊದಲು {items} ಗೆ ದರ ಹಾಕಿ.',
+  'Supplier invoice':
+      'ಸರಬರಾಜುದಾರರ ಇನ್‌ವಾಯ್ಸ್',
+  'Supplier invoices':
+      'ಸರಬರಾಜುದಾರರ ಇನ್‌ವಾಯ್ಸ್‌ಗಳು',
+  'Waiting':
+      'ಕಾಯುತ್ತಿದೆ',
+  'Where (e.g. Block A, 2nd floor)':
+      'ಎಲ್ಲಿ (ಉದಾ. Block A, 2ನೇ ಮಹಡಿ)',
+  'Why':
+      'ಏಕೆ',
+  'received {amount}':
+      'ಬಂದದ್ದು {amount}',
+  'retention held {amount}':
+      'ರಿಟೆನ್ಷನ್ {amount}',
+  '{amount} more than received':
+      'ಬಂದದ್ದಕ್ಕಿಂತ {amount} ಹೆಚ್ಚು',
+  '{amount} received is not against a bill yet':
+      'ಬಂದ {amount} ಇನ್ನೂ ಯಾವ ಬಿಲ್‌ಗೂ ಹಾಕಿಲ್ಲ',
+  '{amount} still due':
+      '{amount} ಇನ್ನೂ ಬಾಕಿ',
+  '{m} of {n} invoices need checking before payment.':
+      '{n} ರಲ್ಲಿ {m} ಇನ್‌ವಾಯ್ಸ್‌ಗಳನ್ನು ಪಾವತಿಗೆ ಮುನ್ನ ಪರಿಶೀಲಿಸಬೇಕು.',
+  '{n} amounts put against bills.':
+      '{n} ಮೊತ್ತಗಳನ್ನು ಬಿಲ್‌ಗಳ ವಿರುದ್ಧ ಹಾಕಲಾಗಿದೆ.',
+  '{n} waiting for approval':
+      '{n} ಅನುಮೋದನೆಗೆ ಕಾಯುತ್ತಿವೆ',
+  '{paid} received, {due} due':
+      '{paid} ಬಂದಿದೆ, {due} ಬಾಕಿ',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'ಎಲ್ಲಾ ದಾಖಲೆಗಳು, ಫೋಟೋಗಳು, ಬಿಲ್‌ಗಳು ಒಂದೇ ಫೈಲ್‌ನಲ್ಲಿ. ಅದನ್ನು Drive ಅಥವಾ ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ ಇಡಿ.',
+  'Back up this phone':
+      'ಈ ಫೋನ್‌ನ ಬ್ಯಾಕಪ್ ತೆಗೆದುಕೊಳ್ಳಿ',
+  'Backup checked':
+      'ಬ್ಯಾಕಪ್ ಪರಿಶೀಲಿಸಲಾಗಿದೆ',
+  'Backup failed: {error}':
+      'ಬ್ಯಾಕಪ್ ವಿಫಲವಾಯಿತು: {error}',
+  'Checked before anything is replaced':
+      'ಏನನ್ನೂ ಬದಲಿಸುವ ಮೊದಲು ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ',
+  'Choose backup file':
+      'ಬ್ಯಾಕಪ್ ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'ಮುಂದಿನ ಬಾರಿ FieldOS ತೆರೆದಾಗ ಈ ಫೋನ್‌ನಲ್ಲಿರುವ ಎಲ್ಲವೂ ಬ್ಯಾಕಪ್‌ನಿಂದ ಬದಲಾಗುತ್ತದೆ. ಈಗಿನ ಡೇಟಾ ಬೇಕಾದರೆ ಮರಳಿ ಪಡೆಯಲು ಫೋನ್‌ನಲ್ಲೇ ಪಕ್ಕಕ್ಕೆ ಇಡಲಾಗುತ್ತದೆ.',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS ಬ್ಯಾಕಪ್: {sites} ಸೈಟ್‌ಗಳು, {files} ಫೋಟೋಗಳು, ಬಿಲ್‌ಗಳು',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} ರಂದು ಮಾಡಿದ್ದು: {sites} ಸೈಟ್‌ಗಳು, {files} ಫೋಟೋಗಳು, ಬಿಲ್‌ಗಳು. ಮರುಸ್ಥಾಪನೆ ಮುಗಿಸಲು FieldOS ಅನ್ನು ಪೂರ್ತಿ ಮುಚ್ಚಿ ಮತ್ತೆ ತೆರೆಯಿರಿ.',
+  'Restore a backup':
+      'ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ',
+  'Restore a backup?':
+      'ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಬೇಕೆ?',
+  'Restore failed: {error}':
+      'ಮರುಸ್ಥಾಪನೆ ವಿಫಲವಾಯಿತು: {error}',
+  'The backup is damaged and was not restored.':
+      'ಬ್ಯಾಕಪ್ ಹಾಳಾಗಿದೆ, ಮರುಸ್ಥಾಪಿಸಲಿಲ್ಲ.',
+  'The backup is incomplete and was not restored.':
+      'ಬ್ಯಾಕಪ್ ಅಪೂರ್ಣ, ಮರುಸ್ಥಾಪಿಸಲಿಲ್ಲ.',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'ಈ ಬ್ಯಾಕಪ್ ಹೊಸ FieldOS ನಿಂದ ಮಾಡಲಾಗಿದೆ. ಮೊದಲು ಆಪ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಿ.',
+  'This is not a FieldOS backup file.':
+      'ಇದು FieldOS ಬ್ಯಾಕಪ್ ಫೈಲ್ ಅಲ್ಲ.',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'ರಫ್ತು ಪರಿಶೀಲನೆಯಲ್ಲಿ ಪಾಸ್ ಆಗಲಿಲ್ಲ, ಆದ್ದರಿಂದ ಕಳುಹಿಸಲಿಲ್ಲ: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'ಈ ಮೊತ್ತಗಳಿಗಿಂತ ಹೆಚ್ಚಾದರೆ ಮೊದಲು ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್, ನಂತರ ಮಾಲೀಕರು ಅನುಮೋದಿಸುತ್ತಾರೆ. ಅನುಮೋದನೆ ಬೇಡವಾದರೆ ಖಾಲಿ ಬಿಡಿ. ನಿಯಮಗಳು ಇನ್ನು ಮುಂದೆ ದಾಖಲಾಗುವುದಕ್ಕೆ ಮಾತ್ರ ಅನ್ವಯಿಸುತ್ತವೆ.',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'ಯಾವ ಮೊತ್ತಕ್ಕಿಂತ ಹೆಚ್ಚಾದರೆ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್, ನಂತರ ನೀವು, ವಿನಂತಿ, ಖರ್ಚು, ಆರ್ಡರ್ ಅನುಮೋದಿಸಬೇಕು',
+  'Approval rules':
+      'ಅನುಮೋದನೆ ನಿಯಮಗಳು',
+  'Approval rules saved':
+      'ಅನುಮೋದನೆ ನಿಯಮಗಳು ಉಳಿಸಲಾಗಿದೆ',
+  'Enter amounts in rupees, or leave blank.':
+      'ಮೊತ್ತಗಳನ್ನು ರೂಪಾಯಿಗಳಲ್ಲಿ ನಮೂದಿಸಿ, ಅಥವಾ ಖಾಲಿ ಬಿಡಿ.',
+  'Note (needed to reject)':
+      'ಟಿಪ್ಪಣಿ (ತಿರಸ್ಕರಿಸಲು ಅಗತ್ಯ)',
+  'Owner also approves above (₹)':
+      'ಇದಕ್ಕಿಂತ ಹೆಚ್ಚಾದರೆ ಮಾಲೀಕರೂ ಅನುಮೋದಿಸುತ್ತಾರೆ (₹)',
+  'Project manager approves above (₹)':
+      'ಇದಕ್ಕಿಂತ ಹೆಚ್ಚಾದರೆ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್ ಅನುಮೋದಿಸುತ್ತಾರೆ (₹)',
+  'Purchase orders':
+      'ಖರೀದಿ ಆರ್ಡರ್‌ಗಳು',
+  'Purchase requests':
+      'ಖರೀದಿ ವಿನಂತಿಗಳು',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'ನಿಮ್ಮ ಅನುಮೋದನೆ ಮೊತ್ತಗಳಿಗಿಂತ ಹೆಚ್ಚಿನ ಖರೀದಿ ವಿನಂತಿ, ಆರ್ಡರ್, ಖರ್ಚುಗಳು ಇಲ್ಲಿ ಕಾಯುತ್ತವೆ.',
+  'Say why it is rejected.':
+      'ಏಕೆ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ ಎಂದು ಹೇಳಿ.',
+  'Signed. It now waits for the owner\'s approval.':
+      'ಸಹಿ ಆಯಿತು. ಈಗ ಇದು ಮಾಲೀಕರ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ.',
+  'The owner approves it after you.':
+      'ನಿಮ್ಮ ನಂತರ ಮಾಲೀಕರು ಇದನ್ನು ಅನುಮೋದಿಸುತ್ತಾರೆ.',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'ಮಾಲೀಕರ ಮೊತ್ತ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್ ಮೊತ್ತಕ್ಕಿಂತ ಕಡಿಮೆ ಇರಬಾರದು.',
+  'Waiting for a project manager\'s approval':
+      'ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ',
+  'Waiting for the owner\'s approval':
+      'ಮಾಲೀಕರ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ',
+  'Waiting for your approval':
+      'ನಿಮ್ಮ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿರುವುದು',
+  '{amount}. You sign as {level}.':
+      '{amount}. ನೀವು {level} ಆಗಿ ಸಹಿ ಮಾಡುತ್ತೀರಿ.',
+  '{n} requests, orders or expenses above your approval amounts':
+      'ನಿಮ್ಮ ಅನುಮೋದನೆ ಮೊತ್ತಗಳಿಗಿಂತ ಹೆಚ್ಚಿನ {n} ವಿನಂತಿ, ಆರ್ಡರ್ ಅಥವಾ ಖರ್ಚು',
+  // Audit trail
+  'Audit trail':
+      'ಆಡಿಟ್ ಟ್ರೇಲ್',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'ಪ್ರತಿ ಅನುಮೋದನೆ, ರದ್ದು, ಪಾವತಿ, ಯಾರು ಯಾವಾಗ ಮಾಡಿದರು ಎಂಬುದು ಒಂದೇ ಫೈಲ್‌ನಲ್ಲಿ',
+  'Nothing has been recorded yet.':
+      'ಇನ್ನೂ ಏನೂ ದಾಖಲಾಗಿಲ್ಲ.',
 };

@@ -903,3 +903,261 @@ ExpenseAttachmentsCompanion expenseAttachmentFromSupabaseJson(Map<String, dynami
       filePath: localPath,
       mimeType: row['mime_type'] as String? ?? attachmentMimeType(localPath),
     );
+
+// --- Weekly site close and delivery slips (app schema v15,
+// 20261110030000_weekly_close.sql)
+
+String receiptSlipStoragePath(String projectId, ReceiptAttachment a) =>
+    '$projectId/receipt-slips/${a.id}${_ext(a.filePath)}';
+
+Map<String, dynamic> receiptAttachmentToSupabaseJson(ReceiptAttachment a, {required String projectId}) => {
+      'id': a.id,
+      'receipt_id': a.receiptId,
+      'file_path': receiptSlipStoragePath(projectId, a),
+      'mime_type': a.mimeType,
+      '_local_file_path': a.filePath,
+    };
+
+ReceiptAttachmentsCompanion receiptAttachmentFromSupabaseJson(Map<String, dynamic> row, {required String localPath}) =>
+    ReceiptAttachmentsCompanion.insert(
+      id: row['id'] as String,
+      receiptId: row['receipt_id'] as String,
+      filePath: localPath,
+      mimeType: row['mime_type'] as String? ?? attachmentMimeType(localPath),
+    );
+
+Map<String, dynamic> closeReviewToSupabaseJson(CloseReview r) => {
+      'id': r.id,
+      'project_id': r.projectId,
+      'week_start': r.weekStart,
+      'item_kind': r.itemKind,
+      'item_id': r.itemId,
+      'decision': r.decision,
+      'note': r.note,
+      'fingerprint': r.fingerprint,
+      'amount': r.amount,
+      'accepted_qty': r.acceptedQty,
+      'decided_by': r.decidedBy,
+      'created_at': _timestamp(r.createdAt.toUtc()),
+    };
+
+CloseReviewsCompanion closeReviewFromSupabaseJson(Map<String, dynamic> row) => CloseReviewsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      weekStart: row['week_start'] as String,
+      itemKind: row['item_kind'] as String,
+      itemId: row['item_id'] as String,
+      decision: row['decision'] as String,
+      note: Value(row['note'] as String?),
+      fingerprint: Value(row['fingerprint'] as String?),
+      amount: Value((row['amount'] as num?)?.toDouble()),
+      acceptedQty: Value((row['accepted_qty'] as num?)?.toDouble()),
+      decidedBy: row['decided_by'] as String,
+      createdAt: row['created_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['created_at'] as String).toLocal()),
+    );
+
+// --- Site team and access (app schema v17, 20261110210000_site_roles.sql)
+
+Map<String, dynamic> projectMemberToSupabaseJson(ProjectMember m) => {
+      'id': m.id,
+      'project_id': m.projectId,
+      'user_id': m.userId,
+      'role': m.role,
+      'approval_limit': m.approvalLimit,
+    };
+
+ProjectMembersCompanion projectMemberFromSupabaseJson(Map<String, dynamic> row) => ProjectMembersCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      userId: row['user_id'] as String,
+      role: row['role'] as String,
+      approvalLimit: Value((row['approval_limit'] as num?)?.toDouble()),
+      createdAt: row['created_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['created_at'] as String).toLocal()),
+      updatedAt: row['updated_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['updated_at'] as String).toLocal()),
+    );
+
+Map<String, dynamic> siteAccessToSupabaseJson(SiteAccessData a) => {
+      'id': a.id,
+      'project_id': a.projectId,
+      'members_only': a.membersOnly,
+    };
+
+SiteAccessCompanion siteAccessFromSupabaseJson(Map<String, dynamic> row) => SiteAccessCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      membersOnly: Value(row['members_only'] as bool? ?? false),
+    );
+
+// --- Measurement to billing (app schema v18, 20261110310000_billing_reconciliation.sql)
+
+Map<String, dynamic> workMeasurementToSupabaseJson(WorkMeasurement m) => {
+      'id': m.id,
+      'project_id': m.projectId,
+      'cost_head_id': m.costHeadId,
+      'description': m.description,
+      'unit': m.unit,
+      'rate': m.rate,
+      'qty': m.qty,
+      'measured_on': _dateOnly(m.measuredOn),
+      'location': m.location,
+      'note': m.note,
+      'measured_by': m.measuredBy,
+      'created_at': _timestamp(m.createdAt.toUtc()),
+    };
+
+DateTime _localDate(String s) {
+  final d = DateTime.parse(s);
+  return DateTime(d.year, d.month, d.day);
+}
+
+WorkMeasurementsCompanion workMeasurementFromSupabaseJson(Map<String, dynamic> r) => WorkMeasurementsCompanion.insert(
+      id: r['id'] as String,
+      projectId: r['project_id'] as String,
+      costHeadId: Value(r['cost_head_id'] as String?),
+      description: r['description'] as String,
+      unit: r['unit'] as String,
+      rate: Value((r['rate'] as num?)?.toDouble()),
+      qty: (r['qty'] as num).toDouble(),
+      measuredOn: _localDate(r['measured_on'] as String),
+      location: Value(r['location'] as String?),
+      note: Value(r['note'] as String?),
+      measuredBy: r['measured_by'] as String,
+      createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
+    );
+
+Map<String, dynamic> measurementDecisionToSupabaseJson(WorkMeasurementDecision d) => {
+      'id': d.id,
+      'project_id': d.projectId,
+      'measurement_id': d.measurementId,
+      'decision': d.decision,
+      'approved_qty': d.approvedQty,
+      'note': d.note,
+      'decided_by': d.decidedBy,
+      'created_at': _timestamp(d.createdAt.toUtc()),
+    };
+
+WorkMeasurementDecisionsCompanion measurementDecisionFromSupabaseJson(Map<String, dynamic> r) =>
+    WorkMeasurementDecisionsCompanion.insert(
+      id: r['id'] as String,
+      projectId: r['project_id'] as String,
+      measurementId: r['measurement_id'] as String,
+      decision: r['decision'] as String,
+      approvedQty: Value((r['approved_qty'] as num?)?.toDouble()),
+      note: Value(r['note'] as String?),
+      decidedBy: r['decided_by'] as String,
+      createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
+    );
+
+Map<String, dynamic> billAllocationToSupabaseJson(BillAllocation a) => {
+      'id': a.id,
+      'project_id': a.projectId,
+      'payment_id': a.paymentId,
+      'bill_id': a.billId,
+      'kind': a.kind,
+      'amount': a.amount,
+      'note': a.note,
+      'created_by': a.createdBy,
+      'created_at': _timestamp(a.createdAt.toUtc()),
+    };
+
+BillAllocationsCompanion billAllocationFromSupabaseJson(Map<String, dynamic> r) => BillAllocationsCompanion.insert(
+      id: r['id'] as String,
+      projectId: r['project_id'] as String,
+      paymentId: r['payment_id'] as String,
+      billId: r['bill_id'] as String,
+      kind: Value(r['kind'] as String? ?? 'bill'),
+      amount: (r['amount'] as num).toDouble(),
+      note: Value(r['note'] as String?),
+      createdBy: r['created_by'] as String,
+      createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
+    );
+
+Map<String, dynamic> supplierInvoiceToSupabaseJson(SupplierInvoice i) => {
+      'id': i.id,
+      'project_id': i.projectId,
+      'supplier_id': i.supplierId,
+      'po_id': i.poId,
+      'invoice_number': i.invoiceNumber,
+      'invoice_date': _dateOnly(i.invoiceDate),
+      'amount': i.amount,
+      'gst_amount': i.gstAmount,
+      'qty': i.qty,
+      'note': i.note,
+      'voided': i.voided,
+      'void_reason': i.voidReason,
+      'recorded_by': i.recordedBy,
+      'created_at': _timestamp(i.createdAt.toUtc()),
+    };
+
+SupplierInvoicesCompanion supplierInvoiceFromSupabaseJson(Map<String, dynamic> r) => SupplierInvoicesCompanion.insert(
+      id: r['id'] as String,
+      projectId: r['project_id'] as String,
+      supplierId: r['supplier_id'] as String,
+      poId: Value(r['po_id'] as String?),
+      invoiceNumber: r['invoice_number'] as String,
+      invoiceDate: _localDate(r['invoice_date'] as String),
+      amount: (r['amount'] as num).toDouble(),
+      gstAmount: Value((r['gst_amount'] as num? ?? 0).toDouble()),
+      qty: Value((r['qty'] as num?)?.toDouble()),
+      note: Value(r['note'] as String?),
+      voided: Value(r['voided'] as bool? ?? false),
+      voidReason: Value(r['void_reason'] as String?),
+      recordedBy: r['recorded_by'] as String,
+      createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
+    );
+
+Map<String, dynamic> approvalRuleToSupabaseJson(ApprovalRule r) => {
+      'id': r.id,
+      'company_id': r.companyId,
+      'kind': r.kind,
+      'role': r.role,
+      'above_amount': r.aboveAmount,
+      'voided': r.voided,
+      'created_by': r.createdBy,
+      'created_at': _timestamp(r.createdAt.toUtc()),
+    };
+
+ApprovalRulesCompanion approvalRuleFromSupabaseJson(Map<String, dynamic> r) => ApprovalRulesCompanion.insert(
+      id: r['id'] as String,
+      companyId: r['company_id'] as String,
+      kind: r['kind'] as String,
+      role: r['role'] as String,
+      aboveAmount: (r['above_amount'] as num).toDouble(),
+      voided: Value(r['voided'] as bool? ?? false),
+      createdBy: r['created_by'] as String,
+      createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
+      updatedAt: r['updated_at'] == null ? const Value.absent() : Value(DateTime.parse(r['updated_at'] as String).toLocal()),
+    );
+
+Map<String, dynamic> approvalStepToSupabaseJson(ApprovalStep s) => {
+      'id': s.id,
+      'project_id': s.projectId,
+      'kind': s.kind,
+      'item_id': s.itemId,
+      'level': s.level,
+      'decision': s.decision,
+      'amount': s.amount,
+      'note': s.note,
+      'decided_by': s.decidedBy,
+      'created_at': _timestamp(s.createdAt.toUtc()),
+    };
+
+ApprovalStepsCompanion approvalStepFromSupabaseJson(Map<String, dynamic> r) => ApprovalStepsCompanion.insert(
+      id: r['id'] as String,
+      projectId: r['project_id'] as String,
+      kind: r['kind'] as String,
+      itemId: r['item_id'] as String,
+      level: r['level'] as String,
+      decision: r['decision'] as String,
+      amount: Value((r['amount'] as num?)?.toDouble()),
+      note: Value(r['note'] as String?),
+      decidedBy: r['decided_by'] as String,
+      createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
+    );
+

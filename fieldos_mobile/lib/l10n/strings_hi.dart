@@ -1874,4 +1874,505 @@ const Map<String, String> stringsHi = {
       'अंतिम',
   'V-{n} (provisional)':
       'V-{n} (अस्थायी)',
+  // Weekly site close
+  'A removed entry':
+      'हटाई गई एंट्री',
+  'Advance of {amount} not worked off yet':
+      '{amount} एडवांस अभी काम से नहीं कटा',
+  'Advances not worked off':
+      'काम से न कटे एडवांस',
+  'Approve each site\'s wages, expenses and deliveries for the week.':
+      'हर साइट की हफ़्ते की मज़दूरी, खर्च और माल की डिलीवरी मंज़ूर करें।',
+  'Approve everything, and get back what was sent back, to close the week.':
+      'हफ़्ता बंद करने के लिए सब मंज़ूर करें, और जो वापस भेजा था वह ठीक होकर लौट आए।',
+  'Approve the {n} with no exceptions':
+      'बिना गड़बड़ी वाले {n} मंज़ूर करें',
+  'Approve this delivery':
+      'यह डिलीवरी मंज़ूर करें',
+  'Bill':
+      'बिल',
+  'Cancelled entry':
+      'रद्द की गई एंट्री',
+  'Changed after approval':
+      'मंज़ूरी के बाद बदला',
+  'Changed since close':
+      'बंद होने के बाद बदला',
+  'Close the week':
+      'हफ़्ता बंद करें',
+  'Close the week again':
+      'हफ़्ता फिर से बंद करें',
+  'Close this week?':
+      'यह हफ़्ता बंद करें?',
+  'Closed':
+      'बंद',
+  'Closed by {who}, {when}':
+      '{who} ने बंद किया, {when}',
+  'Corrected, review again':
+      'ठीक किया, फिर से देखें',
+  'Deliveries':
+      'माल की डिलीवरी',
+  'Delivery slip':
+      'डिलीवरी पर्ची',
+  'Each running site gets a weekly close here: wages, expenses and deliveries to approve.':
+      'हर चालू साइट का हफ़्ते का हिसाब यहाँ आता है: मंज़ूर करने के लिए मज़दूरी, खर्च और डिलीवरी।',
+  'Edited after it was entered':
+      'एंट्री के बाद बदला गया',
+  'Enter the quantity accepted.':
+      'मंज़ूर की गई मात्रा डालें।',
+  'Expenses':
+      'खर्च',
+  'Expenses {amount}':
+      'खर्च {amount}',
+  'History':
+      'इतिहास',
+  'Less than received if some was short or damaged.':
+      'अगर कुछ कम या खराब आया तो आए माल से कम।',
+  'Mark as fixed':
+      'ठीक हुआ बताएँ',
+  'Marked fixed':
+      'ठीक हुआ बताया',
+  'Material delivered':
+      'आया माल',
+  'No attendance recorded':
+      'कोई हाज़िरी दर्ज नहीं',
+  'No bill photo':
+      'बिल की फ़ोटो नहीं',
+  'No daily wage set, so wages can\'t be worked out':
+      'रोज़ की मज़दूरी तय नहीं, इसलिए हिसाब नहीं बन सकता',
+  'No decisions yet this week.':
+      'इस हफ़्ते अभी कोई फ़ैसला नहीं।',
+  'No delivery slip photo':
+      'डिलीवरी पर्ची की फ़ोटो नहीं',
+  'No invoice amount':
+      'बिल की रकम नहीं',
+  'Not against a purchase order':
+      'किसी PO के सामने नहीं',
+  'Nothing approved yet.':
+      'अभी कुछ मंज़ूर नहीं।',
+  'Nothing left to review.':
+      'देखने को कुछ बाकी नहीं।',
+  'Nothing recorded':
+      'कुछ दर्ज नहीं',
+  'Nothing sent back.':
+      'कुछ वापस नहीं भेजा।',
+  'Nothing was recorded on this site this week.':
+      'इस हफ़्ते इस साइट पर कुछ दर्ज नहीं हुआ।',
+  'Photograph the delivery slip':
+      'डिलीवरी पर्ची की फ़ोटो लें',
+  'Punch-out missing on 1 day':
+      '1 दिन पंच-आउट नहीं',
+  'Punch-out missing on {n} days':
+      '{n} दिन पंच-आउट नहीं',
+  'Quantity accepted':
+      'मंज़ूर मात्रा',
+  'Ready to close':
+      'बंद करने को तैयार',
+  'Reopen the week':
+      'हफ़्ता फिर खोलें',
+  'Reopen this week?':
+      'यह हफ़्ता फिर खोलें?',
+  'Report says {n} people, but no attendance':
+      'रिपोर्ट में {n} लोग, पर हाज़िरी नहीं',
+  'Send back':
+      'वापस भेजें',
+  'Send back to the site':
+      'साइट को वापस भेजें',
+  'Send the pack to accounts':
+      'हिसाब का पैक अकाउंट्स को भेजें',
+  'Sent back':
+      'वापस भेजा',
+  'Short by {qty} against the order':
+      'ऑर्डर से {qty} कम',
+  'Site expenses':
+      'साइट के खर्च',
+  'Slip':
+      'पर्ची',
+  'Slip photo attached':
+      'पर्ची की फ़ोटो लगी',
+  'The owner or a project manager approves the week. Fix what is sent back to you and mark it fixed.':
+      'मालिक या प्रोजेक्ट मैनेजर हफ़्ता मंज़ूर करते हैं। जो आपको वापस भेजा जाए उसे ठीक करें और ठीक हुआ बताएँ।',
+  'The photo has not reached this phone yet. Sync and try again.':
+      'फ़ोटो अभी इस फ़ोन पर नहीं आई। सिंक करके फिर कोशिश करें।',
+  'This week on site':
+      'इस हफ़्ते साइट पर',
+  'To review':
+      'देखना है',
+  'Voucher number not confirmed yet (not synced)':
+      'वाउचर नंबर अभी पक्का नहीं (सिंक नहीं हुआ)',
+  'Wages':
+      'मज़दूरी',
+  'Wages and advances paid':
+      'दी गई मज़दूरी और एडवांस',
+  'Wages earned':
+      'कमाई मज़दूरी',
+  'Wages still due':
+      'बाकी मज़दूरी',
+  'Wages {amount}':
+      'मज़दूरी {amount}',
+  'Week':
+      'हफ़्ता',
+  'Week closed':
+      'हफ़्ता बंद हुआ',
+  'Week reopened':
+      'हफ़्ता फिर खुला',
+  'Weekly close':
+      'हफ़्ते का हिसाब',
+  'What needs fixing?':
+      'क्या ठीक करना है?',
+  'What was done? (optional)':
+      'क्या किया गया? (वैकल्पिक)',
+  'Why?':
+      'क्यों?',
+  'due {amount}':
+      'बाकी {amount}',
+  'earned {amount}':
+      'कमाई {amount}',
+  'ordered {qty}':
+      'ऑर्डर {qty}',
+  '{n} exceptions':
+      '{n} गड़बड़ियाँ',
+  '{n} items approved, {amount} in all. Anything changed later comes back here to review.':
+      '{n} चीज़ें मंज़ूर, कुल {amount}। बाद में कुछ बदला तो वह फिर यहाँ देखने आएगा।',
+  '{n} items need a closer look':
+      '{n} चीज़ों को ध्यान से देखना है',
+  '{n} sent back':
+      '{n} वापस भेजे',
+  '{n} to review':
+      '{n} देखने हैं',
+  '{qty} accepted':
+      '{qty} मंज़ूर',
+  '{qty} more than ordered':
+      'ऑर्डर से {qty} ज़्यादा',
+  // Site teams, templates, supplier import, all sites
+  'Above your approval limit of {amount}. The owner approves this.':
+      'आपकी मंज़ूरी सीमा {amount} से ज़्यादा। इसे मालिक मंज़ूर करेंगे।',
+  'Accounts':
+      'अकाउंट्स',
+  'Add many suppliers':
+      'कई सप्लायर जोड़ें',
+  'Add person':
+      'व्यक्ति जोड़ें',
+  'Add to this site':
+      'इस साइट में जोड़ें',
+  'Added to the site team.':
+      'साइट टीम में जोड़ा गया।',
+  'Added {n} suppliers.':
+      '{n} सप्लायर जोड़े गए।',
+  'Added {n} suppliers. {m} already on the list were left as they were.':
+      '{n} सप्लायर जोड़े गए। सूची में पहले से मौजूद {m} जैसे थे वैसे छोड़े गए।',
+  'All sites':
+      'सभी साइटें',
+  'All {n} sites are up to date.':
+      'सभी {n} साइटें अप-टू-डेट हैं।',
+  'An empty site':
+      'खाली साइट',
+  'Approval limit (₹)':
+      'मंज़ूरी सीमा (₹)',
+  'Approves up to {amount}':
+      '{amount} तक मंज़ूर करते हैं',
+  'Can see the site, changes nothing.':
+      'साइट देख सकते हैं, कुछ बदल नहीं सकते।',
+  'Copies the set-up only. Nothing that happened on that site comes across.':
+      'सिर्फ़ सेट-अप कॉपी होता है। उस साइट पर जो हुआ वह नहीं आता।',
+  'Enter the limit in rupees, or leave it empty for no limit.':
+      'सीमा रुपयों में डालें, या कोई सीमा न हो तो खाली छोड़ें।',
+  'Estimate items and rates':
+      'एस्टिमेट आइटम और रेट',
+  'Everyone in the company is already on this site.':
+      'कंपनी के सभी लोग पहले से इस साइट पर हैं।',
+  'Everyone in the company sees this site.':
+      'कंपनी में सभी यह साइट देखते हैं।',
+  'Everyone in the company works here with their company role. Add people to give them a site role or an approval limit.':
+      'कंपनी में सभी यहाँ अपनी कंपनी भूमिका के साथ काम करते हैं। साइट भूमिका या मंज़ूरी सीमा देने के लिए लोग जोड़ें।',
+  'Everything on this site.':
+      'इस साइट पर सब कुछ।',
+  'Hidden from the rest of the company. The company\'s owners and managers still see it.':
+      'कंपनी के बाकी लोगों से छिपी। कंपनी के मालिक और मैनेजर फिर भी देखते हैं।',
+  'In the weekly close they approve items up to this. Leave empty for no limit.':
+      'हफ़्ते के हिसाब में वे इतने तक के आइटम मंज़ूर करते हैं। कोई सीमा न हो तो खाली छोड़ें।',
+  'Last week not closed':
+      'पिछला हफ़्ता बंद नहीं हुआ',
+  'No approval limit':
+      'कोई मंज़ूरी सीमा नहीं',
+  'No one is listed yet':
+      'अभी कोई सूची में नहीं',
+  'No report on {day}':
+      '{day} को रिपोर्ट नहीं',
+  'No supplier names found. Put one supplier on each line.':
+      'कोई सप्लायर नाम नहीं मिला। हर लाइन पर एक सप्लायर लिखें।',
+  'On this site':
+      'इस साइट पर',
+  'One supplier per line: name, phone, GSTIN, what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.':
+      'हर लाइन पर एक सप्लायर: नाम, फ़ोन, GSTIN, आज आप पर उनका कितना बाकी है। सिर्फ़ नाम ज़रूरी है। अगर आपका पैसा उनके पास है तो रकम के बाद "advance" लिखें।',
+  'Only this team sees the site':
+      'सिर्फ़ यह टीम साइट देखे',
+  'Paste a list':
+      'सूची पेस्ट करें',
+  'Receives material and keeps the stock.':
+      'माल लेते हैं और स्टॉक रखते हैं।',
+  'Records the day: reports, labour, money, material.':
+      'दिन दर्ज करते हैं: रिपोर्ट, मज़दूर, पैसा, माल।',
+  'Remove from this site?':
+      'इस साइट से हटाएँ?',
+  'Removed from the site team.':
+      'साइट टीम से हटाया गया।',
+  'Retention held by clients':
+      'क्लाइंट के पास रुकी रिटेंशन',
+  'Runs the site and approves up to their limit.':
+      'साइट चलाते हैं और अपनी सीमा तक मंज़ूर करते हैं।',
+  'Saved.':
+      'सेव हो गया।',
+  'Sees the money and sends packs to accounts.':
+      'पैसे का हिसाब देखते हैं और अकाउंट्स को पैक भेजते हैं।',
+  'Site team':
+      'साइट टीम',
+  'Site team and approval limits':
+      'साइट टीम और मंज़ूरी सीमाएँ',
+  'Sites marked as running show here, the ones that need someone first.':
+      'चालू साइटें यहाँ दिखती हैं, जिन्हें ध्यान चाहिए वे पहले।',
+  'Start from':
+      'शुरुआत',
+  'Storekeeper':
+      'स्टोरकीपर',
+  'Task list':
+      'काम की सूची',
+  'To come from clients':
+      'क्लाइंट से आना बाकी',
+  'Turn on Team & sync to add people. The team list comes from the company\'s accounts.':
+      'लोग जोड़ने के लिए Team & sync चालू करें। टीम की सूची कंपनी के खातों से आती है।',
+  'Up to date':
+      'अप-टू-डेट',
+  'Wages due this week':
+      'इस हफ़्ते की बाकी मज़दूरी',
+  'Workers and wages':
+      'मज़दूर और मज़दूरी',
+  'Your role here: {role}.':
+      'यहाँ आपकी भूमिका: {role}।',
+  'client owes {amount}':
+      'क्लाइंट पर {amount} बाकी',
+  'suppliers {amount}':
+      'सप्लायर {amount}',
+  'wages due {amount}':
+      'बाकी मज़दूरी {amount}',
+  '{m} of {n} sites need someone.':
+      '{n} में से {m} साइटों को ध्यान चाहिए।',
+  '{name} will no longer be on this site\'s team.':
+      '{name} अब इस साइट की टीम में नहीं रहेंगे।',
+  '{n} approvals waiting over 2 days':
+      '{n} मंज़ूरियाँ 2 दिन से ज़्यादा रुकी',
+  '{n} days without a report':
+      '{n} दिन बिना रिपोर्ट',
+  '{n} sites with last week not closed':
+      '{n} साइटों का पिछला हफ़्ता बंद नहीं',
+  '{n} to approve':
+      '{n} मंज़ूर करने हैं',
+  // Measurement book, bill payments, supplier invoices
+  'A minus quantity corrects an earlier one.':
+      'माइनस मात्रा पहले वाली को ठीक करती है।',
+  'Add invoice':
+      'इनवॉइस जोड़ें',
+  'Add the supplier first, under Procure > Suppliers.':
+      'पहले Procure > Suppliers में सप्लायर जोड़ें।',
+  'All {n} invoices match their orders and deliveries.':
+      'सभी {n} इनवॉइस अपने ऑर्डर और डिलीवरी से मेल खाते हैं।',
+  'Approved to date':
+      'अब तक मंज़ूर',
+  'Approved {qty}':
+      '{qty} मंज़ूर',
+  'Approved.':
+      'मंज़ूर किया।',
+  'BOQ item':
+      'BOQ आइटम',
+  'Cancel invoice':
+      'इनवॉइस रद्द करें',
+  'Cancel this invoice?':
+      'यह इनवॉइस रद्द करें?',
+  'Cancelled: {why}':
+      'रद्द: {why}',
+  'Decide':
+      'फ़ैसला करें',
+  'Enter each invoice as it comes. It is checked against the purchase order and what was received.':
+      'हर इनवॉइस आते ही दर्ज करें। उसे PO और आए माल से मिलाया जाता है।',
+  'Everything approved has been billed already.':
+      'जो मंज़ूर हुआ वह सब बिल हो चुका है।',
+  'GST in it (₹, optional)':
+      'उसमें GST (₹, वैकल्पिक)',
+  'Give the invoice number and its total.':
+      'इनवॉइस नंबर और कुल रकम दें।',
+  'Give the item, its unit and a quantity.':
+      'आइटम, उसकी यूनिट और मात्रा दें।',
+  'Invoice number':
+      'इनवॉइस नंबर',
+  'Invoice total with GST (₹)':
+      'GST सहित इनवॉइस कुल (₹)',
+  'Make the next RA bill':
+      'अगला RA बिल बनाएँ',
+  'Matched':
+      'मेल खाता',
+  'Measure work':
+      'काम नापें',
+  'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
+      'BOQ के सामने हुआ काम नापें। मंज़ूर मात्राएँ अगले RA बिल में जाती हैं।',
+  'Measured {qty} {unit}':
+      'नापा {qty} {unit}',
+  'Measurement book':
+      'मेज़रमेंट बुक',
+  'Measurement saved. It waits for approval.':
+      'नाप सेव हुआ। मंज़ूरी का इंतज़ार है।',
+  'More quantity than was received':
+      'आए माल से ज़्यादा मात्रा',
+  'More than the purchase order':
+      'PO से ज़्यादा',
+  'More than what was received':
+      'आए माल से ज़्यादा',
+  'No measurements yet':
+      'अभी कोई नाप नहीं',
+  'No purchase order':
+      'कोई PO नहीं',
+  'No supplier invoices yet':
+      'अभी कोई सप्लायर इनवॉइस नहीं',
+  'Not in the BOQ':
+      'BOQ में नहीं',
+  'Nothing received against it yet':
+      'इसके सामने अभी कुछ नहीं आया',
+  'PO {amount}':
+      'पीओ {amount}',
+  'Part paid':
+      'कुछ भुगतान',
+  'Payment against this bill':
+      'इस बिल के सामने भुगतान',
+  'Put against bills':
+      'बिलों के सामने रखें',
+  'Put it against the oldest bills still due.':
+      'इसे सबसे पुराने बाकी बिलों के सामने रखें।',
+  'Quantity approved':
+      'मंज़ूर मात्रा',
+  'Quantity invoiced (optional)':
+      'इनवॉइस की मात्रा (वैकल्पिक)',
+  'Quantity measured':
+      'नापी गई मात्रा',
+  'Record the payment in the money book first. Every payment so far is already against a bill.':
+      'पहले मनी बुक में भुगतान दर्ज करें। अब तक का हर भुगतान किसी बिल के सामने है।',
+  'Rejected.':
+      'नामंज़ूर किया।',
+  'Release retention':
+      'रिटेंशन छोड़ें',
+  'Retention held by the client: {amount}':
+      'क्लाइंट के पास रुकी रिटेंशन: {amount}',
+  'Same invoice number entered before':
+      'यही इनवॉइस नंबर पहले दर्ज हुआ',
+  'Set a rate for {items} first.':
+      'पहले {items} का रेट तय करें।',
+  'Supplier invoice':
+      'सप्लायर इनवॉइस',
+  'Supplier invoices':
+      'सप्लायर इनवॉइस',
+  'Waiting':
+      'रुका है',
+  'Where (e.g. Block A, 2nd floor)':
+      'कहाँ (जैसे Block A, दूसरी मंज़िल)',
+  'Why':
+      'क्यों',
+  'received {amount}':
+      'आया {amount}',
+  'retention held {amount}':
+      'रुकी रिटेंशन {amount}',
+  '{amount} more than received':
+      'आए माल से {amount} ज़्यादा',
+  '{amount} received is not against a bill yet':
+      'आए {amount} अभी किसी बिल के सामने नहीं',
+  '{amount} still due':
+      '{amount} अभी बाकी',
+  '{m} of {n} invoices need checking before payment.':
+      '{n} में से {m} इनवॉइस भुगतान से पहले जाँचने हैं।',
+  '{n} amounts put against bills.':
+      '{n} रकम बिलों के सामने रखी गईं।',
+  '{n} waiting for approval':
+      '{n} मंज़ूरी के इंतज़ार में',
+  '{paid} received, {due} due':
+      '{paid} आया, {due} बाकी',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'सारे रिकॉर्ड, फ़ोटो और बिल एक फ़ाइल में। इसे Drive या कंप्यूटर पर रखें।',
+  'Back up this phone':
+      'इस फ़ोन का बैकअप लें',
+  'Backup checked':
+      'बैकअप जाँच लिया',
+  'Backup failed: {error}':
+      'बैकअप नहीं हुआ: {error}',
+  'Checked before anything is replaced':
+      'कुछ भी बदलने से पहले जाँचा जाता है',
+  'Choose backup file':
+      'बैकअप फ़ाइल चुनें',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'अगली बार FieldOS खुलने पर इस फ़ोन का सब कुछ बैकअप से बदल जाएगा। अभी का डेटा फ़ोन पर अलग रखा जाता है, ताकि ज़रूरत हो तो वापस मिल सके।',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS बैकअप: {sites} साइट, {files} फ़ोटो और बिल',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} को बना: {sites} साइट, {files} फ़ोटो और बिल। रीस्टोर पूरा करने के लिए FieldOS पूरी तरह बंद करके फिर खोलें।',
+  'Restore a backup':
+      'बैकअप रीस्टोर करें',
+  'Restore a backup?':
+      'बैकअप रीस्टोर करें?',
+  'Restore failed: {error}':
+      'रीस्टोर नहीं हुआ: {error}',
+  'The backup is damaged and was not restored.':
+      'बैकअप खराब है, रीस्टोर नहीं किया।',
+  'The backup is incomplete and was not restored.':
+      'बैकअप अधूरा है, रीस्टोर नहीं किया।',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'यह बैकअप नए FieldOS से बना है। पहले ऐप अपडेट करें।',
+  'This is not a FieldOS backup file.':
+      'यह FieldOS बैकअप फ़ाइल नहीं है।',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'एक्सपोर्ट जाँच में पास नहीं हुआ, इसलिए नहीं भेजा: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'इन रकमों से ऊपर पहले प्रोजेक्ट मैनेजर मंज़ूरी देता है, फिर मालिक। मंज़ूरी न चाहिए तो खाना खाली छोड़ें। नियम अब से दर्ज होने वाली चीज़ों पर लागू होते हैं।',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'किस रकम से ऊपर पहले प्रोजेक्ट मैनेजर, फिर आप, रिक्वेस्ट, खर्च और ऑर्डर मंज़ूर करें',
+  'Approval rules':
+      'मंज़ूरी के नियम',
+  'Approval rules saved':
+      'मंज़ूरी के नियम सेव हुए',
+  'Enter amounts in rupees, or leave blank.':
+      'रकम रुपयों में डालें, या खाली छोड़ें।',
+  'Note (needed to reject)':
+      'नोट (रिजेक्ट करने के लिए ज़रूरी)',
+  'Owner also approves above (₹)':
+      'इससे ऊपर मालिक भी मंज़ूर करे (₹)',
+  'Project manager approves above (₹)':
+      'इससे ऊपर प्रोजेक्ट मैनेजर मंज़ूर करे (₹)',
+  'Purchase orders':
+      'खरीद ऑर्डर',
+  'Purchase requests':
+      'खरीद रिक्वेस्ट',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'आपकी मंज़ूरी की रकम से ऊपर की खरीद रिक्वेस्ट, ऑर्डर और खर्च यहाँ इंतज़ार करते हैं।',
+  'Say why it is rejected.':
+      'बताएँ कि क्यों रिजेक्ट किया।',
+  'Signed. It now waits for the owner\'s approval.':
+      'साइन हो गया। अब यह मालिक की मंज़ूरी का इंतज़ार कर रहा है।',
+  'The owner approves it after you.':
+      'आपके बाद मालिक इसे मंज़ूर करेगा।',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'मालिक की रकम प्रोजेक्ट मैनेजर की रकम से कम नहीं होनी चाहिए।',
+  'Waiting for a project manager\'s approval':
+      'प्रोजेक्ट मैनेजर की मंज़ूरी का इंतज़ार',
+  'Waiting for the owner\'s approval':
+      'मालिक की मंज़ूरी का इंतज़ार',
+  'Waiting for your approval':
+      'आपकी मंज़ूरी का इंतज़ार',
+  '{amount}. You sign as {level}.':
+      '{amount}। आप {level} के रूप में साइन करेंगे।',
+  '{n} requests, orders or expenses above your approval amounts':
+      'आपकी मंज़ूरी की रकम से ऊपर {n} रिक्वेस्ट, ऑर्डर या खर्च',
+  // Audit trail
+  'Audit trail':
+      'ऑडिट ट्रेल',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'हर मंज़ूरी, रद्द और भुगतान, किसने और कब किया, एक फ़ाइल में',
+  'Nothing has been recorded yet.':
+      'अभी तक कुछ दर्ज नहीं हुआ।',
 };

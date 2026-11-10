@@ -129,6 +129,7 @@ class SyncEngine {
   static const userIdColumns = {
     'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
     'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by', 'edited_by',
+    'decided_by', 'measured_by',
   };
 
   Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>
@@ -201,6 +202,7 @@ class SyncEngine {
     'documents': 'file_path',
     'dpr_photos': 'photo_path',
     'expense_attachments': 'file_path',
+    'site_receipt_attachments': 'file_path',
   };
 
   /// The Storage bucket every synced file lives in. Its policies key access
@@ -313,6 +315,8 @@ class SyncEngine {
   /// How each pulled table lands in Drift, parents before children.
   late final Map<String, Future<void> Function(Map<String, dynamic> row)> _upserters = {
         'projects': (r) => db.projectDao.upsertFromRemote(projectFromSupabaseJson(r)),
+        'site_access': (r) => db.siteTeamDao.upsertAccessFromRemote(siteAccessFromSupabaseJson(r)),
+        'project_members': (r) => db.siteTeamDao.upsertMemberFromRemote(projectMemberFromSupabaseJson(r)),
         'tasks': (r) => db.taskDao.upsertFromRemote(taskFromSupabaseJson(r)),
         'dpr_entries': (r) => db.dprDao.upsertFromRemote(dprEntryFromSupabaseJson(r)),
         'issues': (r) => db.issueDao.upsertFromRemote(issueFromSupabaseJson(r)),
@@ -352,6 +356,22 @@ class SyncEngine {
       final local = await _downloadFile(r['file_path'] as String, r['id'] as String);
       if (local != null) await db.expenseDao.upsertAttachmentFromRemote(expenseAttachmentFromSupabaseJson(r, localPath: local));
     },
+        'site_receipt_attachments': (r) async {
+      final mine = await db.materialDao.slipById(r['id'] as String);
+      if (mine != null && File(mine.filePath).existsSync()) return;
+      final local = await _downloadFile(r['file_path'] as String, r['id'] as String);
+      if (local != null) await db.materialDao.upsertSlipFromRemote(receiptAttachmentFromSupabaseJson(r, localPath: local));
+    },
+        'site_close_reviews': (r) => db.closeDao.upsertFromRemote(closeReviewFromSupabaseJson(r)),
+        'site_work_measurements': (r) =>
+            db.billingRecordsDao.upsertMeasurementFromRemote(workMeasurementFromSupabaseJson(r)),
+        'site_work_measurement_decisions': (r) =>
+            db.billingRecordsDao.upsertDecisionFromRemote(measurementDecisionFromSupabaseJson(r)),
+        'site_bill_allocations': (r) => db.billingRecordsDao.upsertAllocationFromRemote(billAllocationFromSupabaseJson(r)),
+        'site_supplier_invoices': (r) =>
+            db.billingRecordsDao.upsertSupplierInvoiceFromRemote(supplierInvoiceFromSupabaseJson(r)),
+        'site_approval_rules': (r) => db.approvalChainDao.upsertRuleFromRemote(approvalRuleFromSupabaseJson(r)),
+        'site_approval_steps': (r) => db.approvalChainDao.upsertStepFromRemote(approvalStepFromSupabaseJson(r)),
         'documents': (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
@@ -552,6 +572,16 @@ class SyncEngine {
     'site_notes': 'project_notes',
     'documents': 'documents',
     'expense_attachments': 'expense_attachments',
+    'site_receipt_attachments': 'receipt_attachments',
+    'site_close_reviews': 'close_reviews',
+    'project_members': 'project_members',
+    'site_access': 'site_access',
+    'site_work_measurements': 'work_measurements',
+    'site_work_measurement_decisions': 'work_measurement_decisions',
+    'site_bill_allocations': 'bill_allocations',
+    'site_supplier_invoices': 'supplier_invoices',
+    'site_approval_rules': 'approval_rules',
+    'site_approval_steps': 'approval_steps',
   };
 
   /// Tables whose rows carry project_id on the phone too.
@@ -559,7 +589,9 @@ class SyncEngine {
     'tasks', 'dpr_entries', 'issues', 'workers', 'equipment', 'inspections', 'work_orders', 'approvals',
     'estimations', 'purchase_requisitions', 'purchase_orders', 'project_messages', 'site_attendance',
     'site_expenses', 'site_material_receipts', 'site_material_usage', 'site_payments_received',
-    'site_client_bills', 'site_attendance_marks', 'site_notes', 'documents',
+    'site_client_bills', 'site_attendance_marks', 'site_notes', 'documents', 'site_close_reviews',
+    'project_members', 'site_access', 'site_work_measurements', 'site_work_measurement_decisions',
+    'site_bill_allocations', 'site_supplier_invoices', 'site_approval_steps',
   };
 
   /// Children found through their parent, for removing a whole site or
@@ -572,6 +604,7 @@ class SyncEngine {
     ('steel_entries', 'cost_heads', 'cost_head_id'),
     ('cost_heads', 'estimations', 'estimation_id'),
     ('expense_attachments', 'site_expenses', 'expense_id'),
+    ('site_receipt_attachments', 'site_material_receipts', 'receipt_id'),
   ];
 
   /// Removes a row from the phone, with what hangs off it (a site takes all
@@ -589,7 +622,7 @@ class SyncEngine {
             await drop(child, '$column = ?', [r.read<String>('id')]);
           }
         }
-        if (t == 'dpr_photos' || t == 'expense_attachments') {
+        if (t == 'dpr_photos' || t == 'expense_attachments' || t == 'site_receipt_attachments') {
           final column = t == 'dpr_photos' ? 'photo_path' : 'file_path';
           final files = await db
               .customSelect('SELECT $column AS f FROM $local WHERE $where',
