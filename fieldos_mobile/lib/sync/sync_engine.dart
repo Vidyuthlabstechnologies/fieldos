@@ -129,8 +129,8 @@ class SyncEngine {
   static const userIdColumns = {
     'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
     'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by', 'edited_by',
-    'decided_by', 'submitted_by', 'certified_by', 'raised_by', 'owner_id', 'acted_by', 'measured_by',
-    'supervisor_id', 'backup_id', 'updated_by',
+    'decided_by', 'submitted_by', 'certified_by', 'raised_by', 'owner_id', 'acted_by', 'measured_by', 'by_user',
+    'sent_by', 'issued_by', 'taken_by', 'reviewed_by', 'supervisor_id', 'backup_id', 'updated_by',
   };
 
   Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>
@@ -205,6 +205,7 @@ class SyncEngine {
     'expense_attachments': 'file_path',
     'site_receipt_attachments': 'file_path',
     'commercial_attachments': 'file_path',
+    'attendance_photos': 'file_path',
   };
 
   /// The Storage bucket every synced file lives in. Its policies key access
@@ -329,7 +330,14 @@ class SyncEngine {
     final pending = await db.syncOutboxDao.pendingCount();
     try {
       for (final companyId in linked) {
-        await client.rpc('report_sync_status', params: {'p_company_id': companyId, 'p_pending': pending});
+        try {
+          await client.rpc('report_sync_status', params: {'p_company_id': companyId, 'p_pending': pending});
+        } on PostgrestException catch (e) {
+          // Removed from the company: the pull takes its data off this
+          // phone; there is no status to report.
+          if (e.code == '42501') continue;
+          rethrow;
+        }
         final rows = await client.from('member_sync_status').select().eq('company_id', companyId);
         await db.dayCloseDao.replaceSyncStatus(
             companyId, [for (final r in rows) memberSyncStatusFromSupabaseJson(_toLocalIds(r))]);
@@ -428,6 +436,26 @@ class SyncEngine {
       final local = await _downloadFile(r['file_path'] as String, r['id'] as String);
       if (local != null) {
         await db.commercialDao.upsertAttachment(commercialAttachmentFromSupabaseJson(r, localPath: local));
+      }
+    },
+        'crm_leads': (r) => db.crmDao.upsertLeadFromRemote(crmLeadFromSupabaseJson(r)),
+        'crm_activities': (r) => db.crmDao.upsertActivityFromRemote(crmActivityFromSupabaseJson(r)),
+        'crm_quotes': (r) => db.crmDao.upsertQuoteFromRemote(crmQuoteFromSupabaseJson(r)),
+        'stores': (r) => db.warehouseDao.upsertStoreFromRemote(storeFromSupabaseJson(r)),
+        'stock_moves': (r) => db.warehouseDao.upsertMoveFromRemote(stockMoveFromSupabaseJson(r)),
+        'tools': (r) => db.warehouseDao.upsertToolFromRemote(toolFromSupabaseJson(r)),
+        'tool_issues': (r) => db.warehouseDao.upsertIssueFromRemote(toolIssueFromSupabaseJson(r)),
+        'staff_members': (r) => db.payrollDao.upsertStaffFromRemote(staffMemberFromSupabaseJson(r)),
+        'staff_advances': (r) => db.payrollDao.upsertAdvanceFromRemote(staffAdvanceFromSupabaseJson(r)),
+        'payroll_lines': (r) => db.payrollDao.upsertLineFromRemote(payrollLineFromSupabaseJson(r)),
+        'site_supplier_quotes': (r) => db.supplierQuoteDao.upsertFromRemote(supplierQuoteFromSupabaseJson(r)),
+        'staff_attendance': (r) => db.staffAttendanceDao.upsertFromRemote(staffAttendanceFromSupabaseJson(r)),
+        'attendance_photos': (r) async {
+      final mine = await db.staffAttendanceDao.photoById(r['id'] as String);
+      if (mine != null && File(mine.filePath).existsSync()) return;
+      final local = await _downloadFile(r['file_path'] as String, r['id'] as String);
+      if (local != null) {
+        await db.staffAttendanceDao.upsertPhotoFromRemote(attendancePhotoFromSupabaseJson(r, localPath: local));
       }
     },
         'site_work_measurements': (r) =>
@@ -648,6 +676,17 @@ class SyncEngine {
     'variation_decisions': 'variation_decisions',
     'commercial_attachments': 'commercial_attachments',
     'commercial_exception_actions': 'exception_actions',
+    'crm_leads': 'crm_leads',
+    'crm_activities': 'crm_activities',
+    'crm_quotes': 'crm_quotes',
+    'stores': 'stores',
+    'stock_moves': 'stock_moves',
+    'tools': 'tools',
+    'tool_issues': 'tool_issues',
+    'staff_members': 'staff_members',
+    'staff_advances': 'staff_advances',
+    'payroll_lines': 'payroll_lines',
+    'site_supplier_quotes': 'supplier_quotes',
     'project_members': 'project_members',
     'site_access': 'site_access',
     'site_work_measurements': 'work_measurements',
@@ -658,6 +697,8 @@ class SyncEngine {
     'site_approval_steps': 'approval_steps',
     'site_close_settings': 'site_close_settings',
     'site_day_events': 'site_day_events',
+    'attendance_photos': 'attendance_photos',
+    'staff_attendance': 'staff_attendance',
   };
 
   /// Tables whose rows carry project_id on the phone too.
@@ -667,9 +708,10 @@ class SyncEngine {
     'site_expenses', 'site_material_receipts', 'site_material_usage', 'site_payments_received',
     'site_client_bills', 'site_attendance_marks', 'site_notes', 'documents', 'site_close_reviews',
     'cost_codes', 'work_claims', 'work_certifications', 'variations', 'variation_decisions',
-    'commercial_attachments', 'commercial_exception_actions',
+    'commercial_attachments', 'commercial_exception_actions', 'site_supplier_quotes',
     'project_members', 'site_access', 'site_work_measurements', 'site_work_measurement_decisions',
     'site_bill_allocations', 'site_supplier_invoices', 'site_approval_steps', 'site_close_settings', 'site_day_events',
+    'attendance_photos', 'staff_attendance',
   };
 
   /// Children found through their parent, for removing a whole site or
@@ -683,6 +725,11 @@ class SyncEngine {
     ('cost_heads', 'estimations', 'estimation_id'),
     ('expense_attachments', 'site_expenses', 'expense_id'),
     ('site_receipt_attachments', 'site_material_receipts', 'receipt_id'),
+    ('crm_activities', 'crm_leads', 'lead_id'),
+    ('crm_quotes', 'crm_leads', 'lead_id'),
+    ('tool_issues', 'tools', 'tool_id'),
+    ('staff_advances', 'staff_members', 'staff_id'),
+    ('payroll_lines', 'staff_members', 'staff_id'),
   ];
 
   /// Removes a row from the phone, with what hangs off it (a site takes all
@@ -703,7 +750,8 @@ class SyncEngine {
         if (t == 'dpr_photos' ||
             t == 'expense_attachments' ||
             t == 'site_receipt_attachments' ||
-            t == 'commercial_attachments') {
+            t == 'commercial_attachments' ||
+            t == 'attendance_photos') {
           final column = t == 'dpr_photos' ? 'photo_path' : 'file_path';
           final files = await db
               .customSelect('SELECT $column AS f FROM $local WHERE $where',

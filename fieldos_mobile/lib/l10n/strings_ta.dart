@@ -4,6 +4,8 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_ta.dart';
+import 'package:fieldos_mobile/l10n/strings_crm_ta.dart';
+import 'package:fieldos_mobile/l10n/strings_wh_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_ta.dart';
 
 const Map<String, String> stringsTa = {
@@ -3256,5 +3258,7 @@ const Map<String, String> stringsTa = {
   'Nothing has been recorded yet.':
       'இன்னும் எதுவும் பதிவாகவில்லை.',
   ...commercialTa,
+  ...crmTa,
+  ...warehouseTa,
   ...dailyTa,
 };

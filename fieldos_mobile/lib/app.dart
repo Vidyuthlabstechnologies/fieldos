@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/features/commercial/subcontractor_portal.dart';
+import 'package:fieldos_mobile/features/portals/portal_screens.dart';
 import 'package:fieldos_mobile/features/daily/today_screen.dart';
 import 'package:fieldos_mobile/services/notification_service.dart';
 import 'package:fieldos_mobile/features/auth/login_screen.dart';
@@ -74,6 +75,9 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     // (owner's decision, 10 Nov 2026); everyone else needs a subscription
     // (the 3-day store trial counts) past login.
     if (session.role == Roles.subcontractor && session.activeCompany != null) return const SubcontractorHomeScreen();
+    // Suppliers and site clients too (owner's ask, 10 Nov 2026).
+    if (session.role == Roles.supplier && session.activeCompany != null) return const SupplierHomeScreen();
+    if (session.role == Roles.client && session.activeCompany != null) return const ClientHomeScreen();
     return SubscriptionGate(child: session.needsCompany ? const CompanySetupScreen() : const HomeScreen());
   }
 }

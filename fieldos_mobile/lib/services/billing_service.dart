@@ -28,7 +28,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
-import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/data/app_database.dart' hide Store;
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/services/subscription_access.dart';
 

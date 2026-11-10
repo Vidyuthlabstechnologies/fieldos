@@ -6,6 +6,7 @@ import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/branded_page.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/commercial/subcontractor_portal.dart';
+import 'package:fieldos_mobile/features/portals/portal_screens.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
@@ -131,6 +132,14 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
               onPressed: _busy
                   ? null
                   : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SubcontractorJoinScreen())),
+            ),
+            TextButton.icon(
+              key: const Key('setup-portal'),
+              icon: const Icon(Icons.storefront_outlined),
+              label: Text(tr('Supplier or client? Join free with the builder\'s code')),
+              onPressed: _busy
+                  ? null
+                  : () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PortalJoinScreen())),
             ),
           ],
           const SizedBox(height: 24),

@@ -253,7 +253,7 @@ Future<Uint8List> buildWorkOrderStatement({
     pageFormat: PdfPageFormat.a4,
     margin: const pw.EdgeInsets.all(28),
     footer: (ctx) => pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-      t(branding.showFooter ? 'Made with FieldOS' : '', size: 7, color: muted),
+      t(branding.footerLine, size: 7, color: muted),
       t('Page ${ctx.pageNumber} of ${ctx.pagesCount}', size: 7, color: muted),
     ]),
     build: (ctx) => [

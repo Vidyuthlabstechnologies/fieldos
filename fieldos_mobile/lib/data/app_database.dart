@@ -15,7 +15,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/core/format.dart' show fmtQty;
+import 'package:fieldos_mobile/features/attendance/staff_attendance.dart';
 import 'package:fieldos_mobile/features/commercial/commercial_rules.dart';
+import 'package:fieldos_mobile/features/crm/crm_rules.dart';
+import 'package:fieldos_mobile/features/payroll/payroll_rules.dart';
+import 'package:fieldos_mobile/features/procurement/quote_compare.dart' show awardNote, compareQuotes;
+import 'package:fieldos_mobile/features/warehouse/tools_rules.dart';
+import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart';
+import 'package:fieldos_mobile/features/money/billing_calc.dart' show BillLine, encodeLines;
 import 'package:fieldos_mobile/l10n/language.dart' show trf;
 import 'package:fieldos_mobile/data/backup.dart';
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
@@ -80,6 +87,17 @@ String? _clip(String? s, int max) {
   VariationDecisions,
   CommercialAttachments,
   ExceptionActions,
+  CrmLeads,
+  CrmActivities,
+  CrmQuotes,
+  Stores,
+  StockMoves,
+  Tools,
+  ToolIssues,
+  StaffMembers,
+  StaffAdvances,
+  PayrollLines,
+  SupplierQuotes,
   SiteAccess,
   WorkMeasurements,
   WorkMeasurementDecisions,
@@ -90,6 +108,8 @@ String? _clip(String? s, int max) {
   SiteDayEvents,
   SiteCloseSettings,
   MemberSyncStatus,
+  AttendancePhotos,
+  StaffAttendance,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -121,7 +141,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 31;
+  int get schemaVersion => 32;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -284,8 +304,8 @@ class AppDatabase extends _$AppDatabase {
           }
           // v19 to v29 are other work's steps; v30 is approval rules.
           if (from < 30) {
-            await m.createTable(approvalRules);
-            await m.createTable(approvalSteps);
+            await _createTableIfMissing(m, approvalRules);
+            await _createTableIfMissing(m, approvalSteps);
           }
           if (from < 31) {
             // Daily site close: the day's submission and what was said
@@ -295,6 +315,37 @@ class AppDatabase extends _$AppDatabase {
             // already has the tables keeps them.)
             for (final TableInfo t in [siteDayEvents, siteCloseSettings, memberSyncStatus]) {
               await _createTableIfMissing(m, t);
+            }
+          }
+          if (from < 32) {
+            // Beat Onsite (built as v21 to v24, moved after master's v31;
+            // each part checks what is there, so a phone that already has
+            // them keeps them): CRM leads, history and quotations; central
+            // stores, transfers, tools and staff salaries; supplier quotes;
+            // selfie and geofence attendance.
+            for (final TableInfo t in [
+              crmLeads,
+              crmActivities,
+              crmQuotes,
+              stores,
+              stockMoves,
+              tools,
+              toolIssues,
+              staffMembers,
+              staffAdvances,
+              payrollLines,
+              supplierQuotes,
+              attendancePhotos,
+              staffAttendance,
+            ]) {
+              await _createTableIfMissing(m, t);
+            }
+            for (final c in [labourAttendance.photoId, labourAttendance.distanceM, labourAttendance.accuracyM]) {
+              await _addColumnIfMissing(m, labourAttendance, c);
+            }
+            await _addColumnIfMissing(m, staffMembers, staffMembers.userId);
+            for (final c in [purchaseOrders.dispatchedOn, purchaseOrders.dispatchVehicle, purchaseOrders.supplierNote]) {
+              await _addColumnIfMissing(m, purchaseOrders, c);
             }
           }
         },
@@ -391,6 +442,11 @@ class AppDatabase extends _$AppDatabase {
   NoteDao get noteDao => NoteDao(this);
   CloseDao get closeDao => CloseDao(this);
   CommercialDao get commercialDao => CommercialDao(this);
+  CrmDao get crmDao => CrmDao(this);
+  WarehouseDao get warehouseDao => WarehouseDao(this);
+  PayrollDao get payrollDao => PayrollDao(this);
+  SupplierQuoteDao get supplierQuoteDao => SupplierQuoteDao(this);
+  StaffAttendanceDao get staffAttendanceDao => StaffAttendanceDao(this);
   SiteTeamDao get siteTeamDao => SiteTeamDao(this);
   BillingRecordsDao get billingRecordsDao => BillingRecordsDao(this);
   ApprovalChainDao get approvalChainDao => ApprovalChainDao(this);
@@ -3291,6 +3347,1293 @@ class ApprovalChainDao extends DatabaseAccessor<AppDatabase> with _$ApprovalChai
 
 /// The roles a person can have on one site.
 const siteRoleValues = ['owner', 'project_manager', 'site_engineer', 'accounts', 'storekeeper', 'viewer'];
+
+// ---------------------------------------------------------------------------
+// CRM (v21): leads, their history and quotations. Company-wide; the server
+// lets only the owner and project managers read or write them
+// (supabase/migrations/20261110400000_crm.sql). Rules in
+// features/crm/crm_rules.dart.
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [CrmLeads, CrmActivities, CrmQuotes])
+class CrmDao extends DatabaseAccessor<AppDatabase> with _$CrmDaoMixin {
+  CrmDao(super.db);
+
+  Future<void> _queue(String table, String id, String op, Map<String, dynamic> json) =>
+      db.syncOutboxDao.enqueue(targetTable: table, recordId: id, operation: op, payloadJson: jsonEncode(json));
+
+  Future<List<CrmLead>> leadsFor(String companyId) => (select(crmLeads)
+        ..where((l) => l.companyId.equals(companyId))
+        ..orderBy([(l) => OrderingTerm.desc(l.updatedAt)]))
+      .get();
+
+  Future<CrmLead?> leadById(String id) => (select(crmLeads)..where((l) => l.id.equals(id))).getSingleOrNull();
+
+  Future<List<CrmActivity>> activitiesFor(String leadId) => (select(crmActivities)
+        ..where((a) => a.leadId.equals(leadId))
+        ..orderBy([(a) => OrderingTerm.desc(a.createdAt), (a) => OrderingTerm.desc(a.rowId)]))
+      .get();
+
+  Future<List<CrmQuote>> quotesFor(String companyId) => (select(crmQuotes)
+        ..where((q) => q.companyId.equals(companyId))
+        ..orderBy([(q) => OrderingTerm.desc(q.quoteDate), (q) => OrderingTerm.desc(q.createdAt)]))
+      .get();
+
+  Future<List<CrmQuote>> quotesForLead(String leadId) => (select(crmQuotes)
+        ..where((q) => q.leadId.equals(leadId))
+        ..orderBy([(q) => OrderingTerm.desc(q.quoteDate), (q) => OrderingTerm.desc(q.createdAt)]))
+      .get();
+
+  Future<CrmQuote?> quoteById(String id) => (select(crmQuotes)..where((q) => q.id.equals(id))).getSingleOrNull();
+
+  Future<CrmLead> addLead({
+    required String companyId,
+    required String name,
+    required String by,
+    String? phone,
+    String? email,
+    String? location,
+    String source = 'other',
+    String? workType,
+    double? estimatedValue,
+    DateTime? nextFollowUp,
+    String? notes,
+    String? ownerId,
+  }) {
+    if (name.trim().isEmpty) throw ArgumentError('Enter who the enquiry is from.');
+    return transaction(() async {
+      final row = await into(crmLeads).insertReturning(CrmLeadsCompanion.insert(
+        id: _uuid.v4(),
+        companyId: companyId,
+        name: _clip(name.trim(), 200)!,
+        phone: Value(_blank(phone, 30)),
+        email: Value(_blank(email, 120)),
+        location: Value(_blank(location, 300)),
+        source: Value(leadSources.contains(source) ? source : 'other'),
+        workType: Value(_blank(workType, 200)),
+        estimatedValue: Value(estimatedValue),
+        nextFollowUp: Value(nextFollowUp),
+        notes: Value(_blank(notes, 1000)),
+        ownerId: Value(ownerId ?? by),
+        createdBy: by,
+      ));
+      await _queue('crm_leads', row.id, 'insert', crmLeadToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  Future<CrmLead> updateLead(
+    String id, {
+    String? name,
+    Value<String?> phone = const Value.absent(),
+    Value<String?> email = const Value.absent(),
+    Value<String?> location = const Value.absent(),
+    String? source,
+    Value<String?> workType = const Value.absent(),
+    Value<double?> estimatedValue = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
+    Value<String?> ownerId = const Value.absent(),
+  }) =>
+      transaction(() async {
+        String? b(Value<String?> v, int max) => _blank(v.value, max);
+        await (update(crmLeads)..where((l) => l.id.equals(id))).write(CrmLeadsCompanion(
+          name: name == null || name.trim().isEmpty ? const Value.absent() : Value(_clip(name.trim(), 200)!),
+          phone: phone.present ? Value(b(phone, 30)) : const Value.absent(),
+          email: email.present ? Value(b(email, 120)) : const Value.absent(),
+          location: location.present ? Value(b(location, 300)) : const Value.absent(),
+          source: source != null && leadSources.contains(source) ? Value(source) : const Value.absent(),
+          workType: workType.present ? Value(b(workType, 200)) : const Value.absent(),
+          estimatedValue: estimatedValue,
+          notes: notes.present ? Value(b(notes, 1000)) : const Value.absent(),
+          ownerId: ownerId,
+          updatedAt: Value(DateTime.now()),
+        ));
+        return _pushLead(id);
+      });
+
+  Future<CrmLead> _pushLead(String id) async {
+    final row = await (select(crmLeads)..where((l) => l.id.equals(id))).getSingle();
+    await _queue('crm_leads', id, 'update', crmLeadToSupabaseJson(row));
+    return row;
+  }
+
+  /// Moves a lead along. Lost needs a reason (that is the point of
+  /// tracking it); every move is written to the lead's history.
+  Future<CrmLead> setStage(String id, String stage, {required String by, String? lostReason, DateTime? now}) {
+    if (!leadStages.contains(stage)) throw ArgumentError.value(stage, 'stage');
+    if (stage == 'lost' && (lostReason ?? '').trim().isEmpty) {
+      throw ArgumentError('Say why it was lost, so the next one is not.');
+    }
+    return transaction(() async {
+      final before = await leadById(id);
+      if (before == null) throw StateError('This lead is no longer on the phone.');
+      if (before.stage == stage) return before;
+      final at = now ?? DateTime.now();
+      await (update(crmLeads)..where((l) => l.id.equals(id))).write(CrmLeadsCompanion(
+        stage: Value(stage),
+        lostReason: Value(stage == 'lost' ? _clip(lostReason!.trim(), 300) : null),
+        // Nothing to follow up on a decided lead.
+        nextFollowUp: isOpenStage(stage) ? const Value.absent() : const Value(null),
+        updatedAt: Value(at),
+      ));
+      final note = stage == 'lost'
+          ? '${leadStageLabels[before.stage]} -> ${leadStageLabels[stage]}: ${lostReason!.trim()}'
+          : '${leadStageLabels[before.stage]} -> ${leadStageLabels[stage]}';
+      await _addActivity(before.companyId, id, 'stage', note, by, at);
+      return _pushLead(id);
+    });
+  }
+
+  Future<CrmLead> setFollowUp(String id, DateTime? when) => transaction(() async {
+        await (update(crmLeads)..where((l) => l.id.equals(id)))
+            .write(CrmLeadsCompanion(nextFollowUp: Value(when), updatedAt: Value(DateTime.now())));
+        return _pushLead(id);
+      });
+
+  /// Logs a call, visit or note and (optionally) sets the next follow-up
+  /// in one go, the way it happens on the phone after a call. A first
+  /// contact moves a new lead to contacted.
+  Future<void> logActivity({
+    required String leadId,
+    required String kind,
+    required String note,
+    required String by,
+    DateTime? nextFollowUp,
+    bool clearFollowUp = false,
+    DateTime? now,
+  }) {
+    if (!activityKinds.contains(kind)) throw ArgumentError.value(kind, 'kind');
+    if (note.trim().isEmpty) throw ArgumentError('Write what was said or agreed.');
+    return transaction(() async {
+      final lead = await leadById(leadId);
+      if (lead == null) throw StateError('This lead is no longer on the phone.');
+      final at = now ?? DateTime.now();
+      await _addActivity(lead.companyId, leadId, kind, note.trim(), by, at);
+      final moveOn = lead.stage == 'new' && kind != 'note';
+      await (update(crmLeads)..where((l) => l.id.equals(leadId))).write(CrmLeadsCompanion(
+        stage: moveOn ? Value(kind == 'visit' ? 'site_visit' : 'contacted') : const Value.absent(),
+        nextFollowUp: nextFollowUp != null
+            ? Value(nextFollowUp)
+            : clearFollowUp
+                ? const Value(null)
+                : const Value.absent(),
+        updatedAt: Value(at),
+      ));
+      await _pushLead(leadId);
+    });
+  }
+
+  Future<void> _addActivity(String companyId, String leadId, String kind, String note, String by, DateTime at) async {
+    final row = await into(crmActivities).insertReturning(CrmActivitiesCompanion.insert(
+      id: _uuid.v4(),
+      companyId: companyId,
+      leadId: leadId,
+      kind: kind,
+      note: _clip(note, 1000)!,
+      byUser: by,
+      createdAt: Value(at),
+    ));
+    await _queue('crm_activities', row.id, 'insert', crmActivityToSupabaseJson(row));
+  }
+
+  /// A new quote, or a change to one. The total is worked out here so the
+  /// list and the pipeline always agree with the PDF.
+  Future<CrmQuote> saveQuote({
+    String? id,
+    required String leadId,
+    required List<BillLine> lines,
+    required String by,
+    double gstRate = 18,
+    bool interState = false,
+    double discount = 0,
+    DateTime? quoteDate,
+    DateTime? validUntil,
+    String? terms,
+  }) {
+    final clean = [for (final l in lines) if (l.description.trim().isNotEmpty) l];
+    if (clean.isEmpty) throw ArgumentError('Add at least one item with a description.');
+    if (clean.any((l) => l.qty < 0 || l.rate < 0)) throw ArgumentError('Quantities and rates cannot be negative.');
+    if (gstRate < 0 || gstRate > 28) throw ArgumentError('GST is between 0 and 28%.');
+    final totals = quoteTotals(clean, discount: discount, gstRate: gstRate, interState: interState);
+    return transaction(() async {
+      final lead = await leadById(leadId);
+      if (lead == null) throw StateError('This lead is no longer on the phone.');
+      final date = quoteDate ?? DateTime.now();
+      if (id == null) {
+        final existing = (await quotesFor(lead.companyId)).map((q) => q.quoteNumber);
+        final row = await into(crmQuotes).insertReturning(CrmQuotesCompanion.insert(
+          id: _uuid.v4(),
+          companyId: lead.companyId,
+          leadId: leadId,
+          quoteNumber: nextQuoteNumber(existing, date),
+          quoteDate: date,
+          validUntil: Value(validUntil),
+          linesJson: Value(encodeLines(clean)),
+          gstRate: Value(gstRate),
+          interState: Value(interState),
+          discount: Value(totals.discount),
+          total: Value(totals.total),
+          terms: Value(_blank(terms, 2000)),
+          createdBy: by,
+        ));
+        await _queue('crm_quotes', row.id, 'insert', crmQuoteToSupabaseJson(row));
+        if (const ['new', 'contacted', 'site_visit'].contains(lead.stage)) {
+          await (update(crmLeads)..where((l) => l.id.equals(leadId)))
+              .write(CrmLeadsCompanion(stage: const Value('quoted'), updatedAt: Value(DateTime.now())));
+          await _addActivity(lead.companyId, leadId, 'stage',
+              '${leadStageLabels[lead.stage]} -> ${leadStageLabels['quoted']}: ${row.quoteNumber}', by, DateTime.now());
+          await _pushLead(leadId);
+        }
+        return row;
+      }
+      final before = await quoteById(id);
+      if (before == null) throw StateError('This quote is no longer on the phone.');
+      if (before.status == 'accepted') throw ArgumentError('An accepted quote is not changed. Make a new one.');
+      await (update(crmQuotes)..where((q) => q.id.equals(id))).write(CrmQuotesCompanion(
+        quoteDate: Value(date),
+        validUntil: Value(validUntil),
+        linesJson: Value(encodeLines(clean)),
+        gstRate: Value(gstRate),
+        interState: Value(interState),
+        discount: Value(totals.discount),
+        total: Value(totals.total),
+        terms: Value(_blank(terms, 2000)),
+        updatedAt: Value(DateTime.now()),
+      ));
+      final row = await (select(crmQuotes)..where((q) => q.id.equals(id))).getSingle();
+      await _queue('crm_quotes', id, 'update', crmQuoteToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  Future<CrmQuote> setQuoteStatus(String id, String status, {required String by}) {
+    if (!quoteStatuses.contains(status)) throw ArgumentError.value(status, 'status');
+    return transaction(() async {
+      final q = await quoteById(id);
+      if (q == null) throw StateError('This quote is no longer on the phone.');
+      await (update(crmQuotes)..where((x) => x.id.equals(id)))
+          .write(CrmQuotesCompanion(status: Value(status), updatedAt: Value(DateTime.now())));
+      final row = await (select(crmQuotes)..where((x) => x.id.equals(id))).getSingle();
+      await _queue('crm_quotes', id, 'update', crmQuoteToSupabaseJson(row));
+      await _addActivity(q.companyId, q.leadId, 'stage',
+          '${q.quoteNumber}: ${quoteStatusLabels[q.status]} -> ${quoteStatusLabels[status]}', by, DateTime.now());
+      return row;
+    });
+  }
+
+  Future<void> deleteQuote(String id) => transaction(() async {
+        final q = await quoteById(id);
+        if (q == null) return;
+        if (q.status == 'accepted') throw ArgumentError('An accepted quote is kept with the site it became.');
+        await (delete(crmQuotes)..where((x) => x.id.equals(id))).go();
+        await _queue('crm_quotes', id, 'delete', {'id': id});
+      });
+
+  /// Won: makes the site with the client's name, puts the accepted quote's
+  /// items on it as budget lines, and links the lead to it. One
+  /// transaction, so a half-made site never appears.
+  Future<Project> convertToSite({
+    required String leadId,
+    required String siteName,
+    required String by,
+    String? quoteId,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final lead = await leadById(leadId);
+        if (lead == null) throw StateError('This lead is no longer on the phone.');
+        if (lead.projectId != null) {
+          final existing = await db.projectDao.byId(lead.projectId!);
+          if (existing != null) return existing;
+        }
+        final name = siteName.trim().isEmpty ? lead.name : siteName.trim();
+        final project = await db.projectDao.create(ProjectsCompanion.insert(
+          id: _uuid.v4(),
+          companyId: lead.companyId,
+          name: _clip(name, 200)!,
+          clientName: Value(_clip(lead.name, 200)),
+          status: const Value('planning'),
+        ));
+        if (quoteId != null) {
+          final q = await quoteById(quoteId);
+          if (q != null) {
+            if (q.status != 'accepted') await setQuoteStatus(q.id, 'accepted', by: by);
+            for (final b in budgetLinesFromQuote(decodeQuoteLines(q.linesJson))) {
+              await db.commercialDao
+                  .addCostCode(projectId: project.id, code: b.code, name: _clip(b.name, 200)!, originalBudget: b.budget);
+            }
+          }
+        }
+        final at = now ?? DateTime.now();
+        await (update(crmLeads)..where((l) => l.id.equals(leadId))).write(CrmLeadsCompanion(
+          stage: const Value('won'),
+          projectId: Value(project.id),
+          nextFollowUp: const Value(null),
+          lostReason: const Value(null),
+          updatedAt: Value(at),
+        ));
+        await _addActivity(lead.companyId, leadId, 'stage',
+            '${leadStageLabels[lead.stage]} -> ${leadStageLabels['won']}: ${project.name}', by, at);
+        await _pushLead(leadId);
+        return project;
+      });
+
+  Future<void> deleteLead(String id) => transaction(() async {
+        final lead = await leadById(id);
+        if (lead == null) return;
+        if (lead.projectId != null) throw ArgumentError('A won lead is kept: it is where the site came from.');
+        await (delete(crmActivities)..where((a) => a.leadId.equals(id))).go();
+        await (delete(crmQuotes)..where((q) => q.leadId.equals(id))).go();
+        await (delete(crmLeads)..where((l) => l.id.equals(id))).go();
+        // The server removes the history and quotes with the lead.
+        await _queue('crm_leads', id, 'delete', {'id': id});
+      });
+
+  Future<void> upsertLeadFromRemote(CrmLeadsCompanion c) => into(crmLeads).insertOnConflictUpdate(c);
+  Future<void> upsertActivityFromRemote(CrmActivitiesCompanion c) => into(crmActivities).insertOnConflictUpdate(c);
+  Future<void> upsertQuoteFromRemote(CrmQuotesCompanion c) => into(crmQuotes).insertOnConflictUpdate(c);
+}
+
+String? _blank(String? s, int max) {
+  final t = s?.trim() ?? '';
+  return t.isEmpty ? null : _clip(t, max);
+}
+
+/// Company stores, stock moves between stores and sites, and the tools
+/// register.
+@DriftAccessor(tables: [Stores, StockMoves, Tools, ToolIssues])
+class WarehouseDao extends DatabaseAccessor<AppDatabase> with _$WarehouseDaoMixin {
+  WarehouseDao(super.db);
+
+  Future<void> _queue(String table, String id, String op, Map<String, dynamic> json) =>
+      db.syncOutboxDao.enqueue(targetTable: table, recordId: id, operation: op, payloadJson: jsonEncode(json));
+
+  // --- Stores -----------------------------------------------------------------
+
+  Future<List<Store>> storesFor(String companyId, {bool includeArchived = false}) => (select(stores)
+        ..where((s) => s.companyId.equals(companyId) & (includeArchived ? const Constant(true) : s.archived.equals(false)))
+        ..orderBy([(s) => OrderingTerm.asc(s.name)]))
+      .get();
+
+  Future<Store?> storeById(String id) => (select(stores)..where((s) => s.id.equals(id))).getSingleOrNull();
+
+  Future<Store> addStore({required String companyId, required String name, required String by, String? location}) async {
+    if (name.trim().isEmpty) throw ArgumentError('Enter the store name.');
+    return transaction(() async {
+      final row = await into(stores).insertReturning(StoresCompanion.insert(
+        id: _uuid.v4(),
+        companyId: companyId,
+        name: _clip(name, 120)!,
+        location: Value(_blankW(location, 300)),
+        createdBy: by,
+      ));
+      await _queue('stores', row.id, 'insert', storeToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  Future<void> updateStore(String id, {required String name, String? location, bool? archived}) =>
+      transaction(() async {
+        if (name.trim().isEmpty) throw ArgumentError('Enter the store name.');
+        await (update(stores)..where((s) => s.id.equals(id))).write(StoresCompanion(
+          name: Value(_clip(name, 120)!),
+          location: Value(_blankW(location, 300)),
+          archived: archived == null ? const Value.absent() : Value(archived),
+        ));
+        final row = await storeById(id);
+        if (row != null) await _queue('stores', id, 'update', storeToSupabaseJson(row));
+      });
+
+  // --- Stock moves --------------------------------------------------------------
+
+  Future<List<StockMove>> movesFor(String companyId) => (select(stockMoves)
+        ..where((m) => m.companyId.equals(companyId))
+        ..orderBy([(m) => OrderingTerm.desc(m.sentOn), (m) => OrderingTerm.desc(m.createdAt)]))
+      .get();
+
+  /// Moves into or out of one site, for its stock tab.
+  Future<List<StockMove>> movesForSite(String projectId) => (select(stockMoves)
+        ..where((m) => m.fromProjectId.equals(projectId) | m.toProjectId.equals(projectId))
+        ..orderBy([(m) => OrderingTerm.desc(m.sentOn), (m) => OrderingTerm.desc(m.createdAt)]))
+      .get();
+
+  Future<StockMove?> moveById(String id) => (select(stockMoves)..where((m) => m.id.equals(id))).getSingleOrNull();
+
+  /// Saves a move after [checkMove]. Material bought into a store and count
+  /// corrections are done at once; a transfer is on the way until counted
+  /// at the other end. A transfer out of a store is priced at the store's
+  /// average rate when no rate is given, and cannot send more than the
+  /// store holds.
+  Future<StockMove> addMove({
+    required String companyId,
+    required String kind,
+    required String materialName,
+    required double quantity,
+    required String by,
+    String? unit,
+    String? fromStoreId,
+    String? fromProjectId,
+    String? toStoreId,
+    String? toProjectId,
+    String? supplierName,
+    double? rate,
+    String? vehicle,
+    String? note,
+    DateTime? on,
+  }) async {
+    final problem = checkMove(
+      kind: kind,
+      fromStoreId: fromStoreId,
+      fromProjectId: fromProjectId,
+      toStoreId: toStoreId,
+      toProjectId: toProjectId,
+      materialName: materialName,
+      quantity: quantity,
+      note: note,
+    );
+    if (problem != null) throw ArgumentError(problem);
+    if (rate != null && rate < 0) throw ArgumentError('A rate is not below zero.');
+    return transaction(() async {
+      var r = rate;
+      if (fromStoreId != null) {
+        final all = await movesFor(companyId);
+        final have = storeBalance(all, fromStoreId, materialName, unit);
+        if (quantity > have + 1e-9) {
+          throw ArgumentError(trf('The store has only {qty} of this.', {'qty': fmtQty(have < 0 ? 0 : have)}));
+        }
+        r ??= storeRate(all, fromStoreId, materialName, unit);
+      }
+      final now = on ?? DateTime.now();
+      final row = await into(stockMoves).insertReturning(StockMovesCompanion.insert(
+        id: _uuid.v4(),
+        companyId: companyId,
+        kind: kind,
+        fromStoreId: Value(fromStoreId),
+        fromProjectId: Value(fromProjectId),
+        toStoreId: Value(toStoreId),
+        toProjectId: Value(toProjectId),
+        supplierName: Value(kind == 'inward' ? _blankW(supplierName, 120) : null),
+        materialName: _clip(materialName, 200)!,
+        unit: Value(_blankW(unit, 20)),
+        quantity: quantity,
+        rate: Value(r == null ? null : (r * 100).roundToDouble() / 100),
+        status: Value(kind == 'transfer' ? 'in_transit' : 'received'),
+        receivedQty: Value(kind == 'transfer' ? null : quantity),
+        vehicle: Value(_blankW(vehicle, 40)),
+        note: Value(_blankW(note, 300)),
+        sentBy: by,
+        sentOn: now,
+        receivedBy: Value(kind == 'transfer' ? null : by),
+        receivedOn: Value(kind == 'transfer' ? null : now),
+      ));
+      await _queue('stock_moves', row.id, 'insert', stockMoveToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  /// The receiving end counts what arrived. [arrived] defaults to all of it;
+  /// less is a shortage, kept on the move.
+  Future<StockMove> receive(String id, {required String by, double? arrived, String? note, DateTime? on}) =>
+      transaction(() async {
+        final m = await moveById(id);
+        if (m == null) throw ArgumentError('That transfer is no longer here.');
+        if (m.status != 'in_transit') throw ArgumentError('This transfer was already closed.');
+        final qty = arrived ?? m.quantity;
+        if (qty < 0 || qty > m.quantity + 1e-9) throw ArgumentError('Enter what arrived, up to what was sent.');
+        final extra = _blankW(note, 300);
+        await (update(stockMoves)..where((x) => x.id.equals(id))).write(StockMovesCompanion(
+          status: const Value('received'),
+          receivedQty: Value(qty),
+          receivedBy: Value(by),
+          receivedOn: Value(on ?? DateTime.now()),
+          note: extra == null ? const Value.absent() : Value(_clip([m.note, extra].whereType<String>().join(' / '), 300)),
+        ));
+        final row = (await moveById(id))!;
+        await _queue('stock_moves', id, 'update', stockMoveToSupabaseJson(row));
+        return row;
+      });
+
+  /// Calls back a transfer that has not been received. The material is back
+  /// with the sender.
+  Future<void> cancelMove(String id, {String? reason}) => transaction(() async {
+        final m = await moveById(id);
+        if (m == null) return;
+        if (m.status != 'in_transit') throw ArgumentError('Only a transfer still on the way can be called back.');
+        final why = _blankW(reason, 300);
+        await (update(stockMoves)..where((x) => x.id.equals(id))).write(StockMovesCompanion(
+          status: const Value('cancelled'),
+          note: why == null ? const Value.absent() : Value(_clip([m.note, why].whereType<String>().join(' / '), 300)),
+        ));
+        final row = (await moveById(id))!;
+        await _queue('stock_moves', id, 'update', stockMoveToSupabaseJson(row));
+      });
+
+  // --- Tools ------------------------------------------------------------------
+
+  Future<List<Tool>> toolsFor(String companyId) => (select(tools)
+        ..where((t) => t.companyId.equals(companyId))
+        ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+      .get();
+
+  Future<Tool?> toolById(String id) => (select(tools)..where((t) => t.id.equals(id))).getSingleOrNull();
+
+  Future<List<ToolIssue>> issuesFor(String companyId) => (select(toolIssues)
+        ..where((i) => i.companyId.equals(companyId))
+        ..orderBy([(i) => OrderingTerm.desc(i.issuedOn), (i) => OrderingTerm.desc(i.createdAt)]))
+      .get();
+
+  Future<List<ToolIssue>> issuesForTool(String toolId) => (select(toolIssues)
+        ..where((i) => i.toolId.equals(toolId))
+        ..orderBy([(i) => OrderingTerm.desc(i.issuedOn), (i) => OrderingTerm.desc(i.createdAt)]))
+      .get();
+
+  Future<ToolIssue?> issueById(String id) => (select(toolIssues)..where((i) => i.id.equals(id))).getSingleOrNull();
+
+  /// Adds a tool; with no code it gets the next asset tag (T-001 ...).
+  Future<Tool> addTool({
+    required String companyId,
+    required String name,
+    required String by,
+    String? code,
+    String? category,
+    double? value,
+    String? storeId,
+    String? notes,
+  }) async {
+    if (name.trim().isEmpty) throw ArgumentError('Enter the tool name.');
+    if (value != null && value < 0) throw ArgumentError('A value is not below zero.');
+    return transaction(() async {
+      final tag = _blankW(code, 40) ?? nextToolCode(await toolsFor(companyId));
+      final row = await into(tools).insertReturning(ToolsCompanion.insert(
+        id: _uuid.v4(),
+        companyId: companyId,
+        name: _clip(name, 120)!,
+        code: Value(tag),
+        category: Value(_blankW(category, 60)),
+        value: Value(value),
+        storeId: Value(storeId),
+        notes: Value(_blankW(notes, 300)),
+        createdBy: by,
+      ));
+      await _queue('tools', row.id, 'insert', toolToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  Future<void> updateTool(
+    String id, {
+    required String name,
+    String? code,
+    String? category,
+    double? value,
+    String? storeId,
+    String? condition,
+    String? notes,
+  }) =>
+      transaction(() async {
+        if (name.trim().isEmpty) throw ArgumentError('Enter the tool name.');
+        if (condition != null && !toolConditions.contains(condition)) throw ArgumentError('Unknown condition.');
+        await (update(tools)..where((t) => t.id.equals(id))).write(ToolsCompanion(
+          name: Value(_clip(name, 120)!),
+          code: Value(_blankW(code, 40)),
+          category: Value(_blankW(category, 60)),
+          value: Value(value),
+          storeId: Value(storeId),
+          condition: condition == null ? const Value.absent() : Value(condition),
+          notes: Value(_blankW(notes, 300)),
+          updatedAt: Value(DateTime.now()),
+        ));
+        final row = await toolById(id);
+        if (row != null) await _queue('tools', id, 'update', toolToSupabaseJson(row));
+      });
+
+  /// Hands a tool to someone, at a site or from the store. A tool already
+  /// out, lost or retired is not issued again.
+  Future<ToolIssue> issueTool({
+    required String toolId,
+    required String issuedTo,
+    required String by,
+    String? projectId,
+    String? workerId,
+    DateTime? dueBack,
+    String? note,
+    DateTime? on,
+  }) =>
+      transaction(() async {
+        final t = await toolById(toolId);
+        if (t == null) throw ArgumentError('That tool is no longer here.');
+        if (issuedTo.trim().isEmpty) throw ArgumentError('Enter who is taking it.');
+        final now = on ?? DateTime.now();
+        final state = toolState(t, await issuesForTool(toolId), now);
+        if (state == ToolState.issued || state == ToolState.overdue) {
+          throw ArgumentError('This tool is already out. Take it back first.');
+        }
+        if (state == ToolState.lost || state == ToolState.retired) throw ArgumentError('This tool is not in use.');
+        final row = await into(toolIssues).insertReturning(ToolIssuesCompanion.insert(
+          id: _uuid.v4(),
+          companyId: t.companyId,
+          toolId: toolId,
+          projectId: Value(projectId),
+          issuedTo: _clip(issuedTo, 120)!,
+          workerId: Value(workerId),
+          issuedBy: by,
+          issuedOn: now,
+          dueBack: Value(dueBack),
+          note: Value(_blankW(note, 300)),
+        ));
+        await _queue('tool_issues', row.id, 'insert', toolIssueToSupabaseJson(row));
+        return row;
+      });
+
+  /// Takes a tool back: fine, damaged (with what to recover) or lost.
+  Future<ToolIssue> returnTool(String issueId,
+          {required String condition, double? recoverAmount, String? note, DateTime? on}) =>
+      transaction(() async {
+        final i = await issueById(issueId);
+        if (i == null) throw ArgumentError('That issue is no longer here.');
+        if (!isOpenIssue(i)) throw ArgumentError('This tool was already taken back.');
+        if (!returnConditions.contains(condition)) throw ArgumentError('Unknown condition.');
+        if (recoverAmount != null && recoverAmount < 0) throw ArgumentError('An amount is not below zero.');
+        final extra = _blankW(note, 300);
+        await (update(toolIssues)..where((x) => x.id.equals(issueId))).write(ToolIssuesCompanion(
+          returnedOn: Value(condition == 'lost' ? null : (on ?? DateTime.now())),
+          returnCondition: Value(condition),
+          recoverAmount: Value(condition == 'ok' ? null : recoverAmount),
+          note: extra == null ? const Value.absent() : Value(_clip([i.note, extra].whereType<String>().join(' / '), 300)),
+        ));
+        if (condition == 'damaged') {
+          // The server does the same when the return arrives (a site
+          // engineer cannot edit the register itself), so nothing is sent.
+          await (update(tools)..where((t) => t.id.equals(i.toolId) & t.condition.equals('in_use')))
+              .write(ToolsCompanion(condition: const Value('repair'), updatedAt: Value(DateTime.now())));
+        }
+        final row = (await issueById(issueId))!;
+        await _queue('tool_issues', issueId, 'update', toolIssueToSupabaseJson(row));
+        return row;
+      });
+
+  Future<void> upsertStoreFromRemote(StoresCompanion c) => into(stores).insertOnConflictUpdate(c);
+  Future<void> upsertMoveFromRemote(StockMovesCompanion c) => into(stockMoves).insertOnConflictUpdate(c);
+  Future<void> upsertToolFromRemote(ToolsCompanion c) => into(tools).insertOnConflictUpdate(c);
+  Future<void> upsertIssueFromRemote(ToolIssuesCompanion c) => into(toolIssues).insertOnConflictUpdate(c);
+}
+
+/// Monthly salaried staff, their advances and payslips.
+@DriftAccessor(tables: [StaffMembers, StaffAdvances, PayrollLines])
+class PayrollDao extends DatabaseAccessor<AppDatabase> with _$PayrollDaoMixin {
+  PayrollDao(super.db);
+
+  Future<void> _queue(String table, String id, String op, Map<String, dynamic> json) =>
+      db.syncOutboxDao.enqueue(targetTable: table, recordId: id, operation: op, payloadJson: jsonEncode(json));
+
+  Future<List<StaffMember>> staffFor(String companyId) => (select(staffMembers)
+        ..where((s) => s.companyId.equals(companyId))
+        ..orderBy([(s) => OrderingTerm.desc(s.active), (s) => OrderingTerm.asc(s.name)]))
+      .get();
+
+  Future<StaffMember?> staffById(String id) => (select(staffMembers)..where((s) => s.id.equals(id))).getSingleOrNull();
+
+  Future<List<StaffAdvance>> advancesFor(String companyId) => (select(staffAdvances)
+        ..where((a) => a.companyId.equals(companyId))
+        ..orderBy([(a) => OrderingTerm.desc(a.givenOn)]))
+      .get();
+
+  Future<List<PayrollLine>> linesFor(String companyId) => (select(payrollLines)
+        ..where((l) => l.companyId.equals(companyId))
+        ..orderBy([(l) => OrderingTerm.desc(l.month)]))
+      .get();
+
+  Future<List<PayrollLine>> linesForMonth(String companyId, String month) => (select(payrollLines)
+        ..where((l) => l.companyId.equals(companyId) & l.month.equals(month)))
+      .get();
+
+  Future<PayrollLine?> lineById(String id) => (select(payrollLines)..where((l) => l.id.equals(id))).getSingleOrNull();
+
+  static void _checkPay(String name, double basic, double hra, double other, String ptState) {
+    if (name.trim().isEmpty) throw ArgumentError('Enter the name.');
+    if (!(basic > 0)) throw ArgumentError('Enter the monthly basic pay.');
+    if (hra < 0 || other < 0) throw ArgumentError('An allowance is not below zero.');
+    if (!ptStates.contains(ptState)) throw ArgumentError('Unknown professional tax state.');
+  }
+
+  Future<StaffMember> addStaff({
+    required String companyId,
+    required String name,
+    required double basic,
+    double hra = 0,
+    double otherAllowance = 0,
+    bool pf = true,
+    bool esi = true,
+    String ptState = 'TS',
+    String? phone,
+    String? designation,
+    String? projectId,
+    String? uan,
+    DateTime? joinedOn,
+    String? userId,
+  }) async {
+    _checkPay(name, basic, hra, otherAllowance, ptState);
+    return transaction(() async {
+      await _checkLogin(companyId, userId, null);
+      final row = await into(staffMembers).insertReturning(StaffMembersCompanion.insert(
+        id: _uuid.v4(),
+        companyId: companyId,
+        name: _clip(name, 120)!,
+        phone: Value(_blankW(phone, 30)),
+        designation: Value(_blankW(designation, 80)),
+        projectId: Value(projectId),
+        basic: basic,
+        hra: Value(hra),
+        otherAllowance: Value(otherAllowance),
+        pf: Value(pf),
+        esi: Value(esi),
+        ptState: Value(ptState),
+        uan: Value(_blankW(uan, 20)),
+        joinedOn: Value(joinedOn),
+        userId: Value(userId),
+      ));
+      await _queue('staff_members', row.id, 'insert', staffMemberToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  Future<void> updateStaff(
+    String id, {
+    required String name,
+    required double basic,
+    double hra = 0,
+    double otherAllowance = 0,
+    bool pf = true,
+    bool esi = true,
+    String ptState = 'TS',
+    String? phone,
+    String? designation,
+    String? projectId,
+    String? uan,
+    DateTime? joinedOn,
+    bool active = true,
+    Value<String?> userId = const Value.absent(),
+  }) =>
+      transaction(() async {
+        _checkPay(name, basic, hra, otherAllowance, ptState);
+        if (userId.present) {
+          final s = await staffById(id);
+          if (s != null) await _checkLogin(s.companyId, userId.value, id);
+        }
+        await (update(staffMembers)..where((s) => s.id.equals(id))).write(StaffMembersCompanion(
+          name: Value(_clip(name, 120)!),
+          phone: Value(_blankW(phone, 30)),
+          designation: Value(_blankW(designation, 80)),
+          projectId: Value(projectId),
+          basic: Value(basic),
+          hra: Value(hra),
+          otherAllowance: Value(otherAllowance),
+          pf: Value(pf),
+          esi: Value(esi),
+          ptState: Value(ptState),
+          uan: Value(_blankW(uan, 20)),
+          joinedOn: Value(joinedOn),
+          active: Value(active),
+          userId: userId,
+          updatedAt: Value(DateTime.now()),
+        ));
+        final row = await staffById(id);
+        if (row != null) await _queue('staff_members', id, 'update', staffMemberToSupabaseJson(row));
+      });
+
+  /// One salary per login.
+  Future<void> _checkLogin(String companyId, String? userId, String? exceptId) async {
+    if (userId == null) return;
+    for (final o in await staffFor(companyId)) {
+      if (o.userId == userId && o.id != exceptId) {
+        throw ArgumentError(trf('That login is already linked to {name}.', {'name': o.name}));
+      }
+    }
+  }
+
+  Future<StaffAdvance> giveAdvance(
+      {required String staffId, required double amount, required String by, String? note, DateTime? on}) async {
+    if (!(amount > 0)) throw ArgumentError('Enter the amount given.');
+    return transaction(() async {
+      final s = await staffById(staffId);
+      if (s == null) throw ArgumentError('That person is no longer here.');
+      final row = await into(staffAdvances).insertReturning(StaffAdvancesCompanion.insert(
+        id: _uuid.v4(),
+        companyId: s.companyId,
+        staffId: staffId,
+        amount: amount,
+        givenOn: on ?? DateTime.now(),
+        note: Value(_blankW(note, 200)),
+        createdBy: by,
+      ));
+      await _queue('staff_advances', row.id, 'insert', staffAdvanceToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  Future<double> owedBy(String staffId, {String? exceptLineId}) async {
+    final s = await staffById(staffId);
+    if (s == null) return 0;
+    return advanceOwed(staffId, await advancesFor(s.companyId), await linesFor(s.companyId),
+        exceptLineId: exceptLineId);
+  }
+
+  /// Makes the month's payslips for every active staff member who has none
+  /// yet: the full month paid, and up to the whole advance owed recovered.
+  /// Returns how many were made.
+  Future<int> makeMonth(String companyId, String month, {required String by}) => transaction(() async {
+        final days = daysInMonth(month);
+        final have = {for (final l in await linesForMonth(companyId, month)) l.staffId};
+        final advances = await advancesFor(companyId);
+        final lines = await linesFor(companyId);
+        var made = 0;
+        for (final s in await staffFor(companyId)) {
+          if (!s.active || have.contains(s.id)) continue;
+          final joined = s.joinedOn;
+          final start = monthStart(month);
+          if (joined != null && !joined.isBefore(DateTime(start.year, start.month + 1))) continue;
+          // Joined in the month: paid from the day they joined.
+          final paidDays = joined != null && joined.year == start.year && joined.month == start.month
+              ? (days - joined.day + 1).toDouble()
+              : days.toDouble();
+          final owed = advanceOwed(s.id, advances, lines);
+          final calc = computePay(s, days: days, paidDays: paidDays, advanceWanted: owed, advanceOwed: owed);
+          await _insertLine(s, month, calc, by);
+          made++;
+        }
+        return made;
+      });
+
+  Future<PayrollLine> _insertLine(StaffMember s, String month, PayCalc c, String by) async {
+    final row = await into(payrollLines).insertReturning(PayrollLinesCompanion.insert(
+      id: _uuid.v4(),
+      companyId: s.companyId,
+      staffId: s.id,
+      month: month,
+      daysInMonth: c.daysInMonth,
+      paidDays: c.paidDays,
+      basic: c.basic,
+      hra: c.hra,
+      otherAllowance: c.otherAllowance,
+      gross: c.gross,
+      pfEmployee: c.pfEmployee,
+      esiEmployee: c.esiEmployee,
+      pt: c.pt,
+      advanceRecovery: c.advanceRecovery,
+      otherDeduction: c.otherDeduction,
+      net: c.net,
+      pfEmployer: c.pfEmployer,
+      esiEmployer: c.esiEmployer,
+      projectId: Value(s.projectId),
+      createdBy: by,
+    ));
+    await _queue('payroll_lines', row.id, 'insert', payrollLineToSupabaseJson(row));
+    return row;
+  }
+
+  /// Works a draft payslip out again with new days, recovery or other
+  /// deduction (and the person's current salary). A paid one is kept.
+  Future<PayrollLine> recalculate(String lineId,
+          {required double paidDays, required double advanceRecovery, double otherDeduction = 0}) =>
+      transaction(() async {
+        final l = await lineById(lineId);
+        if (l == null) throw ArgumentError('That payslip is no longer here.');
+        if (l.status == 'paid') throw ArgumentError('A paid salary is kept as it was paid.');
+        final s = await staffById(l.staffId);
+        if (s == null) throw ArgumentError('That person is no longer here.');
+        if (paidDays < 0 || paidDays > l.daysInMonth) {
+          throw ArgumentError(trf('Paid days are 0 to {n}.', {'n': l.daysInMonth}));
+        }
+        final owed = await owedBy(s.id, exceptLineId: l.id);
+        final c = computePay(s,
+            days: l.daysInMonth,
+            paidDays: paidDays,
+            advanceWanted: advanceRecovery,
+            advanceOwed: owed,
+            otherDeduction: otherDeduction);
+        await (update(payrollLines)..where((x) => x.id.equals(lineId))).write(PayrollLinesCompanion(
+          paidDays: Value(c.paidDays),
+          basic: Value(c.basic),
+          hra: Value(c.hra),
+          otherAllowance: Value(c.otherAllowance),
+          gross: Value(c.gross),
+          pfEmployee: Value(c.pfEmployee),
+          esiEmployee: Value(c.esiEmployee),
+          pt: Value(c.pt),
+          advanceRecovery: Value(c.advanceRecovery),
+          otherDeduction: Value(c.otherDeduction),
+          net: Value(c.net),
+          pfEmployer: Value(c.pfEmployer),
+          esiEmployer: Value(c.esiEmployer),
+          projectId: Value(s.projectId),
+          updatedAt: Value(DateTime.now()),
+        ));
+        final row = (await lineById(lineId))!;
+        await _queue('payroll_lines', lineId, 'update', payrollLineToSupabaseJson(row));
+        return row;
+      });
+
+  /// Marks a payslip paid. When the person is posted at a site and
+  /// [addSiteExpense] is set, the net pay goes in that site's money book
+  /// as a salary expense, so the site's spending includes it.
+  Future<PayrollLine> markPaid(String lineId,
+          {required String mode, required String by, bool addSiteExpense = true, DateTime? on}) =>
+      transaction(() async {
+        final l = await lineById(lineId);
+        if (l == null) throw ArgumentError('That payslip is no longer here.');
+        if (l.status == 'paid') return l;
+        if (!payModes.containsKey(mode)) throw ArgumentError('Pick how it was paid.');
+        final s = await staffById(l.staffId);
+        final when = on ?? DateTime.now();
+        String? expenseId;
+        if (addSiteExpense && l.projectId != null && l.net > 0) {
+          final e = await db.expenseDao.create(SiteExpensesCompanion.insert(
+            id: _uuid.v4(),
+            projectId: l.projectId!,
+            category: staffSalaryCategory,
+            amount: l.net,
+            incurredOn: when.toIso8601String().substring(0, 10),
+            recordedBy: by,
+            note: Value(_clip(trf('Salary {month}', {'month': l.month}), 300)),
+            paidTo: Value(_clip(s?.name, 120)),
+            mode: Value(mode),
+          ));
+          expenseId = e.id;
+        }
+        await (update(payrollLines)..where((x) => x.id.equals(lineId))).write(PayrollLinesCompanion(
+          status: const Value('paid'),
+          paidOn: Value(when),
+          paidMode: Value(mode),
+          expenseId: Value(expenseId),
+          updatedAt: Value(DateTime.now()),
+        ));
+        final row = (await lineById(lineId))!;
+        await _queue('payroll_lines', lineId, 'update', payrollLineToSupabaseJson(row));
+        return row;
+      });
+
+  /// Removes a draft payslip (made by mistake, or the person left). A paid
+  /// one is kept.
+  Future<void> deleteDraft(String lineId) => transaction(() async {
+        final l = await lineById(lineId);
+        if (l == null) return;
+        if (l.status == 'paid') throw ArgumentError('A paid salary is kept as it was paid.');
+        await (delete(payrollLines)..where((x) => x.id.equals(lineId))).go();
+        await _queue('payroll_lines', lineId, 'delete', {'id': lineId});
+      });
+
+  Future<void> upsertStaffFromRemote(StaffMembersCompanion c) => into(staffMembers).insertOnConflictUpdate(c);
+  Future<void> upsertAdvanceFromRemote(StaffAdvancesCompanion c) => into(staffAdvances).insertOnConflictUpdate(c);
+  Future<void> upsertLineFromRemote(PayrollLinesCompanion c) => into(payrollLines).insertOnConflictUpdate(c);
+}
+
+/// The money-book category for salaries paid from a site.
+const staffSalaryCategory = 'Staff salary';
+
+String? _blankW(String? s, int max) {
+  final t = s?.trim() ?? '';
+  return t.isEmpty ? null : _clip(t, max);
+}
+
+/// Supplier quotes for a purchase request, and turning the chosen one into
+/// the PO.
+@DriftAccessor(tables: [SupplierQuotes, PurchaseRequests, PurchaseOrders])
+class SupplierQuoteDao extends DatabaseAccessor<AppDatabase> with _$SupplierQuoteDaoMixin {
+  SupplierQuoteDao(super.db);
+
+  Future<void> _queue(String id, String op, SupplierQuote row) => db.syncOutboxDao.enqueue(
+      targetTable: 'site_supplier_quotes', recordId: id, operation: op, payloadJson: jsonEncode(supplierQuoteToSupabaseJson(row)));
+
+  Future<List<SupplierQuote>> forRequest(String requestId) => (select(supplierQuotes)
+        ..where((q) => q.requestId.equals(requestId))
+        ..orderBy([(q) => OrderingTerm.asc(q.createdAt)]))
+      .get();
+
+  Future<List<SupplierQuote>> forProject(String projectId) =>
+      (select(supplierQuotes)..where((q) => q.projectId.equals(projectId))).get();
+
+  Future<SupplierQuote?> byId(String id) => (select(supplierQuotes)..where((q) => q.id.equals(id))).getSingleOrNull();
+
+  static void _check(double rate, double gstPct, double transport, int? days) {
+    if (!(rate > 0)) throw ArgumentError('Enter the rate a unit.');
+    if (gstPct < 0 || gstPct > 28) throw ArgumentError('GST is 0 to 28%.');
+    if (transport < 0) throw ArgumentError('An amount is not below zero.');
+    if (days != null && days < 0) throw ArgumentError('Delivery days are not below zero.');
+  }
+
+  /// A supplier's price. A second quote from the same supplier replaces
+  /// their first while neither has been decided.
+  Future<SupplierQuote> addQuote({
+    required String requestId,
+    required String supplierId,
+    required double rate,
+    required String by,
+    double gstPct = 18,
+    double transport = 0,
+    int? deliveryDays,
+    String? paymentTerms,
+    DateTime? validUntil,
+    String? notes,
+  }) async {
+    _check(rate, gstPct, transport, deliveryDays);
+    return transaction(() async {
+      final r = await (select(purchaseRequests)..where((x) => x.id.equals(requestId))).getSingleOrNull();
+      if (r == null) throw ArgumentError('That purchase request is no longer here.');
+      if (r.status != 'pending') throw ArgumentError('This request already has a PO.');
+      final same = (await forRequest(requestId)).where((q) => q.supplierId == supplierId && q.status == 'received');
+      final values = SupplierQuotesCompanion(
+        rate: Value(rate),
+        gstPct: Value(gstPct),
+        transport: Value(transport),
+        deliveryDays: Value(deliveryDays),
+        paymentTerms: Value(_blankW(paymentTerms, 120)),
+        validUntil: Value(validUntil),
+        notes: Value(_blankW(notes, 300)),
+      );
+      if (same.isNotEmpty) {
+        final id = same.first.id;
+        await (update(supplierQuotes)..where((q) => q.id.equals(id))).write(values);
+        final row = (await byId(id))!;
+        await _queue(id, 'update', row);
+        return row;
+      }
+      final row = await into(supplierQuotes).insertReturning(values.copyWith(
+        id: Value(_uuid.v4()),
+        projectId: Value(r.projectId),
+        requestId: Value(requestId),
+        supplierId: Value(supplierId),
+        createdBy: Value(by),
+      ));
+      await _queue(row.id, 'insert', row);
+      return row;
+    });
+  }
+
+  Future<void> reject(String quoteId) => transaction(() async {
+        final q = await byId(quoteId);
+        if (q == null || q.status != 'received') return;
+        await (update(supplierQuotes)..where((x) => x.id.equals(quoteId))).write(const SupplierQuotesCompanion(status: Value('rejected')));
+        await _queue(quoteId, 'update', (await byId(quoteId))!);
+      });
+
+  /// Gives the order to [quoteId]'s supplier: the PO for the request at the
+  /// quote's landed total, the quote accepted, the others turned down. A
+  /// second tap returns the same PO.
+  Future<PurchaseOrder> award(String quoteId, {required String by, DateTime? deliveryDate}) => transaction(() async {
+        final q = await byId(quoteId);
+        if (q == null) throw ArgumentError('That quote is no longer here.');
+        if (q.status == 'rejected') throw ArgumentError('This quote was turned down.');
+        final r = await (select(purchaseRequests)..where((x) => x.id.equals(q.requestId))).getSingle();
+        final landed = compareQuotes(r, [q], DateTime.now()).lines.single.landed;
+        final po = await db.purchaseDao.orderFromRequest(
+            r.id,
+            PurchaseOrdersCompanion.insert(
+              id: _uuid.v4(),
+              projectId: r.projectId,
+              supplierId: q.supplierId,
+              raisedBy: by,
+              totalAmount: Value((landed * 100).roundToDouble() / 100),
+              deliveryDate: Value(deliveryDate ?? (q.deliveryDays == null ? null : DateTime.now().add(Duration(days: q.deliveryDays!)))),
+              notes: Value(_clip(awardNote(q), 500)),
+            ));
+        for (final other in await forRequest(r.id)) {
+          final status = other.id == quoteId ? 'accepted' : (other.status == 'received' ? 'rejected' : other.status);
+          final poId = other.id == quoteId ? po.id : other.poId;
+          if (status == other.status && poId == other.poId) continue;
+          await (update(supplierQuotes)..where((x) => x.id.equals(other.id)))
+              .write(SupplierQuotesCompanion(status: Value(status), poId: Value(poId)));
+          await _queue(other.id, 'update', (await byId(other.id))!);
+        }
+        return po;
+      });
+
+  Future<void> upsertFromRemote(SupplierQuotesCompanion c) => into(supplierQuotes).insertOnConflictUpdate(c);
+}
+
+// ---------------------------------------------------------------------------
+// Selfie and geofence attendance
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [StaffAttendance, AttendancePhotos])
+class StaffAttendanceDao extends DatabaseAccessor<AppDatabase> with _$StaffAttendanceDaoMixin {
+  StaffAttendanceDao(super.db);
+
+  Future<void> _queue(StaffAttendanceData row, String op) => db.syncOutboxDao.enqueue(
+      targetTable: 'staff_attendance', recordId: row.id, operation: op, payloadJson: jsonEncode(staffAttendanceToSupabaseJson(row)));
+
+  /// Keeps a punch or check-in photo (already on the phone) and queues it
+  /// for the cloud.
+  Future<AttendancePhoto> addPhoto({
+    required String projectId,
+    required String filePath,
+    required String by,
+    DateTime? takenAt,
+    double? lat,
+    double? lng,
+  }) =>
+      transaction(() async {
+        final row = await into(attendancePhotos).insertReturning(AttendancePhotosCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          filePath: filePath,
+          mimeType: Value(attachmentMimeType(filePath)),
+          takenBy: by,
+          takenAt: takenAt ?? DateTime.now(),
+          lat: Value(lat),
+          lng: Value(lng),
+        ));
+        await db.syncOutboxDao.enqueue(
+            targetTable: 'attendance_photos',
+            recordId: row.id,
+            operation: 'insert',
+            payloadJson: jsonEncode(attendancePhotoToSupabaseJson(row)));
+        return row;
+      });
+
+  Future<AttendancePhoto?> photoById(String? id) => id == null
+      ? Future.value(null)
+      : (select(attendancePhotos)..where((p) => p.id.equals(id))).getSingleOrNull();
+
+  Future<Map<String, AttendancePhoto>> photosFor(Iterable<String> ids) async {
+    final list = ids.toSet().toList();
+    if (list.isEmpty) return const {};
+    final rows = await (select(attendancePhotos)..where((p) => p.id.isIn(list))).get();
+    return {for (final r in rows) r.id: r};
+  }
+
+  Future<StaffAttendanceData?> byId(String id) =>
+      (select(staffAttendance)..where((a) => a.id.equals(id))).getSingleOrNull();
+
+  /// Checks [userId] in at [projectId] with a selfie. Inside the geofence
+  /// it counts at once; otherwise [reason] is needed and it waits for an OK.
+  Future<StaffAttendanceData> checkIn({
+    required String companyId,
+    required String projectId,
+    required String userId,
+    required String? selfiePath,
+    required ProjectGeofence? fence,
+    double? lat,
+    double? lng,
+    double? accuracyM,
+    String? reason,
+    DateTime? now,
+  }) {
+    if (selfiePath == null || selfiePath.isEmpty) throw ArgumentError('Take a selfie to check in.');
+    final at = now ?? DateTime.now();
+    final day = dayKey(at);
+    final geo = geoCheck(lat, lng, fence);
+    final why = _clip(reason, 300);
+    if (geo.within != true && why == null) {
+      throw ArgumentError(fence == null
+          ? 'This site has no location set. Say where you are, for your manager to approve.'
+          : lat == null
+              ? 'No GPS fix. Say where you are, for your manager to approve.'
+              : 'You are away from the site. Say why, for your manager to approve.');
+    }
+    return transaction(() async {
+      final same = await (select(staffAttendance)
+            ..where((a) => a.userId.equals(userId) & a.projectId.equals(projectId) & a.day.equals(day)))
+          .getSingleOrNull();
+      if (same != null) {
+        throw ArgumentError(same.checkOut == null
+            ? 'You are already checked in at this site.'
+            : 'You have checked in and out at this site today already.');
+      }
+      final photo = await addPhoto(projectId: projectId, filePath: selfiePath, by: userId, takenAt: at, lat: lat, lng: lng);
+      final row = await into(staffAttendance).insertReturning(StaffAttendanceCompanion.insert(
+        id: _uuid.v4(),
+        companyId: companyId,
+        projectId: projectId,
+        userId: userId,
+        day: day,
+        checkIn: at,
+        inLat: Value(lat),
+        inLng: Value(lng),
+        inAccuracyM: Value(accuracyM),
+        inDistanceM: Value(geo.distanceM),
+        inPhotoId: Value(photo.id),
+        withinGeofence: Value(geo.within),
+        status: Value(geo.within == true ? 'ok' : 'pending'),
+        reason: Value(why),
+        createdAt: Value(at),
+      ));
+      await _queue(row, 'insert');
+      return row;
+    });
+  }
+
+  /// Closes today's check-in, with a selfie and fix where there is one.
+  Future<StaffAttendanceData> checkOut(
+    String id, {
+    required ProjectGeofence? fence,
+    String? selfiePath,
+    double? lat,
+    double? lng,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final r = await byId(id);
+        if (r == null) throw ArgumentError('That check-in is no longer here.');
+        if (r.checkOut != null) throw ArgumentError('You have checked out already.');
+        final at = now ?? DateTime.now();
+        if (!at.isAfter(r.checkIn)) throw ArgumentError('Check-out is after check-in.');
+        final geo = geoCheck(lat, lng, fence);
+        final photo = selfiePath == null || selfiePath.isEmpty
+            ? null
+            : await addPhoto(projectId: r.projectId, filePath: selfiePath, by: r.userId, takenAt: at, lat: lat, lng: lng);
+        await (update(staffAttendance)..where((a) => a.id.equals(id))).write(StaffAttendanceCompanion(
+          checkOut: Value(at),
+          outLat: Value(lat),
+          outLng: Value(lng),
+          outDistanceM: Value(geo.distanceM),
+          outPhotoId: Value(photo?.id),
+          outWithin: Value(geo.within),
+        ));
+        final row = (await byId(id))!;
+        await _queue(row, 'update');
+        return row;
+      });
+
+  /// An owner or project manager approves or turns down a check-in.
+  Future<StaffAttendanceData> review(String id, {required bool approve, required String by, String? note, DateTime? now}) =>
+      transaction(() async {
+        final r = await byId(id);
+        if (r == null) throw ArgumentError('That check-in is no longer here.');
+        if (r.userId == by) throw ArgumentError('Someone else approves your own attendance.');
+        await (update(staffAttendance)..where((a) => a.id.equals(id))).write(StaffAttendanceCompanion(
+          status: Value(approve ? 'approved' : 'rejected'),
+          reviewedBy: Value(by),
+          reviewedAt: Value(now ?? DateTime.now()),
+          reviewNote: Value(_clip(note, 300)),
+        ));
+        final row = (await byId(id))!;
+        await _queue(row, 'update');
+        return row;
+      });
+
+  /// Newest first.
+  Future<List<StaffAttendanceData>> forUsers(Iterable<String> userIds, {String? fromDay, String? toDay}) {
+    final ids = userIds.toSet().toList();
+    if (ids.isEmpty) return Future.value(const []);
+    final q = select(staffAttendance)..where((a) => a.userId.isIn(ids));
+    if (fromDay != null) q.where((a) => a.day.isBiggerOrEqualValue(fromDay));
+    if (toDay != null) q.where((a) => a.day.isSmallerOrEqualValue(toDay));
+    q.orderBy([(a) => OrderingTerm.desc(a.checkIn)]);
+    return q.get();
+  }
+
+  /// Newest first.
+  Future<List<StaffAttendanceData>> forCompany(String companyId, {String? fromDay, String? toDay}) {
+    final q = select(staffAttendance)..where((a) => a.companyId.equals(companyId));
+    if (fromDay != null) q.where((a) => a.day.isBiggerOrEqualValue(fromDay));
+    if (toDay != null) q.where((a) => a.day.isSmallerOrEqualValue(toDay));
+    q.orderBy([(a) => OrderingTerm.desc(a.checkIn)]);
+    return q.get();
+  }
+
+  Future<void> upsertFromRemote(StaffAttendanceCompanion c) => into(staffAttendance).insertOnConflictUpdate(c);
+  Future<void> upsertPhotoFromRemote(AttendancePhotosCompanion c) => into(attendancePhotos).insertOnConflictUpdate(c);
+}
 
 // ---------------------------------------------------------------------------
 // Daily site close (v31). Rules in features/daily/day_close.dart; the
