@@ -17,6 +17,8 @@ import 'package:fieldos_mobile/features/payroll/payroll_rules.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_tools.dart';
 import 'package:fieldos_mobile/features/project/dpr_draft_screen.dart';
 import 'package:fieldos_mobile/features/reports/period_report.dart';
+import 'package:fieldos_mobile/features/reports/report_library.dart';
+import 'package:fieldos_mobile/features/reports/reports_library_screen.dart' show reportPeriodLabels;
 import 'package:fieldos_mobile/features/subscription/paywall_screen.dart';
 import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/warehouse/tools_rules.dart';
@@ -43,6 +45,13 @@ void main() {
     'stock move statuses': moveStatusLabels.values,
     'count correction reasons': adjustReasonChoices,
     'tool states': toolStateLabels.values,
+    'report groups': reportGroupLabels.values,
+    'report library periods': reportPeriodLabels.values,
+    'report titles': [for (final r in reportLibrary) r.title],
+    'report descriptions': [for (final r in reportLibrary) r.about],
+    'report columns': {
+      for (final r in reportLibrary) ...r.build(ReportInput(sites: const [], from: DateTime(2026), to: DateTime(2027), now: DateTime(2026, 6))).headers,
+    },
     'tool return conditions': returnConditionLabels.values,
     'professional tax states': ptStateLabels.values,
     'salary pay modes': [...payModes.values, staffSalaryCategory],

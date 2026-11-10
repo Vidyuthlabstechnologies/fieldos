@@ -12,6 +12,7 @@ import 'package:fieldos_mobile/features/close/week_close_screen.dart';
 import 'package:fieldos_mobile/features/commercial/exceptions_screen.dart';
 import 'package:fieldos_mobile/features/crm/crm_screen.dart';
 import 'package:fieldos_mobile/features/payroll/payroll_screen.dart';
+import 'package:fieldos_mobile/features/reports/reports_library_screen.dart';
 import 'package:fieldos_mobile/features/warehouse/warehouse_screen.dart';
 import 'package:fieldos_mobile/features/assistant/assistant_screen.dart';
 import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
@@ -126,6 +127,8 @@ class HomeScreen extends ConsumerWidget {
                       .push(MaterialPageRoute(builder: (_) => CommercialExceptionsScreen(companyId: company.id)));
                 case 'leads':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => LeadsScreen(companyId: company.id)));
+                case 'reports':
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => ReportsLibraryScreen(companyId: company.id)));
                 case 'stores':
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (_) => WarehouseScreen(companyId: company.id, userId: session.user!.id)));
@@ -168,6 +171,9 @@ class HomeScreen extends ConsumerWidget {
               PopupMenuItem(
                   value: 'close',
                   child: ListTile(leading: Icon(Icons.fact_check_outlined), title: Text(tr('Weekly close')))),
+              PopupMenuItem(
+                  value: 'reports',
+                  child: ListTile(leading: const Icon(Icons.summarize_outlined), title: Text(tr('Reports')))),
               PopupMenuItem(
                   value: 'exceptions',
                   child: ListTile(leading: Icon(Icons.rule_folder_outlined), title: Text(tr('Commercial exceptions')))),

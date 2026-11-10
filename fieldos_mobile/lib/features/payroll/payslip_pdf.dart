@@ -79,7 +79,7 @@ Future<Uint8List> buildPayslipPdf({
         ],
         pw.Expanded(
           child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-            t(companyName, size: 15, bold: true),
+            t(companyName, size: 15, bold: true, color: brandInk(branding)),
             if (profile.address.trim().isNotEmpty) t(profile.address.trim(), color: _muted),
           ]),
         ),
@@ -142,7 +142,7 @@ Future<Uint8List> buildPayslipPdf({
       ],
       pw.Spacer(),
       t('This is a computer-made payslip.', color: _muted, size: 8),
-      if (branding.showFooter) t('Made with FieldOS', size: 7, color: _muted, align: pw.TextAlign.right),
+      if (branding.hasFooter) t(branding.footerLine, size: 7, color: _muted, align: pw.TextAlign.right),
     ]),
   ));
   return doc.save();

@@ -65,8 +65,8 @@ Future<Uint8List> buildQuotePdf({
   doc.addPage(pw.MultiPage(
     pageFormat: PdfPageFormat.a4,
     margin: const pw.EdgeInsets.all(32),
-    footer: branding.showFooter
-        ? (ctx) => pw.Align(alignment: pw.Alignment.centerRight, child: t('Made with FieldOS', size: 7, color: _muted))
+    footer: branding.hasFooter
+        ? (ctx) => pw.Align(alignment: pw.Alignment.centerRight, child: t(branding.footerLine, size: 7, color: _muted))
         : null,
     build: (_) => [
       pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
@@ -76,7 +76,7 @@ Future<Uint8List> buildQuotePdf({
         ],
         pw.Expanded(
           child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-            t(companyName, size: 16, bold: true),
+            t(companyName, size: 16, bold: true, color: brandInk(branding)),
             if (profile.address.trim().isNotEmpty) t(profile.address.trim(), color: _muted),
             if (profile.gstin.trim().isNotEmpty) t('GSTIN: ${profile.gstin.trim().toUpperCase()}', color: _muted),
           ]),

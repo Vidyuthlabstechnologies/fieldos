@@ -819,7 +819,11 @@ class _DprPhotosBlockState extends ConsumerState<DprPhotosBlock> {
     for (final p in photos.where((p) => p.photoPath == path)) {
       await db.dprDao.deletePhoto(p.id);
     }
-    if (mounted) setState(() => _photos = _load());
+    if (!mounted) return;
+    final next = _load();
+    setState(() {
+      _photos = next;
+    });
   }
 
   @override
