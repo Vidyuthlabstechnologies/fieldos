@@ -6,7 +6,7 @@ nobody worked, or nobody sent it; those are very different when wages are
 due.
 
 Code: `fieldos_mobile/lib/features/daily/`. Server:
-`supabase/migrations/20261110200000_daily_site_close.sql` (app schema v19).
+`supabase/migrations/20261110200000_daily_site_close.sql` (app schema v31; built as v19, moved after master's v30).
 Policy test: `supabase/tests/daily_close_test.sql`.
 
 ## What each person sees

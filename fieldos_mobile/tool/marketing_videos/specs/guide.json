@@ -11,7 +11,7 @@
   {
    "type": "logo",
    "tag": "Your 3-minute guide",
-   "vo": "Welcome to Field O S. Here's how to run your sites from your phone, in three minutes.",
+   "vo": "Welcome to the new Field O S. Here's how to run your sites from your phone, in three minutes.",
    "min": 4.5
   },
   {
@@ -37,33 +37,43 @@
    "kicker": "Home",
    "title": [
     "All your sites",
-    "in one list."
+    "on one calm screen."
    ],
    "bullets": [
     "Ask FieldOS at the top",
-    "Today's brief in red when a site needs you",
-    "New project adds a site"
+    "Four big buttons for daily work",
+    "Today's brief when a site needs you"
    ],
-   "vo": "Home shows all your sites. Ask Field O S sits at the top. The red card is today's brief: it tells you when a site needs you. Tap New project to add a site.",
+   "vo": "Home shows all your sites. Ask Field O S sits at the top. Four big buttons cover the daily work: attendance, expenses, the daily report and material. Today's brief tells you when a site needs you.",
    "highlights": [
     {
      "box": [
-      45,
+      42,
       180,
-      990,
-      210
+      996,
+      216
      ],
      "at": 2.2,
      "hold": 2.2
     },
     {
      "box": [
-      45,
+      42,
+      630,
       996,
-      990,
-      210
+      300
      ],
-     "at": 5.6,
+     "at": 5.0,
+     "hold": 2.6
+    },
+    {
+     "box": [
+      42,
+      950,
+      996,
+      230
+     ],
+     "at": 9.4,
      "hold": 2.6
     }
    ]
@@ -276,9 +286,9 @@
     {
      "box": [
       60,
-      876,
+      880,
       960,
-      132
+      140
      ],
      "at": 2.2,
      "hold": 2.4
@@ -298,6 +308,42 @@
   {
    "type": "chapter",
    "num": "7",
+   "text": "Your language",
+   "vo": "Your language.",
+   "min": 2.2
+  },
+  {
+   "type": "phone",
+   "shot": "te/18_languages",
+   "kicker": "Settings → Language",
+   "title": [
+    "Six languages,",
+    "one tap."
+   ],
+   "bullets": [
+    "English, हिंदी, తెలుగు, தமிழ், ಕನ್ನಡ, मराठी",
+    "Each person picks their own"
+   ],
+   "vo": "Open Settings from the menu and pick a language: English, Hindi, Telugu, Tamil, Kannada or Marathi. Each person on your team picks their own."
+  },
+  {
+   "type": "phone",
+   "shot": "te/14_assistant",
+   "side": "right",
+   "kicker": "Read aloud",
+   "title": [
+    "Mitra reads",
+    "it to you."
+   ],
+   "vo": "Tap the speaker next to a reply, and Mitra reads it aloud. It stays off until you tap it.",
+   "mitra": {
+    "mood": "talk",
+    "pos": "bl"
+   }
+  },
+  {
+   "type": "chapter",
+   "num": "8",
    "text": "Take the tour",
    "vo": "Last, take the tour.",
    "min": 2.2

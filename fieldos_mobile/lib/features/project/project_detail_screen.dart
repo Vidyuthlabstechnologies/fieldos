@@ -15,6 +15,9 @@ import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart';
 import 'package:fieldos_mobile/features/daily/today_screen.dart';
 import 'package:fieldos_mobile/features/commercial/commercial_screens.dart';
+import 'package:fieldos_mobile/features/team/site_team_screen.dart';
+import 'package:fieldos_mobile/features/money/measurement_book_screen.dart';
+import 'package:fieldos_mobile/features/procurement/supplier_invoices_screen.dart';
 import 'package:fieldos_mobile/features/reports/period_report_screen.dart';
 import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
 import 'package:fieldos_mobile/features/project/dpr_draft_screen.dart';
@@ -164,6 +167,15 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (_) => CommercialScreen(project: widget.project)));
               }
+              if (v == 'measure') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => MeasurementBookScreen(project: widget.project)));
+              }
+              if (v == 'invoices') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => SupplierInvoicesScreen(project: widget.project)));
+              }
+              if (v == 'team') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => SiteTeamScreen(project: widget.project)));
+              }
               if (v == 'excel') exportProjectToExcel(context, ref, widget.project);
               if (v == 'notes') {
                 Navigator.of(context).push(MaterialPageRoute(
@@ -198,6 +210,27 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 child: ListTile(
                   leading: const Icon(Icons.handshake_outlined),
                   title: Text(tr('Work orders, variations and cost')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'measure',
+                child: ListTile(
+                  leading: const Icon(Icons.straighten),
+                  title: Text(tr('Measurement book')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'invoices',
+                child: ListTile(
+                  leading: const Icon(Icons.receipt_long_outlined),
+                  title: Text(tr('Supplier invoices')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'team',
+                child: ListTile(
+                  leading: const Icon(Icons.groups_outlined),
+                  title: Text(tr('Site team')),
                 ),
               ),
               PopupMenuItem(

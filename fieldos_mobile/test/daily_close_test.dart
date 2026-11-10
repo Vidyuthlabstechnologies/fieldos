@@ -243,7 +243,7 @@ void main() {
 
     expect(() => manager.overrideAndApprove(v, wages, ' '), throwsArgumentError);
     final review = await manager.overrideAndApprove(v, wages, 'Saw him on site, phone was dead');
-    expect(review.note, 'Override: Saw him on site, phone was dead');
+    expect(review!.note, 'Override: Saw him on site, phone was dead');
     v = await loadWeekVerification(db, await loadWeekClose(db, site, _tue, now: _tue.add(const Duration(hours: 20))));
     final o = v.overrideFor(wages)!;
     expect(o.recordedBy, 'pm');

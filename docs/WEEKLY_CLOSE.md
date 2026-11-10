@@ -33,7 +33,7 @@ else, so the dated history can't be rewritten.
 
 | Decision | Who | Effect |
 |---|---|---|
-| approved | owner, project manager | item is approved; for a delivery, records the quantity accepted |
+| approved | owner, project manager (a site PM up to their approval limit, see SITE_TEAMS.md) | item is approved; for a delivery, records the quantity accepted |
 | sent_back | owner, project manager | item goes back to the site with a note |
 | fixed | anyone on the site | "sorted" for a fix that changed nothing on record |
 | closed / reopened | owner, project manager | the whole week |

@@ -1,0 +1,96 @@
+{
+ "name": "fieldos-reel-7-your-site-your-language",
+ "width": 1080,
+ "height": 1920,
+ "mood": "drive",
+ "speed": 1.08,
+ "bug": true,
+ "caption_style": "bold",
+ "scenes": [
+  {
+   "type": "hook",
+   "lines": [
+    "Your site app",
+    "finally speaks",
+    "your language."
+   ],
+   "vo": "Your site app finally speaks your language.",
+   "min": 3.2
+  },
+  {
+   "type": "chat",
+   "title": [
+    "Just say it.",
+    "It's saved."
+   ],
+   "ask": "Add ₹5,000 spent on cement at Kompally",
+   "reply": "Sure, Ravi. Here it is for Kompally Villa.",
+   "card": "Expense ₹5,000 for Material at Kompally Villa, Block B · cement",
+   "final": "Saved ₹5,000 for cement at Kompally Villa.",
+   "vo": "Just say it. Five thousand for cement at Kompally. Tap save. Done.",
+   "min": 7.6,
+   "save_after": 2.4
+  },
+  {
+   "type": "phone",
+   "shot": "te/14_assistant",
+   "title": [
+    "Telugu lo",
+    "cheppandi."
+   ],
+   "vo": "Say it in Telugu, Hindi, or four more languages.",
+   "min": 3.6
+  },
+  {
+   "type": "phone",
+   "shot": "te/18_languages",
+   "title": [
+    "6 languages.",
+    "One app."
+   ],
+   "vo": "The whole team, in their own language.",
+   "min": 3
+  },
+  {
+   "type": "phone",
+   "shot": "en/15_brief",
+   "title": [
+    "Which site",
+    "needs you?"
+   ],
+   "vo": "Every evening, one brief tells you which site needs you.",
+   "highlights": [
+    {
+     "box": [
+      285,
+      336,
+      750,
+      240
+     ],
+     "at": 1.4,
+     "hold": 2
+    }
+   ]
+  },
+  {
+   "type": "phone",
+   "shot": "en/11_wage_sheet",
+   "title": [
+    "Saturday wages,",
+    "ready."
+   ],
+   "vo": "And Saturday wages add themselves up.",
+   "mitra": {
+    "mood": "thumbsUp",
+    "pos": "br",
+    "size": 260
+   }
+  },
+  {
+   "type": "cta",
+   "title": "Try FieldOS free for 3 days",
+   "vo": "Try Field O S free for three days. Link in bio.",
+   "min": 4.5
+  }
+ ]
+}

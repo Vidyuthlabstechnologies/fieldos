@@ -6,6 +6,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
+import 'package:fieldos_mobile/features/portfolio/portfolio_screen.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart';
 import 'package:fieldos_mobile/features/daily/daily_reports_screen.dart';
 import 'package:fieldos_mobile/features/daily/today_home_card.dart';
@@ -113,6 +114,8 @@ class HomeScreen extends ConsumerWidget {
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeamSyncScreen()));
                 case 'approvals':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => ApprovalsScreen(companyId: company.id)));
+                case 'portfolio':
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => PortfolioScreen(companyId: company.id)));
                 case 'daily':
                   Navigator.of(context)
                       .push(MaterialPageRoute(builder: (_) => DailyReportsScreen(companyId: company.id)));
@@ -152,6 +155,9 @@ class HomeScreen extends ConsumerWidget {
               PopupMenuItem(
                   value: 'approvals',
                   child: ListTile(leading: Icon(Icons.approval_outlined), title: Text(tr('Approvals')))),
+              PopupMenuItem(
+                  value: 'portfolio',
+                  child: ListTile(leading: Icon(Icons.domain_outlined), title: Text(tr('All sites')))),
               PopupMenuItem(
                   value: 'daily',
                   child: ListTile(leading: Icon(Icons.today_outlined), title: Text(tr('Daily reports')))),

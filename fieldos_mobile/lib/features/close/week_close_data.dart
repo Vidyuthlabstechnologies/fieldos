@@ -3,7 +3,10 @@
 library;
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/auth/site_roles.dart';
+import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/approvals/approval_chain.dart';
 import 'package:fieldos_mobile/features/close/week_close.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet.dart' show weekStart, markDay;
 
@@ -41,21 +44,63 @@ class CloseNotAllowed implements Exception {
 /// The decisions people make on a week. [role] is the app's role
 /// (owner / manager / member / viewer).
 class CloseActions {
-  CloseActions(this.db, {required this.userId, required this.role});
+  /// [site]: the person's access on this site (their site role and
+  /// approval limit). Without it, the company [role] decides, as before
+  /// site teams existed.
+  CloseActions(this.db, {required this.userId, required this.role, this.site});
   final AppDatabase db;
   final String userId;
   final String role;
+  final SiteAccessFor? site;
 
-  bool get canDecide => Roles.canApprove(role);
-  bool get canFix => Roles.canWrite(role);
+  bool get canDecide => site?.managesSite ?? Roles.canApprove(role);
+  bool get canFix => site?.canWrite ?? Roles.canWrite(role);
+
+  /// Whether this person may approve [item] themselves (its amount is
+  /// within their limit).
+  bool canApprove(CloseItem item) => canDecide && (site?.canApprove((item.amount ?? 0).abs()) ?? true);
 
   void _mustDecide() {
     if (!canDecide) throw const CloseNotAllowed('Only the owner or a project manager can approve or send back.');
   }
 
-  Future<CloseReview> approve(WeekClose w, CloseItem item, {double? acceptedQty, String? note, DateTime? now}) {
+  /// Approves [item]. An expense above the owner's approval amounts
+  /// (Settings > Approval rules) is signed at this person's level first;
+  /// when it still needs the owner, nothing more is recorded and null is
+  /// returned: it waits for the owner's approval.
+  Future<CloseReview?> approve(WeekClose w, CloseItem item, {double? acceptedQty, String? note, DateTime? now}) async {
     _mustDecide();
+    if (!canApprove(item)) {
+      throw CloseNotAllowed('This is above your approval limit of ${rupees(site?.approvalLimit ?? 0)}. '
+          'The owner approves it.');
+    }
     if (acceptedQty != null && acceptedQty < 0) throw ArgumentError('accepted quantity below zero');
+    if (item.kind == CloseKind.expense) {
+      final amount = (item.amount ?? 0).abs();
+      final rules = await db.approvalChainDao.rulesFor(w.project.companyId);
+      final made = (await (db.select(db.siteExpenses)..where((e) => e.id.equals(item.id))).getSingleOrNull())?.createdAt;
+      final required = requiredLevels(rules, ApprovalKind.expense, amount, createdAt: made);
+      if (required.isNotEmpty) {
+        var chain = chainStatus(required, await db.approvalChainDao.stepsForItem(ApprovalKind.expense, item.id));
+        if (chain.rejected) throw const CloseNotAllowed('This expense was rejected in its approvals.');
+        if (!chain.complete) {
+          final level = signingLevel(chain, site ?? SiteAccessFor(companyRole: role), amount);
+          if (level == null) throw const CloseNotAllowed("This expense is waiting for the owner's approval.");
+          await db.approvalChainDao.sign(
+            projectId: w.project.id,
+            kind: ApprovalKind.expense,
+            itemId: item.id,
+            level: level,
+            approve: true,
+            amount: amount,
+            by: userId,
+            note: note,
+          );
+          chain = chainStatus(required, await db.approvalChainDao.stepsForItem(ApprovalKind.expense, item.id));
+          if (!chain.complete) return null;
+        }
+      }
+    }
     return db.closeDao.record(
       projectId: w.project.id,
       weekStart: w.weekKey,
@@ -76,9 +121,12 @@ class CloseActions {
   Future<int> approveClean(WeekClose w, {DateTime? now}) async {
     _mustDecide();
     var n = 0;
-    for (final i in w.waiting.where((i) => !i.hasFlags)) {
-      await approve(w, i, now: now);
-      n++;
+    for (final i in w.waiting.where((i) => !i.hasFlags && canApprove(i))) {
+      try {
+        if (await approve(w, i, now: now) != null) n++;
+      } on CloseNotAllowed {
+        // Waiting for someone else's approval: left for them.
+      }
     }
     return n;
   }

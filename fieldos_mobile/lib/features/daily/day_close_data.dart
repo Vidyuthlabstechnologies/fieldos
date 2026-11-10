@@ -6,6 +6,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/auth/site_roles.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/close/week_close.dart';
 import 'package:fieldos_mobile/features/close/week_close_data.dart';
@@ -90,10 +91,22 @@ class DayCloseNotAllowed implements Exception {
 }
 
 class DayCloseActions {
-  DayCloseActions(this.db, {required this.userId, required this.role});
+  DayCloseActions(this.db, {required this.userId, required this.role, this.site});
   final AppDatabase db;
   final String userId;
   final String role;
+
+  /// This person's place on the site, for the weekly close's approval
+  /// limits (releasing or overriding held money is approving it).
+  final SiteAccessFor? site;
+
+  CloseActions get _close => CloseActions(db, userId: userId, role: role, site: site);
+
+  void _mustApprove(CloseItem item) {
+    if (!_close.canApprove(item)) {
+      throw const DayCloseNotAllowed('This is above your approval limit. The owner approves it.');
+    }
+  }
 
   bool get canRecord => Roles.canWrite(role) && role != Roles.subcontractor;
   bool get canManage => Roles.canApprove(role);
@@ -175,6 +188,7 @@ class DayCloseActions {
   /// waits for its day reports. Recorded against the approver.
   Future<SiteDayEvent> releaseVerified(WeekVerification v, CloseItem item, {DateTime? now}) {
     _mustManage();
+    _mustApprove(item);
     final iv = v.of(item);
     if (iv == null || !iv.isPartial || iv.verified <= 0.005) throw StateError('Nothing verified to release.');
     return db.dayCloseDao.record(
@@ -193,8 +207,12 @@ class DayCloseActions {
   /// Approves a weekly item in full although some of its days have no
   /// submitted report. The reason and the approver are recorded, on the
   /// override and on the approval itself.
-  Future<CloseReview> overrideAndApprove(WeekVerification v, CloseItem item, String reason, {DateTime? now}) async {
+  ///
+  /// Returns null when the item still waits for a higher approver (an
+  /// approval rule), as [CloseActions.approve] does.
+  Future<CloseReview?> overrideAndApprove(WeekVerification v, CloseItem item, String reason, {DateTime? now}) async {
     _mustManage();
+    _mustApprove(item);
     if (reason.trim().isEmpty) throw ArgumentError('Say why it is approved without the day reports.');
     final iv = v.of(item);
     await db.dayCloseDao.record(
@@ -208,8 +226,7 @@ class DayCloseActions {
       note: reason,
       now: now,
     );
-    return CloseActions(db, userId: userId, role: role)
-        .approve(v.week, item, note: 'Override: ${reason.trim()}', now: now);
+    return _close.approve(v.week, item, note: 'Override: ${reason.trim()}', now: now);
   }
 }
 
