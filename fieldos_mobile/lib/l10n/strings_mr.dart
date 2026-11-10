@@ -2749,4 +2749,6 @@ const Map<String, String> stringsMr = {
       'पर्यावरण',
   'Final':
       'अंतिम',
+  'V-{n} (provisional)':
+      'V-{n} (तात्पुरता)',
 };

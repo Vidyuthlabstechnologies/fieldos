@@ -1860,4 +1860,6 @@ const Map<String, String> stringsTe = {
       'పర్యావరణం',
   'Final':
       'చివరి',
+  'V-{n} (provisional)':
+      'V-{n} (తాత్కాలిక)',
 };

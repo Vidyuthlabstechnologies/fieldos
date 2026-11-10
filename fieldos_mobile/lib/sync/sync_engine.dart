@@ -292,7 +292,12 @@ class SyncEngine {
         final keep = {...dirty.map((k) => k.substring(k.indexOf(':') + 1)), ...await db.syncOutboxDao.localOnlyIds()};
         final cursorKey = 'sync_cursor:${client.auth.currentUser?.id}';
         final cursor = int.tryParse(await db.settingsDao.get(cursorKey) ?? '');
-        if (cursor != null && cursor >= await _rpcInt('sync_changes_floor')) {
+        // A backend without 20261110020000_incremental_sync.sql yet: full
+        // pulls, as before, until it is deployed.
+        final floor = await _rpcIntOrNull('sync_changes_floor');
+        if (floor == null) {
+          await _pullEverything(dirty, keep);
+        } else if (cursor != null && cursor >= floor) {
           final next = await _pullChanges(cursor, dirty, keep);
           await db.settingsDao.set(cursorKey, '$next');
         } else {
@@ -367,6 +372,20 @@ class SyncEngine {
 
   Future<int> _rpcInt(String fn) async => ((await client.rpc(fn)) as num).toInt();
 
+  Future<int?> _rpcIntOrNull(String fn) async {
+    try {
+      return await _rpcInt(fn);
+    } on PostgrestException catch (e) {
+      if (_isMissingOnServer(e)) return null;
+      rethrow;
+    }
+  }
+
+  /// A function or table a newer migration adds, not deployed on this
+  /// backend yet (PostgREST: PGRST202 function, PGRST205 table).
+  static bool _isMissingOnServer(PostgrestException e) =>
+      e.code == 'PGRST202' || e.code == 'PGRST205' || e.code == '42P01' || e.code == '42883';
+
   Future<void> _apply(String table, Map<String, dynamic> row, Set<String> dirty) async {
     if (dirty.contains(SyncOutboxDao.key(table, row['id'] as String))) return;
     await _notifyIfNew(table, row);
@@ -379,17 +398,23 @@ class SyncEngine {
   Future<void> _pullEverything(Set<String> dirty, Set<String> keep) async {
     final seen = <String, Set<String>>{};
     for (final table in _upserters.keys) {
-      final rows = await _fetchAll(table);
+      final List<Map<String, dynamic>> rows;
+      try {
+        rows = await _fetchAll(table);
+      } on PostgrestException catch (e) {
+        if (!_isMissingOnServer(e)) rethrow;
+        continue; // not on this backend yet; nothing to reconcile either
+      }
       seen[table] = {for (final r in rows) r['id'] as String};
       for (final row in rows) {
         await _apply(table, row, dirty);
       }
     }
-    final sites = seen['projects']!;
+    final sites = seen['projects'] ?? const <String>{};
     if (sites.isEmpty) return;
     final marks = List.filled(sites.length, '?').join(',');
     for (final MapEntry(key: remote, value: local) in localTableNames.entries) {
-      if (!_projectScoped.contains(remote)) continue;
+      if (!_projectScoped.contains(remote) || !seen.containsKey(remote)) continue;
       final rows = await db
           .customSelect('SELECT id FROM $local WHERE project_id IN ($marks)',
               variables: [for (final s in sites) Variable<String>(s)])
