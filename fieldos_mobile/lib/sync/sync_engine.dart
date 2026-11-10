@@ -129,7 +129,7 @@ class SyncEngine {
   static const userIdColumns = {
     'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
     'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by', 'edited_by',
-    'decided_by',
+    'decided_by', 'measured_by',
   };
 
   Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>
@@ -363,6 +363,13 @@ class SyncEngine {
       if (local != null) await db.materialDao.upsertSlipFromRemote(receiptAttachmentFromSupabaseJson(r, localPath: local));
     },
         'site_close_reviews': (r) => db.closeDao.upsertFromRemote(closeReviewFromSupabaseJson(r)),
+        'site_work_measurements': (r) =>
+            db.billingRecordsDao.upsertMeasurementFromRemote(workMeasurementFromSupabaseJson(r)),
+        'site_work_measurement_decisions': (r) =>
+            db.billingRecordsDao.upsertDecisionFromRemote(measurementDecisionFromSupabaseJson(r)),
+        'site_bill_allocations': (r) => db.billingRecordsDao.upsertAllocationFromRemote(billAllocationFromSupabaseJson(r)),
+        'site_supplier_invoices': (r) =>
+            db.billingRecordsDao.upsertSupplierInvoiceFromRemote(supplierInvoiceFromSupabaseJson(r)),
         'documents': (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
@@ -567,6 +574,10 @@ class SyncEngine {
     'site_close_reviews': 'close_reviews',
     'project_members': 'project_members',
     'site_access': 'site_access',
+    'site_work_measurements': 'work_measurements',
+    'site_work_measurement_decisions': 'work_measurement_decisions',
+    'site_bill_allocations': 'bill_allocations',
+    'site_supplier_invoices': 'supplier_invoices',
   };
 
   /// Tables whose rows carry project_id on the phone too.
@@ -575,7 +586,8 @@ class SyncEngine {
     'estimations', 'purchase_requisitions', 'purchase_orders', 'project_messages', 'site_attendance',
     'site_expenses', 'site_material_receipts', 'site_material_usage', 'site_payments_received',
     'site_client_bills', 'site_attendance_marks', 'site_notes', 'documents', 'site_close_reviews',
-    'project_members', 'site_access',
+    'project_members', 'site_access', 'site_work_measurements', 'site_work_measurement_decisions',
+    'site_bill_allocations', 'site_supplier_invoices',
   };
 
   /// Children found through their parent, for removing a whole site or

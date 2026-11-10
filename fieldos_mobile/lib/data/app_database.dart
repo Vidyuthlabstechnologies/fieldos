@@ -70,6 +70,10 @@ String? _clip(String? s, int max) {
   ReceiptAttachments,
   CloseReviews,
   SiteAccess,
+  WorkMeasurements,
+  WorkMeasurementDecisions,
+  BillAllocations,
+  SupplierInvoices,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -98,7 +102,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -232,6 +236,12 @@ class AppDatabase extends _$AppDatabase {
             }
             await m.createTable(siteAccess);
           }
+          if (from < 18) {
+            await m.createTable(workMeasurements);
+            await m.createTable(workMeasurementDecisions);
+            await m.createTable(billAllocations);
+            await m.createTable(supplierInvoices);
+          }
         },
       );
 
@@ -320,6 +330,7 @@ class AppDatabase extends _$AppDatabase {
   NoteDao get noteDao => NoteDao(this);
   CloseDao get closeDao => CloseDao(this);
   SiteTeamDao get siteTeamDao => SiteTeamDao(this);
+  BillingRecordsDao get billingRecordsDao => BillingRecordsDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -2501,6 +2512,200 @@ class SiteTeamDao extends DatabaseAccessor<AppDatabase> with _$SiteTeamDaoMixin 
       });
   Future<void> upsertAccessFromRemote(SiteAccessCompanion c) => into(siteAccess).insertOnConflictUpdate(c);
 }
+
+// ---------------------------------------------------------------------------
+// Measurement to billing, and reconciliation (v18)
+// ---------------------------------------------------------------------------
+
+/// Thrown when an allocation would pay more than the payment has left, or
+/// more than the bill or its retention needs. The server refuses the same.
+class AllocationTooBig implements Exception {
+  const AllocationTooBig(this.message);
+  final String message;
+  @override
+  String toString() => message;
+}
+
+@DriftAccessor(tables: [WorkMeasurements, WorkMeasurementDecisions, BillAllocations, SupplierInvoices, ClientBills, PaymentsReceived])
+class BillingRecordsDao extends DatabaseAccessor<AppDatabase> with _$BillingRecordsDaoMixin {
+  BillingRecordsDao(super.db);
+
+  // Measurement book
+
+  Future<WorkMeasurement> measure({
+    required String projectId,
+    String? costHeadId,
+    required String description,
+    required String unit,
+    double? rate,
+    required double qty,
+    required DateTime on,
+    required String by,
+    String? location,
+    String? note,
+  }) {
+    if (qty == 0 || !qty.isFinite) throw ArgumentError.value(qty, 'qty');
+    if (description.trim().isEmpty || unit.trim().isEmpty) throw ArgumentError('Say what was measured, and its unit.');
+    return transaction(() async {
+      final row = await into(workMeasurements).insertReturning(WorkMeasurementsCompanion.insert(
+        id: _uuid.v4(),
+        projectId: projectId,
+        costHeadId: Value(costHeadId),
+        description: _clip(description.trim(), 200)!,
+        unit: _clip(unit.trim(), 20)!,
+        rate: Value(rate),
+        qty: qty,
+        measuredOn: DateTime(on.year, on.month, on.day),
+        location: Value(_clip(location, 200)),
+        note: Value(_clip(note, 300)),
+        measuredBy: by,
+      ));
+      await db.syncOutboxDao.enqueue(
+          targetTable: 'site_work_measurements',
+          recordId: row.id,
+          operation: 'insert',
+          payloadJson: jsonEncode(workMeasurementToSupabaseJson(row)));
+      return row;
+    });
+  }
+
+  /// Approves (all or part of) a measurement, or rejects it. One decision
+  /// per measurement.
+  Future<WorkMeasurementDecision> decide(String measurementId,
+      {required bool approve, double? approvedQty, required String by, String? note}) {
+    return transaction(() async {
+      final m = await (select(workMeasurements)..where((w) => w.id.equals(measurementId))).getSingle();
+      final existing =
+          await (select(workMeasurementDecisions)..where((d) => d.measurementId.equals(measurementId))).getSingleOrNull();
+      if (existing != null) throw StateError('This measurement has been decided already.');
+      final qty = approve ? (approvedQty ?? m.qty) : null;
+      if (qty != null && (qty.sign != m.qty.sign || qty.abs() > m.qty.abs() + 1e-9)) {
+        throw ArgumentError('The approved quantity must be between zero and what was measured.');
+      }
+      final row = await into(workMeasurementDecisions).insertReturning(WorkMeasurementDecisionsCompanion.insert(
+        id: _uuid.v4(),
+        projectId: m.projectId,
+        measurementId: m.id,
+        decision: approve ? 'approved' : 'rejected',
+        approvedQty: Value(qty),
+        note: Value(_clip(note, 300)),
+        decidedBy: by,
+      ));
+      await db.syncOutboxDao.enqueue(
+          targetTable: 'site_work_measurement_decisions',
+          recordId: row.id,
+          operation: 'insert',
+          payloadJson: jsonEncode(measurementDecisionToSupabaseJson(row)));
+      return row;
+    });
+  }
+
+  Future<List<WorkMeasurement>> measurementsFor(String projectId) => (select(workMeasurements)
+        ..where((m) => m.projectId.equals(projectId))
+        ..orderBy([(m) => OrderingTerm.asc(m.measuredOn), (m) => OrderingTerm.asc(m.createdAt)]))
+      .get();
+
+  Future<Map<String, WorkMeasurementDecision>> decisionsFor(String projectId) async => {
+        for (final d in await (select(workMeasurementDecisions)..where((d) => d.projectId.equals(projectId))).get())
+          d.measurementId: d,
+      };
+
+  // Payments against bills
+
+  Future<List<BillAllocation>> allocationsFor(String projectId) =>
+      (select(billAllocations)..where((a) => a.projectId.equals(projectId))).get();
+
+  /// Puts [amount] of [paymentId] against [billId] (its net amount, or its
+  /// retention). Marks the bill paid when its net amount is covered.
+  Future<BillAllocation> allocate(
+      {required String paymentId, required String billId, String kind = 'bill', required double amount, required String by, String? note}) {
+    if (!(amount > 0)) throw ArgumentError.value(amount, 'amount');
+    if (kind != 'bill' && kind != 'retention') throw ArgumentError.value(kind, 'kind');
+    return transaction(() async {
+      final p = await (select(paymentsReceived)..where((x) => x.id.equals(paymentId))).getSingle();
+      final b = await (select(clientBills)..where((x) => x.id.equals(billId))).getSingle();
+      if (p.projectId != b.projectId) throw ArgumentError('The payment and the bill are on different sites.');
+      if (p.voided) throw const AllocationTooBig('A cancelled payment pays nothing.');
+      final all = await allocationsFor(p.projectId);
+      double used(bool Function(BillAllocation) f) => all.where(f).fold(0.0, (s, a) => s + a.amount);
+      final left = p.amount - used((a) => a.paymentId == paymentId);
+      if (amount > left + 0.005) throw AllocationTooBig('Only ${left.toStringAsFixed(2)} of this payment is left.');
+      final need = kind == 'bill'
+          ? b.netPayable - used((a) => a.billId == billId && a.kind == 'bill')
+          : _round2(b.gross * b.retentionPct / 100) - used((a) => a.billId == billId && a.kind == 'retention');
+      if (amount > need + 0.005) throw AllocationTooBig('Only ${need.toStringAsFixed(2)} is still due on this.');
+      final row = await into(billAllocations).insertReturning(BillAllocationsCompanion.insert(
+        id: _uuid.v4(),
+        projectId: p.projectId,
+        paymentId: paymentId,
+        billId: billId,
+        kind: Value(kind),
+        amount: _round2(amount),
+        note: Value(_clip(note, 300)),
+        createdBy: by,
+      ));
+      await db.syncOutboxDao.enqueue(
+          targetTable: 'site_bill_allocations',
+          recordId: row.id,
+          operation: 'insert',
+          payloadJson: jsonEncode(billAllocationToSupabaseJson(row)));
+      if (kind == 'bill' && need - amount <= 0.005 && b.status != 'paid') await db.billDao.setStatus(billId, 'paid');
+      return row;
+    });
+  }
+
+  /// Takes an allocation back; a bill no longer covered is unpaid again.
+  Future<void> removeAllocation(String id) => transaction(() async {
+        final a = await (select(billAllocations)..where((x) => x.id.equals(id))).getSingleOrNull();
+        if (a == null) return;
+        await (delete(billAllocations)..where((x) => x.id.equals(id))).go();
+        await db.syncOutboxDao.enqueue(
+            targetTable: 'site_bill_allocations', recordId: id, operation: 'delete', payloadJson: jsonEncode({'id': id}));
+        final b = await (select(clientBills)..where((x) => x.id.equals(a.billId))).getSingleOrNull();
+        if (a.kind == 'bill' && b != null && b.status == 'paid') await db.billDao.setStatus(b.id, 'issued');
+      });
+
+  // Supplier invoices
+
+  Future<SupplierInvoice> recordSupplierInvoice(SupplierInvoicesCompanion c) => transaction(() async {
+        final row = await into(supplierInvoices)
+            .insertReturning(c.copyWith(id: c.id.present ? c.id : Value(_uuid.v4())));
+        await db.syncOutboxDao.enqueue(
+            targetTable: 'site_supplier_invoices',
+            recordId: row.id,
+            operation: 'insert',
+            payloadJson: jsonEncode(supplierInvoiceToSupabaseJson(row)));
+        return row;
+      });
+
+  Future<void> voidSupplierInvoice(String id, String reason) {
+    if (reason.trim().isEmpty) throw ArgumentError('Say why the invoice is cancelled.');
+    return transaction(() async {
+      await (update(supplierInvoices)..where((i) => i.id.equals(id)))
+          .write(SupplierInvoicesCompanion(voided: const Value(true), voidReason: Value(_clip(reason.trim(), 200))));
+      final row = await (select(supplierInvoices)..where((i) => i.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+          targetTable: 'site_supplier_invoices',
+          recordId: id,
+          operation: 'update',
+          payloadJson: jsonEncode(supplierInvoiceToSupabaseJson(row)));
+    });
+  }
+
+  Future<List<SupplierInvoice>> supplierInvoicesFor(String projectId) => (select(supplierInvoices)
+        ..where((i) => i.projectId.equals(projectId))
+        ..orderBy([(i) => OrderingTerm.desc(i.invoiceDate), (i) => OrderingTerm.desc(i.createdAt)]))
+      .get();
+
+  Future<void> upsertMeasurementFromRemote(WorkMeasurementsCompanion c) => into(workMeasurements).insertOnConflictUpdate(c);
+  Future<void> upsertDecisionFromRemote(WorkMeasurementDecisionsCompanion c) =>
+      into(workMeasurementDecisions).insertOnConflictUpdate(c);
+  Future<void> upsertAllocationFromRemote(BillAllocationsCompanion c) => into(billAllocations).insertOnConflictUpdate(c);
+  Future<void> upsertSupplierInvoiceFromRemote(SupplierInvoicesCompanion c) =>
+      into(supplierInvoices).insertOnConflictUpdate(c);
+}
+
+double _round2(double v) => (v * 100).roundToDouble() / 100;
 
 /// The roles a person can have on one site.
 const siteRoleValues = ['owner', 'project_manager', 'site_engineer', 'accounts', 'storekeeper', 'viewer'];

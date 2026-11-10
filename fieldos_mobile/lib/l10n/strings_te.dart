@@ -2154,4 +2154,129 @@ const Map<String, String> stringsTe = {
       '{n} సైట్లలో గత వారం మూసివేయలేదు',
   '{n} to approve':
       '{n} ఆమోదించాలి',
+  // Measurement book, bill payments, supplier invoices
+  'A minus quantity corrects an earlier one.':
+      'మైనస్ పరిమాణం ముందటిదాన్ని సరిచేస్తుంది.',
+  'Add invoice':
+      'ఇన్వాయిస్ చేర్చండి',
+  'Add the supplier first, under Procure > Suppliers.':
+      'ముందు Procure > Suppliers లో సప్లయర్‌ను చేర్చండి.',
+  'All {n} invoices match their orders and deliveries.':
+      'అన్ని {n} ఇన్వాయిస్‌లు ఆర్డర్లు, డెలివరీలతో సరిపోతున్నాయి.',
+  'Approved to date':
+      'ఇప్పటివరకు ఆమోదించినది',
+  'Approved {qty}':
+      '{qty} ఆమోదించారు',
+  'Approved.':
+      'ఆమోదించారు.',
+  'BOQ item':
+      'BOQ ఐటమ్',
+  'Cancel invoice':
+      'ఇన్వాయిస్ రద్దు చేయండి',
+  'Cancel this invoice?':
+      'ఈ ఇన్వాయిస్ రద్దు చేయాలా?',
+  'Cancelled: {why}':
+      'రద్దు: {why}',
+  'Decide':
+      'నిర్ణయించండి',
+  'Enter each invoice as it comes. It is checked against the purchase order and what was received.':
+      'ప్రతి ఇన్వాయిస్ వచ్చినప్పుడే నమోదు చేయండి. దాన్ని PO, వచ్చిన సరుకుతో సరిచూస్తారు.',
+  'Everything approved has been billed already.':
+      'ఆమోదించినదంతా ఇప్పటికే బిల్ చేశారు.',
+  'GST in it (₹, optional)':
+      'అందులో GST (₹, ఐచ్ఛికం)',
+  'Give the invoice number and its total.':
+      'ఇన్వాయిస్ నంబర్, మొత్తం ఇవ్వండి.',
+  'Give the item, its unit and a quantity.':
+      'ఐటమ్, దాని యూనిట్, పరిమాణం ఇవ్వండి.',
+  'Invoice number':
+      'ఇన్వాయిస్ నంబర్',
+  'Invoice total with GST (₹)':
+      'GST తో ఇన్వాయిస్ మొత్తం (₹)',
+  'Make the next RA bill':
+      'తదుపరి RA బిల్లు చేయండి',
+  'Matched':
+      'సరిపోయింది',
+  'Measure work':
+      'పని కొలవండి',
+  'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
+      'BOQ ప్రకారం చేసిన పనిని కొలవండి. ఆమోదించిన పరిమాణాలు తదుపరి RA బిల్లులోకి వెళ్తాయి.',
+  'Measured {qty} {unit}':
+      'కొలిచినది {qty} {unit}',
+  'Measurement book':
+      'కొలతల పుస్తకం',
+  'Measurement saved. It waits for approval.':
+      'కొలత సేవ్ అయింది. ఆమోదం కోసం వేచి ఉంది.',
+  'More quantity than was received':
+      'వచ్చినదానికంటే ఎక్కువ పరిమాణం',
+  'More than the purchase order':
+      'PO కంటే ఎక్కువ',
+  'More than what was received':
+      'వచ్చినదానికంటే ఎక్కువ',
+  'No measurements yet':
+      'ఇంకా కొలతలు లేవు',
+  'No purchase order':
+      'PO లేదు',
+  'No supplier invoices yet':
+      'ఇంకా సప్లయర్ ఇన్వాయిస్‌లు లేవు',
+  'Not in the BOQ':
+      'BOQ లో లేదు',
+  'Nothing received against it yet':
+      'దీనికి ఇంకా ఏమీ రాలేదు',
+  'PO {amount}':
+      'పీఓ {amount}',
+  'Part paid':
+      'పాక్షికంగా చెల్లించారు',
+  'Payment against this bill':
+      'ఈ బిల్లుకు చెల్లింపు',
+  'Put against bills':
+      'బిల్లులకు వేయండి',
+  'Put it against the oldest bills still due.':
+      'దీన్ని పాత బాకీ బిల్లులకు వేయండి.',
+  'Quantity approved':
+      'ఆమోదించిన పరిమాణం',
+  'Quantity invoiced (optional)':
+      'ఇన్వాయిస్ పరిమాణం (ఐచ్ఛికం)',
+  'Quantity measured':
+      'కొలిచిన పరిమాణం',
+  'Record the payment in the money book first. Every payment so far is already against a bill.':
+      'ముందు మనీ బుక్‌లో చెల్లింపు నమోదు చేయండి. ఇప్పటివరకు ప్రతి చెల్లింపు ఏదో బిల్లుకు వేశారు.',
+  'Rejected.':
+      'తిరస్కరించారు.',
+  'Release retention':
+      'రిటెన్షన్ విడుదల',
+  'Retention held by the client: {amount}':
+      'క్లయింట్ వద్ద ఉన్న రిటెన్షన్: {amount}',
+  'Same invoice number entered before':
+      'ఇదే ఇన్వాయిస్ నంబర్ ముందే నమోదైంది',
+  'Set a rate for {items} first.':
+      'ముందు {items} కి రేట్ పెట్టండి.',
+  'Supplier invoice':
+      'సప్లయర్ ఇన్వాయిస్',
+  'Supplier invoices':
+      'సప్లయర్ ఇన్వాయిస్‌లు',
+  'Waiting':
+      'వేచి ఉంది',
+  'Where (e.g. Block A, 2nd floor)':
+      'ఎక్కడ (ఉదా. Block A, 2వ అంతస్తు)',
+  'Why':
+      'ఎందుకు',
+  'received {amount}':
+      'వచ్చింది {amount}',
+  'retention held {amount}':
+      'రిటెన్షన్ {amount}',
+  '{amount} more than received':
+      'వచ్చినదానికంటే {amount} ఎక్కువ',
+  '{amount} received is not against a bill yet':
+      'వచ్చిన {amount} ఇంకా ఏ బిల్లుకూ వేయలేదు',
+  '{amount} still due':
+      '{amount} ఇంకా బాకీ',
+  '{m} of {n} invoices need checking before payment.':
+      '{n} లో {m} ఇన్వాయిస్‌లు చెల్లింపుకు ముందు చూడాలి.',
+  '{n} amounts put against bills.':
+      '{n} మొత్తాలు బిల్లులకు వేశారు.',
+  '{n} waiting for approval':
+      '{n} ఆమోదం కోసం వేచి ఉన్నాయి',
+  '{paid} received, {due} due':
+      '{paid} వచ్చింది, {due} బాకీ',
 };
