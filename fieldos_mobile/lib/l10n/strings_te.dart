@@ -2315,4 +2315,45 @@ const Map<String, String> stringsTe = {
   // Accounts export check
   'The export did not pass its check, so it was not sent: {why}':
       'ఎక్స్‌పోర్ట్ తనిఖీలో పాస్ కాలేదు, కాబట్టి పంపలేదు: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'ఈ మొత్తాల కంటే ఎక్కువైతే ముందు ప్రాజెక్ట్ మేనేజర్, తర్వాత యజమాని ఆమోదిస్తారు. ఆమోదం అవసరం లేకపోతే ఖాళీగా వదలండి. నియమాలు ఇకపై నమోదయ్యే వాటికే వర్తిస్తాయి.',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'ఏ మొత్తం కంటే ఎక్కువైతే ప్రాజెక్ట్ మేనేజర్, తర్వాత మీరు, రిక్వెస్ట్‌లు, ఖర్చులు, ఆర్డర్లు ఆమోదించాలి',
+  'Approval rules':
+      'ఆమోద నియమాలు',
+  'Approval rules saved':
+      'ఆమోద నియమాలు సేవ్ అయ్యాయి',
+  'Enter amounts in rupees, or leave blank.':
+      'మొత్తాలను రూపాయల్లో ఇవ్వండి, లేదా ఖాళీగా వదలండి.',
+  'Note (needed to reject)':
+      'నోట్ (తిరస్కరించడానికి అవసరం)',
+  'Owner also approves above (₹)':
+      'దీని కంటే ఎక్కువైతే యజమాని కూడా ఆమోదించాలి (₹)',
+  'Project manager approves above (₹)':
+      'దీని కంటే ఎక్కువైతే ప్రాజెక్ట్ మేనేజర్ ఆమోదించాలి (₹)',
+  'Purchase orders':
+      'కొనుగోలు ఆర్డర్లు',
+  'Purchase requests':
+      'కొనుగోలు రిక్వెస్ట్‌లు',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'మీ ఆమోద మొత్తాల కంటే ఎక్కువ ఉన్న కొనుగోలు రిక్వెస్ట్‌లు, ఆర్డర్లు, ఖర్చులు ఇక్కడ వేచి ఉంటాయి.',
+  'Say why it is rejected.':
+      'ఎందుకు తిరస్కరించారో చెప్పండి.',
+  'Signed. It now waits for the owner\'s approval.':
+      'సంతకం అయింది. ఇప్పుడు ఇది యజమాని ఆమోదం కోసం వేచి ఉంది.',
+  'The owner approves it after you.':
+      'మీ తర్వాత యజమాని దీన్ని ఆమోదిస్తారు.',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'యజమాని మొత్తం ప్రాజెక్ట్ మేనేజర్ మొత్తం కంటే తక్కువ ఉండకూడదు.',
+  'Waiting for a project manager\'s approval':
+      'ప్రాజెక్ట్ మేనేజర్ ఆమోదం కోసం వేచి ఉంది',
+  'Waiting for the owner\'s approval':
+      'యజమాని ఆమోదం కోసం వేచి ఉంది',
+  'Waiting for your approval':
+      'మీ ఆమోదం కోసం వేచి ఉన్నవి',
+  '{amount}. You sign as {level}.':
+      '{amount}. మీరు {level} గా సంతకం చేస్తారు.',
+  '{n} requests, orders or expenses above your approval amounts':
+      'మీ ఆమోద మొత్తాల కంటే ఎక్కువ {n} రిక్వెస్ట్‌లు, ఆర్డర్లు లేదా ఖర్చులు',
 };

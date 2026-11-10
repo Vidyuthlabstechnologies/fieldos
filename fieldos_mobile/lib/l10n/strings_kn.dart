@@ -3204,4 +3204,45 @@ const Map<String, String> stringsKn = {
   // Accounts export check
   'The export did not pass its check, so it was not sent: {why}':
       'ರಫ್ತು ಪರಿಶೀಲನೆಯಲ್ಲಿ ಪಾಸ್ ಆಗಲಿಲ್ಲ, ಆದ್ದರಿಂದ ಕಳುಹಿಸಲಿಲ್ಲ: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'ಈ ಮೊತ್ತಗಳಿಗಿಂತ ಹೆಚ್ಚಾದರೆ ಮೊದಲು ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್, ನಂತರ ಮಾಲೀಕರು ಅನುಮೋದಿಸುತ್ತಾರೆ. ಅನುಮೋದನೆ ಬೇಡವಾದರೆ ಖಾಲಿ ಬಿಡಿ. ನಿಯಮಗಳು ಇನ್ನು ಮುಂದೆ ದಾಖಲಾಗುವುದಕ್ಕೆ ಮಾತ್ರ ಅನ್ವಯಿಸುತ್ತವೆ.',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'ಯಾವ ಮೊತ್ತಕ್ಕಿಂತ ಹೆಚ್ಚಾದರೆ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್, ನಂತರ ನೀವು, ವಿನಂತಿ, ಖರ್ಚು, ಆರ್ಡರ್ ಅನುಮೋದಿಸಬೇಕು',
+  'Approval rules':
+      'ಅನುಮೋದನೆ ನಿಯಮಗಳು',
+  'Approval rules saved':
+      'ಅನುಮೋದನೆ ನಿಯಮಗಳು ಉಳಿಸಲಾಗಿದೆ',
+  'Enter amounts in rupees, or leave blank.':
+      'ಮೊತ್ತಗಳನ್ನು ರೂಪಾಯಿಗಳಲ್ಲಿ ನಮೂದಿಸಿ, ಅಥವಾ ಖಾಲಿ ಬಿಡಿ.',
+  'Note (needed to reject)':
+      'ಟಿಪ್ಪಣಿ (ತಿರಸ್ಕರಿಸಲು ಅಗತ್ಯ)',
+  'Owner also approves above (₹)':
+      'ಇದಕ್ಕಿಂತ ಹೆಚ್ಚಾದರೆ ಮಾಲೀಕರೂ ಅನುಮೋದಿಸುತ್ತಾರೆ (₹)',
+  'Project manager approves above (₹)':
+      'ಇದಕ್ಕಿಂತ ಹೆಚ್ಚಾದರೆ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್ ಅನುಮೋದಿಸುತ್ತಾರೆ (₹)',
+  'Purchase orders':
+      'ಖರೀದಿ ಆರ್ಡರ್‌ಗಳು',
+  'Purchase requests':
+      'ಖರೀದಿ ವಿನಂತಿಗಳು',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'ನಿಮ್ಮ ಅನುಮೋದನೆ ಮೊತ್ತಗಳಿಗಿಂತ ಹೆಚ್ಚಿನ ಖರೀದಿ ವಿನಂತಿ, ಆರ್ಡರ್, ಖರ್ಚುಗಳು ಇಲ್ಲಿ ಕಾಯುತ್ತವೆ.',
+  'Say why it is rejected.':
+      'ಏಕೆ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ ಎಂದು ಹೇಳಿ.',
+  'Signed. It now waits for the owner\'s approval.':
+      'ಸಹಿ ಆಯಿತು. ಈಗ ಇದು ಮಾಲೀಕರ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ.',
+  'The owner approves it after you.':
+      'ನಿಮ್ಮ ನಂತರ ಮಾಲೀಕರು ಇದನ್ನು ಅನುಮೋದಿಸುತ್ತಾರೆ.',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'ಮಾಲೀಕರ ಮೊತ್ತ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್ ಮೊತ್ತಕ್ಕಿಂತ ಕಡಿಮೆ ಇರಬಾರದು.',
+  'Waiting for a project manager\'s approval':
+      'ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ',
+  'Waiting for the owner\'s approval':
+      'ಮಾಲೀಕರ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ',
+  'Waiting for your approval':
+      'ನಿಮ್ಮ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿರುವುದು',
+  '{amount}. You sign as {level}.':
+      '{amount}. ನೀವು {level} ಆಗಿ ಸಹಿ ಮಾಡುತ್ತೀರಿ.',
+  '{n} requests, orders or expenses above your approval amounts':
+      'ನಿಮ್ಮ ಅನುಮೋದನೆ ಮೊತ್ತಗಳಿಗಿಂತ ಹೆಚ್ಚಿನ {n} ವಿನಂತಿ, ಆರ್ಡರ್ ಅಥವಾ ಖರ್ಚು',
 };

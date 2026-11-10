@@ -25924,6 +25924,1199 @@ class SupplierInvoicesCompanion extends UpdateCompanion<SupplierInvoice> {
   }
 }
 
+class $ApprovalRulesTable extends ApprovalRules
+    with TableInfo<$ApprovalRulesTable, ApprovalRule> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ApprovalRulesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+    'role',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _aboveAmountMeta = const VerificationMeta(
+    'aboveAmount',
+  );
+  @override
+  late final GeneratedColumn<double> aboveAmount = GeneratedColumn<double>(
+    'above_amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _voidedMeta = const VerificationMeta('voided');
+  @override
+  late final GeneratedColumn<bool> voided = GeneratedColumn<bool>(
+    'voided',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("voided" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    companyId,
+    kind,
+    role,
+    aboveAmount,
+    voided,
+    createdBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'approval_rules';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ApprovalRule> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+        _roleMeta,
+        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
+    if (data.containsKey('above_amount')) {
+      context.handle(
+        _aboveAmountMeta,
+        aboveAmount.isAcceptableOrUnknown(
+          data['above_amount']!,
+          _aboveAmountMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_aboveAmountMeta);
+    }
+    if (data.containsKey('voided')) {
+      context.handle(
+        _voidedMeta,
+        voided.isAcceptableOrUnknown(data['voided']!, _voidedMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ApprovalRule map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ApprovalRule(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      role: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}role'],
+      )!,
+      aboveAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}above_amount'],
+      )!,
+      voided: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}voided'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ApprovalRulesTable createAlias(String alias) {
+    return $ApprovalRulesTable(attachedDatabase, alias);
+  }
+}
+
+class ApprovalRule extends DataClass implements Insertable<ApprovalRule> {
+  final String id;
+  final String companyId;
+  final String kind;
+  final String role;
+  final double aboveAmount;
+  final bool voided;
+  final String createdBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const ApprovalRule({
+    required this.id,
+    required this.companyId,
+    required this.kind,
+    required this.role,
+    required this.aboveAmount,
+    required this.voided,
+    required this.createdBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['company_id'] = Variable<String>(companyId);
+    map['kind'] = Variable<String>(kind);
+    map['role'] = Variable<String>(role);
+    map['above_amount'] = Variable<double>(aboveAmount);
+    map['voided'] = Variable<bool>(voided);
+    map['created_by'] = Variable<String>(createdBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ApprovalRulesCompanion toCompanion(bool nullToAbsent) {
+    return ApprovalRulesCompanion(
+      id: Value(id),
+      companyId: Value(companyId),
+      kind: Value(kind),
+      role: Value(role),
+      aboveAmount: Value(aboveAmount),
+      voided: Value(voided),
+      createdBy: Value(createdBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ApprovalRule.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ApprovalRule(
+      id: serializer.fromJson<String>(json['id']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      role: serializer.fromJson<String>(json['role']),
+      aboveAmount: serializer.fromJson<double>(json['aboveAmount']),
+      voided: serializer.fromJson<bool>(json['voided']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'companyId': serializer.toJson<String>(companyId),
+      'kind': serializer.toJson<String>(kind),
+      'role': serializer.toJson<String>(role),
+      'aboveAmount': serializer.toJson<double>(aboveAmount),
+      'voided': serializer.toJson<bool>(voided),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ApprovalRule copyWith({
+    String? id,
+    String? companyId,
+    String? kind,
+    String? role,
+    double? aboveAmount,
+    bool? voided,
+    String? createdBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => ApprovalRule(
+    id: id ?? this.id,
+    companyId: companyId ?? this.companyId,
+    kind: kind ?? this.kind,
+    role: role ?? this.role,
+    aboveAmount: aboveAmount ?? this.aboveAmount,
+    voided: voided ?? this.voided,
+    createdBy: createdBy ?? this.createdBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ApprovalRule copyWithCompanion(ApprovalRulesCompanion data) {
+    return ApprovalRule(
+      id: data.id.present ? data.id.value : this.id,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      role: data.role.present ? data.role.value : this.role,
+      aboveAmount: data.aboveAmount.present
+          ? data.aboveAmount.value
+          : this.aboveAmount,
+      voided: data.voided.present ? data.voided.value : this.voided,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ApprovalRule(')
+          ..write('id: $id, ')
+          ..write('companyId: $companyId, ')
+          ..write('kind: $kind, ')
+          ..write('role: $role, ')
+          ..write('aboveAmount: $aboveAmount, ')
+          ..write('voided: $voided, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    companyId,
+    kind,
+    role,
+    aboveAmount,
+    voided,
+    createdBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ApprovalRule &&
+          other.id == this.id &&
+          other.companyId == this.companyId &&
+          other.kind == this.kind &&
+          other.role == this.role &&
+          other.aboveAmount == this.aboveAmount &&
+          other.voided == this.voided &&
+          other.createdBy == this.createdBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ApprovalRulesCompanion extends UpdateCompanion<ApprovalRule> {
+  final Value<String> id;
+  final Value<String> companyId;
+  final Value<String> kind;
+  final Value<String> role;
+  final Value<double> aboveAmount;
+  final Value<bool> voided;
+  final Value<String> createdBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const ApprovalRulesCompanion({
+    this.id = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.role = const Value.absent(),
+    this.aboveAmount = const Value.absent(),
+    this.voided = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ApprovalRulesCompanion.insert({
+    required String id,
+    required String companyId,
+    required String kind,
+    required String role,
+    required double aboveAmount,
+    this.voided = const Value.absent(),
+    required String createdBy,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       companyId = Value(companyId),
+       kind = Value(kind),
+       role = Value(role),
+       aboveAmount = Value(aboveAmount),
+       createdBy = Value(createdBy);
+  static Insertable<ApprovalRule> custom({
+    Expression<String>? id,
+    Expression<String>? companyId,
+    Expression<String>? kind,
+    Expression<String>? role,
+    Expression<double>? aboveAmount,
+    Expression<bool>? voided,
+    Expression<String>? createdBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (companyId != null) 'company_id': companyId,
+      if (kind != null) 'kind': kind,
+      if (role != null) 'role': role,
+      if (aboveAmount != null) 'above_amount': aboveAmount,
+      if (voided != null) 'voided': voided,
+      if (createdBy != null) 'created_by': createdBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ApprovalRulesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? companyId,
+    Value<String>? kind,
+    Value<String>? role,
+    Value<double>? aboveAmount,
+    Value<bool>? voided,
+    Value<String>? createdBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ApprovalRulesCompanion(
+      id: id ?? this.id,
+      companyId: companyId ?? this.companyId,
+      kind: kind ?? this.kind,
+      role: role ?? this.role,
+      aboveAmount: aboveAmount ?? this.aboveAmount,
+      voided: voided ?? this.voided,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (aboveAmount.present) {
+      map['above_amount'] = Variable<double>(aboveAmount.value);
+    }
+    if (voided.present) {
+      map['voided'] = Variable<bool>(voided.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ApprovalRulesCompanion(')
+          ..write('id: $id, ')
+          ..write('companyId: $companyId, ')
+          ..write('kind: $kind, ')
+          ..write('role: $role, ')
+          ..write('aboveAmount: $aboveAmount, ')
+          ..write('voided: $voided, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ApprovalStepsTable extends ApprovalSteps
+    with TableInfo<$ApprovalStepsTable, ApprovalStep> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ApprovalStepsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _itemIdMeta = const VerificationMeta('itemId');
+  @override
+  late final GeneratedColumn<String> itemId = GeneratedColumn<String>(
+    'item_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _levelMeta = const VerificationMeta('level');
+  @override
+  late final GeneratedColumn<String> level = GeneratedColumn<String>(
+    'level',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _decisionMeta = const VerificationMeta(
+    'decision',
+  );
+  @override
+  late final GeneratedColumn<String> decision = GeneratedColumn<String>(
+    'decision',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _decidedByMeta = const VerificationMeta(
+    'decidedBy',
+  );
+  @override
+  late final GeneratedColumn<String> decidedBy = GeneratedColumn<String>(
+    'decided_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    kind,
+    itemId,
+    level,
+    decision,
+    amount,
+    note,
+    decidedBy,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'approval_steps';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ApprovalStep> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('item_id')) {
+      context.handle(
+        _itemIdMeta,
+        itemId.isAcceptableOrUnknown(data['item_id']!, _itemIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemIdMeta);
+    }
+    if (data.containsKey('level')) {
+      context.handle(
+        _levelMeta,
+        level.isAcceptableOrUnknown(data['level']!, _levelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_levelMeta);
+    }
+    if (data.containsKey('decision')) {
+      context.handle(
+        _decisionMeta,
+        decision.isAcceptableOrUnknown(data['decision']!, _decisionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_decisionMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('decided_by')) {
+      context.handle(
+        _decidedByMeta,
+        decidedBy.isAcceptableOrUnknown(data['decided_by']!, _decidedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_decidedByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ApprovalStep map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ApprovalStep(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      itemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_id'],
+      )!,
+      level: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}level'],
+      )!,
+      decision: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decision'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      decidedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decided_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ApprovalStepsTable createAlias(String alias) {
+    return $ApprovalStepsTable(attachedDatabase, alias);
+  }
+}
+
+class ApprovalStep extends DataClass implements Insertable<ApprovalStep> {
+  final String id;
+  final String projectId;
+  final String kind;
+  final String itemId;
+  final String level;
+  final String decision;
+  final double? amount;
+  final String? note;
+  final String decidedBy;
+  final DateTime createdAt;
+  const ApprovalStep({
+    required this.id,
+    required this.projectId,
+    required this.kind,
+    required this.itemId,
+    required this.level,
+    required this.decision,
+    this.amount,
+    this.note,
+    required this.decidedBy,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['kind'] = Variable<String>(kind);
+    map['item_id'] = Variable<String>(itemId);
+    map['level'] = Variable<String>(level);
+    map['decision'] = Variable<String>(decision);
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<double>(amount);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['decided_by'] = Variable<String>(decidedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ApprovalStepsCompanion toCompanion(bool nullToAbsent) {
+    return ApprovalStepsCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      kind: Value(kind),
+      itemId: Value(itemId),
+      level: Value(level),
+      decision: Value(decision),
+      amount: amount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amount),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      decidedBy: Value(decidedBy),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ApprovalStep.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ApprovalStep(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      itemId: serializer.fromJson<String>(json['itemId']),
+      level: serializer.fromJson<String>(json['level']),
+      decision: serializer.fromJson<String>(json['decision']),
+      amount: serializer.fromJson<double?>(json['amount']),
+      note: serializer.fromJson<String?>(json['note']),
+      decidedBy: serializer.fromJson<String>(json['decidedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'kind': serializer.toJson<String>(kind),
+      'itemId': serializer.toJson<String>(itemId),
+      'level': serializer.toJson<String>(level),
+      'decision': serializer.toJson<String>(decision),
+      'amount': serializer.toJson<double?>(amount),
+      'note': serializer.toJson<String?>(note),
+      'decidedBy': serializer.toJson<String>(decidedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ApprovalStep copyWith({
+    String? id,
+    String? projectId,
+    String? kind,
+    String? itemId,
+    String? level,
+    String? decision,
+    Value<double?> amount = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    String? decidedBy,
+    DateTime? createdAt,
+  }) => ApprovalStep(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    kind: kind ?? this.kind,
+    itemId: itemId ?? this.itemId,
+    level: level ?? this.level,
+    decision: decision ?? this.decision,
+    amount: amount.present ? amount.value : this.amount,
+    note: note.present ? note.value : this.note,
+    decidedBy: decidedBy ?? this.decidedBy,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  ApprovalStep copyWithCompanion(ApprovalStepsCompanion data) {
+    return ApprovalStep(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      itemId: data.itemId.present ? data.itemId.value : this.itemId,
+      level: data.level.present ? data.level.value : this.level,
+      decision: data.decision.present ? data.decision.value : this.decision,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      note: data.note.present ? data.note.value : this.note,
+      decidedBy: data.decidedBy.present ? data.decidedBy.value : this.decidedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ApprovalStep(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('kind: $kind, ')
+          ..write('itemId: $itemId, ')
+          ..write('level: $level, ')
+          ..write('decision: $decision, ')
+          ..write('amount: $amount, ')
+          ..write('note: $note, ')
+          ..write('decidedBy: $decidedBy, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    kind,
+    itemId,
+    level,
+    decision,
+    amount,
+    note,
+    decidedBy,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ApprovalStep &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.kind == this.kind &&
+          other.itemId == this.itemId &&
+          other.level == this.level &&
+          other.decision == this.decision &&
+          other.amount == this.amount &&
+          other.note == this.note &&
+          other.decidedBy == this.decidedBy &&
+          other.createdAt == this.createdAt);
+}
+
+class ApprovalStepsCompanion extends UpdateCompanion<ApprovalStep> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> kind;
+  final Value<String> itemId;
+  final Value<String> level;
+  final Value<String> decision;
+  final Value<double?> amount;
+  final Value<String?> note;
+  final Value<String> decidedBy;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const ApprovalStepsCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.itemId = const Value.absent(),
+    this.level = const Value.absent(),
+    this.decision = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.note = const Value.absent(),
+    this.decidedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ApprovalStepsCompanion.insert({
+    required String id,
+    required String projectId,
+    required String kind,
+    required String itemId,
+    required String level,
+    required String decision,
+    this.amount = const Value.absent(),
+    this.note = const Value.absent(),
+    required String decidedBy,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       kind = Value(kind),
+       itemId = Value(itemId),
+       level = Value(level),
+       decision = Value(decision),
+       decidedBy = Value(decidedBy);
+  static Insertable<ApprovalStep> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? kind,
+    Expression<String>? itemId,
+    Expression<String>? level,
+    Expression<String>? decision,
+    Expression<double>? amount,
+    Expression<String>? note,
+    Expression<String>? decidedBy,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (kind != null) 'kind': kind,
+      if (itemId != null) 'item_id': itemId,
+      if (level != null) 'level': level,
+      if (decision != null) 'decision': decision,
+      if (amount != null) 'amount': amount,
+      if (note != null) 'note': note,
+      if (decidedBy != null) 'decided_by': decidedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ApprovalStepsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? kind,
+    Value<String>? itemId,
+    Value<String>? level,
+    Value<String>? decision,
+    Value<double?>? amount,
+    Value<String?>? note,
+    Value<String>? decidedBy,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return ApprovalStepsCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      kind: kind ?? this.kind,
+      itemId: itemId ?? this.itemId,
+      level: level ?? this.level,
+      decision: decision ?? this.decision,
+      amount: amount ?? this.amount,
+      note: note ?? this.note,
+      decidedBy: decidedBy ?? this.decidedBy,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (itemId.present) {
+      map['item_id'] = Variable<String>(itemId.value);
+    }
+    if (level.present) {
+      map['level'] = Variable<String>(level.value);
+    }
+    if (decision.present) {
+      map['decision'] = Variable<String>(decision.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (decidedBy.present) {
+      map['decided_by'] = Variable<String>(decidedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ApprovalStepsCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('kind: $kind, ')
+          ..write('itemId: $itemId, ')
+          ..write('level: $level, ')
+          ..write('decision: $decision, ')
+          ..write('amount: $amount, ')
+          ..write('note: $note, ')
+          ..write('decidedBy: $decidedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -26516,6 +27709,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SupplierInvoicesTable supplierInvoices = $SupplierInvoicesTable(
     this,
   );
+  late final $ApprovalRulesTable approvalRules = $ApprovalRulesTable(this);
+  late final $ApprovalStepsTable approvalSteps = $ApprovalStepsTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -26567,6 +27762,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     workMeasurementDecisions,
     billAllocations,
     supplierInvoices,
+    approvalRules,
+    approvalSteps,
     syncOutbox,
   ];
 }
@@ -39632,6 +40829,597 @@ typedef $$SupplierInvoicesTableProcessedTableManager =
       SupplierInvoice,
       PrefetchHooks Function()
     >;
+typedef $$ApprovalRulesTableCreateCompanionBuilder =
+    ApprovalRulesCompanion Function({
+      required String id,
+      required String companyId,
+      required String kind,
+      required String role,
+      required double aboveAmount,
+      Value<bool> voided,
+      required String createdBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ApprovalRulesTableUpdateCompanionBuilder =
+    ApprovalRulesCompanion Function({
+      Value<String> id,
+      Value<String> companyId,
+      Value<String> kind,
+      Value<String> role,
+      Value<double> aboveAmount,
+      Value<bool> voided,
+      Value<String> createdBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$ApprovalRulesTableFilterComposer
+    extends Composer<_$AppDatabase, $ApprovalRulesTable> {
+  $$ApprovalRulesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get aboveAmount => $composableBuilder(
+    column: $table.aboveAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get voided => $composableBuilder(
+    column: $table.voided,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ApprovalRulesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ApprovalRulesTable> {
+  $$ApprovalRulesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get aboveAmount => $composableBuilder(
+    column: $table.aboveAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get voided => $composableBuilder(
+    column: $table.voided,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ApprovalRulesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ApprovalRulesTable> {
+  $$ApprovalRulesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<double> get aboveAmount => $composableBuilder(
+    column: $table.aboveAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get voided =>
+      $composableBuilder(column: $table.voided, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ApprovalRulesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ApprovalRulesTable,
+          ApprovalRule,
+          $$ApprovalRulesTableFilterComposer,
+          $$ApprovalRulesTableOrderingComposer,
+          $$ApprovalRulesTableAnnotationComposer,
+          $$ApprovalRulesTableCreateCompanionBuilder,
+          $$ApprovalRulesTableUpdateCompanionBuilder,
+          (
+            ApprovalRule,
+            BaseReferences<_$AppDatabase, $ApprovalRulesTable, ApprovalRule>,
+          ),
+          ApprovalRule,
+          PrefetchHooks Function()
+        > {
+  $$ApprovalRulesTableTableManager(_$AppDatabase db, $ApprovalRulesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ApprovalRulesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ApprovalRulesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ApprovalRulesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> role = const Value.absent(),
+                Value<double> aboveAmount = const Value.absent(),
+                Value<bool> voided = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ApprovalRulesCompanion(
+                id: id,
+                companyId: companyId,
+                kind: kind,
+                role: role,
+                aboveAmount: aboveAmount,
+                voided: voided,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String companyId,
+                required String kind,
+                required String role,
+                required double aboveAmount,
+                Value<bool> voided = const Value.absent(),
+                required String createdBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ApprovalRulesCompanion.insert(
+                id: id,
+                companyId: companyId,
+                kind: kind,
+                role: role,
+                aboveAmount: aboveAmount,
+                voided: voided,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ApprovalRulesTable, ApprovalRule>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ApprovalRulesTable,
+                    ApprovalRule
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ApprovalRulesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ApprovalRulesTable,
+      ApprovalRule,
+      $$ApprovalRulesTableFilterComposer,
+      $$ApprovalRulesTableOrderingComposer,
+      $$ApprovalRulesTableAnnotationComposer,
+      $$ApprovalRulesTableCreateCompanionBuilder,
+      $$ApprovalRulesTableUpdateCompanionBuilder,
+      (
+        ApprovalRule,
+        BaseReferences<_$AppDatabase, $ApprovalRulesTable, ApprovalRule>,
+      ),
+      ApprovalRule,
+      PrefetchHooks Function()
+    >;
+typedef $$ApprovalStepsTableCreateCompanionBuilder =
+    ApprovalStepsCompanion Function({
+      required String id,
+      required String projectId,
+      required String kind,
+      required String itemId,
+      required String level,
+      required String decision,
+      Value<double?> amount,
+      Value<String?> note,
+      required String decidedBy,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$ApprovalStepsTableUpdateCompanionBuilder =
+    ApprovalStepsCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> kind,
+      Value<String> itemId,
+      Value<String> level,
+      Value<String> decision,
+      Value<double?> amount,
+      Value<String?> note,
+      Value<String> decidedBy,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$ApprovalStepsTableFilterComposer
+    extends Composer<_$AppDatabase, $ApprovalStepsTable> {
+  $$ApprovalStepsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get decision => $composableBuilder(
+    column: $table.decision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get decidedBy => $composableBuilder(
+    column: $table.decidedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ApprovalStepsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ApprovalStepsTable> {
+  $$ApprovalStepsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get decision => $composableBuilder(
+    column: $table.decision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get decidedBy => $composableBuilder(
+    column: $table.decidedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ApprovalStepsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ApprovalStepsTable> {
+  $$ApprovalStepsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get itemId =>
+      $composableBuilder(column: $table.itemId, builder: (column) => column);
+
+  GeneratedColumn<String> get level =>
+      $composableBuilder(column: $table.level, builder: (column) => column);
+
+  GeneratedColumn<String> get decision =>
+      $composableBuilder(column: $table.decision, builder: (column) => column);
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get decidedBy =>
+      $composableBuilder(column: $table.decidedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$ApprovalStepsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ApprovalStepsTable,
+          ApprovalStep,
+          $$ApprovalStepsTableFilterComposer,
+          $$ApprovalStepsTableOrderingComposer,
+          $$ApprovalStepsTableAnnotationComposer,
+          $$ApprovalStepsTableCreateCompanionBuilder,
+          $$ApprovalStepsTableUpdateCompanionBuilder,
+          (
+            ApprovalStep,
+            BaseReferences<_$AppDatabase, $ApprovalStepsTable, ApprovalStep>,
+          ),
+          ApprovalStep,
+          PrefetchHooks Function()
+        > {
+  $$ApprovalStepsTableTableManager(_$AppDatabase db, $ApprovalStepsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ApprovalStepsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ApprovalStepsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ApprovalStepsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> itemId = const Value.absent(),
+                Value<String> level = const Value.absent(),
+                Value<String> decision = const Value.absent(),
+                Value<double?> amount = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> decidedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ApprovalStepsCompanion(
+                id: id,
+                projectId: projectId,
+                kind: kind,
+                itemId: itemId,
+                level: level,
+                decision: decision,
+                amount: amount,
+                note: note,
+                decidedBy: decidedBy,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String kind,
+                required String itemId,
+                required String level,
+                required String decision,
+                Value<double?> amount = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                required String decidedBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ApprovalStepsCompanion.insert(
+                id: id,
+                projectId: projectId,
+                kind: kind,
+                itemId: itemId,
+                level: level,
+                decision: decision,
+                amount: amount,
+                note: note,
+                decidedBy: decidedBy,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ApprovalStepsTable, ApprovalStep>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ApprovalStepsTable,
+                    ApprovalStep
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ApprovalStepsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ApprovalStepsTable,
+      ApprovalStep,
+      $$ApprovalStepsTableFilterComposer,
+      $$ApprovalStepsTableOrderingComposer,
+      $$ApprovalStepsTableAnnotationComposer,
+      $$ApprovalStepsTableCreateCompanionBuilder,
+      $$ApprovalStepsTableUpdateCompanionBuilder,
+      (
+        ApprovalStep,
+        BaseReferences<_$AppDatabase, $ApprovalStepsTable, ApprovalStep>,
+      ),
+      ApprovalStep,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -39993,6 +41781,10 @@ class $AppDatabaseManager {
       $$BillAllocationsTableTableManager(_db, _db.billAllocations);
   $$SupplierInvoicesTableTableManager get supplierInvoices =>
       $$SupplierInvoicesTableTableManager(_db, _db.supplierInvoices);
+  $$ApprovalRulesTableTableManager get approvalRules =>
+      $$ApprovalRulesTableTableManager(_db, _db.approvalRules);
+  $$ApprovalStepsTableTableManager get approvalSteps =>
+      $$ApprovalStepsTableTableManager(_db, _db.approvalSteps);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }
@@ -40481,4 +42273,19 @@ class BillingRecordsDaoManager {
         _db.attachedDatabase,
         _db.paymentsReceived,
       );
+}
+
+mixin _$ApprovalChainDaoMixin on DatabaseAccessor<AppDatabase> {
+  $ApprovalRulesTable get approvalRules => attachedDatabase.approvalRules;
+  $ApprovalStepsTable get approvalSteps => attachedDatabase.approvalSteps;
+  ApprovalChainDaoManager get managers => ApprovalChainDaoManager(this);
+}
+
+class ApprovalChainDaoManager {
+  final _$ApprovalChainDaoMixin _db;
+  ApprovalChainDaoManager(this._db);
+  $$ApprovalRulesTableTableManager get approvalRules =>
+      $$ApprovalRulesTableTableManager(_db.attachedDatabase, _db.approvalRules);
+  $$ApprovalStepsTableTableManager get approvalSteps =>
+      $$ApprovalStepsTableTableManager(_db.attachedDatabase, _db.approvalSteps);
 }

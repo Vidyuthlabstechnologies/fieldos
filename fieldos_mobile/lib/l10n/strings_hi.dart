@@ -2313,4 +2313,45 @@ const Map<String, String> stringsHi = {
   // Accounts export check
   'The export did not pass its check, so it was not sent: {why}':
       'एक्सपोर्ट जाँच में पास नहीं हुआ, इसलिए नहीं भेजा: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'इन रकमों से ऊपर पहले प्रोजेक्ट मैनेजर मंज़ूरी देता है, फिर मालिक। मंज़ूरी न चाहिए तो खाना खाली छोड़ें। नियम अब से दर्ज होने वाली चीज़ों पर लागू होते हैं।',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'किस रकम से ऊपर पहले प्रोजेक्ट मैनेजर, फिर आप, रिक्वेस्ट, खर्च और ऑर्डर मंज़ूर करें',
+  'Approval rules':
+      'मंज़ूरी के नियम',
+  'Approval rules saved':
+      'मंज़ूरी के नियम सेव हुए',
+  'Enter amounts in rupees, or leave blank.':
+      'रकम रुपयों में डालें, या खाली छोड़ें।',
+  'Note (needed to reject)':
+      'नोट (रिजेक्ट करने के लिए ज़रूरी)',
+  'Owner also approves above (₹)':
+      'इससे ऊपर मालिक भी मंज़ूर करे (₹)',
+  'Project manager approves above (₹)':
+      'इससे ऊपर प्रोजेक्ट मैनेजर मंज़ूर करे (₹)',
+  'Purchase orders':
+      'खरीद ऑर्डर',
+  'Purchase requests':
+      'खरीद रिक्वेस्ट',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'आपकी मंज़ूरी की रकम से ऊपर की खरीद रिक्वेस्ट, ऑर्डर और खर्च यहाँ इंतज़ार करते हैं।',
+  'Say why it is rejected.':
+      'बताएँ कि क्यों रिजेक्ट किया।',
+  'Signed. It now waits for the owner\'s approval.':
+      'साइन हो गया। अब यह मालिक की मंज़ूरी का इंतज़ार कर रहा है।',
+  'The owner approves it after you.':
+      'आपके बाद मालिक इसे मंज़ूर करेगा।',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'मालिक की रकम प्रोजेक्ट मैनेजर की रकम से कम नहीं होनी चाहिए।',
+  'Waiting for a project manager\'s approval':
+      'प्रोजेक्ट मैनेजर की मंज़ूरी का इंतज़ार',
+  'Waiting for the owner\'s approval':
+      'मालिक की मंज़ूरी का इंतज़ार',
+  'Waiting for your approval':
+      'आपकी मंज़ूरी का इंतज़ार',
+  '{amount}. You sign as {level}.':
+      '{amount}। आप {level} के रूप में साइन करेंगे।',
+  '{n} requests, orders or expenses above your approval amounts':
+      'आपकी मंज़ूरी की रकम से ऊपर {n} रिक्वेस्ट, ऑर्डर या खर्च',
 };

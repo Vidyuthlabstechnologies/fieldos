@@ -75,6 +75,8 @@ String? _clip(String? s, int max) {
   WorkMeasurementDecisions,
   BillAllocations,
   SupplierInvoices,
+  ApprovalRules,
+  ApprovalSteps,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -106,7 +108,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 30;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -246,6 +248,11 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(billAllocations);
             await m.createTable(supplierInvoices);
           }
+          // v19 to v29 are other work's steps; v30 is approval rules.
+          if (from < 30) {
+            await m.createTable(approvalRules);
+            await m.createTable(approvalSteps);
+          }
         },
       );
 
@@ -335,6 +342,7 @@ class AppDatabase extends _$AppDatabase {
   CloseDao get closeDao => CloseDao(this);
   SiteTeamDao get siteTeamDao => SiteTeamDao(this);
   BillingRecordsDao get billingRecordsDao => BillingRecordsDao(this);
+  ApprovalChainDao get approvalChainDao => ApprovalChainDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -2714,6 +2722,96 @@ class BillingRecordsDao extends DatabaseAccessor<AppDatabase> with _$BillingReco
 }
 
 double _round2(double v) => (v * 100).roundToDouble() / 100;
+
+/// Multi-level approvals by amount (v30): the owner's rules, and the
+/// signatures on each item. What a chain needs is worked out in
+/// lib/features/approvals/approval_chain.dart.
+@DriftAccessor(tables: [ApprovalRules, ApprovalSteps])
+class ApprovalChainDao extends DatabaseAccessor<AppDatabase> with _$ApprovalChainDaoMixin {
+  ApprovalChainDao(super.db);
+
+  Future<List<ApprovalRule>> rulesFor(String companyId) => (select(approvalRules)
+        ..where((r) => r.companyId.equals(companyId) & r.voided.equals(false))
+        ..orderBy([(r) => OrderingTerm.asc(r.kind), (r) => OrderingTerm.asc(r.aboveAmount)]))
+      .get();
+
+  /// Sets the amount above which [kind] needs [role]; null removes the
+  /// rule. One live rule per kind and level.
+  Future<void> setRule(String companyId, {required String kind, required String role, double? above, required String by}) =>
+      transaction(() async {
+        if (above != null && (above < 0 || !above.isFinite)) throw ArgumentError.value(above, 'above');
+        final live = await (select(approvalRules)
+              ..where((r) =>
+                  r.companyId.equals(companyId) & r.kind.equals(kind) & r.role.equals(role) & r.voided.equals(false)))
+            .get();
+        for (final (i, r) in live.indexed) {
+          final keep = i == 0 && above != null;
+          final row = r.copyWith(aboveAmount: keep ? _round2(above) : r.aboveAmount, voided: !keep, updatedAt: DateTime.now());
+          if (row == r) continue;
+          await update(approvalRules).replace(row);
+          await db.syncOutboxDao.enqueue(
+              targetTable: 'site_approval_rules',
+              recordId: row.id,
+              operation: 'update',
+              payloadJson: jsonEncode(approvalRuleToSupabaseJson(row)));
+        }
+        if (live.isEmpty && above != null) {
+          final row = await into(approvalRules).insertReturning(ApprovalRulesCompanion.insert(
+              id: _uuid.v4(), companyId: companyId, kind: kind, role: role, aboveAmount: _round2(above), createdBy: by));
+          await db.syncOutboxDao.enqueue(
+              targetTable: 'site_approval_rules',
+              recordId: row.id,
+              operation: 'insert',
+              payloadJson: jsonEncode(approvalRuleToSupabaseJson(row)));
+        }
+      });
+
+  Future<List<ApprovalStep>> stepsFor(String projectId) =>
+      (select(approvalSteps)..where((s) => s.projectId.equals(projectId))..orderBy([(s) => OrderingTerm.asc(s.createdAt)])).get();
+
+  Future<List<ApprovalStep>> stepsForItem(String kind, String itemId) => (select(approvalSteps)
+        ..where((s) => s.kind.equals(kind) & s.itemId.equals(itemId))
+        ..orderBy([(s) => OrderingTerm.asc(s.createdAt)]))
+      .get();
+
+  /// Signs [level] on an item. A person signs each level of an item once.
+  Future<ApprovalStep> sign({
+    required String projectId,
+    required String kind,
+    required String itemId,
+    required String level,
+    required bool approve,
+    double? amount,
+    required String by,
+    String? note,
+  }) =>
+      transaction(() async {
+        final mine = await (select(approvalSteps)
+              ..where((s) => s.kind.equals(kind) & s.itemId.equals(itemId) & s.level.equals(level) & s.decidedBy.equals(by)))
+            .getSingleOrNull();
+        if (mine != null) return mine;
+        final row = await into(approvalSteps).insertReturning(ApprovalStepsCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          kind: kind,
+          itemId: itemId,
+          level: level,
+          decision: approve ? 'approved' : 'rejected',
+          amount: Value(amount),
+          note: Value(_clip(note, 300)),
+          decidedBy: by,
+        ));
+        await db.syncOutboxDao.enqueue(
+            targetTable: 'site_approval_steps',
+            recordId: row.id,
+            operation: 'insert',
+            payloadJson: jsonEncode(approvalStepToSupabaseJson(row)));
+        return row;
+      });
+
+  Future<void> upsertRuleFromRemote(ApprovalRulesCompanion c) => into(approvalRules).insertOnConflictUpdate(c);
+  Future<void> upsertStepFromRemote(ApprovalStepsCompanion c) => into(approvalSteps).insertOnConflictUpdate(c);
+}
 
 /// The roles a person can have on one site.
 const siteRoleValues = ['owner', 'project_manager', 'site_engineer', 'accounts', 'storekeeper', 'viewer'];

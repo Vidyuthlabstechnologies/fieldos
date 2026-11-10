@@ -3204,4 +3204,45 @@ const Map<String, String> stringsTa = {
   // Accounts export check
   'The export did not pass its check, so it was not sent: {why}':
       'ஏற்றுமதி சரிபார்ப்பில் தேறவில்லை, அதனால் அனுப்பப்படவில்லை: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'இந்தத் தொகைகளுக்கு மேல் முதலில் திட்ட மேலாளர், பிறகு உரிமையாளர் ஒப்புதல் தருவார். ஒப்புதல் தேவையில்லை என்றால் காலியாக விடுங்கள். விதிகள் இனி பதிவாகுபவற்றுக்கு மட்டும் பொருந்தும்.',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'எந்தத் தொகைக்கு மேல் திட்ட மேலாளர், பிறகு நீங்கள், கோரிக்கைகள், செலவுகள், ஆர்டர்களை ஒப்புக்கொள்ள வேண்டும்',
+  'Approval rules':
+      'ஒப்புதல் விதிகள்',
+  'Approval rules saved':
+      'ஒப்புதல் விதிகள் சேமிக்கப்பட்டன',
+  'Enter amounts in rupees, or leave blank.':
+      'தொகைகளை ரூபாயில் இடுங்கள், அல்லது காலியாக விடுங்கள்.',
+  'Note (needed to reject)':
+      'குறிப்பு (நிராகரிக்கத் தேவை)',
+  'Owner also approves above (₹)':
+      'இதற்கு மேல் உரிமையாளரும் ஒப்புதல் தருவார் (₹)',
+  'Project manager approves above (₹)':
+      'இதற்கு மேல் திட்ட மேலாளர் ஒப்புதல் தருவார் (₹)',
+  'Purchase orders':
+      'கொள்முதல் ஆர்டர்கள்',
+  'Purchase requests':
+      'கொள்முதல் கோரிக்கைகள்',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'உங்கள் ஒப்புதல் தொகைகளுக்கு மேல் உள்ள கொள்முதல் கோரிக்கைகள், ஆர்டர்கள், செலவுகள் இங்கே காத்திருக்கும்.',
+  'Say why it is rejected.':
+      'ஏன் நிராகரிக்கப்பட்டது என்று சொல்லுங்கள்.',
+  'Signed. It now waits for the owner\'s approval.':
+      'கையொப்பம் இடப்பட்டது. இப்போது உரிமையாளரின் ஒப்புதலுக்குக் காத்திருக்கிறது.',
+  'The owner approves it after you.':
+      'உங்களுக்குப் பிறகு உரிமையாளர் இதை ஒப்புக்கொள்வார்.',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'உரிமையாளரின் தொகை திட்ட மேலாளரின் தொகையை விடக் குறைவாக இருக்கக் கூடாது.',
+  'Waiting for a project manager\'s approval':
+      'திட்ட மேலாளர் ஒப்புதலுக்குக் காத்திருக்கிறது',
+  'Waiting for the owner\'s approval':
+      'உரிமையாளர் ஒப்புதலுக்குக் காத்திருக்கிறது',
+  'Waiting for your approval':
+      'உங்கள் ஒப்புதலுக்குக் காத்திருப்பவை',
+  '{amount}. You sign as {level}.':
+      '{amount}. நீங்கள் {level} ஆகக் கையொப்பமிடுவீர்கள்.',
+  '{n} requests, orders or expenses above your approval amounts':
+      'உங்கள் ஒப்புதல் தொகைகளுக்கு மேல் {n} கோரிக்கைகள், ஆர்டர்கள் அல்லது செலவுகள்',
 };

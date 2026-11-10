@@ -13,6 +13,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/features/approvals/approval_rules_screen.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
@@ -327,6 +328,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               title: Text(tr('Send to your accountant')),
               subtitle: Text(tr('Tally vouchers or a Zoho Books file, with GST split out')),
               onTap: () => showAccountsExport(context, ref),
+            ),
+          if (company != null && session.role == Roles.owner)
+            ListTile(
+              key: const Key('settings-approval-rules'),
+              leading: const Icon(Icons.approval_outlined),
+              title: Text(tr('Approval rules')),
+              subtitle: Text(tr('Above what amount a project manager, then you, approve requests, expenses and orders')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => ApprovalRulesScreen(companyId: company.id))),
             ),
           if (company != null && session.canManageSettings) ...[
             const SectionHeader('Bills and reports', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),

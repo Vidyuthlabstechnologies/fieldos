@@ -1111,3 +1111,53 @@ SupplierInvoicesCompanion supplierInvoiceFromSupabaseJson(Map<String, dynamic> r
       recordedBy: r['recorded_by'] as String,
       createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
     );
+
+Map<String, dynamic> approvalRuleToSupabaseJson(ApprovalRule r) => {
+      'id': r.id,
+      'company_id': r.companyId,
+      'kind': r.kind,
+      'role': r.role,
+      'above_amount': r.aboveAmount,
+      'voided': r.voided,
+      'created_by': r.createdBy,
+      'created_at': _timestamp(r.createdAt.toUtc()),
+    };
+
+ApprovalRulesCompanion approvalRuleFromSupabaseJson(Map<String, dynamic> r) => ApprovalRulesCompanion.insert(
+      id: r['id'] as String,
+      companyId: r['company_id'] as String,
+      kind: r['kind'] as String,
+      role: r['role'] as String,
+      aboveAmount: (r['above_amount'] as num).toDouble(),
+      voided: Value(r['voided'] as bool? ?? false),
+      createdBy: r['created_by'] as String,
+      createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
+      updatedAt: r['updated_at'] == null ? const Value.absent() : Value(DateTime.parse(r['updated_at'] as String).toLocal()),
+    );
+
+Map<String, dynamic> approvalStepToSupabaseJson(ApprovalStep s) => {
+      'id': s.id,
+      'project_id': s.projectId,
+      'kind': s.kind,
+      'item_id': s.itemId,
+      'level': s.level,
+      'decision': s.decision,
+      'amount': s.amount,
+      'note': s.note,
+      'decided_by': s.decidedBy,
+      'created_at': _timestamp(s.createdAt.toUtc()),
+    };
+
+ApprovalStepsCompanion approvalStepFromSupabaseJson(Map<String, dynamic> r) => ApprovalStepsCompanion.insert(
+      id: r['id'] as String,
+      projectId: r['project_id'] as String,
+      kind: r['kind'] as String,
+      itemId: r['item_id'] as String,
+      level: r['level'] as String,
+      decision: r['decision'] as String,
+      amount: Value((r['amount'] as num?)?.toDouble()),
+      note: Value(r['note'] as String?),
+      decidedBy: r['decided_by'] as String,
+      createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
+    );
+

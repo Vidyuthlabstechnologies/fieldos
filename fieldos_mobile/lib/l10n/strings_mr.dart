@@ -3204,4 +3204,45 @@ const Map<String, String> stringsMr = {
   // Accounts export check
   'The export did not pass its check, so it was not sent: {why}':
       'एक्सपोर्ट तपासणीत पास झाला नाही, म्हणून पाठवला नाही: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'या रकमेपेक्षा जास्त असल्यास आधी प्रोजेक्ट मॅनेजर, मग मालक मंजुरी देतात. मंजुरी नको असल्यास जागा रिकामी ठेवा. नियम आतापासून नोंदवलेल्या गोष्टींना लागू होतात.',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'कोणत्या रकमेपेक्षा जास्त असल्यास प्रोजेक्ट मॅनेजर, मग तुम्ही, मागणी, खर्च आणि ऑर्डर मंजूर करावे',
+  'Approval rules':
+      'मंजुरीचे नियम',
+  'Approval rules saved':
+      'मंजुरीचे नियम सेव्ह झाले',
+  'Enter amounts in rupees, or leave blank.':
+      'रक्कम रुपयांत भरा, किंवा रिकामी ठेवा.',
+  'Note (needed to reject)':
+      'टीप (नाकारण्यासाठी आवश्यक)',
+  'Owner also approves above (₹)':
+      'यापेक्षा जास्त असल्यास मालकही मंजूर करतात (₹)',
+  'Project manager approves above (₹)':
+      'यापेक्षा जास्त असल्यास प्रोजेक्ट मॅनेजर मंजूर करतात (₹)',
+  'Purchase orders':
+      'खरेदी ऑर्डर',
+  'Purchase requests':
+      'खरेदी मागण्या',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'तुमच्या मंजुरीच्या रकमेपेक्षा जास्त खरेदी मागण्या, ऑर्डर आणि खर्च येथे थांबतात.',
+  'Say why it is rejected.':
+      'का नाकारले ते सांगा.',
+  'Signed. It now waits for the owner\'s approval.':
+      'सही झाली. आता हे मालकाच्या मंजुरीची वाट पाहत आहे.',
+  'The owner approves it after you.':
+      'तुमच्यानंतर मालक हे मंजूर करतील.',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'मालकाची रक्कम प्रोजेक्ट मॅनेजरच्या रकमेपेक्षा कमी नसावी.',
+  'Waiting for a project manager\'s approval':
+      'प्रोजेक्ट मॅनेजरच्या मंजुरीची वाट',
+  'Waiting for the owner\'s approval':
+      'मालकाच्या मंजुरीची वाट',
+  'Waiting for your approval':
+      'तुमच्या मंजुरीची वाट',
+  '{amount}. You sign as {level}.':
+      '{amount}. तुम्ही {level} म्हणून सही करता.',
+  '{n} requests, orders or expenses above your approval amounts':
+      'तुमच्या मंजुरीच्या रकमेपेक्षा जास्त {n} मागण्या, ऑर्डर किंवा खर्च',
 };
