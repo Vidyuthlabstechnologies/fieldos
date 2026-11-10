@@ -2,7 +2,7 @@
 
 Plain static HTML and CSS, no build step. Open `index.html` in a browser to preview.
 
-Pages: home (`index.html`), `guide.html` (the video guide), `privacy-policy.html`, `terms-of-use.html`,
+Pages: home (`index.html`), `builders.html` (For builders: company plans with no public prices and the "Book a site audit" form; `builders-thanks.html` after sending it), `guide.html` (the video guide), `privacy-policy.html`, `terms-of-use.html`,
 `delete-account.html` (Play Console's account-deletion URL), `support.html`, `404.html`.
 Colours match `fieldos_mobile/lib/core/brand.dart`.
 
@@ -17,6 +17,13 @@ Use any free static host and upload this folder as it is:
 Then set these in Play Console and as repo variables (`PRIVACY_POLICY_URL`, `TERMS_URL`):
 `<site>/privacy-policy.html`, `<site>/terms-of-use.html`, and `<site>/delete-account.html`
 for the Data safety account-deletion link.
+
+## Site audit form
+
+`builders.html` posts to **Netlify Forms** (`data-netlify="true"`, form name `site-audit`,
+with a honeypot field). Netlify picks the form up on deploy. To get an email for each request:
+Netlify → the site → Forms → Form notifications → add info@mldynamic.com. Other hosts don't
+process the form; the page also gives the email address.
 
 ## Before going live
 

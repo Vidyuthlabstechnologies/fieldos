@@ -61,6 +61,7 @@ function fakeDeps(over: Partial<Deps> = {}) {
   const deps: Deps = {
     userFromToken: (t) => Promise.resolve(t === "good" ? { id: "u1" } : null),
     hasPlan: (s) => Promise.resolve(s === "paid"),
+    hasCompanyPlan: () => Promise.resolve(false),
     takeUsage: (u, k, a, l) => {
       calls.usage.push([u, k, a, l]);
       return Promise.resolve(a);
@@ -186,6 +187,18 @@ Deno.test("chat: no plan is refused", async () => {
     assertEquals(res.status, 402);
   }
   assertEquals(calls.claude.length, 0);
+});
+
+Deno.test("chat: a company plan lets a member in with no store subscription", async () => {
+  const { deps } = fakeDeps({ hasCompanyPlan: (u) => Promise.resolve(u === "u1") });
+  const res = await handle(post({ action: "chat", messages: hello }), deps);
+  assertEquals(res.status, 200);
+  // Even before RevenueCat is set up on the server.
+  const { deps: d2 } = fakeDeps({
+    hasCompanyPlan: () => Promise.resolve(true),
+    configured: { anthropic: true, sarvam: true, revenuecat: false },
+  });
+  assertEquals((await handle(post({ action: "chat", messages: hello }), d2)).status, 200);
 });
 
 Deno.test("chat: plan check can be switched off for a test project", async () => {

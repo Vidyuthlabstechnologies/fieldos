@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -8,6 +9,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/project/project_status.dart';
 import 'package:fieldos_mobile/features/project/site_template.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/services/company_plan.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 /// Asks for a new project's name, client and stage, saves it, and returns
@@ -69,6 +71,13 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
     });
     try {
       final db = ref.read(appDatabaseProvider);
+      if (countsAsActiveSite(_status)) {
+        final blocked = await newActiveSiteBlocked(db, widget.companyId);
+        if (blocked != null) {
+          if (mounted) setState(() => _error = blocked);
+          return;
+        }
+      }
       final from = _from;
       final Project project;
       if (from != null) {

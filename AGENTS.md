@@ -26,6 +26,11 @@ before assuming otherwise) with:
   confirm card. Tool names in `tools.ts` and `assistant_tools.dart` must
   match (a test checks). See `docs/AI_ASSISTANT.md`.
 
+- **Company plans**: builder firms pay by GST invoice outside the stores;
+  the team switches a plan on in Supabase and it covers everyone in the
+  company, up to a number of active sites. The apps must never show its
+  price or a way to buy it. See `docs/COMPANY_PLANS.md`.
+
 ## Code Style Rules
 
 ### Python (Backend)

@@ -2344,6 +2344,12 @@ const Map<String, String> stringsTa = {
       'உங்கள் திட்டம்',
   'This needs a FieldOS server update that is on its way. Your work is safe on the phone; try again in a day or two.':
       'இதற்கு FieldOS சர்வர் புதுப்பிப்பு தேவை, அது விரைவில் வரும். உங்கள் வேலை போனில் பாதுகாப்பாக உள்ளது; ஓரிரு நாளில் மீண்டும் முயலுங்கள்.',
+  'Your company has a FieldOS plan?':
+      'உங்கள் நிறுவனத்திடம் FieldOS திட்டம் உள்ளதா?',
+  'Sign in and join your company with the code from its owner. Everyone in the company is included.':
+      'உள்நுழைந்து, உரிமையாளர் தந்த குறியீட்டுடன் உங்கள் நிறுவனத்தில் சேருங்கள். நிறுவனத்தில் உள்ள அனைவரும் இதில் அடங்குவர்.',
+  'Sign in to my company':
+      'என் நிறுவனத்தில் உள்நுழை',
   'Your role in this company does not allow that. Ask the owner.':
       'இந்த நிறுவனத்தில் உங்கள் பங்குக்கு இதற்கு அனுமதி இல்லை. உரிமையாளரிடம் கேளுங்கள்.',
   'Your subscription is on this phone.':

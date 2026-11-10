@@ -47,6 +47,7 @@ import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
 import 'package:fieldos_mobile/features/reminders/reminders.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/sync/sync_engine.dart';
+import 'package:fieldos_mobile/services/company_plan.dart';
 
 class ProjectDetailScreen extends ConsumerStatefulWidget {
   const ProjectDetailScreen({super.key, required this.project, this.initialTab = 0});
@@ -142,7 +143,16 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
     final next = await showProjectStatusSheet(context, current: _status);
     if (next == null || !mounted) return;
     try {
-      await ref.read(appDatabaseProvider).projectDao.setStatus(widget.project.id, next);
+      final db = ref.read(appDatabaseProvider);
+      // Reopening a completed site takes one of the company plan's sites.
+      if (!countsAsActiveSite(_status) && countsAsActiveSite(next)) {
+        final blocked = await newActiveSiteBlocked(db, widget.project.companyId, reopening: widget.project.id);
+        if (blocked != null) {
+          if (mounted) showSnack(context, blocked, error: true);
+          return;
+        }
+      }
+      await db.projectDao.setStatus(widget.project.id, next);
       if (!mounted) return;
       setState(() => _status = next);
       ref.invalidate(projectsProvider(widget.project.companyId));

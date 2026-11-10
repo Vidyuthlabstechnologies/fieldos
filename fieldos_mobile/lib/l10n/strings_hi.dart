@@ -1143,6 +1143,9 @@ const Map<String, String> stringsHi = {
   '{n} expenses': '{n} खर्च',
   '{pct}% done. At this rate the job costs {total}, {over} over budget.': '{pct}% पूरा। इसी रफ़्तार से काम {total} का पड़ेगा, बजट से {over} ज़्यादा।',
   '{pct}% done. At this rate the job finishes within budget ({total}).': '{pct}% पूरा। इसी रफ़्तार से काम बजट में पूरा होगा ({total})।',
+  'Your company has a FieldOS plan?': 'आपकी कंपनी के पास FieldOS प्लान है?',
+  'Sign in and join your company with the code from its owner. Everyone in the company is included.': 'साइन इन करें और मालिक से मिले कोड से अपनी कंपनी से जुड़ें। कंपनी के सभी लोग इसमें शामिल हैं।',
+  'Sign in to my company': 'मेरी कंपनी में साइन इन करें',
 
   // Read aloud
   'Stop':

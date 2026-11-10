@@ -2344,6 +2344,12 @@ const Map<String, String> stringsMr = {
       'तुमचा प्लॅन',
   'This needs a FieldOS server update that is on its way. Your work is safe on the phone; try again in a day or two.':
       'यासाठी FieldOS सर्व्हर अपडेट लागेल, ते लवकरच येत आहे. तुमचे काम फोनवर सुरक्षित आहे; एक-दोन दिवसांत पुन्हा प्रयत्न करा.',
+  'Your company has a FieldOS plan?':
+      'तुमच्या कंपनीकडे FieldOS प्लॅन आहे का?',
+  'Sign in and join your company with the code from its owner. Everyone in the company is included.':
+      'साइन इन करा आणि मालकाकडून मिळालेल्या कोडने तुमच्या कंपनीत सामील व्हा. कंपनीतील सर्वजण यात समाविष्ट आहेत.',
+  'Sign in to my company':
+      'माझ्या कंपनीत साइन इन करा',
   'Your role in this company does not allow that. Ask the owner.':
       'या कंपनीतील तुमच्या भूमिकेला याची परवानगी नाही. मालकाला विचारा.',
   'Your subscription is on this phone.':

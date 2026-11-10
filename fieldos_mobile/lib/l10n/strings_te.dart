@@ -1145,6 +1145,9 @@ const Map<String, String> stringsTe = {
   '{n} expenses': '{n} ఖర్చులు',
   '{pct}% done. At this rate the job costs {total}, {over} over budget.': '{pct}% పూర్తి. ఇదే వేగంతో పని {total} అవుతుంది, బడ్జెట్ కంటే {over} ఎక్కువ.',
   '{pct}% done. At this rate the job finishes within budget ({total}).': '{pct}% పూర్తి. ఇదే వేగంతో పని బడ్జెట్‌లోనే పూర్తవుతుంది ({total}).',
+  'Your company has a FieldOS plan?': 'మీ కంపెనీకి FieldOS ప్లాన్ ఉందా?',
+  'Sign in and join your company with the code from its owner. Everyone in the company is included.': 'సైన్ ఇన్ చేసి, యజమాని ఇచ్చిన కోడ్‌తో మీ కంపెనీలో చేరండి. కంపెనీలోని అందరూ ఇందులో ఉంటారు.',
+  'Sign in to my company': 'నా కంపెనీలో సైన్ ఇన్ చేయండి',
 
   // Read aloud
   'Stop':
