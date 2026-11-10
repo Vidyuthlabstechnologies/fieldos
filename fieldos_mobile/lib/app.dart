@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/features/commercial/subcontractor_portal.dart';
+import 'package:fieldos_mobile/features/daily/today_screen.dart';
+import 'package:fieldos_mobile/services/notification_service.dart';
 import 'package:fieldos_mobile/features/auth/login_screen.dart';
 import 'package:fieldos_mobile/features/company/company_setup_screen.dart';
 import 'package:fieldos_mobile/features/home/home_screen.dart';
@@ -30,6 +32,16 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     ref.read(bugReportServiceProvider).flush().catchError((_) => 0);
     Future.microtask(() => ref.read(reminderSchedulerProvider).refresh());
+    NotificationService.onTap = _openFromReminder;
+  }
+
+  /// A tapped cutoff reminder opens that site's Today checklist.
+  Future<void> _openFromReminder(String payload) async {
+    if (!payload.startsWith('today:')) return;
+    final project = await ref.read(appDatabaseProvider).projectDao.byId(payload.substring(6));
+    final nav = appNavigatorKey.currentState;
+    if (project == null || nav == null || !ref.read(sessionProvider).isAuthenticated) return;
+    await nav.push(MaterialPageRoute<void>(builder: (_) => TodayScreen(project: project, day: DateTime.now())));
   }
 
   @override

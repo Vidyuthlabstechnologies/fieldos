@@ -7,6 +7,8 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart';
+import 'package:fieldos_mobile/features/daily/daily_reports_screen.dart';
+import 'package:fieldos_mobile/features/daily/today_home_card.dart';
 import 'package:fieldos_mobile/features/commercial/exceptions_screen.dart';
 import 'package:fieldos_mobile/features/assistant/assistant_screen.dart';
 import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
@@ -111,6 +113,9 @@ class HomeScreen extends ConsumerWidget {
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeamSyncScreen()));
                 case 'approvals':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => ApprovalsScreen(companyId: company.id)));
+                case 'daily':
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (_) => DailyReportsScreen(companyId: company.id)));
                 case 'close':
                   Navigator.of(context)
                       .push(MaterialPageRoute(builder: (_) => WeeklyCloseListScreen(companyId: company.id)));
@@ -147,6 +152,9 @@ class HomeScreen extends ConsumerWidget {
               PopupMenuItem(
                   value: 'approvals',
                   child: ListTile(leading: Icon(Icons.approval_outlined), title: Text(tr('Approvals')))),
+              PopupMenuItem(
+                  value: 'daily',
+                  child: ListTile(leading: Icon(Icons.today_outlined), title: Text(tr('Daily reports')))),
               PopupMenuItem(
                   value: 'close',
                   child: ListTile(leading: Icon(Icons.fact_check_outlined), title: Text(tr('Weekly close')))),
@@ -334,6 +342,9 @@ class _ProjectList extends StatelessWidget {
         ),
         // The day's four jobs as big picture buttons, one tap each.
         QuickActions(projects: projects),
+        // The day's report: what is still to send (or, for a manager, which
+        // sites' reports came in). Above the brief so it is seen first.
+        TodayHomeCard(companyId: company.id),
         TodayBriefCard(companyId: company.id, companyName: company.name),
         const SectionHeader('Projects'),
         for (final p in sorted) ...[

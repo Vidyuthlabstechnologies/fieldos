@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_ta.dart';
+import 'package:fieldos_mobile/l10n/strings_daily_ta.dart';
 
 const Map<String, String> stringsTa = {
   'Try again':
@@ -2923,4 +2924,5 @@ const Map<String, String> stringsTa = {
   '{qty} more than ordered':
       'ஆர்டரை விட {qty} அதிகம்',
   ...commercialTa,
+  ...dailyTa,
 };

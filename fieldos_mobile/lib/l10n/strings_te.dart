@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_te.dart';
+import 'package:fieldos_mobile/l10n/strings_daily_te.dart';
 
 const Map<String, String> stringsTe = {
   'Try again': 'మళ్ళీ ప్రయత్నించండి',
@@ -2034,4 +2035,5 @@ const Map<String, String> stringsTe = {
   '{qty} more than ordered':
       'ఆర్డర్ కంటే {qty} ఎక్కువ',
   ...commercialTe,
+  ...dailyTe,
 };

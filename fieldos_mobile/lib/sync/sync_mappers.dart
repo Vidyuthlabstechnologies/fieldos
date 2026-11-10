@@ -1159,3 +1159,70 @@ ExceptionActionsCompanion exceptionActionFromSupabaseJson(Map<String, dynamic> r
       actedBy: row['acted_by'] as String,
       createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
     );
+
+// --- v19: daily site close --------------------------------------------------
+
+Map<String, dynamic> siteDayEventToSupabaseJson(SiteDayEvent e) => {
+      'id': e.id,
+      'project_id': e.projectId,
+      'work_date': e.workDate,
+      'kind': e.kind,
+      'site_closed': e.siteClosed,
+      'no_deliveries': e.noDeliveries,
+      'no_expenses': e.noExpenses,
+      'reason': e.reason,
+      'note': e.note,
+      'fingerprint': e.fingerprint,
+      'amount': e.amount,
+      'item_ref': e.itemRef,
+      'recorded_by': e.recordedBy,
+      'created_at': _timestamp(e.createdAt.toUtc()),
+    };
+
+SiteDayEventsCompanion siteDayEventFromSupabaseJson(Map<String, dynamic> row) => SiteDayEventsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      workDate: row['work_date'] as String,
+      kind: row['kind'] as String,
+      siteClosed: Value(row['site_closed'] as bool? ?? false),
+      noDeliveries: Value(row['no_deliveries'] as bool? ?? false),
+      noExpenses: Value(row['no_expenses'] as bool? ?? false),
+      reason: Value(row['reason'] as String?),
+      note: Value(row['note'] as String?),
+      fingerprint: Value(row['fingerprint'] as String?),
+      amount: Value((row['amount'] as num?)?.toDouble()),
+      itemRef: Value(row['item_ref'] as String?),
+      recordedBy: row['recorded_by'] as String,
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+Map<String, dynamic> siteCloseSettingToSupabaseJson(SiteCloseSetting s) => {
+      'id': s.id,
+      'project_id': s.projectId,
+      'cutoff_minutes': s.cutoffMinutes,
+      'supervisor_id': s.supervisorId,
+      'backup_id': s.backupId,
+      'backup_until': s.backupUntil,
+      'updated_by': s.updatedBy,
+      'updated_at': _timestamp(s.updatedAt.toUtc()),
+    };
+
+SiteCloseSettingsCompanion siteCloseSettingFromSupabaseJson(Map<String, dynamic> row) =>
+    SiteCloseSettingsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      cutoffMinutes: Value((row['cutoff_minutes'] as num?)?.toInt() ?? 19 * 60),
+      supervisorId: Value(row['supervisor_id'] as String?),
+      backupId: Value(row['backup_id'] as String?),
+      backupUntil: Value(row['backup_until'] as String?),
+      updatedBy: row['updated_by'] as String,
+      updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
+    );
+
+MemberSyncStatusCompanion memberSyncStatusFromSupabaseJson(Map<String, dynamic> row) =>
+    MemberSyncStatusCompanion.insert(
+      userId: row['user_id'] as String,
+      companyId: row['company_id'] as String,
+      lastSyncedAt: _localTs(row['last_synced_at'])!,
+      pending: Value((row['pending_count'] as num?)?.toInt() ?? 0),
+    );

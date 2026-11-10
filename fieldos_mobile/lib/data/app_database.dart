@@ -79,6 +79,9 @@ String? _clip(String? s, int max) {
   VariationDecisions,
   CommercialAttachments,
   ExceptionActions,
+  SiteDayEvents,
+  SiteCloseSettings,
+  MemberSyncStatus,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -107,7 +110,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 19;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -249,8 +252,25 @@ class AppDatabase extends _$AppDatabase {
             await _addColumnIfMissing(m, purchaseOrders, purchaseOrders.costCodeId);
             await _addColumnIfMissing(m, siteExpenses, siteExpenses.costCodeId);
           }
+          // v17 and v18 are the weekly close's site roles and billing
+          // reconciliation; v20 is site execution. Each checks for its own
+          // tables, so the order they merge in doesn't matter.
+          if (from < 19) {
+            // Daily site close: the day's submission and what was said
+            // about it, each site's cutoff and supervisors, and when each
+            // teammate's phone last synced.
+            for (final TableInfo t in [siteDayEvents, siteCloseSettings, memberSyncStatus]) {
+              await _createTableIfMissing(m, t);
+            }
+          }
         },
       );
+
+  Future<void> _createTableIfMissing(Migrator m, TableInfo t) async {
+    final found = await customSelect("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+        variables: [Variable<String>(t.actualTableName)]).get();
+    if (found.isEmpty) await m.createTable(t);
+  }
 
   /// Before v15 a delivery photo was kept as `Photo: <path>` in the
   /// receipt's note. Those become real slips, so they sync like new ones.
@@ -337,6 +357,7 @@ class AppDatabase extends _$AppDatabase {
   NoteDao get noteDao => NoteDao(this);
   CloseDao get closeDao => CloseDao(this);
   CommercialDao get commercialDao => CommercialDao(this);
+  DayCloseDao get dayCloseDao => DayCloseDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -2808,3 +2829,119 @@ class CommercialDao extends DatabaseAccessor<AppDatabase> with _$CommercialDaoMi
 }
 
 double _money(double v) => (v * 100).roundToDouble() / 100;
+
+// ---------------------------------------------------------------------------
+// Daily site close (v19). Rules in features/daily/day_close.dart; the
+// server's copy in supabase/migrations/20261110200000_daily_site_close.sql.
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [SiteDayEvents, SiteCloseSettings, MemberSyncStatus])
+class DayCloseDao extends DatabaseAccessor<AppDatabase> with _$DayCloseDaoMixin {
+  DayCloseDao(super.db);
+
+  /// A site's day events, oldest first, optionally from [fromDay] to
+  /// [toDay] (yyyy-mm-dd, inclusive).
+  Future<List<SiteDayEvent>> eventsFor(String projectId, {String? fromDay, String? toDay}) {
+    final q = select(siteDayEvents)..where((e) => e.projectId.equals(projectId));
+    if (fromDay != null) q.where((e) => e.workDate.isBiggerOrEqualValue(fromDay));
+    if (toDay != null) q.where((e) => e.workDate.isSmallerOrEqualValue(toDay));
+    q.orderBy([(e) => OrderingTerm.asc(e.createdAt), (e) => OrderingTerm.asc(e.rowId)]);
+    return q.get();
+  }
+
+  /// Adds one event. Never changed afterwards: a correction is a new row.
+  Future<SiteDayEvent> record({
+    required String projectId,
+    required String workDate,
+    required String kind,
+    required String by,
+    bool siteClosed = false,
+    bool noDeliveries = false,
+    bool noExpenses = false,
+    String? reason,
+    String? note,
+    String? fingerprint,
+    double? amount,
+    String? itemRef,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final row = await into(siteDayEvents).insertReturning(SiteDayEventsCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          workDate: workDate,
+          kind: kind,
+          siteClosed: Value(siteClosed),
+          noDeliveries: Value(noDeliveries),
+          noExpenses: Value(noExpenses),
+          reason: Value(_clip(reason, 20)),
+          note: Value(_clip(note, 300)),
+          fingerprint: Value(_clip(fingerprint, 200)),
+          amount: Value(amount),
+          itemRef: Value(_clip(itemRef, 160)),
+          recordedBy: by,
+          createdAt: Value(now ?? DateTime.now()),
+        ));
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'site_day_events',
+          recordId: row.id,
+          operation: 'insert',
+          payloadJson: jsonEncode(siteDayEventToSupabaseJson(row)),
+        );
+        return row;
+      });
+
+  Future<SiteCloseSetting?> settingsFor(String projectId) =>
+      (select(siteCloseSettings)..where((s) => s.id.equals(projectId))).getSingleOrNull();
+
+  Future<SiteCloseSetting> saveSettings({
+    required String projectId,
+    required int cutoffMinutes,
+    required String by,
+    String? supervisorId,
+    String? backupId,
+    String? backupUntil,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        if (cutoffMinutes < 0 || cutoffMinutes >= 24 * 60) throw ArgumentError('cutoff outside the day');
+        final row = SiteCloseSettingsCompanion.insert(
+          id: projectId,
+          projectId: projectId,
+          cutoffMinutes: Value(cutoffMinutes),
+          supervisorId: Value(supervisorId),
+          backupId: Value(backupId),
+          backupUntil: Value(backupId == null ? null : backupUntil),
+          updatedBy: by,
+          updatedAt: Value(now ?? DateTime.now()),
+        );
+        await into(siteCloseSettings).insertOnConflictUpdate(row);
+        final saved = (await settingsFor(projectId))!;
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'site_close_settings',
+          recordId: projectId,
+          operation: 'upsert',
+          payloadJson: jsonEncode(siteCloseSettingToSupabaseJson(saved)),
+        );
+        return saved;
+      });
+
+  /// Whether this phone still has [eventId] waiting to send.
+  Future<bool> isWaitingToSync(String eventId) async =>
+      (await db.syncOutboxDao.dirtyKeys()).contains(SyncOutboxDao.key('site_day_events', eventId));
+
+  Future<List<MemberSyncStatusData>> syncStatusFor(String companyId) =>
+      (select(memberSyncStatus)..where((s) => s.companyId.equals(companyId))).get();
+
+  /// What the server says about the company's phones now.
+  Future<void> replaceSyncStatus(String companyId, List<MemberSyncStatusCompanion> rows) => transaction(() async {
+        await (delete(memberSyncStatus)..where((s) => s.companyId.equals(companyId))).go();
+        for (final r in rows) {
+          await into(memberSyncStatus).insertOnConflictUpdate(r);
+        }
+      });
+
+  Future<void> upsertEventFromRemote(SiteDayEventsCompanion c) => into(siteDayEvents).insertOnConflictUpdate(c);
+  Future<void> upsertSettingsFromRemote(SiteCloseSettingsCompanion c) =>
+      into(siteCloseSettings).insertOnConflictUpdate(c);
+}
