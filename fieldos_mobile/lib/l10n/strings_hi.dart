@@ -1518,6 +1518,20 @@ const Map<String, String> stringsHi = {
       'बाकी',
   '{from} to {to}':
       '{from} से {to}',
+
+  // Your language: voice language vs screen language
+  'Your language':
+      'आपकी भाषा',
+  'Mitra talks with you in it, mixed with English, and voice input listens for it.':
+      'Mitra आपसे इसी में, English मिलाकर बात करेगा, और बोलकर लिखना भी इसी को सुनेगा।',
+  'Show screens in {language}':
+      'स्क्रीन {language} में दिखाएँ',
+  'Off: screens stay in English. Mitra still talks in your language.':
+      'बंद: स्क्रीन English में रहेंगी। Mitra फिर भी आपकी भाषा में बोलेगा।',
+
+  // Settings section
+  'Language and voice':
+      'भाषा और आवाज़',
   'Show this week\'s expenses':
       'इस हफ़्ते के खर्च दिखाओ',
   'What is due this week?':

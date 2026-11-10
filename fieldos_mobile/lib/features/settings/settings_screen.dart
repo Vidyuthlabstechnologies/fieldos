@@ -236,14 +236,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: () => showMySubscription(context),
             ),
 
-          const SectionHeader('App language', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
+          const SectionHeader('Language and voice', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           ListTile(
-            leading: const Icon(Icons.translate),
-            title: Text(tr('App language')),
+            leading: const Icon(Icons.record_voice_over_outlined),
+            title: Text(tr('Your language')),
             subtitle: Text(ref.watch(languageProvider).nativeName),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => showLanguagePicker(context, ref),
           ),
+          if (ref.watch(languageProvider) != AppLanguage.en)
+            SwitchListTile(
+              secondary: const Icon(Icons.translate),
+              title: Text(trf('Show screens in {language}', {'language': ref.watch(languageProvider).nativeName})),
+              subtitle: Text(tr('Off: screens stay in English. Mitra still talks in your language.')),
+              value: ref.watch(screensInLanguageProvider),
+              onChanged: (v) => setScreensInLanguage(ref, v),
+            ),
           ListTile(
             leading: const Icon(Icons.format_size),
             title: Text(tr('Text size')),

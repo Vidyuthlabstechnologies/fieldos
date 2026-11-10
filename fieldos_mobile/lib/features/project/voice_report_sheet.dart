@@ -91,7 +91,7 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
   /// will speak Tamil), else the phone's own language when we offer it,
   /// else English.
   SpeechLanguage _defaultLanguage() {
-    if (currentLanguage != AppLanguage.en) return speechLanguageFor(speechCodeFor(currentLanguage));
+    if (spokenLanguage != AppLanguage.en) return speechLanguageFor(speechCodeFor(spokenLanguage));
     final tag = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
     return speechLanguages.firstWhere((l) => l.code.startsWith('$tag-'), orElse: () => speechLanguages.first);
   }

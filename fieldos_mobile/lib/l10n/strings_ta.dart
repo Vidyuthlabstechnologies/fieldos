@@ -2409,6 +2409,20 @@ const Map<String, String> stringsTa = {
       'பாக்கி',
   '{from} to {to}':
       '{from} முதல் {to} வரை',
+
+  // Your language: voice language vs screen language
+  'Your language':
+      'உங்கள் மொழி',
+  'Mitra talks with you in it, mixed with English, and voice input listens for it.':
+      'Mitra உங்களுடன் இதில், English கலந்து பேசும், voice input-உம் இதையே கேட்கும்.',
+  'Show screens in {language}':
+      'திரைகளை {language} இல் காட்டு',
+  'Off: screens stay in English. Mitra still talks in your language.':
+      'ஆஃப்: திரைகள் English-ல இருக்கும். Mitra உங்கள் மொழியிலேயே பேசும்.',
+
+  // Settings section
+  'Language and voice':
+      'மொழி, குரல்',
   'Show this week\'s expenses':
       'இந்த வாரச் செலவுகளைக் காட்டு',
   'What is due this week?':

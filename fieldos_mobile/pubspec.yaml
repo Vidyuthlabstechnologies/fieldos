@@ -2,7 +2,7 @@ name: fieldos_mobile
 description: "FieldOS Mobile — offline-first agentic construction platform (Flutter)."
 publish_to: 'none'
 
-version: 1.7.0+15
+version: 1.7.1+16
 
 environment:
   sdk: ^3.12.2
@@ -109,6 +109,7 @@ dependencies:
   # The AI assistant reads its answers out loud with the phone's own voice
   # (Android/iOS text to speech): free and offline, no Sarvam needed.
   flutter_tts: ^4.2.5
+  audioplayers: ^6.8.1
   # Already present through `supabase`; declared because the sync engine
   # tells a network failure (http's ClientException) from a server refusal.
   http: ^1.2.0
@@ -131,6 +132,15 @@ flutter:
     # Mitra the mascot: one looping WebP and one still PNG per mood
     # (made by mascot/render_frames.py from the Rive scene).
     - assets/mascot/
+    # Mitra's recorded guide voice, one folder per language (made by
+    # tool/guide_voice/make_clips.py; manifest.json lists what is recorded).
+    - assets/voice/
+    - assets/voice/en/
+    - assets/voice/hi/
+    - assets/voice/te/
+    - assets/voice/ta/
+    - assets/voice/kn/
+    - assets/voice/mr/
 
   # Inter, the brand typeface (Latin subset, see tools/subset_fonts.sh).
   # Telugu, Hindi and other Indian scripts use the phone's own fonts.

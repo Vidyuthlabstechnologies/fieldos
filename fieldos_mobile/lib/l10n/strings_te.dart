@@ -1520,6 +1520,20 @@ const Map<String, String> stringsTe = {
       'బాకీ',
   '{from} to {to}':
       '{from} నుండి {to}',
+
+  // Your language: voice language vs screen language
+  'Your language':
+      'మీ భాష',
+  'Mitra talks with you in it, mixed with English, and voice input listens for it.':
+      'Mitra మీతో ఇందులో, English కలిపి మాట్లాడుతుంది, voice input కూడా దీన్నే వింటుంది.',
+  'Show screens in {language}':
+      'స్క్రీన్‌లు {language} లో చూపించు',
+  'Off: screens stay in English. Mitra still talks in your language.':
+      'ఆఫ్: స్క్రీన్‌లు English లోనే ఉంటాయి. Mitra మాత్రం మీ భాషలోనే మాట్లాడుతుంది.',
+
+  // Settings section
+  'Language and voice':
+      'భాష, వాయిస్',
   'Show this week\'s expenses':
       'ఈ వారం ఖర్చులు చూపించు',
   'What is due this week?':

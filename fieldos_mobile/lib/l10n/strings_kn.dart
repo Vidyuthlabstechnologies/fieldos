@@ -2409,6 +2409,20 @@ const Map<String, String> stringsKn = {
       'ಬಾಕಿ',
   '{from} to {to}':
       '{from} ರಿಂದ {to}',
+
+  // Your language: voice language vs screen language
+  'Your language':
+      'ನಿಮ್ಮ ಭಾಷೆ',
+  'Mitra talks with you in it, mixed with English, and voice input listens for it.':
+      'Mitra ನಿಮ್ಜೊತೆ ಇದರಲ್ಲೇ, English ಮಿಕ್ಸ್ ಮಾಡಿ ಮಾತಾಡುತ್ತೆ, voice input ಕೂಡ ಇದನ್ನೇ ಕೇಳುತ್ತೆ.',
+  'Show screens in {language}':
+      'ಪರದೆಗಳನ್ನು {language} ನಲ್ಲಿ ತೋರಿಸಿ',
+  'Off: screens stay in English. Mitra still talks in your language.':
+      'ಆಫ್: ಪರದೆಗಳು English ನಲ್ಲೇ ಇರುತ್ತವೆ. Mitra ಮಾತ್ರ ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲೇ ಮಾತಾಡುತ್ತೆ.',
+
+  // Settings section
+  'Language and voice':
+      'ಭಾಷೆ ಮತ್ತು ಧ್ವನಿ',
   'Show this week\'s expenses':
       'ಈ ವಾರದ ಖರ್ಚುಗಳನ್ನು ತೋರಿಸು',
   'What is due this week?':

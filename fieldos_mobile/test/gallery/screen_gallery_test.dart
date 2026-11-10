@@ -46,6 +46,7 @@ import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/features/tour/app_tour.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/l10n/language_welcome.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
@@ -194,6 +195,7 @@ void main() {
   }
 
   final shots = <String, Future<void> Function(WidgetTester, ProviderContainer, AppDatabase, Project)>{
+    '00_language_welcome': (t, c, db, p) => shoot(t, c, '00_language_welcome', const LanguageWelcomeScreen()),
     '01_login': (t, c, db, p) => shoot(t, c, '01_login', const LoginScreen()),
     '02_company_setup': (t, c, db, p) => shoot(t, c, '02_company_setup', const CompanySetupScreen()),
     '03_paywall': (t, c, db, p) => shoot(t, c, '03_paywall', PaywallScreen(onUnlocked: () {})),

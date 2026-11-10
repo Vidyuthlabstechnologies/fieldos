@@ -2409,6 +2409,20 @@ const Map<String, String> stringsMr = {
       'बाकी',
   '{from} to {to}':
       '{from} ते {to}',
+
+  // Your language: voice language vs screen language
+  'Your language':
+      'तुमची भाषा',
+  'Mitra talks with you in it, mixed with English, and voice input listens for it.':
+      'Mitra तुमच्याशी यातच, English मिसळून बोलेल, आणि voice input हीच भाषा ऐकेल.',
+  'Show screens in {language}':
+      'स्क्रीन {language} मध्ये दाखवा',
+  'Off: screens stay in English. Mitra still talks in your language.':
+      'बंद: स्क्रीन English मध्येच राहतील. Mitra तरीही तुमच्या भाषेत बोलेल.',
+
+  // Settings section
+  'Language and voice':
+      'भाषा आणि आवाज',
   'Show this week\'s expenses':
       'या आठवड्याचा खर्च दाखवा',
   'What is due this week?':
