@@ -414,17 +414,19 @@ class _LineBuilder {
 
 // --- Commercial exceptions inbox (FOS-204) ----------------------------------
 
-enum ExceptionKind { beyondScope, aboveContract, overdueCertification, forecastOverrun }
+enum ExceptionKind { beyondScope, aboveContract, overdueCertification, forecastOverrun, missingDayReport }
 
 String exceptionKindLabel(ExceptionKind k) => switch (k) {
       ExceptionKind.beyondScope => tr('Work beyond approved scope'),
       ExceptionKind.aboveContract => tr('Quantity above contract'),
       ExceptionKind.overdueCertification => tr('Certification overdue'),
       ExceptionKind.forecastOverrun => tr('Forecast overrun'),
+      // From the daily site close (features/daily/day_close_exceptions.dart).
+      ExceptionKind.missingDayReport => tr('Daily report missing'),
     };
 
 /// Which source record an exception points at.
-enum ExceptionSource { claim, variation, costCode }
+enum ExceptionSource { claim, variation, costCode, dayClose }
 
 class CommercialException {
   CommercialException({

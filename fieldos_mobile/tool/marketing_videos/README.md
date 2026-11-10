@@ -21,6 +21,11 @@ Everything is free and runs offline once set up.
 - `mitra_sheets.py` — Mitra's animations from the app as sprite sheets.
 - `peek.js <project dir> <out.png> t1 t2 …` — a contact sheet of frames,
   to check a composition before the slow render.
+- `launch_store_assets.js <raw shots> <out>` — the launch set: 8 screenshots
+  for every store slot (phone, 7" and 10" tablet, iPhone 6.9", iPad 13") in
+  English and Telugu+English mix, plus both feature graphics. Raw shots come
+  from the screenshot test run once per device with `SHOTS_DEVICE=phone|iphone|tablet7|tablet10|ipad`
+  and `SHOTS_LANG=en|te`, into `<raw shots>/<device>/<lang>/`.
 - `store_screenshots.js <out>` — the 8 Play Store screenshots in English,
   Hindi and Telugu (each with the app itself in that language), and the
   1024×500 feature graphic.

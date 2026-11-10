@@ -1802,3 +1802,120 @@ StaffAttendanceCompanion staffAttendanceFromSupabaseJson(Map<String, dynamic> ro
       reviewNote: Value(row['review_note'] as String?),
       createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
     );
+
+Map<String, dynamic> approvalRuleToSupabaseJson(ApprovalRule r) => {
+      'id': r.id,
+      'company_id': r.companyId,
+      'kind': r.kind,
+      'role': r.role,
+      'above_amount': r.aboveAmount,
+      'voided': r.voided,
+      'created_by': r.createdBy,
+      'created_at': _timestamp(r.createdAt.toUtc()),
+    };
+
+ApprovalRulesCompanion approvalRuleFromSupabaseJson(Map<String, dynamic> r) => ApprovalRulesCompanion.insert(
+      id: r['id'] as String,
+      companyId: r['company_id'] as String,
+      kind: r['kind'] as String,
+      role: r['role'] as String,
+      aboveAmount: (r['above_amount'] as num).toDouble(),
+      voided: Value(r['voided'] as bool? ?? false),
+      createdBy: r['created_by'] as String,
+      createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
+      updatedAt: r['updated_at'] == null ? const Value.absent() : Value(DateTime.parse(r['updated_at'] as String).toLocal()),
+    );
+
+Map<String, dynamic> approvalStepToSupabaseJson(ApprovalStep s) => {
+      'id': s.id,
+      'project_id': s.projectId,
+      'kind': s.kind,
+      'item_id': s.itemId,
+      'level': s.level,
+      'decision': s.decision,
+      'amount': s.amount,
+      'note': s.note,
+      'decided_by': s.decidedBy,
+      'created_at': _timestamp(s.createdAt.toUtc()),
+    };
+
+ApprovalStepsCompanion approvalStepFromSupabaseJson(Map<String, dynamic> r) => ApprovalStepsCompanion.insert(
+      id: r['id'] as String,
+      projectId: r['project_id'] as String,
+      kind: r['kind'] as String,
+      itemId: r['item_id'] as String,
+      level: r['level'] as String,
+      decision: r['decision'] as String,
+      amount: Value((r['amount'] as num?)?.toDouble()),
+      note: Value(r['note'] as String?),
+      decidedBy: r['decided_by'] as String,
+      createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
+    );
+
+
+// --- v19: daily site close --------------------------------------------------
+
+Map<String, dynamic> siteDayEventToSupabaseJson(SiteDayEvent e) => {
+      'id': e.id,
+      'project_id': e.projectId,
+      'work_date': e.workDate,
+      'kind': e.kind,
+      'site_closed': e.siteClosed,
+      'no_deliveries': e.noDeliveries,
+      'no_expenses': e.noExpenses,
+      'reason': e.reason,
+      'note': e.note,
+      'fingerprint': e.fingerprint,
+      'amount': e.amount,
+      'item_ref': e.itemRef,
+      'recorded_by': e.recordedBy,
+      'created_at': _timestamp(e.createdAt.toUtc()),
+    };
+
+SiteDayEventsCompanion siteDayEventFromSupabaseJson(Map<String, dynamic> row) => SiteDayEventsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      workDate: row['work_date'] as String,
+      kind: row['kind'] as String,
+      siteClosed: Value(row['site_closed'] as bool? ?? false),
+      noDeliveries: Value(row['no_deliveries'] as bool? ?? false),
+      noExpenses: Value(row['no_expenses'] as bool? ?? false),
+      reason: Value(row['reason'] as String?),
+      note: Value(row['note'] as String?),
+      fingerprint: Value(row['fingerprint'] as String?),
+      amount: Value((row['amount'] as num?)?.toDouble()),
+      itemRef: Value(row['item_ref'] as String?),
+      recordedBy: row['recorded_by'] as String,
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+Map<String, dynamic> siteCloseSettingToSupabaseJson(SiteCloseSetting s) => {
+      'id': s.id,
+      'project_id': s.projectId,
+      'cutoff_minutes': s.cutoffMinutes,
+      'supervisor_id': s.supervisorId,
+      'backup_id': s.backupId,
+      'backup_until': s.backupUntil,
+      'updated_by': s.updatedBy,
+      'updated_at': _timestamp(s.updatedAt.toUtc()),
+    };
+
+SiteCloseSettingsCompanion siteCloseSettingFromSupabaseJson(Map<String, dynamic> row) =>
+    SiteCloseSettingsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      cutoffMinutes: Value((row['cutoff_minutes'] as num?)?.toInt() ?? 19 * 60),
+      supervisorId: Value(row['supervisor_id'] as String?),
+      backupId: Value(row['backup_id'] as String?),
+      backupUntil: Value(row['backup_until'] as String?),
+      updatedBy: row['updated_by'] as String,
+      updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
+    );
+
+MemberSyncStatusCompanion memberSyncStatusFromSupabaseJson(Map<String, dynamic> row) =>
+    MemberSyncStatusCompanion.insert(
+      userId: row['user_id'] as String,
+      companyId: row['company_id'] as String,
+      lastSyncedAt: _localTs(row['last_synced_at'])!,
+      pending: Value((row['pending_count'] as num?)?.toInt() ?? 0),
+    );

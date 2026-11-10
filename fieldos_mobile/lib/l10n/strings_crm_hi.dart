@@ -72,7 +72,6 @@ const Map<String, String> crmHi = {
   'Referral': 'रेफ़रल',
   'Remove item': 'आइटम हटाएँ',
   'Send PDF': 'PDF भेजें',
-  'Sent': 'भेजा गया',
   'Site name': 'साइट का नाम',
   'Site visit': 'साइट विज़िट',
   'Social media': 'सोशल मीडिया',

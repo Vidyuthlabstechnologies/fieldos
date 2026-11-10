@@ -12,6 +12,7 @@ import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/approvals/approval_chain_ui.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
@@ -152,7 +153,9 @@ class _WeeklyCloseLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: padding,
-    child: Card(
+    child: Column(children: [
+      _ChainQueueLink(companyId: companyId),
+      Card(
       child: ListTile(
         leading: const Icon(Icons.fact_check_outlined),
         title: Text(tr('Weekly close')),
@@ -162,7 +165,31 @@ class _WeeklyCloseLink extends StatelessWidget {
             Navigator.of(context).push(MaterialPageRoute(builder: (_) => WeeklyCloseListScreen(companyId: companyId))),
       ),
     ),
+    ]),
   );
+}
+
+/// Shown when the owner's approval rules leave something for this person
+/// to sign (requests, orders and expenses above the amounts).
+class _ChainQueueLink extends ConsumerWidget {
+  const _ChainQueueLink({required this.companyId});
+  final String companyId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final n = ref.watch(chainQueueProvider(companyId)).value?.length ?? 0;
+    if (n == 0) return const SizedBox.shrink();
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.approval_outlined),
+        title: Text(tr('Waiting for your approval')),
+        subtitle: Text(trf('{n} requests, orders or expenses above your approval amounts', {'n': n})),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => ChainQueueScreen(companyId: companyId))),
+      ),
+    );
+  }
 }
 
 /// "raised today", "raised yesterday" or "raised on 3 Nov", in the app's

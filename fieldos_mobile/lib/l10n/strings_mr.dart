@@ -6,6 +6,7 @@ library;
 import 'package:fieldos_mobile/l10n/strings_commercial_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_daily_mr.dart';
 
 const Map<String, String> stringsMr = {
   'Try again':
@@ -3172,7 +3173,92 @@ const Map<String, String> stringsMr = {
       '{n} मंजुरीच्या प्रतीक्षेत',
   '{paid} received, {due} due':
       '{paid} आले, {due} बाकी',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'सर्व नोंदी, फोटो आणि बिले एका फाइलमध्ये. ती Drive किंवा संगणकावर ठेवा.',
+  'Back up this phone':
+      'या फोनचा बॅकअप घ्या',
+  'Backup checked':
+      'बॅकअप तपासला',
+  'Backup failed: {error}':
+      'बॅकअप झाला नाही: {error}',
+  'Checked before anything is replaced':
+      'काहीही बदलण्याआधी तपासले जाते',
+  'Choose backup file':
+      'बॅकअप फाइल निवडा',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'पुढच्या वेळी FieldOS उघडल्यावर या फोनवरील सर्व काही बॅकअपने बदलले जाईल. सध्याचा डेटा गरज पडल्यास परत मिळावा म्हणून फोनवर बाजूला ठेवला जातो.',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS बॅकअप: {sites} साइट, {files} फोटो आणि बिले',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} रोजी केलेला: {sites} साइट, {files} फोटो आणि बिले. रिस्टोअर पूर्ण करण्यासाठी FieldOS पूर्ण बंद करून पुन्हा उघडा.',
+  'Restore a backup':
+      'बॅकअप रिस्टोअर करा',
+  'Restore a backup?':
+      'बॅकअप रिस्टोअर करायचा?',
+  'Restore failed: {error}':
+      'रिस्टोअर झाला नाही: {error}',
+  'The backup is damaged and was not restored.':
+      'बॅकअप खराब आहे, रिस्टोअर केला नाही.',
+  'The backup is incomplete and was not restored.':
+      'बॅकअप अपूर्ण आहे, रिस्टोअर केला नाही.',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'हा बॅकअप नव्या FieldOS ने केला आहे. आधी ॲप अपडेट करा.',
+  'This is not a FieldOS backup file.':
+      'ही FieldOS बॅकअप फाइल नाही.',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'एक्सपोर्ट तपासणीत पास झाला नाही, म्हणून पाठवला नाही: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'या रकमेपेक्षा जास्त असल्यास आधी प्रोजेक्ट मॅनेजर, मग मालक मंजुरी देतात. मंजुरी नको असल्यास जागा रिकामी ठेवा. नियम आतापासून नोंदवलेल्या गोष्टींना लागू होतात.',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'कोणत्या रकमेपेक्षा जास्त असल्यास प्रोजेक्ट मॅनेजर, मग तुम्ही, मागणी, खर्च आणि ऑर्डर मंजूर करावे',
+  'Approval rules':
+      'मंजुरीचे नियम',
+  'Approval rules saved':
+      'मंजुरीचे नियम सेव्ह झाले',
+  'Enter amounts in rupees, or leave blank.':
+      'रक्कम रुपयांत भरा, किंवा रिकामी ठेवा.',
+  'Note (needed to reject)':
+      'टीप (नाकारण्यासाठी आवश्यक)',
+  'Owner also approves above (₹)':
+      'यापेक्षा जास्त असल्यास मालकही मंजूर करतात (₹)',
+  'Project manager approves above (₹)':
+      'यापेक्षा जास्त असल्यास प्रोजेक्ट मॅनेजर मंजूर करतात (₹)',
+  'Purchase orders':
+      'खरेदी ऑर्डर',
+  'Purchase requests':
+      'खरेदी मागण्या',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'तुमच्या मंजुरीच्या रकमेपेक्षा जास्त खरेदी मागण्या, ऑर्डर आणि खर्च येथे थांबतात.',
+  'Say why it is rejected.':
+      'का नाकारले ते सांगा.',
+  'Signed. It now waits for the owner\'s approval.':
+      'सही झाली. आता हे मालकाच्या मंजुरीची वाट पाहत आहे.',
+  'The owner approves it after you.':
+      'तुमच्यानंतर मालक हे मंजूर करतील.',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'मालकाची रक्कम प्रोजेक्ट मॅनेजरच्या रकमेपेक्षा कमी नसावी.',
+  'Waiting for a project manager\'s approval':
+      'प्रोजेक्ट मॅनेजरच्या मंजुरीची वाट',
+  'Waiting for the owner\'s approval':
+      'मालकाच्या मंजुरीची वाट',
+  'Waiting for your approval':
+      'तुमच्या मंजुरीची वाट',
+  '{amount}. You sign as {level}.':
+      '{amount}. तुम्ही {level} म्हणून सही करता.',
+  '{n} requests, orders or expenses above your approval amounts':
+      'तुमच्या मंजुरीच्या रकमेपेक्षा जास्त {n} मागण्या, ऑर्डर किंवा खर्च',
+  // Audit trail
+  'Audit trail':
+      'ऑडिट ट्रेल',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'प्रत्येक मंजुरी, रद्द आणि पेमेंट, कोणी आणि केव्हा केले, एका फाइलमध्ये',
+  'Nothing has been recorded yet.':
+      'अजून काहीही नोंदवले नाही.',
   ...commercialMr,
   ...crmMr,
   ...warehouseMr,
+  ...dailyMr,
 };

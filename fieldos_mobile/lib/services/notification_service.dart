@@ -8,6 +8,7 @@
 /// minutes while open), not the instant a colleague acts.
 library;
 
+import 'package:flutter/widgets.dart' show GlobalKey, NavigatorState;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -63,6 +64,9 @@ import 'package:fieldos_mobile/features/reminders/reminders.dart';
   }
 }
 
+/// The app's navigator, so a tapped reminder can open its screen.
+final appNavigatorKey = GlobalKey<NavigatorState>();
+
 class NotificationService {
   NotificationService([FlutterLocalNotificationsPlugin? plugin])
       : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
@@ -79,6 +83,10 @@ class NotificationService {
     priority: Priority.high,
   );
 
+  /// Called with a tapped reminder's payload (e.g. `today:<projectId>`),
+  /// also when the tap launched the app.
+  static void Function(String payload)? onTap;
+
   Future<void> init() async {
     if (_ready) return;
     await _plugin.initialize(
@@ -87,7 +95,14 @@ class NotificationService {
         // iOS asks for alert/badge/sound permission on initialise.
         iOS: DarwinInitializationSettings(),
       ),
+      onDidReceiveNotificationResponse: (r) {
+        final p = r.payload;
+        if (p != null && p.isNotEmpty) onTap?.call(p);
+      },
     );
+    final launch = await _plugin.getNotificationAppLaunchDetails();
+    final p = launch?.notificationResponse?.payload;
+    if ((launch?.didNotificationLaunchApp ?? false) && p != null && p.isNotEmpty) onTap?.call(p);
     await _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
@@ -131,6 +146,7 @@ class NotificationService {
         scheduledDate: tz.TZDateTime.from(r.at, location),
         notificationDetails: const NotificationDetails(android: _reminderChannel, iOS: DarwinNotificationDetails()),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        payload: r.payload,
       );
     }
   }

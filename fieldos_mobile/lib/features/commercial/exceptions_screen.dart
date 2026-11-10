@@ -17,6 +17,10 @@ import 'package:fieldos_mobile/features/commercial/commercial_data.dart';
 import 'package:fieldos_mobile/features/commercial/commercial_rules.dart';
 import 'package:fieldos_mobile/features/commercial/commercial_screens.dart';
 import 'package:fieldos_mobile/features/commercial/commercial_widgets.dart';
+import 'package:fieldos_mobile/features/daily/day_close_data.dart';
+import 'package:fieldos_mobile/features/daily/day_close_exceptions.dart';
+import 'package:fieldos_mobile/features/daily/day_close_widgets.dart' show showCloseSetupSheet;
+import 'package:fieldos_mobile/features/daily/today_screen.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 
@@ -36,7 +40,7 @@ class _State extends ConsumerState<CommercialExceptionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final async = ref.watch(companyExceptionsProvider(widget.companyId));
+    final async = ref.watch(inboxExceptionsProvider(widget.companyId));
     final names = ref.watch(closeNamesProvider(widget.companyId)).value ?? const {};
     final session = ref.watch(sessionProvider);
     final me = session.user!.id;
@@ -55,7 +59,7 @@ class _State extends ConsumerState<CommercialExceptionsScreen> {
           final open = sites.fold<int>(0, (n, s) => n + s.items.where((e) => !e.isResolved).length);
           final overdue = sites.fold<int>(0, (n, s) => n + s.items.where((e) => e.isOverdue(now)).length);
           return RefreshIndicator(
-            onRefresh: () => ref.refresh(companyExceptionsProvider(widget.companyId).future),
+            onRefresh: () => ref.refresh(inboxExceptionsProvider(widget.companyId).future),
             child: ListView(padding: const EdgeInsets.all(12), children: [
               Text(
                 trf('{open} open across {sites} sites, {late} overdue',
@@ -156,6 +160,18 @@ class _ExceptionCard extends ConsumerWidget {
                 },
                 child: Text(tr('Change due date')),
               ),
+            if (canResolve && !e.isResolved && e.source == ExceptionSource.dayClose) ...[
+              TextButton(onPressed: () => _followUp(context, ref), child: Text(tr('Record a follow-up'))),
+              TextButton(
+                onPressed: () async {
+                  final r = await SiteRecords.load(ref.read(appDatabaseProvider), site.project);
+                  if (!context.mounted) return;
+                  await showCloseSetupSheet(context, project: site.project, current: r.setup, backupFirst: true);
+                  ref.invalidate(inboxExceptionsProvider(companyId));
+                },
+                child: Text(tr('Assign a backup supervisor')),
+              ),
+            ],
             if (canResolve && !e.isResolved)
               TextButton(onPressed: () => _resolve(context, ref), child: Text(tr('Record a decision'))),
             if (canResolve && e.isResolved)
@@ -176,6 +192,8 @@ class _ExceptionCard extends ConsumerWidget {
           builder: (_) => WorkOrderScreen(project: p, orderId: site.data.claimById(e.sourceId)!.workOrderId)),
       ExceptionSource.variation => MaterialPageRoute<void>(builder: (_) => VariationScreen(project: p, variationId: e.sourceId)),
       ExceptionSource.costCode => MaterialPageRoute<void>(builder: (_) => CostLineScreen(project: p, costCodeId: e.sourceId)),
+      ExceptionSource.dayClose =>
+        MaterialPageRoute<void>(builder: (_) => TodayScreen(project: p, day: DateTime.parse(e.sourceId))),
     };
     Navigator.of(context).push(route);
   }
@@ -193,6 +211,19 @@ class _ExceptionCard extends ConsumerWidget {
         );
     ref.invalidate(companyExceptionsProvider(companyId));
     ref.invalidate(commercialDataProvider(site.project.id));
+  }
+
+  /// A missing day report: the follow-up goes on the day itself, and the
+  /// exception is taken by whoever followed up.
+  Future<void> _followUp(BuildContext context, WidgetRef ref) async {
+    final note = await askText(context,
+        title: tr('Record a follow-up'), label: tr('What you did (e.g. called, he will send by 10)'));
+    if (note == null || note.isEmpty) return;
+    final s = ref.read(sessionProvider);
+    final db = ref.read(appDatabaseProvider);
+    final day = await loadDayClose(db, site.project, DateTime.parse(e.sourceId));
+    await DayCloseActions(db, userId: s.user!.id, role: s.role ?? 'viewer').followUp(day, note);
+    await _act(ref, 'assigned', ownerId: s.user!.id, note: note);
   }
 
   Future<void> _assign(WidgetRef ref, {String? ownerId, String? dueOn}) =>

@@ -72,7 +72,6 @@ const Map<String, String> crmTa = {
   'Referral': 'பரிந்துரை',
   'Remove item': 'உருப்படியை நீக்கு',
   'Send PDF': 'PDF அனுப்பு',
-  'Sent': 'அனுப்பப்பட்டது',
   'Site name': 'சைட் பெயர்',
   'Site visit': 'சைட் வருகை',
   'Social media': 'சமூக ஊடகம்',

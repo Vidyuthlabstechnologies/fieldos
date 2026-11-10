@@ -6,6 +6,7 @@ library;
 import 'package:fieldos_mobile/l10n/strings_commercial_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_daily_hi.dart';
 
 const Map<String, String> stringsHi = {
   'Try again': 'फिर से कोशिश करें',
@@ -2281,7 +2282,92 @@ const Map<String, String> stringsHi = {
       '{n} मंज़ूरी के इंतज़ार में',
   '{paid} received, {due} due':
       '{paid} आया, {due} बाकी',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'सारे रिकॉर्ड, फ़ोटो और बिल एक फ़ाइल में। इसे Drive या कंप्यूटर पर रखें।',
+  'Back up this phone':
+      'इस फ़ोन का बैकअप लें',
+  'Backup checked':
+      'बैकअप जाँच लिया',
+  'Backup failed: {error}':
+      'बैकअप नहीं हुआ: {error}',
+  'Checked before anything is replaced':
+      'कुछ भी बदलने से पहले जाँचा जाता है',
+  'Choose backup file':
+      'बैकअप फ़ाइल चुनें',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'अगली बार FieldOS खुलने पर इस फ़ोन का सब कुछ बैकअप से बदल जाएगा। अभी का डेटा फ़ोन पर अलग रखा जाता है, ताकि ज़रूरत हो तो वापस मिल सके।',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS बैकअप: {sites} साइट, {files} फ़ोटो और बिल',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} को बना: {sites} साइट, {files} फ़ोटो और बिल। रीस्टोर पूरा करने के लिए FieldOS पूरी तरह बंद करके फिर खोलें।',
+  'Restore a backup':
+      'बैकअप रीस्टोर करें',
+  'Restore a backup?':
+      'बैकअप रीस्टोर करें?',
+  'Restore failed: {error}':
+      'रीस्टोर नहीं हुआ: {error}',
+  'The backup is damaged and was not restored.':
+      'बैकअप खराब है, रीस्टोर नहीं किया।',
+  'The backup is incomplete and was not restored.':
+      'बैकअप अधूरा है, रीस्टोर नहीं किया।',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'यह बैकअप नए FieldOS से बना है। पहले ऐप अपडेट करें।',
+  'This is not a FieldOS backup file.':
+      'यह FieldOS बैकअप फ़ाइल नहीं है।',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'एक्सपोर्ट जाँच में पास नहीं हुआ, इसलिए नहीं भेजा: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'इन रकमों से ऊपर पहले प्रोजेक्ट मैनेजर मंज़ूरी देता है, फिर मालिक। मंज़ूरी न चाहिए तो खाना खाली छोड़ें। नियम अब से दर्ज होने वाली चीज़ों पर लागू होते हैं।',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'किस रकम से ऊपर पहले प्रोजेक्ट मैनेजर, फिर आप, रिक्वेस्ट, खर्च और ऑर्डर मंज़ूर करें',
+  'Approval rules':
+      'मंज़ूरी के नियम',
+  'Approval rules saved':
+      'मंज़ूरी के नियम सेव हुए',
+  'Enter amounts in rupees, or leave blank.':
+      'रकम रुपयों में डालें, या खाली छोड़ें।',
+  'Note (needed to reject)':
+      'नोट (रिजेक्ट करने के लिए ज़रूरी)',
+  'Owner also approves above (₹)':
+      'इससे ऊपर मालिक भी मंज़ूर करे (₹)',
+  'Project manager approves above (₹)':
+      'इससे ऊपर प्रोजेक्ट मैनेजर मंज़ूर करे (₹)',
+  'Purchase orders':
+      'खरीद ऑर्डर',
+  'Purchase requests':
+      'खरीद रिक्वेस्ट',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'आपकी मंज़ूरी की रकम से ऊपर की खरीद रिक्वेस्ट, ऑर्डर और खर्च यहाँ इंतज़ार करते हैं।',
+  'Say why it is rejected.':
+      'बताएँ कि क्यों रिजेक्ट किया।',
+  'Signed. It now waits for the owner\'s approval.':
+      'साइन हो गया। अब यह मालिक की मंज़ूरी का इंतज़ार कर रहा है।',
+  'The owner approves it after you.':
+      'आपके बाद मालिक इसे मंज़ूर करेगा।',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'मालिक की रकम प्रोजेक्ट मैनेजर की रकम से कम नहीं होनी चाहिए।',
+  'Waiting for a project manager\'s approval':
+      'प्रोजेक्ट मैनेजर की मंज़ूरी का इंतज़ार',
+  'Waiting for the owner\'s approval':
+      'मालिक की मंज़ूरी का इंतज़ार',
+  'Waiting for your approval':
+      'आपकी मंज़ूरी का इंतज़ार',
+  '{amount}. You sign as {level}.':
+      '{amount}। आप {level} के रूप में साइन करेंगे।',
+  '{n} requests, orders or expenses above your approval amounts':
+      'आपकी मंज़ूरी की रकम से ऊपर {n} रिक्वेस्ट, ऑर्डर या खर्च',
+  // Audit trail
+  'Audit trail':
+      'ऑडिट ट्रेल',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'हर मंज़ूरी, रद्द और भुगतान, किसने और कब किया, एक फ़ाइल में',
+  'Nothing has been recorded yet.':
+      'अभी तक कुछ दर्ज नहीं हुआ।',
   ...commercialHi,
   ...crmHi,
   ...warehouseHi,
+  ...dailyHi,
 };

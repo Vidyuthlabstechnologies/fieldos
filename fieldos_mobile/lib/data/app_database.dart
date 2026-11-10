@@ -24,6 +24,7 @@ import 'package:fieldos_mobile/features/warehouse/tools_rules.dart';
 import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart' show BillLine, encodeLines;
 import 'package:fieldos_mobile/l10n/language.dart' show trf;
+import 'package:fieldos_mobile/data/backup.dart';
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
 
 import 'tables.dart';
@@ -102,6 +103,11 @@ String? _clip(String? s, int max) {
   WorkMeasurementDecisions,
   BillAllocations,
   SupplierInvoices,
+  ApprovalRules,
+  ApprovalSteps,
+  SiteDayEvents,
+  SiteCloseSettings,
+  MemberSyncStatus,
   AttendancePhotos,
   StaffAttendance,
   SyncOutbox,
@@ -122,8 +128,11 @@ class AppDatabase extends _$AppDatabase {
                 // Centralised under the app's documents dir, mirroring the
                 // desktop app's app-data layout (fieldos/paths.py).
                 databasePath: () async {
-                  final docs = await getApplicationDocumentsDirectory();
-                  return p.join(docs.path, 'fieldos.sqlite');
+                  final path = await appDatabasePath();
+                  // A restore checked earlier is swapped in before the
+                  // database opens, never while it is open.
+                  applyStagedRestore(path);
+                  return path;
                 },
               ),
             ));
@@ -132,7 +141,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 24;
+  int get schemaVersion => 32;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -293,29 +302,44 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(billAllocations);
             await m.createTable(supplierInvoices);
           }
-          // v19-v20 belong to the daily close and site execution work stacked
-          // before this one.
-          if (from < 21) {
-            // CRM: enquiries, their history and quotations.
-            for (final TableInfo t in [crmLeads, crmActivities, crmQuotes]) {
-              await m.createTable(t);
+          // v19 to v29 are other work's steps; v30 is approval rules.
+          if (from < 30) {
+            await _createTableIfMissing(m, approvalRules);
+            await _createTableIfMissing(m, approvalSteps);
+          }
+          if (from < 31) {
+            // Daily site close: the day's submission and what was said
+            // about it, each site's cutoff and supervisors, and when each
+            // teammate's phone last synced. (Built as v19, moved after
+            // master's v30; it checks what is there, so a phone that
+            // already has the tables keeps them.)
+            for (final TableInfo t in [siteDayEvents, siteCloseSettings, memberSyncStatus]) {
+              await _createTableIfMissing(m, t);
             }
           }
-          if (from < 22) {
-            // Central stores and transfers, tools register, staff salaries.
-            for (final TableInfo t in [stores, stockMoves, tools, toolIssues, staffMembers, staffAdvances, payrollLines]) {
-              await m.createTable(t);
+          if (from < 32) {
+            // Beat Onsite (built as v21 to v24, moved after master's v31;
+            // each part checks what is there, so a phone that already has
+            // them keeps them): CRM leads, history and quotations; central
+            // stores, transfers, tools and staff salaries; supplier quotes;
+            // selfie and geofence attendance.
+            for (final TableInfo t in [
+              crmLeads,
+              crmActivities,
+              crmQuotes,
+              stores,
+              stockMoves,
+              tools,
+              toolIssues,
+              staffMembers,
+              staffAdvances,
+              payrollLines,
+              supplierQuotes,
+              attendancePhotos,
+              staffAttendance,
+            ]) {
+              await _createTableIfMissing(m, t);
             }
-          }
-          if (from < 23) {
-            // Supplier quotes compared against a purchase request.
-            await m.createTable(supplierQuotes);
-          }
-          if (from < 24) {
-            // Selfie and geofence attendance: photos on punches, staff
-            // checking themselves in, and their login on the salary list.
-            await m.createTable(attendancePhotos);
-            await m.createTable(staffAttendance);
             for (final c in [labourAttendance.photoId, labourAttendance.distanceM, labourAttendance.accuracyM]) {
               await _addColumnIfMissing(m, labourAttendance, c);
             }
@@ -340,6 +364,12 @@ class AppDatabase extends _$AppDatabase {
 
   /// A table made by an earlier step of this same upgrade (createTable
   /// uses today's columns) already has the column.
+  Future<void> _createTableIfMissing(Migrator m, TableInfo t) async {
+    final found = await customSelect("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+        variables: [Variable<String>(t.actualTableName)]).get();
+    if (found.isEmpty) await m.createTable(t);
+  }
+
   Future<void> _addColumnIfMissing(Migrator m, TableInfo table, GeneratedColumn column) async {
     final cols = await customSelect('PRAGMA table_info(${table.actualTableName})').get();
     if (cols.any((r) => r.read<String>('name') == column.name)) return;
@@ -416,6 +446,8 @@ class AppDatabase extends _$AppDatabase {
   StaffAttendanceDao get staffAttendanceDao => StaffAttendanceDao(this);
   SiteTeamDao get siteTeamDao => SiteTeamDao(this);
   BillingRecordsDao get billingRecordsDao => BillingRecordsDao(this);
+  ApprovalChainDao get approvalChainDao => ApprovalChainDao(this);
+  DayCloseDao get dayCloseDao => DayCloseDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -454,6 +486,10 @@ class AppDatabase extends _$AppDatabase {
     return queued;
   }
 }
+
+/// The database file on the phone.
+Future<String> appDatabasePath() async =>
+    p.join((await getApplicationDocumentsDirectory()).path, 'fieldos.sqlite');
 
 /// Where DPR photos and other local media are stored, relative to the app's
 /// documents directory.
@@ -3216,6 +3252,96 @@ class BillingRecordsDao extends DatabaseAccessor<AppDatabase> with _$BillingReco
 
 double _round2(double v) => (v * 100).roundToDouble() / 100;
 
+/// Multi-level approvals by amount (v30): the owner's rules, and the
+/// signatures on each item. What a chain needs is worked out in
+/// lib/features/approvals/approval_chain.dart.
+@DriftAccessor(tables: [ApprovalRules, ApprovalSteps])
+class ApprovalChainDao extends DatabaseAccessor<AppDatabase> with _$ApprovalChainDaoMixin {
+  ApprovalChainDao(super.db);
+
+  Future<List<ApprovalRule>> rulesFor(String companyId) => (select(approvalRules)
+        ..where((r) => r.companyId.equals(companyId) & r.voided.equals(false))
+        ..orderBy([(r) => OrderingTerm.asc(r.kind), (r) => OrderingTerm.asc(r.aboveAmount)]))
+      .get();
+
+  /// Sets the amount above which [kind] needs [role]; null removes the
+  /// rule. One live rule per kind and level.
+  Future<void> setRule(String companyId, {required String kind, required String role, double? above, required String by}) =>
+      transaction(() async {
+        if (above != null && (above < 0 || !above.isFinite)) throw ArgumentError.value(above, 'above');
+        final live = await (select(approvalRules)
+              ..where((r) =>
+                  r.companyId.equals(companyId) & r.kind.equals(kind) & r.role.equals(role) & r.voided.equals(false)))
+            .get();
+        for (final (i, r) in live.indexed) {
+          final keep = i == 0 && above != null;
+          final row = r.copyWith(aboveAmount: keep ? _round2(above) : r.aboveAmount, voided: !keep, updatedAt: DateTime.now());
+          if (row == r) continue;
+          await update(approvalRules).replace(row);
+          await db.syncOutboxDao.enqueue(
+              targetTable: 'site_approval_rules',
+              recordId: row.id,
+              operation: 'update',
+              payloadJson: jsonEncode(approvalRuleToSupabaseJson(row)));
+        }
+        if (live.isEmpty && above != null) {
+          final row = await into(approvalRules).insertReturning(ApprovalRulesCompanion.insert(
+              id: _uuid.v4(), companyId: companyId, kind: kind, role: role, aboveAmount: _round2(above), createdBy: by));
+          await db.syncOutboxDao.enqueue(
+              targetTable: 'site_approval_rules',
+              recordId: row.id,
+              operation: 'insert',
+              payloadJson: jsonEncode(approvalRuleToSupabaseJson(row)));
+        }
+      });
+
+  Future<List<ApprovalStep>> stepsFor(String projectId) =>
+      (select(approvalSteps)..where((s) => s.projectId.equals(projectId))..orderBy([(s) => OrderingTerm.asc(s.createdAt)])).get();
+
+  Future<List<ApprovalStep>> stepsForItem(String kind, String itemId) => (select(approvalSteps)
+        ..where((s) => s.kind.equals(kind) & s.itemId.equals(itemId))
+        ..orderBy([(s) => OrderingTerm.asc(s.createdAt)]))
+      .get();
+
+  /// Signs [level] on an item. A person signs each level of an item once.
+  Future<ApprovalStep> sign({
+    required String projectId,
+    required String kind,
+    required String itemId,
+    required String level,
+    required bool approve,
+    double? amount,
+    required String by,
+    String? note,
+  }) =>
+      transaction(() async {
+        final mine = await (select(approvalSteps)
+              ..where((s) => s.kind.equals(kind) & s.itemId.equals(itemId) & s.level.equals(level) & s.decidedBy.equals(by)))
+            .getSingleOrNull();
+        if (mine != null) return mine;
+        final row = await into(approvalSteps).insertReturning(ApprovalStepsCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          kind: kind,
+          itemId: itemId,
+          level: level,
+          decision: approve ? 'approved' : 'rejected',
+          amount: Value(amount),
+          note: Value(_clip(note, 300)),
+          decidedBy: by,
+        ));
+        await db.syncOutboxDao.enqueue(
+            targetTable: 'site_approval_steps',
+            recordId: row.id,
+            operation: 'insert',
+            payloadJson: jsonEncode(approvalStepToSupabaseJson(row)));
+        return row;
+      });
+
+  Future<void> upsertRuleFromRemote(ApprovalRulesCompanion c) => into(approvalRules).insertOnConflictUpdate(c);
+  Future<void> upsertStepFromRemote(ApprovalStepsCompanion c) => into(approvalSteps).insertOnConflictUpdate(c);
+}
+
 /// The roles a person can have on one site.
 const siteRoleValues = ['owner', 'project_manager', 'site_engineer', 'accounts', 'storekeeper', 'viewer'];
 
@@ -4504,4 +4630,120 @@ class StaffAttendanceDao extends DatabaseAccessor<AppDatabase> with _$StaffAtten
 
   Future<void> upsertFromRemote(StaffAttendanceCompanion c) => into(staffAttendance).insertOnConflictUpdate(c);
   Future<void> upsertPhotoFromRemote(AttendancePhotosCompanion c) => into(attendancePhotos).insertOnConflictUpdate(c);
+}
+
+// ---------------------------------------------------------------------------
+// Daily site close (v31). Rules in features/daily/day_close.dart; the
+// server's copy in supabase/migrations/20261110200000_daily_site_close.sql.
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [SiteDayEvents, SiteCloseSettings, MemberSyncStatus])
+class DayCloseDao extends DatabaseAccessor<AppDatabase> with _$DayCloseDaoMixin {
+  DayCloseDao(super.db);
+
+  /// A site's day events, oldest first, optionally from [fromDay] to
+  /// [toDay] (yyyy-mm-dd, inclusive).
+  Future<List<SiteDayEvent>> eventsFor(String projectId, {String? fromDay, String? toDay}) {
+    final q = select(siteDayEvents)..where((e) => e.projectId.equals(projectId));
+    if (fromDay != null) q.where((e) => e.workDate.isBiggerOrEqualValue(fromDay));
+    if (toDay != null) q.where((e) => e.workDate.isSmallerOrEqualValue(toDay));
+    q.orderBy([(e) => OrderingTerm.asc(e.createdAt), (e) => OrderingTerm.asc(e.rowId)]);
+    return q.get();
+  }
+
+  /// Adds one event. Never changed afterwards: a correction is a new row.
+  Future<SiteDayEvent> record({
+    required String projectId,
+    required String workDate,
+    required String kind,
+    required String by,
+    bool siteClosed = false,
+    bool noDeliveries = false,
+    bool noExpenses = false,
+    String? reason,
+    String? note,
+    String? fingerprint,
+    double? amount,
+    String? itemRef,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final row = await into(siteDayEvents).insertReturning(SiteDayEventsCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          workDate: workDate,
+          kind: kind,
+          siteClosed: Value(siteClosed),
+          noDeliveries: Value(noDeliveries),
+          noExpenses: Value(noExpenses),
+          reason: Value(_clip(reason, 20)),
+          note: Value(_clip(note, 300)),
+          fingerprint: Value(_clip(fingerprint, 200)),
+          amount: Value(amount),
+          itemRef: Value(_clip(itemRef, 160)),
+          recordedBy: by,
+          createdAt: Value(now ?? DateTime.now()),
+        ));
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'site_day_events',
+          recordId: row.id,
+          operation: 'insert',
+          payloadJson: jsonEncode(siteDayEventToSupabaseJson(row)),
+        );
+        return row;
+      });
+
+  Future<SiteCloseSetting?> settingsFor(String projectId) =>
+      (select(siteCloseSettings)..where((s) => s.id.equals(projectId))).getSingleOrNull();
+
+  Future<SiteCloseSetting> saveSettings({
+    required String projectId,
+    required int cutoffMinutes,
+    required String by,
+    String? supervisorId,
+    String? backupId,
+    String? backupUntil,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        if (cutoffMinutes < 0 || cutoffMinutes >= 24 * 60) throw ArgumentError('cutoff outside the day');
+        final row = SiteCloseSettingsCompanion.insert(
+          id: projectId,
+          projectId: projectId,
+          cutoffMinutes: Value(cutoffMinutes),
+          supervisorId: Value(supervisorId),
+          backupId: Value(backupId),
+          backupUntil: Value(backupId == null ? null : backupUntil),
+          updatedBy: by,
+          updatedAt: Value(now ?? DateTime.now()),
+        );
+        await into(siteCloseSettings).insertOnConflictUpdate(row);
+        final saved = (await settingsFor(projectId))!;
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'site_close_settings',
+          recordId: projectId,
+          operation: 'upsert',
+          payloadJson: jsonEncode(siteCloseSettingToSupabaseJson(saved)),
+        );
+        return saved;
+      });
+
+  /// Whether this phone still has [eventId] waiting to send.
+  Future<bool> isWaitingToSync(String eventId) async =>
+      (await db.syncOutboxDao.dirtyKeys()).contains(SyncOutboxDao.key('site_day_events', eventId));
+
+  Future<List<MemberSyncStatusData>> syncStatusFor(String companyId) =>
+      (select(memberSyncStatus)..where((s) => s.companyId.equals(companyId))).get();
+
+  /// What the server says about the company's phones now.
+  Future<void> replaceSyncStatus(String companyId, List<MemberSyncStatusCompanion> rows) => transaction(() async {
+        await (delete(memberSyncStatus)..where((s) => s.companyId.equals(companyId))).go();
+        for (final r in rows) {
+          await into(memberSyncStatus).insertOnConflictUpdate(r);
+        }
+      });
+
+  Future<void> upsertEventFromRemote(SiteDayEventsCompanion c) => into(siteDayEvents).insertOnConflictUpdate(c);
+  Future<void> upsertSettingsFromRemote(SiteCloseSettingsCompanion c) =>
+      into(siteCloseSettings).insertOnConflictUpdate(c);
 }

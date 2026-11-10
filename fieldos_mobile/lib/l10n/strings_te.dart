@@ -6,6 +6,7 @@ library;
 import 'package:fieldos_mobile/l10n/strings_commercial_te.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_te.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_te.dart';
+import 'package:fieldos_mobile/l10n/strings_daily_te.dart';
 
 const Map<String, String> stringsTe = {
   'Try again': 'మళ్ళీ ప్రయత్నించండి',
@@ -2283,7 +2284,92 @@ const Map<String, String> stringsTe = {
       '{n} ఆమోదం కోసం వేచి ఉన్నాయి',
   '{paid} received, {due} due':
       '{paid} వచ్చింది, {due} బాకీ',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'అన్ని రికార్డులు, ఫోటోలు, బిల్లులు ఒకే ఫైల్‌లో. దాన్ని Drive లేదా కంప్యూటర్‌లో ఉంచండి.',
+  'Back up this phone':
+      'ఈ ఫోన్ బ్యాకప్ తీసుకోండి',
+  'Backup checked':
+      'బ్యాకప్ తనిఖీ అయింది',
+  'Backup failed: {error}':
+      'బ్యాకప్ కాలేదు: {error}',
+  'Checked before anything is replaced':
+      'ఏదైనా మార్చే ముందు తనిఖీ చేస్తుంది',
+  'Choose backup file':
+      'బ్యాకప్ ఫైల్ ఎంచుకోండి',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'తదుపరి సారి FieldOS తెరిచినప్పుడు ఈ ఫోన్‌లో ఉన్నదంతా బ్యాకప్‌తో మారుతుంది. ఇప్పటి డేటా అవసరమైతే తిరిగి పొందేందుకు ఫోన్‌లోనే పక్కన ఉంచబడుతుంది.',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS బ్యాకప్: {sites} సైట్లు, {files} ఫోటోలు, బిల్లులు',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} న చేసినది: {sites} సైట్లు, {files} ఫోటోలు, బిల్లులు. రీస్టోర్ పూర్తి చేయడానికి FieldOS ని పూర్తిగా మూసి మళ్ళీ తెరవండి.',
+  'Restore a backup':
+      'బ్యాకప్ రీస్టోర్ చేయండి',
+  'Restore a backup?':
+      'బ్యాకప్ రీస్టోర్ చేయాలా?',
+  'Restore failed: {error}':
+      'రీస్టోర్ కాలేదు: {error}',
+  'The backup is damaged and was not restored.':
+      'బ్యాకప్ పాడైంది, రీస్టోర్ చేయలేదు.',
+  'The backup is incomplete and was not restored.':
+      'బ్యాకప్ అసంపూర్ణం, రీస్టోర్ చేయలేదు.',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'ఈ బ్యాకప్ కొత్త FieldOS తో చేసినది. ముందు యాప్ అప్‌డేట్ చేయండి.',
+  'This is not a FieldOS backup file.':
+      'ఇది FieldOS బ్యాకప్ ఫైల్ కాదు.',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'ఎక్స్‌పోర్ట్ తనిఖీలో పాస్ కాలేదు, కాబట్టి పంపలేదు: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'ఈ మొత్తాల కంటే ఎక్కువైతే ముందు ప్రాజెక్ట్ మేనేజర్, తర్వాత యజమాని ఆమోదిస్తారు. ఆమోదం అవసరం లేకపోతే ఖాళీగా వదలండి. నియమాలు ఇకపై నమోదయ్యే వాటికే వర్తిస్తాయి.',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'ఏ మొత్తం కంటే ఎక్కువైతే ప్రాజెక్ట్ మేనేజర్, తర్వాత మీరు, రిక్వెస్ట్‌లు, ఖర్చులు, ఆర్డర్లు ఆమోదించాలి',
+  'Approval rules':
+      'ఆమోద నియమాలు',
+  'Approval rules saved':
+      'ఆమోద నియమాలు సేవ్ అయ్యాయి',
+  'Enter amounts in rupees, or leave blank.':
+      'మొత్తాలను రూపాయల్లో ఇవ్వండి, లేదా ఖాళీగా వదలండి.',
+  'Note (needed to reject)':
+      'నోట్ (తిరస్కరించడానికి అవసరం)',
+  'Owner also approves above (₹)':
+      'దీని కంటే ఎక్కువైతే యజమాని కూడా ఆమోదించాలి (₹)',
+  'Project manager approves above (₹)':
+      'దీని కంటే ఎక్కువైతే ప్రాజెక్ట్ మేనేజర్ ఆమోదించాలి (₹)',
+  'Purchase orders':
+      'కొనుగోలు ఆర్డర్లు',
+  'Purchase requests':
+      'కొనుగోలు రిక్వెస్ట్‌లు',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'మీ ఆమోద మొత్తాల కంటే ఎక్కువ ఉన్న కొనుగోలు రిక్వెస్ట్‌లు, ఆర్డర్లు, ఖర్చులు ఇక్కడ వేచి ఉంటాయి.',
+  'Say why it is rejected.':
+      'ఎందుకు తిరస్కరించారో చెప్పండి.',
+  'Signed. It now waits for the owner\'s approval.':
+      'సంతకం అయింది. ఇప్పుడు ఇది యజమాని ఆమోదం కోసం వేచి ఉంది.',
+  'The owner approves it after you.':
+      'మీ తర్వాత యజమాని దీన్ని ఆమోదిస్తారు.',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'యజమాని మొత్తం ప్రాజెక్ట్ మేనేజర్ మొత్తం కంటే తక్కువ ఉండకూడదు.',
+  'Waiting for a project manager\'s approval':
+      'ప్రాజెక్ట్ మేనేజర్ ఆమోదం కోసం వేచి ఉంది',
+  'Waiting for the owner\'s approval':
+      'యజమాని ఆమోదం కోసం వేచి ఉంది',
+  'Waiting for your approval':
+      'మీ ఆమోదం కోసం వేచి ఉన్నవి',
+  '{amount}. You sign as {level}.':
+      '{amount}. మీరు {level} గా సంతకం చేస్తారు.',
+  '{n} requests, orders or expenses above your approval amounts':
+      'మీ ఆమోద మొత్తాల కంటే ఎక్కువ {n} రిక్వెస్ట్‌లు, ఆర్డర్లు లేదా ఖర్చులు',
+  // Audit trail
+  'Audit trail':
+      'ఆడిట్ ట్రెయిల్',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'ప్రతి ఆమోదం, రద్దు, చెల్లింపు, ఎవరు ఎప్పుడు చేశారో, ఒకే ఫైల్‌లో',
+  'Nothing has been recorded yet.':
+      'ఇంకా ఏదీ నమోదు కాలేదు.',
   ...commercialTe,
   ...crmTe,
   ...warehouseTe,
+  ...dailyTe,
 };

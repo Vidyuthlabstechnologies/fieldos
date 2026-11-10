@@ -1,5 +1,5 @@
 /// Upgrading to schema v15 (weekly close) adds the slip and decision tables
-/// and turns the old "Photo: <path>" receipt notes into delivery slips that
+/// and turns the old `Photo: <path>` receipt notes into delivery slips that
 /// sync, leaving receipts with other notes alone.
 library;
 

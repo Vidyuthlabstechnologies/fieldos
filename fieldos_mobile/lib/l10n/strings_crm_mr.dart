@@ -72,7 +72,6 @@ const Map<String, String> crmMr = {
   'Referral': 'ओळखीतून',
   'Remove item': 'आयटम काढा',
   'Send PDF': 'PDF पाठवा',
-  'Sent': 'पाठवले',
   'Site name': 'साइटचे नाव',
   'Site visit': 'साइट भेट',
   'Social media': 'सोशल मीडिया',

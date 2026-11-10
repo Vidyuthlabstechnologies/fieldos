@@ -72,7 +72,6 @@ const Map<String, String> crmTe = {
   'Referral': 'రెఫరల్',
   'Remove item': 'ఐటమ్ తీసివేయండి',
   'Send PDF': 'PDF పంపండి',
-  'Sent': 'పంపాం',
   'Site name': 'సైట్ పేరు',
   'Site visit': 'సైట్ విజిట్',
   'Social media': 'సోషల్ మీడియా',

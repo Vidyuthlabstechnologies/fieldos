@@ -72,7 +72,6 @@ const Map<String, String> crmKn = {
   'Referral': 'ಶಿಫಾರಸು',
   'Remove item': 'ಐಟಂ ತೆಗೆದುಹಾಕಿ',
   'Send PDF': 'PDF ಕಳುಹಿಸಿ',
-  'Sent': 'ಕಳುಹಿಸಲಾಗಿದೆ',
   'Site name': 'ಸೈಟ್ ಹೆಸರು',
   'Site visit': 'ಸೈಟ್ ಭೇಟಿ',
   'Social media': 'ಸೋಶಿಯಲ್ ಮೀಡಿಯಾ',

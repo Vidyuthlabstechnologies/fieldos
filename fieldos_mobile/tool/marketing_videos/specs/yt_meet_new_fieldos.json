@@ -1,0 +1,298 @@
+{
+ "name": "fieldos-youtube-meet-the-new-fieldos",
+ "width": 1920,
+ "height": 1080,
+ "mood": "drive",
+ "speed": 1.03,
+ "bug": true,
+ "progress": true,
+ "caption_style": "bold",
+ "music_db": -15,
+ "scenes": [
+  {
+   "type": "chaos",
+   "notes": [
+    [
+     "Site supervisor",
+     "Sir, cement is finished"
+    ],
+    [
+     "Ramesh (mason)",
+     "When is Saturday payment?"
+    ],
+    [
+     "Mr. Reddy (client)",
+     "What work happened today?"
+    ],
+    [
+     "Miyapur site",
+     "JCB did not come"
+    ],
+    [
+     "Accounts",
+     "Send the bill photo"
+    ],
+    [
+     "Kompally site",
+     "4 came, 2 absent"
+    ],
+    [
+     "Steel supplier",
+     "Payment pending 64 days"
+    ]
+   ],
+   "title": [
+    "Every site.",
+    "Every call.",
+    "Every rupee."
+   ],
+   "vo": "Four sites. Forty calls a day. A notebook for wages, WhatsApp for reports, and no idea where the money went.",
+   "min": 6
+  },
+  {
+   "type": "logo",
+   "tag": "Run every site from your phone",
+   "vo": "Meet the new Field O S. One calm app for every site you run.",
+   "min": 4
+  },
+  {
+   "type": "mitra",
+   "mood": "wave",
+   "lines": [
+    "Namaste! I'm Mitra,",
+    "your site buddy."
+   ],
+   "vo": "And this is Mitra, your site buddy.",
+   "min": 3.2
+  },
+  {
+   "type": "phone",
+   "shot": "en/01_home",
+   "side": "right",
+   "kicker": "Home",
+   "title": [
+    "Every site.",
+    "One calm screen."
+   ],
+   "bullets": [
+    "Attendance, expense, report, material: one tap",
+    "Today's brief tells you who needs you"
+   ],
+   "vo": "Home is calm and simple. Big buttons for attendance, expenses, the daily report and material. And today's brief tells you which site needs you.",
+   "highlights": [
+    {
+     "box": [
+      42,
+      630,
+      996,
+      300
+     ],
+     "at": 2.4,
+     "hold": 2.4
+    },
+    {
+     "box": [
+      42,
+      950,
+      996,
+      230
+     ],
+     "at": 6.2,
+     "hold": 2.6
+    }
+   ]
+  },
+  {
+   "type": "chat",
+   "kicker": "Ask FieldOS",
+   "title": [
+    "Just say it.",
+    "It's saved."
+   ],
+   "ask": "Add ₹5,000 spent on cement at Kompally",
+   "reply": "Sure, Ravi. Here it is for Kompally Villa.",
+   "card": "Expense ₹5,000 for Material at Kompally Villa, Block B · cement",
+   "final": "Saved ₹5,000 for cement at Kompally Villa.",
+   "vo": "Too busy to type? Just say it. Add five thousand for cement at Kompally. Field O S fills it in. You tap save.",
+   "min": 8.6,
+   "save_after": 2.8
+  },
+  {
+   "type": "chat",
+   "side": "right",
+   "kicker": "Ask anything",
+   "title": [
+    "Who came",
+    "today?"
+   ],
+   "ask": "Who came to Kompally today?",
+   "reply": "4 people punched in at Kompally Villa today: Ramesh, Suresh, Anil and Venkat. Lakshmi is absent.",
+   "vo": "Ask it anything. Who came to Kompally today? It answers from your own records.",
+   "min": 7
+  },
+  {
+   "type": "phone",
+   "shot": "te/18_languages",
+   "kicker": "6 languages",
+   "title": [
+    "Your language.",
+    "Your team's too."
+   ],
+   "bullets": [
+    "English, हिंदी, తెలుగు",
+    "தமிழ், ಕನ್ನಡ, मराठी"
+   ],
+   "vo": "Your whole team can use it in their own language. English, Hindi, Telugu, Tamil, Kannada or Marathi.",
+   "mitra": {
+    "mood": "talk",
+    "pos": "br",
+    "size": 240
+   }
+  },
+  {
+   "type": "phone",
+   "shot": "te/01_home",
+   "side": "right",
+   "kicker": "తెలుగు",
+   "title": [
+    "Telugu lo,",
+    "full app."
+   ],
+   "vo": "Every screen, every button, in the language they pick. And Mitra reads replies aloud when you tap the speaker."
+  },
+  {
+   "type": "phone",
+   "shot": "en/11_wage_sheet",
+   "kicker": "Saturday",
+   "title": [
+    "Wages,",
+    "added up."
+   ],
+   "bullets": [
+    "GPS attendance",
+    "Days, half days, overtime"
+   ],
+   "vo": "Saturday wages add themselves up from G P S attendance. Days, half days and overtime. No arguments."
+  },
+  {
+   "type": "phone",
+   "shot": "en/08_money",
+   "side": "right",
+   "kicker": "Money",
+   "title": [
+    "Every rupee,",
+    "every site."
+   ],
+   "vo": "Every rupee in and out, for every site, with the balance at the top.",
+   "highlights": [
+    {
+     "box": [
+      30,
+      375,
+      1020,
+      195
+     ],
+     "at": 1.6,
+     "hold": 2.4
+    }
+   ]
+  },
+  {
+   "type": "phone",
+   "shot": "en/16_owe",
+   "kicker": "Suppliers",
+   "title": [
+    "Who you owe,",
+    "oldest first."
+   ],
+   "vo": "See who you owe, oldest first, before a supplier stops your credit.",
+   "highlights": [
+    {
+     "box": [
+      42,
+      549,
+      996,
+      249
+     ],
+     "at": 1.6,
+     "hold": 2.2
+    }
+   ]
+  },
+  {
+   "type": "phone",
+   "shot": "en/15_brief",
+   "side": "right",
+   "kicker": "7:30 pm",
+   "title": [
+    "The owner's",
+    "evening brief."
+   ],
+   "vo": "Every evening, the owner gets one brief. Which site has no report, which is over budget, and who needs a call.",
+   "highlights": [
+    {
+     "box": [
+      285,
+      336,
+      750,
+      240
+     ],
+     "at": 2.2,
+     "hold": 2.4
+    }
+   ]
+  },
+  {
+   "type": "phone",
+   "shot": "en/02_dashboard",
+   "kicker": "Budgets",
+   "title": [
+    "Catch overspending",
+    "early."
+   ],
+   "vo": "The dashboard compares every site with its budget, and warns you before it's too late.",
+   "highlights": [
+    {
+     "box": [
+      60,
+      880,
+      960,
+      140
+     ],
+     "at": 2.0,
+     "hold": 2.4
+    }
+   ]
+  },
+  {
+   "type": "mitra",
+   "mood": "thumbsUp",
+   "lines": [
+    "Works on site,",
+    "even offline."
+   ],
+   "vo": "It works on site even without internet, and syncs when you're back. Only the assistant needs a connection.",
+   "min": 4
+  },
+  {
+   "type": "phone",
+   "shot": "en/17_tour_0",
+   "side": "right",
+   "title": [
+    "Mitra shows you",
+    "around in 2 minutes."
+   ],
+   "vo": "New to it? Mitra's two-minute tour shows your team one full day on a sample site.",
+   "mitra": {
+    "mood": "point",
+    "pos": "bl"
+   }
+  },
+  {
+   "type": "cta",
+   "title": "Try FieldOS free for 3 days",
+   "vo": "Try Field O S free for three days. Link in the description.",
+   "min": 5.5
+  }
+ ]
+}

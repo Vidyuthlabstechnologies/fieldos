@@ -6,6 +6,7 @@ library;
 import 'package:fieldos_mobile/l10n/strings_commercial_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_kn.dart';
+import 'package:fieldos_mobile/l10n/strings_daily_kn.dart';
 
 const Map<String, String> stringsKn = {
   'Try again':
@@ -3172,7 +3173,92 @@ const Map<String, String> stringsKn = {
       '{n} ಅನುಮೋದನೆಗೆ ಕಾಯುತ್ತಿವೆ',
   '{paid} received, {due} due':
       '{paid} ಬಂದಿದೆ, {due} ಬಾಕಿ',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'ಎಲ್ಲಾ ದಾಖಲೆಗಳು, ಫೋಟೋಗಳು, ಬಿಲ್‌ಗಳು ಒಂದೇ ಫೈಲ್‌ನಲ್ಲಿ. ಅದನ್ನು Drive ಅಥವಾ ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ ಇಡಿ.',
+  'Back up this phone':
+      'ಈ ಫೋನ್‌ನ ಬ್ಯಾಕಪ್ ತೆಗೆದುಕೊಳ್ಳಿ',
+  'Backup checked':
+      'ಬ್ಯಾಕಪ್ ಪರಿಶೀಲಿಸಲಾಗಿದೆ',
+  'Backup failed: {error}':
+      'ಬ್ಯಾಕಪ್ ವಿಫಲವಾಯಿತು: {error}',
+  'Checked before anything is replaced':
+      'ಏನನ್ನೂ ಬದಲಿಸುವ ಮೊದಲು ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ',
+  'Choose backup file':
+      'ಬ್ಯಾಕಪ್ ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'ಮುಂದಿನ ಬಾರಿ FieldOS ತೆರೆದಾಗ ಈ ಫೋನ್‌ನಲ್ಲಿರುವ ಎಲ್ಲವೂ ಬ್ಯಾಕಪ್‌ನಿಂದ ಬದಲಾಗುತ್ತದೆ. ಈಗಿನ ಡೇಟಾ ಬೇಕಾದರೆ ಮರಳಿ ಪಡೆಯಲು ಫೋನ್‌ನಲ್ಲೇ ಪಕ್ಕಕ್ಕೆ ಇಡಲಾಗುತ್ತದೆ.',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS ಬ್ಯಾಕಪ್: {sites} ಸೈಟ್‌ಗಳು, {files} ಫೋಟೋಗಳು, ಬಿಲ್‌ಗಳು',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} ರಂದು ಮಾಡಿದ್ದು: {sites} ಸೈಟ್‌ಗಳು, {files} ಫೋಟೋಗಳು, ಬಿಲ್‌ಗಳು. ಮರುಸ್ಥಾಪನೆ ಮುಗಿಸಲು FieldOS ಅನ್ನು ಪೂರ್ತಿ ಮುಚ್ಚಿ ಮತ್ತೆ ತೆರೆಯಿರಿ.',
+  'Restore a backup':
+      'ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ',
+  'Restore a backup?':
+      'ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಬೇಕೆ?',
+  'Restore failed: {error}':
+      'ಮರುಸ್ಥಾಪನೆ ವಿಫಲವಾಯಿತು: {error}',
+  'The backup is damaged and was not restored.':
+      'ಬ್ಯಾಕಪ್ ಹಾಳಾಗಿದೆ, ಮರುಸ್ಥಾಪಿಸಲಿಲ್ಲ.',
+  'The backup is incomplete and was not restored.':
+      'ಬ್ಯಾಕಪ್ ಅಪೂರ್ಣ, ಮರುಸ್ಥಾಪಿಸಲಿಲ್ಲ.',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'ಈ ಬ್ಯಾಕಪ್ ಹೊಸ FieldOS ನಿಂದ ಮಾಡಲಾಗಿದೆ. ಮೊದಲು ಆಪ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಿ.',
+  'This is not a FieldOS backup file.':
+      'ಇದು FieldOS ಬ್ಯಾಕಪ್ ಫೈಲ್ ಅಲ್ಲ.',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'ರಫ್ತು ಪರಿಶೀಲನೆಯಲ್ಲಿ ಪಾಸ್ ಆಗಲಿಲ್ಲ, ಆದ್ದರಿಂದ ಕಳುಹಿಸಲಿಲ್ಲ: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'ಈ ಮೊತ್ತಗಳಿಗಿಂತ ಹೆಚ್ಚಾದರೆ ಮೊದಲು ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್, ನಂತರ ಮಾಲೀಕರು ಅನುಮೋದಿಸುತ್ತಾರೆ. ಅನುಮೋದನೆ ಬೇಡವಾದರೆ ಖಾಲಿ ಬಿಡಿ. ನಿಯಮಗಳು ಇನ್ನು ಮುಂದೆ ದಾಖಲಾಗುವುದಕ್ಕೆ ಮಾತ್ರ ಅನ್ವಯಿಸುತ್ತವೆ.',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'ಯಾವ ಮೊತ್ತಕ್ಕಿಂತ ಹೆಚ್ಚಾದರೆ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್, ನಂತರ ನೀವು, ವಿನಂತಿ, ಖರ್ಚು, ಆರ್ಡರ್ ಅನುಮೋದಿಸಬೇಕು',
+  'Approval rules':
+      'ಅನುಮೋದನೆ ನಿಯಮಗಳು',
+  'Approval rules saved':
+      'ಅನುಮೋದನೆ ನಿಯಮಗಳು ಉಳಿಸಲಾಗಿದೆ',
+  'Enter amounts in rupees, or leave blank.':
+      'ಮೊತ್ತಗಳನ್ನು ರೂಪಾಯಿಗಳಲ್ಲಿ ನಮೂದಿಸಿ, ಅಥವಾ ಖಾಲಿ ಬಿಡಿ.',
+  'Note (needed to reject)':
+      'ಟಿಪ್ಪಣಿ (ತಿರಸ್ಕರಿಸಲು ಅಗತ್ಯ)',
+  'Owner also approves above (₹)':
+      'ಇದಕ್ಕಿಂತ ಹೆಚ್ಚಾದರೆ ಮಾಲೀಕರೂ ಅನುಮೋದಿಸುತ್ತಾರೆ (₹)',
+  'Project manager approves above (₹)':
+      'ಇದಕ್ಕಿಂತ ಹೆಚ್ಚಾದರೆ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್ ಅನುಮೋದಿಸುತ್ತಾರೆ (₹)',
+  'Purchase orders':
+      'ಖರೀದಿ ಆರ್ಡರ್‌ಗಳು',
+  'Purchase requests':
+      'ಖರೀದಿ ವಿನಂತಿಗಳು',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'ನಿಮ್ಮ ಅನುಮೋದನೆ ಮೊತ್ತಗಳಿಗಿಂತ ಹೆಚ್ಚಿನ ಖರೀದಿ ವಿನಂತಿ, ಆರ್ಡರ್, ಖರ್ಚುಗಳು ಇಲ್ಲಿ ಕಾಯುತ್ತವೆ.',
+  'Say why it is rejected.':
+      'ಏಕೆ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ ಎಂದು ಹೇಳಿ.',
+  'Signed. It now waits for the owner\'s approval.':
+      'ಸಹಿ ಆಯಿತು. ಈಗ ಇದು ಮಾಲೀಕರ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ.',
+  'The owner approves it after you.':
+      'ನಿಮ್ಮ ನಂತರ ಮಾಲೀಕರು ಇದನ್ನು ಅನುಮೋದಿಸುತ್ತಾರೆ.',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'ಮಾಲೀಕರ ಮೊತ್ತ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್ ಮೊತ್ತಕ್ಕಿಂತ ಕಡಿಮೆ ಇರಬಾರದು.',
+  'Waiting for a project manager\'s approval':
+      'ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ',
+  'Waiting for the owner\'s approval':
+      'ಮಾಲೀಕರ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ',
+  'Waiting for your approval':
+      'ನಿಮ್ಮ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿರುವುದು',
+  '{amount}. You sign as {level}.':
+      '{amount}. ನೀವು {level} ಆಗಿ ಸಹಿ ಮಾಡುತ್ತೀರಿ.',
+  '{n} requests, orders or expenses above your approval amounts':
+      'ನಿಮ್ಮ ಅನುಮೋದನೆ ಮೊತ್ತಗಳಿಗಿಂತ ಹೆಚ್ಚಿನ {n} ವಿನಂತಿ, ಆರ್ಡರ್ ಅಥವಾ ಖರ್ಚು',
+  // Audit trail
+  'Audit trail':
+      'ಆಡಿಟ್ ಟ್ರೇಲ್',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'ಪ್ರತಿ ಅನುಮೋದನೆ, ರದ್ದು, ಪಾವತಿ, ಯಾರು ಯಾವಾಗ ಮಾಡಿದರು ಎಂಬುದು ಒಂದೇ ಫೈಲ್‌ನಲ್ಲಿ',
+  'Nothing has been recorded yet.':
+      'ಇನ್ನೂ ಏನೂ ದಾಖಲಾಗಿಲ್ಲ.',
   ...commercialKn,
   ...crmKn,
   ...warehouseKn,
+  ...dailyKn,
 };

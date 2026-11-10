@@ -130,7 +130,7 @@ class SyncEngine {
     'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
     'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by', 'edited_by',
     'decided_by', 'submitted_by', 'certified_by', 'raised_by', 'owner_id', 'acted_by', 'measured_by', 'by_user',
-    'sent_by', 'issued_by', 'taken_by', 'reviewed_by',
+    'sent_by', 'issued_by', 'taken_by', 'reviewed_by', 'supervisor_id', 'backup_id', 'updated_by',
   };
 
   Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>
@@ -314,7 +314,38 @@ class SyncEngine {
         }
         final portalSites = await _pullSubcontractorSites();
         await _dropProjectsNoLongerShared({...keep, ...portalSites});
+        await _exchangeSyncStatus();
       });
+
+  /// Tells the server this phone just synced (and how much is still
+  /// waiting on it), then reads when every teammate's phone last did. The
+  /// manager's "Report not received · last synced at 2:10 pm" comes from
+  /// here: without it, a report saved offline and a report never written
+  /// look the same. A backend without 20261110200000_daily_site_close.sql
+  /// yet is skipped.
+  Future<void> _exchangeSyncStatus() async {
+    final raw = await db.settingsDao.get('cloud_linked_companies');
+    if (raw == null || raw.isEmpty) return;
+    final linked = (jsonDecode(raw) as List).cast<String>();
+    final pending = await db.syncOutboxDao.pendingCount();
+    try {
+      for (final companyId in linked) {
+        try {
+          await client.rpc('report_sync_status', params: {'p_company_id': companyId, 'p_pending': pending});
+        } on PostgrestException catch (e) {
+          // Removed from the company: the pull takes its data off this
+          // phone; there is no status to report.
+          if (e.code == '42501') continue;
+          rethrow;
+        }
+        final rows = await client.from('member_sync_status').select().eq('company_id', companyId);
+        await db.dayCloseDao.replaceSyncStatus(
+            companyId, [for (final r in rows) memberSyncStatusFromSupabaseJson(_toLocalIds(r))]);
+      }
+    } on PostgrestException catch (e) {
+      if (!_isMissingOnServer(e)) rethrow;
+    }
+  }
 
   /// A subcontractor can't read the projects table (it carries the client
   /// and money columns), so the sites they work on come by name only.
@@ -397,6 +428,8 @@ class SyncEngine {
         'work_certifications': (r) => db.commercialDao.upsertCertification(workCertificationFromSupabaseJson(r)),
         'commercial_exception_actions': (r) =>
             db.commercialDao.upsertExceptionAction(exceptionActionFromSupabaseJson(r)),
+        'site_close_settings': (r) => db.dayCloseDao.upsertSettingsFromRemote(siteCloseSettingFromSupabaseJson(r)),
+        'site_day_events': (r) => db.dayCloseDao.upsertEventFromRemote(siteDayEventFromSupabaseJson(r)),
         'commercial_attachments': (r) async {
       final mine = await db.commercialDao.attachmentById(r['id'] as String);
       if (mine != null && File(mine.filePath).existsSync()) return;
@@ -432,6 +465,8 @@ class SyncEngine {
         'site_bill_allocations': (r) => db.billingRecordsDao.upsertAllocationFromRemote(billAllocationFromSupabaseJson(r)),
         'site_supplier_invoices': (r) =>
             db.billingRecordsDao.upsertSupplierInvoiceFromRemote(supplierInvoiceFromSupabaseJson(r)),
+        'site_approval_rules': (r) => db.approvalChainDao.upsertRuleFromRemote(approvalRuleFromSupabaseJson(r)),
+        'site_approval_steps': (r) => db.approvalChainDao.upsertStepFromRemote(approvalStepFromSupabaseJson(r)),
         'documents': (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
@@ -658,6 +693,10 @@ class SyncEngine {
     'site_work_measurement_decisions': 'work_measurement_decisions',
     'site_bill_allocations': 'bill_allocations',
     'site_supplier_invoices': 'supplier_invoices',
+    'site_approval_rules': 'approval_rules',
+    'site_approval_steps': 'approval_steps',
+    'site_close_settings': 'site_close_settings',
+    'site_day_events': 'site_day_events',
     'attendance_photos': 'attendance_photos',
     'staff_attendance': 'staff_attendance',
   };
@@ -671,7 +710,8 @@ class SyncEngine {
     'cost_codes', 'work_claims', 'work_certifications', 'variations', 'variation_decisions',
     'commercial_attachments', 'commercial_exception_actions', 'site_supplier_quotes',
     'project_members', 'site_access', 'site_work_measurements', 'site_work_measurement_decisions',
-    'site_bill_allocations', 'site_supplier_invoices', 'attendance_photos', 'staff_attendance',
+    'site_bill_allocations', 'site_supplier_invoices', 'site_approval_steps', 'site_close_settings', 'site_day_events',
+    'attendance_photos', 'staff_attendance',
   };
 
   /// Children found through their parent, for removing a whole site or
