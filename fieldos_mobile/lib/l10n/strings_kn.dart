@@ -2378,6 +2378,32 @@ const Map<String, String> stringsKn = {
       'ಪ್ರತಿ 6 ತಿಂಗಳಿಗೆ {price}',
   '{price}, charged by {store} today. It renews {renews} until you cancel in {cancelIn}, at least 24 hours before the next payment.':
       '{price}, ಇಂದು {store} ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ. ಮುಂದಿನ ಪಾವತಿಗೆ ಕನಿಷ್ಠ 24 ಗಂಟೆ ಮೊದಲು {cancelIn} ನಲ್ಲಿ ರದ್ದುಮಾಡುವವರೆಗೆ {renews} ನವೀಕರಣಗೊಳ್ಳುತ್ತದೆ.',
+
+  // Wage sheet
+  'Earned {earned} · Paid {paid} · Still due {due}':
+      'ಗಳಿಕೆ {earned} · ಕೊಟ್ಟಿದ್ದು {paid} · ಇನ್ನೂ ಬಾಕಿ {due}',
+  '{n} day ({h} h)':
+      '{n} ದಿನ ({h} ಗಂ)',
+  '{n} days ({h} h)':
+      '{n} ದಿನಗಳು ({h} ಗಂ)',
+  'OT {h} h':
+      'ಓವರ್‌ಟೈಮ್ {h} ಗಂ',
+  'no daily wage set':
+      'ದಿನಗೂಲಿ ಹೊಂದಿಸಿಲ್ಲ',
+  '{amount}/day':
+      '{amount}/ದಿನ',
+  '1 missing punch-out (half day)':
+      '1 ಪಂಚ್-ಔಟ್ ಇಲ್ಲ (ಅರ್ಧ ದಿನ)',
+  '{n} missing punch-outs (half days)':
+      '{n} ಪಂಚ್-ಔಟ್ ಇಲ್ಲ (ಅರ್ಧ ದಿನಗಳು)',
+  'paid {amount}':
+      'ಕೊಟ್ಟಿದ್ದು {amount}',
+  'advance':
+      'ಮುಂಗಡ',
+  'due':
+      'ಬಾಕಿ',
+  '{from} to {to}':
+      '{from} ರಿಂದ {to}',
   'Show this week\'s expenses':
       'ಈ ವಾರದ ಖರ್ಚುಗಳನ್ನು ತೋರಿಸು',
   'What is due this week?':

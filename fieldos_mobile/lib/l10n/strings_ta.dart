@@ -2378,6 +2378,32 @@ const Map<String, String> stringsTa = {
       'ஒவ்வொரு 6 மாதமும் {price}',
   '{price}, charged by {store} today. It renews {renews} until you cancel in {cancelIn}, at least 24 hours before the next payment.':
       '{price}, இன்று {store} வசூலிக்கும். அடுத்த கட்டணத்துக்கு குறைந்தது 24 மணி நேரம் முன் {cancelIn} இல் ரத்து செய்யும் வரை {renews} புதுப்பிக்கப்படும்.',
+
+  // Wage sheet
+  'Earned {earned} · Paid {paid} · Still due {due}':
+      'சம்பாதித்தது {earned} · கொடுத்தது {paid} · இன்னும் பாக்கி {due}',
+  '{n} day ({h} h)':
+      '{n} நாள் ({h} மணி)',
+  '{n} days ({h} h)':
+      '{n} நாட்கள் ({h} மணி)',
+  'OT {h} h':
+      'கூடுதல் நேரம் {h} மணி',
+  'no daily wage set':
+      'தினக்கூலி அமைக்கவில்லை',
+  '{amount}/day':
+      '{amount}/நாள்',
+  '1 missing punch-out (half day)':
+      '1 பஞ்ச்-அவுட் இல்லை (அரை நாள்)',
+  '{n} missing punch-outs (half days)':
+      '{n} பஞ்ச்-அவுட் இல்லை (அரை நாட்கள்)',
+  'paid {amount}':
+      'கொடுத்தது {amount}',
+  'advance':
+      'முன்பணம்',
+  'due':
+      'பாக்கி',
+  '{from} to {to}':
+      '{from} முதல் {to} வரை',
   'Show this week\'s expenses':
       'இந்த வாரச் செலவுகளைக் காட்டு',
   'What is due this week?':

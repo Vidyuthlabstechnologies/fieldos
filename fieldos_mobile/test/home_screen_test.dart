@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase/supabase.dart';
@@ -122,6 +123,33 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('picture button labels never break a word in the middle, even with large text', (tester) async {
+    final (container, db, companyId) = await setUpCompany(tester);
+    await tester.runAsync(() => db.projectDao.create(ProjectsCompanion.insert(
+          id: 'Tower B',
+          companyId: companyId,
+          name: 'Tower B',
+          status: const Value('active'),
+        )));
+    // Large text. The test font draws every letter a full em wide, so a
+    // wider screen here stands for a 360 dp phone with a real font: the
+    // label still has to shrink to keep "Attendance" whole.
+    tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await pumpApp(tester, container, const HomeScreen(), size: const Size(600, 1200));
+    final label = find.text('Attendance');
+    expect(label, findsOneWidget);
+    final text = tester.widget<Text>(label);
+    final para = tester.renderObject<RenderParagraph>(label);
+    final oneLine = TextPainter(
+      text: TextSpan(text: 'Attendance', style: text.style),
+      textDirection: TextDirection.ltr,
+      textScaler: const TextScaler.linear(1.3),
+    )..layout();
+    expect(para.size.height, lessThan(oneLine.height * 1.5), reason: '"Attendance" stays on one line');
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a new project needs a name, and an empty client is saved as none', (tester) async {
