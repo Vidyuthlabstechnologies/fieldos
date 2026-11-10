@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/auth/auth_service.dart' show Roles;
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -8,6 +9,7 @@ import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart';
 import 'package:fieldos_mobile/features/commercial/exceptions_screen.dart';
+import 'package:fieldos_mobile/features/crm/crm_screen.dart';
 import 'package:fieldos_mobile/features/assistant/assistant_screen.dart';
 import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
@@ -117,6 +119,8 @@ class HomeScreen extends ConsumerWidget {
                 case 'exceptions':
                   Navigator.of(context)
                       .push(MaterialPageRoute(builder: (_) => CommercialExceptionsScreen(companyId: company.id)));
+                case 'leads':
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => LeadsScreen(companyId: company.id)));
                 case 'brief':
                   openOwnerBrief(context, companyId: company.id, companyName: company.name);
                 case 'payables':
@@ -153,6 +157,18 @@ class HomeScreen extends ConsumerWidget {
               PopupMenuItem(
                   value: 'exceptions',
                   child: ListTile(leading: Icon(Icons.rule_folder_outlined), title: Text(tr('Commercial exceptions')))),
+              // Sales are the owner's and managers' business; the server
+              // hides leads from everyone else too.
+              if (Roles.canApprove(session.role))
+                PopupMenuItem(
+                    value: 'leads',
+                    child: ListTile(
+                        leading: const Icon(Icons.handshake_outlined),
+                        title: Text(tr('Leads and quotes')),
+                        trailing: Consumer(builder: (context, ref, _) {
+                          final due = ref.watch(crmDueProvider(company.id)).value ?? 0;
+                          return due == 0 ? const SizedBox.shrink() : Badge.count(count: due);
+                        }))),
               PopupMenuItem(
                   value: 'brief',
                   child: ListTile(leading: Icon(Icons.wb_twilight_outlined), title: Text(tr('Site brief')))),

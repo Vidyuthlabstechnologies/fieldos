@@ -27495,6 +27495,2421 @@ class ExceptionActionsCompanion extends UpdateCompanion<ExceptionAction> {
   }
 }
 
+class $CrmLeadsTable extends CrmLeads with TableInfo<$CrmLeadsTable, CrmLead> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CrmLeadsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 200,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
+  @override
+  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
+    'phone',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 30),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _locationMeta = const VerificationMeta(
+    'location',
+  );
+  @override
+  late final GeneratedColumn<String> location = GeneratedColumn<String>(
+    'location',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('other'),
+  );
+  static const VerificationMeta _workTypeMeta = const VerificationMeta(
+    'workType',
+  );
+  @override
+  late final GeneratedColumn<String> workType = GeneratedColumn<String>(
+    'work_type',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _estimatedValueMeta = const VerificationMeta(
+    'estimatedValue',
+  );
+  @override
+  late final GeneratedColumn<double> estimatedValue = GeneratedColumn<double>(
+    'estimated_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stageMeta = const VerificationMeta('stage');
+  @override
+  late final GeneratedColumn<String> stage = GeneratedColumn<String>(
+    'stage',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('new'),
+  );
+  static const VerificationMeta _lostReasonMeta = const VerificationMeta(
+    'lostReason',
+  );
+  @override
+  late final GeneratedColumn<String> lostReason = GeneratedColumn<String>(
+    'lost_reason',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nextFollowUpMeta = const VerificationMeta(
+    'nextFollowUp',
+  );
+  @override
+  late final GeneratedColumn<DateTime> nextFollowUp = GeneratedColumn<DateTime>(
+    'next_follow_up',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 1000),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 36),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    companyId,
+    name,
+    phone,
+    email,
+    location,
+    source,
+    workType,
+    estimatedValue,
+    stage,
+    lostReason,
+    ownerId,
+    nextFollowUp,
+    notes,
+    projectId,
+    createdBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'crm_leads';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CrmLead> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('phone')) {
+      context.handle(
+        _phoneMeta,
+        phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta),
+      );
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    }
+    if (data.containsKey('location')) {
+      context.handle(
+        _locationMeta,
+        location.isAcceptableOrUnknown(data['location']!, _locationMeta),
+      );
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    if (data.containsKey('work_type')) {
+      context.handle(
+        _workTypeMeta,
+        workType.isAcceptableOrUnknown(data['work_type']!, _workTypeMeta),
+      );
+    }
+    if (data.containsKey('estimated_value')) {
+      context.handle(
+        _estimatedValueMeta,
+        estimatedValue.isAcceptableOrUnknown(
+          data['estimated_value']!,
+          _estimatedValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('stage')) {
+      context.handle(
+        _stageMeta,
+        stage.isAcceptableOrUnknown(data['stage']!, _stageMeta),
+      );
+    }
+    if (data.containsKey('lost_reason')) {
+      context.handle(
+        _lostReasonMeta,
+        lostReason.isAcceptableOrUnknown(data['lost_reason']!, _lostReasonMeta),
+      );
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('next_follow_up')) {
+      context.handle(
+        _nextFollowUpMeta,
+        nextFollowUp.isAcceptableOrUnknown(
+          data['next_follow_up']!,
+          _nextFollowUpMeta,
+        ),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CrmLead map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CrmLead(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      phone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}phone'],
+      ),
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      ),
+      location: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location'],
+      ),
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      workType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}work_type'],
+      ),
+      estimatedValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}estimated_value'],
+      ),
+      stage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stage'],
+      )!,
+      lostReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lost_reason'],
+      ),
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      ),
+      nextFollowUp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}next_follow_up'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      ),
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CrmLeadsTable createAlias(String alias) {
+    return $CrmLeadsTable(attachedDatabase, alias);
+  }
+}
+
+class CrmLead extends DataClass implements Insertable<CrmLead> {
+  final String id;
+  final String companyId;
+  final String name;
+  final String? phone;
+  final String? email;
+
+  /// Where the work is: a plot, an area, a building.
+  final String? location;
+
+  /// referral | walk_in | website | social | builder | repeat | other
+  final String source;
+
+  /// What they want built: "G+2 house", "Interiors, 3BHK".
+  final String? workType;
+  final double? estimatedValue;
+
+  /// new | contacted | site_visit | quoted | negotiation | won | lost
+  final String stage;
+  final String? lostReason;
+
+  /// Who is following it up (a user id).
+  final String? ownerId;
+  final DateTime? nextFollowUp;
+  final String? notes;
+
+  /// The site made from it once won.
+  final String? projectId;
+  final String createdBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const CrmLead({
+    required this.id,
+    required this.companyId,
+    required this.name,
+    this.phone,
+    this.email,
+    this.location,
+    required this.source,
+    this.workType,
+    this.estimatedValue,
+    required this.stage,
+    this.lostReason,
+    this.ownerId,
+    this.nextFollowUp,
+    this.notes,
+    this.projectId,
+    required this.createdBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['company_id'] = Variable<String>(companyId);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || phone != null) {
+      map['phone'] = Variable<String>(phone);
+    }
+    if (!nullToAbsent || email != null) {
+      map['email'] = Variable<String>(email);
+    }
+    if (!nullToAbsent || location != null) {
+      map['location'] = Variable<String>(location);
+    }
+    map['source'] = Variable<String>(source);
+    if (!nullToAbsent || workType != null) {
+      map['work_type'] = Variable<String>(workType);
+    }
+    if (!nullToAbsent || estimatedValue != null) {
+      map['estimated_value'] = Variable<double>(estimatedValue);
+    }
+    map['stage'] = Variable<String>(stage);
+    if (!nullToAbsent || lostReason != null) {
+      map['lost_reason'] = Variable<String>(lostReason);
+    }
+    if (!nullToAbsent || ownerId != null) {
+      map['owner_id'] = Variable<String>(ownerId);
+    }
+    if (!nullToAbsent || nextFollowUp != null) {
+      map['next_follow_up'] = Variable<DateTime>(nextFollowUp);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    if (!nullToAbsent || projectId != null) {
+      map['project_id'] = Variable<String>(projectId);
+    }
+    map['created_by'] = Variable<String>(createdBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  CrmLeadsCompanion toCompanion(bool nullToAbsent) {
+    return CrmLeadsCompanion(
+      id: Value(id),
+      companyId: Value(companyId),
+      name: Value(name),
+      phone: phone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(phone),
+      email: email == null && nullToAbsent
+          ? const Value.absent()
+          : Value(email),
+      location: location == null && nullToAbsent
+          ? const Value.absent()
+          : Value(location),
+      source: Value(source),
+      workType: workType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(workType),
+      estimatedValue: estimatedValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(estimatedValue),
+      stage: Value(stage),
+      lostReason: lostReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lostReason),
+      ownerId: ownerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerId),
+      nextFollowUp: nextFollowUp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextFollowUp),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      projectId: projectId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(projectId),
+      createdBy: Value(createdBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory CrmLead.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CrmLead(
+      id: serializer.fromJson<String>(json['id']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      name: serializer.fromJson<String>(json['name']),
+      phone: serializer.fromJson<String?>(json['phone']),
+      email: serializer.fromJson<String?>(json['email']),
+      location: serializer.fromJson<String?>(json['location']),
+      source: serializer.fromJson<String>(json['source']),
+      workType: serializer.fromJson<String?>(json['workType']),
+      estimatedValue: serializer.fromJson<double?>(json['estimatedValue']),
+      stage: serializer.fromJson<String>(json['stage']),
+      lostReason: serializer.fromJson<String?>(json['lostReason']),
+      ownerId: serializer.fromJson<String?>(json['ownerId']),
+      nextFollowUp: serializer.fromJson<DateTime?>(json['nextFollowUp']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      projectId: serializer.fromJson<String?>(json['projectId']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'companyId': serializer.toJson<String>(companyId),
+      'name': serializer.toJson<String>(name),
+      'phone': serializer.toJson<String?>(phone),
+      'email': serializer.toJson<String?>(email),
+      'location': serializer.toJson<String?>(location),
+      'source': serializer.toJson<String>(source),
+      'workType': serializer.toJson<String?>(workType),
+      'estimatedValue': serializer.toJson<double?>(estimatedValue),
+      'stage': serializer.toJson<String>(stage),
+      'lostReason': serializer.toJson<String?>(lostReason),
+      'ownerId': serializer.toJson<String?>(ownerId),
+      'nextFollowUp': serializer.toJson<DateTime?>(nextFollowUp),
+      'notes': serializer.toJson<String?>(notes),
+      'projectId': serializer.toJson<String?>(projectId),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  CrmLead copyWith({
+    String? id,
+    String? companyId,
+    String? name,
+    Value<String?> phone = const Value.absent(),
+    Value<String?> email = const Value.absent(),
+    Value<String?> location = const Value.absent(),
+    String? source,
+    Value<String?> workType = const Value.absent(),
+    Value<double?> estimatedValue = const Value.absent(),
+    String? stage,
+    Value<String?> lostReason = const Value.absent(),
+    Value<String?> ownerId = const Value.absent(),
+    Value<DateTime?> nextFollowUp = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
+    Value<String?> projectId = const Value.absent(),
+    String? createdBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => CrmLead(
+    id: id ?? this.id,
+    companyId: companyId ?? this.companyId,
+    name: name ?? this.name,
+    phone: phone.present ? phone.value : this.phone,
+    email: email.present ? email.value : this.email,
+    location: location.present ? location.value : this.location,
+    source: source ?? this.source,
+    workType: workType.present ? workType.value : this.workType,
+    estimatedValue: estimatedValue.present
+        ? estimatedValue.value
+        : this.estimatedValue,
+    stage: stage ?? this.stage,
+    lostReason: lostReason.present ? lostReason.value : this.lostReason,
+    ownerId: ownerId.present ? ownerId.value : this.ownerId,
+    nextFollowUp: nextFollowUp.present ? nextFollowUp.value : this.nextFollowUp,
+    notes: notes.present ? notes.value : this.notes,
+    projectId: projectId.present ? projectId.value : this.projectId,
+    createdBy: createdBy ?? this.createdBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  CrmLead copyWithCompanion(CrmLeadsCompanion data) {
+    return CrmLead(
+      id: data.id.present ? data.id.value : this.id,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      name: data.name.present ? data.name.value : this.name,
+      phone: data.phone.present ? data.phone.value : this.phone,
+      email: data.email.present ? data.email.value : this.email,
+      location: data.location.present ? data.location.value : this.location,
+      source: data.source.present ? data.source.value : this.source,
+      workType: data.workType.present ? data.workType.value : this.workType,
+      estimatedValue: data.estimatedValue.present
+          ? data.estimatedValue.value
+          : this.estimatedValue,
+      stage: data.stage.present ? data.stage.value : this.stage,
+      lostReason: data.lostReason.present
+          ? data.lostReason.value
+          : this.lostReason,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      nextFollowUp: data.nextFollowUp.present
+          ? data.nextFollowUp.value
+          : this.nextFollowUp,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CrmLead(')
+          ..write('id: $id, ')
+          ..write('companyId: $companyId, ')
+          ..write('name: $name, ')
+          ..write('phone: $phone, ')
+          ..write('email: $email, ')
+          ..write('location: $location, ')
+          ..write('source: $source, ')
+          ..write('workType: $workType, ')
+          ..write('estimatedValue: $estimatedValue, ')
+          ..write('stage: $stage, ')
+          ..write('lostReason: $lostReason, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('nextFollowUp: $nextFollowUp, ')
+          ..write('notes: $notes, ')
+          ..write('projectId: $projectId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    companyId,
+    name,
+    phone,
+    email,
+    location,
+    source,
+    workType,
+    estimatedValue,
+    stage,
+    lostReason,
+    ownerId,
+    nextFollowUp,
+    notes,
+    projectId,
+    createdBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CrmLead &&
+          other.id == this.id &&
+          other.companyId == this.companyId &&
+          other.name == this.name &&
+          other.phone == this.phone &&
+          other.email == this.email &&
+          other.location == this.location &&
+          other.source == this.source &&
+          other.workType == this.workType &&
+          other.estimatedValue == this.estimatedValue &&
+          other.stage == this.stage &&
+          other.lostReason == this.lostReason &&
+          other.ownerId == this.ownerId &&
+          other.nextFollowUp == this.nextFollowUp &&
+          other.notes == this.notes &&
+          other.projectId == this.projectId &&
+          other.createdBy == this.createdBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class CrmLeadsCompanion extends UpdateCompanion<CrmLead> {
+  final Value<String> id;
+  final Value<String> companyId;
+  final Value<String> name;
+  final Value<String?> phone;
+  final Value<String?> email;
+  final Value<String?> location;
+  final Value<String> source;
+  final Value<String?> workType;
+  final Value<double?> estimatedValue;
+  final Value<String> stage;
+  final Value<String?> lostReason;
+  final Value<String?> ownerId;
+  final Value<DateTime?> nextFollowUp;
+  final Value<String?> notes;
+  final Value<String?> projectId;
+  final Value<String> createdBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const CrmLeadsCompanion({
+    this.id = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.email = const Value.absent(),
+    this.location = const Value.absent(),
+    this.source = const Value.absent(),
+    this.workType = const Value.absent(),
+    this.estimatedValue = const Value.absent(),
+    this.stage = const Value.absent(),
+    this.lostReason = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.nextFollowUp = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CrmLeadsCompanion.insert({
+    required String id,
+    required String companyId,
+    required String name,
+    this.phone = const Value.absent(),
+    this.email = const Value.absent(),
+    this.location = const Value.absent(),
+    this.source = const Value.absent(),
+    this.workType = const Value.absent(),
+    this.estimatedValue = const Value.absent(),
+    this.stage = const Value.absent(),
+    this.lostReason = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.nextFollowUp = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.projectId = const Value.absent(),
+    required String createdBy,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       companyId = Value(companyId),
+       name = Value(name),
+       createdBy = Value(createdBy);
+  static Insertable<CrmLead> custom({
+    Expression<String>? id,
+    Expression<String>? companyId,
+    Expression<String>? name,
+    Expression<String>? phone,
+    Expression<String>? email,
+    Expression<String>? location,
+    Expression<String>? source,
+    Expression<String>? workType,
+    Expression<double>? estimatedValue,
+    Expression<String>? stage,
+    Expression<String>? lostReason,
+    Expression<String>? ownerId,
+    Expression<DateTime>? nextFollowUp,
+    Expression<String>? notes,
+    Expression<String>? projectId,
+    Expression<String>? createdBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (companyId != null) 'company_id': companyId,
+      if (name != null) 'name': name,
+      if (phone != null) 'phone': phone,
+      if (email != null) 'email': email,
+      if (location != null) 'location': location,
+      if (source != null) 'source': source,
+      if (workType != null) 'work_type': workType,
+      if (estimatedValue != null) 'estimated_value': estimatedValue,
+      if (stage != null) 'stage': stage,
+      if (lostReason != null) 'lost_reason': lostReason,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (nextFollowUp != null) 'next_follow_up': nextFollowUp,
+      if (notes != null) 'notes': notes,
+      if (projectId != null) 'project_id': projectId,
+      if (createdBy != null) 'created_by': createdBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CrmLeadsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? companyId,
+    Value<String>? name,
+    Value<String?>? phone,
+    Value<String?>? email,
+    Value<String?>? location,
+    Value<String>? source,
+    Value<String?>? workType,
+    Value<double?>? estimatedValue,
+    Value<String>? stage,
+    Value<String?>? lostReason,
+    Value<String?>? ownerId,
+    Value<DateTime?>? nextFollowUp,
+    Value<String?>? notes,
+    Value<String?>? projectId,
+    Value<String>? createdBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return CrmLeadsCompanion(
+      id: id ?? this.id,
+      companyId: companyId ?? this.companyId,
+      name: name ?? this.name,
+      phone: phone ?? this.phone,
+      email: email ?? this.email,
+      location: location ?? this.location,
+      source: source ?? this.source,
+      workType: workType ?? this.workType,
+      estimatedValue: estimatedValue ?? this.estimatedValue,
+      stage: stage ?? this.stage,
+      lostReason: lostReason ?? this.lostReason,
+      ownerId: ownerId ?? this.ownerId,
+      nextFollowUp: nextFollowUp ?? this.nextFollowUp,
+      notes: notes ?? this.notes,
+      projectId: projectId ?? this.projectId,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (phone.present) {
+      map['phone'] = Variable<String>(phone.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (location.present) {
+      map['location'] = Variable<String>(location.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (workType.present) {
+      map['work_type'] = Variable<String>(workType.value);
+    }
+    if (estimatedValue.present) {
+      map['estimated_value'] = Variable<double>(estimatedValue.value);
+    }
+    if (stage.present) {
+      map['stage'] = Variable<String>(stage.value);
+    }
+    if (lostReason.present) {
+      map['lost_reason'] = Variable<String>(lostReason.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (nextFollowUp.present) {
+      map['next_follow_up'] = Variable<DateTime>(nextFollowUp.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CrmLeadsCompanion(')
+          ..write('id: $id, ')
+          ..write('companyId: $companyId, ')
+          ..write('name: $name, ')
+          ..write('phone: $phone, ')
+          ..write('email: $email, ')
+          ..write('location: $location, ')
+          ..write('source: $source, ')
+          ..write('workType: $workType, ')
+          ..write('estimatedValue: $estimatedValue, ')
+          ..write('stage: $stage, ')
+          ..write('lostReason: $lostReason, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('nextFollowUp: $nextFollowUp, ')
+          ..write('notes: $notes, ')
+          ..write('projectId: $projectId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CrmActivitiesTable extends CrmActivities
+    with TableInfo<$CrmActivitiesTable, CrmActivity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CrmActivitiesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _leadIdMeta = const VerificationMeta('leadId');
+  @override
+  late final GeneratedColumn<String> leadId = GeneratedColumn<String>(
+    'lead_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 1000),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _byUserMeta = const VerificationMeta('byUser');
+  @override
+  late final GeneratedColumn<String> byUser = GeneratedColumn<String>(
+    'by_user',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    companyId,
+    leadId,
+    kind,
+    note,
+    byUser,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'crm_activities';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CrmActivity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('lead_id')) {
+      context.handle(
+        _leadIdMeta,
+        leadId.isAcceptableOrUnknown(data['lead_id']!, _leadIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_leadIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_noteMeta);
+    }
+    if (data.containsKey('by_user')) {
+      context.handle(
+        _byUserMeta,
+        byUser.isAcceptableOrUnknown(data['by_user']!, _byUserMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_byUserMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CrmActivity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CrmActivity(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      leadId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lead_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      )!,
+      byUser: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}by_user'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CrmActivitiesTable createAlias(String alias) {
+    return $CrmActivitiesTable(attachedDatabase, alias);
+  }
+}
+
+class CrmActivity extends DataClass implements Insertable<CrmActivity> {
+  final String id;
+  final String companyId;
+  final String leadId;
+
+  /// call | visit | meeting | whatsapp | note | stage
+  final String kind;
+  final String note;
+  final String byUser;
+  final DateTime createdAt;
+  const CrmActivity({
+    required this.id,
+    required this.companyId,
+    required this.leadId,
+    required this.kind,
+    required this.note,
+    required this.byUser,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['company_id'] = Variable<String>(companyId);
+    map['lead_id'] = Variable<String>(leadId);
+    map['kind'] = Variable<String>(kind);
+    map['note'] = Variable<String>(note);
+    map['by_user'] = Variable<String>(byUser);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  CrmActivitiesCompanion toCompanion(bool nullToAbsent) {
+    return CrmActivitiesCompanion(
+      id: Value(id),
+      companyId: Value(companyId),
+      leadId: Value(leadId),
+      kind: Value(kind),
+      note: Value(note),
+      byUser: Value(byUser),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory CrmActivity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CrmActivity(
+      id: serializer.fromJson<String>(json['id']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      leadId: serializer.fromJson<String>(json['leadId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      note: serializer.fromJson<String>(json['note']),
+      byUser: serializer.fromJson<String>(json['byUser']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'companyId': serializer.toJson<String>(companyId),
+      'leadId': serializer.toJson<String>(leadId),
+      'kind': serializer.toJson<String>(kind),
+      'note': serializer.toJson<String>(note),
+      'byUser': serializer.toJson<String>(byUser),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  CrmActivity copyWith({
+    String? id,
+    String? companyId,
+    String? leadId,
+    String? kind,
+    String? note,
+    String? byUser,
+    DateTime? createdAt,
+  }) => CrmActivity(
+    id: id ?? this.id,
+    companyId: companyId ?? this.companyId,
+    leadId: leadId ?? this.leadId,
+    kind: kind ?? this.kind,
+    note: note ?? this.note,
+    byUser: byUser ?? this.byUser,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  CrmActivity copyWithCompanion(CrmActivitiesCompanion data) {
+    return CrmActivity(
+      id: data.id.present ? data.id.value : this.id,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      leadId: data.leadId.present ? data.leadId.value : this.leadId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      note: data.note.present ? data.note.value : this.note,
+      byUser: data.byUser.present ? data.byUser.value : this.byUser,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CrmActivity(')
+          ..write('id: $id, ')
+          ..write('companyId: $companyId, ')
+          ..write('leadId: $leadId, ')
+          ..write('kind: $kind, ')
+          ..write('note: $note, ')
+          ..write('byUser: $byUser, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, companyId, leadId, kind, note, byUser, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CrmActivity &&
+          other.id == this.id &&
+          other.companyId == this.companyId &&
+          other.leadId == this.leadId &&
+          other.kind == this.kind &&
+          other.note == this.note &&
+          other.byUser == this.byUser &&
+          other.createdAt == this.createdAt);
+}
+
+class CrmActivitiesCompanion extends UpdateCompanion<CrmActivity> {
+  final Value<String> id;
+  final Value<String> companyId;
+  final Value<String> leadId;
+  final Value<String> kind;
+  final Value<String> note;
+  final Value<String> byUser;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const CrmActivitiesCompanion({
+    this.id = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.leadId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.note = const Value.absent(),
+    this.byUser = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CrmActivitiesCompanion.insert({
+    required String id,
+    required String companyId,
+    required String leadId,
+    required String kind,
+    required String note,
+    required String byUser,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       companyId = Value(companyId),
+       leadId = Value(leadId),
+       kind = Value(kind),
+       note = Value(note),
+       byUser = Value(byUser);
+  static Insertable<CrmActivity> custom({
+    Expression<String>? id,
+    Expression<String>? companyId,
+    Expression<String>? leadId,
+    Expression<String>? kind,
+    Expression<String>? note,
+    Expression<String>? byUser,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (companyId != null) 'company_id': companyId,
+      if (leadId != null) 'lead_id': leadId,
+      if (kind != null) 'kind': kind,
+      if (note != null) 'note': note,
+      if (byUser != null) 'by_user': byUser,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CrmActivitiesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? companyId,
+    Value<String>? leadId,
+    Value<String>? kind,
+    Value<String>? note,
+    Value<String>? byUser,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return CrmActivitiesCompanion(
+      id: id ?? this.id,
+      companyId: companyId ?? this.companyId,
+      leadId: leadId ?? this.leadId,
+      kind: kind ?? this.kind,
+      note: note ?? this.note,
+      byUser: byUser ?? this.byUser,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (leadId.present) {
+      map['lead_id'] = Variable<String>(leadId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (byUser.present) {
+      map['by_user'] = Variable<String>(byUser.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CrmActivitiesCompanion(')
+          ..write('id: $id, ')
+          ..write('companyId: $companyId, ')
+          ..write('leadId: $leadId, ')
+          ..write('kind: $kind, ')
+          ..write('note: $note, ')
+          ..write('byUser: $byUser, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CrmQuotesTable extends CrmQuotes
+    with TableInfo<$CrmQuotesTable, CrmQuote> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CrmQuotesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _leadIdMeta = const VerificationMeta('leadId');
+  @override
+  late final GeneratedColumn<String> leadId = GeneratedColumn<String>(
+    'lead_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quoteNumberMeta = const VerificationMeta(
+    'quoteNumber',
+  );
+  @override
+  late final GeneratedColumn<String> quoteNumber = GeneratedColumn<String>(
+    'quote_number',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 40,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quoteDateMeta = const VerificationMeta(
+    'quoteDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> quoteDate = GeneratedColumn<DateTime>(
+    'quote_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _validUntilMeta = const VerificationMeta(
+    'validUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> validUntil = GeneratedColumn<DateTime>(
+    'valid_until',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('draft'),
+  );
+  static const VerificationMeta _linesJsonMeta = const VerificationMeta(
+    'linesJson',
+  );
+  @override
+  late final GeneratedColumn<String> linesJson = GeneratedColumn<String>(
+    'lines_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _gstRateMeta = const VerificationMeta(
+    'gstRate',
+  );
+  @override
+  late final GeneratedColumn<double> gstRate = GeneratedColumn<double>(
+    'gst_rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(18),
+  );
+  static const VerificationMeta _interStateMeta = const VerificationMeta(
+    'interState',
+  );
+  @override
+  late final GeneratedColumn<bool> interState = GeneratedColumn<bool>(
+    'inter_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("inter_state" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _discountMeta = const VerificationMeta(
+    'discount',
+  );
+  @override
+  late final GeneratedColumn<double> discount = GeneratedColumn<double>(
+    'discount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _totalMeta = const VerificationMeta('total');
+  @override
+  late final GeneratedColumn<double> total = GeneratedColumn<double>(
+    'total',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _termsMeta = const VerificationMeta('terms');
+  @override
+  late final GeneratedColumn<String> terms = GeneratedColumn<String>(
+    'terms',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 2000),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    companyId,
+    leadId,
+    quoteNumber,
+    quoteDate,
+    validUntil,
+    status,
+    linesJson,
+    gstRate,
+    interState,
+    discount,
+    total,
+    terms,
+    createdBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'crm_quotes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CrmQuote> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('lead_id')) {
+      context.handle(
+        _leadIdMeta,
+        leadId.isAcceptableOrUnknown(data['lead_id']!, _leadIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_leadIdMeta);
+    }
+    if (data.containsKey('quote_number')) {
+      context.handle(
+        _quoteNumberMeta,
+        quoteNumber.isAcceptableOrUnknown(
+          data['quote_number']!,
+          _quoteNumberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_quoteNumberMeta);
+    }
+    if (data.containsKey('quote_date')) {
+      context.handle(
+        _quoteDateMeta,
+        quoteDate.isAcceptableOrUnknown(data['quote_date']!, _quoteDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_quoteDateMeta);
+    }
+    if (data.containsKey('valid_until')) {
+      context.handle(
+        _validUntilMeta,
+        validUntil.isAcceptableOrUnknown(data['valid_until']!, _validUntilMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('lines_json')) {
+      context.handle(
+        _linesJsonMeta,
+        linesJson.isAcceptableOrUnknown(data['lines_json']!, _linesJsonMeta),
+      );
+    }
+    if (data.containsKey('gst_rate')) {
+      context.handle(
+        _gstRateMeta,
+        gstRate.isAcceptableOrUnknown(data['gst_rate']!, _gstRateMeta),
+      );
+    }
+    if (data.containsKey('inter_state')) {
+      context.handle(
+        _interStateMeta,
+        interState.isAcceptableOrUnknown(data['inter_state']!, _interStateMeta),
+      );
+    }
+    if (data.containsKey('discount')) {
+      context.handle(
+        _discountMeta,
+        discount.isAcceptableOrUnknown(data['discount']!, _discountMeta),
+      );
+    }
+    if (data.containsKey('total')) {
+      context.handle(
+        _totalMeta,
+        total.isAcceptableOrUnknown(data['total']!, _totalMeta),
+      );
+    }
+    if (data.containsKey('terms')) {
+      context.handle(
+        _termsMeta,
+        terms.isAcceptableOrUnknown(data['terms']!, _termsMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CrmQuote map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CrmQuote(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      leadId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lead_id'],
+      )!,
+      quoteNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quote_number'],
+      )!,
+      quoteDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}quote_date'],
+      )!,
+      validUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}valid_until'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      linesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lines_json'],
+      )!,
+      gstRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gst_rate'],
+      )!,
+      interState: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}inter_state'],
+      )!,
+      discount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}discount'],
+      )!,
+      total: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}total'],
+      )!,
+      terms: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}terms'],
+      ),
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CrmQuotesTable createAlias(String alias) {
+    return $CrmQuotesTable(attachedDatabase, alias);
+  }
+}
+
+class CrmQuote extends DataClass implements Insertable<CrmQuote> {
+  final String id;
+  final String companyId;
+  final String leadId;
+  final String quoteNumber;
+  final DateTime quoteDate;
+  final DateTime? validUntil;
+
+  /// draft | sent | accepted | rejected
+  final String status;
+  final String linesJson;
+  final double gstRate;
+  final bool interState;
+
+  /// A flat amount off before GST.
+  final double discount;
+
+  /// The grand total with GST, kept so lists and the pipeline don't decode
+  /// every quote.
+  final double total;
+  final String? terms;
+  final String createdBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const CrmQuote({
+    required this.id,
+    required this.companyId,
+    required this.leadId,
+    required this.quoteNumber,
+    required this.quoteDate,
+    this.validUntil,
+    required this.status,
+    required this.linesJson,
+    required this.gstRate,
+    required this.interState,
+    required this.discount,
+    required this.total,
+    this.terms,
+    required this.createdBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['company_id'] = Variable<String>(companyId);
+    map['lead_id'] = Variable<String>(leadId);
+    map['quote_number'] = Variable<String>(quoteNumber);
+    map['quote_date'] = Variable<DateTime>(quoteDate);
+    if (!nullToAbsent || validUntil != null) {
+      map['valid_until'] = Variable<DateTime>(validUntil);
+    }
+    map['status'] = Variable<String>(status);
+    map['lines_json'] = Variable<String>(linesJson);
+    map['gst_rate'] = Variable<double>(gstRate);
+    map['inter_state'] = Variable<bool>(interState);
+    map['discount'] = Variable<double>(discount);
+    map['total'] = Variable<double>(total);
+    if (!nullToAbsent || terms != null) {
+      map['terms'] = Variable<String>(terms);
+    }
+    map['created_by'] = Variable<String>(createdBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  CrmQuotesCompanion toCompanion(bool nullToAbsent) {
+    return CrmQuotesCompanion(
+      id: Value(id),
+      companyId: Value(companyId),
+      leadId: Value(leadId),
+      quoteNumber: Value(quoteNumber),
+      quoteDate: Value(quoteDate),
+      validUntil: validUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(validUntil),
+      status: Value(status),
+      linesJson: Value(linesJson),
+      gstRate: Value(gstRate),
+      interState: Value(interState),
+      discount: Value(discount),
+      total: Value(total),
+      terms: terms == null && nullToAbsent
+          ? const Value.absent()
+          : Value(terms),
+      createdBy: Value(createdBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory CrmQuote.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CrmQuote(
+      id: serializer.fromJson<String>(json['id']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      leadId: serializer.fromJson<String>(json['leadId']),
+      quoteNumber: serializer.fromJson<String>(json['quoteNumber']),
+      quoteDate: serializer.fromJson<DateTime>(json['quoteDate']),
+      validUntil: serializer.fromJson<DateTime?>(json['validUntil']),
+      status: serializer.fromJson<String>(json['status']),
+      linesJson: serializer.fromJson<String>(json['linesJson']),
+      gstRate: serializer.fromJson<double>(json['gstRate']),
+      interState: serializer.fromJson<bool>(json['interState']),
+      discount: serializer.fromJson<double>(json['discount']),
+      total: serializer.fromJson<double>(json['total']),
+      terms: serializer.fromJson<String?>(json['terms']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'companyId': serializer.toJson<String>(companyId),
+      'leadId': serializer.toJson<String>(leadId),
+      'quoteNumber': serializer.toJson<String>(quoteNumber),
+      'quoteDate': serializer.toJson<DateTime>(quoteDate),
+      'validUntil': serializer.toJson<DateTime?>(validUntil),
+      'status': serializer.toJson<String>(status),
+      'linesJson': serializer.toJson<String>(linesJson),
+      'gstRate': serializer.toJson<double>(gstRate),
+      'interState': serializer.toJson<bool>(interState),
+      'discount': serializer.toJson<double>(discount),
+      'total': serializer.toJson<double>(total),
+      'terms': serializer.toJson<String?>(terms),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  CrmQuote copyWith({
+    String? id,
+    String? companyId,
+    String? leadId,
+    String? quoteNumber,
+    DateTime? quoteDate,
+    Value<DateTime?> validUntil = const Value.absent(),
+    String? status,
+    String? linesJson,
+    double? gstRate,
+    bool? interState,
+    double? discount,
+    double? total,
+    Value<String?> terms = const Value.absent(),
+    String? createdBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => CrmQuote(
+    id: id ?? this.id,
+    companyId: companyId ?? this.companyId,
+    leadId: leadId ?? this.leadId,
+    quoteNumber: quoteNumber ?? this.quoteNumber,
+    quoteDate: quoteDate ?? this.quoteDate,
+    validUntil: validUntil.present ? validUntil.value : this.validUntil,
+    status: status ?? this.status,
+    linesJson: linesJson ?? this.linesJson,
+    gstRate: gstRate ?? this.gstRate,
+    interState: interState ?? this.interState,
+    discount: discount ?? this.discount,
+    total: total ?? this.total,
+    terms: terms.present ? terms.value : this.terms,
+    createdBy: createdBy ?? this.createdBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  CrmQuote copyWithCompanion(CrmQuotesCompanion data) {
+    return CrmQuote(
+      id: data.id.present ? data.id.value : this.id,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      leadId: data.leadId.present ? data.leadId.value : this.leadId,
+      quoteNumber: data.quoteNumber.present
+          ? data.quoteNumber.value
+          : this.quoteNumber,
+      quoteDate: data.quoteDate.present ? data.quoteDate.value : this.quoteDate,
+      validUntil: data.validUntil.present
+          ? data.validUntil.value
+          : this.validUntil,
+      status: data.status.present ? data.status.value : this.status,
+      linesJson: data.linesJson.present ? data.linesJson.value : this.linesJson,
+      gstRate: data.gstRate.present ? data.gstRate.value : this.gstRate,
+      interState: data.interState.present
+          ? data.interState.value
+          : this.interState,
+      discount: data.discount.present ? data.discount.value : this.discount,
+      total: data.total.present ? data.total.value : this.total,
+      terms: data.terms.present ? data.terms.value : this.terms,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CrmQuote(')
+          ..write('id: $id, ')
+          ..write('companyId: $companyId, ')
+          ..write('leadId: $leadId, ')
+          ..write('quoteNumber: $quoteNumber, ')
+          ..write('quoteDate: $quoteDate, ')
+          ..write('validUntil: $validUntil, ')
+          ..write('status: $status, ')
+          ..write('linesJson: $linesJson, ')
+          ..write('gstRate: $gstRate, ')
+          ..write('interState: $interState, ')
+          ..write('discount: $discount, ')
+          ..write('total: $total, ')
+          ..write('terms: $terms, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    companyId,
+    leadId,
+    quoteNumber,
+    quoteDate,
+    validUntil,
+    status,
+    linesJson,
+    gstRate,
+    interState,
+    discount,
+    total,
+    terms,
+    createdBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CrmQuote &&
+          other.id == this.id &&
+          other.companyId == this.companyId &&
+          other.leadId == this.leadId &&
+          other.quoteNumber == this.quoteNumber &&
+          other.quoteDate == this.quoteDate &&
+          other.validUntil == this.validUntil &&
+          other.status == this.status &&
+          other.linesJson == this.linesJson &&
+          other.gstRate == this.gstRate &&
+          other.interState == this.interState &&
+          other.discount == this.discount &&
+          other.total == this.total &&
+          other.terms == this.terms &&
+          other.createdBy == this.createdBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class CrmQuotesCompanion extends UpdateCompanion<CrmQuote> {
+  final Value<String> id;
+  final Value<String> companyId;
+  final Value<String> leadId;
+  final Value<String> quoteNumber;
+  final Value<DateTime> quoteDate;
+  final Value<DateTime?> validUntil;
+  final Value<String> status;
+  final Value<String> linesJson;
+  final Value<double> gstRate;
+  final Value<bool> interState;
+  final Value<double> discount;
+  final Value<double> total;
+  final Value<String?> terms;
+  final Value<String> createdBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const CrmQuotesCompanion({
+    this.id = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.leadId = const Value.absent(),
+    this.quoteNumber = const Value.absent(),
+    this.quoteDate = const Value.absent(),
+    this.validUntil = const Value.absent(),
+    this.status = const Value.absent(),
+    this.linesJson = const Value.absent(),
+    this.gstRate = const Value.absent(),
+    this.interState = const Value.absent(),
+    this.discount = const Value.absent(),
+    this.total = const Value.absent(),
+    this.terms = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CrmQuotesCompanion.insert({
+    required String id,
+    required String companyId,
+    required String leadId,
+    required String quoteNumber,
+    required DateTime quoteDate,
+    this.validUntil = const Value.absent(),
+    this.status = const Value.absent(),
+    this.linesJson = const Value.absent(),
+    this.gstRate = const Value.absent(),
+    this.interState = const Value.absent(),
+    this.discount = const Value.absent(),
+    this.total = const Value.absent(),
+    this.terms = const Value.absent(),
+    required String createdBy,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       companyId = Value(companyId),
+       leadId = Value(leadId),
+       quoteNumber = Value(quoteNumber),
+       quoteDate = Value(quoteDate),
+       createdBy = Value(createdBy);
+  static Insertable<CrmQuote> custom({
+    Expression<String>? id,
+    Expression<String>? companyId,
+    Expression<String>? leadId,
+    Expression<String>? quoteNumber,
+    Expression<DateTime>? quoteDate,
+    Expression<DateTime>? validUntil,
+    Expression<String>? status,
+    Expression<String>? linesJson,
+    Expression<double>? gstRate,
+    Expression<bool>? interState,
+    Expression<double>? discount,
+    Expression<double>? total,
+    Expression<String>? terms,
+    Expression<String>? createdBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (companyId != null) 'company_id': companyId,
+      if (leadId != null) 'lead_id': leadId,
+      if (quoteNumber != null) 'quote_number': quoteNumber,
+      if (quoteDate != null) 'quote_date': quoteDate,
+      if (validUntil != null) 'valid_until': validUntil,
+      if (status != null) 'status': status,
+      if (linesJson != null) 'lines_json': linesJson,
+      if (gstRate != null) 'gst_rate': gstRate,
+      if (interState != null) 'inter_state': interState,
+      if (discount != null) 'discount': discount,
+      if (total != null) 'total': total,
+      if (terms != null) 'terms': terms,
+      if (createdBy != null) 'created_by': createdBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CrmQuotesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? companyId,
+    Value<String>? leadId,
+    Value<String>? quoteNumber,
+    Value<DateTime>? quoteDate,
+    Value<DateTime?>? validUntil,
+    Value<String>? status,
+    Value<String>? linesJson,
+    Value<double>? gstRate,
+    Value<bool>? interState,
+    Value<double>? discount,
+    Value<double>? total,
+    Value<String?>? terms,
+    Value<String>? createdBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return CrmQuotesCompanion(
+      id: id ?? this.id,
+      companyId: companyId ?? this.companyId,
+      leadId: leadId ?? this.leadId,
+      quoteNumber: quoteNumber ?? this.quoteNumber,
+      quoteDate: quoteDate ?? this.quoteDate,
+      validUntil: validUntil ?? this.validUntil,
+      status: status ?? this.status,
+      linesJson: linesJson ?? this.linesJson,
+      gstRate: gstRate ?? this.gstRate,
+      interState: interState ?? this.interState,
+      discount: discount ?? this.discount,
+      total: total ?? this.total,
+      terms: terms ?? this.terms,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (leadId.present) {
+      map['lead_id'] = Variable<String>(leadId.value);
+    }
+    if (quoteNumber.present) {
+      map['quote_number'] = Variable<String>(quoteNumber.value);
+    }
+    if (quoteDate.present) {
+      map['quote_date'] = Variable<DateTime>(quoteDate.value);
+    }
+    if (validUntil.present) {
+      map['valid_until'] = Variable<DateTime>(validUntil.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (linesJson.present) {
+      map['lines_json'] = Variable<String>(linesJson.value);
+    }
+    if (gstRate.present) {
+      map['gst_rate'] = Variable<double>(gstRate.value);
+    }
+    if (interState.present) {
+      map['inter_state'] = Variable<bool>(interState.value);
+    }
+    if (discount.present) {
+      map['discount'] = Variable<double>(discount.value);
+    }
+    if (total.present) {
+      map['total'] = Variable<double>(total.value);
+    }
+    if (terms.present) {
+      map['terms'] = Variable<String>(terms.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CrmQuotesCompanion(')
+          ..write('id: $id, ')
+          ..write('companyId: $companyId, ')
+          ..write('leadId: $leadId, ')
+          ..write('quoteNumber: $quoteNumber, ')
+          ..write('quoteDate: $quoteDate, ')
+          ..write('validUntil: $validUntil, ')
+          ..write('status: $status, ')
+          ..write('linesJson: $linesJson, ')
+          ..write('gstRate: $gstRate, ')
+          ..write('interState: $interState, ')
+          ..write('discount: $discount, ')
+          ..write('total: $total, ')
+          ..write('terms: $terms, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -28087,6 +30502,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ExceptionActionsTable exceptionActions = $ExceptionActionsTable(
     this,
   );
+  late final $CrmLeadsTable crmLeads = $CrmLeadsTable(this);
+  late final $CrmActivitiesTable crmActivities = $CrmActivitiesTable(this);
+  late final $CrmQuotesTable crmQuotes = $CrmQuotesTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -28140,6 +30558,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     variationDecisions,
     commercialAttachments,
     exceptionActions,
+    crmLeads,
+    crmActivities,
+    crmQuotes,
     syncOutbox,
   ];
 }
@@ -41936,6 +44357,1127 @@ typedef $$ExceptionActionsTableProcessedTableManager =
       ExceptionAction,
       PrefetchHooks Function()
     >;
+typedef $$CrmLeadsTableCreateCompanionBuilder =
+    CrmLeadsCompanion Function({
+      required String id,
+      required String companyId,
+      required String name,
+      Value<String?> phone,
+      Value<String?> email,
+      Value<String?> location,
+      Value<String> source,
+      Value<String?> workType,
+      Value<double?> estimatedValue,
+      Value<String> stage,
+      Value<String?> lostReason,
+      Value<String?> ownerId,
+      Value<DateTime?> nextFollowUp,
+      Value<String?> notes,
+      Value<String?> projectId,
+      required String createdBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$CrmLeadsTableUpdateCompanionBuilder =
+    CrmLeadsCompanion Function({
+      Value<String> id,
+      Value<String> companyId,
+      Value<String> name,
+      Value<String?> phone,
+      Value<String?> email,
+      Value<String?> location,
+      Value<String> source,
+      Value<String?> workType,
+      Value<double?> estimatedValue,
+      Value<String> stage,
+      Value<String?> lostReason,
+      Value<String?> ownerId,
+      Value<DateTime?> nextFollowUp,
+      Value<String?> notes,
+      Value<String?> projectId,
+      Value<String> createdBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$CrmLeadsTableFilterComposer
+    extends Composer<_$AppDatabase, $CrmLeadsTable> {
+  $$CrmLeadsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get workType => $composableBuilder(
+    column: $table.workType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get estimatedValue => $composableBuilder(
+    column: $table.estimatedValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stage => $composableBuilder(
+    column: $table.stage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lostReason => $composableBuilder(
+    column: $table.lostReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get nextFollowUp => $composableBuilder(
+    column: $table.nextFollowUp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CrmLeadsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CrmLeadsTable> {
+  $$CrmLeadsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get workType => $composableBuilder(
+    column: $table.workType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get estimatedValue => $composableBuilder(
+    column: $table.estimatedValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stage => $composableBuilder(
+    column: $table.stage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lostReason => $composableBuilder(
+    column: $table.lostReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get nextFollowUp => $composableBuilder(
+    column: $table.nextFollowUp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CrmLeadsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CrmLeadsTable> {
+  $$CrmLeadsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get phone =>
+      $composableBuilder(column: $table.phone, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get location =>
+      $composableBuilder(column: $table.location, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get workType =>
+      $composableBuilder(column: $table.workType, builder: (column) => column);
+
+  GeneratedColumn<double> get estimatedValue => $composableBuilder(
+    column: $table.estimatedValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get stage =>
+      $composableBuilder(column: $table.stage, builder: (column) => column);
+
+  GeneratedColumn<String> get lostReason => $composableBuilder(
+    column: $table.lostReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get nextFollowUp => $composableBuilder(
+    column: $table.nextFollowUp,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$CrmLeadsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CrmLeadsTable,
+          CrmLead,
+          $$CrmLeadsTableFilterComposer,
+          $$CrmLeadsTableOrderingComposer,
+          $$CrmLeadsTableAnnotationComposer,
+          $$CrmLeadsTableCreateCompanionBuilder,
+          $$CrmLeadsTableUpdateCompanionBuilder,
+          (CrmLead, BaseReferences<_$AppDatabase, $CrmLeadsTable, CrmLead>),
+          CrmLead,
+          PrefetchHooks Function()
+        > {
+  $$CrmLeadsTableTableManager(_$AppDatabase db, $CrmLeadsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CrmLeadsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CrmLeadsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CrmLeadsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> phone = const Value.absent(),
+                Value<String?> email = const Value.absent(),
+                Value<String?> location = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String?> workType = const Value.absent(),
+                Value<double?> estimatedValue = const Value.absent(),
+                Value<String> stage = const Value.absent(),
+                Value<String?> lostReason = const Value.absent(),
+                Value<String?> ownerId = const Value.absent(),
+                Value<DateTime?> nextFollowUp = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<String?> projectId = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CrmLeadsCompanion(
+                id: id,
+                companyId: companyId,
+                name: name,
+                phone: phone,
+                email: email,
+                location: location,
+                source: source,
+                workType: workType,
+                estimatedValue: estimatedValue,
+                stage: stage,
+                lostReason: lostReason,
+                ownerId: ownerId,
+                nextFollowUp: nextFollowUp,
+                notes: notes,
+                projectId: projectId,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String companyId,
+                required String name,
+                Value<String?> phone = const Value.absent(),
+                Value<String?> email = const Value.absent(),
+                Value<String?> location = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String?> workType = const Value.absent(),
+                Value<double?> estimatedValue = const Value.absent(),
+                Value<String> stage = const Value.absent(),
+                Value<String?> lostReason = const Value.absent(),
+                Value<String?> ownerId = const Value.absent(),
+                Value<DateTime?> nextFollowUp = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<String?> projectId = const Value.absent(),
+                required String createdBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CrmLeadsCompanion.insert(
+                id: id,
+                companyId: companyId,
+                name: name,
+                phone: phone,
+                email: email,
+                location: location,
+                source: source,
+                workType: workType,
+                estimatedValue: estimatedValue,
+                stage: stage,
+                lostReason: lostReason,
+                ownerId: ownerId,
+                nextFollowUp: nextFollowUp,
+                notes: notes,
+                projectId: projectId,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CrmLeadsTable, CrmLead>(table),
+                  BaseReferences<_$AppDatabase, $CrmLeadsTable, CrmLead>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CrmLeadsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CrmLeadsTable,
+      CrmLead,
+      $$CrmLeadsTableFilterComposer,
+      $$CrmLeadsTableOrderingComposer,
+      $$CrmLeadsTableAnnotationComposer,
+      $$CrmLeadsTableCreateCompanionBuilder,
+      $$CrmLeadsTableUpdateCompanionBuilder,
+      (CrmLead, BaseReferences<_$AppDatabase, $CrmLeadsTable, CrmLead>),
+      CrmLead,
+      PrefetchHooks Function()
+    >;
+typedef $$CrmActivitiesTableCreateCompanionBuilder =
+    CrmActivitiesCompanion Function({
+      required String id,
+      required String companyId,
+      required String leadId,
+      required String kind,
+      required String note,
+      required String byUser,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$CrmActivitiesTableUpdateCompanionBuilder =
+    CrmActivitiesCompanion Function({
+      Value<String> id,
+      Value<String> companyId,
+      Value<String> leadId,
+      Value<String> kind,
+      Value<String> note,
+      Value<String> byUser,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$CrmActivitiesTableFilterComposer
+    extends Composer<_$AppDatabase, $CrmActivitiesTable> {
+  $$CrmActivitiesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get leadId => $composableBuilder(
+    column: $table.leadId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get byUser => $composableBuilder(
+    column: $table.byUser,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CrmActivitiesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CrmActivitiesTable> {
+  $$CrmActivitiesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get leadId => $composableBuilder(
+    column: $table.leadId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get byUser => $composableBuilder(
+    column: $table.byUser,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CrmActivitiesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CrmActivitiesTable> {
+  $$CrmActivitiesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get leadId =>
+      $composableBuilder(column: $table.leadId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get byUser =>
+      $composableBuilder(column: $table.byUser, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$CrmActivitiesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CrmActivitiesTable,
+          CrmActivity,
+          $$CrmActivitiesTableFilterComposer,
+          $$CrmActivitiesTableOrderingComposer,
+          $$CrmActivitiesTableAnnotationComposer,
+          $$CrmActivitiesTableCreateCompanionBuilder,
+          $$CrmActivitiesTableUpdateCompanionBuilder,
+          (
+            CrmActivity,
+            BaseReferences<_$AppDatabase, $CrmActivitiesTable, CrmActivity>,
+          ),
+          CrmActivity,
+          PrefetchHooks Function()
+        > {
+  $$CrmActivitiesTableTableManager(_$AppDatabase db, $CrmActivitiesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CrmActivitiesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CrmActivitiesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CrmActivitiesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> leadId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<String> byUser = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CrmActivitiesCompanion(
+                id: id,
+                companyId: companyId,
+                leadId: leadId,
+                kind: kind,
+                note: note,
+                byUser: byUser,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String companyId,
+                required String leadId,
+                required String kind,
+                required String note,
+                required String byUser,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CrmActivitiesCompanion.insert(
+                id: id,
+                companyId: companyId,
+                leadId: leadId,
+                kind: kind,
+                note: note,
+                byUser: byUser,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CrmActivitiesTable, CrmActivity>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $CrmActivitiesTable,
+                    CrmActivity
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CrmActivitiesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CrmActivitiesTable,
+      CrmActivity,
+      $$CrmActivitiesTableFilterComposer,
+      $$CrmActivitiesTableOrderingComposer,
+      $$CrmActivitiesTableAnnotationComposer,
+      $$CrmActivitiesTableCreateCompanionBuilder,
+      $$CrmActivitiesTableUpdateCompanionBuilder,
+      (
+        CrmActivity,
+        BaseReferences<_$AppDatabase, $CrmActivitiesTable, CrmActivity>,
+      ),
+      CrmActivity,
+      PrefetchHooks Function()
+    >;
+typedef $$CrmQuotesTableCreateCompanionBuilder =
+    CrmQuotesCompanion Function({
+      required String id,
+      required String companyId,
+      required String leadId,
+      required String quoteNumber,
+      required DateTime quoteDate,
+      Value<DateTime?> validUntil,
+      Value<String> status,
+      Value<String> linesJson,
+      Value<double> gstRate,
+      Value<bool> interState,
+      Value<double> discount,
+      Value<double> total,
+      Value<String?> terms,
+      required String createdBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$CrmQuotesTableUpdateCompanionBuilder =
+    CrmQuotesCompanion Function({
+      Value<String> id,
+      Value<String> companyId,
+      Value<String> leadId,
+      Value<String> quoteNumber,
+      Value<DateTime> quoteDate,
+      Value<DateTime?> validUntil,
+      Value<String> status,
+      Value<String> linesJson,
+      Value<double> gstRate,
+      Value<bool> interState,
+      Value<double> discount,
+      Value<double> total,
+      Value<String?> terms,
+      Value<String> createdBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$CrmQuotesTableFilterComposer
+    extends Composer<_$AppDatabase, $CrmQuotesTable> {
+  $$CrmQuotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get leadId => $composableBuilder(
+    column: $table.leadId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quoteNumber => $composableBuilder(
+    column: $table.quoteNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get quoteDate => $composableBuilder(
+    column: $table.quoteDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get validUntil => $composableBuilder(
+    column: $table.validUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linesJson => $composableBuilder(
+    column: $table.linesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get gstRate => $composableBuilder(
+    column: $table.gstRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get interState => $composableBuilder(
+    column: $table.interState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get discount => $composableBuilder(
+    column: $table.discount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get total => $composableBuilder(
+    column: $table.total,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get terms => $composableBuilder(
+    column: $table.terms,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CrmQuotesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CrmQuotesTable> {
+  $$CrmQuotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get leadId => $composableBuilder(
+    column: $table.leadId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quoteNumber => $composableBuilder(
+    column: $table.quoteNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get quoteDate => $composableBuilder(
+    column: $table.quoteDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get validUntil => $composableBuilder(
+    column: $table.validUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get linesJson => $composableBuilder(
+    column: $table.linesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get gstRate => $composableBuilder(
+    column: $table.gstRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get interState => $composableBuilder(
+    column: $table.interState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get discount => $composableBuilder(
+    column: $table.discount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get total => $composableBuilder(
+    column: $table.total,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get terms => $composableBuilder(
+    column: $table.terms,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CrmQuotesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CrmQuotesTable> {
+  $$CrmQuotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get leadId =>
+      $composableBuilder(column: $table.leadId, builder: (column) => column);
+
+  GeneratedColumn<String> get quoteNumber => $composableBuilder(
+    column: $table.quoteNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get quoteDate =>
+      $composableBuilder(column: $table.quoteDate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get validUntil => $composableBuilder(
+    column: $table.validUntil,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get linesJson =>
+      $composableBuilder(column: $table.linesJson, builder: (column) => column);
+
+  GeneratedColumn<double> get gstRate =>
+      $composableBuilder(column: $table.gstRate, builder: (column) => column);
+
+  GeneratedColumn<bool> get interState => $composableBuilder(
+    column: $table.interState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get discount =>
+      $composableBuilder(column: $table.discount, builder: (column) => column);
+
+  GeneratedColumn<double> get total =>
+      $composableBuilder(column: $table.total, builder: (column) => column);
+
+  GeneratedColumn<String> get terms =>
+      $composableBuilder(column: $table.terms, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$CrmQuotesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CrmQuotesTable,
+          CrmQuote,
+          $$CrmQuotesTableFilterComposer,
+          $$CrmQuotesTableOrderingComposer,
+          $$CrmQuotesTableAnnotationComposer,
+          $$CrmQuotesTableCreateCompanionBuilder,
+          $$CrmQuotesTableUpdateCompanionBuilder,
+          (CrmQuote, BaseReferences<_$AppDatabase, $CrmQuotesTable, CrmQuote>),
+          CrmQuote,
+          PrefetchHooks Function()
+        > {
+  $$CrmQuotesTableTableManager(_$AppDatabase db, $CrmQuotesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CrmQuotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CrmQuotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CrmQuotesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> leadId = const Value.absent(),
+                Value<String> quoteNumber = const Value.absent(),
+                Value<DateTime> quoteDate = const Value.absent(),
+                Value<DateTime?> validUntil = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> linesJson = const Value.absent(),
+                Value<double> gstRate = const Value.absent(),
+                Value<bool> interState = const Value.absent(),
+                Value<double> discount = const Value.absent(),
+                Value<double> total = const Value.absent(),
+                Value<String?> terms = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CrmQuotesCompanion(
+                id: id,
+                companyId: companyId,
+                leadId: leadId,
+                quoteNumber: quoteNumber,
+                quoteDate: quoteDate,
+                validUntil: validUntil,
+                status: status,
+                linesJson: linesJson,
+                gstRate: gstRate,
+                interState: interState,
+                discount: discount,
+                total: total,
+                terms: terms,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String companyId,
+                required String leadId,
+                required String quoteNumber,
+                required DateTime quoteDate,
+                Value<DateTime?> validUntil = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> linesJson = const Value.absent(),
+                Value<double> gstRate = const Value.absent(),
+                Value<bool> interState = const Value.absent(),
+                Value<double> discount = const Value.absent(),
+                Value<double> total = const Value.absent(),
+                Value<String?> terms = const Value.absent(),
+                required String createdBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CrmQuotesCompanion.insert(
+                id: id,
+                companyId: companyId,
+                leadId: leadId,
+                quoteNumber: quoteNumber,
+                quoteDate: quoteDate,
+                validUntil: validUntil,
+                status: status,
+                linesJson: linesJson,
+                gstRate: gstRate,
+                interState: interState,
+                discount: discount,
+                total: total,
+                terms: terms,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CrmQuotesTable, CrmQuote>(table),
+                  BaseReferences<_$AppDatabase, $CrmQuotesTable, CrmQuote>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CrmQuotesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CrmQuotesTable,
+      CrmQuote,
+      $$CrmQuotesTableFilterComposer,
+      $$CrmQuotesTableOrderingComposer,
+      $$CrmQuotesTableAnnotationComposer,
+      $$CrmQuotesTableCreateCompanionBuilder,
+      $$CrmQuotesTableUpdateCompanionBuilder,
+      (CrmQuote, BaseReferences<_$AppDatabase, $CrmQuotesTable, CrmQuote>),
+      CrmQuote,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -42298,6 +45840,12 @@ class $AppDatabaseManager {
       $$CommercialAttachmentsTableTableManager(_db, _db.commercialAttachments);
   $$ExceptionActionsTableTableManager get exceptionActions =>
       $$ExceptionActionsTableTableManager(_db, _db.exceptionActions);
+  $$CrmLeadsTableTableManager get crmLeads =>
+      $$CrmLeadsTableTableManager(_db, _db.crmLeads);
+  $$CrmActivitiesTableTableManager get crmActivities =>
+      $$CrmActivitiesTableTableManager(_db, _db.crmActivities);
+  $$CrmQuotesTableTableManager get crmQuotes =>
+      $$CrmQuotesTableTableManager(_db, _db.crmQuotes);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }
@@ -42780,4 +46328,22 @@ class CommercialDaoManager {
       );
   $$SiteExpensesTableTableManager get siteExpenses =>
       $$SiteExpensesTableTableManager(_db.attachedDatabase, _db.siteExpenses);
+}
+
+mixin _$CrmDaoMixin on DatabaseAccessor<AppDatabase> {
+  $CrmLeadsTable get crmLeads => attachedDatabase.crmLeads;
+  $CrmActivitiesTable get crmActivities => attachedDatabase.crmActivities;
+  $CrmQuotesTable get crmQuotes => attachedDatabase.crmQuotes;
+  CrmDaoManager get managers => CrmDaoManager(this);
+}
+
+class CrmDaoManager {
+  final _$CrmDaoMixin _db;
+  CrmDaoManager(this._db);
+  $$CrmLeadsTableTableManager get crmLeads =>
+      $$CrmLeadsTableTableManager(_db.attachedDatabase, _db.crmLeads);
+  $$CrmActivitiesTableTableManager get crmActivities =>
+      $$CrmActivitiesTableTableManager(_db.attachedDatabase, _db.crmActivities);
+  $$CrmQuotesTableTableManager get crmQuotes =>
+      $$CrmQuotesTableTableManager(_db.attachedDatabase, _db.crmQuotes);
 }

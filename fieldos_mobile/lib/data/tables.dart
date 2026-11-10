@@ -924,3 +924,95 @@ class ExceptionActions extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+// ---------------------------------------------------------------------------
+// v21: CRM -- enquiries before they are sites. Company-wide, owner and
+// project managers only (the server's row level security says the same).
+// ---------------------------------------------------------------------------
+
+/// Someone who may give the company work: a plot owner, a builder, a
+/// society. Moves new -> contacted -> site_visit -> quoted -> negotiation,
+/// and ends won (a site is made from it) or lost (with the reason).
+class CrmLeads extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  TextColumn get name => text().withLength(min: 1, max: 200)();
+  TextColumn get phone => text().withLength(max: 30).nullable()();
+  TextColumn get email => text().withLength(max: 120).nullable()();
+
+  /// Where the work is: a plot, an area, a building.
+  TextColumn get location => text().withLength(max: 300).nullable()();
+
+  /// referral | walk_in | website | social | builder | repeat | other
+  TextColumn get source => text().withLength(min: 1, max: 20).withDefault(const Constant('other'))();
+
+  /// What they want built: "G+2 house", "Interiors, 3BHK".
+  TextColumn get workType => text().withLength(max: 200).nullable()();
+  RealColumn get estimatedValue => real().nullable()();
+
+  /// new | contacted | site_visit | quoted | negotiation | won | lost
+  TextColumn get stage => text().withLength(min: 1, max: 20).withDefault(const Constant('new'))();
+  TextColumn get lostReason => text().withLength(max: 300).nullable()();
+
+  /// Who is following it up (a user id).
+  TextColumn get ownerId => text().withLength(max: 64).nullable()();
+  DateTimeColumn get nextFollowUp => dateTime().nullable()();
+  TextColumn get notes => text().withLength(max: 1000).nullable()();
+
+  /// The site made from it once won.
+  TextColumn get projectId => text().withLength(max: 36).nullable()();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A call, visit, meeting or note on a lead. Never edited: the history is
+/// what was said, in order.
+class CrmActivities extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  TextColumn get leadId => text().withLength(min: 1, max: 36)();
+
+  /// call | visit | meeting | whatsapp | note | stage
+  TextColumn get kind => text().withLength(min: 1, max: 20)();
+  TextColumn get note => text().withLength(max: 1000)();
+  TextColumn get byUser => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A priced offer to a lead. Lines are kept as JSON (description, unit,
+/// qty, rate), like a client bill's.
+class CrmQuotes extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  TextColumn get leadId => text().withLength(min: 1, max: 36)();
+  TextColumn get quoteNumber => text().withLength(min: 1, max: 40)();
+  DateTimeColumn get quoteDate => dateTime()();
+  DateTimeColumn get validUntil => dateTime().nullable()();
+
+  /// draft | sent | accepted | rejected
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('draft'))();
+  TextColumn get linesJson => text().withDefault(const Constant('[]'))();
+  RealColumn get gstRate => real().withDefault(const Constant(18))();
+  BoolColumn get interState => boolean().withDefault(const Constant(false))();
+
+  /// A flat amount off before GST.
+  RealColumn get discount => real().withDefault(const Constant(0))();
+
+  /// The grand total with GST, kept so lists and the pipeline don't decode
+  /// every quote.
+  RealColumn get total => real().withDefault(const Constant(0))();
+  TextColumn get terms => text().withLength(max: 2000).nullable()();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

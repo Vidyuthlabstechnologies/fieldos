@@ -16,6 +16,8 @@ import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/core/format.dart' show fmtQty;
 import 'package:fieldos_mobile/features/commercial/commercial_rules.dart';
+import 'package:fieldos_mobile/features/crm/crm_rules.dart';
+import 'package:fieldos_mobile/features/money/billing_calc.dart' show BillLine, encodeLines;
 import 'package:fieldos_mobile/l10n/language.dart' show trf;
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
 
@@ -79,6 +81,9 @@ String? _clip(String? s, int max) {
   VariationDecisions,
   CommercialAttachments,
   ExceptionActions,
+  CrmLeads,
+  CrmActivities,
+  CrmQuotes,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -107,7 +112,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 21;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -249,6 +254,14 @@ class AppDatabase extends _$AppDatabase {
             await _addColumnIfMissing(m, purchaseOrders, purchaseOrders.costCodeId);
             await _addColumnIfMissing(m, siteExpenses, siteExpenses.costCodeId);
           }
+          // v17-v20 belong to the site roles, billing, daily close and site
+          // execution work stacked before this one.
+          if (from < 21) {
+            // CRM: enquiries, their history and quotations.
+            for (final TableInfo t in [crmLeads, crmActivities, crmQuotes]) {
+              await m.createTable(t);
+            }
+          }
         },
       );
 
@@ -337,6 +350,7 @@ class AppDatabase extends _$AppDatabase {
   NoteDao get noteDao => NoteDao(this);
   CloseDao get closeDao => CloseDao(this);
   CommercialDao get commercialDao => CommercialDao(this);
+  CrmDao get crmDao => CrmDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -2808,3 +2822,354 @@ class CommercialDao extends DatabaseAccessor<AppDatabase> with _$CommercialDaoMi
 }
 
 double _money(double v) => (v * 100).roundToDouble() / 100;
+
+// ---------------------------------------------------------------------------
+// CRM (v21): leads, their history and quotations. Company-wide; the server
+// lets only the owner and project managers read or write them
+// (supabase/migrations/20261110400000_crm.sql). Rules in
+// features/crm/crm_rules.dart.
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [CrmLeads, CrmActivities, CrmQuotes])
+class CrmDao extends DatabaseAccessor<AppDatabase> with _$CrmDaoMixin {
+  CrmDao(super.db);
+
+  Future<void> _queue(String table, String id, String op, Map<String, dynamic> json) =>
+      db.syncOutboxDao.enqueue(targetTable: table, recordId: id, operation: op, payloadJson: jsonEncode(json));
+
+  Future<List<CrmLead>> leadsFor(String companyId) => (select(crmLeads)
+        ..where((l) => l.companyId.equals(companyId))
+        ..orderBy([(l) => OrderingTerm.desc(l.updatedAt)]))
+      .get();
+
+  Future<CrmLead?> leadById(String id) => (select(crmLeads)..where((l) => l.id.equals(id))).getSingleOrNull();
+
+  Future<List<CrmActivity>> activitiesFor(String leadId) => (select(crmActivities)
+        ..where((a) => a.leadId.equals(leadId))
+        ..orderBy([(a) => OrderingTerm.desc(a.createdAt), (a) => OrderingTerm.desc(a.rowId)]))
+      .get();
+
+  Future<List<CrmQuote>> quotesFor(String companyId) => (select(crmQuotes)
+        ..where((q) => q.companyId.equals(companyId))
+        ..orderBy([(q) => OrderingTerm.desc(q.quoteDate), (q) => OrderingTerm.desc(q.createdAt)]))
+      .get();
+
+  Future<List<CrmQuote>> quotesForLead(String leadId) => (select(crmQuotes)
+        ..where((q) => q.leadId.equals(leadId))
+        ..orderBy([(q) => OrderingTerm.desc(q.quoteDate), (q) => OrderingTerm.desc(q.createdAt)]))
+      .get();
+
+  Future<CrmQuote?> quoteById(String id) => (select(crmQuotes)..where((q) => q.id.equals(id))).getSingleOrNull();
+
+  Future<CrmLead> addLead({
+    required String companyId,
+    required String name,
+    required String by,
+    String? phone,
+    String? email,
+    String? location,
+    String source = 'other',
+    String? workType,
+    double? estimatedValue,
+    DateTime? nextFollowUp,
+    String? notes,
+    String? ownerId,
+  }) {
+    if (name.trim().isEmpty) throw ArgumentError('Enter who the enquiry is from.');
+    return transaction(() async {
+      final row = await into(crmLeads).insertReturning(CrmLeadsCompanion.insert(
+        id: _uuid.v4(),
+        companyId: companyId,
+        name: _clip(name.trim(), 200)!,
+        phone: Value(_blank(phone, 30)),
+        email: Value(_blank(email, 120)),
+        location: Value(_blank(location, 300)),
+        source: Value(leadSources.contains(source) ? source : 'other'),
+        workType: Value(_blank(workType, 200)),
+        estimatedValue: Value(estimatedValue),
+        nextFollowUp: Value(nextFollowUp),
+        notes: Value(_blank(notes, 1000)),
+        ownerId: Value(ownerId ?? by),
+        createdBy: by,
+      ));
+      await _queue('crm_leads', row.id, 'insert', crmLeadToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  Future<CrmLead> updateLead(
+    String id, {
+    String? name,
+    Value<String?> phone = const Value.absent(),
+    Value<String?> email = const Value.absent(),
+    Value<String?> location = const Value.absent(),
+    String? source,
+    Value<String?> workType = const Value.absent(),
+    Value<double?> estimatedValue = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
+    Value<String?> ownerId = const Value.absent(),
+  }) =>
+      transaction(() async {
+        String? b(Value<String?> v, int max) => _blank(v.value, max);
+        await (update(crmLeads)..where((l) => l.id.equals(id))).write(CrmLeadsCompanion(
+          name: name == null || name.trim().isEmpty ? const Value.absent() : Value(_clip(name.trim(), 200)!),
+          phone: phone.present ? Value(b(phone, 30)) : const Value.absent(),
+          email: email.present ? Value(b(email, 120)) : const Value.absent(),
+          location: location.present ? Value(b(location, 300)) : const Value.absent(),
+          source: source != null && leadSources.contains(source) ? Value(source) : const Value.absent(),
+          workType: workType.present ? Value(b(workType, 200)) : const Value.absent(),
+          estimatedValue: estimatedValue,
+          notes: notes.present ? Value(b(notes, 1000)) : const Value.absent(),
+          ownerId: ownerId,
+          updatedAt: Value(DateTime.now()),
+        ));
+        return _pushLead(id);
+      });
+
+  Future<CrmLead> _pushLead(String id) async {
+    final row = await (select(crmLeads)..where((l) => l.id.equals(id))).getSingle();
+    await _queue('crm_leads', id, 'update', crmLeadToSupabaseJson(row));
+    return row;
+  }
+
+  /// Moves a lead along. Lost needs a reason (that is the point of
+  /// tracking it); every move is written to the lead's history.
+  Future<CrmLead> setStage(String id, String stage, {required String by, String? lostReason, DateTime? now}) {
+    if (!leadStages.contains(stage)) throw ArgumentError.value(stage, 'stage');
+    if (stage == 'lost' && (lostReason ?? '').trim().isEmpty) {
+      throw ArgumentError('Say why it was lost, so the next one is not.');
+    }
+    return transaction(() async {
+      final before = await leadById(id);
+      if (before == null) throw StateError('This lead is no longer on the phone.');
+      if (before.stage == stage) return before;
+      final at = now ?? DateTime.now();
+      await (update(crmLeads)..where((l) => l.id.equals(id))).write(CrmLeadsCompanion(
+        stage: Value(stage),
+        lostReason: Value(stage == 'lost' ? _clip(lostReason!.trim(), 300) : null),
+        // Nothing to follow up on a decided lead.
+        nextFollowUp: isOpenStage(stage) ? const Value.absent() : const Value(null),
+        updatedAt: Value(at),
+      ));
+      final note = stage == 'lost'
+          ? '${leadStageLabels[before.stage]} -> ${leadStageLabels[stage]}: ${lostReason!.trim()}'
+          : '${leadStageLabels[before.stage]} -> ${leadStageLabels[stage]}';
+      await _addActivity(before.companyId, id, 'stage', note, by, at);
+      return _pushLead(id);
+    });
+  }
+
+  Future<CrmLead> setFollowUp(String id, DateTime? when) => transaction(() async {
+        await (update(crmLeads)..where((l) => l.id.equals(id)))
+            .write(CrmLeadsCompanion(nextFollowUp: Value(when), updatedAt: Value(DateTime.now())));
+        return _pushLead(id);
+      });
+
+  /// Logs a call, visit or note and (optionally) sets the next follow-up
+  /// in one go, the way it happens on the phone after a call. A first
+  /// contact moves a new lead to contacted.
+  Future<void> logActivity({
+    required String leadId,
+    required String kind,
+    required String note,
+    required String by,
+    DateTime? nextFollowUp,
+    bool clearFollowUp = false,
+    DateTime? now,
+  }) {
+    if (!activityKinds.contains(kind)) throw ArgumentError.value(kind, 'kind');
+    if (note.trim().isEmpty) throw ArgumentError('Write what was said or agreed.');
+    return transaction(() async {
+      final lead = await leadById(leadId);
+      if (lead == null) throw StateError('This lead is no longer on the phone.');
+      final at = now ?? DateTime.now();
+      await _addActivity(lead.companyId, leadId, kind, note.trim(), by, at);
+      final moveOn = lead.stage == 'new' && kind != 'note';
+      await (update(crmLeads)..where((l) => l.id.equals(leadId))).write(CrmLeadsCompanion(
+        stage: moveOn ? Value(kind == 'visit' ? 'site_visit' : 'contacted') : const Value.absent(),
+        nextFollowUp: nextFollowUp != null
+            ? Value(nextFollowUp)
+            : clearFollowUp
+                ? const Value(null)
+                : const Value.absent(),
+        updatedAt: Value(at),
+      ));
+      await _pushLead(leadId);
+    });
+  }
+
+  Future<void> _addActivity(String companyId, String leadId, String kind, String note, String by, DateTime at) async {
+    final row = await into(crmActivities).insertReturning(CrmActivitiesCompanion.insert(
+      id: _uuid.v4(),
+      companyId: companyId,
+      leadId: leadId,
+      kind: kind,
+      note: _clip(note, 1000)!,
+      byUser: by,
+      createdAt: Value(at),
+    ));
+    await _queue('crm_activities', row.id, 'insert', crmActivityToSupabaseJson(row));
+  }
+
+  /// A new quote, or a change to one. The total is worked out here so the
+  /// list and the pipeline always agree with the PDF.
+  Future<CrmQuote> saveQuote({
+    String? id,
+    required String leadId,
+    required List<BillLine> lines,
+    required String by,
+    double gstRate = 18,
+    bool interState = false,
+    double discount = 0,
+    DateTime? quoteDate,
+    DateTime? validUntil,
+    String? terms,
+  }) {
+    final clean = [for (final l in lines) if (l.description.trim().isNotEmpty) l];
+    if (clean.isEmpty) throw ArgumentError('Add at least one item with a description.');
+    if (clean.any((l) => l.qty < 0 || l.rate < 0)) throw ArgumentError('Quantities and rates cannot be negative.');
+    if (gstRate < 0 || gstRate > 28) throw ArgumentError('GST is between 0 and 28%.');
+    final totals = quoteTotals(clean, discount: discount, gstRate: gstRate, interState: interState);
+    return transaction(() async {
+      final lead = await leadById(leadId);
+      if (lead == null) throw StateError('This lead is no longer on the phone.');
+      final date = quoteDate ?? DateTime.now();
+      if (id == null) {
+        final existing = (await quotesFor(lead.companyId)).map((q) => q.quoteNumber);
+        final row = await into(crmQuotes).insertReturning(CrmQuotesCompanion.insert(
+          id: _uuid.v4(),
+          companyId: lead.companyId,
+          leadId: leadId,
+          quoteNumber: nextQuoteNumber(existing, date),
+          quoteDate: date,
+          validUntil: Value(validUntil),
+          linesJson: Value(encodeLines(clean)),
+          gstRate: Value(gstRate),
+          interState: Value(interState),
+          discount: Value(totals.discount),
+          total: Value(totals.total),
+          terms: Value(_blank(terms, 2000)),
+          createdBy: by,
+        ));
+        await _queue('crm_quotes', row.id, 'insert', crmQuoteToSupabaseJson(row));
+        if (const ['new', 'contacted', 'site_visit'].contains(lead.stage)) {
+          await (update(crmLeads)..where((l) => l.id.equals(leadId)))
+              .write(CrmLeadsCompanion(stage: const Value('quoted'), updatedAt: Value(DateTime.now())));
+          await _addActivity(lead.companyId, leadId, 'stage',
+              '${leadStageLabels[lead.stage]} -> ${leadStageLabels['quoted']}: ${row.quoteNumber}', by, DateTime.now());
+          await _pushLead(leadId);
+        }
+        return row;
+      }
+      final before = await quoteById(id);
+      if (before == null) throw StateError('This quote is no longer on the phone.');
+      if (before.status == 'accepted') throw ArgumentError('An accepted quote is not changed. Make a new one.');
+      await (update(crmQuotes)..where((q) => q.id.equals(id))).write(CrmQuotesCompanion(
+        quoteDate: Value(date),
+        validUntil: Value(validUntil),
+        linesJson: Value(encodeLines(clean)),
+        gstRate: Value(gstRate),
+        interState: Value(interState),
+        discount: Value(totals.discount),
+        total: Value(totals.total),
+        terms: Value(_blank(terms, 2000)),
+        updatedAt: Value(DateTime.now()),
+      ));
+      final row = await (select(crmQuotes)..where((q) => q.id.equals(id))).getSingle();
+      await _queue('crm_quotes', id, 'update', crmQuoteToSupabaseJson(row));
+      return row;
+    });
+  }
+
+  Future<CrmQuote> setQuoteStatus(String id, String status, {required String by}) {
+    if (!quoteStatuses.contains(status)) throw ArgumentError.value(status, 'status');
+    return transaction(() async {
+      final q = await quoteById(id);
+      if (q == null) throw StateError('This quote is no longer on the phone.');
+      await (update(crmQuotes)..where((x) => x.id.equals(id)))
+          .write(CrmQuotesCompanion(status: Value(status), updatedAt: Value(DateTime.now())));
+      final row = await (select(crmQuotes)..where((x) => x.id.equals(id))).getSingle();
+      await _queue('crm_quotes', id, 'update', crmQuoteToSupabaseJson(row));
+      await _addActivity(q.companyId, q.leadId, 'stage',
+          '${q.quoteNumber}: ${quoteStatusLabels[q.status]} -> ${quoteStatusLabels[status]}', by, DateTime.now());
+      return row;
+    });
+  }
+
+  Future<void> deleteQuote(String id) => transaction(() async {
+        final q = await quoteById(id);
+        if (q == null) return;
+        if (q.status == 'accepted') throw ArgumentError('An accepted quote is kept with the site it became.');
+        await (delete(crmQuotes)..where((x) => x.id.equals(id))).go();
+        await _queue('crm_quotes', id, 'delete', {'id': id});
+      });
+
+  /// Won: makes the site with the client's name, puts the accepted quote's
+  /// items on it as budget lines, and links the lead to it. One
+  /// transaction, so a half-made site never appears.
+  Future<Project> convertToSite({
+    required String leadId,
+    required String siteName,
+    required String by,
+    String? quoteId,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final lead = await leadById(leadId);
+        if (lead == null) throw StateError('This lead is no longer on the phone.');
+        if (lead.projectId != null) {
+          final existing = await db.projectDao.byId(lead.projectId!);
+          if (existing != null) return existing;
+        }
+        final name = siteName.trim().isEmpty ? lead.name : siteName.trim();
+        final project = await db.projectDao.create(ProjectsCompanion.insert(
+          id: _uuid.v4(),
+          companyId: lead.companyId,
+          name: _clip(name, 200)!,
+          clientName: Value(_clip(lead.name, 200)),
+          status: const Value('planning'),
+        ));
+        if (quoteId != null) {
+          final q = await quoteById(quoteId);
+          if (q != null) {
+            if (q.status != 'accepted') await setQuoteStatus(q.id, 'accepted', by: by);
+            for (final b in budgetLinesFromQuote(decodeQuoteLines(q.linesJson))) {
+              await db.commercialDao
+                  .addCostCode(projectId: project.id, code: b.code, name: _clip(b.name, 200)!, originalBudget: b.budget);
+            }
+          }
+        }
+        final at = now ?? DateTime.now();
+        await (update(crmLeads)..where((l) => l.id.equals(leadId))).write(CrmLeadsCompanion(
+          stage: const Value('won'),
+          projectId: Value(project.id),
+          nextFollowUp: const Value(null),
+          lostReason: const Value(null),
+          updatedAt: Value(at),
+        ));
+        await _addActivity(lead.companyId, leadId, 'stage',
+            '${leadStageLabels[lead.stage]} -> ${leadStageLabels['won']}: ${project.name}', by, at);
+        await _pushLead(leadId);
+        return project;
+      });
+
+  Future<void> deleteLead(String id) => transaction(() async {
+        final lead = await leadById(id);
+        if (lead == null) return;
+        if (lead.projectId != null) throw ArgumentError('A won lead is kept: it is where the site came from.');
+        await (delete(crmActivities)..where((a) => a.leadId.equals(id))).go();
+        await (delete(crmQuotes)..where((q) => q.leadId.equals(id))).go();
+        await (delete(crmLeads)..where((l) => l.id.equals(id))).go();
+        // The server removes the history and quotes with the lead.
+        await _queue('crm_leads', id, 'delete', {'id': id});
+      });
+
+  Future<void> upsertLeadFromRemote(CrmLeadsCompanion c) => into(crmLeads).insertOnConflictUpdate(c);
+  Future<void> upsertActivityFromRemote(CrmActivitiesCompanion c) => into(crmActivities).insertOnConflictUpdate(c);
+  Future<void> upsertQuoteFromRemote(CrmQuotesCompanion c) => into(crmQuotes).insertOnConflictUpdate(c);
+}
+
+String? _blank(String? s, int max) {
+  final t = s?.trim() ?? '';
+  return t.isEmpty ? null : _clip(t, max);
+}

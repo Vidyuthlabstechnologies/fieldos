@@ -129,7 +129,7 @@ class SyncEngine {
   static const userIdColumns = {
     'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
     'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by', 'edited_by',
-    'decided_by', 'submitted_by', 'certified_by', 'raised_by', 'owner_id', 'acted_by',
+    'decided_by', 'submitted_by', 'certified_by', 'raised_by', 'owner_id', 'acted_by', 'by_user',
   };
 
   Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>
@@ -401,6 +401,9 @@ class SyncEngine {
         await db.commercialDao.upsertAttachment(commercialAttachmentFromSupabaseJson(r, localPath: local));
       }
     },
+        'crm_leads': (r) => db.crmDao.upsertLeadFromRemote(crmLeadFromSupabaseJson(r)),
+        'crm_activities': (r) => db.crmDao.upsertActivityFromRemote(crmActivityFromSupabaseJson(r)),
+        'crm_quotes': (r) => db.crmDao.upsertQuoteFromRemote(crmQuoteFromSupabaseJson(r)),
         'documents': (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
@@ -610,6 +613,9 @@ class SyncEngine {
     'variation_decisions': 'variation_decisions',
     'commercial_attachments': 'commercial_attachments',
     'commercial_exception_actions': 'exception_actions',
+    'crm_leads': 'crm_leads',
+    'crm_activities': 'crm_activities',
+    'crm_quotes': 'crm_quotes',
   };
 
   /// Tables whose rows carry project_id on the phone too.
@@ -633,6 +639,8 @@ class SyncEngine {
     ('cost_heads', 'estimations', 'estimation_id'),
     ('expense_attachments', 'site_expenses', 'expense_id'),
     ('site_receipt_attachments', 'site_material_receipts', 'receipt_id'),
+    ('crm_activities', 'crm_leads', 'lead_id'),
+    ('crm_quotes', 'crm_leads', 'lead_id'),
   ];
 
   /// Removes a row from the phone, with what hangs off it (a site takes all

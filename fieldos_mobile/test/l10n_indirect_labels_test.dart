@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fieldos_mobile/agents/assistant_tools.dart';
 import 'package:fieldos_mobile/features/chat/project_chat_view.dart';
+import 'package:fieldos_mobile/features/crm/crm_rules.dart';
 import 'package:fieldos_mobile/features/inspections/inspections_screen.dart';
 import 'package:fieldos_mobile/features/labour/day_register.dart';
 import 'package:fieldos_mobile/features/money/money_book.dart';
@@ -29,6 +30,12 @@ void main() {
   final labels = <String, Iterable<String>>{
     'paywall benefits': [for (final (_, t) in paywallBenefits) t],
     'weather': weatherChoices,
+    'lead stages': leadStageLabels.values,
+    'lead sources': leadSourceLabels.values,
+    'lead activities': activityKindLabels.values,
+    'quote statuses': quoteStatusLabels.values,
+    'lost reasons': lostReasonChoices,
+    'follow-up choices': [for (final (_, l) in followUpChoices) l],
     'trades': commonTrades,
     'payment modes': paymentModes.values,
     'expense categories': {...defaultExpenseCategories, ...expenseCategories},

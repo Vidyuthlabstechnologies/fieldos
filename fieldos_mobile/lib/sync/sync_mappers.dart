@@ -1159,3 +1159,105 @@ ExceptionActionsCompanion exceptionActionFromSupabaseJson(Map<String, dynamic> r
       actedBy: row['acted_by'] as String,
       createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
     );
+
+// --- v21: CRM ----------------------------------------------------------------
+
+Map<String, dynamic> crmLeadToSupabaseJson(CrmLead l) => {
+      'id': l.id,
+      'company_id': l.companyId,
+      'name': l.name,
+      'phone': l.phone,
+      'email': l.email,
+      'location': l.location,
+      'source': l.source,
+      'work_type': l.workType,
+      'estimated_value': l.estimatedValue,
+      'stage': l.stage,
+      'lost_reason': l.lostReason,
+      'owner_id': l.ownerId,
+      'created_by': l.createdBy,
+      'next_follow_up': _timestamp(l.nextFollowUp?.toUtc()),
+      'notes': l.notes,
+      'project_id': l.projectId,
+      'created_at': _timestamp(l.createdAt.toUtc()),
+      'updated_at': _timestamp(l.updatedAt.toUtc()),
+    };
+
+CrmLeadsCompanion crmLeadFromSupabaseJson(Map<String, dynamic> row) => CrmLeadsCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      name: row['name'] as String,
+      phone: Value(row['phone'] as String?),
+      email: Value(row['email'] as String?),
+      location: Value(row['location'] as String?),
+      source: Value(row['source'] as String? ?? 'other'),
+      workType: Value(row['work_type'] as String?),
+      estimatedValue: Value((row['estimated_value'] as num?)?.toDouble()),
+      stage: Value(row['stage'] as String? ?? 'new'),
+      lostReason: Value(row['lost_reason'] as String?),
+      ownerId: Value(row['owner_id'] as String?),
+      nextFollowUp: Value(_localTs(row['next_follow_up'])),
+      notes: Value(row['notes'] as String?),
+      projectId: Value(row['project_id'] as String?),
+      createdBy: row['created_by'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+      updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
+    );
+
+Map<String, dynamic> crmActivityToSupabaseJson(CrmActivity a) => {
+      'id': a.id,
+      'company_id': a.companyId,
+      'lead_id': a.leadId,
+      'kind': a.kind,
+      'note': a.note,
+      'by_user': a.byUser,
+      'created_at': _timestamp(a.createdAt.toUtc()),
+    };
+
+CrmActivitiesCompanion crmActivityFromSupabaseJson(Map<String, dynamic> row) => CrmActivitiesCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      leadId: row['lead_id'] as String,
+      kind: row['kind'] as String,
+      note: row['note'] as String,
+      byUser: row['by_user'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+Map<String, dynamic> crmQuoteToSupabaseJson(CrmQuote q) => {
+      'id': q.id,
+      'company_id': q.companyId,
+      'lead_id': q.leadId,
+      'quote_number': q.quoteNumber,
+      'quote_date': _timestamp(q.quoteDate.toUtc()),
+      'valid_until': _timestamp(q.validUntil?.toUtc()),
+      'status': q.status,
+      'lines': jsonDecode(q.linesJson),
+      'gst_rate': q.gstRate,
+      'inter_state': q.interState,
+      'discount': q.discount,
+      'total': q.total,
+      'terms': q.terms,
+      'created_by': q.createdBy,
+      'created_at': _timestamp(q.createdAt.toUtc()),
+      'updated_at': _timestamp(q.updatedAt.toUtc()),
+    };
+
+CrmQuotesCompanion crmQuoteFromSupabaseJson(Map<String, dynamic> row) => CrmQuotesCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      leadId: row['lead_id'] as String,
+      quoteNumber: row['quote_number'] as String,
+      quoteDate: _localTs(row['quote_date'])!,
+      validUntil: Value(_localTs(row['valid_until'])),
+      status: Value(row['status'] as String? ?? 'draft'),
+      linesJson: Value(row['lines'] is String ? row['lines'] as String : jsonEncode(row['lines'] ?? const [])),
+      gstRate: Value((row['gst_rate'] as num? ?? 18).toDouble()),
+      interState: Value(row['inter_state'] as bool? ?? false),
+      discount: Value((row['discount'] as num? ?? 0).toDouble()),
+      total: Value((row['total'] as num? ?? 0).toDouble()),
+      terms: Value(row['terms'] as String?),
+      createdBy: row['created_by'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+      updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
+    );

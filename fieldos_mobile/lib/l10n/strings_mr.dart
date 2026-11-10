@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_crm_mr.dart';
 
 const Map<String, String> stringsMr = {
   'Try again':
@@ -2923,4 +2924,5 @@ const Map<String, String> stringsMr = {
   '{qty} more than ordered':
       'ऑर्डरपेक्षा {qty} जास्त',
   ...commercialMr,
+  ...crmMr,
 };

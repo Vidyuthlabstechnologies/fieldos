@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_crm_hi.dart';
 
 const Map<String, String> stringsHi = {
   'Try again': 'फिर से कोशिश करें',
@@ -2032,4 +2033,5 @@ const Map<String, String> stringsHi = {
   '{qty} more than ordered':
       'ऑर्डर से {qty} ज़्यादा',
   ...commercialHi,
+  ...crmHi,
 };
