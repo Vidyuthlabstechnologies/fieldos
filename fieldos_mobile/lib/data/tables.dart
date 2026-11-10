@@ -1064,3 +1064,79 @@ class ApprovalSteps extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+// ---------------------------------------------------------------------------
+// Daily site close (v31). See features/daily/day_close.dart for the rules
+// and supabase/migrations/20261110200000_daily_site_close.sql for the
+// server's copy.
+// ---------------------------------------------------------------------------
+
+/// Everything said about one site's day, only ever added to: the
+/// supervisor submitting it (with what was explicitly "nothing to report"),
+/// reopening it, why it was missed, a manager following up, and an
+/// approver's recorded override or partial release.
+class SiteDayEvents extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// The day the work happened (yyyy-mm-dd). The entry date is [createdAt].
+  TextColumn get workDate => text().withLength(min: 10, max: 10)();
+
+  /// submitted | reopened | miss_reason | follow_up | override | partial
+  TextColumn get kind => text().withLength(min: 1, max: 20)();
+  BoolColumn get siteClosed => boolean().withDefault(const Constant(false))();
+  BoolColumn get noDeliveries => boolean().withDefault(const Constant(false))();
+  BoolColumn get noExpenses => boolean().withDefault(const Constant(false))();
+
+  /// For a miss: forgot | poor_signal | too_much_work | other.
+  TextColumn get reason => text().withLength(max: 20).nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+
+  /// What a submission covered (people, deliveries, expenses), so the
+  /// manager sees whether it changed after it was sent.
+  TextColumn get fingerprint => text().withLength(max: 200).nullable()();
+
+  /// Overrides and partial releases: the money and the weekly item
+  /// (`wages:<key>`, `expense:<id>`, `receipt:<id>`).
+  RealColumn get amount => real().nullable()();
+  TextColumn get itemRef => text().withLength(max: 160).nullable()();
+  TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A site's daily close setup. [id] is the project id (one row per site).
+class SiteCloseSettings extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// Minutes after midnight by which the day's report is due.
+  IntColumn get cutoffMinutes => integer().withDefault(const Constant(19 * 60))();
+  TextColumn get supervisorId => text().withLength(max: 64).nullable()();
+
+  /// Covers the site's report while [backupUntil] (yyyy-mm-dd, inclusive)
+  /// lasts.
+  TextColumn get backupId => text().withLength(max: 64).nullable()();
+  TextColumn get backupUntil => text().withLength(max: 10).nullable()();
+  TextColumn get updatedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// When each teammate's phone last reached the server, as the server saw
+/// it. Read only; refreshed on every sync.
+class MemberSyncStatus extends Table {
+  TextColumn get userId => text().withLength(min: 1, max: 64)();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  DateTimeColumn get lastSyncedAt => dateTime()();
+
+  /// Changes still waiting on that phone when it last synced.
+  IntColumn get pending => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {companyId, userId};
+}

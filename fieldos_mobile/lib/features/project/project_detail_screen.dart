@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart';
+import 'package:fieldos_mobile/features/daily/today_screen.dart';
 import 'package:fieldos_mobile/features/commercial/commercial_screens.dart';
 import 'package:fieldos_mobile/features/team/site_team_screen.dart';
 import 'package:fieldos_mobile/features/money/measurement_book_screen.dart';
@@ -156,6 +157,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
             onSelected: (v) {
               if (v == 'stage') _changeStage();
               if (v == 'report') openPeriodReport(context, widget.project);
+              if (v == 'today') openToday(context, widget.project);
               if (v == 'close') {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => WeekCloseScreen(project: widget.project, weekOf: DateTime.now()),
@@ -187,6 +189,13 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 child: ListTile(
                   leading: const Icon(Icons.sticky_note_2_outlined),
                   title: Text(tr('Site notes')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'today',
+                child: ListTile(
+                  leading: const Icon(Icons.today_outlined),
+                  title: Text(tr("Today's report")),
                 ),
               ),
               PopupMenuItem(

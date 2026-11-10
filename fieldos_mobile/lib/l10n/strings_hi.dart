@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_daily_hi.dart';
 
 const Map<String, String> stringsHi = {
   'Try again': 'फिर से कोशिश करें',
@@ -2364,4 +2365,5 @@ const Map<String, String> stringsHi = {
   'Nothing has been recorded yet.':
       'अभी तक कुछ दर्ज नहीं हुआ।',
   ...commercialHi,
+  ...dailyHi,
 };

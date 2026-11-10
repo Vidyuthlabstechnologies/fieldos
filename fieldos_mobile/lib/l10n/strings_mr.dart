@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_daily_mr.dart';
 
 const Map<String, String> stringsMr = {
   'Try again':
@@ -3255,4 +3256,5 @@ const Map<String, String> stringsMr = {
   'Nothing has been recorded yet.':
       'अजून काहीही नोंदवले नाही.',
   ...commercialMr,
+  ...dailyMr,
 };

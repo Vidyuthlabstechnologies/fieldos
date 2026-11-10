@@ -31779,6 +31779,1725 @@ class ApprovalStepsCompanion extends UpdateCompanion<ApprovalStep> {
   }
 }
 
+class $SiteDayEventsTable extends SiteDayEvents
+    with TableInfo<$SiteDayEventsTable, SiteDayEvent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SiteDayEventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _workDateMeta = const VerificationMeta(
+    'workDate',
+  );
+  @override
+  late final GeneratedColumn<String> workDate = GeneratedColumn<String>(
+    'work_date',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 10,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _siteClosedMeta = const VerificationMeta(
+    'siteClosed',
+  );
+  @override
+  late final GeneratedColumn<bool> siteClosed = GeneratedColumn<bool>(
+    'site_closed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("site_closed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _noDeliveriesMeta = const VerificationMeta(
+    'noDeliveries',
+  );
+  @override
+  late final GeneratedColumn<bool> noDeliveries = GeneratedColumn<bool>(
+    'no_deliveries',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("no_deliveries" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _noExpensesMeta = const VerificationMeta(
+    'noExpenses',
+  );
+  @override
+  late final GeneratedColumn<bool> noExpenses = GeneratedColumn<bool>(
+    'no_expenses',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("no_expenses" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 20),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fingerprintMeta = const VerificationMeta(
+    'fingerprint',
+  );
+  @override
+  late final GeneratedColumn<String> fingerprint = GeneratedColumn<String>(
+    'fingerprint',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _itemRefMeta = const VerificationMeta(
+    'itemRef',
+  );
+  @override
+  late final GeneratedColumn<String> itemRef = GeneratedColumn<String>(
+    'item_ref',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 160),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _recordedByMeta = const VerificationMeta(
+    'recordedBy',
+  );
+  @override
+  late final GeneratedColumn<String> recordedBy = GeneratedColumn<String>(
+    'recorded_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    workDate,
+    kind,
+    siteClosed,
+    noDeliveries,
+    noExpenses,
+    reason,
+    note,
+    fingerprint,
+    amount,
+    itemRef,
+    recordedBy,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'site_day_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SiteDayEvent> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('work_date')) {
+      context.handle(
+        _workDateMeta,
+        workDate.isAcceptableOrUnknown(data['work_date']!, _workDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_workDateMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('site_closed')) {
+      context.handle(
+        _siteClosedMeta,
+        siteClosed.isAcceptableOrUnknown(data['site_closed']!, _siteClosedMeta),
+      );
+    }
+    if (data.containsKey('no_deliveries')) {
+      context.handle(
+        _noDeliveriesMeta,
+        noDeliveries.isAcceptableOrUnknown(
+          data['no_deliveries']!,
+          _noDeliveriesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('no_expenses')) {
+      context.handle(
+        _noExpensesMeta,
+        noExpenses.isAcceptableOrUnknown(data['no_expenses']!, _noExpensesMeta),
+      );
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('fingerprint')) {
+      context.handle(
+        _fingerprintMeta,
+        fingerprint.isAcceptableOrUnknown(
+          data['fingerprint']!,
+          _fingerprintMeta,
+        ),
+      );
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    }
+    if (data.containsKey('item_ref')) {
+      context.handle(
+        _itemRefMeta,
+        itemRef.isAcceptableOrUnknown(data['item_ref']!, _itemRefMeta),
+      );
+    }
+    if (data.containsKey('recorded_by')) {
+      context.handle(
+        _recordedByMeta,
+        recordedBy.isAcceptableOrUnknown(data['recorded_by']!, _recordedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordedByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SiteDayEvent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SiteDayEvent(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      workDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}work_date'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      siteClosed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}site_closed'],
+      )!,
+      noDeliveries: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}no_deliveries'],
+      )!,
+      noExpenses: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}no_expenses'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      fingerprint: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fingerprint'],
+      ),
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount'],
+      ),
+      itemRef: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_ref'],
+      ),
+      recordedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recorded_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SiteDayEventsTable createAlias(String alias) {
+    return $SiteDayEventsTable(attachedDatabase, alias);
+  }
+}
+
+class SiteDayEvent extends DataClass implements Insertable<SiteDayEvent> {
+  final String id;
+  final String projectId;
+
+  /// The day the work happened (yyyy-mm-dd). The entry date is [createdAt].
+  final String workDate;
+
+  /// submitted | reopened | miss_reason | follow_up | override | partial
+  final String kind;
+  final bool siteClosed;
+  final bool noDeliveries;
+  final bool noExpenses;
+
+  /// For a miss: forgot | poor_signal | too_much_work | other.
+  final String? reason;
+  final String? note;
+
+  /// What a submission covered (people, deliveries, expenses), so the
+  /// manager sees whether it changed after it was sent.
+  final String? fingerprint;
+
+  /// Overrides and partial releases: the money and the weekly item
+  /// (`wages:<key>`, `expense:<id>`, `receipt:<id>`).
+  final double? amount;
+  final String? itemRef;
+  final String recordedBy;
+  final DateTime createdAt;
+  const SiteDayEvent({
+    required this.id,
+    required this.projectId,
+    required this.workDate,
+    required this.kind,
+    required this.siteClosed,
+    required this.noDeliveries,
+    required this.noExpenses,
+    this.reason,
+    this.note,
+    this.fingerprint,
+    this.amount,
+    this.itemRef,
+    required this.recordedBy,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['work_date'] = Variable<String>(workDate);
+    map['kind'] = Variable<String>(kind);
+    map['site_closed'] = Variable<bool>(siteClosed);
+    map['no_deliveries'] = Variable<bool>(noDeliveries);
+    map['no_expenses'] = Variable<bool>(noExpenses);
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || fingerprint != null) {
+      map['fingerprint'] = Variable<String>(fingerprint);
+    }
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<double>(amount);
+    }
+    if (!nullToAbsent || itemRef != null) {
+      map['item_ref'] = Variable<String>(itemRef);
+    }
+    map['recorded_by'] = Variable<String>(recordedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  SiteDayEventsCompanion toCompanion(bool nullToAbsent) {
+    return SiteDayEventsCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      workDate: Value(workDate),
+      kind: Value(kind),
+      siteClosed: Value(siteClosed),
+      noDeliveries: Value(noDeliveries),
+      noExpenses: Value(noExpenses),
+      reason: reason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reason),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      fingerprint: fingerprint == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fingerprint),
+      amount: amount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amount),
+      itemRef: itemRef == null && nullToAbsent
+          ? const Value.absent()
+          : Value(itemRef),
+      recordedBy: Value(recordedBy),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SiteDayEvent.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SiteDayEvent(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      workDate: serializer.fromJson<String>(json['workDate']),
+      kind: serializer.fromJson<String>(json['kind']),
+      siteClosed: serializer.fromJson<bool>(json['siteClosed']),
+      noDeliveries: serializer.fromJson<bool>(json['noDeliveries']),
+      noExpenses: serializer.fromJson<bool>(json['noExpenses']),
+      reason: serializer.fromJson<String?>(json['reason']),
+      note: serializer.fromJson<String?>(json['note']),
+      fingerprint: serializer.fromJson<String?>(json['fingerprint']),
+      amount: serializer.fromJson<double?>(json['amount']),
+      itemRef: serializer.fromJson<String?>(json['itemRef']),
+      recordedBy: serializer.fromJson<String>(json['recordedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'workDate': serializer.toJson<String>(workDate),
+      'kind': serializer.toJson<String>(kind),
+      'siteClosed': serializer.toJson<bool>(siteClosed),
+      'noDeliveries': serializer.toJson<bool>(noDeliveries),
+      'noExpenses': serializer.toJson<bool>(noExpenses),
+      'reason': serializer.toJson<String?>(reason),
+      'note': serializer.toJson<String?>(note),
+      'fingerprint': serializer.toJson<String?>(fingerprint),
+      'amount': serializer.toJson<double?>(amount),
+      'itemRef': serializer.toJson<String?>(itemRef),
+      'recordedBy': serializer.toJson<String>(recordedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  SiteDayEvent copyWith({
+    String? id,
+    String? projectId,
+    String? workDate,
+    String? kind,
+    bool? siteClosed,
+    bool? noDeliveries,
+    bool? noExpenses,
+    Value<String?> reason = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    Value<String?> fingerprint = const Value.absent(),
+    Value<double?> amount = const Value.absent(),
+    Value<String?> itemRef = const Value.absent(),
+    String? recordedBy,
+    DateTime? createdAt,
+  }) => SiteDayEvent(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    workDate: workDate ?? this.workDate,
+    kind: kind ?? this.kind,
+    siteClosed: siteClosed ?? this.siteClosed,
+    noDeliveries: noDeliveries ?? this.noDeliveries,
+    noExpenses: noExpenses ?? this.noExpenses,
+    reason: reason.present ? reason.value : this.reason,
+    note: note.present ? note.value : this.note,
+    fingerprint: fingerprint.present ? fingerprint.value : this.fingerprint,
+    amount: amount.present ? amount.value : this.amount,
+    itemRef: itemRef.present ? itemRef.value : this.itemRef,
+    recordedBy: recordedBy ?? this.recordedBy,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  SiteDayEvent copyWithCompanion(SiteDayEventsCompanion data) {
+    return SiteDayEvent(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      workDate: data.workDate.present ? data.workDate.value : this.workDate,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      siteClosed: data.siteClosed.present
+          ? data.siteClosed.value
+          : this.siteClosed,
+      noDeliveries: data.noDeliveries.present
+          ? data.noDeliveries.value
+          : this.noDeliveries,
+      noExpenses: data.noExpenses.present
+          ? data.noExpenses.value
+          : this.noExpenses,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      note: data.note.present ? data.note.value : this.note,
+      fingerprint: data.fingerprint.present
+          ? data.fingerprint.value
+          : this.fingerprint,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      itemRef: data.itemRef.present ? data.itemRef.value : this.itemRef,
+      recordedBy: data.recordedBy.present
+          ? data.recordedBy.value
+          : this.recordedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SiteDayEvent(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('workDate: $workDate, ')
+          ..write('kind: $kind, ')
+          ..write('siteClosed: $siteClosed, ')
+          ..write('noDeliveries: $noDeliveries, ')
+          ..write('noExpenses: $noExpenses, ')
+          ..write('reason: $reason, ')
+          ..write('note: $note, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('amount: $amount, ')
+          ..write('itemRef: $itemRef, ')
+          ..write('recordedBy: $recordedBy, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    workDate,
+    kind,
+    siteClosed,
+    noDeliveries,
+    noExpenses,
+    reason,
+    note,
+    fingerprint,
+    amount,
+    itemRef,
+    recordedBy,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SiteDayEvent &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.workDate == this.workDate &&
+          other.kind == this.kind &&
+          other.siteClosed == this.siteClosed &&
+          other.noDeliveries == this.noDeliveries &&
+          other.noExpenses == this.noExpenses &&
+          other.reason == this.reason &&
+          other.note == this.note &&
+          other.fingerprint == this.fingerprint &&
+          other.amount == this.amount &&
+          other.itemRef == this.itemRef &&
+          other.recordedBy == this.recordedBy &&
+          other.createdAt == this.createdAt);
+}
+
+class SiteDayEventsCompanion extends UpdateCompanion<SiteDayEvent> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> workDate;
+  final Value<String> kind;
+  final Value<bool> siteClosed;
+  final Value<bool> noDeliveries;
+  final Value<bool> noExpenses;
+  final Value<String?> reason;
+  final Value<String?> note;
+  final Value<String?> fingerprint;
+  final Value<double?> amount;
+  final Value<String?> itemRef;
+  final Value<String> recordedBy;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const SiteDayEventsCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.workDate = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.siteClosed = const Value.absent(),
+    this.noDeliveries = const Value.absent(),
+    this.noExpenses = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.note = const Value.absent(),
+    this.fingerprint = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.itemRef = const Value.absent(),
+    this.recordedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SiteDayEventsCompanion.insert({
+    required String id,
+    required String projectId,
+    required String workDate,
+    required String kind,
+    this.siteClosed = const Value.absent(),
+    this.noDeliveries = const Value.absent(),
+    this.noExpenses = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.note = const Value.absent(),
+    this.fingerprint = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.itemRef = const Value.absent(),
+    required String recordedBy,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       workDate = Value(workDate),
+       kind = Value(kind),
+       recordedBy = Value(recordedBy);
+  static Insertable<SiteDayEvent> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? workDate,
+    Expression<String>? kind,
+    Expression<bool>? siteClosed,
+    Expression<bool>? noDeliveries,
+    Expression<bool>? noExpenses,
+    Expression<String>? reason,
+    Expression<String>? note,
+    Expression<String>? fingerprint,
+    Expression<double>? amount,
+    Expression<String>? itemRef,
+    Expression<String>? recordedBy,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (workDate != null) 'work_date': workDate,
+      if (kind != null) 'kind': kind,
+      if (siteClosed != null) 'site_closed': siteClosed,
+      if (noDeliveries != null) 'no_deliveries': noDeliveries,
+      if (noExpenses != null) 'no_expenses': noExpenses,
+      if (reason != null) 'reason': reason,
+      if (note != null) 'note': note,
+      if (fingerprint != null) 'fingerprint': fingerprint,
+      if (amount != null) 'amount': amount,
+      if (itemRef != null) 'item_ref': itemRef,
+      if (recordedBy != null) 'recorded_by': recordedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SiteDayEventsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? workDate,
+    Value<String>? kind,
+    Value<bool>? siteClosed,
+    Value<bool>? noDeliveries,
+    Value<bool>? noExpenses,
+    Value<String?>? reason,
+    Value<String?>? note,
+    Value<String?>? fingerprint,
+    Value<double?>? amount,
+    Value<String?>? itemRef,
+    Value<String>? recordedBy,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return SiteDayEventsCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      workDate: workDate ?? this.workDate,
+      kind: kind ?? this.kind,
+      siteClosed: siteClosed ?? this.siteClosed,
+      noDeliveries: noDeliveries ?? this.noDeliveries,
+      noExpenses: noExpenses ?? this.noExpenses,
+      reason: reason ?? this.reason,
+      note: note ?? this.note,
+      fingerprint: fingerprint ?? this.fingerprint,
+      amount: amount ?? this.amount,
+      itemRef: itemRef ?? this.itemRef,
+      recordedBy: recordedBy ?? this.recordedBy,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (workDate.present) {
+      map['work_date'] = Variable<String>(workDate.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (siteClosed.present) {
+      map['site_closed'] = Variable<bool>(siteClosed.value);
+    }
+    if (noDeliveries.present) {
+      map['no_deliveries'] = Variable<bool>(noDeliveries.value);
+    }
+    if (noExpenses.present) {
+      map['no_expenses'] = Variable<bool>(noExpenses.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (fingerprint.present) {
+      map['fingerprint'] = Variable<String>(fingerprint.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (itemRef.present) {
+      map['item_ref'] = Variable<String>(itemRef.value);
+    }
+    if (recordedBy.present) {
+      map['recorded_by'] = Variable<String>(recordedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SiteDayEventsCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('workDate: $workDate, ')
+          ..write('kind: $kind, ')
+          ..write('siteClosed: $siteClosed, ')
+          ..write('noDeliveries: $noDeliveries, ')
+          ..write('noExpenses: $noExpenses, ')
+          ..write('reason: $reason, ')
+          ..write('note: $note, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('amount: $amount, ')
+          ..write('itemRef: $itemRef, ')
+          ..write('recordedBy: $recordedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SiteCloseSettingsTable extends SiteCloseSettings
+    with TableInfo<$SiteCloseSettingsTable, SiteCloseSetting> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SiteCloseSettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cutoffMinutesMeta = const VerificationMeta(
+    'cutoffMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> cutoffMinutes = GeneratedColumn<int>(
+    'cutoff_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(19 * 60),
+  );
+  static const VerificationMeta _supervisorIdMeta = const VerificationMeta(
+    'supervisorId',
+  );
+  @override
+  late final GeneratedColumn<String> supervisorId = GeneratedColumn<String>(
+    'supervisor_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _backupIdMeta = const VerificationMeta(
+    'backupId',
+  );
+  @override
+  late final GeneratedColumn<String> backupId = GeneratedColumn<String>(
+    'backup_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _backupUntilMeta = const VerificationMeta(
+    'backupUntil',
+  );
+  @override
+  late final GeneratedColumn<String> backupUntil = GeneratedColumn<String>(
+    'backup_until',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    cutoffMinutes,
+    supervisorId,
+    backupId,
+    backupUntil,
+    updatedBy,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'site_close_settings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SiteCloseSetting> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('cutoff_minutes')) {
+      context.handle(
+        _cutoffMinutesMeta,
+        cutoffMinutes.isAcceptableOrUnknown(
+          data['cutoff_minutes']!,
+          _cutoffMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('supervisor_id')) {
+      context.handle(
+        _supervisorIdMeta,
+        supervisorId.isAcceptableOrUnknown(
+          data['supervisor_id']!,
+          _supervisorIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('backup_id')) {
+      context.handle(
+        _backupIdMeta,
+        backupId.isAcceptableOrUnknown(data['backup_id']!, _backupIdMeta),
+      );
+    }
+    if (data.containsKey('backup_until')) {
+      context.handle(
+        _backupUntilMeta,
+        backupUntil.isAcceptableOrUnknown(
+          data['backup_until']!,
+          _backupUntilMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SiteCloseSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SiteCloseSetting(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      cutoffMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cutoff_minutes'],
+      )!,
+      supervisorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supervisor_id'],
+      ),
+      backupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}backup_id'],
+      ),
+      backupUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}backup_until'],
+      ),
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SiteCloseSettingsTable createAlias(String alias) {
+    return $SiteCloseSettingsTable(attachedDatabase, alias);
+  }
+}
+
+class SiteCloseSetting extends DataClass
+    implements Insertable<SiteCloseSetting> {
+  final String id;
+  final String projectId;
+
+  /// Minutes after midnight by which the day's report is due.
+  final int cutoffMinutes;
+  final String? supervisorId;
+
+  /// Covers the site's report while [backupUntil] (yyyy-mm-dd, inclusive)
+  /// lasts.
+  final String? backupId;
+  final String? backupUntil;
+  final String updatedBy;
+  final DateTime updatedAt;
+  const SiteCloseSetting({
+    required this.id,
+    required this.projectId,
+    required this.cutoffMinutes,
+    this.supervisorId,
+    this.backupId,
+    this.backupUntil,
+    required this.updatedBy,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['cutoff_minutes'] = Variable<int>(cutoffMinutes);
+    if (!nullToAbsent || supervisorId != null) {
+      map['supervisor_id'] = Variable<String>(supervisorId);
+    }
+    if (!nullToAbsent || backupId != null) {
+      map['backup_id'] = Variable<String>(backupId);
+    }
+    if (!nullToAbsent || backupUntil != null) {
+      map['backup_until'] = Variable<String>(backupUntil);
+    }
+    map['updated_by'] = Variable<String>(updatedBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  SiteCloseSettingsCompanion toCompanion(bool nullToAbsent) {
+    return SiteCloseSettingsCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      cutoffMinutes: Value(cutoffMinutes),
+      supervisorId: supervisorId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supervisorId),
+      backupId: backupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(backupId),
+      backupUntil: backupUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(backupUntil),
+      updatedBy: Value(updatedBy),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SiteCloseSetting.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SiteCloseSetting(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      cutoffMinutes: serializer.fromJson<int>(json['cutoffMinutes']),
+      supervisorId: serializer.fromJson<String?>(json['supervisorId']),
+      backupId: serializer.fromJson<String?>(json['backupId']),
+      backupUntil: serializer.fromJson<String?>(json['backupUntil']),
+      updatedBy: serializer.fromJson<String>(json['updatedBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'cutoffMinutes': serializer.toJson<int>(cutoffMinutes),
+      'supervisorId': serializer.toJson<String?>(supervisorId),
+      'backupId': serializer.toJson<String?>(backupId),
+      'backupUntil': serializer.toJson<String?>(backupUntil),
+      'updatedBy': serializer.toJson<String>(updatedBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  SiteCloseSetting copyWith({
+    String? id,
+    String? projectId,
+    int? cutoffMinutes,
+    Value<String?> supervisorId = const Value.absent(),
+    Value<String?> backupId = const Value.absent(),
+    Value<String?> backupUntil = const Value.absent(),
+    String? updatedBy,
+    DateTime? updatedAt,
+  }) => SiteCloseSetting(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    cutoffMinutes: cutoffMinutes ?? this.cutoffMinutes,
+    supervisorId: supervisorId.present ? supervisorId.value : this.supervisorId,
+    backupId: backupId.present ? backupId.value : this.backupId,
+    backupUntil: backupUntil.present ? backupUntil.value : this.backupUntil,
+    updatedBy: updatedBy ?? this.updatedBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SiteCloseSetting copyWithCompanion(SiteCloseSettingsCompanion data) {
+    return SiteCloseSetting(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      cutoffMinutes: data.cutoffMinutes.present
+          ? data.cutoffMinutes.value
+          : this.cutoffMinutes,
+      supervisorId: data.supervisorId.present
+          ? data.supervisorId.value
+          : this.supervisorId,
+      backupId: data.backupId.present ? data.backupId.value : this.backupId,
+      backupUntil: data.backupUntil.present
+          ? data.backupUntil.value
+          : this.backupUntil,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SiteCloseSetting(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('cutoffMinutes: $cutoffMinutes, ')
+          ..write('supervisorId: $supervisorId, ')
+          ..write('backupId: $backupId, ')
+          ..write('backupUntil: $backupUntil, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    cutoffMinutes,
+    supervisorId,
+    backupId,
+    backupUntil,
+    updatedBy,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SiteCloseSetting &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.cutoffMinutes == this.cutoffMinutes &&
+          other.supervisorId == this.supervisorId &&
+          other.backupId == this.backupId &&
+          other.backupUntil == this.backupUntil &&
+          other.updatedBy == this.updatedBy &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SiteCloseSettingsCompanion extends UpdateCompanion<SiteCloseSetting> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<int> cutoffMinutes;
+  final Value<String?> supervisorId;
+  final Value<String?> backupId;
+  final Value<String?> backupUntil;
+  final Value<String> updatedBy;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const SiteCloseSettingsCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.cutoffMinutes = const Value.absent(),
+    this.supervisorId = const Value.absent(),
+    this.backupId = const Value.absent(),
+    this.backupUntil = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SiteCloseSettingsCompanion.insert({
+    required String id,
+    required String projectId,
+    this.cutoffMinutes = const Value.absent(),
+    this.supervisorId = const Value.absent(),
+    this.backupId = const Value.absent(),
+    this.backupUntil = const Value.absent(),
+    required String updatedBy,
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       updatedBy = Value(updatedBy);
+  static Insertable<SiteCloseSetting> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<int>? cutoffMinutes,
+    Expression<String>? supervisorId,
+    Expression<String>? backupId,
+    Expression<String>? backupUntil,
+    Expression<String>? updatedBy,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (cutoffMinutes != null) 'cutoff_minutes': cutoffMinutes,
+      if (supervisorId != null) 'supervisor_id': supervisorId,
+      if (backupId != null) 'backup_id': backupId,
+      if (backupUntil != null) 'backup_until': backupUntil,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SiteCloseSettingsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<int>? cutoffMinutes,
+    Value<String?>? supervisorId,
+    Value<String?>? backupId,
+    Value<String?>? backupUntil,
+    Value<String>? updatedBy,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SiteCloseSettingsCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      cutoffMinutes: cutoffMinutes ?? this.cutoffMinutes,
+      supervisorId: supervisorId ?? this.supervisorId,
+      backupId: backupId ?? this.backupId,
+      backupUntil: backupUntil ?? this.backupUntil,
+      updatedBy: updatedBy ?? this.updatedBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (cutoffMinutes.present) {
+      map['cutoff_minutes'] = Variable<int>(cutoffMinutes.value);
+    }
+    if (supervisorId.present) {
+      map['supervisor_id'] = Variable<String>(supervisorId.value);
+    }
+    if (backupId.present) {
+      map['backup_id'] = Variable<String>(backupId.value);
+    }
+    if (backupUntil.present) {
+      map['backup_until'] = Variable<String>(backupUntil.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SiteCloseSettingsCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('cutoffMinutes: $cutoffMinutes, ')
+          ..write('supervisorId: $supervisorId, ')
+          ..write('backupId: $backupId, ')
+          ..write('backupUntil: $backupUntil, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MemberSyncStatusTable extends MemberSyncStatus
+    with TableInfo<$MemberSyncStatusTable, MemberSyncStatusData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MemberSyncStatusTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastSyncedAtMeta = const VerificationMeta(
+    'lastSyncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
+    'last_synced_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pendingMeta = const VerificationMeta(
+    'pending',
+  );
+  @override
+  late final GeneratedColumn<int> pending = GeneratedColumn<int>(
+    'pending',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    userId,
+    companyId,
+    lastSyncedAt,
+    pending,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'member_sync_status';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MemberSyncStatusData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('last_synced_at')) {
+      context.handle(
+        _lastSyncedAtMeta,
+        lastSyncedAt.isAcceptableOrUnknown(
+          data['last_synced_at']!,
+          _lastSyncedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastSyncedAtMeta);
+    }
+    if (data.containsKey('pending')) {
+      context.handle(
+        _pendingMeta,
+        pending.isAcceptableOrUnknown(data['pending']!, _pendingMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {companyId, userId};
+  @override
+  MemberSyncStatusData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MemberSyncStatusData(
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_synced_at'],
+      )!,
+      pending: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pending'],
+      )!,
+    );
+  }
+
+  @override
+  $MemberSyncStatusTable createAlias(String alias) {
+    return $MemberSyncStatusTable(attachedDatabase, alias);
+  }
+}
+
+class MemberSyncStatusData extends DataClass
+    implements Insertable<MemberSyncStatusData> {
+  final String userId;
+  final String companyId;
+  final DateTime lastSyncedAt;
+
+  /// Changes still waiting on that phone when it last synced.
+  final int pending;
+  const MemberSyncStatusData({
+    required this.userId,
+    required this.companyId,
+    required this.lastSyncedAt,
+    required this.pending,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['user_id'] = Variable<String>(userId);
+    map['company_id'] = Variable<String>(companyId);
+    map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
+    map['pending'] = Variable<int>(pending);
+    return map;
+  }
+
+  MemberSyncStatusCompanion toCompanion(bool nullToAbsent) {
+    return MemberSyncStatusCompanion(
+      userId: Value(userId),
+      companyId: Value(companyId),
+      lastSyncedAt: Value(lastSyncedAt),
+      pending: Value(pending),
+    );
+  }
+
+  factory MemberSyncStatusData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MemberSyncStatusData(
+      userId: serializer.fromJson<String>(json['userId']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      lastSyncedAt: serializer.fromJson<DateTime>(json['lastSyncedAt']),
+      pending: serializer.fromJson<int>(json['pending']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'userId': serializer.toJson<String>(userId),
+      'companyId': serializer.toJson<String>(companyId),
+      'lastSyncedAt': serializer.toJson<DateTime>(lastSyncedAt),
+      'pending': serializer.toJson<int>(pending),
+    };
+  }
+
+  MemberSyncStatusData copyWith({
+    String? userId,
+    String? companyId,
+    DateTime? lastSyncedAt,
+    int? pending,
+  }) => MemberSyncStatusData(
+    userId: userId ?? this.userId,
+    companyId: companyId ?? this.companyId,
+    lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+    pending: pending ?? this.pending,
+  );
+  MemberSyncStatusData copyWithCompanion(MemberSyncStatusCompanion data) {
+    return MemberSyncStatusData(
+      userId: data.userId.present ? data.userId.value : this.userId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
+      pending: data.pending.present ? data.pending.value : this.pending,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MemberSyncStatusData(')
+          ..write('userId: $userId, ')
+          ..write('companyId: $companyId, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('pending: $pending')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(userId, companyId, lastSyncedAt, pending);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MemberSyncStatusData &&
+          other.userId == this.userId &&
+          other.companyId == this.companyId &&
+          other.lastSyncedAt == this.lastSyncedAt &&
+          other.pending == this.pending);
+}
+
+class MemberSyncStatusCompanion extends UpdateCompanion<MemberSyncStatusData> {
+  final Value<String> userId;
+  final Value<String> companyId;
+  final Value<DateTime> lastSyncedAt;
+  final Value<int> pending;
+  final Value<int> rowid;
+  const MemberSyncStatusCompanion({
+    this.userId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.pending = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MemberSyncStatusCompanion.insert({
+    required String userId,
+    required String companyId,
+    required DateTime lastSyncedAt,
+    this.pending = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : userId = Value(userId),
+       companyId = Value(companyId),
+       lastSyncedAt = Value(lastSyncedAt);
+  static Insertable<MemberSyncStatusData> custom({
+    Expression<String>? userId,
+    Expression<String>? companyId,
+    Expression<DateTime>? lastSyncedAt,
+    Expression<int>? pending,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (userId != null) 'user_id': userId,
+      if (companyId != null) 'company_id': companyId,
+      if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (pending != null) 'pending': pending,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MemberSyncStatusCompanion copyWith({
+    Value<String>? userId,
+    Value<String>? companyId,
+    Value<DateTime>? lastSyncedAt,
+    Value<int>? pending,
+    Value<int>? rowid,
+  }) {
+    return MemberSyncStatusCompanion(
+      userId: userId ?? this.userId,
+      companyId: companyId ?? this.companyId,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      pending: pending ?? this.pending,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    }
+    if (pending.present) {
+      map['pending'] = Variable<int>(pending.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MemberSyncStatusCompanion(')
+          ..write('userId: $userId, ')
+          ..write('companyId: $companyId, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('pending: $pending, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -32385,6 +34104,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $ApprovalRulesTable approvalRules = $ApprovalRulesTable(this);
   late final $ApprovalStepsTable approvalSteps = $ApprovalStepsTable(this);
+  late final $SiteDayEventsTable siteDayEvents = $SiteDayEventsTable(this);
+  late final $SiteCloseSettingsTable siteCloseSettings =
+      $SiteCloseSettingsTable(this);
+  late final $MemberSyncStatusTable memberSyncStatus = $MemberSyncStatusTable(
+    this,
+  );
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -32445,6 +34170,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     supplierInvoices,
     approvalRules,
     approvalSteps,
+    siteDayEvents,
+    siteCloseSettings,
+    memberSyncStatus,
     syncOutbox,
   ];
 }
@@ -48399,6 +50127,885 @@ typedef $$ApprovalStepsTableProcessedTableManager =
       ApprovalStep,
       PrefetchHooks Function()
     >;
+typedef $$SiteDayEventsTableCreateCompanionBuilder =
+    SiteDayEventsCompanion Function({
+      required String id,
+      required String projectId,
+      required String workDate,
+      required String kind,
+      Value<bool> siteClosed,
+      Value<bool> noDeliveries,
+      Value<bool> noExpenses,
+      Value<String?> reason,
+      Value<String?> note,
+      Value<String?> fingerprint,
+      Value<double?> amount,
+      Value<String?> itemRef,
+      required String recordedBy,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$SiteDayEventsTableUpdateCompanionBuilder =
+    SiteDayEventsCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> workDate,
+      Value<String> kind,
+      Value<bool> siteClosed,
+      Value<bool> noDeliveries,
+      Value<bool> noExpenses,
+      Value<String?> reason,
+      Value<String?> note,
+      Value<String?> fingerprint,
+      Value<double?> amount,
+      Value<String?> itemRef,
+      Value<String> recordedBy,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$SiteDayEventsTableFilterComposer
+    extends Composer<_$AppDatabase, $SiteDayEventsTable> {
+  $$SiteDayEventsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get workDate => $composableBuilder(
+    column: $table.workDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get siteClosed => $composableBuilder(
+    column: $table.siteClosed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get noDeliveries => $composableBuilder(
+    column: $table.noDeliveries,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get noExpenses => $composableBuilder(
+    column: $table.noExpenses,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get itemRef => $composableBuilder(
+    column: $table.itemRef,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SiteDayEventsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SiteDayEventsTable> {
+  $$SiteDayEventsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get workDate => $composableBuilder(
+    column: $table.workDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get siteClosed => $composableBuilder(
+    column: $table.siteClosed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get noDeliveries => $composableBuilder(
+    column: $table.noDeliveries,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get noExpenses => $composableBuilder(
+    column: $table.noExpenses,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get itemRef => $composableBuilder(
+    column: $table.itemRef,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SiteDayEventsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SiteDayEventsTable> {
+  $$SiteDayEventsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get workDate =>
+      $composableBuilder(column: $table.workDate, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<bool> get siteClosed => $composableBuilder(
+    column: $table.siteClosed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get noDeliveries => $composableBuilder(
+    column: $table.noDeliveries,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get noExpenses => $composableBuilder(
+    column: $table.noExpenses,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get itemRef =>
+      $composableBuilder(column: $table.itemRef, builder: (column) => column);
+
+  GeneratedColumn<String> get recordedBy => $composableBuilder(
+    column: $table.recordedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$SiteDayEventsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SiteDayEventsTable,
+          SiteDayEvent,
+          $$SiteDayEventsTableFilterComposer,
+          $$SiteDayEventsTableOrderingComposer,
+          $$SiteDayEventsTableAnnotationComposer,
+          $$SiteDayEventsTableCreateCompanionBuilder,
+          $$SiteDayEventsTableUpdateCompanionBuilder,
+          (
+            SiteDayEvent,
+            BaseReferences<_$AppDatabase, $SiteDayEventsTable, SiteDayEvent>,
+          ),
+          SiteDayEvent,
+          PrefetchHooks Function()
+        > {
+  $$SiteDayEventsTableTableManager(_$AppDatabase db, $SiteDayEventsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SiteDayEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SiteDayEventsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SiteDayEventsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> workDate = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<bool> siteClosed = const Value.absent(),
+                Value<bool> noDeliveries = const Value.absent(),
+                Value<bool> noExpenses = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String?> fingerprint = const Value.absent(),
+                Value<double?> amount = const Value.absent(),
+                Value<String?> itemRef = const Value.absent(),
+                Value<String> recordedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SiteDayEventsCompanion(
+                id: id,
+                projectId: projectId,
+                workDate: workDate,
+                kind: kind,
+                siteClosed: siteClosed,
+                noDeliveries: noDeliveries,
+                noExpenses: noExpenses,
+                reason: reason,
+                note: note,
+                fingerprint: fingerprint,
+                amount: amount,
+                itemRef: itemRef,
+                recordedBy: recordedBy,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String workDate,
+                required String kind,
+                Value<bool> siteClosed = const Value.absent(),
+                Value<bool> noDeliveries = const Value.absent(),
+                Value<bool> noExpenses = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String?> fingerprint = const Value.absent(),
+                Value<double?> amount = const Value.absent(),
+                Value<String?> itemRef = const Value.absent(),
+                required String recordedBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SiteDayEventsCompanion.insert(
+                id: id,
+                projectId: projectId,
+                workDate: workDate,
+                kind: kind,
+                siteClosed: siteClosed,
+                noDeliveries: noDeliveries,
+                noExpenses: noExpenses,
+                reason: reason,
+                note: note,
+                fingerprint: fingerprint,
+                amount: amount,
+                itemRef: itemRef,
+                recordedBy: recordedBy,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SiteDayEventsTable, SiteDayEvent>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SiteDayEventsTable,
+                    SiteDayEvent
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SiteDayEventsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SiteDayEventsTable,
+      SiteDayEvent,
+      $$SiteDayEventsTableFilterComposer,
+      $$SiteDayEventsTableOrderingComposer,
+      $$SiteDayEventsTableAnnotationComposer,
+      $$SiteDayEventsTableCreateCompanionBuilder,
+      $$SiteDayEventsTableUpdateCompanionBuilder,
+      (
+        SiteDayEvent,
+        BaseReferences<_$AppDatabase, $SiteDayEventsTable, SiteDayEvent>,
+      ),
+      SiteDayEvent,
+      PrefetchHooks Function()
+    >;
+typedef $$SiteCloseSettingsTableCreateCompanionBuilder =
+    SiteCloseSettingsCompanion Function({
+      required String id,
+      required String projectId,
+      Value<int> cutoffMinutes,
+      Value<String?> supervisorId,
+      Value<String?> backupId,
+      Value<String?> backupUntil,
+      required String updatedBy,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SiteCloseSettingsTableUpdateCompanionBuilder =
+    SiteCloseSettingsCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<int> cutoffMinutes,
+      Value<String?> supervisorId,
+      Value<String?> backupId,
+      Value<String?> backupUntil,
+      Value<String> updatedBy,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$SiteCloseSettingsTableFilterComposer
+    extends Composer<_$AppDatabase, $SiteCloseSettingsTable> {
+  $$SiteCloseSettingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get cutoffMinutes => $composableBuilder(
+    column: $table.cutoffMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supervisorId => $composableBuilder(
+    column: $table.supervisorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get backupId => $composableBuilder(
+    column: $table.backupId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get backupUntil => $composableBuilder(
+    column: $table.backupUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SiteCloseSettingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SiteCloseSettingsTable> {
+  $$SiteCloseSettingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get cutoffMinutes => $composableBuilder(
+    column: $table.cutoffMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supervisorId => $composableBuilder(
+    column: $table.supervisorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get backupId => $composableBuilder(
+    column: $table.backupId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get backupUntil => $composableBuilder(
+    column: $table.backupUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SiteCloseSettingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SiteCloseSettingsTable> {
+  $$SiteCloseSettingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<int> get cutoffMinutes => $composableBuilder(
+    column: $table.cutoffMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get supervisorId => $composableBuilder(
+    column: $table.supervisorId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get backupId =>
+      $composableBuilder(column: $table.backupId, builder: (column) => column);
+
+  GeneratedColumn<String> get backupUntil => $composableBuilder(
+    column: $table.backupUntil,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SiteCloseSettingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SiteCloseSettingsTable,
+          SiteCloseSetting,
+          $$SiteCloseSettingsTableFilterComposer,
+          $$SiteCloseSettingsTableOrderingComposer,
+          $$SiteCloseSettingsTableAnnotationComposer,
+          $$SiteCloseSettingsTableCreateCompanionBuilder,
+          $$SiteCloseSettingsTableUpdateCompanionBuilder,
+          (
+            SiteCloseSetting,
+            BaseReferences<
+              _$AppDatabase,
+              $SiteCloseSettingsTable,
+              SiteCloseSetting
+            >,
+          ),
+          SiteCloseSetting,
+          PrefetchHooks Function()
+        > {
+  $$SiteCloseSettingsTableTableManager(
+    _$AppDatabase db,
+    $SiteCloseSettingsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SiteCloseSettingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SiteCloseSettingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SiteCloseSettingsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<int> cutoffMinutes = const Value.absent(),
+                Value<String?> supervisorId = const Value.absent(),
+                Value<String?> backupId = const Value.absent(),
+                Value<String?> backupUntil = const Value.absent(),
+                Value<String> updatedBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SiteCloseSettingsCompanion(
+                id: id,
+                projectId: projectId,
+                cutoffMinutes: cutoffMinutes,
+                supervisorId: supervisorId,
+                backupId: backupId,
+                backupUntil: backupUntil,
+                updatedBy: updatedBy,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                Value<int> cutoffMinutes = const Value.absent(),
+                Value<String?> supervisorId = const Value.absent(),
+                Value<String?> backupId = const Value.absent(),
+                Value<String?> backupUntil = const Value.absent(),
+                required String updatedBy,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SiteCloseSettingsCompanion.insert(
+                id: id,
+                projectId: projectId,
+                cutoffMinutes: cutoffMinutes,
+                supervisorId: supervisorId,
+                backupId: backupId,
+                backupUntil: backupUntil,
+                updatedBy: updatedBy,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SiteCloseSettingsTable, SiteCloseSetting>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SiteCloseSettingsTable,
+                    SiteCloseSetting
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SiteCloseSettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SiteCloseSettingsTable,
+      SiteCloseSetting,
+      $$SiteCloseSettingsTableFilterComposer,
+      $$SiteCloseSettingsTableOrderingComposer,
+      $$SiteCloseSettingsTableAnnotationComposer,
+      $$SiteCloseSettingsTableCreateCompanionBuilder,
+      $$SiteCloseSettingsTableUpdateCompanionBuilder,
+      (
+        SiteCloseSetting,
+        BaseReferences<
+          _$AppDatabase,
+          $SiteCloseSettingsTable,
+          SiteCloseSetting
+        >,
+      ),
+      SiteCloseSetting,
+      PrefetchHooks Function()
+    >;
+typedef $$MemberSyncStatusTableCreateCompanionBuilder =
+    MemberSyncStatusCompanion Function({
+      required String userId,
+      required String companyId,
+      required DateTime lastSyncedAt,
+      Value<int> pending,
+      Value<int> rowid,
+    });
+typedef $$MemberSyncStatusTableUpdateCompanionBuilder =
+    MemberSyncStatusCompanion Function({
+      Value<String> userId,
+      Value<String> companyId,
+      Value<DateTime> lastSyncedAt,
+      Value<int> pending,
+      Value<int> rowid,
+    });
+
+class $$MemberSyncStatusTableFilterComposer
+    extends Composer<_$AppDatabase, $MemberSyncStatusTable> {
+  $$MemberSyncStatusTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get pending => $composableBuilder(
+    column: $table.pending,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MemberSyncStatusTableOrderingComposer
+    extends Composer<_$AppDatabase, $MemberSyncStatusTable> {
+  $$MemberSyncStatusTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get pending => $composableBuilder(
+    column: $table.pending,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MemberSyncStatusTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MemberSyncStatusTable> {
+  $$MemberSyncStatusTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get pending =>
+      $composableBuilder(column: $table.pending, builder: (column) => column);
+}
+
+class $$MemberSyncStatusTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MemberSyncStatusTable,
+          MemberSyncStatusData,
+          $$MemberSyncStatusTableFilterComposer,
+          $$MemberSyncStatusTableOrderingComposer,
+          $$MemberSyncStatusTableAnnotationComposer,
+          $$MemberSyncStatusTableCreateCompanionBuilder,
+          $$MemberSyncStatusTableUpdateCompanionBuilder,
+          (
+            MemberSyncStatusData,
+            BaseReferences<
+              _$AppDatabase,
+              $MemberSyncStatusTable,
+              MemberSyncStatusData
+            >,
+          ),
+          MemberSyncStatusData,
+          PrefetchHooks Function()
+        > {
+  $$MemberSyncStatusTableTableManager(
+    _$AppDatabase db,
+    $MemberSyncStatusTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MemberSyncStatusTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MemberSyncStatusTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MemberSyncStatusTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> userId = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<DateTime> lastSyncedAt = const Value.absent(),
+                Value<int> pending = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MemberSyncStatusCompanion(
+                userId: userId,
+                companyId: companyId,
+                lastSyncedAt: lastSyncedAt,
+                pending: pending,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String userId,
+                required String companyId,
+                required DateTime lastSyncedAt,
+                Value<int> pending = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MemberSyncStatusCompanion.insert(
+                userId: userId,
+                companyId: companyId,
+                lastSyncedAt: lastSyncedAt,
+                pending: pending,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MemberSyncStatusTable, MemberSyncStatusData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MemberSyncStatusTable,
+                    MemberSyncStatusData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MemberSyncStatusTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MemberSyncStatusTable,
+      MemberSyncStatusData,
+      $$MemberSyncStatusTableFilterComposer,
+      $$MemberSyncStatusTableOrderingComposer,
+      $$MemberSyncStatusTableAnnotationComposer,
+      $$MemberSyncStatusTableCreateCompanionBuilder,
+      $$MemberSyncStatusTableUpdateCompanionBuilder,
+      (
+        MemberSyncStatusData,
+        BaseReferences<
+          _$AppDatabase,
+          $MemberSyncStatusTable,
+          MemberSyncStatusData
+        >,
+      ),
+      MemberSyncStatusData,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -48778,6 +51385,12 @@ class $AppDatabaseManager {
       $$ApprovalRulesTableTableManager(_db, _db.approvalRules);
   $$ApprovalStepsTableTableManager get approvalSteps =>
       $$ApprovalStepsTableTableManager(_db, _db.approvalSteps);
+  $$SiteDayEventsTableTableManager get siteDayEvents =>
+      $$SiteDayEventsTableTableManager(_db, _db.siteDayEvents);
+  $$SiteCloseSettingsTableTableManager get siteCloseSettings =>
+      $$SiteCloseSettingsTableTableManager(_db, _db.siteCloseSettings);
+  $$MemberSyncStatusTableTableManager get memberSyncStatus =>
+      $$MemberSyncStatusTableTableManager(_db, _db.memberSyncStatus);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }
@@ -49339,4 +51952,30 @@ class ApprovalChainDaoManager {
       $$ApprovalRulesTableTableManager(_db.attachedDatabase, _db.approvalRules);
   $$ApprovalStepsTableTableManager get approvalSteps =>
       $$ApprovalStepsTableTableManager(_db.attachedDatabase, _db.approvalSteps);
+}
+
+mixin _$DayCloseDaoMixin on DatabaseAccessor<AppDatabase> {
+  $SiteDayEventsTable get siteDayEvents => attachedDatabase.siteDayEvents;
+  $SiteCloseSettingsTable get siteCloseSettings =>
+      attachedDatabase.siteCloseSettings;
+  $MemberSyncStatusTable get memberSyncStatus =>
+      attachedDatabase.memberSyncStatus;
+  DayCloseDaoManager get managers => DayCloseDaoManager(this);
+}
+
+class DayCloseDaoManager {
+  final _$DayCloseDaoMixin _db;
+  DayCloseDaoManager(this._db);
+  $$SiteDayEventsTableTableManager get siteDayEvents =>
+      $$SiteDayEventsTableTableManager(_db.attachedDatabase, _db.siteDayEvents);
+  $$SiteCloseSettingsTableTableManager get siteCloseSettings =>
+      $$SiteCloseSettingsTableTableManager(
+        _db.attachedDatabase,
+        _db.siteCloseSettings,
+      );
+  $$MemberSyncStatusTableTableManager get memberSyncStatus =>
+      $$MemberSyncStatusTableTableManager(
+        _db.attachedDatabase,
+        _db.memberSyncStatus,
+      );
 }

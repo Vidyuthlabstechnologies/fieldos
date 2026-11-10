@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/commercial/commercial_rules.dart';
+import 'package:fieldos_mobile/features/daily/day_close_exceptions.dart';
 import 'package:fieldos_mobile/providers.dart';
 
 Future<CommercialData> loadCommercialData(AppDatabase db, String projectId) async {
@@ -55,6 +56,7 @@ final companyExceptionsProvider =
 
 /// Open exceptions across the company, for the badge on Home.
 final openExceptionCountProvider = FutureProvider.autoDispose.family<int, String>((ref, companyId) async {
-  final sites = await ref.watch(companyExceptionsProvider(companyId).future);
+  // With the daily close's missing reports (day_close_exceptions.dart).
+  final sites = await ref.watch(inboxExceptionsProvider(companyId).future);
   return sites.fold<int>(0, (n, s) => n + s.items.where((e) => !e.isResolved).length);
 });
