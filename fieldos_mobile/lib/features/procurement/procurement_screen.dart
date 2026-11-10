@@ -21,6 +21,7 @@ import 'package:fieldos_mobile/features/procurement/purchase_screens.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_tools.dart';
 import 'package:fieldos_mobile/features/procurement/rate_hint.dart';
 import 'package:fieldos_mobile/features/procurement/supplier_statement_screen.dart';
+import 'package:fieldos_mobile/features/procurement/supplier_import.dart';
 import 'package:fieldos_mobile/features/procurement/stock_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
@@ -127,12 +128,14 @@ class _ProcurementViewState extends ConsumerState<ProcurementView>
       );
 }
 
-Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd) => Padding(
+Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd, {VoidCallback? onPaste}) => Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleSmall),
+          Expanded(child: Text(title, style: Theme.of(context).textTheme.titleSmall)),
+          if (onPaste != null)
+            IconButton(icon: const Icon(Icons.playlist_add), tooltip: tr('Paste a list'), onPressed: onPaste),
           IconButton(icon: const Icon(Icons.add), tooltip: tr('Add'), onPressed: onAdd),
         ],
       ),
@@ -165,7 +168,7 @@ class _SuppliersTab extends ConsumerWidget {
     final ledgers = ref.watch(supplierLedgerProvider(companyId)).value ?? const <String, SupplierLedger>{};
     return Column(
       children: [
-        _sectionHeader(context, tr('Suppliers'), () => _add(context, ref)),
+        _sectionHeader(context, tr('Suppliers'), () => _add(context, ref), onPaste: () => _paste(context, ref)),
         Expanded(
           child: suppliers.when(
             data: (rows) => rows.isEmpty
@@ -206,6 +209,57 @@ class _SuppliersTab extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  /// Many suppliers at once, with opening balances (supplier_import.dart).
+  Future<void> _paste(BuildContext context, WidgetRef ref) async {
+    final text = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('Add many suppliers')),
+        content: SizedBox(
+          width: 400,
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(
+                tr('One supplier per line: name, phone, GSTIN, what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.'),
+                style: Theme.of(ctx).textTheme.bodySmall),
+            const SizedBox(height: 8),
+            TextField(
+              controller: text,
+              minLines: 5,
+              maxLines: 12,
+              decoration: const InputDecoration(
+                  hintText: 'Sri Balaji Cement, 9848012345, 36ABCDE1234F1Z5, 1,25,000\nRaju Sand, 15000 advance'),
+            ),
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Add'))),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    final rows = parseSupplierLines(text.text);
+    if (rows.isEmpty) {
+      showSnack(context, tr('No supplier names found. Put one supplier on each line.'), error: true);
+      return;
+    }
+    try {
+      final r = await importSuppliers(ref.read(appDatabaseProvider), companyId, rows);
+      ref.invalidate(suppliersProvider(companyId));
+      ref.invalidate(supplierLedgerProvider(companyId));
+      if (!context.mounted) return;
+      showSnack(
+          context,
+          r.skipped.isEmpty
+              ? trf('Added {n} suppliers.', {'n': r.added.length})
+              : trf('Added {n} suppliers. {m} already on the list were left as they were.',
+                  {'n': r.added.length, 'm': r.skipped.length}));
+    } catch (e, st) {
+      if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
+    }
   }
 
   Future<void> _add(BuildContext context, WidgetRef ref) async {

@@ -2336,6 +2336,17 @@ class $ProjectMembersTable extends ProjectMembers
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _approvalLimitMeta = const VerificationMeta(
+    'approvalLimit',
+  );
+  @override
+  late final GeneratedColumn<double> approvalLimit = GeneratedColumn<double>(
+    'approval_limit',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -2348,13 +2359,27 @@ class $ProjectMembersTable extends ProjectMembers
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     projectId,
     userId,
     role,
+    approvalLimit,
     createdAt,
+    updatedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2397,10 +2422,25 @@ class $ProjectMembersTable extends ProjectMembers
     } else if (isInserting) {
       context.missing(_roleMeta);
     }
+    if (data.containsKey('approval_limit')) {
+      context.handle(
+        _approvalLimitMeta,
+        approvalLimit.isAcceptableOrUnknown(
+          data['approval_limit']!,
+          _approvalLimitMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
     return context;
@@ -2432,9 +2472,17 @@ class $ProjectMembersTable extends ProjectMembers
         DriftSqlType.string,
         data['${effectivePrefix}role'],
       )!,
+      approvalLimit: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}approval_limit'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
       )!,
     );
   }
@@ -2450,13 +2498,17 @@ class ProjectMember extends DataClass implements Insertable<ProjectMember> {
   final String projectId;
   final String userId;
   final String role;
+  final double? approvalLimit;
   final DateTime createdAt;
+  final DateTime updatedAt;
   const ProjectMember({
     required this.id,
     required this.projectId,
     required this.userId,
     required this.role,
+    this.approvalLimit,
     required this.createdAt,
+    required this.updatedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2465,7 +2517,11 @@ class ProjectMember extends DataClass implements Insertable<ProjectMember> {
     map['project_id'] = Variable<String>(projectId);
     map['user_id'] = Variable<String>(userId);
     map['role'] = Variable<String>(role);
+    if (!nullToAbsent || approvalLimit != null) {
+      map['approval_limit'] = Variable<double>(approvalLimit);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
 
@@ -2475,7 +2531,11 @@ class ProjectMember extends DataClass implements Insertable<ProjectMember> {
       projectId: Value(projectId),
       userId: Value(userId),
       role: Value(role),
+      approvalLimit: approvalLimit == null && nullToAbsent
+          ? const Value.absent()
+          : Value(approvalLimit),
       createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
     );
   }
 
@@ -2489,7 +2549,9 @@ class ProjectMember extends DataClass implements Insertable<ProjectMember> {
       projectId: serializer.fromJson<String>(json['projectId']),
       userId: serializer.fromJson<String>(json['userId']),
       role: serializer.fromJson<String>(json['role']),
+      approvalLimit: serializer.fromJson<double?>(json['approvalLimit']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
   @override
@@ -2500,7 +2562,9 @@ class ProjectMember extends DataClass implements Insertable<ProjectMember> {
       'projectId': serializer.toJson<String>(projectId),
       'userId': serializer.toJson<String>(userId),
       'role': serializer.toJson<String>(role),
+      'approvalLimit': serializer.toJson<double?>(approvalLimit),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
 
@@ -2509,13 +2573,19 @@ class ProjectMember extends DataClass implements Insertable<ProjectMember> {
     String? projectId,
     String? userId,
     String? role,
+    Value<double?> approvalLimit = const Value.absent(),
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) => ProjectMember(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
     userId: userId ?? this.userId,
     role: role ?? this.role,
+    approvalLimit: approvalLimit.present
+        ? approvalLimit.value
+        : this.approvalLimit,
     createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
   );
   ProjectMember copyWithCompanion(ProjectMembersCompanion data) {
     return ProjectMember(
@@ -2523,7 +2593,11 @@ class ProjectMember extends DataClass implements Insertable<ProjectMember> {
       projectId: data.projectId.present ? data.projectId.value : this.projectId,
       userId: data.userId.present ? data.userId.value : this.userId,
       role: data.role.present ? data.role.value : this.role,
+      approvalLimit: data.approvalLimit.present
+          ? data.approvalLimit.value
+          : this.approvalLimit,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
 
@@ -2534,13 +2608,23 @@ class ProjectMember extends DataClass implements Insertable<ProjectMember> {
           ..write('projectId: $projectId, ')
           ..write('userId: $userId, ')
           ..write('role: $role, ')
-          ..write('createdAt: $createdAt')
+          ..write('approvalLimit: $approvalLimit, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, projectId, userId, role, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    userId,
+    role,
+    approvalLimit,
+    createdAt,
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2549,7 +2633,9 @@ class ProjectMember extends DataClass implements Insertable<ProjectMember> {
           other.projectId == this.projectId &&
           other.userId == this.userId &&
           other.role == this.role &&
-          other.createdAt == this.createdAt);
+          other.approvalLimit == this.approvalLimit &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
 }
 
 class ProjectMembersCompanion extends UpdateCompanion<ProjectMember> {
@@ -2557,14 +2643,18 @@ class ProjectMembersCompanion extends UpdateCompanion<ProjectMember> {
   final Value<String> projectId;
   final Value<String> userId;
   final Value<String> role;
+  final Value<double?> approvalLimit;
   final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
   final Value<int> rowid;
   const ProjectMembersCompanion({
     this.id = const Value.absent(),
     this.projectId = const Value.absent(),
     this.userId = const Value.absent(),
     this.role = const Value.absent(),
+    this.approvalLimit = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ProjectMembersCompanion.insert({
@@ -2572,7 +2662,9 @@ class ProjectMembersCompanion extends UpdateCompanion<ProjectMember> {
     required String projectId,
     required String userId,
     required String role,
+    this.approvalLimit = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        projectId = Value(projectId),
@@ -2583,7 +2675,9 @@ class ProjectMembersCompanion extends UpdateCompanion<ProjectMember> {
     Expression<String>? projectId,
     Expression<String>? userId,
     Expression<String>? role,
+    Expression<double>? approvalLimit,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2591,7 +2685,9 @@ class ProjectMembersCompanion extends UpdateCompanion<ProjectMember> {
       if (projectId != null) 'project_id': projectId,
       if (userId != null) 'user_id': userId,
       if (role != null) 'role': role,
+      if (approvalLimit != null) 'approval_limit': approvalLimit,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2601,7 +2697,9 @@ class ProjectMembersCompanion extends UpdateCompanion<ProjectMember> {
     Value<String>? projectId,
     Value<String>? userId,
     Value<String>? role,
+    Value<double?>? approvalLimit,
     Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
     Value<int>? rowid,
   }) {
     return ProjectMembersCompanion(
@@ -2609,7 +2707,9 @@ class ProjectMembersCompanion extends UpdateCompanion<ProjectMember> {
       projectId: projectId ?? this.projectId,
       userId: userId ?? this.userId,
       role: role ?? this.role,
+      approvalLimit: approvalLimit ?? this.approvalLimit,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2629,8 +2729,14 @@ class ProjectMembersCompanion extends UpdateCompanion<ProjectMember> {
     if (role.present) {
       map['role'] = Variable<String>(role.value);
     }
+    if (approvalLimit.present) {
+      map['approval_limit'] = Variable<double>(approvalLimit.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -2645,7 +2751,9 @@ class ProjectMembersCompanion extends UpdateCompanion<ProjectMember> {
           ..write('projectId: $projectId, ')
           ..write('userId: $userId, ')
           ..write('role: $role, ')
+          ..write('approvalLimit: $approvalLimit, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -27495,6 +27603,324 @@ class ExceptionActionsCompanion extends UpdateCompanion<ExceptionAction> {
   }
 }
 
+class $SiteAccessTable extends SiteAccess
+    with TableInfo<$SiteAccessTable, SiteAccessData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SiteAccessTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _membersOnlyMeta = const VerificationMeta(
+    'membersOnly',
+  );
+  @override
+  late final GeneratedColumn<bool> membersOnly = GeneratedColumn<bool>(
+    'members_only',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("members_only" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, projectId, membersOnly, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'site_access';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SiteAccessData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('members_only')) {
+      context.handle(
+        _membersOnlyMeta,
+        membersOnly.isAcceptableOrUnknown(
+          data['members_only']!,
+          _membersOnlyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SiteAccessData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SiteAccessData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      membersOnly: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}members_only'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SiteAccessTable createAlias(String alias) {
+    return $SiteAccessTable(attachedDatabase, alias);
+  }
+}
+
+class SiteAccessData extends DataClass implements Insertable<SiteAccessData> {
+  final String id;
+  final String projectId;
+  final bool membersOnly;
+  final DateTime updatedAt;
+  const SiteAccessData({
+    required this.id,
+    required this.projectId,
+    required this.membersOnly,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['members_only'] = Variable<bool>(membersOnly);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  SiteAccessCompanion toCompanion(bool nullToAbsent) {
+    return SiteAccessCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      membersOnly: Value(membersOnly),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SiteAccessData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SiteAccessData(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      membersOnly: serializer.fromJson<bool>(json['membersOnly']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'membersOnly': serializer.toJson<bool>(membersOnly),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  SiteAccessData copyWith({
+    String? id,
+    String? projectId,
+    bool? membersOnly,
+    DateTime? updatedAt,
+  }) => SiteAccessData(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    membersOnly: membersOnly ?? this.membersOnly,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SiteAccessData copyWithCompanion(SiteAccessCompanion data) {
+    return SiteAccessData(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      membersOnly: data.membersOnly.present
+          ? data.membersOnly.value
+          : this.membersOnly,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SiteAccessData(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('membersOnly: $membersOnly, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, projectId, membersOnly, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SiteAccessData &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.membersOnly == this.membersOnly &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SiteAccessCompanion extends UpdateCompanion<SiteAccessData> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<bool> membersOnly;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const SiteAccessCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.membersOnly = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SiteAccessCompanion.insert({
+    required String id,
+    required String projectId,
+    this.membersOnly = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId);
+  static Insertable<SiteAccessData> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<bool>? membersOnly,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (membersOnly != null) 'members_only': membersOnly,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SiteAccessCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<bool>? membersOnly,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SiteAccessCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      membersOnly: membersOnly ?? this.membersOnly,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (membersOnly.present) {
+      map['members_only'] = Variable<bool>(membersOnly.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SiteAccessCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('membersOnly: $membersOnly, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -28087,6 +28513,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ExceptionActionsTable exceptionActions = $ExceptionActionsTable(
     this,
   );
+  late final $SiteAccessTable siteAccess = $SiteAccessTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -28140,6 +28567,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     variationDecisions,
     commercialAttachments,
     exceptionActions,
+    siteAccess,
     syncOutbox,
   ];
 }
@@ -29410,7 +29838,9 @@ typedef $$ProjectMembersTableCreateCompanionBuilder =
       required String projectId,
       required String userId,
       required String role,
+      Value<double?> approvalLimit,
       Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
       Value<int> rowid,
     });
 typedef $$ProjectMembersTableUpdateCompanionBuilder =
@@ -29419,7 +29849,9 @@ typedef $$ProjectMembersTableUpdateCompanionBuilder =
       Value<String> projectId,
       Value<String> userId,
       Value<String> role,
+      Value<double?> approvalLimit,
       Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
       Value<int> rowid,
     });
 
@@ -29452,8 +29884,18 @@ class $$ProjectMembersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get approvalLimit => $composableBuilder(
+    column: $table.approvalLimit,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -29487,8 +29929,18 @@ class $$ProjectMembersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get approvalLimit => $composableBuilder(
+    column: $table.approvalLimit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -29514,8 +29966,16 @@ class $$ProjectMembersTableAnnotationComposer
   GeneratedColumn<String> get role =>
       $composableBuilder(column: $table.role, builder: (column) => column);
 
+  GeneratedColumn<double> get approvalLimit => $composableBuilder(
+    column: $table.approvalLimit,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
 
 class $$ProjectMembersTableTableManager
@@ -29555,14 +30015,18 @@ class $$ProjectMembersTableTableManager
                 Value<String> projectId = const Value.absent(),
                 Value<String> userId = const Value.absent(),
                 Value<String> role = const Value.absent(),
+                Value<double?> approvalLimit = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProjectMembersCompanion(
                 id: id,
                 projectId: projectId,
                 userId: userId,
                 role: role,
+                approvalLimit: approvalLimit,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -29571,14 +30035,18 @@ class $$ProjectMembersTableTableManager
                 required String projectId,
                 required String userId,
                 required String role,
+                Value<double?> approvalLimit = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProjectMembersCompanion.insert(
                 id: id,
                 projectId: projectId,
                 userId: userId,
                 role: role,
+                approvalLimit: approvalLimit,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -41936,6 +42404,198 @@ typedef $$ExceptionActionsTableProcessedTableManager =
       ExceptionAction,
       PrefetchHooks Function()
     >;
+typedef $$SiteAccessTableCreateCompanionBuilder =
+    SiteAccessCompanion Function({
+      required String id,
+      required String projectId,
+      Value<bool> membersOnly,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SiteAccessTableUpdateCompanionBuilder =
+    SiteAccessCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<bool> membersOnly,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$SiteAccessTableFilterComposer
+    extends Composer<_$AppDatabase, $SiteAccessTable> {
+  $$SiteAccessTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get membersOnly => $composableBuilder(
+    column: $table.membersOnly,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SiteAccessTableOrderingComposer
+    extends Composer<_$AppDatabase, $SiteAccessTable> {
+  $$SiteAccessTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get membersOnly => $composableBuilder(
+    column: $table.membersOnly,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SiteAccessTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SiteAccessTable> {
+  $$SiteAccessTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<bool> get membersOnly => $composableBuilder(
+    column: $table.membersOnly,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SiteAccessTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SiteAccessTable,
+          SiteAccessData,
+          $$SiteAccessTableFilterComposer,
+          $$SiteAccessTableOrderingComposer,
+          $$SiteAccessTableAnnotationComposer,
+          $$SiteAccessTableCreateCompanionBuilder,
+          $$SiteAccessTableUpdateCompanionBuilder,
+          (
+            SiteAccessData,
+            BaseReferences<_$AppDatabase, $SiteAccessTable, SiteAccessData>,
+          ),
+          SiteAccessData,
+          PrefetchHooks Function()
+        > {
+  $$SiteAccessTableTableManager(_$AppDatabase db, $SiteAccessTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SiteAccessTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SiteAccessTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SiteAccessTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<bool> membersOnly = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SiteAccessCompanion(
+                id: id,
+                projectId: projectId,
+                membersOnly: membersOnly,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                Value<bool> membersOnly = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SiteAccessCompanion.insert(
+                id: id,
+                projectId: projectId,
+                membersOnly: membersOnly,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SiteAccessTable, SiteAccessData>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SiteAccessTable,
+                    SiteAccessData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SiteAccessTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SiteAccessTable,
+      SiteAccessData,
+      $$SiteAccessTableFilterComposer,
+      $$SiteAccessTableOrderingComposer,
+      $$SiteAccessTableAnnotationComposer,
+      $$SiteAccessTableCreateCompanionBuilder,
+      $$SiteAccessTableUpdateCompanionBuilder,
+      (
+        SiteAccessData,
+        BaseReferences<_$AppDatabase, $SiteAccessTable, SiteAccessData>,
+      ),
+      SiteAccessData,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -42298,6 +42958,8 @@ class $AppDatabaseManager {
       $$CommercialAttachmentsTableTableManager(_db, _db.commercialAttachments);
   $$ExceptionActionsTableTableManager get exceptionActions =>
       $$ExceptionActionsTableTableManager(_db, _db.exceptionActions);
+  $$SiteAccessTableTableManager get siteAccess =>
+      $$SiteAccessTableTableManager(_db, _db.siteAccess);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }
@@ -42780,4 +43442,22 @@ class CommercialDaoManager {
       );
   $$SiteExpensesTableTableManager get siteExpenses =>
       $$SiteExpensesTableTableManager(_db.attachedDatabase, _db.siteExpenses);
+}
+
+mixin _$SiteTeamDaoMixin on DatabaseAccessor<AppDatabase> {
+  $ProjectMembersTable get projectMembers => attachedDatabase.projectMembers;
+  $SiteAccessTable get siteAccess => attachedDatabase.siteAccess;
+  SiteTeamDaoManager get managers => SiteTeamDaoManager(this);
+}
+
+class SiteTeamDaoManager {
+  final _$SiteTeamDaoMixin _db;
+  SiteTeamDaoManager(this._db);
+  $$ProjectMembersTableTableManager get projectMembers =>
+      $$ProjectMembersTableTableManager(
+        _db.attachedDatabase,
+        _db.projectMembers,
+      );
+  $$SiteAccessTableTableManager get siteAccess =>
+      $$SiteAccessTableTableManager(_db.attachedDatabase, _db.siteAccess);
 }

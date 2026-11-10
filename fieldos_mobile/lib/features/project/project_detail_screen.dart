@@ -14,6 +14,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart';
 import 'package:fieldos_mobile/features/commercial/commercial_screens.dart';
+import 'package:fieldos_mobile/features/team/site_team_screen.dart';
 import 'package:fieldos_mobile/features/reports/period_report_screen.dart';
 import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
 import 'package:fieldos_mobile/features/project/dpr_draft_screen.dart';
@@ -162,6 +163,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (_) => CommercialScreen(project: widget.project)));
               }
+              if (v == 'team') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => SiteTeamScreen(project: widget.project)));
+              }
               if (v == 'excel') exportProjectToExcel(context, ref, widget.project);
               if (v == 'notes') {
                 Navigator.of(context).push(MaterialPageRoute(
@@ -189,6 +193,13 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 child: ListTile(
                   leading: const Icon(Icons.handshake_outlined),
                   title: Text(tr('Work orders, variations and cost')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'team',
+                child: ListTile(
+                  leading: const Icon(Icons.groups_outlined),
+                  title: Text(tr('Site team')),
                 ),
               ),
               PopupMenuItem(

@@ -3,6 +3,8 @@
 library;
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/auth/site_roles.dart';
+import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/close/week_close.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet.dart' show weekStart, markDay;
@@ -41,13 +43,21 @@ class CloseNotAllowed implements Exception {
 /// The decisions people make on a week. [role] is the app's role
 /// (owner / manager / member / viewer).
 class CloseActions {
-  CloseActions(this.db, {required this.userId, required this.role});
+  /// [site]: the person's access on this site (their site role and
+  /// approval limit). Without it, the company [role] decides, as before
+  /// site teams existed.
+  CloseActions(this.db, {required this.userId, required this.role, this.site});
   final AppDatabase db;
   final String userId;
   final String role;
+  final SiteAccessFor? site;
 
-  bool get canDecide => Roles.canApprove(role);
-  bool get canFix => Roles.canWrite(role);
+  bool get canDecide => site?.managesSite ?? Roles.canApprove(role);
+  bool get canFix => site?.canWrite ?? Roles.canWrite(role);
+
+  /// Whether this person may approve [item] themselves (its amount is
+  /// within their limit).
+  bool canApprove(CloseItem item) => canDecide && (site?.canApprove((item.amount ?? 0).abs()) ?? true);
 
   void _mustDecide() {
     if (!canDecide) throw const CloseNotAllowed('Only the owner or a project manager can approve or send back.');
@@ -55,6 +65,10 @@ class CloseActions {
 
   Future<CloseReview> approve(WeekClose w, CloseItem item, {double? acceptedQty, String? note, DateTime? now}) {
     _mustDecide();
+    if (!canApprove(item)) {
+      throw CloseNotAllowed('This is above your approval limit of ${rupees(site?.approvalLimit ?? 0)}. '
+          'The owner approves it.');
+    }
     if (acceptedQty != null && acceptedQty < 0) throw ArgumentError('accepted quantity below zero');
     return db.closeDao.record(
       projectId: w.project.id,
@@ -76,7 +90,7 @@ class CloseActions {
   Future<int> approveClean(WeekClose w, {DateTime? now}) async {
     _mustDecide();
     var n = 0;
-    for (final i in w.waiting.where((i) => !i.hasFlags)) {
+    for (final i in w.waiting.where((i) => !i.hasFlags && canApprove(i))) {
       await approve(w, i, now: now);
       n++;
     }
