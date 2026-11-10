@@ -48,6 +48,8 @@ class CloudSyncBootstrap {
     if (!service.isSignedIn) return;
     if (!await _ref.read(cloudLinksProvider).isLinked(company.id)) return;
 
+    // Photos and bills from before attachments synced (1.7.x) go up once.
+    await _ref.read(appDatabaseProvider).queueFilesFromBeforeSync();
     unawaited(_ref.read(notificationServiceProvider).init().catchError((_) {}));
     final trigger = _ref.read(periodicSyncTriggerProvider);
     if (!trigger.isRunning) trigger.start();

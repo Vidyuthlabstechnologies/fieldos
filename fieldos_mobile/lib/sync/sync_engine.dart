@@ -247,6 +247,13 @@ class SyncEngine {
           throw SyncNotAppliedException(
               entry.targetTable, entry.recordId, 'the server refused to delete it (no permission)');
         }
+        final objectPath = fileColumn == null ? null : data[fileColumn] as String?;
+        if (objectPath != null) {
+          // The row is gone; the file behind it is only storage cost now.
+          try {
+            await client.storage.from(filesBucket).remove([objectPath]);
+          } catch (_) {}
+        }
       default:
         throw StateError('Unknown outbox operation: ${entry.operation}');
     }
@@ -320,6 +327,18 @@ class SyncEngine {
     await pull('site_attendance_marks',
         (r) => db.attendanceDao.upsertMarkFromRemote(attendanceMarkFromSupabaseJson(r)));
     await pull('site_notes', (r) => db.noteDao.upsertFromRemote(projectNoteFromSupabaseJson(r)));
+    await pull('dpr_photos', (r) async {
+      final mine = await db.dprDao.photoById(r['id'] as String);
+      if (mine != null && File(mine.photoPath).existsSync()) return;
+      final local = await _downloadFile(r['photo_path'] as String, r['id'] as String);
+      if (local != null) await db.dprDao.upsertPhotoFromRemote(dprPhotoFromSupabaseJson(r, localPath: local));
+    });
+    await pull('expense_attachments', (r) async {
+      final mine = await db.expenseDao.attachmentById(r['id'] as String);
+      if (mine != null && File(mine.filePath).existsSync()) return;
+      final local = await _downloadFile(r['file_path'] as String, r['id'] as String);
+      if (local != null) await db.expenseDao.upsertAttachmentFromRemote(expenseAttachmentFromSupabaseJson(r, localPath: local));
+    });
     await pull('documents', (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
@@ -337,6 +356,24 @@ class SyncEngine {
       await db.documentDao.upsertFromRemote(documentFromSupabaseJson(row, localPath: localFile.path));
     });
   });
+
+  /// Saves a teammate's photo or bill on this phone. A file that can't be
+  /// fetched right now (weak signal) is skipped, not fatal: the row is left
+  /// for the next pull, so one photo never holds up the rest of the sync.
+  Future<String?> _downloadFile(String objectPath, String id) async {
+    final dir = await _resolveDocumentsDirectory();
+    final slash = objectPath.lastIndexOf('/');
+    final name = objectPath.substring(slash + 1).replaceAll(RegExp(r'[^\w.\-]'), '_');
+    final file = File('${dir.path}/synced_${name.isEmpty ? id : name}');
+    if (!file.existsSync()) {
+      try {
+        await file.writeAsBytes(await client.storage.from(filesBucket).download(objectPath));
+      } catch (_) {
+        return null;
+      }
+    }
+    return file.path;
+  }
 
   /// Rows per PostgREST request when pulling. Below the server's default
   /// 1,000-row cap so a full page is never mistaken for the last one.

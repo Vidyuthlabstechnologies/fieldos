@@ -125,8 +125,11 @@ void main() {
       await db.expenseDao.removeAttachment(pdf.id);
       expect((await db.expenseDao.attachmentsFor('e1')).map((a) => a.id), [photo.id]);
       expect(File(pdf.filePath).existsSync(), isFalse);
-      // Bills stay on the phone: nothing about them goes to the cloud.
-      expect((await db.syncOutboxDao.pending()).map((o) => o.targetTable).toSet(), {'site_expenses'});
+      // Bills go to the team too (1.7.x): each add is queued, and taking
+      // the PDF off is queued as a delete.
+      final bills = (await db.syncOutboxDao.pending()).where((o) => o.targetTable == 'expense_attachments');
+      expect(bills.where((o) => o.operation == 'insert'), hasLength(4));
+      expect(bills.where((o) => o.operation == 'delete').map((o) => o.recordId), [pdf.id]);
     });
 
     testWidgets('the expense shows its photo and PDF bills, and says when one is on another phone', (tester) async {

@@ -283,6 +283,43 @@ class AppDatabase extends _$AppDatabase {
   PaymentDao get paymentDao => PaymentDao(this);
   BillDao get billDao => BillDao(this);
   NoteDao get noteDao => NoteDao(this);
+
+  static const filesQueuedKey = 'files_queued_for_sync_v1';
+
+  /// DPR photos and expense bills used to stay on the phone that took them.
+  /// The first time sync runs on a version that sends them, queue every one
+  /// still on disk (once; a replay of one already sent is harmless, see
+  /// SyncEngine.pushPending). Local-only (sample) records stay local.
+  Future<int> queueFilesFromBeforeSync() async {
+    if (await settingsDao.get(filesQueuedKey) != null) return 0;
+    var queued = 0;
+    await transaction(() async {
+      for (final photo in await select(dprPhotos).get()) {
+        final dpr = await dprDao.byId(photo.dprEntryId);
+        if (dpr == null || !File(photo.photoPath).existsSync()) continue;
+        await syncOutboxDao.enqueue(
+          targetTable: 'dpr_photos',
+          recordId: photo.id,
+          operation: 'insert',
+          payloadJson: jsonEncode(dprPhotoToSupabaseJson(photo, projectId: dpr.projectId)),
+        );
+        queued++;
+      }
+      for (final bill in await select(expenseAttachments).get()) {
+        final expense = await expenseDao.byId(bill.expenseId);
+        if (expense == null || !File(bill.filePath).existsSync()) continue;
+        await syncOutboxDao.enqueue(
+          targetTable: 'expense_attachments',
+          recordId: bill.id,
+          operation: 'insert',
+          payloadJson: jsonEncode(expenseAttachmentToSupabaseJson(bill, projectId: expense.projectId)),
+        );
+        queued++;
+      }
+      await settingsDao.set(filesQueuedKey, DateTime.now().toUtc().toIso8601String());
+    });
+    return queued;
+  }
 }
 
 /// Where DPR photos and other local media are stored, relative to the app's
@@ -631,18 +668,47 @@ class DprDao extends DatabaseAccessor<AppDatabase> with _$DprDaoMixin {
   Future<DprEntry?> byId(String id) =>
       (select(dprEntries)..where((d) => d.id.equals(id))).getSingleOrNull();
 
-  Future<void> addPhoto(DprPhotosCompanion companion) =>
-      into(dprPhotos).insert(companion.copyWith(id: Value(_uuid.v4())));
+  /// Adds a photo to a report and queues it (file first, then the row) so
+  /// the rest of the team sees it too.
+  Future<DprPhoto> addPhoto(DprPhotosCompanion companion) => transaction(() async {
+        final row = await into(dprPhotos).insertReturning(companion.copyWith(id: Value(_uuid.v4())));
+        final dpr = await byId(row.dprEntryId);
+        if (dpr != null) {
+          await db.syncOutboxDao.enqueue(
+            targetTable: 'dpr_photos',
+            recordId: row.id,
+            operation: 'insert',
+            payloadJson: jsonEncode(dprPhotoToSupabaseJson(row, projectId: dpr.projectId)),
+          );
+        }
+        return row;
+      });
+
+  /// A teammate's photo, already downloaded to [DprPhotosCompanion.photoPath].
+  Future<void> upsertPhotoFromRemote(DprPhotosCompanion c) => into(dprPhotos).insertOnConflictUpdate(c);
+
+  Future<DprPhoto?> photoById(String id) => (select(dprPhotos)..where((p) => p.id.equals(id))).getSingleOrNull();
 
   Future<List<DprPhoto>> photosFor(String dprEntryId) =>
       (select(dprPhotos)..where((p) => p.dprEntryId.equals(dprEntryId))).get();
 
-  /// Takes a photo off its report and deletes the file from the phone.
-  /// Photos stay on the phone that took them, so there is nothing to sync.
+  /// Takes a photo off its report, for the whole team, and deletes the
+  /// file from the phone.
   Future<void> deletePhoto(String id) async {
     final row = await (select(dprPhotos)..where((p) => p.id.equals(id))).getSingleOrNull();
     if (row == null) return;
-    await (delete(dprPhotos)..where((p) => p.id.equals(id))).go();
+    await transaction(() async {
+      await (delete(dprPhotos)..where((p) => p.id.equals(id))).go();
+      final dpr = await byId(row.dprEntryId);
+      if (dpr != null) {
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'dpr_photos',
+          recordId: row.id,
+          operation: 'delete',
+          payloadJson: jsonEncode({'id': row.id, 'photo_path': dprPhotoStoragePath(dpr.projectId, row)}),
+        );
+      }
+    });
     await _deleteFileQuietly(row.photoPath);
   }
 }
@@ -1217,16 +1283,32 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
 
   Future<void> upsertFromRemote(SiteExpensesCompanion c) => into(siteExpenses).insertOnConflictUpdate(c);
 
-  /// Keeps a bill photo or PDF with an expense, on this phone.
-  Future<ExpenseAttachment> attach(String expenseId, String filePath, {String? mimeType}) async {
-    final row = ExpenseAttachmentsCompanion.insert(
-      id: _uuid.v4(),
-      expenseId: expenseId,
-      filePath: filePath,
-      mimeType: mimeType ?? attachmentMimeType(filePath),
-    );
-    return into(expenseAttachments).insertReturning(row);
-  }
+  /// Keeps a bill photo or PDF with an expense, and queues it (file first,
+  /// then the row) so the office and the rest of the team can open it.
+  Future<ExpenseAttachment> attach(String expenseId, String filePath, {String? mimeType}) => transaction(() async {
+        final row = await into(expenseAttachments).insertReturning(ExpenseAttachmentsCompanion.insert(
+          id: _uuid.v4(),
+          expenseId: expenseId,
+          filePath: filePath,
+          mimeType: mimeType ?? attachmentMimeType(filePath),
+        ));
+        final expense = await byId(expenseId);
+        if (expense != null) {
+          await db.syncOutboxDao.enqueue(
+            targetTable: 'expense_attachments',
+            recordId: row.id,
+            operation: 'insert',
+            payloadJson: jsonEncode(expenseAttachmentToSupabaseJson(row, projectId: expense.projectId)),
+          );
+        }
+        return row;
+      });
+
+  Future<void> upsertAttachmentFromRemote(ExpenseAttachmentsCompanion c) =>
+      into(expenseAttachments).insertOnConflictUpdate(c);
+
+  Future<ExpenseAttachment?> attachmentById(String id) =>
+      (select(expenseAttachments)..where((a) => a.id.equals(id))).getSingleOrNull();
 
   Future<List<ExpenseAttachment>> attachmentsFor(String expenseId) => (select(expenseAttachments)
         ..where((a) => a.expenseId.equals(expenseId))
@@ -1246,11 +1328,23 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     return {for (final r in rows) r.read(expenseAttachments.expenseId)!: r.read(count) ?? 0};
   }
 
-  /// Takes the bill off the expense and deletes its file from the phone.
+  /// Takes the bill off the expense, for the whole team, and deletes its
+  /// file from the phone.
   Future<void> removeAttachment(String id) async {
     final row = await (select(expenseAttachments)..where((a) => a.id.equals(id))).getSingleOrNull();
     if (row == null) return;
-    await (delete(expenseAttachments)..where((a) => a.id.equals(id))).go();
+    await transaction(() async {
+      await (delete(expenseAttachments)..where((a) => a.id.equals(id))).go();
+      final expense = await byId(row.expenseId);
+      if (expense != null) {
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'expense_attachments',
+          recordId: row.id,
+          operation: 'delete',
+          payloadJson: jsonEncode({'id': row.id, 'file_path': expenseBillStoragePath(expense.projectId, row)}),
+        );
+      }
+    });
     await _deleteFileQuietly(row.filePath);
   }
 
