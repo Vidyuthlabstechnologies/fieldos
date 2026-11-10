@@ -20,6 +20,7 @@ import 'package:fieldos_mobile/features/warehouse/warehouse_screen.dart';
 import 'package:fieldos_mobile/features/assistant/assistant_screen.dart';
 import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
+import 'package:fieldos_mobile/features/home/app_update_banner.dart';
 import 'package:fieldos_mobile/features/home/quick_actions.dart';
 import 'package:fieldos_mobile/features/map/site_map_screen.dart';
 import 'package:fieldos_mobile/features/project/new_project_sheet.dart';
@@ -407,6 +408,7 @@ class _ProjectList extends StatelessWidget {
             ),
           ]),
         ),
+        const AppUpdateBanner(),
         // The day's four jobs as big picture buttons, one tap each.
         QuickActions(projects: projects),
         // The day's report: what is still to send (or, for a manager, which

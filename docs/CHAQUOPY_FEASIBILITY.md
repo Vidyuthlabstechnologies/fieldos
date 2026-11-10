@@ -1,5 +1,7 @@
 # Chaquopy Feasibility — Embedding fieldos/ on Android
 
+> **Removed in 1.7.4 (2026-11-11, issue #144).** Nothing in the app called the on-device Python engine: estimation runs on the Dart port (`lib/estimation/estimation_calc.dart`), which `test/estimation_differential_test.dart` still checks against fixtures from the Python reference. Bundling Python 3.13 cost every install a large runtime, started an interpreter on each launch, and kept the app off 32-bit (`armeabi-v7a`) phones because Chaquopy's 3.13 has no 32-bit build. The plugin, `src/main/python/`, `NativeCalcBridge` and its integration test are gone. What follows is the original study, kept for the record.
+
 **Verdict: NO-GO for the "full backend as-is over an on-device HTTP server" scope (§1-4 below,
 unchanged). The narrower "just the calc engine" scope (§5) is a confirmed GO — built, and
 verified end-to-end on a real emulator: `fieldos/estimation_calc.py` runs unmodified on-device

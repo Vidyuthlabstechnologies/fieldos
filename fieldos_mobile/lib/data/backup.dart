@@ -93,6 +93,7 @@ Future<BackupInfo> writeBackup(AppDatabase db, File outFile, {required Directory
   if (copy.existsSync()) copy.deleteSync();
   await db.customStatement('VACUUM INTO ?', [copy.path]);
   try {
+    _stripCredentials(copy);
     final counts = await _countRows(db);
     final files = await _filePaths(db);
     final info = BackupInfo(schemaVersion: db.schemaVersion, madeAt: now ?? DateTime.now(), counts: counts, files: files.length);
@@ -116,6 +117,27 @@ Future<BackupInfo> writeBackup(AppDatabase db, File outFile, {required Directory
     return info;
   } finally {
     if (copy.existsSync()) copy.deleteSync();
+  }
+}
+
+/// Settings rows that are sign-ins, never data: the cloud session holds a
+/// live refresh token, so whoever got a forwarded backup zip would be
+/// signed in to the company's cloud without a password. Left out of every
+/// backup and dropped from every restore; after a restore the person signs
+/// in again.
+const backupCredentialSettings = {'cloud_session'};
+
+void _stripCredentials(File databaseFile) {
+  final raw = sqlite3.open(databaseFile.path);
+  try {
+    final hasSettings = raw.select("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'app_settings'").isNotEmpty;
+    if (!hasSettings) return;
+    final marks = List.filled(backupCredentialSettings.length, '?').join(',');
+    raw.execute('DELETE FROM app_settings WHERE key IN ($marks)', backupCredentialSettings.toList());
+    // Rewrite the file so the deleted value is not left in a free page.
+    raw.execute('VACUUM');
+  } finally {
+    raw.close();
   }
 }
 
@@ -187,6 +209,9 @@ Future<BackupInfo> stageRestore(File backup, {required String databasePath, requ
       restored++;
     }
     await check.repoint(moves);
+    // Backups made before 1.7.4 still carry the sign-in.
+    await check.close();
+    _stripCredentials(staged);
     return BackupInfo(
       schemaVersion: version,
       madeAt: DateTime.parse(manifest['made_at'] as String).toLocal(),

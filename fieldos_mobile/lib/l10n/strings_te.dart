@@ -1458,6 +1458,14 @@ const Map<String, String> stringsTe = {
       'మీ ప్లాన్',
   'This needs a FieldOS server update that is on its way. Your work is safe on the phone; try again in a day or two.':
       'దీనికి FieldOS సర్వర్ అప్‌డేట్ కావాలి, అది త్వరలో వస్తుంది. మీ పని ఫోన్‌లో భద్రంగా ఉంది; ఒకటి రెండు రోజుల్లో మళ్లీ ప్రయత్నించండి.',
+  'Update FieldOS to keep syncing. Everything you enter is saved on this phone and goes up once you update.':
+      'సింక్ కొనసాగడానికి FieldOS‌ను అప్‌డేట్ చేయండి. మీరు నమోదు చేసేదంతా ఈ ఫోన్‌లో సేవ్ అవుతుంది, అప్‌డేట్ చేశాక పైకి వెళ్తుంది.',
+  'A newer FieldOS is needed':
+      'FieldOS కొత్త వెర్షన్ కావాలి',
+  'Update now':
+      'ఇప్పుడే అప్‌డేట్ చేయండి',
+  'Open the App Store and update FieldOS.':
+      'App Store తెరిచి FieldOS‌ను అప్‌డేట్ చేయండి.',
   'Your role in this company does not allow that. Ask the owner.':
       'ఈ కంపెనీలో మీ పాత్రకు దీనికి అనుమతి లేదు. ఓనర్‌ను అడగండి.',
   'Your subscription is on this phone.':

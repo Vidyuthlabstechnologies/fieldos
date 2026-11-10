@@ -2350,6 +2350,14 @@ const Map<String, String> stringsKn = {
       'ಸೈನ್ ಇನ್ ಮಾಡಿ, ಮಾಲೀಕರು ಕೊಟ್ಟ ಕೋಡ್‌ನೊಂದಿಗೆ ನಿಮ್ಮ ಕಂಪನಿಗೆ ಸೇರಿ. ಕಂಪನಿಯ ಎಲ್ಲರೂ ಇದರಲ್ಲಿ ಸೇರಿದ್ದಾರೆ.',
   'Sign in to my company':
       'ನನ್ನ ಕಂಪನಿಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ',
+  'Update FieldOS to keep syncing. Everything you enter is saved on this phone and goes up once you update.':
+      'ಸಿಂಕ್ ಮುಂದುವರಿಯಲು FieldOS ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಿ. ನೀವು ನಮೂದಿಸುವುದೆಲ್ಲವೂ ಈ ಫೋನ್‌ನಲ್ಲಿ ಉಳಿಯುತ್ತದೆ, ಅಪ್‌ಡೇಟ್ ಮಾಡಿದ ನಂತರ ಮೇಲಕ್ಕೆ ಹೋಗುತ್ತದೆ.',
+  'A newer FieldOS is needed':
+      'FieldOS ನ ಹೊಸ ಆವೃತ್ತಿ ಬೇಕು',
+  'Update now':
+      'ಈಗಲೇ ಅಪ್‌ಡೇಟ್ ಮಾಡಿ',
+  'Open the App Store and update FieldOS.':
+      'App Store ತೆರೆದು FieldOS ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಿ.',
   'Your role in this company does not allow that. Ask the owner.':
       'ಈ ಕಂಪನಿಯಲ್ಲಿ ನಿಮ್ಮ ಪಾತ್ರಕ್ಕೆ ಇದಕ್ಕೆ ಅನುಮತಿ ಇಲ್ಲ. ಮಾಲೀಕರನ್ನು ಕೇಳಿ.',
   'Your subscription is on this phone.':

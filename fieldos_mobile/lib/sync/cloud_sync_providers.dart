@@ -16,6 +16,7 @@ import 'package:fieldos_mobile/services/ai_backend.dart';
 import 'package:fieldos_mobile/services/bug_report_service.dart';
 import 'package:fieldos_mobile/services/company_plan.dart';
 import 'package:fieldos_mobile/services/message_report_service.dart';
+import 'app_version_gate.dart';
 import 'cloud_sync_service.dart';
 import 'periodic_sync_trigger.dart';
 import 'sync_config.dart';
@@ -55,8 +56,27 @@ final aiBackendProvider = Provider<AiBackend>((ref) => SupabaseAiBackend(
       subscriberId: () => ref.read(billingServiceProvider).customerId(),
     ));
 
+/// The server's minimum app build (issue #146), shared by sync and the
+/// home banner.
+final appVersionGateProvider = Provider<AppVersionGate>((ref) {
+  final gate = AppVersionGate(db: ref.watch(appDatabaseProvider), client: () => ref.read(cloudSyncClientProvider));
+  ref.onDispose(gate.dispose);
+  return gate;
+});
+
+/// The "please update" notice for Home, from the answer sync last got (no
+/// network of its own); null when this build is fine.
+final appUpdateRequiredProvider = FutureProvider<AppUpdateRequired?>((ref) {
+  final gate = ref.watch(appVersionGateProvider);
+  final sub = gate.changes.listen((_) => ref.invalidateSelf());
+  ref.onDispose(sub.cancel);
+  return gate.cached();
+});
+
 final cloudSyncEngineProvider = Provider<SyncEngine>((ref) {
-  final engine = SyncEngine(db: ref.watch(appDatabaseProvider), client: ref.watch(cloudSyncClientProvider));
+  final db = ref.watch(appDatabaseProvider);
+  final client = ref.watch(cloudSyncClientProvider);
+  final engine = SyncEngine(db: db, client: client, versionGate: ref.watch(appVersionGateProvider));
   ref.onDispose(engine.dispose);
   return engine;
 });

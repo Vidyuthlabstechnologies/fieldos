@@ -2,7 +2,6 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    id("com.chaquo.python")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -38,30 +37,12 @@ android {
         applicationId = "com.mldynamic.fieldos"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // Chaquopy 17+ requires minSdk >= 24.
+        // Android 7.0+. (Was set for Chaquopy, removed in 1.7.4; kept so no
+        // phone that installs today stops getting updates.)
         minSdk = maxOf(flutter.minSdkVersion, 24)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-
-        ndk {
-            // Chaquopy's Python 3.13 distribution only supports these two
-            // ABIs -- must REPLACE Flutter's own default filter set (which
-            // includes armeabi-v7a), not add to it.
-            abiFilters.clear()
-            abiFilters += listOf("arm64-v8a", "x86_64")
-        }
-    }
-
-    // Only the pure-stdlib estimation_calc.py is bundled here (see
-    // src/main/python/) -- no pip dependencies needed, and none should be
-    // added without re-checking Chaquopy's package repository first (see
-    // docs/CHAQUOPY_FEASIBILITY.md for why pydantic/bcrypt/sqlalchemy etc.
-    // are NOT safe to add here).
-    chaquopy {
-        defaultConfig {
-            version = "3.13"
-        }
     }
 
     signingConfigs {

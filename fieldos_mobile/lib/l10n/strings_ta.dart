@@ -2350,6 +2350,14 @@ const Map<String, String> stringsTa = {
       'உள்நுழைந்து, உரிமையாளர் தந்த குறியீட்டுடன் உங்கள் நிறுவனத்தில் சேருங்கள். நிறுவனத்தில் உள்ள அனைவரும் இதில் அடங்குவர்.',
   'Sign in to my company':
       'என் நிறுவனத்தில் உள்நுழை',
+  'Update FieldOS to keep syncing. Everything you enter is saved on this phone and goes up once you update.':
+      'ஒத்திசைவு தொடர FieldOS-ஐப் புதுப்பிக்கவும். நீங்கள் உள்ளிடுவது அனைத்தும் இந்த ஃபோனில் சேமிக்கப்படும், புதுப்பித்த பிறகு மேலே செல்லும்.',
+  'A newer FieldOS is needed':
+      'FieldOS-இன் புதிய பதிப்பு தேவை',
+  'Update now':
+      'இப்போதே புதுப்பிக்கவும்',
+  'Open the App Store and update FieldOS.':
+      'App Store-ஐத் திறந்து FieldOS-ஐப் புதுப்பிக்கவும்.',
   'Your role in this company does not allow that. Ask the owner.':
       'இந்த நிறுவனத்தில் உங்கள் பங்குக்கு இதற்கு அனுமதி இல்லை. உரிமையாளரிடம் கேளுங்கள்.',
   'Your subscription is on this phone.':

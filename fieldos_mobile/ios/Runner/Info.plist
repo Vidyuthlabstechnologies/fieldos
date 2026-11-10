@@ -43,9 +43,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>FieldOS reads your location once when you punch a worker in or out, or set a site's location, to check the site geofence.</string>
+	<string>FieldOS reads your location once when you check in or out, punch a worker in or out, take a site photo, or set a site's location, to check you are at the site.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>FieldOS uses the camera to take site photos for daily reports, inspections and goods receipts.</string>
+	<string>FieldOS uses the camera for site photos in reports, inspections and goods receipts, and for your attendance selfie when you check in or out.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>FieldOS lets you attach existing site photos to reports.</string>
 	<key>NSMicrophoneUsageDescription</key>
