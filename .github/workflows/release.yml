@@ -57,11 +57,9 @@ jobs:
 
       - run: flutter pub get
 
-      # Real upload-key signing only if the four secrets below are set
-      # (Settings -> Secrets and variables -> Actions on the repo). Without
-      # them this still builds -- debug-signed, for pipeline verification
-      # only -- and the release notes say so explicitly rather than quietly
-      # shipping an unsigned artifact as if it were the real thing.
+      # Upload-key signing from the four secrets below (Settings -> Secrets
+      # and variables -> Actions on the repo). Without them the build step
+      # stops: a debug-signed copy can't go to Play anyway.
       - name: Write release keystore from secrets
         id: keystore
         env:
@@ -77,16 +75,15 @@ jobs:
           EOF
           echo "signed=true" >> "$GITHUB_OUTPUT"
 
-      # The production Supabase project (SUPABASE_URL / SUPABASE_ANON_KEY
-      # repo secrets) is baked in at build time -- see
-      # lib/sync/sync_config.dart. Without them the build still succeeds,
-      # but cloud sync is hidden in the app (offline-only build).
+      # A store build needs the production Supabase project, the RevenueCat
+      # key and the upload key. tool/android/build_store_release.sh refuses
+      # to build without any of them (a build without them installs fine but
+      # runs offline-only or with no paywall), so this job fails instead of
+      # publishing a valid-looking but broken release.
       - name: Build release APK and App Bundle
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          # RevenueCat PUBLIC SDK keys for the subscription. Without them the
-          # build has no paywall at all, so set them before a store release.
           REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
           REVENUECAT_IOS_KEY: ${{ secrets.REVENUECAT_IOS_KEY }}
           # The "Web application" OAuth client id from Google Cloud (public,
@@ -97,10 +94,7 @@ jobs:
           # not secrets). Default: the live site on Netlify.
           PRIVACY_POLICY_URL: ${{ vars.PRIVACY_POLICY_URL || 'https://fieldos-mldynamic.netlify.app/privacy-policy.html' }}
           TERMS_URL: ${{ vars.TERMS_URL || 'https://fieldos-mldynamic.netlify.app/terms-of-use.html' }}
-        run: |
-          DEFINES="--dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY --dart-define=REVENUECAT_ANDROID_KEY=$REVENUECAT_ANDROID_KEY --dart-define=REVENUECAT_IOS_KEY=$REVENUECAT_IOS_KEY --dart-define=PRIVACY_POLICY_URL=$PRIVACY_POLICY_URL --dart-define=TERMS_URL=$TERMS_URL --dart-define=GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID"
-          flutter build apk --release $DEFINES
-          flutter build appbundle --release $DEFINES
+        run: bash tool/android/build_store_release.sh
 
       - uses: actions/upload-artifact@v7
         with:

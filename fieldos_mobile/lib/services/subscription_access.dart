@@ -8,6 +8,7 @@
 library;
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/release_config.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 class SubscriptionState {
@@ -63,8 +64,8 @@ const offlineGrace = Duration(days: 3);
 
 enum Access { allowed, blocked }
 
-/// [billingSetUp] is false in builds without store keys (development, or a
-/// release before payments are configured): nothing is locked then.
+/// [billingSetUp] is false in builds without store keys (development):
+/// nothing is locked then, except in a store build.
 /// [live] is the store's answer, or null when it couldn't be reached.
 /// [lastPaidUntil] is the expiry remembered from the last good answer.
 Access accessFor({
@@ -73,7 +74,9 @@ Access accessFor({
   required DateTime? lastPaidUntil,
   required DateTime now,
 }) {
-  if (!billingSetUp) return Access.allowed;
+  // A store build always has billing (see release_config.dart); one that
+  // somehow lacks it locks rather than giving FieldOS away.
+  if (!billingSetUp) return storeRelease ? Access.blocked : Access.allowed;
   if (live != null) return live.active ? Access.allowed : Access.blocked;
   if (lastPaidUntil != null && now.isBefore(lastPaidUntil.add(offlineGrace))) return Access.allowed;
   return Access.blocked;
