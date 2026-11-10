@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FieldOS owner dashboard</title>
+<meta name="description" content="Every site at a glance for FieldOS owners and project managers.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0b1d35">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/owner/owner.css">
+</head>
+<body class="owner">
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" aria-label="FieldOS home"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M20 58a30 30 0 0 1 60 0z" fill="#f5a524"/><rect x="20" y="51" width="60" height="7" fill="#d6860e"/><rect x="46" y="27" width="8" height="31" rx="4" fill="#d6860e"/><rect x="10" y="57" width="80" height="9" rx="4.5" fill="#f5a524"/><rect x="24" y="73" width="52" height="4" rx="2" fill="#fff"/></svg><span>Field<span class="os">OS</span></span></a>
+    <nav class="nav" aria-label="Account">
+      <span id="who" class="who" hidden></span>
+      <button id="sign-out" class="btn btn-sm" type="button" hidden>Sign out</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap owner-main">
+  <section id="setup" class="card" hidden>
+    <h1>Owner dashboard</h1>
+    <p>This copy of the website isn't connected to the FieldOS cloud yet. Whoever deploys it fills in
+      <code>assets/owner/config.js</code>.</p>
+  </section>
+
+  <section id="signin" class="card signin" hidden>
+    <h1>Owner dashboard</h1>
+    <p class="muted">Every site at a glance: money in and out, daily reports, labour, approvals and changes.
+      Read only. Sign in with your FieldOS account.</p>
+    <form id="signin-form" autocomplete="on">
+      <label>Email <input id="email" type="email" required autocomplete="username"></label>
+      <label>Password <input id="password" type="password" required autocomplete="current-password"></label>
+      <button class="btn btn-amber" type="submit">Sign in</button>
+    </form>
+    <p class="or">or</p>
+    <button id="google" class="btn" type="button">Sign in with Google</button>
+    <p id="signin-error" class="error" role="alert" hidden></p>
+    <p class="muted small">Use the same email and password, or Google account, as in the app. Signed in with Apple? Use the app for now.</p>
+  </section>
+
+  <section id="dash" hidden>
+    <div class="dash-head">
+      <div>
+        <h1 id="company-name">Your sites</h1>
+        <p class="muted" id="as-of"></p>
+      </div>
+      <div class="dash-tools">
+        <select id="company" aria-label="Company" hidden></select>
+        <button id="refresh" class="btn btn-sm" type="button">Refresh</button>
+      </div>
+    </div>
+    <div id="totals" class="totals"></div>
+    <div id="sites" class="sites"></div>
+    <p class="muted small">Figures are what each site recorded and synced. Money is the last 30 days; cancelled
+      entries are left out. Changes are corrections and deletes of entries in the last 7 days.</p>
+  </section>
+
+  <p id="status" class="muted" role="status"></p>
+</main>
+
+<script src="assets/owner/config.js"></script>
+<script src="assets/owner/owner.js"></script>
+</body>
+</html>

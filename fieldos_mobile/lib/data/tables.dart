@@ -1526,3 +1526,80 @@ class MemberSyncStatus extends Table {
   @override
   Set<Column<Object>> get primaryKey => {companyId, userId};
 }
+
+/// v36, the site cash book: cash handed to someone on site ([kind] given),
+/// handed back (returned) and counted in their hand (counted). What they
+/// spent is their own cash expenses on the site, so it is never stored
+/// twice. Entries are only cancelled ([voided]), never changed. Synced as
+/// site_cash_moves (20261111100000_site_cash_book.sql).
+class CashMoves extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// The person holding the cash (a user id, like recordedBy).
+  TextColumn get holderId => text().withLength(min: 1, max: 64)();
+
+  /// given | returned | counted
+  TextColumn get kind => text().withLength(min: 1, max: 10)();
+
+  /// For a count, the cash found in hand (may be 0).
+  RealColumn get amount => real()();
+
+  /// yyyy-mm-dd
+  TextColumn get movedOn => text().withLength(min: 10, max: 10)();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get voided => boolean().withDefault(const Constant(false))();
+  TextColumn get voidReason => text().withLength(max: 200).nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// v37, progress by block and floor for the RERA quarterly report. Each
+/// update is a new row; the latest on or before a date is the progress
+/// then. Synced as site_floor_progress (20261111110000_floor_progress.sql).
+class FloorProgress extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get block => text().withLength(min: 1, max: 60)();
+  TextColumn get floor => text().withLength(min: 1, max: 30)();
+
+  /// not_started | excavation | foundation | plinth | columns | slab |
+  /// masonry | plastering | flooring | finishing | complete
+  TextColumn get stage => text().withLength(min: 1, max: 20)();
+  IntColumn get pct => integer()();
+
+  /// yyyy-mm-dd
+  TextColumn get asOf => text().withLength(min: 10, max: 10)();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// v38, change history: the row as it was (and became) each time an
+/// expense, payment, receipt, usage, bill, punch, supplier invoice or work
+/// measurement was changed or deleted, and who did it. Written only by the
+/// server (20261111120000_entry_history.sql) and pulled; never pushed.
+class EntryHistory extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// The server table, e.g. site_expenses.
+  TextColumn get sourceTable => text().withLength(min: 1, max: 60)();
+  TextColumn get rowId => text().withLength(min: 1, max: 36)();
+
+  /// update | delete
+  TextColumn get op => text().withLength(min: 1, max: 10)();
+  TextColumn get oldJson => text()();
+  TextColumn get newJson => text().nullable()();
+  TextColumn get changedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get changedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

@@ -7,6 +7,7 @@ import 'package:fieldos_mobile/l10n/strings_commercial_te.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_te.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_te.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_te.dart';
+import 'package:fieldos_mobile/l10n/strings_proof_te.dart';
 
 const Map<String, String> stringsTe = {
   'Try again': 'మళ్ళీ ప్రయత్నించండి',
@@ -2391,4 +2392,5 @@ const Map<String, String> stringsTe = {
   ...crmTe,
   ...warehouseTe,
   ...dailyTe,
+  ...proofTe,
 };

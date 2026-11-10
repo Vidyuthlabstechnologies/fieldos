@@ -1922,3 +1922,79 @@ MemberSyncStatusCompanion memberSyncStatusFromSupabaseJson(Map<String, dynamic> 
       lastSyncedAt: _localTs(row['last_synced_at'])!,
       pending: Value((row['pending_count'] as num?)?.toInt() ?? 0),
     );
+
+// --- Site cash book (app schema v36, 20261111100000_site_cash_book.sql)
+
+Map<String, dynamic> cashMoveToSupabaseJson(CashMove c) => {
+      'id': c.id,
+      'project_id': c.projectId,
+      'holder_id': c.holderId,
+      'kind': c.kind,
+      'amount': c.amount,
+      'moved_on': c.movedOn,
+      'note': c.note,
+      'recorded_by': c.recordedBy,
+      'created_at': _timestamp(c.createdAt.toUtc()),
+      'voided': c.voided,
+      'void_reason': c.voidReason,
+    };
+
+CashMovesCompanion cashMoveFromSupabaseJson(Map<String, dynamic> row) => CashMovesCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      holderId: row['holder_id'] as String,
+      kind: row['kind'] as String,
+      amount: (row['amount'] as num).toDouble(),
+      movedOn: (row['moved_on'] as String).substring(0, 10),
+      note: Value(row['note'] as String?),
+      recordedBy: row['recorded_by'] as String,
+      createdAt: row['created_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['created_at'] as String).toLocal()),
+      voided: Value(row['voided'] as bool? ?? false),
+      voidReason: Value(row['void_reason'] as String?),
+    );
+
+// --- Floor progress for the RERA report (app schema v37, 20261111110000_floor_progress.sql)
+
+Map<String, dynamic> floorProgressToSupabaseJson(FloorProgressData f) => {
+      'id': f.id,
+      'project_id': f.projectId,
+      'block': f.block,
+      'floor': f.floor,
+      'stage': f.stage,
+      'pct': f.pct,
+      'as_of': f.asOf,
+      'note': f.note,
+      'recorded_by': f.recordedBy,
+      'created_at': _timestamp(f.createdAt.toUtc()),
+    };
+
+FloorProgressCompanion floorProgressFromSupabaseJson(Map<String, dynamic> row) => FloorProgressCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      block: row['block'] as String,
+      floor: row['floor'] as String,
+      stage: row['stage'] as String,
+      pct: (row['pct'] as num).toInt(),
+      asOf: (row['as_of'] as String).substring(0, 10),
+      note: Value(row['note'] as String?),
+      recordedBy: row['recorded_by'] as String,
+      createdAt: row['created_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['created_at'] as String).toLocal()),
+    );
+
+// --- Change history (app schema v38, 20261111120000_entry_history.sql), pulled only
+
+EntryHistoryCompanion entryHistoryFromSupabaseJson(Map<String, dynamic> row) => EntryHistoryCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      sourceTable: row['table_name'] as String,
+      rowId: row['row_id'] as String,
+      op: row['op'] as String,
+      oldJson: jsonEncode(row['old_row']),
+      newJson: Value(row['new_row'] == null ? null : jsonEncode(row['new_row'])),
+      changedBy: Value(row['changed_by'] as String?),
+      changedAt: DateTime.parse(row['changed_at'] as String).toLocal(),
+    );
