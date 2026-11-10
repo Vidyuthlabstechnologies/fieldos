@@ -2749,4 +2749,6 @@ const Map<String, String> stringsKn = {
       'ಪರಿಸರ',
   'Final':
       'ಅಂತಿಮ',
+  'V-{n} (provisional)':
+      'V-{n} (ತಾತ್ಕಾಲಿಕ)',
 };

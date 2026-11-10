@@ -55,6 +55,7 @@ else
 fi
 
 args=(build ipa --release
+  "--dart-define=FIELDOS_STORE_RELEASE=true"
   "--dart-define=SUPABASE_URL=$SUPABASE_URL"
   "--dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
   "--dart-define=REVENUECAT_IOS_KEY=$REVENUECAT_IOS_KEY"

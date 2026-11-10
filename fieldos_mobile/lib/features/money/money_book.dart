@@ -12,6 +12,7 @@ library;
 import 'dart:convert';
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 /// The categories every company starts with.
 const defaultExpenseCategories = ['Material', 'Labour', 'Transport', 'Equipment hire', 'Food & tea', 'Fuel', 'Other'];
@@ -52,7 +53,10 @@ GstSplit gstSplit(double total, double ratePct, {bool interState = false}) {
 double withGst(double beforeGst, double ratePct) => _round2(beforeGst * (100 + ratePct) / 100);
 
 /// "V-12", as printed on the voucher and shown in the list.
-String voucherLabel(int? n) => n == null ? '' : 'V-$n';
+/// [provisional]: the phone's own number for an entry the server has not
+/// numbered yet (see ExpenseDao.nextVoucherNo); it can still change.
+String voucherLabel(int? n, {bool provisional = false}) =>
+    n == null ? '' : (provisional ? trf('V-{n} (provisional)', {'n': n}) : 'V-$n');
 
 enum MoneyPeriod { all, thisWeek, thisMonth, lastMonth, custom }
 

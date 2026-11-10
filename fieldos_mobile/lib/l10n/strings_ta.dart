@@ -2749,4 +2749,6 @@ const Map<String, String> stringsTa = {
       'சுற்றுச்சூழல்',
   'Final':
       'இறுதி',
+  'V-{n} (provisional)':
+      'V-{n} (தற்காலிகம்)',
 };

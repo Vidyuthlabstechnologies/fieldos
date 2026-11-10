@@ -10,7 +10,7 @@ Everything needed to publish `fieldos_mobile/` on Google Play. Items marked
 |---|---|---|
 | 1 | Create the production Supabase project (free plan is fine), then add repo secrets `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD`, and run the **supabase-deploy** workflow from the Actions tab; it applies every migration. In **Authentication → Sign In / Providers → Email**, turn "Confirm email" off for launch: Supabase's built-in mailer sends only a few emails an hour, and company data is already gated by the join code. Turn it back on once custom SMTP is set up. | **(you)** |
 | 1b | **Setting secrets:** on a personal GitHub repo only the repository owner's account can add or see Actions secrets; a collaborator with write access gets a 403, so these steps cannot be delegated. `tools/set_launch_secrets.sh` sets all of them from one local file (`launch-secrets.env`, gitignored; copy `launch-secrets.env.example`). Then anyone can run the **launch-readiness** workflow from the Actions tab: it shows which secrets are set, whether each is the right kind of key (anon and not service_role, RevenueCat public and not secret, keystore opens with the alias and passwords), and what the Supabase project has deployed. It never prints a value. | **(you)** set, anyone checks |
-| 2 | The release workflow bakes `SUPABASE_URL` and `SUPABASE_ANON_KEY` into the build; without them the app ships offline-only and hides Team & sync. | automatic |
+| 2 | Store builds come only from `fieldos_mobile/tool/android/build_store_release.sh` (the release workflow runs it; it also works on any machine with Flutter, no Actions needed). It **refuses to build** without the production `SUPABASE_URL` / `SUPABASE_ANON_KEY`, `REVENUECAT_ANDROID_KEY` (goog_) and the upload key, and it builds with `FIELDOS_STORE_RELEASE=true`, so a copy that still lacks them shows a "built without its setup" screen instead of running offline-only or with no paywall. A signed AAB proves signing only: sync and purchases are checked in section 6 on that same build. | automatic |
 | 3 | Create the upload keystore on your own computer (Android Studio → Build → Generate Signed App Bundle → Create new, or `keytool`), and add the four signing secrets (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ANDROID_STORE_PASSWORD`). Keep the keystore and passwords offline. With Play App Signing (the default for new apps) this is only the upload key, and Play support can reset it if lost. | **(you)** |
 | 4 | The application id is `com.mldynamic.fieldos` (chosen by the owner, `android/app/build.gradle.kts`). It can never change after the first upload. The Kotlin `namespace` stays `com.predictera.fieldos_mobile`; that is internal and never shown. | done |
 | 5 | Publish the privacy policy (section 4) at a public URL, e.g. a published Google Doc or the company website. Play requires the URL. | **(you)** |
@@ -150,6 +150,17 @@ company). Expected rating: Everyone / 3+.
    or wait 5 minutes), A gets a notification.
 6. Kill and reopen both apps: neither asks for the cloud password again.
 7. On A, share a DPR as PDF to WhatsApp and check photos and issues show.
+8. Both phones in flight mode: each records an expense on the same site
+   (both show the same voucher number, marked provisional). Sync A, then B:
+   B's voucher becomes the next number, and both phones show the same
+   numbers. Attach a bill photo on B and a DPR photo on A; after a sync each
+   phone opens the other's photo.
+9. On B, turn flight mode on mid-sync (or kill the app while it says
+   Syncing), then sync again: nothing is duplicated and Team & sync shows
+   nothing waiting.
+10. On this same build: buy the subscription on A, restore it on B's Google
+    account, let a test-card subscription lapse (license testers renew every
+    few minutes), and delete account B from Settings.
 
 ## 7. Subscription: 3-day free trial, then paid
 

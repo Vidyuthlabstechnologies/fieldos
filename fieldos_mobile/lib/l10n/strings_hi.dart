@@ -1858,4 +1858,6 @@ const Map<String, String> stringsHi = {
       'पर्यावरण',
   'Final':
       'अंतिम',
+  'V-{n} (provisional)':
+      'V-{n} (अस्थायी)',
 };
