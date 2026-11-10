@@ -14,6 +14,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/data/backup.dart';
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
 
 import 'tables.dart';
@@ -67,6 +68,15 @@ String? _clip(String? s, int max) {
   Documents,
   Workers,
   ProjectMessages,
+  ReceiptAttachments,
+  CloseReviews,
+  SiteAccess,
+  WorkMeasurements,
+  WorkMeasurementDecisions,
+  BillAllocations,
+  SupplierInvoices,
+  ApprovalRules,
+  ApprovalSteps,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -85,8 +95,11 @@ class AppDatabase extends _$AppDatabase {
                 // Centralised under the app's documents dir, mirroring the
                 // desktop app's app-data layout (fieldos/paths.py).
                 databasePath: () async {
-                  final docs = await getApplicationDocumentsDirectory();
-                  return p.join(docs.path, 'fieldos.sqlite');
+                  final path = await appDatabasePath();
+                  // A restore checked earlier is swapped in before the
+                  // database opens, never while it is open.
+                  applyStagedRestore(path);
+                  return path;
                 },
               ),
             ));
@@ -95,7 +108,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 30;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -211,8 +224,51 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(expenseAttachments);
             await m.createTable(projectNotes);
           }
+          if (from < 15) {
+            await m.createTable(receiptAttachments);
+            await m.createTable(closeReviews);
+            await _moveSlipPhotosOutOfNotes();
+          }
+          // v16 is commercial controls (PR #122). Each step checks what is
+          // there, so the two land in either order.
+          if (from < 17) {
+            await _addColumnIfMissing(m, projectMembers, projectMembers.approvalLimit);
+            // SQLite can't add a column whose default is the current time;
+            // existing rows take their created_at instead.
+            final cols = await customSelect('PRAGMA table_info(project_members)').get();
+            if (!cols.any((r) => r.read<String>('name') == 'updated_at')) {
+              await customStatement('ALTER TABLE project_members ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0');
+              await customStatement('UPDATE project_members SET updated_at = created_at');
+            }
+            await m.createTable(siteAccess);
+          }
+          if (from < 18) {
+            await m.createTable(workMeasurements);
+            await m.createTable(workMeasurementDecisions);
+            await m.createTable(billAllocations);
+            await m.createTable(supplierInvoices);
+          }
+          // v19 to v29 are other work's steps; v30 is approval rules.
+          if (from < 30) {
+            await m.createTable(approvalRules);
+            await m.createTable(approvalSteps);
+          }
         },
       );
+
+  /// Before v15 a delivery photo was kept as `Photo: <path>` in the
+  /// receipt's note. Those become real slips, so they sync like new ones.
+  Future<void> _moveSlipPhotosOutOfNotes() async {
+    for (final r in await select(materialReceipts).get()) {
+      final note = r.notes?.trim() ?? '';
+      if (!note.startsWith('Photo: ')) continue;
+      final path = note.substring('Photo: '.length).trim();
+      if (path.isEmpty || !File(path).existsSync()) continue;
+      await materialDao.attachSlip(r.id, path);
+      await (update(materialReceipts)..where((m) => m.id.equals(r.id)))
+          .write(const MaterialReceiptsCompanion(notes: Value(null)));
+    }
+  }
 
   /// A table made by an earlier step of this same upgrade (createTable
   /// uses today's columns) already has the column.
@@ -283,6 +339,10 @@ class AppDatabase extends _$AppDatabase {
   PaymentDao get paymentDao => PaymentDao(this);
   BillDao get billDao => BillDao(this);
   NoteDao get noteDao => NoteDao(this);
+  CloseDao get closeDao => CloseDao(this);
+  SiteTeamDao get siteTeamDao => SiteTeamDao(this);
+  BillingRecordsDao get billingRecordsDao => BillingRecordsDao(this);
+  ApprovalChainDao get approvalChainDao => ApprovalChainDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -321,6 +381,10 @@ class AppDatabase extends _$AppDatabase {
     return queued;
   }
 }
+
+/// The database file on the phone.
+Future<String> appDatabasePath() async =>
+    p.join((await getApplicationDocumentsDirectory()).path, 'fieldos.sqlite');
 
 /// Where DPR photos and other local media are stored, relative to the app's
 /// documents directory.
@@ -524,6 +588,23 @@ class ProjectDao extends DatabaseAccessor<AppDatabase> with _$ProjectDaoMixin {
         locationLng: Value(lng),
         geofenceRadiusM: Value(radiusM),
       ));
+      final row = await (select(projects)..where((p) => p.id.equals(projectId))).getSingleOrNull();
+      if (row == null) return;
+      await db.syncOutboxDao.enqueue(
+        targetTable: 'projects',
+        recordId: row.id,
+        operation: 'update',
+        payloadJson: jsonEncode(projectToSupabaseJson(row)),
+      );
+    });
+  }
+
+  /// The geofence radius alone, for a site whose location isn't set yet
+  /// (a new site made from a template).
+  Future<void> setGeofenceRadius(String projectId, int radiusM) {
+    if (radiusM <= 0) throw ArgumentError.value(radiusM, 'radiusM');
+    return transaction(() async {
+      await (update(projects)..where((p) => p.id.equals(projectId))).write(ProjectsCompanion(geofenceRadiusM: Value(radiusM)));
       final row = await (select(projects)..where((p) => p.id.equals(projectId))).getSingleOrNull();
       if (row == null) return;
       await db.syncOutboxDao.enqueue(
@@ -1027,12 +1108,15 @@ class PurchaseDao extends DatabaseAccessor<AppDatabase> with _$PurchaseDaoMixin 
   /// closes it, as one step (audit P1): a receipt without its closure left
   /// a delivered order showing as still due. Idempotent on the receipt id,
   /// so a repeated submit doesn't count the delivery twice.
+  /// [slipPath]: the delivery slip photo, kept with the receipt in the
+  /// same step so a receipt never syncs without the slip it was taken with.
   Future<MaterialReceipt> receiveAgainstOrder(String orderId, MaterialReceiptsCompanion receipt,
-          {required bool closeOrder}) =>
+          {required bool closeOrder, String? slipPath}) =>
       transaction(() async {
         final id = receipt.id.present ? receipt.id.value : _uuid.v4();
         final already = await (select(db.materialReceipts)..where((m) => m.id.equals(id))).getSingleOrNull();
         final row = already ?? await db.materialDao.createReceipt(receipt.copyWith(id: Value(id), poId: Value(orderId)));
+        if (already == null && slipPath != null) await db.materialDao.attachSlip(row.id, slipPath);
         if (closeOrder) {
           final order = await (select(purchaseOrders)..where((o) => o.id.equals(orderId))).getSingleOrNull();
           if (order != null && order.status != 'delivered') await setOrderStatus(orderId, 'delivered');
@@ -1048,7 +1132,7 @@ class PurchaseDao extends DatabaseAccessor<AppDatabase> with _$PurchaseDaoMixin 
       into(purchaseOrders).insertOnConflictUpdate(companion);
 }
 
-@DriftAccessor(tables: [MaterialReceipts, MaterialUsage])
+@DriftAccessor(tables: [MaterialReceipts, MaterialUsage, ReceiptAttachments])
 class MaterialDao extends DatabaseAccessor<AppDatabase> with _$MaterialDaoMixin {
   MaterialDao(super.db);
 
@@ -1089,6 +1173,55 @@ class MaterialDao extends DatabaseAccessor<AppDatabase> with _$MaterialDaoMixin 
       (select(materialUsage)..where((m) => m.projectId.equals(projectId))).get();
 
   Future<void> upsertReceiptFromRemote(MaterialReceiptsCompanion c) => into(materialReceipts).insertOnConflictUpdate(c);
+
+  Future<MaterialReceipt?> receiptById(String id) =>
+      (select(materialReceipts)..where((m) => m.id.equals(id))).getSingleOrNull();
+
+  /// Keeps the delivery slip photo with a receipt and queues it (file
+  /// first, then the row) so the manager approving it sees the slip.
+  Future<ReceiptAttachment> attachSlip(String receiptId, String filePath, {String? mimeType}) => transaction(() async {
+        final row = await into(receiptAttachments).insertReturning(ReceiptAttachmentsCompanion.insert(
+          id: _uuid.v4(),
+          receiptId: receiptId,
+          filePath: filePath,
+          mimeType: mimeType ?? attachmentMimeType(filePath),
+        ));
+        final receipt = await receiptById(receiptId);
+        if (receipt != null) {
+          await db.syncOutboxDao.enqueue(
+            targetTable: 'site_receipt_attachments',
+            recordId: row.id,
+            operation: 'insert',
+            payloadJson: jsonEncode(receiptAttachmentToSupabaseJson(row, projectId: receipt.projectId)),
+          );
+        }
+        return row;
+      });
+
+  Future<ReceiptAttachment?> slipById(String id) =>
+      (select(receiptAttachments)..where((a) => a.id.equals(id))).getSingleOrNull();
+
+  Future<List<ReceiptAttachment>> slipsFor(String receiptId) => (select(receiptAttachments)
+        ..where((a) => a.receiptId.equals(receiptId))
+        ..orderBy([(a) => OrderingTerm.asc(a.createdAt)]))
+      .get();
+
+  /// Every slip of the site's receipts, by receipt id.
+  Future<Map<String, List<ReceiptAttachment>>> slipsForProject(String projectId) async {
+    final rows = await (select(receiptAttachments).join(
+            [innerJoin(materialReceipts, materialReceipts.id.equalsExp(receiptAttachments.receiptId))])
+          ..where(materialReceipts.projectId.equals(projectId))
+          ..orderBy([OrderingTerm.asc(receiptAttachments.createdAt)]))
+        .get();
+    final out = <String, List<ReceiptAttachment>>{};
+    for (final r in rows) {
+      final a = r.readTable(receiptAttachments);
+      (out[a.receiptId] ??= []).add(a);
+    }
+    return out;
+  }
+
+  Future<void> upsertSlipFromRemote(ReceiptAttachmentsCompanion c) => into(receiptAttachments).insertOnConflictUpdate(c);
   Future<void> upsertUsageFromRemote(MaterialUsageCompanion c) => into(materialUsage).insertOnConflictUpdate(c);
 }
 
@@ -2214,3 +2347,471 @@ class MessageDao extends DatabaseAccessor<AppDatabase> with _$MessageDaoMixin {
             ..orderBy([(m) => OrderingTerm.asc(m.createdAt)]))
           .get();
 }
+
+// ---------------------------------------------------------------------------
+// Weekly site close (v15)
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [CloseReviews])
+class CloseDao extends DatabaseAccessor<AppDatabase> with _$CloseDaoMixin {
+  CloseDao(super.db);
+
+  /// Every decision on a site's week, oldest first. Dates are kept to the
+  /// second, so two decisions in the same second keep the order they were
+  /// written in (rowid); pulls apply teammates' rows in change-log order.
+  Future<List<CloseReview>> forWeek(String projectId, String weekStart) => (select(closeReviews)
+        ..where((r) => r.projectId.equals(projectId) & r.weekStart.equals(weekStart))
+        ..orderBy([(r) => OrderingTerm.asc(r.createdAt), (r) => OrderingTerm.asc(r.rowId)]))
+      .get();
+
+  /// Every decision on the site, oldest first.
+  Future<List<CloseReview>> forProject(String projectId) => (select(closeReviews)
+        ..where((r) => r.projectId.equals(projectId))
+        ..orderBy([(r) => OrderingTerm.asc(r.createdAt), (r) => OrderingTerm.asc(r.rowId)]))
+      .get();
+
+  /// Records one decision. Rows are only ever added: a correction is a new
+  /// row, so the history stays as it happened.
+  Future<CloseReview> record({
+    required String projectId,
+    required String weekStart,
+    required String itemKind,
+    required String itemId,
+    required String decision,
+    required String by,
+    String? note,
+    String? fingerprint,
+    double? amount,
+    double? acceptedQty,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final row = await into(closeReviews).insertReturning(CloseReviewsCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          weekStart: weekStart,
+          itemKind: itemKind,
+          itemId: itemId,
+          decision: decision,
+          note: Value(_clip(note, 300)),
+          fingerprint: Value(_clip(fingerprint, 200)),
+          amount: Value(amount),
+          acceptedQty: Value(acceptedQty),
+          decidedBy: by,
+          createdAt: Value(now ?? DateTime.now()),
+        ));
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'site_close_reviews',
+          recordId: row.id,
+          operation: 'insert',
+          payloadJson: jsonEncode(closeReviewToSupabaseJson(row)),
+        );
+        return row;
+      });
+
+  Future<void> upsertFromRemote(CloseReviewsCompanion c) => into(closeReviews).insertOnConflictUpdate(c);
+}
+
+// ---------------------------------------------------------------------------
+// Site team and access (v17)
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [ProjectMembers, SiteAccess])
+class SiteTeamDao extends DatabaseAccessor<AppDatabase> with _$SiteTeamDaoMixin {
+  SiteTeamDao(super.db);
+
+  Future<List<ProjectMember>> membersFor(String projectId) => (select(projectMembers)
+        ..where((m) => m.projectId.equals(projectId))
+        ..orderBy([(m) => OrderingTerm.asc(m.createdAt)]))
+      .get();
+
+  /// The person's row on the site, if they are on its team.
+  Future<ProjectMember?> memberOf(String projectId, String userId) =>
+      (select(projectMembers)..where((m) => m.projectId.equals(projectId) & m.userId.equals(userId)))
+          .getSingleOrNull();
+
+  /// Every site's team rows for a company's sites, by project id.
+  Future<Map<String, List<ProjectMember>>> membersByProject(Iterable<String> projectIds) async {
+    final ids = projectIds.toList();
+    if (ids.isEmpty) return const {};
+    final rows = await (select(projectMembers)..where((m) => m.projectId.isIn(ids))).get();
+    final out = <String, List<ProjectMember>>{};
+    for (final r in rows) {
+      (out[r.projectId] ??= []).add(r);
+    }
+    return out;
+  }
+
+  /// Adds someone to the site, or changes their role and limit if they
+  /// are on it already.
+  Future<ProjectMember> setMember(
+      {required String projectId, required String userId, required String role, double? approvalLimit, DateTime? now}) {
+    if (!siteRoleValues.contains(role)) throw ArgumentError.value(role, 'role');
+    if (approvalLimit != null && approvalLimit < 0) throw ArgumentError.value(approvalLimit, 'approvalLimit');
+    return transaction(() async {
+      final at = now ?? DateTime.now();
+      final mine = await memberOf(projectId, userId);
+      if (mine == null) {
+        final row = await into(projectMembers).insertReturning(ProjectMembersCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          userId: userId,
+          role: role,
+          approvalLimit: Value(approvalLimit),
+          createdAt: Value(at),
+          updatedAt: Value(at),
+        ));
+        await _queueMember(row, 'insert');
+        return row;
+      }
+      await (update(projectMembers)..where((m) => m.id.equals(mine.id))).write(ProjectMembersCompanion(
+        role: Value(role),
+        approvalLimit: Value(approvalLimit),
+        updatedAt: Value(at),
+      ));
+      final row = await (select(projectMembers)..where((m) => m.id.equals(mine.id))).getSingle();
+      await _queueMember(row, 'update');
+      return row;
+    });
+  }
+
+  Future<void> removeMember(String id) => transaction(() async {
+        final row = await (select(projectMembers)..where((m) => m.id.equals(id))).getSingleOrNull();
+        if (row == null) return;
+        await (delete(projectMembers)..where((m) => m.id.equals(id))).go();
+        await db.syncOutboxDao.enqueue(
+            targetTable: 'project_members', recordId: id, operation: 'delete', payloadJson: jsonEncode({'id': id}));
+      });
+
+  Future<void> _queueMember(ProjectMember row, String operation) => db.syncOutboxDao.enqueue(
+        targetTable: 'project_members',
+        recordId: row.id,
+        operation: operation,
+        payloadJson: jsonEncode(projectMemberToSupabaseJson(row)),
+      );
+
+  Future<bool> isMembersOnly(String projectId) async =>
+      (await (select(siteAccess)..where((a) => a.id.equals(projectId))).getSingleOrNull())?.membersOnly ?? false;
+
+  Future<Set<String>> membersOnlySites(Iterable<String> projectIds) async {
+    final ids = projectIds.toList();
+    if (ids.isEmpty) return const {};
+    final rows = await (select(siteAccess)..where((a) => a.id.isIn(ids) & a.membersOnly.equals(true))).get();
+    return {for (final r in rows) r.id};
+  }
+
+  Future<void> setMembersOnly(String projectId, bool membersOnly, {DateTime? now}) => transaction(() async {
+        final existed = await (select(siteAccess)..where((a) => a.id.equals(projectId))).getSingleOrNull();
+        await into(siteAccess).insertOnConflictUpdate(SiteAccessCompanion.insert(
+          id: projectId,
+          projectId: projectId,
+          membersOnly: Value(membersOnly),
+          updatedAt: Value(now ?? DateTime.now()),
+        ));
+        final row = await (select(siteAccess)..where((a) => a.id.equals(projectId))).getSingle();
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'site_access',
+          recordId: projectId,
+          operation: existed == null ? 'insert' : 'update',
+          payloadJson: jsonEncode(siteAccessToSupabaseJson(row)),
+        );
+      });
+
+  /// One row per person per site: a server row replaces a local one for
+  /// the same person made with another id (both phones added them).
+  Future<void> upsertMemberFromRemote(ProjectMembersCompanion c) => transaction(() async {
+        await (delete(projectMembers)
+              ..where((m) =>
+                  m.projectId.equals(c.projectId.value) & m.userId.equals(c.userId.value) & m.id.equals(c.id.value).not()))
+            .go();
+        await into(projectMembers).insertOnConflictUpdate(c);
+      });
+  Future<void> upsertAccessFromRemote(SiteAccessCompanion c) => into(siteAccess).insertOnConflictUpdate(c);
+}
+
+// ---------------------------------------------------------------------------
+// Measurement to billing, and reconciliation (v18)
+// ---------------------------------------------------------------------------
+
+/// Thrown when an allocation would pay more than the payment has left, or
+/// more than the bill or its retention needs. The server refuses the same.
+class AllocationTooBig implements Exception {
+  const AllocationTooBig(this.message);
+  final String message;
+  @override
+  String toString() => message;
+}
+
+@DriftAccessor(tables: [WorkMeasurements, WorkMeasurementDecisions, BillAllocations, SupplierInvoices, ClientBills, PaymentsReceived])
+class BillingRecordsDao extends DatabaseAccessor<AppDatabase> with _$BillingRecordsDaoMixin {
+  BillingRecordsDao(super.db);
+
+  // Measurement book
+
+  Future<WorkMeasurement> measure({
+    required String projectId,
+    String? costHeadId,
+    required String description,
+    required String unit,
+    double? rate,
+    required double qty,
+    required DateTime on,
+    required String by,
+    String? location,
+    String? note,
+  }) {
+    if (qty == 0 || !qty.isFinite) throw ArgumentError.value(qty, 'qty');
+    if (description.trim().isEmpty || unit.trim().isEmpty) throw ArgumentError('Say what was measured, and its unit.');
+    return transaction(() async {
+      final row = await into(workMeasurements).insertReturning(WorkMeasurementsCompanion.insert(
+        id: _uuid.v4(),
+        projectId: projectId,
+        costHeadId: Value(costHeadId),
+        description: _clip(description.trim(), 200)!,
+        unit: _clip(unit.trim(), 20)!,
+        rate: Value(rate),
+        qty: qty,
+        measuredOn: DateTime(on.year, on.month, on.day),
+        location: Value(_clip(location, 200)),
+        note: Value(_clip(note, 300)),
+        measuredBy: by,
+      ));
+      await db.syncOutboxDao.enqueue(
+          targetTable: 'site_work_measurements',
+          recordId: row.id,
+          operation: 'insert',
+          payloadJson: jsonEncode(workMeasurementToSupabaseJson(row)));
+      return row;
+    });
+  }
+
+  /// Approves (all or part of) a measurement, or rejects it. One decision
+  /// per measurement.
+  Future<WorkMeasurementDecision> decide(String measurementId,
+      {required bool approve, double? approvedQty, required String by, String? note}) {
+    return transaction(() async {
+      final m = await (select(workMeasurements)..where((w) => w.id.equals(measurementId))).getSingle();
+      final existing =
+          await (select(workMeasurementDecisions)..where((d) => d.measurementId.equals(measurementId))).getSingleOrNull();
+      if (existing != null) throw StateError('This measurement has been decided already.');
+      final qty = approve ? (approvedQty ?? m.qty) : null;
+      if (qty != null && (qty.sign != m.qty.sign || qty.abs() > m.qty.abs() + 1e-9)) {
+        throw ArgumentError('The approved quantity must be between zero and what was measured.');
+      }
+      final row = await into(workMeasurementDecisions).insertReturning(WorkMeasurementDecisionsCompanion.insert(
+        id: _uuid.v4(),
+        projectId: m.projectId,
+        measurementId: m.id,
+        decision: approve ? 'approved' : 'rejected',
+        approvedQty: Value(qty),
+        note: Value(_clip(note, 300)),
+        decidedBy: by,
+      ));
+      await db.syncOutboxDao.enqueue(
+          targetTable: 'site_work_measurement_decisions',
+          recordId: row.id,
+          operation: 'insert',
+          payloadJson: jsonEncode(measurementDecisionToSupabaseJson(row)));
+      return row;
+    });
+  }
+
+  Future<List<WorkMeasurement>> measurementsFor(String projectId) => (select(workMeasurements)
+        ..where((m) => m.projectId.equals(projectId))
+        ..orderBy([(m) => OrderingTerm.asc(m.measuredOn), (m) => OrderingTerm.asc(m.createdAt)]))
+      .get();
+
+  Future<Map<String, WorkMeasurementDecision>> decisionsFor(String projectId) async => {
+        for (final d in await (select(workMeasurementDecisions)..where((d) => d.projectId.equals(projectId))).get())
+          d.measurementId: d,
+      };
+
+  // Payments against bills
+
+  Future<List<BillAllocation>> allocationsFor(String projectId) =>
+      (select(billAllocations)..where((a) => a.projectId.equals(projectId))).get();
+
+  /// Puts [amount] of [paymentId] against [billId] (its net amount, or its
+  /// retention). Marks the bill paid when its net amount is covered.
+  Future<BillAllocation> allocate(
+      {required String paymentId, required String billId, String kind = 'bill', required double amount, required String by, String? note}) {
+    if (!(amount > 0)) throw ArgumentError.value(amount, 'amount');
+    if (kind != 'bill' && kind != 'retention') throw ArgumentError.value(kind, 'kind');
+    return transaction(() async {
+      final p = await (select(paymentsReceived)..where((x) => x.id.equals(paymentId))).getSingle();
+      final b = await (select(clientBills)..where((x) => x.id.equals(billId))).getSingle();
+      if (p.projectId != b.projectId) throw ArgumentError('The payment and the bill are on different sites.');
+      if (p.voided) throw const AllocationTooBig('A cancelled payment pays nothing.');
+      final all = await allocationsFor(p.projectId);
+      double used(bool Function(BillAllocation) f) => all.where(f).fold(0.0, (s, a) => s + a.amount);
+      final left = p.amount - used((a) => a.paymentId == paymentId);
+      if (amount > left + 0.005) throw AllocationTooBig('Only ${left.toStringAsFixed(2)} of this payment is left.');
+      final need = kind == 'bill'
+          ? b.netPayable - used((a) => a.billId == billId && a.kind == 'bill')
+          : _round2(b.gross * b.retentionPct / 100) - used((a) => a.billId == billId && a.kind == 'retention');
+      if (amount > need + 0.005) throw AllocationTooBig('Only ${need.toStringAsFixed(2)} is still due on this.');
+      final row = await into(billAllocations).insertReturning(BillAllocationsCompanion.insert(
+        id: _uuid.v4(),
+        projectId: p.projectId,
+        paymentId: paymentId,
+        billId: billId,
+        kind: Value(kind),
+        amount: _round2(amount),
+        note: Value(_clip(note, 300)),
+        createdBy: by,
+      ));
+      await db.syncOutboxDao.enqueue(
+          targetTable: 'site_bill_allocations',
+          recordId: row.id,
+          operation: 'insert',
+          payloadJson: jsonEncode(billAllocationToSupabaseJson(row)));
+      if (kind == 'bill' && need - amount <= 0.005 && b.status != 'paid') await db.billDao.setStatus(billId, 'paid');
+      return row;
+    });
+  }
+
+  /// Takes an allocation back; a bill no longer covered is unpaid again.
+  Future<void> removeAllocation(String id) => transaction(() async {
+        final a = await (select(billAllocations)..where((x) => x.id.equals(id))).getSingleOrNull();
+        if (a == null) return;
+        await (delete(billAllocations)..where((x) => x.id.equals(id))).go();
+        await db.syncOutboxDao.enqueue(
+            targetTable: 'site_bill_allocations', recordId: id, operation: 'delete', payloadJson: jsonEncode({'id': id}));
+        final b = await (select(clientBills)..where((x) => x.id.equals(a.billId))).getSingleOrNull();
+        if (a.kind == 'bill' && b != null && b.status == 'paid') await db.billDao.setStatus(b.id, 'issued');
+      });
+
+  // Supplier invoices
+
+  Future<SupplierInvoice> recordSupplierInvoice(SupplierInvoicesCompanion c) => transaction(() async {
+        final row = await into(supplierInvoices)
+            .insertReturning(c.copyWith(id: c.id.present ? c.id : Value(_uuid.v4())));
+        await db.syncOutboxDao.enqueue(
+            targetTable: 'site_supplier_invoices',
+            recordId: row.id,
+            operation: 'insert',
+            payloadJson: jsonEncode(supplierInvoiceToSupabaseJson(row)));
+        return row;
+      });
+
+  Future<void> voidSupplierInvoice(String id, String reason) {
+    if (reason.trim().isEmpty) throw ArgumentError('Say why the invoice is cancelled.');
+    return transaction(() async {
+      await (update(supplierInvoices)..where((i) => i.id.equals(id)))
+          .write(SupplierInvoicesCompanion(voided: const Value(true), voidReason: Value(_clip(reason.trim(), 200))));
+      final row = await (select(supplierInvoices)..where((i) => i.id.equals(id))).getSingle();
+      await db.syncOutboxDao.enqueue(
+          targetTable: 'site_supplier_invoices',
+          recordId: id,
+          operation: 'update',
+          payloadJson: jsonEncode(supplierInvoiceToSupabaseJson(row)));
+    });
+  }
+
+  Future<List<SupplierInvoice>> supplierInvoicesFor(String projectId) => (select(supplierInvoices)
+        ..where((i) => i.projectId.equals(projectId))
+        ..orderBy([(i) => OrderingTerm.desc(i.invoiceDate), (i) => OrderingTerm.desc(i.createdAt)]))
+      .get();
+
+  Future<void> upsertMeasurementFromRemote(WorkMeasurementsCompanion c) => into(workMeasurements).insertOnConflictUpdate(c);
+  Future<void> upsertDecisionFromRemote(WorkMeasurementDecisionsCompanion c) =>
+      into(workMeasurementDecisions).insertOnConflictUpdate(c);
+  Future<void> upsertAllocationFromRemote(BillAllocationsCompanion c) => into(billAllocations).insertOnConflictUpdate(c);
+  Future<void> upsertSupplierInvoiceFromRemote(SupplierInvoicesCompanion c) =>
+      into(supplierInvoices).insertOnConflictUpdate(c);
+}
+
+double _round2(double v) => (v * 100).roundToDouble() / 100;
+
+/// Multi-level approvals by amount (v30): the owner's rules, and the
+/// signatures on each item. What a chain needs is worked out in
+/// lib/features/approvals/approval_chain.dart.
+@DriftAccessor(tables: [ApprovalRules, ApprovalSteps])
+class ApprovalChainDao extends DatabaseAccessor<AppDatabase> with _$ApprovalChainDaoMixin {
+  ApprovalChainDao(super.db);
+
+  Future<List<ApprovalRule>> rulesFor(String companyId) => (select(approvalRules)
+        ..where((r) => r.companyId.equals(companyId) & r.voided.equals(false))
+        ..orderBy([(r) => OrderingTerm.asc(r.kind), (r) => OrderingTerm.asc(r.aboveAmount)]))
+      .get();
+
+  /// Sets the amount above which [kind] needs [role]; null removes the
+  /// rule. One live rule per kind and level.
+  Future<void> setRule(String companyId, {required String kind, required String role, double? above, required String by}) =>
+      transaction(() async {
+        if (above != null && (above < 0 || !above.isFinite)) throw ArgumentError.value(above, 'above');
+        final live = await (select(approvalRules)
+              ..where((r) =>
+                  r.companyId.equals(companyId) & r.kind.equals(kind) & r.role.equals(role) & r.voided.equals(false)))
+            .get();
+        for (final (i, r) in live.indexed) {
+          final keep = i == 0 && above != null;
+          final row = r.copyWith(aboveAmount: keep ? _round2(above) : r.aboveAmount, voided: !keep, updatedAt: DateTime.now());
+          if (row == r) continue;
+          await update(approvalRules).replace(row);
+          await db.syncOutboxDao.enqueue(
+              targetTable: 'site_approval_rules',
+              recordId: row.id,
+              operation: 'update',
+              payloadJson: jsonEncode(approvalRuleToSupabaseJson(row)));
+        }
+        if (live.isEmpty && above != null) {
+          final row = await into(approvalRules).insertReturning(ApprovalRulesCompanion.insert(
+              id: _uuid.v4(), companyId: companyId, kind: kind, role: role, aboveAmount: _round2(above), createdBy: by));
+          await db.syncOutboxDao.enqueue(
+              targetTable: 'site_approval_rules',
+              recordId: row.id,
+              operation: 'insert',
+              payloadJson: jsonEncode(approvalRuleToSupabaseJson(row)));
+        }
+      });
+
+  Future<List<ApprovalStep>> stepsFor(String projectId) =>
+      (select(approvalSteps)..where((s) => s.projectId.equals(projectId))..orderBy([(s) => OrderingTerm.asc(s.createdAt)])).get();
+
+  Future<List<ApprovalStep>> stepsForItem(String kind, String itemId) => (select(approvalSteps)
+        ..where((s) => s.kind.equals(kind) & s.itemId.equals(itemId))
+        ..orderBy([(s) => OrderingTerm.asc(s.createdAt)]))
+      .get();
+
+  /// Signs [level] on an item. A person signs each level of an item once.
+  Future<ApprovalStep> sign({
+    required String projectId,
+    required String kind,
+    required String itemId,
+    required String level,
+    required bool approve,
+    double? amount,
+    required String by,
+    String? note,
+  }) =>
+      transaction(() async {
+        final mine = await (select(approvalSteps)
+              ..where((s) => s.kind.equals(kind) & s.itemId.equals(itemId) & s.level.equals(level) & s.decidedBy.equals(by)))
+            .getSingleOrNull();
+        if (mine != null) return mine;
+        final row = await into(approvalSteps).insertReturning(ApprovalStepsCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          kind: kind,
+          itemId: itemId,
+          level: level,
+          decision: approve ? 'approved' : 'rejected',
+          amount: Value(amount),
+          note: Value(_clip(note, 300)),
+          decidedBy: by,
+        ));
+        await db.syncOutboxDao.enqueue(
+            targetTable: 'site_approval_steps',
+            recordId: row.id,
+            operation: 'insert',
+            payloadJson: jsonEncode(approvalStepToSupabaseJson(row)));
+        return row;
+      });
+
+  Future<void> upsertRuleFromRemote(ApprovalRulesCompanion c) => into(approvalRules).insertOnConflictUpdate(c);
+  Future<void> upsertStepFromRemote(ApprovalStepsCompanion c) => into(approvalSteps).insertOnConflictUpdate(c);
+}
+
+/// The roles a person can have on one site.
+const siteRoleValues = ['owner', 'project_manager', 'site_engineer', 'accounts', 'storekeeper', 'viewer'];

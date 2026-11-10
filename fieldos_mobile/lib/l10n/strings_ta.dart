@@ -2751,4 +2751,505 @@ const Map<String, String> stringsTa = {
       'இறுதி',
   'V-{n} (provisional)':
       'V-{n} (தற்காலிகம்)',
+  // Weekly site close
+  'A removed entry':
+      'நீக்கப்பட்ட பதிவு',
+  'Advance of {amount} not worked off yet':
+      '{amount} முன்பணம் இன்னும் வேலையில் கழியவில்லை',
+  'Advances not worked off':
+      'கழியாத முன்பணங்கள்',
+  'Approve each site\'s wages, expenses and deliveries for the week.':
+      'ஒவ்வொரு தளத்தின் வார கூலி, செலவுகள், பொருள் வரவுகளை ஒப்புதல் செய்யுங்கள்.',
+  'Approve everything, and get back what was sent back, to close the week.':
+      'வாரத்தை மூட அனைத்தையும் ஒப்புதல் செய்யுங்கள்; திருப்பி அனுப்பியவை சரிசெய்து வர வேண்டும்.',
+  'Approve the {n} with no exceptions':
+      'சிக்கல் இல்லாத {n} ஒப்புதல்',
+  'Approve this delivery':
+      'இந்த வரவை ஒப்புதல் செய்',
+  'Bill':
+      'பில்',
+  'Cancelled entry':
+      'ரத்தான பதிவு',
+  'Changed after approval':
+      'ஒப்புதலுக்குப் பிறகு மாற்றம்',
+  'Changed since close':
+      'மூடிய பின் மாற்றம்',
+  'Close the week':
+      'வாரத்தை மூடு',
+  'Close the week again':
+      'வாரத்தை மீண்டும் மூடு',
+  'Close this week?':
+      'இந்த வாரத்தை மூடவா?',
+  'Closed':
+      'மூடப்பட்டது',
+  'Closed by {who}, {when}':
+      '{who} மூடினார், {when}',
+  'Corrected, review again':
+      'சரிசெய்யப்பட்டது, மீண்டும் பாருங்கள்',
+  'Deliveries':
+      'பொருள் வரவுகள்',
+  'Delivery slip':
+      'டெலிவரி சீட்டு',
+  'Each running site gets a weekly close here: wages, expenses and deliveries to approve.':
+      'இயங்கும் ஒவ்வொரு தளத்தின் வார முடிவும் இங்கே: ஒப்புதலுக்கான கூலி, செலவுகள், வரவுகள்.',
+  'Edited after it was entered':
+      'பதிவுக்குப் பின் திருத்தப்பட்டது',
+  'Enter the quantity accepted.':
+      'ஏற்ற அளவை உள்ளிடுங்கள்.',
+  'Expenses':
+      'செலவுகள்',
+  'Expenses {amount}':
+      'செலவுகள் {amount}',
+  'History':
+      'வரலாறு',
+  'Less than received if some was short or damaged.':
+      'சில குறைவு அல்லது சேதமானால் வந்ததை விடக் குறைவு.',
+  'Mark as fixed':
+      'சரிசெய்ததாகக் குறி',
+  'Marked fixed':
+      'சரிசெய்ததாகக் குறிக்கப்பட்டது',
+  'Material delivered':
+      'வந்த பொருள்',
+  'No attendance recorded':
+      'வருகை பதிவு இல்லை',
+  'No bill photo':
+      'பில் புகைப்படம் இல்லை',
+  'No daily wage set, so wages can\'t be worked out':
+      'தினக் கூலி அமைக்கவில்லை, எனவே கணக்கிட முடியாது',
+  'No decisions yet this week.':
+      'இந்த வாரம் இன்னும் முடிவுகள் இல்லை.',
+  'No delivery slip photo':
+      'டெலிவரி சீட்டு புகைப்படம் இல்லை',
+  'No invoice amount':
+      'இன்வாய்ஸ் தொகை இல்லை',
+  'Not against a purchase order':
+      'எந்த PO-க்கும் எதிராக இல்லை',
+  'Nothing approved yet.':
+      'இன்னும் எதுவும் ஒப்புதல் இல்லை.',
+  'Nothing left to review.':
+      'பார்க்க எதுவும் இல்லை.',
+  'Nothing recorded':
+      'எதுவும் பதிவில்லை',
+  'Nothing sent back.':
+      'எதுவும் திருப்பி அனுப்பவில்லை.',
+  'Nothing was recorded on this site this week.':
+      'இந்த வாரம் இந்தத் தளத்தில் எதுவும் பதிவாகவில்லை.',
+  'Photograph the delivery slip':
+      'டெலிவரி சீட்டை புகைப்படம் எடு',
+  'Punch-out missing on 1 day':
+      '1 நாள் பஞ்ச்-அவுட் இல்லை',
+  'Punch-out missing on {n} days':
+      '{n} நாட்கள் பஞ்ச்-அவுட் இல்லை',
+  'Quantity accepted':
+      'ஏற்ற அளவு',
+  'Ready to close':
+      'மூடத் தயார்',
+  'Reopen the week':
+      'வாரத்தை மீண்டும் திற',
+  'Reopen this week?':
+      'இந்த வாரத்தை மீண்டும் திறக்கவா?',
+  'Report says {n} people, but no attendance':
+      'அறிக்கையில் {n} பேர், ஆனால் வருகை இல்லை',
+  'Send back':
+      'திருப்பி அனுப்பு',
+  'Send back to the site':
+      'தளத்துக்குத் திருப்பி அனுப்பு',
+  'Send the pack to accounts':
+      'தொகுப்பை கணக்குப் பிரிவுக்கு அனுப்பு',
+  'Sent back':
+      'திருப்பி அனுப்பப்பட்டது',
+  'Short by {qty} against the order':
+      'ஆர்டரை விட {qty} குறைவு',
+  'Site expenses':
+      'தளச் செலவுகள்',
+  'Slip':
+      'சீட்டு',
+  'Slip photo attached':
+      'சீட்டு புகைப்படம் இணைக்கப்பட்டது',
+  'The owner or a project manager approves the week. Fix what is sent back to you and mark it fixed.':
+      'உரிமையாளர் அல்லது திட்ட மேலாளர் வாரத்தை ஒப்புதல் செய்வார். உங்களுக்குத் திருப்பி அனுப்பியதைச் சரிசெய்து குறியிடுங்கள்.',
+  'The photo has not reached this phone yet. Sync and try again.':
+      'புகைப்படம் இன்னும் இந்த ஃபோனுக்கு வரவில்லை. ஒத்திசைத்து மீண்டும் முயலுங்கள்.',
+  'This week on site':
+      'இந்த வாரம் தளத்தில்',
+  'To review':
+      'பார்க்க வேண்டும்',
+  'Voucher number not confirmed yet (not synced)':
+      'வவுச்சர் எண் இன்னும் உறுதியாகவில்லை (ஒத்திசைக்கவில்லை)',
+  'Wages':
+      'கூலி',
+  'Wages and advances paid':
+      'கொடுத்த கூலி, முன்பணம்',
+  'Wages earned':
+      'ஈட்டிய கூலி',
+  'Wages still due':
+      'இன்னும் தர வேண்டிய கூலி',
+  'Wages {amount}':
+      'கூலி {amount}',
+  'Week':
+      'வாரம்',
+  'Week closed':
+      'வாரம் மூடப்பட்டது',
+  'Week reopened':
+      'வாரம் மீண்டும் திறக்கப்பட்டது',
+  'Weekly close':
+      'வார முடிவு',
+  'What needs fixing?':
+      'எதைச் சரிசெய்ய வேண்டும்?',
+  'What was done? (optional)':
+      'என்ன செய்யப்பட்டது? (விருப்பம்)',
+  'Why?':
+      'ஏன்?',
+  'due {amount}':
+      'நிலுவை {amount}',
+  'earned {amount}':
+      'ஈட்டியது {amount}',
+  'ordered {qty}':
+      'ஆர்டர் {qty}',
+  '{n} exceptions':
+      '{n} சிக்கல்கள்',
+  '{n} items approved, {amount} in all. Anything changed later comes back here to review.':
+      '{n} உருப்படிகள் ஒப்புதல், மொத்தம் {amount}. பின்னர் மாறினால் மீண்டும் இங்கே வரும்.',
+  '{n} items need a closer look':
+      '{n} உருப்படிகளைக் கவனமாகப் பார்க்க வேண்டும்',
+  '{n} sent back':
+      '{n} திருப்பி அனுப்பப்பட்டன',
+  '{n} to review':
+      '{n} பார்க்க வேண்டும்',
+  '{qty} accepted':
+      '{qty} ஏற்கப்பட்டது',
+  '{qty} more than ordered':
+      'ஆர்டரை விட {qty} அதிகம்',
+  // Site teams, templates, supplier import, all sites
+  'Above your approval limit of {amount}. The owner approves this.':
+      'உங்கள் ஒப்புதல் வரம்பு {amount}-ஐ விட அதிகம். இதை உரிமையாளர் ஒப்புதல் செய்வார்.',
+  'Accounts':
+      'கணக்குகள்',
+  'Add many suppliers':
+      'பல சப்ளையர்களைச் சேர்',
+  'Add person':
+      'நபரைச் சேர்',
+  'Add to this site':
+      'இந்தத் தளத்தில் சேர்',
+  'Added to the site team.':
+      'தளக் குழுவில் சேர்க்கப்பட்டது.',
+  'Added {n} suppliers.':
+      '{n} சப்ளையர்கள் சேர்க்கப்பட்டனர்.',
+  'Added {n} suppliers. {m} already on the list were left as they were.':
+      '{n} சப்ளையர்கள் சேர்க்கப்பட்டனர். ஏற்கனவே பட்டியலில் இருந்த {m} அப்படியே விடப்பட்டன.',
+  'All sites':
+      'அனைத்துத் தளங்கள்',
+  'All {n} sites are up to date.':
+      'அனைத்து {n} தளங்களும் புதுப்பித்த நிலையில் உள்ளன.',
+  'An empty site':
+      'வெற்றுத் தளம்',
+  'Approval limit (₹)':
+      'ஒப்புதல் வரம்பு (₹)',
+  'Approves up to {amount}':
+      '{amount} வரை ஒப்புதல் செய்வார்',
+  'Can see the site, changes nothing.':
+      'தளத்தைப் பார்க்கலாம், எதையும் மாற்ற முடியாது.',
+  'Copies the set-up only. Nothing that happened on that site comes across.':
+      'அமைப்பு மட்டுமே நகலெடுக்கப்படும். அந்தத் தளத்தில் நடந்தது எதுவும் வராது.',
+  'Enter the limit in rupees, or leave it empty for no limit.':
+      'வரம்பை ரூபாயில் உள்ளிடுங்கள், வரம்பு வேண்டாமெனில் காலியாக விடுங்கள்.',
+  'Estimate items and rates':
+      'மதிப்பீட்டு உருப்படிகள், விலைகள்',
+  'Everyone in the company is already on this site.':
+      'நிறுவனத்தில் உள்ள அனைவரும் ஏற்கனவே இந்தத் தளத்தில் உள்ளனர்.',
+  'Everyone in the company sees this site.':
+      'நிறுவனத்தில் அனைவரும் இந்தத் தளத்தைப் பார்ப்பார்கள்.',
+  'Everyone in the company works here with their company role. Add people to give them a site role or an approval limit.':
+      'நிறுவனத்தில் அனைவரும் இங்கே தங்கள் நிறுவனப் பங்கில் வேலை செய்கிறார்கள். தளப் பங்கு அல்லது ஒப்புதல் வரம்பு கொடுக்க நபர்களைச் சேர்க்கவும்.',
+  'Everything on this site.':
+      'இந்தத் தளத்தில் அனைத்தும்.',
+  'Hidden from the rest of the company. The company\'s owners and managers still see it.':
+      'நிறுவனத்தின் மற்றவர்களுக்குத் தெரியாது. நிறுவன உரிமையாளர்களும் மேலாளர்களும் பார்ப்பார்கள்.',
+  'In the weekly close they approve items up to this. Leave empty for no limit.':
+      'வார முடிவில் இதுவரை உள்ள உருப்படிகளை அவர்கள் ஒப்புதல் செய்வார்கள். வரம்பு வேண்டாமெனில் காலியாக விடுங்கள்.',
+  'Last week not closed':
+      'கடந்த வாரம் மூடப்படவில்லை',
+  'No approval limit':
+      'ஒப்புதல் வரம்பு இல்லை',
+  'No one is listed yet':
+      'இன்னும் யாரும் பட்டியலில் இல்லை',
+  'No report on {day}':
+      '{day} அன்று அறிக்கை இல்லை',
+  'No supplier names found. Put one supplier on each line.':
+      'சப்ளையர் பெயர்கள் இல்லை. ஒவ்வொரு வரியிலும் ஒரு சப்ளையர் எழுதுங்கள்.',
+  'On this site':
+      'இந்தத் தளத்தில்',
+  'One supplier per line: name, phone, GSTIN, what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.':
+      'ஒரு வரிக்கு ஒரு சப்ளையர்: பெயர், தொலைபேசி, GSTIN, இன்று நீங்கள் அவர்களுக்குத் தர வேண்டியது. பெயர் மட்டுமே தேவை. உங்கள் பணம் அவர்களிடம் இருந்தால் தொகைக்குப் பின் "advance" எழுதுங்கள்.',
+  'Only this team sees the site':
+      'இந்தக் குழு மட்டுமே தளத்தைப் பார்க்கும்',
+  'Paste a list':
+      'பட்டியலை ஒட்டு',
+  'Receives material and keeps the stock.':
+      'பொருளைப் பெற்று இருப்பைக் கவனிப்பார்.',
+  'Records the day: reports, labour, money, material.':
+      'நாளைப் பதிவு செய்வார்: அறிக்கைகள், தொழிலாளர், பணம், பொருள்.',
+  'Remove from this site?':
+      'இந்தத் தளத்திலிருந்து நீக்கவா?',
+  'Removed from the site team.':
+      'தளக் குழுவிலிருந்து நீக்கப்பட்டது.',
+  'Retention held by clients':
+      'வாடிக்கையாளர்களிடம் உள்ள தக்கவைப்புத் தொகை',
+  'Runs the site and approves up to their limit.':
+      'தளத்தை நடத்தி தங்கள் வரம்பு வரை ஒப்புதல் செய்வார்.',
+  'Saved.':
+      'சேமிக்கப்பட்டது.',
+  'Sees the money and sends packs to accounts.':
+      'பணத்தைப் பார்த்து கணக்குப் பிரிவுக்குத் தொகுப்பு அனுப்புவார்.',
+  'Site team':
+      'தளக் குழு',
+  'Site team and approval limits':
+      'தளக் குழு, ஒப்புதல் வரம்புகள்',
+  'Sites marked as running show here, the ones that need someone first.':
+      'இயங்கும் தளங்கள் இங்கே தெரியும், கவனம் தேவைப்படுபவை முதலில்.',
+  'Start from':
+      'எதிலிருந்து தொடங்க',
+  'Storekeeper':
+      'ஸ்டோர்கீப்பர்',
+  'Task list':
+      'பணிப் பட்டியல்',
+  'To come from clients':
+      'வாடிக்கையாளர்களிடமிருந்து வர வேண்டியது',
+  'Turn on Team & sync to add people. The team list comes from the company\'s accounts.':
+      'நபர்களைச் சேர்க்க Team & sync இயக்குங்கள். குழுப் பட்டியல் நிறுவனக் கணக்குகளிலிருந்து வரும்.',
+  'Up to date':
+      'புதுப்பித்த நிலையில்',
+  'Wages due this week':
+      'இந்த வாரம் தர வேண்டிய கூலி',
+  'Workers and wages':
+      'தொழிலாளர்கள், கூலி',
+  'Your role here: {role}.':
+      'இங்கே உங்கள் பங்கு: {role}.',
+  'client owes {amount}':
+      'வாடிக்கையாளர் தர வேண்டியது {amount}',
+  'suppliers {amount}':
+      'சப்ளையர்கள் {amount}',
+  'wages due {amount}':
+      'தர வேண்டிய கூலி {amount}',
+  '{m} of {n} sites need someone.':
+      '{n} தளங்களில் {m} கவனம் தேவை.',
+  '{name} will no longer be on this site\'s team.':
+      '{name} இனி இந்தத் தளக் குழுவில் இருக்க மாட்டார்.',
+  '{n} approvals waiting over 2 days':
+      '{n} ஒப்புதல்கள் 2 நாளுக்கு மேல் காத்திருக்கின்றன',
+  '{n} days without a report':
+      '{n} நாட்கள் அறிக்கை இல்லை',
+  '{n} sites with last week not closed':
+      '{n} தளங்களில் கடந்த வாரம் மூடப்படவில்லை',
+  '{n} to approve':
+      '{n} ஒப்புதல் தேவை',
+  // Measurement book, bill payments, supplier invoices
+  'A minus quantity corrects an earlier one.':
+      'கழித்தல் அளவு முந்தையதைத் திருத்தும்.',
+  'Add invoice':
+      'இன்வாய்ஸ் சேர்',
+  'Add the supplier first, under Procure > Suppliers.':
+      'முதலில் Procure > Suppliers-ல் சப்ளையரைச் சேர்க்கவும்.',
+  'All {n} invoices match their orders and deliveries.':
+      'அனைத்து {n} இன்வாய்ஸ்களும் ஆர்டர், வரவுகளுடன் பொருந்துகின்றன.',
+  'Approved to date':
+      'இதுவரை ஒப்புதல்',
+  'Approved {qty}':
+      '{qty} ஒப்புதல்',
+  'Approved.':
+      'ஒப்புதல் செய்யப்பட்டது.',
+  'BOQ item':
+      'BOQ உருப்படி',
+  'Cancel invoice':
+      'இன்வாய்ஸை ரத்து செய்',
+  'Cancel this invoice?':
+      'இந்த இன்வாய்ஸை ரத்து செய்யவா?',
+  'Cancelled: {why}':
+      'ரத்து: {why}',
+  'Decide':
+      'முடிவு செய்',
+  'Enter each invoice as it comes. It is checked against the purchase order and what was received.':
+      'ஒவ்வொரு இன்வாய்ஸையும் வந்தவுடன் பதிவு செய்யுங்கள். அது PO மற்றும் வந்த பொருளுடன் சரிபார்க்கப்படும்.',
+  'Everything approved has been billed already.':
+      'ஒப்புதலானவை அனைத்தும் ஏற்கனவே பில் செய்யப்பட்டன.',
+  'GST in it (₹, optional)':
+      'அதில் GST (₹, விருப்பம்)',
+  'Give the invoice number and its total.':
+      'இன்வாய்ஸ் எண்ணும் மொத்தமும் தாருங்கள்.',
+  'Give the item, its unit and a quantity.':
+      'உருப்படி, அலகு, அளவு தாருங்கள்.',
+  'Invoice number':
+      'இன்வாய்ஸ் எண்',
+  'Invoice total with GST (₹)':
+      'GST உடன் இன்வாய்ஸ் மொத்தம் (₹)',
+  'Make the next RA bill':
+      'அடுத்த RA பில் தயாரி',
+  'Matched':
+      'பொருந்தியது',
+  'Measure work':
+      'வேலையை அளவிடு',
+  'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
+      'BOQ-க்கு எதிராக முடிந்த வேலையை அளவிடுங்கள். ஒப்புதலான அளவுகள் அடுத்த RA பில்லில் சேரும்.',
+  'Measured {qty} {unit}':
+      'அளந்தது {qty} {unit}',
+  'Measurement book':
+      'அளவீட்டுப் புத்தகம்',
+  'Measurement saved. It waits for approval.':
+      'அளவீடு சேமிக்கப்பட்டது. ஒப்புதலுக்குக் காத்திருக்கிறது.',
+  'More quantity than was received':
+      'வந்ததை விட அதிக அளவு',
+  'More than the purchase order':
+      'PO-ஐ விட அதிகம்',
+  'More than what was received':
+      'வந்ததை விட அதிகம்',
+  'No measurements yet':
+      'இன்னும் அளவீடுகள் இல்லை',
+  'No purchase order':
+      'PO இல்லை',
+  'No supplier invoices yet':
+      'இன்னும் சப்ளையர் இன்வாய்ஸ் இல்லை',
+  'Not in the BOQ':
+      'BOQ-ல் இல்லை',
+  'Nothing received against it yet':
+      'இதற்கு எதிராக இன்னும் எதுவும் வரவில்லை',
+  'PO {amount}':
+      'பிஓ {amount}',
+  'Part paid':
+      'பகுதி செலுத்தப்பட்டது',
+  'Payment against this bill':
+      'இந்த பில்லுக்கு எதிரான செலுத்துகை',
+  'Put against bills':
+      'பில்களுக்கு எதிராக வை',
+  'Put it against the oldest bills still due.':
+      'இதை மிகப் பழைய நிலுவை பில்களுக்கு எதிராக வையுங்கள்.',
+  'Quantity approved':
+      'ஒப்புதல் அளவு',
+  'Quantity invoiced (optional)':
+      'இன்வாய்ஸ் அளவு (விருப்பம்)',
+  'Quantity measured':
+      'அளந்த அளவு',
+  'Record the payment in the money book first. Every payment so far is already against a bill.':
+      'முதலில் பணப் புத்தகத்தில் செலுத்துகையைப் பதிவு செய்யுங்கள். இதுவரை ஒவ்வொன்றும் ஒரு பில்லுக்கு எதிராக உள்ளது.',
+  'Rejected.':
+      'நிராகரிக்கப்பட்டது.',
+  'Release retention':
+      'தக்கவைப்பை விடுவி',
+  'Retention held by the client: {amount}':
+      'வாடிக்கையாளரிடம் உள்ள தக்கவைப்பு: {amount}',
+  'Same invoice number entered before':
+      'இதே இன்வாய்ஸ் எண் முன்பே பதிவானது',
+  'Set a rate for {items} first.':
+      'முதலில் {items}-க்கு விலை அமைக்கவும்.',
+  'Supplier invoice':
+      'சப்ளையர் இன்வாய்ஸ்',
+  'Supplier invoices':
+      'சப்ளையர் இன்வாய்ஸ்கள்',
+  'Waiting':
+      'காத்திருக்கிறது',
+  'Where (e.g. Block A, 2nd floor)':
+      'எங்கே (எ.கா. Block A, 2வது தளம்)',
+  'Why':
+      'ஏன்',
+  'received {amount}':
+      'வந்தது {amount}',
+  'retention held {amount}':
+      'தக்கவைப்பு {amount}',
+  '{amount} more than received':
+      'வந்ததை விட {amount} அதிகம்',
+  '{amount} received is not against a bill yet':
+      'வந்த {amount} இன்னும் எந்த பில்லுக்கும் எதிராக இல்லை',
+  '{amount} still due':
+      '{amount} இன்னும் நிலுவை',
+  '{m} of {n} invoices need checking before payment.':
+      '{n}-ல் {m} இன்வாய்ஸ்களைச் செலுத்தும் முன் சரிபார்க்க வேண்டும்.',
+  '{n} amounts put against bills.':
+      '{n} தொகைகள் பில்களுக்கு எதிராக வைக்கப்பட்டன.',
+  '{n} waiting for approval':
+      '{n} ஒப்புதலுக்குக் காத்திருக்கின்றன',
+  '{paid} received, {due} due':
+      '{paid} வந்தது, {due} நிலுவை',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'எல்லா பதிவுகள், புகைப்படங்கள், பில்கள் ஒரே கோப்பில். அதை Drive அல்லது கணினியில் வைக்கவும்.',
+  'Back up this phone':
+      'இந்த போனை பேக்கப் எடு',
+  'Backup checked':
+      'பேக்கப் சரிபார்க்கப்பட்டது',
+  'Backup failed: {error}':
+      'பேக்கப் தோல்வி: {error}',
+  'Checked before anything is replaced':
+      'எதையும் மாற்றும் முன் சரிபார்க்கப்படும்',
+  'Choose backup file':
+      'பேக்கப் கோப்பைத் தேர்ந்தெடு',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'அடுத்த முறை FieldOS திறக்கும்போது இந்த போனில் உள்ள அனைத்தும் பேக்கப்பால் மாற்றப்படும். தற்போதைய தரவு தேவைப்பட்டால் திரும்பப் பெற போனிலேயே தனியாக வைக்கப்படும்.',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS பேக்கப்: {sites} தளங்கள், {files} புகைப்படங்கள், பில்கள்',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} அன்று செய்தது: {sites} தளங்கள், {files} புகைப்படங்கள், பில்கள். மீட்டமைப்பை முடிக்க FieldOS-ஐ முழுதாக மூடி மீண்டும் திறக்கவும்.',
+  'Restore a backup':
+      'பேக்கப்பை மீட்டமை',
+  'Restore a backup?':
+      'பேக்கப்பை மீட்டமைக்கவா?',
+  'Restore failed: {error}':
+      'மீட்டமைப்பு தோல்வி: {error}',
+  'The backup is damaged and was not restored.':
+      'பேக்கப் சேதமடைந்துள்ளது, மீட்டமைக்கப்படவில்லை.',
+  'The backup is incomplete and was not restored.':
+      'பேக்கப் முழுமையாக இல்லை, மீட்டமைக்கப்படவில்லை.',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'இந்த பேக்கப் புதிய FieldOS-ஆல் செய்யப்பட்டது. முதலில் ஆப்பை அப்டேட் செய்யவும்.',
+  'This is not a FieldOS backup file.':
+      'இது FieldOS பேக்கப் கோப்பு அல்ல.',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'ஏற்றுமதி சரிபார்ப்பில் தேறவில்லை, அதனால் அனுப்பப்படவில்லை: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'இந்தத் தொகைகளுக்கு மேல் முதலில் திட்ட மேலாளர், பிறகு உரிமையாளர் ஒப்புதல் தருவார். ஒப்புதல் தேவையில்லை என்றால் காலியாக விடுங்கள். விதிகள் இனி பதிவாகுபவற்றுக்கு மட்டும் பொருந்தும்.',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'எந்தத் தொகைக்கு மேல் திட்ட மேலாளர், பிறகு நீங்கள், கோரிக்கைகள், செலவுகள், ஆர்டர்களை ஒப்புக்கொள்ள வேண்டும்',
+  'Approval rules':
+      'ஒப்புதல் விதிகள்',
+  'Approval rules saved':
+      'ஒப்புதல் விதிகள் சேமிக்கப்பட்டன',
+  'Enter amounts in rupees, or leave blank.':
+      'தொகைகளை ரூபாயில் இடுங்கள், அல்லது காலியாக விடுங்கள்.',
+  'Note (needed to reject)':
+      'குறிப்பு (நிராகரிக்கத் தேவை)',
+  'Owner also approves above (₹)':
+      'இதற்கு மேல் உரிமையாளரும் ஒப்புதல் தருவார் (₹)',
+  'Project manager approves above (₹)':
+      'இதற்கு மேல் திட்ட மேலாளர் ஒப்புதல் தருவார் (₹)',
+  'Purchase orders':
+      'கொள்முதல் ஆர்டர்கள்',
+  'Purchase requests':
+      'கொள்முதல் கோரிக்கைகள்',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'உங்கள் ஒப்புதல் தொகைகளுக்கு மேல் உள்ள கொள்முதல் கோரிக்கைகள், ஆர்டர்கள், செலவுகள் இங்கே காத்திருக்கும்.',
+  'Say why it is rejected.':
+      'ஏன் நிராகரிக்கப்பட்டது என்று சொல்லுங்கள்.',
+  'Signed. It now waits for the owner\'s approval.':
+      'கையொப்பம் இடப்பட்டது. இப்போது உரிமையாளரின் ஒப்புதலுக்குக் காத்திருக்கிறது.',
+  'The owner approves it after you.':
+      'உங்களுக்குப் பிறகு உரிமையாளர் இதை ஒப்புக்கொள்வார்.',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'உரிமையாளரின் தொகை திட்ட மேலாளரின் தொகையை விடக் குறைவாக இருக்கக் கூடாது.',
+  'Waiting for a project manager\'s approval':
+      'திட்ட மேலாளர் ஒப்புதலுக்குக் காத்திருக்கிறது',
+  'Waiting for the owner\'s approval':
+      'உரிமையாளர் ஒப்புதலுக்குக் காத்திருக்கிறது',
+  'Waiting for your approval':
+      'உங்கள் ஒப்புதலுக்குக் காத்திருப்பவை',
+  '{amount}. You sign as {level}.':
+      '{amount}. நீங்கள் {level} ஆகக் கையொப்பமிடுவீர்கள்.',
+  '{n} requests, orders or expenses above your approval amounts':
+      'உங்கள் ஒப்புதல் தொகைகளுக்கு மேல் {n} கோரிக்கைகள், ஆர்டர்கள் அல்லது செலவுகள்',
+  // Audit trail
+  'Audit trail':
+      'தணிக்கைப் பதிவு',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'ஒவ்வொரு ஒப்புதல், ரத்து, கட்டணம், யார் எப்போது செய்தார்கள் என்பது ஒரே கோப்பில்',
+  'Nothing has been recorded yet.':
+      'இன்னும் எதுவும் பதிவாகவில்லை.',
 };

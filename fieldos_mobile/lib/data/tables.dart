@@ -88,12 +88,17 @@ class Projects extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+/// A site's team (v17, synced as project_members): who works on the site,
+/// in which site role (owner, project_manager, site_engineer, accounts,
+/// storekeeper, viewer), and a site manager's approval limit in rupees.
 class ProjectMembers extends Table {
   TextColumn get id => text()();
   TextColumn get projectId => text().withLength(min: 1, max: 36)();
   TextColumn get userId => text().withLength(min: 1, max: 64)();
   TextColumn get role => text().withLength(min: 1, max: 30)();
+  RealColumn get approvalLimit => real().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -719,4 +724,191 @@ class SyncOutbox extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   IntColumn get retryCount => integer().withDefault(const Constant(0))();
   TextColumn get lastError => text().nullable()();
+}
+
+/// The delivery slip or challan photographed when material arrives (v15,
+/// synced as site_receipt_attachments with the file in Storage). It used
+/// to sit in the receipt's note as a path on the supervisor's phone, so
+/// the manager approving the delivery never saw it.
+class ReceiptAttachments extends Table {
+  TextColumn get id => text()();
+  TextColumn get receiptId => text().withLength(min: 1, max: 36)();
+  TextColumn get filePath => text().withLength(min: 1, max: 500)();
+  TextColumn get mimeType => text().withLength(max: 100)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// The weekly site close (v15, synced as site_close_reviews): one row per
+/// decision on one item of one site's week (a worker's wages, an expense,
+/// a delivery, a day without attendance, or the week itself). Rows are
+/// never changed or removed, so the week keeps a dated record of what was
+/// approved, sent back and corrected, and by whom. What the item looked
+/// like when it was decided is kept in [fingerprint]; an item edited after
+/// its approval comes back to the queue.
+class CloseReviews extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// Monday of the week, yyyy-mm-dd.
+  TextColumn get weekStart => text().withLength(min: 10, max: 10)();
+
+  /// wages | expense | receipt | attendance | week
+  TextColumn get itemKind => text().withLength(min: 1, max: 20)();
+
+  /// The record's id; a worker's wage line key; a day (yyyy-mm-dd); 'week'.
+  TextColumn get itemId => text().withLength(min: 1, max: 160)();
+
+  /// approved | sent_back | fixed | closed | reopened
+  TextColumn get decision => text().withLength(min: 1, max: 20)();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get fingerprint => text().withLength(max: 200).nullable()();
+
+  /// The money the decision covered (wages earned, expense, invoice).
+  RealColumn get amount => real().nullable()();
+
+  /// For a delivery: the quantity the manager accepted.
+  RealColumn get acceptedQty => real().nullable()();
+  TextColumn get decidedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Whether a site is seen only by its team (v17, synced as site_access).
+/// [id] is the project's id. Sites without a row are open to the company.
+class SiteAccess extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  BoolColumn get membersOnly => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// The measurement book for the client (v18, synced as
+/// site_work_measurements): work measured against a BOQ item. Never
+/// edited; a negative quantity corrects an earlier one.
+class WorkMeasurements extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get costHeadId => text().withLength(max: 36).nullable()();
+  TextColumn get description => text().withLength(min: 1, max: 200)();
+  TextColumn get unit => text().withLength(min: 1, max: 20)();
+  RealColumn get rate => real().nullable()();
+  RealColumn get qty => real()();
+  DateTimeColumn get measuredOn => dateTime()();
+  TextColumn get location => text().withLength(max: 200).nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get measuredBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// The owner's or PM's decision on a measurement, one each (v18).
+class WorkMeasurementDecisions extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get measurementId => text().withLength(min: 1, max: 36)();
+
+  /// approved | rejected
+  TextColumn get decision => text().withLength(min: 1, max: 20)();
+  RealColumn get approvedQty => real().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get decidedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+        {measurementId},
+      ];
+}
+
+/// Part of a payment received put against a bill, or against its
+/// retention (v18, synced as site_bill_allocations).
+class BillAllocations extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get paymentId => text().withLength(min: 1, max: 36)();
+  TextColumn get billId => text().withLength(min: 1, max: 36)();
+
+  /// bill | retention
+  TextColumn get kind => text().withLength(min: 1, max: 20).withDefault(const Constant('bill'))();
+  RealColumn get amount => real()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A supplier's invoice, matched against its PO and the GRNs (v18,
+/// synced as site_supplier_invoices). Only ever cancelled, never edited.
+class SupplierInvoices extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get supplierId => text().withLength(min: 1, max: 36)();
+  TextColumn get poId => text().withLength(max: 36).nullable()();
+  TextColumn get invoiceNumber => text().withLength(min: 1, max: 40)();
+  DateTimeColumn get invoiceDate => dateTime()();
+  RealColumn get amount => real()();
+  RealColumn get gstAmount => real().withDefault(const Constant(0))();
+  RealColumn get qty => real().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  BoolColumn get voided => boolean().withDefault(const Constant(false))();
+  TextColumn get voidReason => text().withLength(max: 200).nullable()();
+  TextColumn get recordedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// An owner's rule (v30, synced as site_approval_rules): above
+/// [aboveAmount], a [kind] of item needs [role]'s approval. kind:
+/// purchase_request | expense | purchase_order; role: project_manager |
+/// owner. Changed by voiding and adding, or by a new amount.
+class ApprovalRules extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  TextColumn get kind => text().withLength(min: 1, max: 20)();
+  TextColumn get role => text().withLength(min: 1, max: 20)();
+  RealColumn get aboveAmount => real()();
+  BoolColumn get voided => boolean().withDefault(const Constant(false))();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// One signature on an item's approval chain (v30, synced as
+/// site_approval_steps, insert-only). [level]: project_manager | owner;
+/// [decision]: approved | rejected. [amount] is the item's amount when
+/// signed (the server sets it from the record).
+class ApprovalSteps extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get kind => text().withLength(min: 1, max: 20)();
+  TextColumn get itemId => text().withLength(min: 1, max: 36)();
+  TextColumn get level => text().withLength(min: 1, max: 20)();
+  TextColumn get decision => text().withLength(min: 1, max: 20)();
+  RealColumn get amount => real().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get decidedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
 }
