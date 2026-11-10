@@ -12,6 +12,7 @@ const bg = 'background:radial-gradient(110% 110% at 20% 10%,#2B4A73 0%,#112A4A 5
 const wide = [
   ['fieldos-youtube-one-day-four-sites', ['4 SITES.', '1 PHONE.'], 'One contractor\'s full day', 'en/15_brief', 'celebrate'],
   ['fieldos-youtube-talk-to-your-site-app', ['TALK.', 'IT SAVES.'], 'Site paperwork, zero typing', 'en/14_assistant', 'talk'],
+  ['fieldos-youtube-meet-the-new-fieldos', ['THE NEW', 'FieldOS'], 'Just say it. In your language.', 'en/01_home', 'wave'],
   ['fieldos-video-guide', ['HOW TO', 'USE FieldOS'], '3-minute guide', 'en/01_home', 'point'],
   ['fieldos-play-promo', ['JUST', 'SAY IT.'], 'Site paperwork, by voice', 'en/14_assistant', 'wave'],
 ];
@@ -21,6 +22,7 @@ const tall = [
   ['fieldos-reel-3-evening-brief', ['7:30 pm. Which site', 'needs you?'], 'en/15_brief', 'chai', 'Inter'],
   ['fieldos-reel-4-who-you-owe', ['₹12 lakh owed.', 'Since when?'], 'en/16_owe', 'surprised', 'Inter'],
   ['fieldos-reel-5-telugu', ['మీ సైట్ యాప్', 'ఇప్పుడు తెలుగులో!'], 'te/14_assistant', 'wave', 'Inter,Tel'],
+  ['fieldos-reel-7-your-site-your-language', ['Your site app,', 'your language.'], 'te/18_languages', 'talk', 'Inter,Tel'],
   ['fieldos-reel-6-hindi', ['आपकी साइट का ऐप', 'अब हिंदी में!'], 'hi/14_assistant', 'wave', 'Inter,Deva'],
 ];
 

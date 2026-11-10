@@ -4,6 +4,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:fieldos_mobile/core/brand.dart';
 
@@ -27,7 +28,12 @@ class BrandedSheetPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    return Scaffold(
+    // White status-bar icons on the navy top. Without this the phone keeps
+    // whatever the last screen (or the launch theme) set, which can be dark
+    // icons that disappear into the navy.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(statusBarColor: Colors.transparent),
+      child: Scaffold(
       backgroundColor: Brand.navy,
       body: SafeArea(
         bottom: false,
@@ -74,6 +80,7 @@ class BrandedSheetPage extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

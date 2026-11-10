@@ -2440,4 +2440,329 @@ const Map<String, String> stringsMr = {
       'सर्व हटवा',
   'No earlier chats yet. Your chats are kept on this phone.':
       'अजून जुन्या गप्पा नाहीत. तुमच्या गप्पा याच फोनवर राहतात.',
+  // 1.7.1 bug-hunt: labels that used to stay in English.
+  '1 open issue':
+      '1 उघडी समस्या',
+  '{n} open issues':
+      '{n} उघड्या समस्या',
+  '1 worker punched in':
+      '1 कामगार पंच-इन झाला',
+  '{n} workers punched in':
+      '{n} कामगार पंच-इन झाले',
+  'A material receipt is waiting for a decision':
+      'माल पावती निर्णयाची वाट पाहत आहे',
+  'A purchase order is waiting for a decision':
+      'एक खरेदी ऑर्डर (PO) निर्णयाची वाट पाहत आहे',
+  'A request is waiting for a decision':
+      'एक विनंती निर्णयाची वाट पाहत आहे',
+  'A site over budget is waiting for a decision':
+      'बजेटपेक्षा जास्त गेलेली साइट निर्णयाची वाट पाहत आहे',
+  'A new code is on its way to {email}. Codes stop working after an hour.':
+      '{email} वर नवीन कोड येत आहे. कोड एका तासानंतर चालत नाहीत.',
+  'A project':
+      'एक प्रोजेक्ट',
+  'A purchase is already in progress. Wait for it to finish.':
+      'एक खरेदी आधीच सुरू आहे. ती पूर्ण होईपर्यंत थांबा.',
+  'Access codes are 10 or more letters and numbers. Type it exactly as you got it.':
+      'ॲक्सेस कोडमध्ये 10 किंवा जास्त अक्षरे आणि अंक असतात. मिळाला तसाच टाइप करा.',
+  'Account created for {email}.':
+      '{email} साठी खाते तयार झाले.',
+  'Approval requested':
+      'मंजुरी मागितली',
+  'Choose a new password of at least 6 characters.':
+      'किमान 6 अक्षरांचा नवीन पासवर्ड निवडा.',
+  'Companies where you are the only member are deleted from the cloud with all their records. Companies with other members keep their records, and ownership passes to another member.':
+      'ज्या कंपन्यांमध्ये तुम्ही एकटेच सदस्य आहात त्या सर्व रेकॉर्डसह क्लाउडवरून हटवल्या जातात. इतर सदस्य असलेल्या कंपन्यांचे रेकॉर्ड राहतात आणि मालकी दुसऱ्या सदस्याकडे जाते.',
+  'Could not sign in. Try again.':
+      'साइन इन झाले नाही. पुन्हा प्रयत्न करा.',
+  'Data on this phone is not deleted. Uninstall the app to remove it.':
+      'या फोनवरील डेटा हटवला जात नाही. तो काढण्यासाठी ॲप अनइन्स्टॉल करा.',
+  'Edit item':
+      'आयटम बदला',
+  'Enter the join code from your company owner.':
+      'तुमच्या कंपनी मालकाकडून मिळालेला जॉइन कोड टाका.',
+  'Enter your email and a password of at least 6 characters.':
+      'तुमचा ईमेल आणि किमान 6 अक्षरांचा पासवर्ड टाका.',
+  'Free access from the FieldOS team':
+      'FieldOS टीमकडून मोफत ॲक्सेस',
+  'Free access from the FieldOS team until {date}':
+      '{date} पर्यंत FieldOS टीमकडून मोफत ॲक्सेस',
+  'Free trial (will not renew)':
+      'मोफत ट्रायल (पुढे चालू होणार नाही)',
+  'Free trial until {date} (will not renew)':
+      '{date} पर्यंत मोफत ट्रायल (पुढे चालू होणार नाही)',
+  'Free trial until {date}, then paid':
+      '{date} पर्यंत मोफत ट्रायल, नंतर पैसे',
+  'Free trial, then paid':
+      'मोफत ट्रायल, नंतर पैसे',
+  'Get the {language} speech pack to work offline':
+      'इंटरनेटशिवाय वापरण्यासाठी {language} स्पीच पॅक घ्या',
+  'Give the project a name, such as the site or building.':
+      'प्रोजेक्टला नाव द्या, जसे साइट किंवा इमारतीचे नाव.',
+  'Headcount not given':
+      'संख्या दिलेली नाही',
+  'If {email} has an account, a code is on its way. Type it below with your new password.':
+      '{email} चे खाते असल्यास कोड येत आहे. तो खाली नवीन पासवर्डसह टाइप करा.',
+  'Items':
+      'आयटम',
+  'Join company':
+      'कंपनीत सामील व्हा',
+  'Joined {company}. Projects will appear after the first sync.':
+      '{company} मध्ये सामील झालात. पहिल्या सिंकनंतर प्रोजेक्ट दिसतील.',
+  'Keep the names under 200 characters.':
+      'नावे 200 अक्षरांपेक्षा कमी ठेवा.',
+  'Listening stopped':
+      'ऐकणे थांबले',
+  'Listening · {time}':
+      'ऐकत आहे · {time}',
+  'Location is blocked for FieldOS. Allow it in Android settings.':
+      'FieldOS साठी लोकेशन बंद आहे. Android सेटिंग्जमध्ये परवानगी द्या.',
+  'Location is turned off. Turn on GPS and try again.':
+      'लोकेशन बंद आहे. GPS चालू करून पुन्हा प्रयत्न करा.',
+  'Location permission was not given.':
+      'लोकेशनची परवानगी दिली नाही.',
+  'Mark as not paid':
+      'न भरलेले म्हणून खूण करा',
+  'Mark as paid':
+      'भरलेले म्हणून खूण करा',
+  'Microphone is off for FieldOS':
+      'FieldOS साठी मायक्रोफोन बंद आहे',
+  'New issue (critical)':
+      'नवीन समस्या (अतिगंभीर)',
+  'New issue (high)':
+      'नवीन समस्या (जास्त)',
+  'New issue (low)':
+      'नवीन समस्या (कमी)',
+  'New issue (medium)':
+      'नवीन समस्या (मध्यम)',
+  'New join code created. The old code no longer works.':
+      'नवीन जॉइन कोड तयार झाला. जुना कोड आता चालणार नाही.',
+  'New password saved. Signed in as {email}.':
+      'नवीन पासवर्ड सेव्ह झाला. {email} म्हणून साइन इन.',
+  'No active subscription':
+      'चालू सबस्क्रिप्शन नाही',
+  'No internet connection. Connect and try again.':
+      'इंटरनेट नाही. कनेक्ट करून पुन्हा प्रयत्न करा.',
+  'Not set':
+      'ठरवलेले नाही',
+  'One project for each site. Its daily reports, labour, materials, money and photos stay together.':
+      'प्रत्येक साइटसाठी एक प्रोजेक्ट. त्याचे दैनिक रिपोर्ट, मजूर, माल, पैसे आणि फोटो एकत्र राहतात.',
+  'Payment problem: update your payment method in the store':
+      'पेमेंट समस्या: स्टोअरमध्ये तुमची पेमेंट पद्धत अपडेट करा',
+  'Payment problem: update your payment method in the store before {date}':
+      'पेमेंट समस्या: {date} पूर्वी स्टोअरमध्ये तुमची पेमेंट पद्धत अपडेट करा',
+  'Photo is on the phone that took it':
+      'फोटो तो काढलेल्या फोनवर आहे',
+  'Pick a time after they punched in ({time}).':
+      'पंच-इन ({time}) नंतरची वेळ निवडा.',
+  'Put company on the cloud':
+      'कंपनी क्लाउडवर ठेवा',
+  'Quantity this bill':
+      'या बिलाचे प्रमाण',
+  'Recording · {time} · tap to stop and send':
+      'रेकॉर्डिंग · {time} · थांबवून पाठवण्यासाठी टॅप करा',
+  'Sign in':
+      'साइन इन करा',
+  'Signed in as {email}.':
+      '{email} म्हणून साइन इन.',
+  'Signed out. This phone keeps working offline.':
+      'साइन आउट झाले. हा फोन इंटरनेटशिवाय काम करत राहील.',
+  'Subscribed':
+      'सबस्क्राइब केले',
+  'Subscribed until {date} (cancelled)':
+      '{date} पर्यंत सबस्क्रिप्शन (रद्द केले)',
+  'Subscribed, renews on {date}':
+      'सबस्क्राइब केले, {date} ला पुन्हा सुरू होईल',
+  'Sync now':
+      'आता सिंक करा',
+  'Synced. 1 change sent, latest data received.':
+      'सिंक झाले. 1 बदल पाठवला, नवीन डेटा आला.',
+  'Synced. {n} changes sent, latest data received.':
+      'सिंक झाले. {n} बदल पाठवले, नवीन डेटा आला.',
+  'Tap the mic and speak':
+      'माइक दाबून बोला',
+  'Tap to start recording':
+      'रेकॉर्डिंग सुरू करण्यासाठी टॅप करा',
+  'That code is not valid or has ended. Check it and try again, or ask whoever gave it to you.':
+      'हा कोड बरोबर नाही किंवा संपला आहे. तपासून पुन्हा प्रयत्न करा, किंवा ज्यांनी दिला त्यांना विचारा.',
+  'That plan is no longer on sale. Please pick again.':
+      'हा प्लान आता विक्रीला नाही. पुन्हा निवडा.',
+  'The FieldOS plans are not on sale in {store} yet. Please try again later, or send a bug report from the menu.':
+      'FieldOS प्लान अजून {store} मध्ये विक्रीला नाहीत. नंतर पुन्हा प्रयत्न करा, किंवा मेन्यूमधून बग रिपोर्ट पाठवा.',
+  'The owner or a project manager decides these. You can see what is waiting.':
+      'यावर मालक किंवा प्रोजेक्ट मॅनेजर निर्णय घेतात. काय बाकी आहे ते तुम्ही पाहू शकता.',
+  'The phone stopped listening. Tap Try again, or type the report.':
+      'फोनने ऐकणे थांबवले. पुन्हा प्रयत्न करा दाबा, किंवा रिपोर्ट टाइप करा.',
+  'There is no internet, and the offline speech pack for {language} is not on this phone yet. Connect once, then download it: Google app › Settings › Voice › Offline speech recognition › {englishName}. After that, voice reports work anywhere on site.':
+      'इंटरनेट नाही, आणि {language} चा ऑफलाइन स्पीच पॅक अजून या फोनवर नाही. एकदा कनेक्ट करून तो डाउनलोड करा: Google ॲप › Settings › Voice › Offline speech recognition › {englishName}. त्यानंतर व्हॉइस रिपोर्ट साइटवर कुठेही चालतील.',
+  'This iPhone needs internet to recognise {language} speech. Connect and try again, or type the report.':
+      'या iPhone ला {language} बोलणे ओळखण्यासाठी इंटरनेट लागते. कनेक्ट करून पुन्हा प्रयत्न करा, किंवा रिपोर्ट टाइप करा.',
+  'This needs internet for {language}':
+      '{language} साठी इंटरनेट लागते',
+  'This permanently deletes {email} from FieldOS cloud.':
+      'हे {email} ला FieldOS क्लाउडवरून कायमचे हटवेल.',
+  'This phone can\'t do {language} yet':
+      'हा फोन अजून {language} करू शकत नाही',
+  'This phone can\'t turn {language} speech into text itself, so FieldOS will record you and send the recording to Sarvam when you stop. This needs internet.':
+      'हा फोन {language} बोलणे स्वतः मजकुरात बदलू शकत नाही, म्हणून FieldOS तुमचे रेकॉर्डिंग करेल आणि तुम्ही थांबल्यावर ते Sarvam ला पाठवेल. यासाठी इंटरनेट लागते.',
+  'This phone has no speech recognition':
+      'या फोनमध्ये बोलणे ओळखण्याची सोय नाही',
+  'This phone is not allowed to make purchases. Check the payment settings or parental controls in {store}.':
+      'या फोनवरून खरेदीला परवानगी नाही. {store} मध्ये पेमेंट सेटिंग्ज किंवा पॅरेंटल कंट्रोल तपासा.',
+  'This plan is not on sale in your country right now.':
+      'हा प्लान सध्या तुमच्या देशात विक्रीला नाही.',
+  'This {store} account already pays for FieldOS for someone else. Write to us and we will sort it out.':
+      'हे {store} खाते आधीच दुसऱ्या कोणासाठी FieldOS चे पैसे भरते. आम्हाला लिहा, आम्ही सोडवू.',
+  'Turning your recording into text…':
+      'तुमचे रेकॉर्डिंग मजकुरात बदलत आहे…',
+  'Turning your recording into text… {n} of {total}':
+      'तुमचे रेकॉर्डिंग मजकुरात बदलत आहे… {total} पैकी {n}',
+  'Type the code from the email: it is 6 digits.':
+      'ईमेलमध्ये आलेला कोड टाइप करा: तो 6 अंकी आहे.',
+  'Type the code we emailed to {email}, and the new password for your cloud account.':
+      '{email} वर पाठवलेला कोड आणि तुमच्या क्लाउड खात्याचा नवीन पासवर्ड टाइप करा.',
+  'Type the code we emailed to {email}. It can take a minute to arrive; look in spam too.':
+      '{email} वर पाठवलेला कोड टाइप करा. यायला एक मिनिट लागू शकतो; स्पॅममध्येही पाहा.',
+  'Type your email above first, then tap "Forgot password?" again.':
+      'आधी वर तुमचा ईमेल टाइप करा, मग "पासवर्ड विसरलात?" पुन्हा दाबा.',
+  'We sent a code to {email}. Type it below to finish creating your account.':
+      'आम्ही {email} वर कोड पाठवला आहे. खाते तयार करणे पूर्ण करण्यासाठी तो खाली टाइप करा.',
+  'Work measured this bill':
+      'या बिलात मोजलेले काम',
+  'Working for someone else\'s company?':
+      'दुसऱ्याच्या कंपनीसाठी काम करता?',
+  'Your cloud account is deleted. This phone keeps working offline.':
+      'तुमचे क्लाउड खाते हटवले. हा फोन इंटरनेटशिवाय काम करत राहील.',
+  'Your payment is waiting for approval, for example in your UPI app. FieldOS opens by itself once {store} confirms it.':
+      'तुमचे पेमेंट मंजुरीची वाट पाहत आहे, उदा. तुमच्या UPI ॲपमध्ये. {store} ने खात्री केल्यावर FieldOS आपोआप उघडेल.',
+  'about {amount}':
+      'सुमारे {amount}',
+  'never':
+      'कधीच नाही',
+  'raised on {date}':
+      '{date} ला उपस्थित केले',
+  'raised today':
+      'आज उपस्थित केले',
+  'raised yesterday':
+      'काल उपस्थित केले',
+  'this account':
+      'हे खाते',
+  'your company':
+      'तुमची कंपनी',
+  '{amount} a day':
+      'दिवसाला {amount}',
+  '{company} is on the cloud. Share the join code with your team.':
+      '{company} क्लाउडवर आहे. तुमच्या टीमसोबत जॉइन कोड शेअर करा.',
+  '{day}, marked {mark}':
+      '{day}, {mark} नोंदवले',
+  '{day}, {h} h':
+      '{day}, {h} तास',
+  '{day}, {h} h, no punch-out':
+      '{day}, {h} तास, पंच-आउट नाही',
+  '{email} already has an account, and that password is not right for it. Try again, or tap "Forgot password?" to choose a new one.':
+      '{email} चे आधीच खाते आहे, आणि हा पासवर्ड त्याचा नाही. पुन्हा प्रयत्न करा, किंवा नवीन निवडण्यासाठी "पासवर्ड विसरलात?" दाबा.',
+  '{email} is no longer on the team.':
+      '{email} आता टीममध्ये नाहीत.',
+  '{email} will stop getting this company\'s projects and cannot send anything new. Work they already recorded stays.':
+      '{email} ला या कंपनीचे प्रोजेक्ट मिळणे बंद होईल आणि ते नवीन काही पाठवू शकणार नाहीत. त्यांनी आधी नोंदवलेले काम राहील.',
+  '{h} h {m} min':
+      '{h} तास {m} मिनिटे',
+  '{m} min':
+      '{m} मिनिटे',
+  '{m} min {s} s':
+      '{m} मिनिटे {s} सेकंद',
+  '{s} s':
+      '{s} सेकंद',
+  '{name} is ready':
+      '{name} तयार आहे',
+  '{name}: out at {time} on {date}':
+      '{name}: {date} ला {time} वाजता बाहेर',
+  '{n} new updates from your team':
+      'तुमच्या टीमकडून {n} नवीन अपडेट',
+  '{sent} sent, {waiting} waiting. They will retry on the next sync.':
+      '{sent} पाठवले, {waiting} बाकी. पुढच्या सिंकला पुन्हा प्रयत्न होईल.',
+  '{store} could not complete that. Please try again, or send a bug report from the menu.':
+      '{store} ते पूर्ण करू शकले नाही. पुन्हा प्रयत्न करा, किंवा मेन्यूमधून बग रिपोर्ट पाठवा.',
+  '{store} had a problem with that. Please try again in a minute.':
+      '{store} मध्ये यात अडचण आली. एका मिनिटाने पुन्हा प्रयत्न करा.',
+  '{store} is having a problem right now. Please try again in a minute.':
+      '{store} मध्ये सध्या अडचण आहे. एका मिनिटाने पुन्हा प्रयत्न करा.',
+  'Speak daily reports in your own language':
+      'तुमच्या भाषेत दैनिक रिपोर्ट बोला',
+  'Labour, wages and materials in one place':
+      'मजूर, मजुरी आणि माल एकाच ठिकाणी',
+  'Photos, issues and team chat for every site':
+      'प्रत्येक साइटसाठी फोटो, समस्या आणि टीम चॅट',
+  'Works offline, syncs when you are back online':
+      'इंटरनेटशिवाय चालते, इंटरनेट आल्यावर सिंक होते',
+  'Sunny':
+      'ऊन',
+  'Cloudy':
+      'ढगाळ',
+  'Rain':
+      'पाऊस',
+  'Heavy rain':
+      'मुसळधार पाऊस',
+  'Light rain':
+      'हलका पाऊस',
+  'Hot':
+      'उष्ण',
+  'Windy':
+      'वारा',
+  'Cold':
+      'थंडी',
+  'Mason':
+      'गवंडी',
+  'Helper':
+      'हेल्पर',
+  'Carpenter':
+      'सुतार',
+  'Bar bender':
+      'बार बेंडर',
+  'Electrician':
+      'इलेक्ट्रिशियन',
+  'Plumber':
+      'प्लंबर',
+  'Painter':
+      'पेंटर',
+  'Welder':
+      'वेल्डर',
+  'Tiler':
+      'टाइल कारागीर',
+  'Labourer':
+      'मजूर',
+  'Supervisor':
+      'सुपरवायझर',
+  'Driver':
+      'ड्रायव्हर',
+  'Operator':
+      'ऑपरेटर',
+  'Fitter':
+      'फिटर',
+  'Cash':
+      'रोख',
+  'UPI':
+      'UPI',
+  'Bank transfer':
+      'बँक ट्रान्सफर',
+  'Cheque':
+      'चेक',
+  'Pass':
+      'ठीक',
+  'Fail':
+      'चूक',
+  'Not needed':
+      'गरज नाही',
+  'Safety':
+      'सुरक्षा',
+  'Quality':
+      'गुणवत्ता',
+  'Structural':
+      'संरचना',
+  'Environmental':
+      'पर्यावरण',
+  'Final':
+      'अंतिम',
+  'V-{n} (provisional)':
+      'V-{n} (तात्पुरता)',
 };

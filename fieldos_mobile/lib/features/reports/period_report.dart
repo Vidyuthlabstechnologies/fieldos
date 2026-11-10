@@ -4,6 +4,7 @@
 /// Saturday; before this they had to copy each day's report by hand.
 library;
 
+import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/project/task_plan.dart';
@@ -188,6 +189,11 @@ Future<PeriodReport> buildPeriodReport(AppDatabase db, Project project, ReportPe
 }
 
 String periodRange(ReportPeriod p) => '${fmtDate(p.start, short: true)} to ${fmtDate(p.lastDay, short: true)}';
+
+/// [periodRange] in the app's language, for the screen (shared messages
+/// stay in English).
+String periodRangeLabel(ReportPeriod p) =>
+    trf('{from} to {to}', {'from': fmtDate(p.start, short: true), 'to': fmtDate(p.lastDay, short: true)});
 
 /// The WhatsApp message. Kept in English like the DPR share: it usually
 /// goes to the client or the head office.

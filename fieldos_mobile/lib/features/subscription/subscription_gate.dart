@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/core/brand.dart';
+import 'package:fieldos_mobile/core/release_config.dart';
 import 'package:fieldos_mobile/features/subscription/paywall_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/billing_service.dart';
@@ -30,7 +31,9 @@ class _SubscriptionGateState extends ConsumerState<SubscriptionGate> with Widget
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     if (!ref.read(billingServiceProvider).setUp) {
-      _access = Access.allowed; // development build, or payments not configured yet
+      // Development build. A store build without billing never gets here
+      // (main.dart shows BrokenBuildApp), and locks if it did.
+      _access = storeRelease ? Access.blocked : Access.allowed;
     } else {
       _check(firstTime: true);
       _listen();

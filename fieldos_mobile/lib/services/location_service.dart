@@ -4,6 +4,8 @@ library;
 
 import 'package:geolocator/geolocator.dart';
 
+import 'package:fieldos_mobile/l10n/language.dart';
+
 class LocationFix {
   const LocationFix(this.lat, this.lng, this.accuracyM);
   final double lat;
@@ -24,17 +26,17 @@ class LocationService {
   /// on (turn on GPS, allow location) instead of a platform error.
   Future<LocationFix> currentFix() async {
     if (!await Geolocator.isLocationServiceEnabled()) {
-      throw const LocationUnavailable('Location is turned off. Turn on GPS and try again.');
+      throw LocationUnavailable(tr('Location is turned off. Turn on GPS and try again.'));
     }
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
     if (permission == LocationPermission.denied) {
-      throw const LocationUnavailable('Location permission was not given.');
+      throw LocationUnavailable(tr('Location permission was not given.'));
     }
     if (permission == LocationPermission.deniedForever) {
-      throw const LocationUnavailable('Location is blocked for FieldOS. Allow it in Android settings.');
+      throw LocationUnavailable(tr('Location is blocked for FieldOS. Allow it in Android settings.'));
     }
     final p = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 20)),

@@ -108,12 +108,11 @@ dependencies:
   # (Android/iOS text to speech): free and offline, no Sarvam needed.
   flutter_tts: ^4.2.5
   audioplayers: ^6.8.1
+  # Already present through `supabase`; declared because the sync engine
+  # tells a network failure (http's ClientException) from a server refusal.
+  http: ^1.2.0
 
 dev_dependencies:
-  # Direct dependency: used by test/sync_engine_test.dart to check the local
-  # Supabase stack is reachable before running (already present transitively
-  # via `supabase`, declared explicitly per "depend on what you import").
-  http: ^1.2.0
   flutter_test:
     sdk: flutter
   integration_test:

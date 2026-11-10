@@ -266,7 +266,7 @@ class _RfqTab extends ConsumerWidget {
                           title: Text(r.materialName),
                           subtitle: Text([
                             '${fmtQty(r.quantity)} ${r.unit}',
-                            if (r.estimatedAmount != null) 'about ${rupees(r.estimatedAmount!)}',
+                            if (r.estimatedAmount != null) trf('about {amount}', {'amount': rupees(r.estimatedAmount!)}),
                             _statusLabel(r.status),
                           ].join(' · ')),
                           trailing: r.status == 'pending'
@@ -355,15 +355,15 @@ class _RfqTab extends ConsumerWidget {
     );
     if (ok != true) return;
     final db = ref.read(appDatabaseProvider);
-    await db.purchaseDao.createOrder(PurchaseOrdersCompanion.insert(
+    await db.purchaseDao.orderFromRequest(
+        r.id,
+        PurchaseOrdersCompanion.insert(
           id: const Uuid().v4(),
           projectId: projectId,
           supplierId: supplierId,
-          requestId: Value(r.id),
           raisedBy: userId,
           totalAmount: Value(double.tryParse(amount.text)),
         ));
-    await db.purchaseDao.setRequestStatus(r.id, 'ordered');
     ref.invalidate(requestsProvider(projectId));
     ref.invalidate(ordersProvider(projectId));
   }
@@ -529,7 +529,7 @@ class _PoTab extends ConsumerWidget {
     // Store photo path in notes field for now (material_receipts table doesn't have a dedicated photo_path column)
     final notes = photoPath.value != null ? 'Photo: ${photoPath.value}' : null;
     
-    await db.materialDao.createReceipt(MaterialReceiptsCompanion.insert(
+    await db.purchaseDao.receiveAgainstOrder(o.id, closeOrder: closeOrder, MaterialReceiptsCompanion.insert(
           id: const Uuid().v4(),
           projectId: projectId,
           poId: Value(o.id),
@@ -543,7 +543,6 @@ class _PoTab extends ConsumerWidget {
           receivedOn: DateTime.now(),
           notes: Value(notes),
         ));
-    if (closeOrder) await db.purchaseDao.setOrderStatus(o.id, 'delivered');
     ref.invalidate(ordersProvider(projectId));
     ref.invalidate(receiptsProvider(projectId));
     ref.invalidate(siteStockProvider(projectId));

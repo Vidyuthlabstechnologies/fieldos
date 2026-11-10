@@ -10,6 +10,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/notification_service.dart';
 import 'package:fieldos_mobile/features/tasks/team_roster.dart';
@@ -47,6 +48,8 @@ class CloudSyncBootstrap {
     if (!service.isSignedIn) return;
     if (!await _ref.read(cloudLinksProvider).isLinked(company.id)) return;
 
+    // Photos and bills from before attachments synced (1.7.x) go up once.
+    await _ref.read(appDatabaseProvider).queueFilesFromBeforeSync();
     unawaited(_ref.read(notificationServiceProvider).init().catchError((_) {}));
     final trigger = _ref.read(periodicSyncTriggerProvider);
     if (!trigger.isRunning) trigger.start();
@@ -95,7 +98,7 @@ class CloudSyncBootstrap {
     _queued.clear();
     final notifications = _ref.read(notificationServiceProvider);
     if (batch.length > maxAlertsPerRun) {
-      await notifications.show('FieldOS', '${batch.length} new updates from your team');
+      await notifications.show('FieldOS', trf('{n} new updates from your team', {'n': batch.length}));
       return;
     }
     for (final a in batch) {

@@ -113,7 +113,7 @@ class _CompanySetupScreenState extends ConsumerState<CompanySetupScreen> {
               const Expanded(child: Divider()),
             ]),
             const SizedBox(height: 20),
-            Text("Working for someone else's company?", style: theme.textTheme.titleSmall),
+            Text(tr("Working for someone else's company?"), style: theme.textTheme.titleSmall),
             const SizedBox(height: 4),
             Text(tr('Ask the owner for the join code. You will see their projects once you join.'), style: muted),
             const SizedBox(height: 12),

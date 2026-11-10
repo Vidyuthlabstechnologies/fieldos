@@ -137,7 +137,7 @@ class BillsView extends ConsumerWidget {
           ),
           ListTile(
             leading: Icon(b.status == 'paid' ? Icons.undo : Icons.check_circle_outline),
-            title: Text(b.status == 'paid' ? 'Mark as not paid' : 'Mark as paid'),
+            title: Text(b.status == 'paid' ? tr('Mark as not paid') : tr('Mark as paid')),
             onTap: () => Navigator.pop(ctx, 'paid'),
           ),
           const SizedBox(height: 8),
@@ -268,7 +268,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     final result = await showDialog<BillLine>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(index == null ? 'Add item' : 'Edit item'),
+        title: Text(index == null ? tr('Add item') : tr('Edit item')),
         content: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             TextField(
@@ -288,7 +288,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               controller: qty,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-              decoration: InputDecoration(labelText: _kind == 'ra' ? 'Quantity this bill' : 'Quantity'),
+              decoration: InputDecoration(labelText: _kind == 'ra' ? tr('Quantity this bill') : tr('Quantity')),
             ),
           ]),
         ),
@@ -531,7 +531,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               ),
             ),
           ]),
-          SectionHeader(_kind == 'ra' ? 'Work measured this bill' : 'Items'),
+          SectionHeader(_kind == 'ra' ? tr('Work measured this bill') : tr('Items')),
           if (_lines.isEmpty && hasEarlier)
             OutlinedButton.icon(
               icon: const Icon(Icons.content_copy_outlined),

@@ -129,27 +129,29 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
   Future<void> _signIn() => _run(() async {
         final email = _email.text.trim();
         if (!email.contains('@') || _password.text.length < 6) {
-          _say('Enter your email and a password of at least 6 characters.', error: true);
+          _say(tr('Enter your email and a password of at least 6 characters.'), error: true);
           return;
         }
         final result = await ref.read(cloudSyncServiceProvider).enableSync(email: email, password: _password.text);
         switch (result.outcome) {
           case CloudSyncOutcome.signedIn:
-            _say('Signed in as $email.');
+            _say(trf('Signed in as {email}.', {'email': email}));
           case CloudSyncOutcome.signedUp:
-            _say('Account created for $email.');
+            _say(trf('Account created for {email}.', {'email': email}));
           case CloudSyncOutcome.needsEmailConfirmation:
             _startCodeStep(_EmailCodeStep.confirmSignUp, email);
-            _say('We sent a code to $email. Type it below to finish creating your account.');
+            _say(trf('We sent a code to {email}. Type it below to finish creating your account.', {'email': email}));
             _password.clear();
             return;
           case CloudSyncOutcome.wrongPassword:
-            _say('$email already has an account, and that password is not right for it. Try again, or tap '
-                '"Forgot password?" to choose a new one.', error: true);
+            _say(
+                trf('{email} already has an account, and that password is not right for it. Try again, or tap '
+                    '"Forgot password?" to choose a new one.', {'email': email}),
+                error: true);
             return;
           case CloudSyncOutcome.failed:
             final cause = result.cause;
-            _say(cause == null ? 'Could not sign in. Try again.' : friendlyError(cause, result.stack), error: true);
+            _say(cause == null ? tr('Could not sign in. Try again.') : friendlyError(cause, result.stack), error: true);
             return;
         }
         _password.clear();
@@ -178,12 +180,12 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
   Future<void> _forgotPassword() => _run(() async {
         final email = _email.text.trim();
         if (!email.contains('@')) {
-          _say('Type your email above first, then tap "Forgot password?" again.', error: true);
+          _say(tr('Type your email above first, then tap "Forgot password?" again.'), error: true);
           return;
         }
         await ref.read(cloudSyncServiceProvider).sendPasswordResetCode(email);
         _startCodeStep(_EmailCodeStep.resetPassword, email);
-        _say('If $email has an account, a code is on its way. Type it below with your new password.');
+        _say(trf('If {email} has an account, a code is on its way. Type it below with your new password.', {'email': email}));
       });
 
   Future<void> _resendCode() => _run(() async {
@@ -194,26 +196,26 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           await service.resendSignUpCode(_codeEmail);
         }
         _emailCode.clear();
-        _say('A new code is on its way to $_codeEmail. Codes stop working after an hour.');
+        _say(trf('A new code is on its way to {email}. Codes stop working after an hour.', {'email': _codeEmail}));
       });
 
   Future<void> _submitCode() => _run(() async {
         final code = _emailCode.text.replaceAll(RegExp(r'\s'), '');
         if (!RegExp(r'^\d{6,10}$').hasMatch(code)) {
-          _say('Type the code from the email: it is 6 digits.', error: true);
+          _say(tr('Type the code from the email: it is 6 digits.'), error: true);
           return;
         }
         final service = ref.read(cloudSyncServiceProvider);
         if (_codeStep == _EmailCodeStep.resetPassword) {
           if (_newPassword.text.length < 6) {
-            _say('Choose a new password of at least 6 characters.', error: true);
+            _say(tr('Choose a new password of at least 6 characters.'), error: true);
             return;
           }
           await service.resetPassword(email: _codeEmail, code: code, newPassword: _newPassword.text);
-          _say('New password saved. Signed in as $_codeEmail.');
+          _say(trf('New password saved. Signed in as {email}.', {'email': _codeEmail}));
         } else {
           await service.confirmSignUp(email: _codeEmail, code: code);
-          _say('Account created for $_codeEmail.');
+          _say(trf('Account created for {email}.', {'email': _codeEmail}));
         }
         setState(() {
           _codeStep = null;
@@ -235,14 +237,14 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         final company = ref.read(sessionProvider).activeCompany!;
         await ref.read(cloudSyncServiceProvider).registerCompany(companyId: company.id, name: company.name);
         await _afterLinked(company.id);
-        _say('${company.name} is on the cloud. Share the join code with your team.');
+        _say(trf('{company} is on the cloud. Share the join code with your team.', {'company': company.name}));
         await _refresh();
       });
 
   Future<void> _joinCompany() => _run(() async {
         final code = _code.text.trim();
         if (code.isEmpty) {
-          _say('Enter the join code from your company owner.', error: true);
+          _say(tr('Enter the join code from your company owner.'), error: true);
           return;
         }
         final cloud = await ref.read(cloudSyncServiceProvider).joinCompany(code);
@@ -251,7 +253,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
             .adoptCloudCompany(id: cloud.companyId, name: cloud.name ?? 'Company', role: cloud.role);
         await _afterLinked(cloud.companyId);
         _code.clear();
-        _say('Joined ${cloud.name ?? 'your company'}. Projects will appear after the first sync.');
+        _say(trf('Joined {company}. Projects will appear after the first sync.', {'company': cloud.name ?? tr('your company')}));
         await _refresh();
       });
 
@@ -259,9 +261,12 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         final result = await ref.read(cloudSyncServiceProvider).syncNow();
         if (result.failed == 0) {
           await ref.read(appDatabaseProvider).settingsDao.set('last_sync_at', DateTime.now().toIso8601String());
-          _say('Synced. ${result.succeeded} change${result.succeeded == 1 ? '' : 's'} sent, latest data received.');
+          _say(result.succeeded == 1
+              ? tr('Synced. 1 change sent, latest data received.')
+              : trf('Synced. {n} changes sent, latest data received.', {'n': result.succeeded}));
         } else {
-          _say('${result.succeeded} sent, ${result.failed} waiting. They will retry on the next sync.', error: true);
+          _say(trf('{sent} sent, {waiting} waiting. They will retry on the next sync.', {'sent': result.succeeded, 'waiting': result.failed}),
+              error: true);
         }
         await _refresh();
       });
@@ -269,21 +274,23 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
   Future<void> _signOut() => _run(() async {
         ref.read(cloudSyncBootstrapProvider).stop();
         await ref.read(cloudSyncServiceProvider).disableSync();
-        _say('Signed out. This phone keeps working offline.');
+        _say(tr('Signed out. This phone keeps working offline.'));
         await _refresh();
       });
 
   Future<void> _deleteAccount() async {
-    final email = ref.read(cloudSyncServiceProvider).email ?? 'this account';
+    final email = ref.read(cloudSyncServiceProvider).email ?? tr('this account');
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('Delete your cloud account?')),
         content: Text(
-          'This permanently deletes $email from FieldOS cloud.\n\n'
-          'Companies where you are the only member are deleted from the cloud with all their records. '
-          'Companies with other members keep their records, and ownership passes to another member.\n\n'
-          'Data on this phone is not deleted. Uninstall the app to remove it.',
+          [
+            trf('This permanently deletes {email} from FieldOS cloud.', {'email': email}),
+            tr('Companies where you are the only member are deleted from the cloud with all their records. '
+                'Companies with other members keep their records, and ownership passes to another member.'),
+            tr('Data on this phone is not deleted. Uninstall the app to remove it.'),
+          ].join('\n\n'),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
@@ -303,14 +310,14 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       ref.read(cloudSyncBootstrapProvider).stop();
       await ref.read(cloudSyncServiceProvider).deleteAccount();
       await ref.read(cloudLinksProvider).clear();
-      _say('Your cloud account is deleted. This phone keeps working offline.');
+      _say(tr('Your cloud account is deleted. This phone keeps working offline.'));
       await _refresh();
     });
   }
 
   Future<void> _resetCode(String companyId) => _run(() async {
         await ref.read(cloudSyncServiceProvider).regenerateJoinCode(companyId);
-        _say('New join code created. The old code no longer works.');
+        _say(tr('New join code created. The old code no longer works.'));
         await _refresh();
       });
 
@@ -325,8 +332,8 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(tr('Remove from the team?')),
         content: Text(
-          '${m.email} will stop getting this company\'s projects and cannot send anything new. '
-          'Work they already recorded stays.',
+          trf('{email} will stop getting this company\'s projects and cannot send anything new. '
+              'Work they already recorded stays.', {'email': m.email}),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
@@ -344,7 +351,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     if (ok != true) return;
     await _run(() async {
       await ref.read(cloudSyncServiceProvider).removeMember(companyId: companyId, userId: m.userId);
-      _say('${m.email} is no longer on the team.');
+      _say(trf('{email} is no longer on the team.', {'email': m.email}));
       await _refresh();
     });
   }
@@ -443,7 +450,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           alignment: Alignment.centerRight,
           child: TextButton(onPressed: _busy ? null : _forgotPassword, child: Text(tr('Forgot password?'))),
         ),
-        FilledButton(onPressed: _busy ? null : _signIn, child: _busyOr('Sign in')),
+        FilledButton(onPressed: _busy ? null : _signIn, child: _busyOr(tr('Sign in'))),
       ];
 
   List<Widget> _codeSection(_EmailCodeStep step) {
@@ -454,8 +461,10 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       const SizedBox(height: 8),
       Text(
         reset
-            ? 'Type the code we emailed to $_codeEmail, and the new password for your cloud account.'
-            : 'Type the code we emailed to $_codeEmail. It can take a minute to arrive; look in spam too.',
+            ? trf('Type the code we emailed to {email}, and the new password for your cloud account.',
+                {'email': _codeEmail})
+            : trf('Type the code we emailed to {email}. It can take a minute to arrive; look in spam too.',
+                {'email': _codeEmail}),
         style: muted,
       ),
       const SizedBox(height: 16),
@@ -508,7 +517,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           FilledButton.icon(
             onPressed: _busy ? null : _registerCompany,
             icon: const Icon(Icons.cloud_upload),
-            label: _busyOr('Put company on the cloud'),
+            label: _busyOr(tr('Put company on the cloud')),
           ),
           const SizedBox(height: 24),
           const Divider(),
@@ -531,13 +540,13 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         OutlinedButton.icon(
           onPressed: _busy ? null : _joinCompany,
           icon: const Icon(Icons.group_add),
-          label: _busyOr('Join company'),
+          label: _busyOr(tr('Join company')),
         ),
       ];
 
   List<Widget> _syncSection() {
     final lastAt = _lastSyncedAt == null ? null : DateTime.tryParse(_lastSyncedAt!);
-    final last = lastAt == null ? 'never' : fmtDateTime(lastAt);
+    final last = lastAt == null ? tr('never') : fmtDateTime(lastAt);
     return [
       Text(tr('Sync'), style: Theme.of(context).textTheme.titleMedium),
       const SizedBox(height: 4),
@@ -549,7 +558,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
             style: TextStyle(color: Theme.of(context).colorScheme.error)),
       const SizedBox(height: 8),
       Row(children: [
-        FilledButton.icon(onPressed: _busy ? null : _syncNow, icon: const Icon(Icons.sync), label: _busyOr('Sync now')),
+        FilledButton.icon(onPressed: _busy ? null : _syncNow, icon: const Icon(Icons.sync), label: _busyOr(tr('Sync now'))),
         if (_parked > 0) ...[
           const SizedBox(width: 8),
           OutlinedButton(

@@ -9,6 +9,7 @@
 /// numbers here.
 library;
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -30,6 +31,7 @@ import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
 import 'package:fieldos_mobile/features/procurement/payables_screen.dart';
 import 'package:fieldos_mobile/features/tour/app_tour.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/l10n/language_picker.dart';
 import 'package:fieldos_mobile/services/ai_backend.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
 import 'package:fieldos_mobile/features/home/home_screen.dart';
@@ -40,8 +42,23 @@ import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
 const _uuid = Uuid();
-const _pixelRatio = 2.625; // a common 1080-wide Android phone
-const _logical = Size(1080 / _pixelRatio, 2160 / _pixelRatio);
+// SHOTS_DEVICE picks the screen the app is laid out for:
+//   phone (default) 1080x2160, a common Android phone
+//   iphone          1290x2796, the App Store 6.9-inch slot
+//   tablet7         1200x1920, a 7-inch Android tablet
+//   tablet10        1600x2560, a 10-inch Android tablet
+//   ipad            2048x2732, the App Store 13-inch iPad slot
+// Tablets use display zoom (a higher pixel ratio), so the phone-first
+// screens fill the tablet instead of floating in empty space.
+final _device = switch (Platform.environment['SHOTS_DEVICE'] ?? 'phone') {
+  'iphone' => (const Size(430, 932), 3.0),
+  'tablet7' => (const Size(480, 768), 2.5),
+  'tablet10' => (const Size(640, 1024), 2.5),
+  'ipad' => (const Size(819.2, 1092.8), 2.5),
+  _ => (const Size(1080 / 2.625, 2160 / 2.625), 2.625),
+};
+final Size _logical = _device.$1;
+final double _pixelRatio = _device.$2;
 
 Future<void> _loadFont(String family, List<String> paths) async {
   final loader = FontLoader(family);
@@ -53,7 +70,7 @@ Future<void> _loadFont(String family, List<String> paths) async {
 }
 
 ThemeData _withIndicFallback(ThemeData t) {
-  const fallback = ['NotoDeva', 'NotoTelugu'];
+  const fallback = ['NotoDeva', 'NotoTelugu', 'NotoTamil', 'NotoKannada'];
   TextTheme add(TextTheme x) => x.apply(fontFamilyFallback: fallback);
   TextStyle? f(TextStyle? x) => x?.copyWith(fontFamilyFallback: fallback);
   ButtonStyle? b(ButtonStyle? x) {
@@ -116,6 +133,11 @@ void main() {
       final files = Directory(indic).listSync().map((f) => f.path).toList()..sort();
       await _loadFont('NotoDeva', files.where((f) => f.contains('devanagari')).toList());
       await _loadFont('NotoTelugu', files.where((f) => f.contains('telugu')).toList());
+      // Tamil and Kannada only show up in the language picker's own names.
+      final tamil = files.where((f) => f.contains('tamil')).toList();
+      final kannada = files.where((f) => f.contains('kannada')).toList();
+      if (tamil.isNotEmpty) await _loadFont('NotoTamil', tamil);
+      if (kannada.isNotEmpty) await _loadFont('NotoKannada', kannada);
     }
     await _loadFont('Roboto', ['$material/Roboto-Regular.ttf', '$material/Roboto-Medium.ttf', '$material/Roboto-Bold.ttf']);
   });
@@ -252,7 +274,14 @@ void main() {
     await tester.runAsync(() => db.customStatement(
         'UPDATE labour_attendance SET punch_out = punch_in + 30600 WHERE punch_out IS NULL'));
     await shoot(tester, '11_wage_sheet',
-        WageSheetScreen(projectId: mainSite.id, projectName: mainSite.name, userId: userId));
+        WageSheetScreen(projectId: mainSite.id, projectName: mainSite.name, userId: userId), before: () async {
+      // Last full week, so Saturday's sheet shows a whole week's days.
+      await tester.tap(find.byIcon(Icons.chevron_left));
+      for (var i = 0; i < 3; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 80)));
+        await tester.pump(const Duration(milliseconds: 300));
+      }
+    });
   });
 
   testWidgets('06 stock', (tester) async {
@@ -302,6 +331,20 @@ void main() {
   testWidgets('16 who you owe', (tester) async {
     await seed(tester);
     await shoot(tester, '16_owe', PayablesScreen(companyId: companyId));
+  });
+
+  testWidgets('18 language picker', (tester) async {
+    await seed(tester);
+    late BuildContext pickerContext;
+    late WidgetRef pickerRef;
+    await shoot(tester, '18_languages', Consumer(builder: (context, ref, _) {
+      pickerContext = context;
+      pickerRef = ref;
+      return const HomeScreen();
+    }), before: () async {
+      unawaited(showLanguagePicker(pickerContext, pickerRef));
+      await tester.pumpAndSettle();
+    });
   });
 
   for (final step in [0, 3, 5]) {

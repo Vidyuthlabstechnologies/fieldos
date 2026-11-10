@@ -48,11 +48,11 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
     final name = _name.text.trim().replaceAll(RegExp(r'\s+'), ' ');
     final client = _client.text.trim().replaceAll(RegExp(r'\s+'), ' ');
     if (name.isEmpty) {
-      setState(() => _error = 'Give the project a name, such as the site or building.');
+      setState(() => _error = tr('Give the project a name, such as the site or building.'));
       return;
     }
     if (name.length > 200 || client.length > 200) {
-      setState(() => _error = 'Keep the names under 200 characters.');
+      setState(() => _error = tr('Keep the names under 200 characters.'));
       return;
     }
     setState(() {
@@ -89,7 +89,7 @@ class _NewProjectSheetState extends ConsumerState<NewProjectSheet> {
             Text(tr('New project'), style: theme.textTheme.titleLarge),
             const SizedBox(height: 4),
             Text(
-              "One project for each site. Its daily reports, labour, materials, money and photos stay together.",
+              tr("One project for each site. Its daily reports, labour, materials, money and photos stay together."),
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 20),

@@ -99,13 +99,14 @@ class _ProjectHealthCard extends ConsumerWidget {
                         child: Text(s.projectName,
                             maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium)),
                     const SizedBox(width: 8),
-                    StatusPill(_statusLabel(s.status), tone: _statusTone(s.status)),
+                    // A long status (Tamil "no budget") shortens instead of pushing the row off.
+                    Flexible(child: StatusPill(_statusLabel(s.status), tone: _statusTone(s.status))),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _Metric(label: tr('Budget'), value: s.status == 'no_budget' ? 'Not set' : rupees(s.budget)),
+                    _Metric(label: tr('Budget'), value: s.status == 'no_budget' ? tr('Not set') : rupees(s.budget)),
                     _Metric(label: tr('Spent'), value: rupees(s.actual)),
                     if (s.status != 'no_budget')
                       _Metric(
@@ -127,8 +128,8 @@ class _ProjectHealthCard extends ConsumerWidget {
                 const SizedBox(height: 10),
                 Text(
                   [
-                    s.openIssues == 1 ? '1 open issue' : '${s.openIssues} open issues',
-                    s.dprCount == 1 ? '1 daily report' : '${s.dprCount} daily reports',
+                    s.openIssues == 1 ? tr('1 open issue') : trf('{n} open issues', {'n': s.openIssues}),
+                    s.dprCount == 1 ? tr('1 daily report') : trf('{n} daily reports', {'n': s.dprCount}),
                   ].join(' · '),
                   style: theme.textTheme.bodySmall?.copyWith(color: muted),
                 ),

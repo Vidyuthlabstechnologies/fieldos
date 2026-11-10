@@ -853,3 +853,53 @@ ProjectNotesCompanion projectNoteFromSupabaseJson(Map<String, dynamic> row) => P
           ? const Value.absent()
           : Value(DateTime.parse(row['updated_at'] as String).toLocal()),
     );
+
+// --- Files that ride with a row (audit P1, 2026-11-10). The row carries the
+// Storage object path ({projectId}/...); the phone's own path travels under
+// the transient `_local_file_path` key, which SyncEngine strips after
+// uploading. See 20261110010000_attachment_sync.sql.
+
+String _ext(String localPath) {
+  final dot = localPath.lastIndexOf('.');
+  final slash = localPath.lastIndexOf('/');
+  if (dot <= slash || localPath.length - dot > 6) return '';
+  return localPath.substring(dot).toLowerCase();
+}
+
+String dprPhotoStoragePath(String projectId, DprPhoto p) => '$projectId/dpr-photos/${p.id}${_ext(p.photoPath)}';
+
+String expenseBillStoragePath(String projectId, ExpenseAttachment a) =>
+    '$projectId/expense-bills/${a.id}${_ext(a.filePath)}';
+
+Map<String, dynamic> dprPhotoToSupabaseJson(DprPhoto p, {required String projectId}) => {
+      'id': p.id,
+      'dpr_entry_id': p.dprEntryId,
+      'photo_path': dprPhotoStoragePath(projectId, p),
+      'caption': p.caption,
+      '_local_file_path': p.photoPath,
+    };
+
+Map<String, dynamic> expenseAttachmentToSupabaseJson(ExpenseAttachment a, {required String projectId}) => {
+      'id': a.id,
+      'expense_id': a.expenseId,
+      'file_path': expenseBillStoragePath(projectId, a),
+      'mime_type': a.mimeType,
+      '_local_file_path': a.filePath,
+    };
+
+/// [localPath]: where SyncEngine saved the downloaded file on this phone.
+DprPhotosCompanion dprPhotoFromSupabaseJson(Map<String, dynamic> row, {required String localPath}) =>
+    DprPhotosCompanion.insert(
+      id: row['id'] as String,
+      dprEntryId: row['dpr_entry_id'] as String,
+      photoPath: localPath,
+      caption: Value(row['caption'] as String?),
+    );
+
+ExpenseAttachmentsCompanion expenseAttachmentFromSupabaseJson(Map<String, dynamic> row, {required String localPath}) =>
+    ExpenseAttachmentsCompanion.insert(
+      id: row['id'] as String,
+      expenseId: row['expense_id'] as String,
+      filePath: localPath,
+      mimeType: row['mime_type'] as String? ?? attachmentMimeType(localPath),
+    );

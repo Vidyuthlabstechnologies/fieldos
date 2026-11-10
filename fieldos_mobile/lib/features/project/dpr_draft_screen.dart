@@ -26,6 +26,10 @@ import 'package:fieldos_mobile/services/speech_service.dart';
 import 'package:fieldos_mobile/services/translation_service.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
+
+/// The weather a report can pick, as English keys shown through tr().
+const weatherChoices = ['Sunny', 'Cloudy', 'Rain', 'Hot', 'Windy', 'Cold'];
+
 class DprDraftResult {
   const DprDraftResult({
     required this.date,
@@ -371,9 +375,9 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
             Wrap(
               spacing: 6,
               children: [
-                for (final w in const ['Sunny', 'Cloudy', 'Rain', 'Hot', 'Windy', 'Cold'])
+                for (final w in weatherChoices)
                   ChoiceChip(
-                    label: Text(w),
+                    label: Text(tr(w)),
                     selected: _weather.text == w,
                     onSelected: (_) => setState(() {
                       _weather.text = w;
@@ -565,7 +569,7 @@ class _FromSiteRecords extends ConsumerWidget {
         if (workers > 0)
           ActionChip(
             avatar: const Icon(Icons.groups_outlined, size: 18),
-            label: Text(workers == 1 ? '1 worker punched in' : '$workers workers punched in'),
+            label: Text(workers == 1 ? tr('1 worker punched in') : trf('{n} workers punched in', {'n': workers})),
             onPressed: () => onUseWorkers(workers),
           ),
         if (showMaterials)

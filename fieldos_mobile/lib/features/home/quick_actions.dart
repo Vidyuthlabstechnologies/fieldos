@@ -86,25 +86,35 @@ class QuickActions extends StatelessWidget {
     final actions = quickActions();
     return Padding(
       padding: const EdgeInsets.only(top: 16),
-      // Same height for every tile, however the words wrap.
-      child: IntrinsicHeight(
-        child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < actions.length; i++) ...[
-            if (i > 0) const SizedBox(width: 8),
-            Expanded(child: _Tile(action: actions[i], onTap: () => _open(context, actions[i]))),
-          ],
-        ],
-      ),
-      ),
+      child: LayoutBuilder(builder: (context, box) {
+        // Every tile's label shares one size, small enough that the longest
+        // word ("Attendance" on a 360 dp phone with large text) fits a tile
+        // without breaking in the middle.
+        const gap = 8.0, tilePadding = 8.0;
+        final tileText = (box.maxWidth - gap * (actions.length - 1)) / actions.length - tilePadding;
+        final style = _labelStyle(context, [for (final a in actions) a.label], tileText);
+        // Same height for every tile, however the words wrap.
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < actions.length; i++) ...[
+                if (i > 0) const SizedBox(width: gap),
+                Expanded(
+                    child: _Tile(action: actions[i], labelStyle: style, onTap: () => _open(context, actions[i]))),
+              ],
+            ],
+          ),
+        );
+      }),
     );
   }
 }
 
 class _Tile extends StatelessWidget {
-  const _Tile({required this.action, required this.onTap});
+  const _Tile({required this.action, required this.labelStyle, required this.onTap});
   final QuickAction action;
+  final TextStyle labelStyle;
   final VoidCallback onTap;
 
   @override
@@ -139,7 +149,7 @@ class _Tile extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelLarge?.copyWith(height: 1.2),
+                style: labelStyle,
               ),
             ]),
           ),
@@ -147,4 +157,33 @@ class _Tile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The tiles' label style: the theme's labelLarge, shrunk (down to 9) until
+/// the widest single word of any label fits [width].
+TextStyle _labelStyle(BuildContext context, List<String> labels, double width) {
+  final base = DefaultTextStyle.of(context).style.merge(Theme.of(context).textTheme.labelLarge?.copyWith(height: 1.2));
+  final scaler = MediaQuery.textScalerOf(context);
+  final direction = Directionality.of(context);
+  final words = [for (final l in labels) ...l.split(RegExp(r'\s+'))];
+  double widest(double size) {
+    var w = 0.0;
+    for (final word in words) {
+      final tp = TextPainter(
+        text: TextSpan(text: word, style: base.copyWith(fontSize: size)),
+        textDirection: direction,
+        textScaler: scaler,
+        maxLines: 1,
+      )..layout();
+      if (tp.width > w) w = tp.width;
+      tp.dispose();
+    }
+    return w;
+  }
+
+  var size = base.fontSize ?? 14;
+  while (size > 9 && width.isFinite && widest(size) > width) {
+    size -= 0.5;
+  }
+  return base.copyWith(fontSize: size);
 }

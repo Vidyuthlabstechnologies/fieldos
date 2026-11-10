@@ -248,9 +248,11 @@ class _AppTourScreenState extends ConsumerState<AppTourScreen> {
                   fit: StackFit.expand,
                   children: [
                     IgnorePointer(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 280),
-                        child: KeyedSubtree(key: ValueKey(_index), child: _stage(step)),
+                      child: TourStageFrame(
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 280),
+                          child: KeyedSubtree(key: ValueKey(_index), child: _stage(step)),
+                        ),
                       ),
                     ),
                   ],
@@ -314,6 +316,9 @@ class _GuideCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final height = MediaQuery.sizeOf(context).height;
+    final compact = height < 700;
+    final maxTextHeight = height * (compact ? 0.3 : 0.34);
     return Material(
       color: scheme.surface,
       elevation: 12,
@@ -349,11 +354,16 @@ class _GuideCard extends StatelessWidget {
                     icon: const Icon(Icons.volume_up_outlined),
                     selectedIcon: const Icon(Icons.volume_up),
                   ),
-                TextButton.icon(
-                  onPressed: onSkip,
-                  style: TextButton.styleFrom(minimumSize: const Size(48, 36), padding: const EdgeInsets.symmetric(horizontal: 8)),
-                  icon: const Icon(Icons.close, size: 18),
-                  label: Text(tr('Skip tour')),
+                // A long "Skip tour" (Tamil) shrinks instead of pushing the
+                // row off a small phone.
+                Flexible(
+                  flex: count,
+                  child: TextButton.icon(
+                    onPressed: onSkip,
+                    style: TextButton.styleFrom(minimumSize: const Size(48, 36), padding: const EdgeInsets.symmetric(horizontal: 8)),
+                    icon: const Icon(Icons.close, size: 18),
+                    label: Text(tr('Skip tour'), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ),
                 ),
               ],
             ),
@@ -365,11 +375,16 @@ class _GuideCard extends StatelessWidget {
                   // Tapping Mitra reads the step aloud too.
                   GestureDetector(
                     onTap: onMitra,
-                    child: Mitra(mood: step.mood, size: 104),
+                    child: Mitra(mood: step.mood, size: compact ? 72 : 104),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: AnimatedSwitcher(
+                    // On a small phone, or with large text, the words scroll
+                    // inside the card so the live screen above stays in view.
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: maxTextHeight),
+                      child: SingleChildScrollView(
+                        child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 220),
                       child: Column(
                         key: ValueKey(index),
@@ -395,6 +410,8 @@ class _GuideCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -412,9 +429,13 @@ class _GuideCard extends StatelessWidget {
               ])
             else
               Row(children: [
-                Text(trf('{n} of {total}', {'n': index + 1, 'total': count}),
-                    style: theme.textTheme.labelLarge?.copyWith(color: scheme.onSurfaceVariant)),
-                const Spacer(),
+                // The step count gives way first, so Back and Next always fit.
+                Expanded(
+                  child: Text(trf('{n} of {total}', {'n': index + 1, 'total': count}),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelLarge?.copyWith(color: scheme.onSurfaceVariant)),
+                ),
                 if (onBack != null) TextButton(onPressed: onBack, child: Text(tr('Back'))),
                 const SizedBox(width: 6),
                 FilledButton.icon(
@@ -476,5 +497,31 @@ class TourInviteCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// The live screen above the guide card. On a small phone the card leaves
+/// it little room, so it is laid out at least [minHeight] tall and cut off
+/// at the bottom, the way a phone screen shows its top part, instead of
+/// squashing the screen until its own layout breaks.
+class TourStageFrame extends StatelessWidget {
+  const TourStageFrame({super.key, required this.child, this.minHeight = 640});
+
+  final Widget child;
+  final double minHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, box) {
+      if (box.maxHeight >= minHeight) return child;
+      return ClipRect(
+        child: OverflowBox(
+          alignment: Alignment.topCenter,
+          minHeight: minHeight,
+          maxHeight: minHeight,
+          child: child,
+        ),
+      );
+    });
   }
 }
