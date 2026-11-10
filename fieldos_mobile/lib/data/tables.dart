@@ -720,3 +720,55 @@ class SyncOutbox extends Table {
   IntColumn get retryCount => integer().withDefault(const Constant(0))();
   TextColumn get lastError => text().nullable()();
 }
+
+/// The delivery slip or challan photographed when material arrives (v15,
+/// synced as site_receipt_attachments with the file in Storage). It used
+/// to sit in the receipt's note as a path on the supervisor's phone, so
+/// the manager approving the delivery never saw it.
+class ReceiptAttachments extends Table {
+  TextColumn get id => text()();
+  TextColumn get receiptId => text().withLength(min: 1, max: 36)();
+  TextColumn get filePath => text().withLength(min: 1, max: 500)();
+  TextColumn get mimeType => text().withLength(max: 100)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// The weekly site close (v15, synced as site_close_reviews): one row per
+/// decision on one item of one site's week (a worker's wages, an expense,
+/// a delivery, a day without attendance, or the week itself). Rows are
+/// never changed or removed, so the week keeps a dated record of what was
+/// approved, sent back and corrected, and by whom. What the item looked
+/// like when it was decided is kept in [fingerprint]; an item edited after
+/// its approval comes back to the queue.
+class CloseReviews extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// Monday of the week, yyyy-mm-dd.
+  TextColumn get weekStart => text().withLength(min: 10, max: 10)();
+
+  /// wages | expense | receipt | attendance | week
+  TextColumn get itemKind => text().withLength(min: 1, max: 20)();
+
+  /// The record's id; a worker's wage line key; a day (yyyy-mm-dd); 'week'.
+  TextColumn get itemId => text().withLength(min: 1, max: 160)();
+
+  /// approved | sent_back | fixed | closed | reopened
+  TextColumn get decision => text().withLength(min: 1, max: 20)();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get fingerprint => text().withLength(max: 200).nullable()();
+
+  /// The money the decision covered (wages earned, expense, invoice).
+  RealColumn get amount => real().nullable()();
+
+  /// For a delivery: the quantity the manager accepted.
+  RealColumn get acceptedQty => real().nullable()();
+  TextColumn get decidedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

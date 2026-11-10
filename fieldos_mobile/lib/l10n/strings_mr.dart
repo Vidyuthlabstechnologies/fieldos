@@ -2751,4 +2751,173 @@ const Map<String, String> stringsMr = {
       'अंतिम',
   'V-{n} (provisional)':
       'V-{n} (तात्पुरता)',
+  // Weekly site close
+  'A removed entry':
+      'काढलेली नोंद',
+  'Advance of {amount} not worked off yet':
+      '{amount} ॲडव्हान्स अजून कामातून फिटला नाही',
+  'Advances not worked off':
+      'न फिटलेले ॲडव्हान्स',
+  'Approve each site\'s wages, expenses and deliveries for the week.':
+      'प्रत्येक साइटची आठवड्याची मजुरी, खर्च आणि माल डिलिव्हरी मंजूर करा.',
+  'Approve everything, and get back what was sent back, to close the week.':
+      'आठवडा बंद करण्यासाठी सर्व मंजूर करा, आणि परत पाठवलेले दुरुस्त होऊन परत यावे.',
+  'Approve the {n} with no exceptions':
+      'अडचण नसलेले {n} मंजूर करा',
+  'Approve this delivery':
+      'ही डिलिव्हरी मंजूर करा',
+  'Bill':
+      'बिल',
+  'Cancelled entry':
+      'रद्द केलेली नोंद',
+  'Changed after approval':
+      'मंजुरीनंतर बदलले',
+  'Changed since close':
+      'बंद केल्यानंतर बदलले',
+  'Close the week':
+      'आठवडा बंद करा',
+  'Close the week again':
+      'आठवडा पुन्हा बंद करा',
+  'Close this week?':
+      'हा आठवडा बंद करायचा?',
+  'Closed':
+      'बंद',
+  'Closed by {who}, {when}':
+      '{who} यांनी बंद केला, {when}',
+  'Corrected, review again':
+      'दुरुस्त केले, पुन्हा पाहा',
+  'Deliveries':
+      'माल डिलिव्हरी',
+  'Delivery slip':
+      'डिलिव्हरी पावती',
+  'Each running site gets a weekly close here: wages, expenses and deliveries to approve.':
+      'प्रत्येक चालू साइटचा आठवड्याचा हिशोब इथे: मंजूर करायची मजुरी, खर्च आणि डिलिव्हरी.',
+  'Edited after it was entered':
+      'नोंदीनंतर बदलले',
+  'Enter the quantity accepted.':
+      'स्वीकारलेले प्रमाण टाका.',
+  'Expenses':
+      'खर्च',
+  'Expenses {amount}':
+      'खर्च {amount}',
+  'History':
+      'इतिहास',
+  'Less than received if some was short or damaged.':
+      'काही कमी किंवा खराब आले असल्यास आलेल्यापेक्षा कमी.',
+  'Mark as fixed':
+      'दुरुस्त झाले म्हणून नोंदवा',
+  'Marked fixed':
+      'दुरुस्त झाले म्हणून नोंदवले',
+  'Material delivered':
+      'आलेला माल',
+  'No attendance recorded':
+      'हजेरी नोंदवली नाही',
+  'No bill photo':
+      'बिलाचा फोटो नाही',
+  'No daily wage set, so wages can\'t be worked out':
+      'रोजची मजुरी ठरवली नाही, त्यामुळे हिशोब होऊ शकत नाही',
+  'No decisions yet this week.':
+      'या आठवड्यात अजून निर्णय नाहीत.',
+  'No delivery slip photo':
+      'डिलिव्हरी पावतीचा फोटो नाही',
+  'No invoice amount':
+      'बिलाची रक्कम नाही',
+  'Not against a purchase order':
+      'कोणत्याही PO विरुद्ध नाही',
+  'Nothing approved yet.':
+      'अजून काहीही मंजूर नाही.',
+  'Nothing left to review.':
+      'पाहण्यासाठी काही उरले नाही.',
+  'Nothing recorded':
+      'काहीही नोंदवले नाही',
+  'Nothing sent back.':
+      'काहीही परत पाठवले नाही.',
+  'Nothing was recorded on this site this week.':
+      'या आठवड्यात या साइटवर काहीही नोंदवले नाही.',
+  'Photograph the delivery slip':
+      'डिलिव्हरी पावतीचा फोटो घ्या',
+  'Punch-out missing on 1 day':
+      '1 दिवस पंच-आउट नाही',
+  'Punch-out missing on {n} days':
+      '{n} दिवस पंच-आउट नाही',
+  'Quantity accepted':
+      'स्वीकारलेले प्रमाण',
+  'Ready to close':
+      'बंद करण्यास तयार',
+  'Reopen the week':
+      'आठवडा पुन्हा उघडा',
+  'Reopen this week?':
+      'हा आठवडा पुन्हा उघडायचा?',
+  'Report says {n} people, but no attendance':
+      'अहवालात {n} लोक, पण हजेरी नाही',
+  'Send back':
+      'परत पाठवा',
+  'Send back to the site':
+      'साइटला परत पाठवा',
+  'Send the pack to accounts':
+      'पॅक अकाउंट्सला पाठवा',
+  'Sent back':
+      'परत पाठवले',
+  'Short by {qty} against the order':
+      'ऑर्डरपेक्षा {qty} कमी',
+  'Site expenses':
+      'साइटचे खर्च',
+  'Slip':
+      'पावती',
+  'Slip photo attached':
+      'पावतीचा फोटो जोडला',
+  'The owner or a project manager approves the week. Fix what is sent back to you and mark it fixed.':
+      'मालक किंवा प्रोजेक्ट मॅनेजर आठवडा मंजूर करतात. तुम्हाला परत पाठवलेले दुरुस्त करा आणि दुरुस्त झाले म्हणून नोंदवा.',
+  'The photo has not reached this phone yet. Sync and try again.':
+      'फोटो अजून या फोनवर आला नाही. सिंक करून पुन्हा प्रयत्न करा.',
+  'This week on site':
+      'या आठवड्यात साइटवर',
+  'To review':
+      'पाहायचे',
+  'Voucher number not confirmed yet (not synced)':
+      'व्हाउचर नंबर अजून पक्का नाही (सिंक झाले नाही)',
+  'Wages':
+      'मजुरी',
+  'Wages and advances paid':
+      'दिलेली मजुरी आणि ॲडव्हान्स',
+  'Wages earned':
+      'कमावलेली मजुरी',
+  'Wages still due':
+      'बाकी मजुरी',
+  'Wages {amount}':
+      'मजुरी {amount}',
+  'Week':
+      'आठवडा',
+  'Week closed':
+      'आठवडा बंद झाला',
+  'Week reopened':
+      'आठवडा पुन्हा उघडला',
+  'Weekly close':
+      'आठवड्याचा हिशोब',
+  'What needs fixing?':
+      'काय दुरुस्त करायचे?',
+  'What was done? (optional)':
+      'काय केले? (ऐच्छिक)',
+  'Why?':
+      'का?',
+  'due {amount}':
+      'बाकी {amount}',
+  'earned {amount}':
+      'कमाई {amount}',
+  'ordered {qty}':
+      'ऑर्डर {qty}',
+  '{n} exceptions':
+      '{n} अडचणी',
+  '{n} items approved, {amount} in all. Anything changed later comes back here to review.':
+      '{n} गोष्टी मंजूर, एकूण {amount}. नंतर काही बदलले तर ते पुन्हा इथे येईल.',
+  '{n} items need a closer look':
+      '{n} गोष्टी नीट पाहायच्या आहेत',
+  '{n} sent back':
+      '{n} परत पाठवले',
+  '{n} to review':
+      '{n} पाहायचे',
+  '{qty} accepted':
+      '{qty} स्वीकारले',
+  '{qty} more than ordered':
+      'ऑर्डरपेक्षा {qty} जास्त',
 };

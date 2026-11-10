@@ -903,3 +903,57 @@ ExpenseAttachmentsCompanion expenseAttachmentFromSupabaseJson(Map<String, dynami
       filePath: localPath,
       mimeType: row['mime_type'] as String? ?? attachmentMimeType(localPath),
     );
+
+// --- Weekly site close and delivery slips (app schema v15,
+// 20261110030000_weekly_close.sql)
+
+String receiptSlipStoragePath(String projectId, ReceiptAttachment a) =>
+    '$projectId/receipt-slips/${a.id}${_ext(a.filePath)}';
+
+Map<String, dynamic> receiptAttachmentToSupabaseJson(ReceiptAttachment a, {required String projectId}) => {
+      'id': a.id,
+      'receipt_id': a.receiptId,
+      'file_path': receiptSlipStoragePath(projectId, a),
+      'mime_type': a.mimeType,
+      '_local_file_path': a.filePath,
+    };
+
+ReceiptAttachmentsCompanion receiptAttachmentFromSupabaseJson(Map<String, dynamic> row, {required String localPath}) =>
+    ReceiptAttachmentsCompanion.insert(
+      id: row['id'] as String,
+      receiptId: row['receipt_id'] as String,
+      filePath: localPath,
+      mimeType: row['mime_type'] as String? ?? attachmentMimeType(localPath),
+    );
+
+Map<String, dynamic> closeReviewToSupabaseJson(CloseReview r) => {
+      'id': r.id,
+      'project_id': r.projectId,
+      'week_start': r.weekStart,
+      'item_kind': r.itemKind,
+      'item_id': r.itemId,
+      'decision': r.decision,
+      'note': r.note,
+      'fingerprint': r.fingerprint,
+      'amount': r.amount,
+      'accepted_qty': r.acceptedQty,
+      'decided_by': r.decidedBy,
+      'created_at': _timestamp(r.createdAt.toUtc()),
+    };
+
+CloseReviewsCompanion closeReviewFromSupabaseJson(Map<String, dynamic> row) => CloseReviewsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      weekStart: row['week_start'] as String,
+      itemKind: row['item_kind'] as String,
+      itemId: row['item_id'] as String,
+      decision: row['decision'] as String,
+      note: Value(row['note'] as String?),
+      fingerprint: Value(row['fingerprint'] as String?),
+      amount: Value((row['amount'] as num?)?.toDouble()),
+      acceptedQty: Value((row['accepted_qty'] as num?)?.toDouble()),
+      decidedBy: row['decided_by'] as String,
+      createdAt: row['created_at'] == null
+          ? const Value.absent()
+          : Value(DateTime.parse(row['created_at'] as String).toLocal()),
+    );

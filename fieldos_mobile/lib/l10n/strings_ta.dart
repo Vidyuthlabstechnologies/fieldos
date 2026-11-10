@@ -2751,4 +2751,173 @@ const Map<String, String> stringsTa = {
       'இறுதி',
   'V-{n} (provisional)':
       'V-{n} (தற்காலிகம்)',
+  // Weekly site close
+  'A removed entry':
+      'நீக்கப்பட்ட பதிவு',
+  'Advance of {amount} not worked off yet':
+      '{amount} முன்பணம் இன்னும் வேலையில் கழியவில்லை',
+  'Advances not worked off':
+      'கழியாத முன்பணங்கள்',
+  'Approve each site\'s wages, expenses and deliveries for the week.':
+      'ஒவ்வொரு தளத்தின் வார கூலி, செலவுகள், பொருள் வரவுகளை ஒப்புதல் செய்யுங்கள்.',
+  'Approve everything, and get back what was sent back, to close the week.':
+      'வாரத்தை மூட அனைத்தையும் ஒப்புதல் செய்யுங்கள்; திருப்பி அனுப்பியவை சரிசெய்து வர வேண்டும்.',
+  'Approve the {n} with no exceptions':
+      'சிக்கல் இல்லாத {n} ஒப்புதல்',
+  'Approve this delivery':
+      'இந்த வரவை ஒப்புதல் செய்',
+  'Bill':
+      'பில்',
+  'Cancelled entry':
+      'ரத்தான பதிவு',
+  'Changed after approval':
+      'ஒப்புதலுக்குப் பிறகு மாற்றம்',
+  'Changed since close':
+      'மூடிய பின் மாற்றம்',
+  'Close the week':
+      'வாரத்தை மூடு',
+  'Close the week again':
+      'வாரத்தை மீண்டும் மூடு',
+  'Close this week?':
+      'இந்த வாரத்தை மூடவா?',
+  'Closed':
+      'மூடப்பட்டது',
+  'Closed by {who}, {when}':
+      '{who} மூடினார், {when}',
+  'Corrected, review again':
+      'சரிசெய்யப்பட்டது, மீண்டும் பாருங்கள்',
+  'Deliveries':
+      'பொருள் வரவுகள்',
+  'Delivery slip':
+      'டெலிவரி சீட்டு',
+  'Each running site gets a weekly close here: wages, expenses and deliveries to approve.':
+      'இயங்கும் ஒவ்வொரு தளத்தின் வார முடிவும் இங்கே: ஒப்புதலுக்கான கூலி, செலவுகள், வரவுகள்.',
+  'Edited after it was entered':
+      'பதிவுக்குப் பின் திருத்தப்பட்டது',
+  'Enter the quantity accepted.':
+      'ஏற்ற அளவை உள்ளிடுங்கள்.',
+  'Expenses':
+      'செலவுகள்',
+  'Expenses {amount}':
+      'செலவுகள் {amount}',
+  'History':
+      'வரலாறு',
+  'Less than received if some was short or damaged.':
+      'சில குறைவு அல்லது சேதமானால் வந்ததை விடக் குறைவு.',
+  'Mark as fixed':
+      'சரிசெய்ததாகக் குறி',
+  'Marked fixed':
+      'சரிசெய்ததாகக் குறிக்கப்பட்டது',
+  'Material delivered':
+      'வந்த பொருள்',
+  'No attendance recorded':
+      'வருகை பதிவு இல்லை',
+  'No bill photo':
+      'பில் புகைப்படம் இல்லை',
+  'No daily wage set, so wages can\'t be worked out':
+      'தினக் கூலி அமைக்கவில்லை, எனவே கணக்கிட முடியாது',
+  'No decisions yet this week.':
+      'இந்த வாரம் இன்னும் முடிவுகள் இல்லை.',
+  'No delivery slip photo':
+      'டெலிவரி சீட்டு புகைப்படம் இல்லை',
+  'No invoice amount':
+      'இன்வாய்ஸ் தொகை இல்லை',
+  'Not against a purchase order':
+      'எந்த PO-க்கும் எதிராக இல்லை',
+  'Nothing approved yet.':
+      'இன்னும் எதுவும் ஒப்புதல் இல்லை.',
+  'Nothing left to review.':
+      'பார்க்க எதுவும் இல்லை.',
+  'Nothing recorded':
+      'எதுவும் பதிவில்லை',
+  'Nothing sent back.':
+      'எதுவும் திருப்பி அனுப்பவில்லை.',
+  'Nothing was recorded on this site this week.':
+      'இந்த வாரம் இந்தத் தளத்தில் எதுவும் பதிவாகவில்லை.',
+  'Photograph the delivery slip':
+      'டெலிவரி சீட்டை புகைப்படம் எடு',
+  'Punch-out missing on 1 day':
+      '1 நாள் பஞ்ச்-அவுட் இல்லை',
+  'Punch-out missing on {n} days':
+      '{n} நாட்கள் பஞ்ச்-அவுட் இல்லை',
+  'Quantity accepted':
+      'ஏற்ற அளவு',
+  'Ready to close':
+      'மூடத் தயார்',
+  'Reopen the week':
+      'வாரத்தை மீண்டும் திற',
+  'Reopen this week?':
+      'இந்த வாரத்தை மீண்டும் திறக்கவா?',
+  'Report says {n} people, but no attendance':
+      'அறிக்கையில் {n} பேர், ஆனால் வருகை இல்லை',
+  'Send back':
+      'திருப்பி அனுப்பு',
+  'Send back to the site':
+      'தளத்துக்குத் திருப்பி அனுப்பு',
+  'Send the pack to accounts':
+      'தொகுப்பை கணக்குப் பிரிவுக்கு அனுப்பு',
+  'Sent back':
+      'திருப்பி அனுப்பப்பட்டது',
+  'Short by {qty} against the order':
+      'ஆர்டரை விட {qty} குறைவு',
+  'Site expenses':
+      'தளச் செலவுகள்',
+  'Slip':
+      'சீட்டு',
+  'Slip photo attached':
+      'சீட்டு புகைப்படம் இணைக்கப்பட்டது',
+  'The owner or a project manager approves the week. Fix what is sent back to you and mark it fixed.':
+      'உரிமையாளர் அல்லது திட்ட மேலாளர் வாரத்தை ஒப்புதல் செய்வார். உங்களுக்குத் திருப்பி அனுப்பியதைச் சரிசெய்து குறியிடுங்கள்.',
+  'The photo has not reached this phone yet. Sync and try again.':
+      'புகைப்படம் இன்னும் இந்த ஃபோனுக்கு வரவில்லை. ஒத்திசைத்து மீண்டும் முயலுங்கள்.',
+  'This week on site':
+      'இந்த வாரம் தளத்தில்',
+  'To review':
+      'பார்க்க வேண்டும்',
+  'Voucher number not confirmed yet (not synced)':
+      'வவுச்சர் எண் இன்னும் உறுதியாகவில்லை (ஒத்திசைக்கவில்லை)',
+  'Wages':
+      'கூலி',
+  'Wages and advances paid':
+      'கொடுத்த கூலி, முன்பணம்',
+  'Wages earned':
+      'ஈட்டிய கூலி',
+  'Wages still due':
+      'இன்னும் தர வேண்டிய கூலி',
+  'Wages {amount}':
+      'கூலி {amount}',
+  'Week':
+      'வாரம்',
+  'Week closed':
+      'வாரம் மூடப்பட்டது',
+  'Week reopened':
+      'வாரம் மீண்டும் திறக்கப்பட்டது',
+  'Weekly close':
+      'வார முடிவு',
+  'What needs fixing?':
+      'எதைச் சரிசெய்ய வேண்டும்?',
+  'What was done? (optional)':
+      'என்ன செய்யப்பட்டது? (விருப்பம்)',
+  'Why?':
+      'ஏன்?',
+  'due {amount}':
+      'நிலுவை {amount}',
+  'earned {amount}':
+      'ஈட்டியது {amount}',
+  'ordered {qty}':
+      'ஆர்டர் {qty}',
+  '{n} exceptions':
+      '{n} சிக்கல்கள்',
+  '{n} items approved, {amount} in all. Anything changed later comes back here to review.':
+      '{n} உருப்படிகள் ஒப்புதல், மொத்தம் {amount}. பின்னர் மாறினால் மீண்டும் இங்கே வரும்.',
+  '{n} items need a closer look':
+      '{n} உருப்படிகளைக் கவனமாகப் பார்க்க வேண்டும்',
+  '{n} sent back':
+      '{n} திருப்பி அனுப்பப்பட்டன',
+  '{n} to review':
+      '{n} பார்க்க வேண்டும்',
+  '{qty} accepted':
+      '{qty} ஏற்கப்பட்டது',
+  '{qty} more than ordered':
+      'ஆர்டரை விட {qty} அதிகம்',
 };

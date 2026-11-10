@@ -2751,4 +2751,173 @@ const Map<String, String> stringsKn = {
       'ಅಂತಿಮ',
   'V-{n} (provisional)':
       'V-{n} (ತಾತ್ಕಾಲಿಕ)',
+  // Weekly site close
+  'A removed entry':
+      'ತೆಗೆದುಹಾಕಿದ ನಮೂದು',
+  'Advance of {amount} not worked off yet':
+      '{amount} ಮುಂಗಡ ಇನ್ನೂ ಕೆಲಸದಲ್ಲಿ ತೀರಿಲ್ಲ',
+  'Advances not worked off':
+      'ತೀರದ ಮುಂಗಡಗಳು',
+  'Approve each site\'s wages, expenses and deliveries for the week.':
+      'ಪ್ರತಿ ಸೈಟ್‌ನ ವಾರದ ಕೂಲಿ, ಖರ್ಚು ಮತ್ತು ಸಾಮಗ್ರಿ ವಿತರಣೆಗಳನ್ನು ಅನುಮೋದಿಸಿ.',
+  'Approve everything, and get back what was sent back, to close the week.':
+      'ವಾರ ಮುಚ್ಚಲು ಎಲ್ಲವನ್ನೂ ಅನುಮೋದಿಸಿ; ಹಿಂದಿರುಗಿಸಿದವು ಸರಿಯಾಗಿ ಬರಬೇಕು.',
+  'Approve the {n} with no exceptions':
+      'ಸಮಸ್ಯೆ ಇಲ್ಲದ {n} ಅನುಮೋದಿಸಿ',
+  'Approve this delivery':
+      'ಈ ವಿತರಣೆಯನ್ನು ಅನುಮೋದಿಸಿ',
+  'Bill':
+      'ಬಿಲ್',
+  'Cancelled entry':
+      'ರದ್ದಾದ ನಮೂದು',
+  'Changed after approval':
+      'ಅನುಮೋದನೆಯ ನಂತರ ಬದಲಾಗಿದೆ',
+  'Changed since close':
+      'ಮುಚ್ಚಿದ ನಂತರ ಬದಲಾಗಿದೆ',
+  'Close the week':
+      'ವಾರ ಮುಚ್ಚಿ',
+  'Close the week again':
+      'ವಾರವನ್ನು ಮತ್ತೆ ಮುಚ್ಚಿ',
+  'Close this week?':
+      'ಈ ವಾರ ಮುಚ್ಚಬೇಕೆ?',
+  'Closed':
+      'ಮುಚ್ಚಲಾಗಿದೆ',
+  'Closed by {who}, {when}':
+      '{who} ಮುಚ್ಚಿದರು, {when}',
+  'Corrected, review again':
+      'ಸರಿಪಡಿಸಲಾಗಿದೆ, ಮತ್ತೆ ನೋಡಿ',
+  'Deliveries':
+      'ಸಾಮಗ್ರಿ ವಿತರಣೆಗಳು',
+  'Delivery slip':
+      'ಡೆಲಿವರಿ ಚೀಟಿ',
+  'Each running site gets a weekly close here: wages, expenses and deliveries to approve.':
+      'ಪ್ರತಿ ನಡೆಯುತ್ತಿರುವ ಸೈಟ್‌ನ ವಾರದ ಮುಕ್ತಾಯ ಇಲ್ಲಿ: ಅನುಮೋದಿಸಬೇಕಾದ ಕೂಲಿ, ಖರ್ಚು, ವಿತರಣೆಗಳು.',
+  'Edited after it was entered':
+      'ನಮೂದಿಸಿದ ನಂತರ ತಿದ್ದಲಾಗಿದೆ',
+  'Enter the quantity accepted.':
+      'ಸ್ವೀಕರಿಸಿದ ಪ್ರಮಾಣ ನಮೂದಿಸಿ.',
+  'Expenses':
+      'ಖರ್ಚುಗಳು',
+  'Expenses {amount}':
+      'ಖರ್ಚು {amount}',
+  'History':
+      'ಇತಿಹಾಸ',
+  'Less than received if some was short or damaged.':
+      'ಕೆಲವು ಕಡಿಮೆ ಅಥವಾ ಹಾಳಾಗಿದ್ದರೆ ಬಂದದ್ದಕ್ಕಿಂತ ಕಡಿಮೆ.',
+  'Mark as fixed':
+      'ಸರಿಪಡಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿ',
+  'Marked fixed':
+      'ಸರಿಪಡಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ',
+  'Material delivered':
+      'ಬಂದ ಸಾಮಗ್ರಿ',
+  'No attendance recorded':
+      'ಹಾಜರಾತಿ ದಾಖಲಾಗಿಲ್ಲ',
+  'No bill photo':
+      'ಬಿಲ್ ಫೋಟೋ ಇಲ್ಲ',
+  'No daily wage set, so wages can\'t be worked out':
+      'ದಿನದ ಕೂಲಿ ಹಾಕಿಲ್ಲ, ಆದ್ದರಿಂದ ಲೆಕ್ಕ ಮಾಡಲಾಗದು',
+  'No decisions yet this week.':
+      'ಈ ವಾರ ಇನ್ನೂ ನಿರ್ಧಾರಗಳಿಲ್ಲ.',
+  'No delivery slip photo':
+      'ಡೆಲಿವರಿ ಚೀಟಿ ಫೋಟೋ ಇಲ್ಲ',
+  'No invoice amount':
+      'ಇನ್‌ವಾಯ್ಸ್ ಮೊತ್ತ ಇಲ್ಲ',
+  'Not against a purchase order':
+      'ಯಾವುದೇ PO ವಿರುದ್ಧ ಅಲ್ಲ',
+  'Nothing approved yet.':
+      'ಇನ್ನೂ ಏನೂ ಅನುಮೋದಿಸಿಲ್ಲ.',
+  'Nothing left to review.':
+      'ನೋಡಲು ಏನೂ ಉಳಿದಿಲ್ಲ.',
+  'Nothing recorded':
+      'ಏನೂ ದಾಖಲಾಗಿಲ್ಲ',
+  'Nothing sent back.':
+      'ಏನೂ ಹಿಂದಿರುಗಿಸಿಲ್ಲ.',
+  'Nothing was recorded on this site this week.':
+      'ಈ ವಾರ ಈ ಸೈಟ್‌ನಲ್ಲಿ ಏನೂ ದಾಖಲಾಗಿಲ್ಲ.',
+  'Photograph the delivery slip':
+      'ಡೆಲಿವರಿ ಚೀಟಿಯ ಫೋಟೋ ತೆಗೆಯಿರಿ',
+  'Punch-out missing on 1 day':
+      '1 ದಿನ ಪಂಚ್-ಔಟ್ ಇಲ್ಲ',
+  'Punch-out missing on {n} days':
+      '{n} ದಿನ ಪಂಚ್-ಔಟ್ ಇಲ್ಲ',
+  'Quantity accepted':
+      'ಸ್ವೀಕರಿಸಿದ ಪ್ರಮಾಣ',
+  'Ready to close':
+      'ಮುಚ್ಚಲು ಸಿದ್ಧ',
+  'Reopen the week':
+      'ವಾರವನ್ನು ಮತ್ತೆ ತೆರೆಯಿರಿ',
+  'Reopen this week?':
+      'ಈ ವಾರ ಮತ್ತೆ ತೆರೆಯಬೇಕೆ?',
+  'Report says {n} people, but no attendance':
+      'ವರದಿಯಲ್ಲಿ {n} ಜನ, ಆದರೆ ಹಾಜರಾತಿ ಇಲ್ಲ',
+  'Send back':
+      'ಹಿಂದಿರುಗಿಸಿ',
+  'Send back to the site':
+      'ಸೈಟ್‌ಗೆ ಹಿಂದಿರುಗಿಸಿ',
+  'Send the pack to accounts':
+      'ಪ್ಯಾಕ್ ಅನ್ನು ಅಕೌಂಟ್ಸ್‌ಗೆ ಕಳುಹಿಸಿ',
+  'Sent back':
+      'ಹಿಂದಿರುಗಿಸಲಾಗಿದೆ',
+  'Short by {qty} against the order':
+      'ಆರ್ಡರ್‌ಗಿಂತ {qty} ಕಡಿಮೆ',
+  'Site expenses':
+      'ಸೈಟ್ ಖರ್ಚುಗಳು',
+  'Slip':
+      'ಚೀಟಿ',
+  'Slip photo attached':
+      'ಚೀಟಿ ಫೋಟೋ ಸೇರಿಸಲಾಗಿದೆ',
+  'The owner or a project manager approves the week. Fix what is sent back to you and mark it fixed.':
+      'ಮಾಲೀಕರು ಅಥವಾ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್ ವಾರವನ್ನು ಅನುಮೋದಿಸುತ್ತಾರೆ. ನಿಮಗೆ ಹಿಂದಿರುಗಿಸಿದ್ದನ್ನು ಸರಿಪಡಿಸಿ ಗುರುತಿಸಿ.',
+  'The photo has not reached this phone yet. Sync and try again.':
+      'ಫೋಟೋ ಇನ್ನೂ ಈ ಫೋನ್‌ಗೆ ಬಂದಿಲ್ಲ. ಸಿಂಕ್ ಮಾಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'This week on site':
+      'ಈ ವಾರ ಸೈಟ್‌ನಲ್ಲಿ',
+  'To review':
+      'ನೋಡಬೇಕು',
+  'Voucher number not confirmed yet (not synced)':
+      'ವೋಚರ್ ಸಂಖ್ಯೆ ಇನ್ನೂ ಖಚಿತವಾಗಿಲ್ಲ (ಸಿಂಕ್ ಆಗಿಲ್ಲ)',
+  'Wages':
+      'ಕೂಲಿ',
+  'Wages and advances paid':
+      'ಪಾವತಿಸಿದ ಕೂಲಿ ಮತ್ತು ಮುಂಗಡ',
+  'Wages earned':
+      'ಗಳಿಸಿದ ಕೂಲಿ',
+  'Wages still due':
+      'ಇನ್ನೂ ಬಾಕಿ ಕೂಲಿ',
+  'Wages {amount}':
+      'ಕೂಲಿ {amount}',
+  'Week':
+      'ವಾರ',
+  'Week closed':
+      'ವಾರ ಮುಚ್ಚಲಾಗಿದೆ',
+  'Week reopened':
+      'ವಾರ ಮತ್ತೆ ತೆರೆಯಲಾಗಿದೆ',
+  'Weekly close':
+      'ವಾರದ ಮುಕ್ತಾಯ',
+  'What needs fixing?':
+      'ಏನು ಸರಿಪಡಿಸಬೇಕು?',
+  'What was done? (optional)':
+      'ಏನು ಮಾಡಲಾಯಿತು? (ಐಚ್ಛಿಕ)',
+  'Why?':
+      'ಏಕೆ?',
+  'due {amount}':
+      'ಬಾಕಿ {amount}',
+  'earned {amount}':
+      'ಗಳಿಕೆ {amount}',
+  'ordered {qty}':
+      'ಆರ್ಡರ್ {qty}',
+  '{n} exceptions':
+      '{n} ಸಮಸ್ಯೆಗಳು',
+  '{n} items approved, {amount} in all. Anything changed later comes back here to review.':
+      '{n} ಅಂಶಗಳು ಅನುಮೋದಿತ, ಒಟ್ಟು {amount}. ನಂತರ ಬದಲಾದರೆ ಮತ್ತೆ ಇಲ್ಲಿಗೆ ಬರುತ್ತದೆ.',
+  '{n} items need a closer look':
+      '{n} ಅಂಶಗಳನ್ನು ಗಮನವಿಟ್ಟು ನೋಡಬೇಕು',
+  '{n} sent back':
+      '{n} ಹಿಂದಿರುಗಿಸಲಾಗಿದೆ',
+  '{n} to review':
+      '{n} ನೋಡಬೇಕು',
+  '{qty} accepted':
+      '{qty} ಸ್ವೀಕರಿಸಲಾಗಿದೆ',
+  '{qty} more than ordered':
+      'ಆರ್ಡರ್‌ಗಿಂತ {qty} ಹೆಚ್ಚು',
 };

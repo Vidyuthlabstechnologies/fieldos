@@ -1862,4 +1862,173 @@ const Map<String, String> stringsTe = {
       'చివరి',
   'V-{n} (provisional)':
       'V-{n} (తాత్కాలిక)',
+  // Weekly site close
+  'A removed entry':
+      'తొలగించిన ఎంట్రీ',
+  'Advance of {amount} not worked off yet':
+      '{amount} అడ్వాన్స్ ఇంకా పనితో తీరలేదు',
+  'Advances not worked off':
+      'పనితో తీరని అడ్వాన్సులు',
+  'Approve each site\'s wages, expenses and deliveries for the week.':
+      'ప్రతి సైట్ వారపు కూలీ, ఖర్చులు, సరుకు డెలివరీలను ఆమోదించండి.',
+  'Approve everything, and get back what was sent back, to close the week.':
+      'వారం మూసేందుకు అన్నీ ఆమోదించండి, వెనక్కి పంపినవి సరిచేసి రావాలి.',
+  'Approve the {n} with no exceptions':
+      'సమస్య లేని {n} ఆమోదించండి',
+  'Approve this delivery':
+      'ఈ డెలివరీని ఆమోదించండి',
+  'Bill':
+      'బిల్లు',
+  'Cancelled entry':
+      'రద్దు చేసిన ఎంట్రీ',
+  'Changed after approval':
+      'ఆమోదం తర్వాత మారింది',
+  'Changed since close':
+      'మూసిన తర్వాత మారింది',
+  'Close the week':
+      'వారం మూసివేయండి',
+  'Close the week again':
+      'వారం మళ్లీ మూసివేయండి',
+  'Close this week?':
+      'ఈ వారం మూసివేయాలా?',
+  'Closed':
+      'మూసివేశారు',
+  'Closed by {who}, {when}':
+      '{who} మూసివేశారు, {when}',
+  'Corrected, review again':
+      'సరిచేశారు, మళ్లీ చూడండి',
+  'Deliveries':
+      'సరుకు డెలివరీలు',
+  'Delivery slip':
+      'డెలివరీ స్లిప్',
+  'Each running site gets a weekly close here: wages, expenses and deliveries to approve.':
+      'ప్రతి నడుస్తున్న సైట్ వారపు ముగింపు ఇక్కడ: ఆమోదించాల్సిన కూలీ, ఖర్చులు, డెలివరీలు.',
+  'Edited after it was entered':
+      'నమోదు తర్వాత మార్చారు',
+  'Enter the quantity accepted.':
+      'అంగీకరించిన పరిమాణం నమోదు చేయండి.',
+  'Expenses':
+      'ఖర్చులు',
+  'Expenses {amount}':
+      'ఖర్చులు {amount}',
+  'History':
+      'చరిత్ర',
+  'Less than received if some was short or damaged.':
+      'కొంత తక్కువ లేదా పాడైతే వచ్చినదానికంటే తక్కువ.',
+  'Mark as fixed':
+      'సరిచేశామని గుర్తించండి',
+  'Marked fixed':
+      'సరిచేశామని గుర్తించారు',
+  'Material delivered':
+      'వచ్చిన సరుకు',
+  'No attendance recorded':
+      'హాజరు నమోదు కాలేదు',
+  'No bill photo':
+      'బిల్లు ఫోటో లేదు',
+  'No daily wage set, so wages can\'t be worked out':
+      'రోజు కూలీ పెట్టలేదు, కాబట్టి లెక్క వేయలేం',
+  'No decisions yet this week.':
+      'ఈ వారం ఇంకా నిర్ణయాలు లేవు.',
+  'No delivery slip photo':
+      'డెలివరీ స్లిప్ ఫోటో లేదు',
+  'No invoice amount':
+      'ఇన్వాయిస్ మొత్తం లేదు',
+  'Not against a purchase order':
+      'ఏ PO కి వ్యతిరేకంగా కాదు',
+  'Nothing approved yet.':
+      'ఇంకా ఏదీ ఆమోదించలేదు.',
+  'Nothing left to review.':
+      'చూడాల్సినది ఏమీ లేదు.',
+  'Nothing recorded':
+      'ఏమీ నమోదు కాలేదు',
+  'Nothing sent back.':
+      'ఏదీ వెనక్కి పంపలేదు.',
+  'Nothing was recorded on this site this week.':
+      'ఈ వారం ఈ సైట్‌లో ఏమీ నమోదు కాలేదు.',
+  'Photograph the delivery slip':
+      'డెలివరీ స్లిప్ ఫోటో తీయండి',
+  'Punch-out missing on 1 day':
+      '1 రోజు పంచ్-అవుట్ లేదు',
+  'Punch-out missing on {n} days':
+      '{n} రోజులు పంచ్-అవుట్ లేదు',
+  'Quantity accepted':
+      'అంగీకరించిన పరిమాణం',
+  'Ready to close':
+      'మూసేందుకు సిద్ధం',
+  'Reopen the week':
+      'వారం మళ్లీ తెరవండి',
+  'Reopen this week?':
+      'ఈ వారం మళ్లీ తెరవాలా?',
+  'Report says {n} people, but no attendance':
+      'రిపోర్ట్‌లో {n} మంది, కానీ హాజరు లేదు',
+  'Send back':
+      'వెనక్కి పంపండి',
+  'Send back to the site':
+      'సైట్‌కి వెనక్కి పంపండి',
+  'Send the pack to accounts':
+      'ప్యాక్‌ను అకౌంట్స్‌కి పంపండి',
+  'Sent back':
+      'వెనక్కి పంపారు',
+  'Short by {qty} against the order':
+      'ఆర్డర్ కంటే {qty} తక్కువ',
+  'Site expenses':
+      'సైట్ ఖర్చులు',
+  'Slip':
+      'స్లిప్',
+  'Slip photo attached':
+      'స్లిప్ ఫోటో జత చేశారు',
+  'The owner or a project manager approves the week. Fix what is sent back to you and mark it fixed.':
+      'యజమాని లేదా ప్రాజెక్ట్ మేనేజర్ వారాన్ని ఆమోదిస్తారు. మీకు వెనక్కి పంపినది సరిచేసి, సరిచేశామని గుర్తించండి.',
+  'The photo has not reached this phone yet. Sync and try again.':
+      'ఫోటో ఇంకా ఈ ఫోన్‌కి రాలేదు. సింక్ చేసి మళ్లీ ప్రయత్నించండి.',
+  'This week on site':
+      'ఈ వారం సైట్‌లో',
+  'To review':
+      'చూడాలి',
+  'Voucher number not confirmed yet (not synced)':
+      'వోచర్ నంబర్ ఇంకా ఖరారు కాలేదు (సింక్ కాలేదు)',
+  'Wages':
+      'కూలీ',
+  'Wages and advances paid':
+      'చెల్లించిన కూలీ, అడ్వాన్సులు',
+  'Wages earned':
+      'సంపాదించిన కూలీ',
+  'Wages still due':
+      'ఇంకా ఇవ్వాల్సిన కూలీ',
+  'Wages {amount}':
+      'కూలీ {amount}',
+  'Week':
+      'వారం',
+  'Week closed':
+      'వారం మూసివేశారు',
+  'Week reopened':
+      'వారం మళ్లీ తెరిచారు',
+  'Weekly close':
+      'వారపు ముగింపు',
+  'What needs fixing?':
+      'ఏమి సరిచేయాలి?',
+  'What was done? (optional)':
+      'ఏమి చేశారు? (ఐచ్ఛికం)',
+  'Why?':
+      'ఎందుకు?',
+  'due {amount}':
+      'బాకీ {amount}',
+  'earned {amount}':
+      'సంపాదన {amount}',
+  'ordered {qty}':
+      'ఆర్డర్ {qty}',
+  '{n} exceptions':
+      '{n} సమస్యలు',
+  '{n} items approved, {amount} in all. Anything changed later comes back here to review.':
+      '{n} అంశాలు ఆమోదించారు, మొత్తం {amount}. తర్వాత ఏదైనా మారితే మళ్లీ ఇక్కడికి వస్తుంది.',
+  '{n} items need a closer look':
+      '{n} అంశాలను జాగ్రత్తగా చూడాలి',
+  '{n} sent back':
+      '{n} వెనక్కి పంపారు',
+  '{n} to review':
+      '{n} చూడాలి',
+  '{qty} accepted':
+      '{qty} అంగీకరించారు',
+  '{qty} more than ordered':
+      'ఆర్డర్ కంటే {qty} ఎక్కువ',
 };

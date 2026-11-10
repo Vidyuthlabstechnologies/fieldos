@@ -67,6 +67,8 @@ String? _clip(String? s, int max) {
   Documents,
   Workers,
   ProjectMessages,
+  ReceiptAttachments,
+  CloseReviews,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -95,7 +97,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -211,8 +213,27 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(expenseAttachments);
             await m.createTable(projectNotes);
           }
+          if (from < 15) {
+            await m.createTable(receiptAttachments);
+            await m.createTable(closeReviews);
+            await _moveSlipPhotosOutOfNotes();
+          }
         },
       );
+
+  /// Before v15 a delivery photo was kept as `Photo: <path>` in the
+  /// receipt's note. Those become real slips, so they sync like new ones.
+  Future<void> _moveSlipPhotosOutOfNotes() async {
+    for (final r in await select(materialReceipts).get()) {
+      final note = r.notes?.trim() ?? '';
+      if (!note.startsWith('Photo: ')) continue;
+      final path = note.substring('Photo: '.length).trim();
+      if (path.isEmpty || !File(path).existsSync()) continue;
+      await materialDao.attachSlip(r.id, path);
+      await (update(materialReceipts)..where((m) => m.id.equals(r.id)))
+          .write(const MaterialReceiptsCompanion(notes: Value(null)));
+    }
+  }
 
   /// A table made by an earlier step of this same upgrade (createTable
   /// uses today's columns) already has the column.
@@ -283,6 +304,7 @@ class AppDatabase extends _$AppDatabase {
   PaymentDao get paymentDao => PaymentDao(this);
   BillDao get billDao => BillDao(this);
   NoteDao get noteDao => NoteDao(this);
+  CloseDao get closeDao => CloseDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -1027,12 +1049,15 @@ class PurchaseDao extends DatabaseAccessor<AppDatabase> with _$PurchaseDaoMixin 
   /// closes it, as one step (audit P1): a receipt without its closure left
   /// a delivered order showing as still due. Idempotent on the receipt id,
   /// so a repeated submit doesn't count the delivery twice.
+  /// [slipPath]: the delivery slip photo, kept with the receipt in the
+  /// same step so a receipt never syncs without the slip it was taken with.
   Future<MaterialReceipt> receiveAgainstOrder(String orderId, MaterialReceiptsCompanion receipt,
-          {required bool closeOrder}) =>
+          {required bool closeOrder, String? slipPath}) =>
       transaction(() async {
         final id = receipt.id.present ? receipt.id.value : _uuid.v4();
         final already = await (select(db.materialReceipts)..where((m) => m.id.equals(id))).getSingleOrNull();
         final row = already ?? await db.materialDao.createReceipt(receipt.copyWith(id: Value(id), poId: Value(orderId)));
+        if (already == null && slipPath != null) await db.materialDao.attachSlip(row.id, slipPath);
         if (closeOrder) {
           final order = await (select(purchaseOrders)..where((o) => o.id.equals(orderId))).getSingleOrNull();
           if (order != null && order.status != 'delivered') await setOrderStatus(orderId, 'delivered');
@@ -1048,7 +1073,7 @@ class PurchaseDao extends DatabaseAccessor<AppDatabase> with _$PurchaseDaoMixin 
       into(purchaseOrders).insertOnConflictUpdate(companion);
 }
 
-@DriftAccessor(tables: [MaterialReceipts, MaterialUsage])
+@DriftAccessor(tables: [MaterialReceipts, MaterialUsage, ReceiptAttachments])
 class MaterialDao extends DatabaseAccessor<AppDatabase> with _$MaterialDaoMixin {
   MaterialDao(super.db);
 
@@ -1089,6 +1114,55 @@ class MaterialDao extends DatabaseAccessor<AppDatabase> with _$MaterialDaoMixin 
       (select(materialUsage)..where((m) => m.projectId.equals(projectId))).get();
 
   Future<void> upsertReceiptFromRemote(MaterialReceiptsCompanion c) => into(materialReceipts).insertOnConflictUpdate(c);
+
+  Future<MaterialReceipt?> receiptById(String id) =>
+      (select(materialReceipts)..where((m) => m.id.equals(id))).getSingleOrNull();
+
+  /// Keeps the delivery slip photo with a receipt and queues it (file
+  /// first, then the row) so the manager approving it sees the slip.
+  Future<ReceiptAttachment> attachSlip(String receiptId, String filePath, {String? mimeType}) => transaction(() async {
+        final row = await into(receiptAttachments).insertReturning(ReceiptAttachmentsCompanion.insert(
+          id: _uuid.v4(),
+          receiptId: receiptId,
+          filePath: filePath,
+          mimeType: mimeType ?? attachmentMimeType(filePath),
+        ));
+        final receipt = await receiptById(receiptId);
+        if (receipt != null) {
+          await db.syncOutboxDao.enqueue(
+            targetTable: 'site_receipt_attachments',
+            recordId: row.id,
+            operation: 'insert',
+            payloadJson: jsonEncode(receiptAttachmentToSupabaseJson(row, projectId: receipt.projectId)),
+          );
+        }
+        return row;
+      });
+
+  Future<ReceiptAttachment?> slipById(String id) =>
+      (select(receiptAttachments)..where((a) => a.id.equals(id))).getSingleOrNull();
+
+  Future<List<ReceiptAttachment>> slipsFor(String receiptId) => (select(receiptAttachments)
+        ..where((a) => a.receiptId.equals(receiptId))
+        ..orderBy([(a) => OrderingTerm.asc(a.createdAt)]))
+      .get();
+
+  /// Every slip of the site's receipts, by receipt id.
+  Future<Map<String, List<ReceiptAttachment>>> slipsForProject(String projectId) async {
+    final rows = await (select(receiptAttachments).join(
+            [innerJoin(materialReceipts, materialReceipts.id.equalsExp(receiptAttachments.receiptId))])
+          ..where(materialReceipts.projectId.equals(projectId))
+          ..orderBy([OrderingTerm.asc(receiptAttachments.createdAt)]))
+        .get();
+    final out = <String, List<ReceiptAttachment>>{};
+    for (final r in rows) {
+      final a = r.readTable(receiptAttachments);
+      (out[a.receiptId] ??= []).add(a);
+    }
+    return out;
+  }
+
+  Future<void> upsertSlipFromRemote(ReceiptAttachmentsCompanion c) => into(receiptAttachments).insertOnConflictUpdate(c);
   Future<void> upsertUsageFromRemote(MaterialUsageCompanion c) => into(materialUsage).insertOnConflictUpdate(c);
 }
 
@@ -2213,4 +2287,68 @@ class MessageDao extends DatabaseAccessor<AppDatabase> with _$MessageDaoMixin {
             ..where((m) => m.projectId.equals(projectId))
             ..orderBy([(m) => OrderingTerm.asc(m.createdAt)]))
           .get();
+}
+
+// ---------------------------------------------------------------------------
+// Weekly site close (v15)
+// ---------------------------------------------------------------------------
+
+@DriftAccessor(tables: [CloseReviews])
+class CloseDao extends DatabaseAccessor<AppDatabase> with _$CloseDaoMixin {
+  CloseDao(super.db);
+
+  /// Every decision on a site's week, oldest first. Dates are kept to the
+  /// second, so two decisions in the same second keep the order they were
+  /// written in (rowid); pulls apply teammates' rows in change-log order.
+  Future<List<CloseReview>> forWeek(String projectId, String weekStart) => (select(closeReviews)
+        ..where((r) => r.projectId.equals(projectId) & r.weekStart.equals(weekStart))
+        ..orderBy([(r) => OrderingTerm.asc(r.createdAt), (r) => OrderingTerm.asc(r.rowId)]))
+      .get();
+
+  /// Every decision on the site, oldest first.
+  Future<List<CloseReview>> forProject(String projectId) => (select(closeReviews)
+        ..where((r) => r.projectId.equals(projectId))
+        ..orderBy([(r) => OrderingTerm.asc(r.createdAt), (r) => OrderingTerm.asc(r.rowId)]))
+      .get();
+
+  /// Records one decision. Rows are only ever added: a correction is a new
+  /// row, so the history stays as it happened.
+  Future<CloseReview> record({
+    required String projectId,
+    required String weekStart,
+    required String itemKind,
+    required String itemId,
+    required String decision,
+    required String by,
+    String? note,
+    String? fingerprint,
+    double? amount,
+    double? acceptedQty,
+    DateTime? now,
+  }) =>
+      transaction(() async {
+        final row = await into(closeReviews).insertReturning(CloseReviewsCompanion.insert(
+          id: _uuid.v4(),
+          projectId: projectId,
+          weekStart: weekStart,
+          itemKind: itemKind,
+          itemId: itemId,
+          decision: decision,
+          note: Value(_clip(note, 300)),
+          fingerprint: Value(_clip(fingerprint, 200)),
+          amount: Value(amount),
+          acceptedQty: Value(acceptedQty),
+          decidedBy: by,
+          createdAt: Value(now ?? DateTime.now()),
+        ));
+        await db.syncOutboxDao.enqueue(
+          targetTable: 'site_close_reviews',
+          recordId: row.id,
+          operation: 'insert',
+          payloadJson: jsonEncode(closeReviewToSupabaseJson(row)),
+        );
+        return row;
+      });
+
+  Future<void> upsertFromRemote(CloseReviewsCompanion c) => into(closeReviews).insertOnConflictUpdate(c);
 }

@@ -21717,6 +21717,1122 @@ class ProjectMessagesCompanion extends UpdateCompanion<ProjectMessage> {
   }
 }
 
+class $ReceiptAttachmentsTable extends ReceiptAttachments
+    with TableInfo<$ReceiptAttachmentsTable, ReceiptAttachment> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReceiptAttachmentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _receiptIdMeta = const VerificationMeta(
+    'receiptId',
+  );
+  @override
+  late final GeneratedColumn<String> receiptId = GeneratedColumn<String>(
+    'receipt_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _filePathMeta = const VerificationMeta(
+    'filePath',
+  );
+  @override
+  late final GeneratedColumn<String> filePath = GeneratedColumn<String>(
+    'file_path',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 500,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _mimeTypeMeta = const VerificationMeta(
+    'mimeType',
+  );
+  @override
+  late final GeneratedColumn<String> mimeType = GeneratedColumn<String>(
+    'mime_type',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    receiptId,
+    filePath,
+    mimeType,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'receipt_attachments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReceiptAttachment> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('receipt_id')) {
+      context.handle(
+        _receiptIdMeta,
+        receiptId.isAcceptableOrUnknown(data['receipt_id']!, _receiptIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_receiptIdMeta);
+    }
+    if (data.containsKey('file_path')) {
+      context.handle(
+        _filePathMeta,
+        filePath.isAcceptableOrUnknown(data['file_path']!, _filePathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_filePathMeta);
+    }
+    if (data.containsKey('mime_type')) {
+      context.handle(
+        _mimeTypeMeta,
+        mimeType.isAcceptableOrUnknown(data['mime_type']!, _mimeTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_mimeTypeMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ReceiptAttachment map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReceiptAttachment(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      receiptId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}receipt_id'],
+      )!,
+      filePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_path'],
+      )!,
+      mimeType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mime_type'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ReceiptAttachmentsTable createAlias(String alias) {
+    return $ReceiptAttachmentsTable(attachedDatabase, alias);
+  }
+}
+
+class ReceiptAttachment extends DataClass
+    implements Insertable<ReceiptAttachment> {
+  final String id;
+  final String receiptId;
+  final String filePath;
+  final String mimeType;
+  final DateTime createdAt;
+  const ReceiptAttachment({
+    required this.id,
+    required this.receiptId,
+    required this.filePath,
+    required this.mimeType,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['receipt_id'] = Variable<String>(receiptId);
+    map['file_path'] = Variable<String>(filePath);
+    map['mime_type'] = Variable<String>(mimeType);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ReceiptAttachmentsCompanion toCompanion(bool nullToAbsent) {
+    return ReceiptAttachmentsCompanion(
+      id: Value(id),
+      receiptId: Value(receiptId),
+      filePath: Value(filePath),
+      mimeType: Value(mimeType),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ReceiptAttachment.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReceiptAttachment(
+      id: serializer.fromJson<String>(json['id']),
+      receiptId: serializer.fromJson<String>(json['receiptId']),
+      filePath: serializer.fromJson<String>(json['filePath']),
+      mimeType: serializer.fromJson<String>(json['mimeType']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'receiptId': serializer.toJson<String>(receiptId),
+      'filePath': serializer.toJson<String>(filePath),
+      'mimeType': serializer.toJson<String>(mimeType),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ReceiptAttachment copyWith({
+    String? id,
+    String? receiptId,
+    String? filePath,
+    String? mimeType,
+    DateTime? createdAt,
+  }) => ReceiptAttachment(
+    id: id ?? this.id,
+    receiptId: receiptId ?? this.receiptId,
+    filePath: filePath ?? this.filePath,
+    mimeType: mimeType ?? this.mimeType,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  ReceiptAttachment copyWithCompanion(ReceiptAttachmentsCompanion data) {
+    return ReceiptAttachment(
+      id: data.id.present ? data.id.value : this.id,
+      receiptId: data.receiptId.present ? data.receiptId.value : this.receiptId,
+      filePath: data.filePath.present ? data.filePath.value : this.filePath,
+      mimeType: data.mimeType.present ? data.mimeType.value : this.mimeType,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReceiptAttachment(')
+          ..write('id: $id, ')
+          ..write('receiptId: $receiptId, ')
+          ..write('filePath: $filePath, ')
+          ..write('mimeType: $mimeType, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, receiptId, filePath, mimeType, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReceiptAttachment &&
+          other.id == this.id &&
+          other.receiptId == this.receiptId &&
+          other.filePath == this.filePath &&
+          other.mimeType == this.mimeType &&
+          other.createdAt == this.createdAt);
+}
+
+class ReceiptAttachmentsCompanion extends UpdateCompanion<ReceiptAttachment> {
+  final Value<String> id;
+  final Value<String> receiptId;
+  final Value<String> filePath;
+  final Value<String> mimeType;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const ReceiptAttachmentsCompanion({
+    this.id = const Value.absent(),
+    this.receiptId = const Value.absent(),
+    this.filePath = const Value.absent(),
+    this.mimeType = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReceiptAttachmentsCompanion.insert({
+    required String id,
+    required String receiptId,
+    required String filePath,
+    required String mimeType,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       receiptId = Value(receiptId),
+       filePath = Value(filePath),
+       mimeType = Value(mimeType);
+  static Insertable<ReceiptAttachment> custom({
+    Expression<String>? id,
+    Expression<String>? receiptId,
+    Expression<String>? filePath,
+    Expression<String>? mimeType,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (receiptId != null) 'receipt_id': receiptId,
+      if (filePath != null) 'file_path': filePath,
+      if (mimeType != null) 'mime_type': mimeType,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReceiptAttachmentsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? receiptId,
+    Value<String>? filePath,
+    Value<String>? mimeType,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return ReceiptAttachmentsCompanion(
+      id: id ?? this.id,
+      receiptId: receiptId ?? this.receiptId,
+      filePath: filePath ?? this.filePath,
+      mimeType: mimeType ?? this.mimeType,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (receiptId.present) {
+      map['receipt_id'] = Variable<String>(receiptId.value);
+    }
+    if (filePath.present) {
+      map['file_path'] = Variable<String>(filePath.value);
+    }
+    if (mimeType.present) {
+      map['mime_type'] = Variable<String>(mimeType.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReceiptAttachmentsCompanion(')
+          ..write('id: $id, ')
+          ..write('receiptId: $receiptId, ')
+          ..write('filePath: $filePath, ')
+          ..write('mimeType: $mimeType, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CloseReviewsTable extends CloseReviews
+    with TableInfo<$CloseReviewsTable, CloseReview> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CloseReviewsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _weekStartMeta = const VerificationMeta(
+    'weekStart',
+  );
+  @override
+  late final GeneratedColumn<String> weekStart = GeneratedColumn<String>(
+    'week_start',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 10,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _itemKindMeta = const VerificationMeta(
+    'itemKind',
+  );
+  @override
+  late final GeneratedColumn<String> itemKind = GeneratedColumn<String>(
+    'item_kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _itemIdMeta = const VerificationMeta('itemId');
+  @override
+  late final GeneratedColumn<String> itemId = GeneratedColumn<String>(
+    'item_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 160,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _decisionMeta = const VerificationMeta(
+    'decision',
+  );
+  @override
+  late final GeneratedColumn<String> decision = GeneratedColumn<String>(
+    'decision',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fingerprintMeta = const VerificationMeta(
+    'fingerprint',
+  );
+  @override
+  late final GeneratedColumn<String> fingerprint = GeneratedColumn<String>(
+    'fingerprint',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _acceptedQtyMeta = const VerificationMeta(
+    'acceptedQty',
+  );
+  @override
+  late final GeneratedColumn<double> acceptedQty = GeneratedColumn<double>(
+    'accepted_qty',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _decidedByMeta = const VerificationMeta(
+    'decidedBy',
+  );
+  @override
+  late final GeneratedColumn<String> decidedBy = GeneratedColumn<String>(
+    'decided_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    weekStart,
+    itemKind,
+    itemId,
+    decision,
+    note,
+    fingerprint,
+    amount,
+    acceptedQty,
+    decidedBy,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'close_reviews';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CloseReview> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('week_start')) {
+      context.handle(
+        _weekStartMeta,
+        weekStart.isAcceptableOrUnknown(data['week_start']!, _weekStartMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_weekStartMeta);
+    }
+    if (data.containsKey('item_kind')) {
+      context.handle(
+        _itemKindMeta,
+        itemKind.isAcceptableOrUnknown(data['item_kind']!, _itemKindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemKindMeta);
+    }
+    if (data.containsKey('item_id')) {
+      context.handle(
+        _itemIdMeta,
+        itemId.isAcceptableOrUnknown(data['item_id']!, _itemIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemIdMeta);
+    }
+    if (data.containsKey('decision')) {
+      context.handle(
+        _decisionMeta,
+        decision.isAcceptableOrUnknown(data['decision']!, _decisionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_decisionMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('fingerprint')) {
+      context.handle(
+        _fingerprintMeta,
+        fingerprint.isAcceptableOrUnknown(
+          data['fingerprint']!,
+          _fingerprintMeta,
+        ),
+      );
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    }
+    if (data.containsKey('accepted_qty')) {
+      context.handle(
+        _acceptedQtyMeta,
+        acceptedQty.isAcceptableOrUnknown(
+          data['accepted_qty']!,
+          _acceptedQtyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('decided_by')) {
+      context.handle(
+        _decidedByMeta,
+        decidedBy.isAcceptableOrUnknown(data['decided_by']!, _decidedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_decidedByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CloseReview map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CloseReview(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      weekStart: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}week_start'],
+      )!,
+      itemKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_kind'],
+      )!,
+      itemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_id'],
+      )!,
+      decision: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decision'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      fingerprint: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fingerprint'],
+      ),
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount'],
+      ),
+      acceptedQty: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}accepted_qty'],
+      ),
+      decidedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decided_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CloseReviewsTable createAlias(String alias) {
+    return $CloseReviewsTable(attachedDatabase, alias);
+  }
+}
+
+class CloseReview extends DataClass implements Insertable<CloseReview> {
+  final String id;
+  final String projectId;
+
+  /// Monday of the week, yyyy-mm-dd.
+  final String weekStart;
+
+  /// wages | expense | receipt | attendance | week
+  final String itemKind;
+
+  /// The record's id; a worker's wage line key; a day (yyyy-mm-dd); 'week'.
+  final String itemId;
+
+  /// approved | sent_back | fixed | closed | reopened
+  final String decision;
+  final String? note;
+  final String? fingerprint;
+
+  /// The money the decision covered (wages earned, expense, invoice).
+  final double? amount;
+
+  /// For a delivery: the quantity the manager accepted.
+  final double? acceptedQty;
+  final String decidedBy;
+  final DateTime createdAt;
+  const CloseReview({
+    required this.id,
+    required this.projectId,
+    required this.weekStart,
+    required this.itemKind,
+    required this.itemId,
+    required this.decision,
+    this.note,
+    this.fingerprint,
+    this.amount,
+    this.acceptedQty,
+    required this.decidedBy,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['week_start'] = Variable<String>(weekStart);
+    map['item_kind'] = Variable<String>(itemKind);
+    map['item_id'] = Variable<String>(itemId);
+    map['decision'] = Variable<String>(decision);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || fingerprint != null) {
+      map['fingerprint'] = Variable<String>(fingerprint);
+    }
+    if (!nullToAbsent || amount != null) {
+      map['amount'] = Variable<double>(amount);
+    }
+    if (!nullToAbsent || acceptedQty != null) {
+      map['accepted_qty'] = Variable<double>(acceptedQty);
+    }
+    map['decided_by'] = Variable<String>(decidedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  CloseReviewsCompanion toCompanion(bool nullToAbsent) {
+    return CloseReviewsCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      weekStart: Value(weekStart),
+      itemKind: Value(itemKind),
+      itemId: Value(itemId),
+      decision: Value(decision),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      fingerprint: fingerprint == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fingerprint),
+      amount: amount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amount),
+      acceptedQty: acceptedQty == null && nullToAbsent
+          ? const Value.absent()
+          : Value(acceptedQty),
+      decidedBy: Value(decidedBy),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory CloseReview.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CloseReview(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      weekStart: serializer.fromJson<String>(json['weekStart']),
+      itemKind: serializer.fromJson<String>(json['itemKind']),
+      itemId: serializer.fromJson<String>(json['itemId']),
+      decision: serializer.fromJson<String>(json['decision']),
+      note: serializer.fromJson<String?>(json['note']),
+      fingerprint: serializer.fromJson<String?>(json['fingerprint']),
+      amount: serializer.fromJson<double?>(json['amount']),
+      acceptedQty: serializer.fromJson<double?>(json['acceptedQty']),
+      decidedBy: serializer.fromJson<String>(json['decidedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'weekStart': serializer.toJson<String>(weekStart),
+      'itemKind': serializer.toJson<String>(itemKind),
+      'itemId': serializer.toJson<String>(itemId),
+      'decision': serializer.toJson<String>(decision),
+      'note': serializer.toJson<String?>(note),
+      'fingerprint': serializer.toJson<String?>(fingerprint),
+      'amount': serializer.toJson<double?>(amount),
+      'acceptedQty': serializer.toJson<double?>(acceptedQty),
+      'decidedBy': serializer.toJson<String>(decidedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  CloseReview copyWith({
+    String? id,
+    String? projectId,
+    String? weekStart,
+    String? itemKind,
+    String? itemId,
+    String? decision,
+    Value<String?> note = const Value.absent(),
+    Value<String?> fingerprint = const Value.absent(),
+    Value<double?> amount = const Value.absent(),
+    Value<double?> acceptedQty = const Value.absent(),
+    String? decidedBy,
+    DateTime? createdAt,
+  }) => CloseReview(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    weekStart: weekStart ?? this.weekStart,
+    itemKind: itemKind ?? this.itemKind,
+    itemId: itemId ?? this.itemId,
+    decision: decision ?? this.decision,
+    note: note.present ? note.value : this.note,
+    fingerprint: fingerprint.present ? fingerprint.value : this.fingerprint,
+    amount: amount.present ? amount.value : this.amount,
+    acceptedQty: acceptedQty.present ? acceptedQty.value : this.acceptedQty,
+    decidedBy: decidedBy ?? this.decidedBy,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  CloseReview copyWithCompanion(CloseReviewsCompanion data) {
+    return CloseReview(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      weekStart: data.weekStart.present ? data.weekStart.value : this.weekStart,
+      itemKind: data.itemKind.present ? data.itemKind.value : this.itemKind,
+      itemId: data.itemId.present ? data.itemId.value : this.itemId,
+      decision: data.decision.present ? data.decision.value : this.decision,
+      note: data.note.present ? data.note.value : this.note,
+      fingerprint: data.fingerprint.present
+          ? data.fingerprint.value
+          : this.fingerprint,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      acceptedQty: data.acceptedQty.present
+          ? data.acceptedQty.value
+          : this.acceptedQty,
+      decidedBy: data.decidedBy.present ? data.decidedBy.value : this.decidedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CloseReview(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('weekStart: $weekStart, ')
+          ..write('itemKind: $itemKind, ')
+          ..write('itemId: $itemId, ')
+          ..write('decision: $decision, ')
+          ..write('note: $note, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('amount: $amount, ')
+          ..write('acceptedQty: $acceptedQty, ')
+          ..write('decidedBy: $decidedBy, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    weekStart,
+    itemKind,
+    itemId,
+    decision,
+    note,
+    fingerprint,
+    amount,
+    acceptedQty,
+    decidedBy,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CloseReview &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.weekStart == this.weekStart &&
+          other.itemKind == this.itemKind &&
+          other.itemId == this.itemId &&
+          other.decision == this.decision &&
+          other.note == this.note &&
+          other.fingerprint == this.fingerprint &&
+          other.amount == this.amount &&
+          other.acceptedQty == this.acceptedQty &&
+          other.decidedBy == this.decidedBy &&
+          other.createdAt == this.createdAt);
+}
+
+class CloseReviewsCompanion extends UpdateCompanion<CloseReview> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> weekStart;
+  final Value<String> itemKind;
+  final Value<String> itemId;
+  final Value<String> decision;
+  final Value<String?> note;
+  final Value<String?> fingerprint;
+  final Value<double?> amount;
+  final Value<double?> acceptedQty;
+  final Value<String> decidedBy;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const CloseReviewsCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.weekStart = const Value.absent(),
+    this.itemKind = const Value.absent(),
+    this.itemId = const Value.absent(),
+    this.decision = const Value.absent(),
+    this.note = const Value.absent(),
+    this.fingerprint = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.acceptedQty = const Value.absent(),
+    this.decidedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CloseReviewsCompanion.insert({
+    required String id,
+    required String projectId,
+    required String weekStart,
+    required String itemKind,
+    required String itemId,
+    required String decision,
+    this.note = const Value.absent(),
+    this.fingerprint = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.acceptedQty = const Value.absent(),
+    required String decidedBy,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       weekStart = Value(weekStart),
+       itemKind = Value(itemKind),
+       itemId = Value(itemId),
+       decision = Value(decision),
+       decidedBy = Value(decidedBy);
+  static Insertable<CloseReview> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? weekStart,
+    Expression<String>? itemKind,
+    Expression<String>? itemId,
+    Expression<String>? decision,
+    Expression<String>? note,
+    Expression<String>? fingerprint,
+    Expression<double>? amount,
+    Expression<double>? acceptedQty,
+    Expression<String>? decidedBy,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (weekStart != null) 'week_start': weekStart,
+      if (itemKind != null) 'item_kind': itemKind,
+      if (itemId != null) 'item_id': itemId,
+      if (decision != null) 'decision': decision,
+      if (note != null) 'note': note,
+      if (fingerprint != null) 'fingerprint': fingerprint,
+      if (amount != null) 'amount': amount,
+      if (acceptedQty != null) 'accepted_qty': acceptedQty,
+      if (decidedBy != null) 'decided_by': decidedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CloseReviewsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? weekStart,
+    Value<String>? itemKind,
+    Value<String>? itemId,
+    Value<String>? decision,
+    Value<String?>? note,
+    Value<String?>? fingerprint,
+    Value<double?>? amount,
+    Value<double?>? acceptedQty,
+    Value<String>? decidedBy,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return CloseReviewsCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      weekStart: weekStart ?? this.weekStart,
+      itemKind: itemKind ?? this.itemKind,
+      itemId: itemId ?? this.itemId,
+      decision: decision ?? this.decision,
+      note: note ?? this.note,
+      fingerprint: fingerprint ?? this.fingerprint,
+      amount: amount ?? this.amount,
+      acceptedQty: acceptedQty ?? this.acceptedQty,
+      decidedBy: decidedBy ?? this.decidedBy,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (weekStart.present) {
+      map['week_start'] = Variable<String>(weekStart.value);
+    }
+    if (itemKind.present) {
+      map['item_kind'] = Variable<String>(itemKind.value);
+    }
+    if (itemId.present) {
+      map['item_id'] = Variable<String>(itemId.value);
+    }
+    if (decision.present) {
+      map['decision'] = Variable<String>(decision.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (fingerprint.present) {
+      map['fingerprint'] = Variable<String>(fingerprint.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (acceptedQty.present) {
+      map['accepted_qty'] = Variable<double>(acceptedQty.value);
+    }
+    if (decidedBy.present) {
+      map['decided_by'] = Variable<String>(decidedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CloseReviewsCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('weekStart: $weekStart, ')
+          ..write('itemKind: $itemKind, ')
+          ..write('itemId: $itemId, ')
+          ..write('decision: $decision, ')
+          ..write('note: $note, ')
+          ..write('fingerprint: $fingerprint, ')
+          ..write('amount: $amount, ')
+          ..write('acceptedQty: $acceptedQty, ')
+          ..write('decidedBy: $decidedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -22294,6 +23410,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ProjectMessagesTable projectMessages = $ProjectMessagesTable(
     this,
   );
+  late final $ReceiptAttachmentsTable receiptAttachments =
+      $ReceiptAttachmentsTable(this);
+  late final $CloseReviewsTable closeReviews = $CloseReviewsTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -22338,6 +23457,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     documents,
     workers,
     projectMessages,
+    receiptAttachments,
+    closeReviews,
     syncOutbox,
   ];
 }
@@ -33266,6 +34387,576 @@ typedef $$ProjectMessagesTableProcessedTableManager =
       ProjectMessage,
       PrefetchHooks Function()
     >;
+typedef $$ReceiptAttachmentsTableCreateCompanionBuilder =
+    ReceiptAttachmentsCompanion Function({
+      required String id,
+      required String receiptId,
+      required String filePath,
+      required String mimeType,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$ReceiptAttachmentsTableUpdateCompanionBuilder =
+    ReceiptAttachmentsCompanion Function({
+      Value<String> id,
+      Value<String> receiptId,
+      Value<String> filePath,
+      Value<String> mimeType,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$ReceiptAttachmentsTableFilterComposer
+    extends Composer<_$AppDatabase, $ReceiptAttachmentsTable> {
+  $$ReceiptAttachmentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get receiptId => $composableBuilder(
+    column: $table.receiptId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get filePath => $composableBuilder(
+    column: $table.filePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mimeType => $composableBuilder(
+    column: $table.mimeType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ReceiptAttachmentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReceiptAttachmentsTable> {
+  $$ReceiptAttachmentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get receiptId => $composableBuilder(
+    column: $table.receiptId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filePath => $composableBuilder(
+    column: $table.filePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mimeType => $composableBuilder(
+    column: $table.mimeType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ReceiptAttachmentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReceiptAttachmentsTable> {
+  $$ReceiptAttachmentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get receiptId =>
+      $composableBuilder(column: $table.receiptId, builder: (column) => column);
+
+  GeneratedColumn<String> get filePath =>
+      $composableBuilder(column: $table.filePath, builder: (column) => column);
+
+  GeneratedColumn<String> get mimeType =>
+      $composableBuilder(column: $table.mimeType, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$ReceiptAttachmentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReceiptAttachmentsTable,
+          ReceiptAttachment,
+          $$ReceiptAttachmentsTableFilterComposer,
+          $$ReceiptAttachmentsTableOrderingComposer,
+          $$ReceiptAttachmentsTableAnnotationComposer,
+          $$ReceiptAttachmentsTableCreateCompanionBuilder,
+          $$ReceiptAttachmentsTableUpdateCompanionBuilder,
+          (
+            ReceiptAttachment,
+            BaseReferences<
+              _$AppDatabase,
+              $ReceiptAttachmentsTable,
+              ReceiptAttachment
+            >,
+          ),
+          ReceiptAttachment,
+          PrefetchHooks Function()
+        > {
+  $$ReceiptAttachmentsTableTableManager(
+    _$AppDatabase db,
+    $ReceiptAttachmentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReceiptAttachmentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReceiptAttachmentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReceiptAttachmentsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> receiptId = const Value.absent(),
+                Value<String> filePath = const Value.absent(),
+                Value<String> mimeType = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReceiptAttachmentsCompanion(
+                id: id,
+                receiptId: receiptId,
+                filePath: filePath,
+                mimeType: mimeType,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String receiptId,
+                required String filePath,
+                required String mimeType,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReceiptAttachmentsCompanion.insert(
+                id: id,
+                receiptId: receiptId,
+                filePath: filePath,
+                mimeType: mimeType,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ReceiptAttachmentsTable, ReceiptAttachment>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ReceiptAttachmentsTable,
+                    ReceiptAttachment
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ReceiptAttachmentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReceiptAttachmentsTable,
+      ReceiptAttachment,
+      $$ReceiptAttachmentsTableFilterComposer,
+      $$ReceiptAttachmentsTableOrderingComposer,
+      $$ReceiptAttachmentsTableAnnotationComposer,
+      $$ReceiptAttachmentsTableCreateCompanionBuilder,
+      $$ReceiptAttachmentsTableUpdateCompanionBuilder,
+      (
+        ReceiptAttachment,
+        BaseReferences<
+          _$AppDatabase,
+          $ReceiptAttachmentsTable,
+          ReceiptAttachment
+        >,
+      ),
+      ReceiptAttachment,
+      PrefetchHooks Function()
+    >;
+typedef $$CloseReviewsTableCreateCompanionBuilder =
+    CloseReviewsCompanion Function({
+      required String id,
+      required String projectId,
+      required String weekStart,
+      required String itemKind,
+      required String itemId,
+      required String decision,
+      Value<String?> note,
+      Value<String?> fingerprint,
+      Value<double?> amount,
+      Value<double?> acceptedQty,
+      required String decidedBy,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+typedef $$CloseReviewsTableUpdateCompanionBuilder =
+    CloseReviewsCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> weekStart,
+      Value<String> itemKind,
+      Value<String> itemId,
+      Value<String> decision,
+      Value<String?> note,
+      Value<String?> fingerprint,
+      Value<double?> amount,
+      Value<double?> acceptedQty,
+      Value<String> decidedBy,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$CloseReviewsTableFilterComposer
+    extends Composer<_$AppDatabase, $CloseReviewsTable> {
+  $$CloseReviewsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get weekStart => $composableBuilder(
+    column: $table.weekStart,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get itemKind => $composableBuilder(
+    column: $table.itemKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get decision => $composableBuilder(
+    column: $table.decision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get acceptedQty => $composableBuilder(
+    column: $table.acceptedQty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get decidedBy => $composableBuilder(
+    column: $table.decidedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CloseReviewsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CloseReviewsTable> {
+  $$CloseReviewsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get weekStart => $composableBuilder(
+    column: $table.weekStart,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get itemKind => $composableBuilder(
+    column: $table.itemKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get decision => $composableBuilder(
+    column: $table.decision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get acceptedQty => $composableBuilder(
+    column: $table.acceptedQty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get decidedBy => $composableBuilder(
+    column: $table.decidedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CloseReviewsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CloseReviewsTable> {
+  $$CloseReviewsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get weekStart =>
+      $composableBuilder(column: $table.weekStart, builder: (column) => column);
+
+  GeneratedColumn<String> get itemKind =>
+      $composableBuilder(column: $table.itemKind, builder: (column) => column);
+
+  GeneratedColumn<String> get itemId =>
+      $composableBuilder(column: $table.itemId, builder: (column) => column);
+
+  GeneratedColumn<String> get decision =>
+      $composableBuilder(column: $table.decision, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get fingerprint => $composableBuilder(
+    column: $table.fingerprint,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<double> get acceptedQty => $composableBuilder(
+    column: $table.acceptedQty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get decidedBy =>
+      $composableBuilder(column: $table.decidedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$CloseReviewsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CloseReviewsTable,
+          CloseReview,
+          $$CloseReviewsTableFilterComposer,
+          $$CloseReviewsTableOrderingComposer,
+          $$CloseReviewsTableAnnotationComposer,
+          $$CloseReviewsTableCreateCompanionBuilder,
+          $$CloseReviewsTableUpdateCompanionBuilder,
+          (
+            CloseReview,
+            BaseReferences<_$AppDatabase, $CloseReviewsTable, CloseReview>,
+          ),
+          CloseReview,
+          PrefetchHooks Function()
+        > {
+  $$CloseReviewsTableTableManager(_$AppDatabase db, $CloseReviewsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CloseReviewsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CloseReviewsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CloseReviewsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> weekStart = const Value.absent(),
+                Value<String> itemKind = const Value.absent(),
+                Value<String> itemId = const Value.absent(),
+                Value<String> decision = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String?> fingerprint = const Value.absent(),
+                Value<double?> amount = const Value.absent(),
+                Value<double?> acceptedQty = const Value.absent(),
+                Value<String> decidedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CloseReviewsCompanion(
+                id: id,
+                projectId: projectId,
+                weekStart: weekStart,
+                itemKind: itemKind,
+                itemId: itemId,
+                decision: decision,
+                note: note,
+                fingerprint: fingerprint,
+                amount: amount,
+                acceptedQty: acceptedQty,
+                decidedBy: decidedBy,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String weekStart,
+                required String itemKind,
+                required String itemId,
+                required String decision,
+                Value<String?> note = const Value.absent(),
+                Value<String?> fingerprint = const Value.absent(),
+                Value<double?> amount = const Value.absent(),
+                Value<double?> acceptedQty = const Value.absent(),
+                required String decidedBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CloseReviewsCompanion.insert(
+                id: id,
+                projectId: projectId,
+                weekStart: weekStart,
+                itemKind: itemKind,
+                itemId: itemId,
+                decision: decision,
+                note: note,
+                fingerprint: fingerprint,
+                amount: amount,
+                acceptedQty: acceptedQty,
+                decidedBy: decidedBy,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CloseReviewsTable, CloseReview>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $CloseReviewsTable,
+                    CloseReview
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CloseReviewsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CloseReviewsTable,
+      CloseReview,
+      $$CloseReviewsTableFilterComposer,
+      $$CloseReviewsTableOrderingComposer,
+      $$CloseReviewsTableAnnotationComposer,
+      $$CloseReviewsTableCreateCompanionBuilder,
+      $$CloseReviewsTableUpdateCompanionBuilder,
+      (
+        CloseReview,
+        BaseReferences<_$AppDatabase, $CloseReviewsTable, CloseReview>,
+      ),
+      CloseReview,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -33610,6 +35301,10 @@ class $AppDatabaseManager {
       $$WorkersTableTableManager(_db, _db.workers);
   $$ProjectMessagesTableTableManager get projectMessages =>
       $$ProjectMessagesTableTableManager(_db, _db.projectMessages);
+  $$ReceiptAttachmentsTableTableManager get receiptAttachments =>
+      $$ReceiptAttachmentsTableTableManager(_db, _db.receiptAttachments);
+  $$CloseReviewsTableTableManager get closeReviews =>
+      $$CloseReviewsTableTableManager(_db, _db.closeReviews);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }
@@ -33806,6 +35501,8 @@ mixin _$MaterialDaoMixin on DatabaseAccessor<AppDatabase> {
   $MaterialReceiptsTable get materialReceipts =>
       attachedDatabase.materialReceipts;
   $MaterialUsageTable get materialUsage => attachedDatabase.materialUsage;
+  $ReceiptAttachmentsTable get receiptAttachments =>
+      attachedDatabase.receiptAttachments;
   MaterialDaoManager get managers => MaterialDaoManager(this);
 }
 
@@ -33819,6 +35516,11 @@ class MaterialDaoManager {
       );
   $$MaterialUsageTableTableManager get materialUsage =>
       $$MaterialUsageTableTableManager(_db.attachedDatabase, _db.materialUsage);
+  $$ReceiptAttachmentsTableTableManager get receiptAttachments =>
+      $$ReceiptAttachmentsTableTableManager(
+        _db.attachedDatabase,
+        _db.receiptAttachments,
+      );
 }
 
 mixin _$PaymentDaoMixin on DatabaseAccessor<AppDatabase> {
@@ -34015,4 +35717,16 @@ class MessageDaoManager {
         _db.attachedDatabase,
         _db.projectMessages,
       );
+}
+
+mixin _$CloseDaoMixin on DatabaseAccessor<AppDatabase> {
+  $CloseReviewsTable get closeReviews => attachedDatabase.closeReviews;
+  CloseDaoManager get managers => CloseDaoManager(this);
+}
+
+class CloseDaoManager {
+  final _$CloseDaoMixin _db;
+  CloseDaoManager(this._db);
+  $$CloseReviewsTableTableManager get closeReviews =>
+      $$CloseReviewsTableTableManager(_db.attachedDatabase, _db.closeReviews);
 }

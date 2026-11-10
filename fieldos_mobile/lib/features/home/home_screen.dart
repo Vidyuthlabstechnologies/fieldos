@@ -6,6 +6,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
+import 'package:fieldos_mobile/features/close/week_close_screen.dart';
 import 'package:fieldos_mobile/features/assistant/assistant_screen.dart';
 import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
@@ -109,6 +110,9 @@ class HomeScreen extends ConsumerWidget {
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeamSyncScreen()));
                 case 'approvals':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => ApprovalsScreen(companyId: company.id)));
+                case 'close':
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (_) => WeeklyCloseListScreen(companyId: company.id)));
                 case 'brief':
                   openOwnerBrief(context, companyId: company.id, companyName: company.name);
                 case 'payables':
@@ -139,6 +143,9 @@ class HomeScreen extends ConsumerWidget {
               PopupMenuItem(
                   value: 'approvals',
                   child: ListTile(leading: Icon(Icons.approval_outlined), title: Text(tr('Approvals')))),
+              PopupMenuItem(
+                  value: 'close',
+                  child: ListTile(leading: Icon(Icons.fact_check_outlined), title: Text(tr('Weekly close')))),
               PopupMenuItem(
                   value: 'brief',
                   child: ListTile(leading: Icon(Icons.wb_twilight_outlined), title: Text(tr('Site brief')))),

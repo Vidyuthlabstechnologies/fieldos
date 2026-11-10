@@ -5,6 +5,8 @@
 /// moment goods hit the site.
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -23,6 +25,7 @@ import 'package:fieldos_mobile/features/procurement/stock_view.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
+import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
@@ -498,7 +501,7 @@ class _PoTab extends ConsumerWidget {
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.photo_camera),
-                label: Text(photoPath.value == null ? tr('Attach delivery photo') : tr('Photo attached')),
+                label: Text(photoPath.value == null ? tr('Photograph the delivery slip') : tr('Slip photo attached')),
                 onPressed: () async {
                   final path = await captureCameraFirst(ctx, prefix: 'grn');
                   if (path != null) {
@@ -525,11 +528,7 @@ class _PoTab extends ConsumerWidget {
     );
     if (ok != true) return;
     final db = ref.read(appDatabaseProvider);
-    
-    // Store photo path in notes field for now (material_receipts table doesn't have a dedicated photo_path column)
-    final notes = photoPath.value != null ? 'Photo: ${photoPath.value}' : null;
-    
-    await db.purchaseDao.receiveAgainstOrder(o.id, closeOrder: closeOrder, MaterialReceiptsCompanion.insert(
+    await db.purchaseDao.receiveAgainstOrder(o.id, closeOrder: closeOrder, slipPath: photoPath.value, MaterialReceiptsCompanion.insert(
           id: const Uuid().v4(),
           projectId: projectId,
           poId: Value(o.id),
@@ -541,10 +540,10 @@ class _PoTab extends ConsumerWidget {
           amount: double.tryParse(amount.text.trim()) ?? 0,
           receivedBy: userId,
           receivedOn: DateTime.now(),
-          notes: Value(notes),
         ));
     ref.invalidate(ordersProvider(projectId));
     ref.invalidate(receiptsProvider(projectId));
+    ref.invalidate(receiptSlipsProvider(projectId));
     ref.invalidate(siteStockProvider(projectId));
     ref.invalidate(costSummaryProvider(projectId));
   }
@@ -588,6 +587,10 @@ String _statusLabel(String status) => switch (status) {
 
 // --- GRN ------------------------------------------------------------------
 
+/// The delivery slips of the site's receipts, by receipt id.
+final receiptSlipsProvider = FutureProvider.autoDispose.family<Map<String, List<ReceiptAttachment>>, String>(
+    (ref, projectId) => ref.watch(appDatabaseProvider).materialDao.slipsForProject(projectId));
+
 class _GrnTab extends ConsumerWidget {
   const _GrnTab({required this.projectId, required this.companyId, required this.userId});
   final String projectId;
@@ -597,6 +600,7 @@ class _GrnTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final receipts = ref.watch(receiptsProvider(projectId));
+    final slips = ref.watch(receiptSlipsProvider(projectId)).value ?? const {};
     return receipts.when(
       data: (rows) => rows.isEmpty
           ? MitraEmpty(tr('No goods receipts yet.'))
@@ -622,6 +626,23 @@ class _GrnTab extends ConsumerWidget {
                       rupees(m.amount),
                       trf('received {date}', {'date': fmtDate(m.receivedOn, short: true)}),
                     ].join(' · ')),
+                    trailing: (slips[m.id] ?? const []).isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: tr('Delivery slip'),
+                            icon: const Icon(Icons.receipt_long_outlined),
+                            onPressed: () {
+                              final paths = [
+                                for (final a in slips[m.id]!)
+                                  if (File(a.filePath).existsSync()) a.filePath,
+                              ];
+                              if (paths.isEmpty) {
+                                showSnack(context, tr('The photo has not reached this phone yet. Sync and try again.'));
+                              } else {
+                                showPhotoViewer(context, paths, shareText: m.materialName);
+                              }
+                            },
+                          ),
                   ),
               ],
             ),
