@@ -329,6 +329,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: Text(tr('Tally vouchers or a Zoho Books file, with GST split out')),
               onTap: () => showAccountsExport(context, ref),
             ),
+          if (canSeeMoneyIn(session.role))
+            ListTile(
+              key: const Key('settings-audit-trail'),
+              leading: const Icon(Icons.history_edu_outlined),
+              title: Text(tr('Audit trail')),
+              subtitle: Text(tr('Every approval, cancellation and payment, who did it and when, in one file')),
+              onTap: () => shareAuditTrail(context, ref),
+            ),
           if (company != null && session.role == Roles.owner)
             ListTile(
               key: const Key('settings-approval-rules'),

@@ -2356,4 +2356,11 @@ const Map<String, String> stringsTe = {
       '{amount}. మీరు {level} గా సంతకం చేస్తారు.',
   '{n} requests, orders or expenses above your approval amounts':
       'మీ ఆమోద మొత్తాల కంటే ఎక్కువ {n} రిక్వెస్ట్‌లు, ఆర్డర్లు లేదా ఖర్చులు',
+  // Audit trail
+  'Audit trail':
+      'ఆడిట్ ట్రెయిల్',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'ప్రతి ఆమోదం, రద్దు, చెల్లింపు, ఎవరు ఎప్పుడు చేశారో, ఒకే ఫైల్‌లో',
+  'Nothing has been recorded yet.':
+      'ఇంకా ఏదీ నమోదు కాలేదు.',
 };

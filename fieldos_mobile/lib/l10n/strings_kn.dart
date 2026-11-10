@@ -3245,4 +3245,11 @@ const Map<String, String> stringsKn = {
       '{amount}. ನೀವು {level} ಆಗಿ ಸಹಿ ಮಾಡುತ್ತೀರಿ.',
   '{n} requests, orders or expenses above your approval amounts':
       'ನಿಮ್ಮ ಅನುಮೋದನೆ ಮೊತ್ತಗಳಿಗಿಂತ ಹೆಚ್ಚಿನ {n} ವಿನಂತಿ, ಆರ್ಡರ್ ಅಥವಾ ಖರ್ಚು',
+  // Audit trail
+  'Audit trail':
+      'ಆಡಿಟ್ ಟ್ರೇಲ್',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'ಪ್ರತಿ ಅನುಮೋದನೆ, ರದ್ದು, ಪಾವತಿ, ಯಾರು ಯಾವಾಗ ಮಾಡಿದರು ಎಂಬುದು ಒಂದೇ ಫೈಲ್‌ನಲ್ಲಿ',
+  'Nothing has been recorded yet.':
+      'ಇನ್ನೂ ಏನೂ ದಾಖಲಾಗಿಲ್ಲ.',
 };

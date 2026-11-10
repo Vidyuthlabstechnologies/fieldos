@@ -3245,4 +3245,11 @@ const Map<String, String> stringsMr = {
       '{amount}. तुम्ही {level} म्हणून सही करता.',
   '{n} requests, orders or expenses above your approval amounts':
       'तुमच्या मंजुरीच्या रकमेपेक्षा जास्त {n} मागण्या, ऑर्डर किंवा खर्च',
+  // Audit trail
+  'Audit trail':
+      'ऑडिट ट्रेल',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'प्रत्येक मंजुरी, रद्द आणि पेमेंट, कोणी आणि केव्हा केले, एका फाइलमध्ये',
+  'Nothing has been recorded yet.':
+      'अजून काहीही नोंदवले नाही.',
 };

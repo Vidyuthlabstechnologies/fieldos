@@ -2354,4 +2354,11 @@ const Map<String, String> stringsHi = {
       '{amount}। आप {level} के रूप में साइन करेंगे।',
   '{n} requests, orders or expenses above your approval amounts':
       'आपकी मंज़ूरी की रकम से ऊपर {n} रिक्वेस्ट, ऑर्डर या खर्च',
+  // Audit trail
+  'Audit trail':
+      'ऑडिट ट्रेल',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'हर मंज़ूरी, रद्द और भुगतान, किसने और कब किया, एक फ़ाइल में',
+  'Nothing has been recorded yet.':
+      'अभी तक कुछ दर्ज नहीं हुआ।',
 };

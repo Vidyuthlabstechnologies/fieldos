@@ -3,15 +3,21 @@
 /// own copy of their records.
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/export/accounts_export.dart';
+import 'package:fieldos_mobile/features/export/audit_trail.dart';
 import 'package:fieldos_mobile/features/export/data_export.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart' show canSeeMoneyIn;
+import 'package:fieldos_mobile/features/tasks/team_roster.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 
@@ -142,6 +148,41 @@ Future<void> showAccountsExport(BuildContext context, WidgetRef ref) async {
       showSnack(context, trf('The export did not pass its check, so it was not sent: {why}', {'why': e.check.problems.first}),
           error: true);
     }
+  } catch (e, st) {
+    if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
+  }
+}
+
+/// Settings > Audit trail: every decision and change of money on the
+/// company's sites, as a CSV for an auditor. Owners and managers.
+Future<void> shareAuditTrail(BuildContext context, WidgetRef ref) async {
+  final session = ref.read(sessionProvider);
+  final company = session.activeCompany;
+  if (company == null || !canSeeMoneyIn(session.role)) return;
+  try {
+    final db = ref.read(appDatabaseProvider);
+    final events = await buildAuditTrail(db, company.id);
+    if (events.isEmpty) {
+      if (context.mounted) showSnack(context, tr('Nothing has been recorded yet.'));
+      return;
+    }
+    final roster = await ref.read(teamRosterProvider(company.id).future);
+    final me = session.user;
+    String nameOf(String id) {
+      if (me != null && (id == me.id || id == roster.myUserId)) return me.name;
+      final m = roster.byId(id);
+      return m == null ? id : m.email;
+    }
+
+    final sites = {for (final p in await db.projectDao.forCompany(company.id)) p.id: p.name};
+    final dir = await getTemporaryDirectory();
+    final safe = company.name.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '_');
+    final file = File(p.join(dir.path, '${safe}_audit_trail.csv'));
+    await file.writeAsString(auditCsv(events, nameOf: nameOf, siteName: sites), flush: true);
+    await SharePlus.instance.share(ShareParams(
+      files: [XFile(file.path, mimeType: 'text/csv')],
+      text: '${company.name}: audit trail, ${events.length} entries.',
+    ));
   } catch (e, st) {
     if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
   }

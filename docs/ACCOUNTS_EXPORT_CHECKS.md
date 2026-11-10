@@ -67,3 +67,22 @@ should be watched, and anything it rejects added as a check.
   expenses at every GST rate, with commas, quotes and new lines, on two
   sites with the same initials.
 - Each kind of broken file is caught.
+
+# Audit trail
+
+Settings > Your data > **Audit trail** is for owners and managers. It
+shares one CSV with the columns When, Site, Who, What, Item, Amount, Note
+and Record. It lists everything on the company's sites in time order:
+
+- expenses, deliveries, purchase requests and POs recorded;
+- expenses and payments changed or cancelled, with the reason;
+- every weekly-close decision (approve, send back, fixed, close, reopen);
+- every approval signature, and approval rules set or changed;
+- measurements and their decisions;
+- supplier invoices, client bills, payments received, and payments put
+  against bills or retention released.
+
+It is built from the records themselves, most of which are insert-only, in
+`fieldos_mobile/lib/features/export/audit_trail.dart`. Money in (bills,
+payments, allocations) is left out for anyone who does not see it in the
+app. Test: `test/audit_trail_test.dart`.

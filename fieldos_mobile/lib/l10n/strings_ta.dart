@@ -3245,4 +3245,11 @@ const Map<String, String> stringsTa = {
       '{amount}. நீங்கள் {level} ஆகக் கையொப்பமிடுவீர்கள்.',
   '{n} requests, orders or expenses above your approval amounts':
       'உங்கள் ஒப்புதல் தொகைகளுக்கு மேல் {n} கோரிக்கைகள், ஆர்டர்கள் அல்லது செலவுகள்',
+  // Audit trail
+  'Audit trail':
+      'தணிக்கைப் பதிவு',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'ஒவ்வொரு ஒப்புதல், ரத்து, கட்டணம், யார் எப்போது செய்தார்கள் என்பது ஒரே கோப்பில்',
+  'Nothing has been recorded yet.':
+      'இன்னும் எதுவும் பதிவாகவில்லை.',
 };
