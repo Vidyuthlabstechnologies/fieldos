@@ -3170,5 +3170,89 @@ const Map<String, String> stringsTa = {
       '{n} ஒப்புதலுக்குக் காத்திருக்கின்றன',
   '{paid} received, {due} due':
       '{paid} வந்தது, {due} நிலுவை',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'எல்லா பதிவுகள், புகைப்படங்கள், பில்கள் ஒரே கோப்பில். அதை Drive அல்லது கணினியில் வைக்கவும்.',
+  'Back up this phone':
+      'இந்த போனை பேக்கப் எடு',
+  'Backup checked':
+      'பேக்கப் சரிபார்க்கப்பட்டது',
+  'Backup failed: {error}':
+      'பேக்கப் தோல்வி: {error}',
+  'Checked before anything is replaced':
+      'எதையும் மாற்றும் முன் சரிபார்க்கப்படும்',
+  'Choose backup file':
+      'பேக்கப் கோப்பைத் தேர்ந்தெடு',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'அடுத்த முறை FieldOS திறக்கும்போது இந்த போனில் உள்ள அனைத்தும் பேக்கப்பால் மாற்றப்படும். தற்போதைய தரவு தேவைப்பட்டால் திரும்பப் பெற போனிலேயே தனியாக வைக்கப்படும்.',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS பேக்கப்: {sites} தளங்கள், {files} புகைப்படங்கள், பில்கள்',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} அன்று செய்தது: {sites} தளங்கள், {files} புகைப்படங்கள், பில்கள். மீட்டமைப்பை முடிக்க FieldOS-ஐ முழுதாக மூடி மீண்டும் திறக்கவும்.',
+  'Restore a backup':
+      'பேக்கப்பை மீட்டமை',
+  'Restore a backup?':
+      'பேக்கப்பை மீட்டமைக்கவா?',
+  'Restore failed: {error}':
+      'மீட்டமைப்பு தோல்வி: {error}',
+  'The backup is damaged and was not restored.':
+      'பேக்கப் சேதமடைந்துள்ளது, மீட்டமைக்கப்படவில்லை.',
+  'The backup is incomplete and was not restored.':
+      'பேக்கப் முழுமையாக இல்லை, மீட்டமைக்கப்படவில்லை.',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'இந்த பேக்கப் புதிய FieldOS-ஆல் செய்யப்பட்டது. முதலில் ஆப்பை அப்டேட் செய்யவும்.',
+  'This is not a FieldOS backup file.':
+      'இது FieldOS பேக்கப் கோப்பு அல்ல.',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'ஏற்றுமதி சரிபார்ப்பில் தேறவில்லை, அதனால் அனுப்பப்படவில்லை: {why}',
+  // Approval rules
+  'Above these amounts, a project manager approves first, then the owner. Leave a box blank for no approval. Rules cover what is recorded from now on.':
+      'இந்தத் தொகைகளுக்கு மேல் முதலில் திட்ட மேலாளர், பிறகு உரிமையாளர் ஒப்புதல் தருவார். ஒப்புதல் தேவையில்லை என்றால் காலியாக விடுங்கள். விதிகள் இனி பதிவாகுபவற்றுக்கு மட்டும் பொருந்தும்.',
+  'Above what amount a project manager, then you, approve requests, expenses and orders':
+      'எந்தத் தொகைக்கு மேல் திட்ட மேலாளர், பிறகு நீங்கள், கோரிக்கைகள், செலவுகள், ஆர்டர்களை ஒப்புக்கொள்ள வேண்டும்',
+  'Approval rules':
+      'ஒப்புதல் விதிகள்',
+  'Approval rules saved':
+      'ஒப்புதல் விதிகள் சேமிக்கப்பட்டன',
+  'Enter amounts in rupees, or leave blank.':
+      'தொகைகளை ரூபாயில் இடுங்கள், அல்லது காலியாக விடுங்கள்.',
+  'Note (needed to reject)':
+      'குறிப்பு (நிராகரிக்கத் தேவை)',
+  'Owner also approves above (₹)':
+      'இதற்கு மேல் உரிமையாளரும் ஒப்புதல் தருவார் (₹)',
+  'Project manager approves above (₹)':
+      'இதற்கு மேல் திட்ட மேலாளர் ஒப்புதல் தருவார் (₹)',
+  'Purchase orders':
+      'கொள்முதல் ஆர்டர்கள்',
+  'Purchase requests':
+      'கொள்முதல் கோரிக்கைகள்',
+  'Purchase requests, orders and expenses above your approval amounts wait here.':
+      'உங்கள் ஒப்புதல் தொகைகளுக்கு மேல் உள்ள கொள்முதல் கோரிக்கைகள், ஆர்டர்கள், செலவுகள் இங்கே காத்திருக்கும்.',
+  'Say why it is rejected.':
+      'ஏன் நிராகரிக்கப்பட்டது என்று சொல்லுங்கள்.',
+  'Signed. It now waits for the owner\'s approval.':
+      'கையொப்பம் இடப்பட்டது. இப்போது உரிமையாளரின் ஒப்புதலுக்குக் காத்திருக்கிறது.',
+  'The owner approves it after you.':
+      'உங்களுக்குப் பிறகு உரிமையாளர் இதை ஒப்புக்கொள்வார்.',
+  'The owner\'s amount should not be below the project manager\'s.':
+      'உரிமையாளரின் தொகை திட்ட மேலாளரின் தொகையை விடக் குறைவாக இருக்கக் கூடாது.',
+  'Waiting for a project manager\'s approval':
+      'திட்ட மேலாளர் ஒப்புதலுக்குக் காத்திருக்கிறது',
+  'Waiting for the owner\'s approval':
+      'உரிமையாளர் ஒப்புதலுக்குக் காத்திருக்கிறது',
+  'Waiting for your approval':
+      'உங்கள் ஒப்புதலுக்குக் காத்திருப்பவை',
+  '{amount}. You sign as {level}.':
+      '{amount}. நீங்கள் {level} ஆகக் கையொப்பமிடுவீர்கள்.',
+  '{n} requests, orders or expenses above your approval amounts':
+      'உங்கள் ஒப்புதல் தொகைகளுக்கு மேல் {n} கோரிக்கைகள், ஆர்டர்கள் அல்லது செலவுகள்',
+  // Audit trail
+  'Audit trail':
+      'தணிக்கைப் பதிவு',
+  'Every approval, cancellation and payment, who did it and when, in one file':
+      'ஒவ்வொரு ஒப்புதல், ரத்து, கட்டணம், யார் எப்போது செய்தார்கள் என்பது ஒரே கோப்பில்',
+  'Nothing has been recorded yet.':
+      'இன்னும் எதுவும் பதிவாகவில்லை.',
   ...commercialTa,
 };

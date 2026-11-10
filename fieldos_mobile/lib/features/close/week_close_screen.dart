@@ -295,7 +295,13 @@ class _WeekCloseScreenState extends ConsumerState<WeekCloseScreen> {
     if (accepted != null && i.quantity != null && accepted < i.quantity! - 0.0001) {
       note = 'Short ${fmtQty(i.quantity! - accepted)} ${i.unit}'.trim();
     }
-    await _run(() => _actions().approve(w, i, acceptedQty: accepted, note: note), done: tr('Approved'));
+    bool? waiting;
+    await _run(() async {
+      waiting = await _actions().approve(w, i, acceptedQty: accepted, note: note) == null;
+    });
+    if (mounted && waiting != null) {
+      showSnack(context, waiting! ? tr("Signed. It now waits for the owner's approval.") : tr('Approved'));
+    }
   }
 
   Future<void> _sendBack(WeekClose w, CloseItem i) async {

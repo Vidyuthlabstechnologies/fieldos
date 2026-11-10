@@ -1025,3 +1025,42 @@ class SupplierInvoices extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+/// An owner's rule (v30, synced as site_approval_rules): above
+/// [aboveAmount], a [kind] of item needs [role]'s approval. kind:
+/// purchase_request | expense | purchase_order; role: project_manager |
+/// owner. Changed by voiding and adding, or by a new amount.
+class ApprovalRules extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+  TextColumn get kind => text().withLength(min: 1, max: 20)();
+  TextColumn get role => text().withLength(min: 1, max: 20)();
+  RealColumn get aboveAmount => real()();
+  BoolColumn get voided => boolean().withDefault(const Constant(false))();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// One signature on an item's approval chain (v30, synced as
+/// site_approval_steps, insert-only). [level]: project_manager | owner;
+/// [decision]: approved | rejected. [amount] is the item's amount when
+/// signed (the server sets it from the record).
+class ApprovalSteps extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get kind => text().withLength(min: 1, max: 20)();
+  TextColumn get itemId => text().withLength(min: 1, max: 36)();
+  TextColumn get level => text().withLength(min: 1, max: 20)();
+  TextColumn get decision => text().withLength(min: 1, max: 20)();
+  RealColumn get amount => real().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get decidedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

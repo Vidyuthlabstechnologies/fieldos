@@ -410,6 +410,8 @@ class SyncEngine {
         'site_bill_allocations': (r) => db.billingRecordsDao.upsertAllocationFromRemote(billAllocationFromSupabaseJson(r)),
         'site_supplier_invoices': (r) =>
             db.billingRecordsDao.upsertSupplierInvoiceFromRemote(supplierInvoiceFromSupabaseJson(r)),
+        'site_approval_rules': (r) => db.approvalChainDao.upsertRuleFromRemote(approvalRuleFromSupabaseJson(r)),
+        'site_approval_steps': (r) => db.approvalChainDao.upsertStepFromRemote(approvalStepFromSupabaseJson(r)),
         'documents': (row) async {
       final docsDir = await _resolveDocumentsDirectory();
       final safeName = (row['name'] as String).replaceAll(RegExp(r'[^\w.\-]'), '_');
@@ -625,6 +627,8 @@ class SyncEngine {
     'site_work_measurement_decisions': 'work_measurement_decisions',
     'site_bill_allocations': 'bill_allocations',
     'site_supplier_invoices': 'supplier_invoices',
+    'site_approval_rules': 'approval_rules',
+    'site_approval_steps': 'approval_steps',
   };
 
   /// Tables whose rows carry project_id on the phone too.
@@ -635,8 +639,8 @@ class SyncEngine {
     'site_client_bills', 'site_attendance_marks', 'site_notes', 'documents', 'site_close_reviews',
     'cost_codes', 'work_claims', 'work_certifications', 'variations', 'variation_decisions',
     'commercial_attachments', 'commercial_exception_actions',
-        'project_members', 'site_access', 'site_work_measurements', 'site_work_measurement_decisions',
-    'site_bill_allocations', 'site_supplier_invoices',
+    'project_members', 'site_access', 'site_work_measurements', 'site_work_measurement_decisions',
+    'site_bill_allocations', 'site_supplier_invoices', 'site_approval_steps',
   };
 
   /// Children found through their parent, for removing a whole site or
