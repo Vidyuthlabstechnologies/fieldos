@@ -32,6 +32,7 @@ import 'package:fieldos_mobile/features/money/expense_bills.dart';
 import 'package:fieldos_mobile/features/money/voucher_pdf.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart' show CapturedFile;
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart' show cloudLinksProvider;
 import 'package:fieldos_mobile/l10n/language.dart';
 
 const paymentModes = {'cash': 'Cash', 'upi': 'UPI', 'bank': 'Bank transfer', 'cheque': 'Cheque'};
@@ -46,6 +47,15 @@ final expensesProvider = FutureProvider.autoDispose.family<List<SiteExpense>, St
 });
 
 /// Every expense of the site, cancelled ones too, for the money book.
+/// Expenses whose voucher number the server has not confirmed yet. Only on
+/// a company linked to the cloud: a phone used alone numbers for good.
+final provisionalVouchersProvider = FutureProvider.autoDispose.family<Set<String>, String>((ref, projectId) async {
+  final db = ref.watch(appDatabaseProvider);
+  final companyId = ref.watch(sessionProvider).activeCompany?.id;
+  if (companyId == null || !await ref.watch(cloudLinksProvider).isLinked(companyId)) return const {};
+  return db.expenseDao.provisionalVoucherIds(projectId);
+});
+
 final moneyBookExpensesProvider = FutureProvider.autoDispose.family<List<SiteExpense>, String>(
     (ref, projectId) => ref.watch(appDatabaseProvider).expenseDao.allForProject(projectId));
 
@@ -83,6 +93,7 @@ void _refreshMoney(WidgetRef ref, String projectId) {
   ref.invalidate(moneyBookPaymentsProvider(projectId));
   ref.invalidate(expenseCategoriesProvider(projectId));
   ref.invalidate(expenseBillCountsProvider(projectId));
+  ref.invalidate(provisionalVouchersProvider(projectId));
 }
 
 IconData _iconFor(String c) => switch (c) {
@@ -295,6 +306,7 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
           final total = totalOf(shown);
           final cancelled = shown.where((e) => e.voided).length;
           final billCounts = ref.watch(expenseBillCountsProvider(widget.projectId)).value ?? const {};
+          final provisional = ref.watch(provisionalVouchersProvider(widget.projectId)).value ?? const <String>{};
           // In a short space (a landscape phone, or the tour's preview) the
           // search, filters and total would leave no room for the list, so
           // the whole view scrolls at a usable height instead of breaking.
@@ -411,8 +423,10 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
                               _ExpenseTile(
                                 expense: e,
                                 bills: billCounts[e.id] ?? 0,
+                                provisional: provisional.contains(e.id),
                                 workerName: e.workerId == null ? null : workerName[e.workerId],
-                                onTap: () => _openExpense(context, e, workerName: workerName),
+                                onTap: () => _openExpense(context, e,
+                                    workerName: workerName, provisional: provisional.contains(e.id)),
                               ),
                           ],
                         ),
@@ -438,7 +452,8 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
         _filter = const MoneyFilter();
       });
 
-  Future<void> _openExpense(BuildContext context, SiteExpense e, {required Map<String, String> workerName}) async {
+  Future<void> _openExpense(BuildContext context, SiteExpense e,
+      {required Map<String, String> workerName, bool provisional = false}) async {
     final session = ref.read(sessionProvider);
     final users = await ref.read(appDatabaseProvider).select(ref.read(appDatabaseProvider).users).get();
     final userName = {for (final u in users) u.id: u.name};
@@ -449,12 +464,14 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
       showDragHandle: true,
       builder: (ctx) => _ExpenseSheet(
         expense: e,
+        provisional: provisional,
         workerName: e.workerId == null ? null : workerName[e.workerId],
         enteredBy: userName[e.recordedBy],
         editedBy: e.editedBy == null ? null : userName[e.editedBy],
         canCorrect: canCorrect(role: session.role, recordedBy: e.recordedBy, userId: widget.userId),
         onVoucher: () async => shareVoucher(
           expense: e,
+          provisional: provisional,
           companyName: session.activeCompany?.name ?? 'FieldOS',
           siteName: widget.project?.name ?? '',
           workerName: e.workerId == null ? null : workerName[e.workerId],
@@ -510,7 +527,10 @@ class _FilterChip extends StatelessWidget {
 }
 
 class _ExpenseTile extends StatelessWidget {
-  const _ExpenseTile({required this.expense, required this.onTap, this.workerName, this.bills = 0});
+  const _ExpenseTile(
+      {required this.expense, required this.onTap, this.workerName, this.bills = 0, this.provisional = false});
+
+  final bool provisional;
   final SiteExpense expense;
   final int bills;
   final String? workerName;
@@ -526,7 +546,7 @@ class _ExpenseTile extends StatelessWidget {
       leading: CircleAvatar(child: Icon(_iconFor(e.category), size: 20)),
       title: Text('${tr(e.category)}${who == null || who.isEmpty ? '' : ' · $who'}', style: strike),
       subtitle: Text([
-        if (e.voucherNo != null) voucherLabel(e.voucherNo),
+        if (e.voucherNo != null) voucherLabel(e.voucherNo, provisional: provisional),
         shortDay(expenseDay(e)),
         if (e.mode != null) tr(paymentModes[e.mode] ?? e.mode!),
         if ((e.gstPct ?? 0) > 0) 'GST ${_rate(e.gstPct!)}%',
@@ -565,9 +585,11 @@ class _ExpenseSheet extends StatelessWidget {
     this.workerName,
     this.enteredBy,
     this.editedBy,
+    this.provisional = false,
   });
 
   final SiteExpense expense;
+  final bool provisional;
   final String? workerName;
   final String? enteredBy;
   final String? editedBy;
@@ -596,7 +618,7 @@ class _ExpenseSheet extends StatelessWidget {
           Row(children: [
             Expanded(
               child: Text(
-                [if (e.voucherNo != null) voucherLabel(e.voucherNo), tr(e.category)].join(' · '),
+                [if (e.voucherNo != null) voucherLabel(e.voucherNo, provisional: provisional), tr(e.category)].join(' · '),
                 style: theme.textTheme.titleLarge,
               ),
             ),
