@@ -18,6 +18,7 @@ import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
 import 'package:fieldos_mobile/features/subscription/my_subscription_sheet.dart';
 import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
+import 'package:fieldos_mobile/features/settings/backup_actions.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/speech_service.dart';
@@ -304,6 +305,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: Text(tr('Export all sites to Excel')),
             subtitle: Text(tr('Every record on this phone, in one file you keep. Free, always.')),
             onTap: () => exportCompanyToExcel(context, ref),
+          ),
+          ListTile(
+            key: const Key('settings-backup'),
+            leading: const Icon(Icons.backup_outlined),
+            title: Text(tr('Back up this phone')),
+            subtitle: Text(tr('All records, photos and bills in one file. Keep it on Drive or a computer.')),
+            onTap: () => backUpPhone(context, ref),
+          ),
+          ListTile(
+            key: const Key('settings-restore'),
+            leading: const Icon(Icons.settings_backup_restore_outlined),
+            title: Text(tr('Restore a backup')),
+            subtitle: Text(tr('Checked before anything is replaced')),
+            onTap: () => restoreBackup(context, ref),
           ),
           if (canSeeMoneyIn(session.role))
             ListTile(

@@ -14,6 +14,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/data/backup.dart';
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
 
 import 'tables.dart';
@@ -92,8 +93,11 @@ class AppDatabase extends _$AppDatabase {
                 // Centralised under the app's documents dir, mirroring the
                 // desktop app's app-data layout (fieldos/paths.py).
                 databasePath: () async {
-                  final docs = await getApplicationDocumentsDirectory();
-                  return p.join(docs.path, 'fieldos.sqlite');
+                  final path = await appDatabasePath();
+                  // A restore checked earlier is swapped in before the
+                  // database opens, never while it is open.
+                  applyStagedRestore(path);
+                  return path;
                 },
               ),
             ));
@@ -369,6 +373,10 @@ class AppDatabase extends _$AppDatabase {
     return queued;
   }
 }
+
+/// The database file on the phone.
+Future<String> appDatabasePath() async =>
+    p.join((await getApplicationDocumentsDirectory()).path, 'fieldos.sqlite');
 
 /// Where DPR photos and other local media are stored, relative to the app's
 /// documents directory.

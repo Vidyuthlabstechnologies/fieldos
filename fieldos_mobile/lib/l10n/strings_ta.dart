@@ -3168,4 +3168,37 @@ const Map<String, String> stringsTa = {
       '{n} ஒப்புதலுக்குக் காத்திருக்கின்றன',
   '{paid} received, {due} due':
       '{paid} வந்தது, {due} நிலுவை',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'எல்லா பதிவுகள், புகைப்படங்கள், பில்கள் ஒரே கோப்பில். அதை Drive அல்லது கணினியில் வைக்கவும்.',
+  'Back up this phone':
+      'இந்த போனை பேக்கப் எடு',
+  'Backup checked':
+      'பேக்கப் சரிபார்க்கப்பட்டது',
+  'Backup failed: {error}':
+      'பேக்கப் தோல்வி: {error}',
+  'Checked before anything is replaced':
+      'எதையும் மாற்றும் முன் சரிபார்க்கப்படும்',
+  'Choose backup file':
+      'பேக்கப் கோப்பைத் தேர்ந்தெடு',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'அடுத்த முறை FieldOS திறக்கும்போது இந்த போனில் உள்ள அனைத்தும் பேக்கப்பால் மாற்றப்படும். தற்போதைய தரவு தேவைப்பட்டால் திரும்பப் பெற போனிலேயே தனியாக வைக்கப்படும்.',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS பேக்கப்: {sites} தளங்கள், {files} புகைப்படங்கள், பில்கள்',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} அன்று செய்தது: {sites} தளங்கள், {files} புகைப்படங்கள், பில்கள். மீட்டமைப்பை முடிக்க FieldOS-ஐ முழுதாக மூடி மீண்டும் திறக்கவும்.',
+  'Restore a backup':
+      'பேக்கப்பை மீட்டமை',
+  'Restore a backup?':
+      'பேக்கப்பை மீட்டமைக்கவா?',
+  'Restore failed: {error}':
+      'மீட்டமைப்பு தோல்வி: {error}',
+  'The backup is damaged and was not restored.':
+      'பேக்கப் சேதமடைந்துள்ளது, மீட்டமைக்கப்படவில்லை.',
+  'The backup is incomplete and was not restored.':
+      'பேக்கப் முழுமையாக இல்லை, மீட்டமைக்கப்படவில்லை.',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'இந்த பேக்கப் புதிய FieldOS-ஆல் செய்யப்பட்டது. முதலில் ஆப்பை அப்டேட் செய்யவும்.',
+  'This is not a FieldOS backup file.':
+      'இது FieldOS பேக்கப் கோப்பு அல்ல.',
 };

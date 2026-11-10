@@ -3168,4 +3168,37 @@ const Map<String, String> stringsKn = {
       '{n} ಅನುಮೋದನೆಗೆ ಕಾಯುತ್ತಿವೆ',
   '{paid} received, {due} due':
       '{paid} ಬಂದಿದೆ, {due} ಬಾಕಿ',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'ಎಲ್ಲಾ ದಾಖಲೆಗಳು, ಫೋಟೋಗಳು, ಬಿಲ್‌ಗಳು ಒಂದೇ ಫೈಲ್‌ನಲ್ಲಿ. ಅದನ್ನು Drive ಅಥವಾ ಕಂಪ್ಯೂಟರ್‌ನಲ್ಲಿ ಇಡಿ.',
+  'Back up this phone':
+      'ಈ ಫೋನ್‌ನ ಬ್ಯಾಕಪ್ ತೆಗೆದುಕೊಳ್ಳಿ',
+  'Backup checked':
+      'ಬ್ಯಾಕಪ್ ಪರಿಶೀಲಿಸಲಾಗಿದೆ',
+  'Backup failed: {error}':
+      'ಬ್ಯಾಕಪ್ ವಿಫಲವಾಯಿತು: {error}',
+  'Checked before anything is replaced':
+      'ಏನನ್ನೂ ಬದಲಿಸುವ ಮೊದಲು ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ',
+  'Choose backup file':
+      'ಬ್ಯಾಕಪ್ ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'ಮುಂದಿನ ಬಾರಿ FieldOS ತೆರೆದಾಗ ಈ ಫೋನ್‌ನಲ್ಲಿರುವ ಎಲ್ಲವೂ ಬ್ಯಾಕಪ್‌ನಿಂದ ಬದಲಾಗುತ್ತದೆ. ಈಗಿನ ಡೇಟಾ ಬೇಕಾದರೆ ಮರಳಿ ಪಡೆಯಲು ಫೋನ್‌ನಲ್ಲೇ ಪಕ್ಕಕ್ಕೆ ಇಡಲಾಗುತ್ತದೆ.',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS ಬ್ಯಾಕಪ್: {sites} ಸೈಟ್‌ಗಳು, {files} ಫೋಟೋಗಳು, ಬಿಲ್‌ಗಳು',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} ರಂದು ಮಾಡಿದ್ದು: {sites} ಸೈಟ್‌ಗಳು, {files} ಫೋಟೋಗಳು, ಬಿಲ್‌ಗಳು. ಮರುಸ್ಥಾಪನೆ ಮುಗಿಸಲು FieldOS ಅನ್ನು ಪೂರ್ತಿ ಮುಚ್ಚಿ ಮತ್ತೆ ತೆರೆಯಿರಿ.',
+  'Restore a backup':
+      'ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ',
+  'Restore a backup?':
+      'ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಬೇಕೆ?',
+  'Restore failed: {error}':
+      'ಮರುಸ್ಥಾಪನೆ ವಿಫಲವಾಯಿತು: {error}',
+  'The backup is damaged and was not restored.':
+      'ಬ್ಯಾಕಪ್ ಹಾಳಾಗಿದೆ, ಮರುಸ್ಥಾಪಿಸಲಿಲ್ಲ.',
+  'The backup is incomplete and was not restored.':
+      'ಬ್ಯಾಕಪ್ ಅಪೂರ್ಣ, ಮರುಸ್ಥಾಪಿಸಲಿಲ್ಲ.',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'ಈ ಬ್ಯಾಕಪ್ ಹೊಸ FieldOS ನಿಂದ ಮಾಡಲಾಗಿದೆ. ಮೊದಲು ಆಪ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಿ.',
+  'This is not a FieldOS backup file.':
+      'ಇದು FieldOS ಬ್ಯಾಕಪ್ ಫೈಲ್ ಅಲ್ಲ.',
 };

@@ -2279,4 +2279,37 @@ const Map<String, String> stringsTe = {
       '{n} ఆమోదం కోసం వేచి ఉన్నాయి',
   '{paid} received, {due} due':
       '{paid} వచ్చింది, {due} బాకీ',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'అన్ని రికార్డులు, ఫోటోలు, బిల్లులు ఒకే ఫైల్‌లో. దాన్ని Drive లేదా కంప్యూటర్‌లో ఉంచండి.',
+  'Back up this phone':
+      'ఈ ఫోన్ బ్యాకప్ తీసుకోండి',
+  'Backup checked':
+      'బ్యాకప్ తనిఖీ అయింది',
+  'Backup failed: {error}':
+      'బ్యాకప్ కాలేదు: {error}',
+  'Checked before anything is replaced':
+      'ఏదైనా మార్చే ముందు తనిఖీ చేస్తుంది',
+  'Choose backup file':
+      'బ్యాకప్ ఫైల్ ఎంచుకోండి',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'తదుపరి సారి FieldOS తెరిచినప్పుడు ఈ ఫోన్‌లో ఉన్నదంతా బ్యాకప్‌తో మారుతుంది. ఇప్పటి డేటా అవసరమైతే తిరిగి పొందేందుకు ఫోన్‌లోనే పక్కన ఉంచబడుతుంది.',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS బ్యాకప్: {sites} సైట్లు, {files} ఫోటోలు, బిల్లులు',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} న చేసినది: {sites} సైట్లు, {files} ఫోటోలు, బిల్లులు. రీస్టోర్ పూర్తి చేయడానికి FieldOS ని పూర్తిగా మూసి మళ్ళీ తెరవండి.',
+  'Restore a backup':
+      'బ్యాకప్ రీస్టోర్ చేయండి',
+  'Restore a backup?':
+      'బ్యాకప్ రీస్టోర్ చేయాలా?',
+  'Restore failed: {error}':
+      'రీస్టోర్ కాలేదు: {error}',
+  'The backup is damaged and was not restored.':
+      'బ్యాకప్ పాడైంది, రీస్టోర్ చేయలేదు.',
+  'The backup is incomplete and was not restored.':
+      'బ్యాకప్ అసంపూర్ణం, రీస్టోర్ చేయలేదు.',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'ఈ బ్యాకప్ కొత్త FieldOS తో చేసినది. ముందు యాప్ అప్‌డేట్ చేయండి.',
+  'This is not a FieldOS backup file.':
+      'ఇది FieldOS బ్యాకప్ ఫైల్ కాదు.',
 };

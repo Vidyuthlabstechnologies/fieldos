@@ -3168,4 +3168,37 @@ const Map<String, String> stringsMr = {
       '{n} मंजुरीच्या प्रतीक्षेत',
   '{paid} received, {due} due':
       '{paid} आले, {due} बाकी',
+  // Backup and restore
+  'All records, photos and bills in one file. Keep it on Drive or a computer.':
+      'सर्व नोंदी, फोटो आणि बिले एका फाइलमध्ये. ती Drive किंवा संगणकावर ठेवा.',
+  'Back up this phone':
+      'या फोनचा बॅकअप घ्या',
+  'Backup checked':
+      'बॅकअप तपासला',
+  'Backup failed: {error}':
+      'बॅकअप झाला नाही: {error}',
+  'Checked before anything is replaced':
+      'काहीही बदलण्याआधी तपासले जाते',
+  'Choose backup file':
+      'बॅकअप फाइल निवडा',
+  'Everything on this phone is replaced by the backup the next time FieldOS opens. The current data is kept aside on the phone in case you need it back.':
+      'पुढच्या वेळी FieldOS उघडल्यावर या फोनवरील सर्व काही बॅकअपने बदलले जाईल. सध्याचा डेटा गरज पडल्यास परत मिळावा म्हणून फोनवर बाजूला ठेवला जातो.',
+  'FieldOS backup: {sites} sites, {files} photos and bills':
+      'FieldOS बॅकअप: {sites} साइट, {files} फोटो आणि बिले',
+  'Made {date}: {sites} sites, {files} photos and bills. Close FieldOS fully and open it again to finish the restore.':
+      '{date} रोजी केलेला: {sites} साइट, {files} फोटो आणि बिले. रिस्टोअर पूर्ण करण्यासाठी FieldOS पूर्ण बंद करून पुन्हा उघडा.',
+  'Restore a backup':
+      'बॅकअप रिस्टोअर करा',
+  'Restore a backup?':
+      'बॅकअप रिस्टोअर करायचा?',
+  'Restore failed: {error}':
+      'रिस्टोअर झाला नाही: {error}',
+  'The backup is damaged and was not restored.':
+      'बॅकअप खराब आहे, रिस्टोअर केला नाही.',
+  'The backup is incomplete and was not restored.':
+      'बॅकअप अपूर्ण आहे, रिस्टोअर केला नाही.',
+  'This backup was made by a newer FieldOS. Update the app first.':
+      'हा बॅकअप नव्या FieldOS ने केला आहे. आधी ॲप अपडेट करा.',
+  'This is not a FieldOS backup file.':
+      'ही FieldOS बॅकअप फाइल नाही.',
 };
