@@ -2341,6 +2341,8 @@ const Map<String, String> stringsMr = {
       'तुमचे क्लाउड साइन इन संपले. टीम आणि सिंक मधून पुन्हा साइन इन करा.',
   'Your plan':
       'तुमचा प्लॅन',
+  'This needs a FieldOS server update that is on its way. Your work is safe on the phone; try again in a day or two.':
+      'यासाठी FieldOS सर्व्हर अपडेट लागेल, ते लवकरच येत आहे. तुमचे काम फोनवर सुरक्षित आहे; एक-दोन दिवसांत पुन्हा प्रयत्न करा.',
   'Your role in this company does not allow that. Ask the owner.':
       'या कंपनीतील तुमच्या भूमिकेला याची परवानगी नाही. मालकाला विचारा.',
   'Your subscription is on this phone.':

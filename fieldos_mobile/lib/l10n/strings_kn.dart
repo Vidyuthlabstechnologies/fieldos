@@ -2341,6 +2341,8 @@ const Map<String, String> stringsKn = {
       'ನಿಮ್ಮ ಕ್ಲೌಡ್ ಸೈನ್ ಇನ್ ಮುಗಿದಿದೆ. ತಂಡ & ಸಿಂಕ್ ನಿಂದ ಮತ್ತೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.',
   'Your plan':
       'ನಿಮ್ಮ ಪ್ಲಾನ್',
+  'This needs a FieldOS server update that is on its way. Your work is safe on the phone; try again in a day or two.':
+      'ಇದಕ್ಕೆ FieldOS ಸರ್ವರ್ ಅಪ್‌ಡೇಟ್ ಬೇಕು, ಅದು ಶೀಘ್ರದಲ್ಲೇ ಬರುತ್ತದೆ. ನಿಮ್ಮ ಕೆಲಸ ಫೋನ್‌ನಲ್ಲಿ ಸುರಕ್ಷಿತವಾಗಿದೆ; ಒಂದೆರಡು ದಿನಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
   'Your role in this company does not allow that. Ask the owner.':
       'ಈ ಕಂಪನಿಯಲ್ಲಿ ನಿಮ್ಮ ಪಾತ್ರಕ್ಕೆ ಇದಕ್ಕೆ ಅನುಮತಿ ಇಲ್ಲ. ಮಾಲೀಕರನ್ನು ಕೇಳಿ.',
   'Your subscription is on this phone.':

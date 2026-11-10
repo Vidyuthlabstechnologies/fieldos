@@ -2341,6 +2341,8 @@ const Map<String, String> stringsTa = {
       'உங்கள் கிளவுட் உள்நுழைவு முடிந்தது. குழு & ஒத்திசைவு இலிருந்து மீண்டும் உள்நுழையுங்கள்.',
   'Your plan':
       'உங்கள் திட்டம்',
+  'This needs a FieldOS server update that is on its way. Your work is safe on the phone; try again in a day or two.':
+      'இதற்கு FieldOS சர்வர் புதுப்பிப்பு தேவை, அது விரைவில் வரும். உங்கள் வேலை போனில் பாதுகாப்பாக உள்ளது; ஓரிரு நாளில் மீண்டும் முயலுங்கள்.',
   'Your role in this company does not allow that. Ask the owner.':
       'இந்த நிறுவனத்தில் உங்கள் பங்குக்கு இதற்கு அனுமதி இல்லை. உரிமையாளரிடம் கேளுங்கள்.',
   'Your subscription is on this phone.':
