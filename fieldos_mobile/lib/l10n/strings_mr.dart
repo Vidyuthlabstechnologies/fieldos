@@ -3201,4 +3201,7 @@ const Map<String, String> stringsMr = {
       'हा बॅकअप नव्या FieldOS ने केला आहे. आधी ॲप अपडेट करा.',
   'This is not a FieldOS backup file.':
       'ही FieldOS बॅकअप फाइल नाही.',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'एक्सपोर्ट तपासणीत पास झाला नाही, म्हणून पाठवला नाही: {why}',
 };

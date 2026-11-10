@@ -3201,4 +3201,7 @@ const Map<String, String> stringsTa = {
       'இந்த பேக்கப் புதிய FieldOS-ஆல் செய்யப்பட்டது. முதலில் ஆப்பை அப்டேட் செய்யவும்.',
   'This is not a FieldOS backup file.':
       'இது FieldOS பேக்கப் கோப்பு அல்ல.',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'ஏற்றுமதி சரிபார்ப்பில் தேறவில்லை, அதனால் அனுப்பப்படவில்லை: {why}',
 };

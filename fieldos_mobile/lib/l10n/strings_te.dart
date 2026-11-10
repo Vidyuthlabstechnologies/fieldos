@@ -2312,4 +2312,7 @@ const Map<String, String> stringsTe = {
       'ఈ బ్యాకప్ కొత్త FieldOS తో చేసినది. ముందు యాప్ అప్‌డేట్ చేయండి.',
   'This is not a FieldOS backup file.':
       'ఇది FieldOS బ్యాకప్ ఫైల్ కాదు.',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'ఎక్స్‌పోర్ట్ తనిఖీలో పాస్ కాలేదు, కాబట్టి పంపలేదు: {why}',
 };

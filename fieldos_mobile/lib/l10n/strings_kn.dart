@@ -3201,4 +3201,7 @@ const Map<String, String> stringsKn = {
       'ಈ ಬ್ಯಾಕಪ್ ಹೊಸ FieldOS ನಿಂದ ಮಾಡಲಾಗಿದೆ. ಮೊದಲು ಆಪ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಿ.',
   'This is not a FieldOS backup file.':
       'ಇದು FieldOS ಬ್ಯಾಕಪ್ ಫೈಲ್ ಅಲ್ಲ.',
+  // Accounts export check
+  'The export did not pass its check, so it was not sent: {why}':
+      'ರಫ್ತು ಪರಿಶೀಲನೆಯಲ್ಲಿ ಪಾಸ್ ಆಗಲಿಲ್ಲ, ಆದ್ದರಿಂದ ಕಳುಹಿಸಲಿಲ್ಲ: {why}',
 };

@@ -117,21 +117,31 @@ Future<void> showAccountsExport(BuildContext context, WidgetRef ref) async {
   if (format == null || !context.mounted) return;
   final (_, from, to) = periods[pick];
   try {
-    final (file, export) = await writeAccountsExport(ref.read(appDatabaseProvider),
+    final out = await writeAccountsExport(ref.read(appDatabaseProvider),
         companyId: company.id, companyName: company.name, format: format, from: from, to: to);
+    final export = out.export;
     if (export.vouchers == 0) {
       if (context.mounted) showSnack(context, 'No money entries in this period.');
       return;
     }
     final note = format == AccountsFormat.tally
-        ? '${company.name}: ${export.vouchers} vouchers for Tally (Gateway > Import > Vouchers).\n'
-            'Create these ledgers in Tally first if they are new: ${export.ledgers.join(', ')}.'
-        : '${company.name}: ${export.vouchers} expenses for Zoho Books (Purchases > Expenses > Import).';
+        ? '${company.name}: ${export.vouchers} vouchers for Tally, checked before sending.\n'
+            'First import the ledgers file (Gateway > Import > Masters), then the vouchers (Import > Vouchers). '
+            'Ledgers: ${export.ledgers.join(', ')}.'
+        : '${company.name}: ${export.vouchers} expenses for Zoho Books (Purchases > Expenses > Import), checked before sending.';
     await SharePlus.instance.share(ShareParams(
-      files: [XFile(file.path, mimeType: format == AccountsFormat.tally ? 'application/xml' : 'text/csv')],
+      files: [
+        if (out.ledgersFile != null) XFile(out.ledgersFile!.path, mimeType: 'application/xml'),
+        XFile(out.file.path, mimeType: format == AccountsFormat.tally ? 'application/xml' : 'text/csv'),
+      ],
       text: note,
       subject: note.split('\n').first,
     ));
+  } on AccountsExportProblem catch (e) {
+    if (context.mounted) {
+      showSnack(context, trf('The export did not pass its check, so it was not sent: {why}', {'why': e.check.problems.first}),
+          error: true);
+    }
   } catch (e, st) {
     if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
   }
