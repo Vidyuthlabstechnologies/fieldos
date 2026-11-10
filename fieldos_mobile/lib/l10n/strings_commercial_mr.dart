@@ -181,4 +181,6 @@ const Map<String, String> commercialMr = {
   '{what}: {qty} {unit} beyond the order': '{what}: ऑर्डरपेक्षा {qty} {unit} जास्त',
   '{who} claims {claimed} {unit}; {left} {unit} left on the order': '{who} यांनी {claimed} {unit} चा क्लेम केला; ऑर्डरवर {left} {unit} बाकी',
   '{who}\'s claim of {qty} {unit} is waiting for certification': '{who} यांचा {qty} {unit} चा क्लेम प्रमाणनाची वाट पाहत आहे',
+  'Approved variations to bill': 'बिल करायचे मंजूर व्हेरिएशन',
+  'Enter the client rate for each one to bill now. Leave a rate empty to leave it for a later bill.': 'आता बिल करण्यासाठी प्रत्येकाचा क्लायंट दर टाका. नंतरच्या बिलासाठी ठेवायचे असल्यास दर रिकामा ठेवा.',
 };

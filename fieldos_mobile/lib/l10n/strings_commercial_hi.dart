@@ -181,4 +181,6 @@ const Map<String, String> commercialHi = {
   '{what}: {qty} {unit} beyond the order': '{what}: ऑर्डर से {qty} {unit} ज़्यादा',
   '{who} claims {claimed} {unit}; {left} {unit} left on the order': '{who} ने {claimed} {unit} का क्लेम किया; ऑर्डर पर {left} {unit} बाकी',
   '{who}\'s claim of {qty} {unit} is waiting for certification': '{who} का {qty} {unit} का क्लेम प्रमाणन के इंतज़ार में है',
+  'Approved variations to bill': 'बिल करने के लिए मंज़ूर वेरिएशन',
+  'Enter the client rate for each one to bill now. Leave a rate empty to leave it for a later bill.': 'अभी बिल करने के लिए हर एक का क्लाइंट रेट डालें। बाद के बिल के लिए छोड़ना हो तो रेट खाली छोड़ें।',
 };

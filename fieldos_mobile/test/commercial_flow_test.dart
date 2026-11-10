@@ -12,6 +12,8 @@ import 'package:uuid/uuid.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/commercial/commercial_data.dart';
 import 'package:fieldos_mobile/features/commercial/commercial_rules.dart';
+import 'package:fieldos_mobile/features/money/billing_calc.dart';
+import 'package:fieldos_mobile/features/money/billing_reconcile.dart';
 
 void main() {
   late AppDatabase db;
@@ -218,5 +220,39 @@ void main() {
     // in schema_v16_upgrade_test.dart.
     final cols = await db.customSelect('PRAGMA table_info(work_orders)').get();
     expect(cols.map((r) => r.read<String>('name')), containsAll(['unit', 'contract_qty', 'rate', 'cost_code_id']));
+  });
+
+  test('approved client variations go on the RA bill once, at the rate the person enters', () async {
+    final client = await dao.raiseVariationRow(
+        projectId: site.id, title: 'Extra niche plaster', origin: 'client_instruction', by: engineer, qty: 12, unit: 'm²');
+    final ours = await dao.raiseVariationRow(
+        projectId: site.id, title: 'Rework after rain', origin: 'site_condition', by: engineer, qty: 5, unit: 'm²');
+    final lump = await dao.raiseVariationRow(
+        projectId: site.id, title: 'Change of skirting', origin: 'design_change', by: engineer, estimatedCost: 4000);
+    final pending = await dao.raiseVariationRow(
+        projectId: site.id, title: 'Extra parapet', origin: 'client_instruction', by: engineer, qty: 3, unit: 'm');
+    await dao.decideVariation(variationId: client.id, approve: true, by: pm, approvedQty: 10);
+    await dao.decideVariation(variationId: ours.id, approve: true, by: pm);
+    await dao.decideVariation(variationId: lump.id, approve: true, by: pm);
+    expect(pending.id, isNotEmpty);
+
+    final billable = clientBillableVariations(await load());
+    expect(billable.map((b) => b.variation.id), [client.id, lump.id], reason: 'site conditions and pending ones are not billed');
+    expect(billable.first.qty, 10, reason: 'the approved quantity, not the raised one');
+    expect(billable.last.unit, 'LS');
+    expect(billable.first.description, contains('Extra niche plaster'));
+
+    final extras = [for (final b in billable) ApprovedExtra(description: b.description, unit: b.unit, qty: b.qty, rate: 300)];
+    final first = nextRaLines(approved: const {}, earlierBills: const [], extras: extras);
+    expect(first.lines.map((l) => l.qty), [10, 1]);
+
+    // Billed once: the same variations are not offered again, even after a
+    // fresh load (the description is stable).
+    final again = clientBillableVariations(await load());
+    final next = nextRaLines(approved: const {}, earlierBills: [first.lines], extras: [
+      for (final b in again) ApprovedExtra(description: b.description, unit: b.unit, qty: b.qty, rate: 300),
+    ]);
+    expect(next.lines, isEmpty);
+    expect(previousQuantities([first.lines]).length, 2);
   });
 }

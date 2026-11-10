@@ -600,3 +600,43 @@ List<CommercialException> withActions(List<CommercialException> list, List<Excep
   }
   return list;
 }
+
+// --- Client billing of variations ------------------------------------------
+
+/// Origins the client normally pays for. A claim over the order or a site
+/// condition is usually the builder's own cost.
+const clientBillableOrigins = {'client_instruction', 'design_change'};
+
+/// One approved variation ready to go on the client's RA bill. The client's
+/// rate is not in the register (its costs are what we pay), so the person
+/// enters it when billing.
+class BillableVariation {
+  const BillableVariation({required this.variation, required this.description, required this.unit, required this.qty});
+  final Variation variation;
+
+  /// Stable across phones and syncs, so a variation already billed is
+  /// recognised by the RA bill builder (same description and unit).
+  final String description;
+  final String unit;
+  final double qty;
+}
+
+/// Approved client instructions and design changes, as RA bill extras. A
+/// variation without a quantity is billed as one lump sum.
+List<BillableVariation> clientBillableVariations(CommercialData d) {
+  final out = <BillableVariation>[];
+  for (final v in d.variations) {
+    if (!clientBillableOrigins.contains(v.origin)) continue;
+    final dec = d.decisionByVariation[v.id];
+    if (dec == null || dec.decision != 'approved') continue;
+    final q = dec.approvedQty ?? v.qty;
+    final lumpSum = q == null || q <= 0 || (v.unit ?? '').trim().isEmpty;
+    out.add(BillableVariation(
+      variation: v,
+      description: '${v.title} (VO ${v.id.substring(0, math.min(8, v.id.length)).toUpperCase()})',
+      unit: lumpSum ? 'LS' : v.unit!.trim(),
+      qty: lumpSum ? 1 : q,
+    ));
+  }
+  return out;
+}

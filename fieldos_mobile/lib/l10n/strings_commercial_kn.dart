@@ -181,4 +181,6 @@ const Map<String, String> commercialKn = {
   '{what}: {qty} {unit} beyond the order': '{what}: ಆರ್ಡರ್ ಮೀರಿ {qty} {unit}',
   '{who} claims {claimed} {unit}; {left} {unit} left on the order': '{who} {claimed} {unit} ಕ್ಲೈಮ್ ಮಾಡಿದ್ದಾರೆ; ಆರ್ಡರ್‌ನಲ್ಲಿ {left} {unit} ಉಳಿದಿದೆ',
   '{who}\'s claim of {qty} {unit} is waiting for certification': '{who} ಅವರ {qty} {unit} ಕ್ಲೈಮ್ ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಕಾಯುತ್ತಿದೆ',
+  'Approved variations to bill': 'ಬಿಲ್ ಮಾಡಬೇಕಾದ ಅನುಮೋದಿತ ಬದಲಾವಣೆಗಳು',
+  'Enter the client rate for each one to bill now. Leave a rate empty to leave it for a later bill.': 'ಈಗ ಬಿಲ್ ಮಾಡಲು ಪ್ರತಿಯೊಂದಕ್ಕೂ ಕ್ಲೈಂಟ್ ದರ ನಮೂದಿಸಿ. ನಂತರದ ಬಿಲ್‌ಗೆ ಬಿಡಲು ದರ ಖಾಲಿ ಬಿಡಿ.',
 };

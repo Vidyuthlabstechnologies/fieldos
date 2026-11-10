@@ -181,4 +181,6 @@ const Map<String, String> commercialTa = {
   '{what}: {qty} {unit} beyond the order': '{what}: ஆணைக்கு அப்பால் {qty} {unit}',
   '{who} claims {claimed} {unit}; {left} {unit} left on the order': '{who} {claimed} {unit} கோருகிறார்; ஆணையில் {left} {unit} மீதம்',
   '{who}\'s claim of {qty} {unit} is waiting for certification': '{who} இன் {qty} {unit} கோரிக்கை சான்றளிப்புக்காகக் காத்திருக்கிறது',
+  'Approved variations to bill': 'பில் செய்ய அங்கீகரித்த மாற்றங்கள்',
+  'Enter the client rate for each one to bill now. Leave a rate empty to leave it for a later bill.': 'இப்போது பில் செய்ய ஒவ்வொன்றுக்கும் வாடிக்கையாளர் விலையை உள்ளிடவும். பின் வரும் பில்லுக்கு விட, விலையைக் காலியாக விடவும்.',
 };
