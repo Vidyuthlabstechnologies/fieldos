@@ -12,6 +12,7 @@ import 'package:fieldos_mobile/auth/auth_service.dart' show Roles;
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/portals/portal_share.dart';
 import 'package:fieldos_mobile/features/procurement/quote_compare.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -45,7 +46,15 @@ class QuoteCompareScreen extends ConsumerWidget {
     final session = ref.watch(sessionProvider);
     final canAward = Roles.canApprove(session.role);
     return Scaffold(
-      appBar: AppBar(title: Text(tr('Compare quotes'))),
+      appBar: AppBar(title: Text(tr('Compare quotes')), actions: [
+        if (canAward && async.value?.request.status == 'pending')
+          IconButton(
+            key: const Key('ask-in-app'),
+            tooltip: tr('Ask for a price in the app'),
+            icon: const Icon(Icons.send_to_mobile_outlined),
+            onPressed: () => askSuppliersInApp(context, ref, request: async.value!.request, suppliers: async.value!.suppliers),
+          ),
+      ]),
       floatingActionButton: async.value?.request.status == 'pending'
           ? FloatingActionButton.extended(
               key: const Key('add-quote'),

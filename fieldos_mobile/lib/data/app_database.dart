@@ -344,6 +344,9 @@ class AppDatabase extends _$AppDatabase {
               await _addColumnIfMissing(m, labourAttendance, c);
             }
             await _addColumnIfMissing(m, staffMembers, staffMembers.userId);
+            for (final c in [purchaseOrders.dispatchedOn, purchaseOrders.dispatchVehicle, purchaseOrders.supplierNote]) {
+              await _addColumnIfMissing(m, purchaseOrders, c);
+            }
           }
         },
       );

@@ -27,6 +27,9 @@ void main() {
       await db.customStatement('ALTER TABLE labour_attendance DROP COLUMN $c');
     }
     await db.customStatement('ALTER TABLE staff_members DROP COLUMN user_id');
+    for (final c in ['dispatched_on', 'dispatch_vehicle', 'supplier_note']) {
+      await db.customStatement('ALTER TABLE purchase_orders DROP COLUMN $c');
+    }
     await db.customStatement('PRAGMA user_version = 23');
     await db.close();
 
@@ -36,6 +39,7 @@ void main() {
     expect(old.workerName, 'Raju');
     expect(old.photoId, isNull);
     expect((await db.payrollDao.staffById(staff.id))!.userId, isNull);
+    expect(await db.select(db.purchaseOrders).get(), isEmpty, reason: 'the supplier dispatch columns are back');
     final r = await db.staffAttendanceDao.checkIn(
         companyId: company.id, projectId: 'p', userId: 'u', selfiePath: '/m/s.jpg', fence: null, reason: 'Office');
     expect(r.status, 'pending');

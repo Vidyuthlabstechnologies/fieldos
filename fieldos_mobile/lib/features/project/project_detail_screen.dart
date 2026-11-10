@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/features/project/site_notes_screen.dart';
+import 'package:fieldos_mobile/features/portals/portal_share.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -177,6 +178,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => SiteTeamScreen(project: widget.project)));
               }
               if (v == 'excel') exportProjectToExcel(context, ref, widget.project);
+              if (v == 'client') shareClientAccess(context, ref, widget.project);
               if (v == 'notes') {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => SiteNotesScreen(projectId: widget.project.id, siteName: widget.project.name),
@@ -233,6 +235,15 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   title: Text(tr('Site team')),
                 ),
               ),
+              if (Roles.canApprove(ref.read(sessionProvider).role))
+                PopupMenuItem(
+                  key: const Key('menu-share-client'),
+                  value: 'client',
+                  child: ListTile(
+                    leading: const Icon(Icons.person_pin_circle_outlined),
+                    title: Text(tr('Share with the client')),
+                  ),
+                ),
               PopupMenuItem(
                 value: 'report',
                 child: ListTile(

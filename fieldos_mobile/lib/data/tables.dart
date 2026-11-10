@@ -312,6 +312,12 @@ class PurchaseOrders extends Table {
   /// v16: the budget line this order is committed against.
   TextColumn get costCodeId => text().withLength(max: 36).nullable()();
 
+  /// v32: the supplier says it is on its way, from their free portal
+  /// (pulled only; the builder's phone never sends these).
+  DateTimeColumn get dispatchedOn => dateTime().nullable()();
+  TextColumn get dispatchVehicle => text().withLength(max: 60).nullable()();
+  TextColumn get supplierNote => text().withLength(max: 500).nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }

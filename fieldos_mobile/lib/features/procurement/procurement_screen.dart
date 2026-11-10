@@ -555,6 +555,7 @@ class _PoTab extends ConsumerWidget {
         _poStage(o, poProgress(o, requests.where((r) => r.id == o.requestId).firstOrNull, receipts)),
         if (chain != null && chain.status.required.isNotEmpty) chain.status.label,
         if (poIsLate(o, now)) trf('late since {date}', {'date': fmtDate(o.deliveryDate!, short: true)}),
+        if (o.status == 'acknowledged' && o.dispatchedOn != null) _onTheWay(o),
       ].join(' · ')),
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
         if (waiting && chain.signAs != null)
@@ -579,7 +580,7 @@ class _PoTab extends ConsumerWidget {
             icon: const Icon(Icons.share_outlined),
             onPressed: () => _sharePo(ref, o, suppliers),
           ),
-        if (o.status == 'issued')
+        if (o.status == 'issued' || o.status == 'acknowledged')
           FilledButton(
             child: Text(tr('Receive')),
             onPressed: () => _receive(context, ref, o, requests.where((r) => r.id == o.requestId).firstOrNull,
@@ -705,6 +706,18 @@ String _poTitle(PurchaseOrder o, PurchaseRequest? request) {
       ? tr('Purchase order')
       : [request.materialName.trim(), fmtQty(request.quantity), request.unit.trim()].where((e) => e.isNotEmpty).join(' ');
   return o.totalAmount == null ? what : '$what · ${rupees(o.totalAmount!)}';
+}
+
+/// What the supplier said from their free portal when they sent it.
+String _onTheWay(PurchaseOrder o) {
+  final vehicle = o.dispatchVehicle?.trim() ?? '';
+  final note = o.supplierNote?.trim() ?? '';
+  return [
+    vehicle.isEmpty
+        ? trf('on the way since {date}', {'date': fmtDate(o.dispatchedOn!, short: true)})
+        : trf('on the way in {vehicle} since {date}', {'vehicle': vehicle, 'date': fmtDate(o.dispatchedOn!, short: true)}),
+    if (note.isNotEmpty) note,
+  ].join(' · ');
 }
 
 /// "Sent to supplier", or how much of it has come when it came in parts.

@@ -563,6 +563,9 @@ PurchaseOrdersCompanion purchaseOrderFromSupabaseJson(Map<String, dynamic> row) 
       status: Value(row['status'] as String? ?? 'issued'),
       notes: Value(row['notes'] as String?),
       costCodeId: _ifSent(row, 'cost_code_id', (v) => v as String?),
+      dispatchedOn: _ifSent(row, 'dispatched_on', (v) => v == null ? null : DateTime.parse(v as String)),
+      dispatchVehicle: _ifSent(row, 'dispatch_vehicle', (v) => v as String?),
+      supplierNote: _ifSent(row, 'supplier_note', (v) => v as String?),
     );
 
 Map<String, dynamic> projectMessageToSupabaseJson(ProjectMessage m) => {

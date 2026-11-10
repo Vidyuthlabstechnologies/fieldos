@@ -8696,6 +8696,41 @@ class $PurchaseOrdersTable extends PurchaseOrders
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _dispatchedOnMeta = const VerificationMeta(
+    'dispatchedOn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dispatchedOn = GeneratedColumn<DateTime>(
+    'dispatched_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dispatchVehicleMeta = const VerificationMeta(
+    'dispatchVehicle',
+  );
+  @override
+  late final GeneratedColumn<String> dispatchVehicle = GeneratedColumn<String>(
+    'dispatch_vehicle',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 60),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _supplierNoteMeta = const VerificationMeta(
+    'supplierNote',
+  );
+  @override
+  late final GeneratedColumn<String> supplierNote = GeneratedColumn<String>(
+    'supplier_note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -8711,6 +8746,9 @@ class $PurchaseOrdersTable extends PurchaseOrders
     notes,
     createdAt,
     costCodeId,
+    dispatchedOn,
+    dispatchVehicle,
+    supplierNote,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -8816,6 +8854,33 @@ class $PurchaseOrdersTable extends PurchaseOrders
         ),
       );
     }
+    if (data.containsKey('dispatched_on')) {
+      context.handle(
+        _dispatchedOnMeta,
+        dispatchedOn.isAcceptableOrUnknown(
+          data['dispatched_on']!,
+          _dispatchedOnMeta,
+        ),
+      );
+    }
+    if (data.containsKey('dispatch_vehicle')) {
+      context.handle(
+        _dispatchVehicleMeta,
+        dispatchVehicle.isAcceptableOrUnknown(
+          data['dispatch_vehicle']!,
+          _dispatchVehicleMeta,
+        ),
+      );
+    }
+    if (data.containsKey('supplier_note')) {
+      context.handle(
+        _supplierNoteMeta,
+        supplierNote.isAcceptableOrUnknown(
+          data['supplier_note']!,
+          _supplierNoteMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -8877,6 +8942,18 @@ class $PurchaseOrdersTable extends PurchaseOrders
         DriftSqlType.string,
         data['${effectivePrefix}cost_code_id'],
       ),
+      dispatchedOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}dispatched_on'],
+      ),
+      dispatchVehicle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dispatch_vehicle'],
+      ),
+      supplierNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supplier_note'],
+      ),
     );
   }
 
@@ -8902,6 +8979,12 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
 
   /// v16: the budget line this order is committed against.
   final String? costCodeId;
+
+  /// v32: the supplier says it is on its way, from their free portal
+  /// (pulled only; the builder's phone never sends these).
+  final DateTime? dispatchedOn;
+  final String? dispatchVehicle;
+  final String? supplierNote;
   const PurchaseOrder({
     required this.id,
     required this.projectId,
@@ -8916,6 +8999,9 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     this.notes,
     required this.createdAt,
     this.costCodeId,
+    this.dispatchedOn,
+    this.dispatchVehicle,
+    this.supplierNote,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -8946,6 +9032,15 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || costCodeId != null) {
       map['cost_code_id'] = Variable<String>(costCodeId);
+    }
+    if (!nullToAbsent || dispatchedOn != null) {
+      map['dispatched_on'] = Variable<DateTime>(dispatchedOn);
+    }
+    if (!nullToAbsent || dispatchVehicle != null) {
+      map['dispatch_vehicle'] = Variable<String>(dispatchVehicle);
+    }
+    if (!nullToAbsent || supplierNote != null) {
+      map['supplier_note'] = Variable<String>(supplierNote);
     }
     return map;
   }
@@ -8979,6 +9074,15 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
       costCodeId: costCodeId == null && nullToAbsent
           ? const Value.absent()
           : Value(costCodeId),
+      dispatchedOn: dispatchedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dispatchedOn),
+      dispatchVehicle: dispatchVehicle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dispatchVehicle),
+      supplierNote: supplierNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supplierNote),
     );
   }
 
@@ -9001,6 +9105,9 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
       notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       costCodeId: serializer.fromJson<String?>(json['costCodeId']),
+      dispatchedOn: serializer.fromJson<DateTime?>(json['dispatchedOn']),
+      dispatchVehicle: serializer.fromJson<String?>(json['dispatchVehicle']),
+      supplierNote: serializer.fromJson<String?>(json['supplierNote']),
     );
   }
   @override
@@ -9020,6 +9127,9 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
       'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'costCodeId': serializer.toJson<String?>(costCodeId),
+      'dispatchedOn': serializer.toJson<DateTime?>(dispatchedOn),
+      'dispatchVehicle': serializer.toJson<String?>(dispatchVehicle),
+      'supplierNote': serializer.toJson<String?>(supplierNote),
     };
   }
 
@@ -9037,6 +9147,9 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
     Value<String?> costCodeId = const Value.absent(),
+    Value<DateTime?> dispatchedOn = const Value.absent(),
+    Value<String?> dispatchVehicle = const Value.absent(),
+    Value<String?> supplierNote = const Value.absent(),
   }) => PurchaseOrder(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -9051,6 +9164,11 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
     costCodeId: costCodeId.present ? costCodeId.value : this.costCodeId,
+    dispatchedOn: dispatchedOn.present ? dispatchedOn.value : this.dispatchedOn,
+    dispatchVehicle: dispatchVehicle.present
+        ? dispatchVehicle.value
+        : this.dispatchVehicle,
+    supplierNote: supplierNote.present ? supplierNote.value : this.supplierNote,
   );
   PurchaseOrder copyWithCompanion(PurchaseOrdersCompanion data) {
     return PurchaseOrder(
@@ -9075,6 +9193,15 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
       costCodeId: data.costCodeId.present
           ? data.costCodeId.value
           : this.costCodeId,
+      dispatchedOn: data.dispatchedOn.present
+          ? data.dispatchedOn.value
+          : this.dispatchedOn,
+      dispatchVehicle: data.dispatchVehicle.present
+          ? data.dispatchVehicle.value
+          : this.dispatchVehicle,
+      supplierNote: data.supplierNote.present
+          ? data.supplierNote.value
+          : this.supplierNote,
     );
   }
 
@@ -9093,7 +9220,10 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
           ..write('status: $status, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
-          ..write('costCodeId: $costCodeId')
+          ..write('costCodeId: $costCodeId, ')
+          ..write('dispatchedOn: $dispatchedOn, ')
+          ..write('dispatchVehicle: $dispatchVehicle, ')
+          ..write('supplierNote: $supplierNote')
           ..write(')'))
         .toString();
   }
@@ -9113,6 +9243,9 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
     notes,
     createdAt,
     costCodeId,
+    dispatchedOn,
+    dispatchVehicle,
+    supplierNote,
   );
   @override
   bool operator ==(Object other) =>
@@ -9130,7 +9263,10 @@ class PurchaseOrder extends DataClass implements Insertable<PurchaseOrder> {
           other.status == this.status &&
           other.notes == this.notes &&
           other.createdAt == this.createdAt &&
-          other.costCodeId == this.costCodeId);
+          other.costCodeId == this.costCodeId &&
+          other.dispatchedOn == this.dispatchedOn &&
+          other.dispatchVehicle == this.dispatchVehicle &&
+          other.supplierNote == this.supplierNote);
 }
 
 class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
@@ -9147,6 +9283,9 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
   final Value<String?> notes;
   final Value<DateTime> createdAt;
   final Value<String?> costCodeId;
+  final Value<DateTime?> dispatchedOn;
+  final Value<String?> dispatchVehicle;
+  final Value<String?> supplierNote;
   final Value<int> rowid;
   const PurchaseOrdersCompanion({
     this.id = const Value.absent(),
@@ -9162,6 +9301,9 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.costCodeId = const Value.absent(),
+    this.dispatchedOn = const Value.absent(),
+    this.dispatchVehicle = const Value.absent(),
+    this.supplierNote = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PurchaseOrdersCompanion.insert({
@@ -9178,6 +9320,9 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.costCodeId = const Value.absent(),
+    this.dispatchedOn = const Value.absent(),
+    this.dispatchVehicle = const Value.absent(),
+    this.supplierNote = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        projectId = Value(projectId),
@@ -9197,6 +9342,9 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     Expression<String>? notes,
     Expression<DateTime>? createdAt,
     Expression<String>? costCodeId,
+    Expression<DateTime>? dispatchedOn,
+    Expression<String>? dispatchVehicle,
+    Expression<String>? supplierNote,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -9213,6 +9361,9 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
       if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
       if (costCodeId != null) 'cost_code_id': costCodeId,
+      if (dispatchedOn != null) 'dispatched_on': dispatchedOn,
+      if (dispatchVehicle != null) 'dispatch_vehicle': dispatchVehicle,
+      if (supplierNote != null) 'supplier_note': supplierNote,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -9231,6 +9382,9 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     Value<String?>? notes,
     Value<DateTime>? createdAt,
     Value<String?>? costCodeId,
+    Value<DateTime?>? dispatchedOn,
+    Value<String?>? dispatchVehicle,
+    Value<String?>? supplierNote,
     Value<int>? rowid,
   }) {
     return PurchaseOrdersCompanion(
@@ -9247,6 +9401,9 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       costCodeId: costCodeId ?? this.costCodeId,
+      dispatchedOn: dispatchedOn ?? this.dispatchedOn,
+      dispatchVehicle: dispatchVehicle ?? this.dispatchVehicle,
+      supplierNote: supplierNote ?? this.supplierNote,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -9293,6 +9450,15 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
     if (costCodeId.present) {
       map['cost_code_id'] = Variable<String>(costCodeId.value);
     }
+    if (dispatchedOn.present) {
+      map['dispatched_on'] = Variable<DateTime>(dispatchedOn.value);
+    }
+    if (dispatchVehicle.present) {
+      map['dispatch_vehicle'] = Variable<String>(dispatchVehicle.value);
+    }
+    if (supplierNote.present) {
+      map['supplier_note'] = Variable<String>(supplierNote.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -9315,6 +9481,9 @@ class PurchaseOrdersCompanion extends UpdateCompanion<PurchaseOrder> {
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('costCodeId: $costCodeId, ')
+          ..write('dispatchedOn: $dispatchedOn, ')
+          ..write('dispatchVehicle: $dispatchVehicle, ')
+          ..write('supplierNote: $supplierNote, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -50071,6 +50240,9 @@ typedef $$PurchaseOrdersTableCreateCompanionBuilder =
       Value<String?> notes,
       Value<DateTime> createdAt,
       Value<String?> costCodeId,
+      Value<DateTime?> dispatchedOn,
+      Value<String?> dispatchVehicle,
+      Value<String?> supplierNote,
       Value<int> rowid,
     });
 typedef $$PurchaseOrdersTableUpdateCompanionBuilder =
@@ -50088,6 +50260,9 @@ typedef $$PurchaseOrdersTableUpdateCompanionBuilder =
       Value<String?> notes,
       Value<DateTime> createdAt,
       Value<String?> costCodeId,
+      Value<DateTime?> dispatchedOn,
+      Value<String?> dispatchVehicle,
+      Value<String?> supplierNote,
       Value<int> rowid,
     });
 
@@ -50162,6 +50337,21 @@ class $$PurchaseOrdersTableFilterComposer
 
   ColumnFilters<String> get costCodeId => $composableBuilder(
     column: $table.costCodeId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dispatchedOn => $composableBuilder(
+    column: $table.dispatchedOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dispatchVehicle => $composableBuilder(
+    column: $table.dispatchVehicle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supplierNote => $composableBuilder(
+    column: $table.supplierNote,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -50239,6 +50429,21 @@ class $$PurchaseOrdersTableOrderingComposer
     column: $table.costCodeId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get dispatchedOn => $composableBuilder(
+    column: $table.dispatchedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dispatchVehicle => $composableBuilder(
+    column: $table.dispatchVehicle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supplierNote => $composableBuilder(
+    column: $table.supplierNote,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PurchaseOrdersTableAnnotationComposer
@@ -50296,6 +50501,21 @@ class $$PurchaseOrdersTableAnnotationComposer
     column: $table.costCodeId,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get dispatchedOn => $composableBuilder(
+    column: $table.dispatchedOn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get dispatchVehicle => $composableBuilder(
+    column: $table.dispatchVehicle,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get supplierNote => $composableBuilder(
+    column: $table.supplierNote,
+    builder: (column) => column,
+  );
 }
 
 class $$PurchaseOrdersTableTableManager
@@ -50344,6 +50564,9 @@ class $$PurchaseOrdersTableTableManager
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<String?> costCodeId = const Value.absent(),
+                Value<DateTime?> dispatchedOn = const Value.absent(),
+                Value<String?> dispatchVehicle = const Value.absent(),
+                Value<String?> supplierNote = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PurchaseOrdersCompanion(
                 id: id,
@@ -50359,6 +50582,9 @@ class $$PurchaseOrdersTableTableManager
                 notes: notes,
                 createdAt: createdAt,
                 costCodeId: costCodeId,
+                dispatchedOn: dispatchedOn,
+                dispatchVehicle: dispatchVehicle,
+                supplierNote: supplierNote,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -50376,6 +50602,9 @@ class $$PurchaseOrdersTableTableManager
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<String?> costCodeId = const Value.absent(),
+                Value<DateTime?> dispatchedOn = const Value.absent(),
+                Value<String?> dispatchVehicle = const Value.absent(),
+                Value<String?> supplierNote = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PurchaseOrdersCompanion.insert(
                 id: id,
@@ -50391,6 +50620,9 @@ class $$PurchaseOrdersTableTableManager
                 notes: notes,
                 createdAt: createdAt,
                 costCodeId: costCodeId,
+                dispatchedOn: dispatchedOn,
+                dispatchVehicle: dispatchVehicle,
+                supplierNote: supplierNote,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
