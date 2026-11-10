@@ -1580,3 +1580,26 @@ class FloorProgress extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+/// v38, change history: the row as it was (and became) each time an
+/// expense, payment, receipt, usage, bill, punch, supplier invoice or work
+/// measurement was changed or deleted, and who did it. Written only by the
+/// server (20261111120000_entry_history.sql) and pulled; never pushed.
+class EntryHistory extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// The server table, e.g. site_expenses.
+  TextColumn get sourceTable => text().withLength(min: 1, max: 60)();
+  TextColumn get rowId => text().withLength(min: 1, max: 36)();
+
+  /// update | delete
+  TextColumn get op => text().withLength(min: 1, max: 10)();
+  TextColumn get oldJson => text()();
+  TextColumn get newJson => text().nullable()();
+  TextColumn get changedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get changedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

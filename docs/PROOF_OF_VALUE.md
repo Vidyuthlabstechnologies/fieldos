@@ -103,3 +103,25 @@ site use the cement, sand, aggregate, bricks and steel the work needed?"
   kg. They are labelled as starting figures and each company sets its own.
   They are kept on the phone (setting `material_norms:<companyId>`), not
   synced.
+
+## Change history (Drift v38, `20261111120000_entry_history.sql`)
+
+Site menu (owners and managers): **Change history**. Every change to, or
+delete of, an expense, payment received, material receipt, material usage,
+client bill, attendance punch, supplier invoice or work measurement keeps
+the row as it was and as it became, who changed it and when.
+
+- **Written only by the server.** A trigger on each of those tables adds a
+  row to `entry_history` after an update or delete. Nobody can insert,
+  change or delete history, from the app or the API. A change that only
+  touches the edit stamp (`edited_at`, `edited_by`) adds nothing. Deleting a
+  whole site still works and keeps no history for it.
+- **Who reads it.** The site's owner or project manager and its accounts
+  person (server policy). A site engineer doesn't.
+- **On the phone** it is pulled, never pushed (`entry_history` in the sync
+  engine; `changed_by` maps to this phone's own id like other user
+  columns). The screen shows each change field by field, old value struck
+  through, with "Deletes and cancels" as a filter, and a deleted entry's
+  amount as it was.
+- History starts when the migration is applied: changes made before that
+  were not recorded.

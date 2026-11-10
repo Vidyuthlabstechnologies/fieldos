@@ -1984,3 +1984,17 @@ FloorProgressCompanion floorProgressFromSupabaseJson(Map<String, dynamic> row) =
           ? const Value.absent()
           : Value(DateTime.parse(row['created_at'] as String).toLocal()),
     );
+
+// --- Change history (app schema v38, 20261111120000_entry_history.sql), pulled only
+
+EntryHistoryCompanion entryHistoryFromSupabaseJson(Map<String, dynamic> row) => EntryHistoryCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      sourceTable: row['table_name'] as String,
+      rowId: row['row_id'] as String,
+      op: row['op'] as String,
+      oldJson: jsonEncode(row['old_row']),
+      newJson: Value(row['new_row'] == null ? null : jsonEncode(row['new_row'])),
+      changedBy: Value(row['changed_by'] as String?),
+      changedAt: DateTime.parse(row['changed_at'] as String).toLocal(),
+    );

@@ -112,6 +112,7 @@ String? _clip(String? s, int max) {
   StaffAttendance,
   CashMoves,
   FloorProgress,
+  EntryHistory,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -143,7 +144,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 37;
+  int get schemaVersion => 38;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -359,6 +360,10 @@ class AppDatabase extends _$AppDatabase {
             // Progress by block and floor for the RERA quarterly report.
             await _createTableIfMissing(m, floorProgress);
           }
+          if (from < 38) {
+            // Change history on money and material entries, pulled only.
+            await _createTableIfMissing(m, entryHistory);
+          }
         },
       );
 
@@ -464,6 +469,7 @@ class AppDatabase extends _$AppDatabase {
   DayCloseDao get dayCloseDao => DayCloseDao(this);
   CashBookDao get cashBookDao => CashBookDao(this);
   FloorProgressDao get floorProgressDao => FloorProgressDao(this);
+  EntryHistoryDao get entryHistoryDao => EntryHistoryDao(this);
 
   static const filesQueuedKey = 'files_queued_for_sync_v1';
 
@@ -4895,4 +4901,39 @@ class FloorProgressDao extends DatabaseAccessor<AppDatabase> with _$FloorProgres
   }
 
   Future<void> upsertFromRemote(FloorProgressCompanion c) => into(floorProgress).insertOnConflictUpdate(c);
+}
+
+@DriftAccessor(tables: [EntryHistory])
+class EntryHistoryDao extends DatabaseAccessor<AppDatabase> with _$EntryHistoryDaoMixin {
+  EntryHistoryDao(super.db);
+
+  /// A site's changes, newest first.
+  Future<List<EntryHistoryData>> forProject(String projectId, {int limit = 500}) => (select(entryHistory)
+        ..where((h) => h.projectId.equals(projectId))
+        ..orderBy([(h) => OrderingTerm.desc(h.changedAt)])
+        ..limit(limit))
+      .get();
+
+  /// One entry's changes, oldest first.
+  Future<List<EntryHistoryData>> forRow(String rowId) => (select(entryHistory)
+        ..where((h) => h.rowId.equals(rowId))
+        ..orderBy([(h) => OrderingTerm.asc(h.changedAt)]))
+      .get();
+
+  /// Which of [rowIds] have been changed or deleted.
+  Future<Set<String>> changedRows(Iterable<String> rowIds) async {
+    final ids = rowIds.toList();
+    if (ids.isEmpty) return {};
+    final out = <String>{};
+    for (var i = 0; i < ids.length; i += 500) {
+      final chunk = ids.sublist(i, i + 500 > ids.length ? ids.length : i + 500);
+      final q = selectOnly(entryHistory, distinct: true)
+        ..addColumns([entryHistory.rowId])
+        ..where(entryHistory.rowId.isIn(chunk));
+      out.addAll((await q.get()).map((r) => r.read(entryHistory.rowId)!));
+    }
+    return out;
+  }
+
+  Future<void> upsertFromRemote(EntryHistoryCompanion c) => into(entryHistory).insertOnConflictUpdate(c);
 }

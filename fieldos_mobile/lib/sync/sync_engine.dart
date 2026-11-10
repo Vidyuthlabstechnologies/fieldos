@@ -130,7 +130,7 @@ class SyncEngine {
     'created_by', 'requested_by', 'approved_by', 'uploaded_by', 'received_by',
     'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by', 'edited_by',
     'decided_by', 'submitted_by', 'holder_id', 'certified_by', 'raised_by', 'owner_id', 'acted_by', 'measured_by', 'by_user',
-    'sent_by', 'issued_by', 'taken_by', 'reviewed_by', 'supervisor_id', 'backup_id', 'updated_by',
+    'sent_by', 'issued_by', 'taken_by', 'reviewed_by', 'supervisor_id', 'backup_id', 'updated_by', 'changed_by',
   };
 
   Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>
@@ -432,6 +432,7 @@ class SyncEngine {
         'site_day_events': (r) => db.dayCloseDao.upsertEventFromRemote(siteDayEventFromSupabaseJson(r)),
         'site_cash_moves': (r) => db.cashBookDao.upsertFromRemote(cashMoveFromSupabaseJson(r)),
         'site_floor_progress': (r) => db.floorProgressDao.upsertFromRemote(floorProgressFromSupabaseJson(r)),
+        'entry_history': (r) => db.entryHistoryDao.upsertFromRemote(entryHistoryFromSupabaseJson(r)),
         'commercial_attachments': (r) async {
       final mine = await db.commercialDao.attachmentById(r['id'] as String);
       if (mine != null && File(mine.filePath).existsSync()) return;
@@ -701,6 +702,7 @@ class SyncEngine {
     'site_day_events': 'site_day_events',
     'site_cash_moves': 'cash_moves',
     'site_floor_progress': 'floor_progress',
+    'entry_history': 'entry_history',
     'attendance_photos': 'attendance_photos',
     'staff_attendance': 'staff_attendance',
   };
@@ -715,7 +717,7 @@ class SyncEngine {
     'commercial_attachments', 'commercial_exception_actions', 'site_supplier_quotes',
     'project_members', 'site_access', 'site_work_measurements', 'site_work_measurement_decisions',
     'site_bill_allocations', 'site_supplier_invoices', 'site_approval_steps', 'site_close_settings', 'site_day_events',
-    'site_cash_moves', 'site_floor_progress',
+    'site_cash_moves', 'site_floor_progress', 'entry_history',
     'attendance_photos', 'staff_attendance',
   };
 

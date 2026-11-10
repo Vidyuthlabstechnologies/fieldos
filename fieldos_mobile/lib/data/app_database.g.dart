@@ -46447,6 +46447,588 @@ class FloorProgressCompanion extends UpdateCompanion<FloorProgressData> {
   }
 }
 
+class $EntryHistoryTable extends EntryHistory
+    with TableInfo<$EntryHistoryTable, EntryHistoryData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EntryHistoryTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceTableMeta = const VerificationMeta(
+    'sourceTable',
+  );
+  @override
+  late final GeneratedColumn<String> sourceTable = GeneratedColumn<String>(
+    'source_table',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 60,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rowIdMeta = const VerificationMeta('rowId');
+  @override
+  late final GeneratedColumn<String> rowId = GeneratedColumn<String>(
+    'row_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _opMeta = const VerificationMeta('op');
+  @override
+  late final GeneratedColumn<String> op = GeneratedColumn<String>(
+    'op',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _oldJsonMeta = const VerificationMeta(
+    'oldJson',
+  );
+  @override
+  late final GeneratedColumn<String> oldJson = GeneratedColumn<String>(
+    'old_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _newJsonMeta = const VerificationMeta(
+    'newJson',
+  );
+  @override
+  late final GeneratedColumn<String> newJson = GeneratedColumn<String>(
+    'new_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _changedByMeta = const VerificationMeta(
+    'changedBy',
+  );
+  @override
+  late final GeneratedColumn<String> changedBy = GeneratedColumn<String>(
+    'changed_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _changedAtMeta = const VerificationMeta(
+    'changedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> changedAt = GeneratedColumn<DateTime>(
+    'changed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    sourceTable,
+    rowId,
+    op,
+    oldJson,
+    newJson,
+    changedBy,
+    changedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'entry_history';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EntryHistoryData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('source_table')) {
+      context.handle(
+        _sourceTableMeta,
+        sourceTable.isAcceptableOrUnknown(
+          data['source_table']!,
+          _sourceTableMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceTableMeta);
+    }
+    if (data.containsKey('row_id')) {
+      context.handle(
+        _rowIdMeta,
+        rowId.isAcceptableOrUnknown(data['row_id']!, _rowIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowIdMeta);
+    }
+    if (data.containsKey('op')) {
+      context.handle(_opMeta, op.isAcceptableOrUnknown(data['op']!, _opMeta));
+    } else if (isInserting) {
+      context.missing(_opMeta);
+    }
+    if (data.containsKey('old_json')) {
+      context.handle(
+        _oldJsonMeta,
+        oldJson.isAcceptableOrUnknown(data['old_json']!, _oldJsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_oldJsonMeta);
+    }
+    if (data.containsKey('new_json')) {
+      context.handle(
+        _newJsonMeta,
+        newJson.isAcceptableOrUnknown(data['new_json']!, _newJsonMeta),
+      );
+    }
+    if (data.containsKey('changed_by')) {
+      context.handle(
+        _changedByMeta,
+        changedBy.isAcceptableOrUnknown(data['changed_by']!, _changedByMeta),
+      );
+    }
+    if (data.containsKey('changed_at')) {
+      context.handle(
+        _changedAtMeta,
+        changedAt.isAcceptableOrUnknown(data['changed_at']!, _changedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_changedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EntryHistoryData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EntryHistoryData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      sourceTable: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_table'],
+      )!,
+      rowId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}row_id'],
+      )!,
+      op: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}op'],
+      )!,
+      oldJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}old_json'],
+      )!,
+      newJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}new_json'],
+      ),
+      changedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}changed_by'],
+      ),
+      changedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}changed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $EntryHistoryTable createAlias(String alias) {
+    return $EntryHistoryTable(attachedDatabase, alias);
+  }
+}
+
+class EntryHistoryData extends DataClass
+    implements Insertable<EntryHistoryData> {
+  final String id;
+  final String projectId;
+
+  /// The server table, e.g. site_expenses.
+  final String sourceTable;
+  final String rowId;
+
+  /// update | delete
+  final String op;
+  final String oldJson;
+  final String? newJson;
+  final String? changedBy;
+  final DateTime changedAt;
+  const EntryHistoryData({
+    required this.id,
+    required this.projectId,
+    required this.sourceTable,
+    required this.rowId,
+    required this.op,
+    required this.oldJson,
+    this.newJson,
+    this.changedBy,
+    required this.changedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['source_table'] = Variable<String>(sourceTable);
+    map['row_id'] = Variable<String>(rowId);
+    map['op'] = Variable<String>(op);
+    map['old_json'] = Variable<String>(oldJson);
+    if (!nullToAbsent || newJson != null) {
+      map['new_json'] = Variable<String>(newJson);
+    }
+    if (!nullToAbsent || changedBy != null) {
+      map['changed_by'] = Variable<String>(changedBy);
+    }
+    map['changed_at'] = Variable<DateTime>(changedAt);
+    return map;
+  }
+
+  EntryHistoryCompanion toCompanion(bool nullToAbsent) {
+    return EntryHistoryCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      sourceTable: Value(sourceTable),
+      rowId: Value(rowId),
+      op: Value(op),
+      oldJson: Value(oldJson),
+      newJson: newJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(newJson),
+      changedBy: changedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(changedBy),
+      changedAt: Value(changedAt),
+    );
+  }
+
+  factory EntryHistoryData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EntryHistoryData(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      sourceTable: serializer.fromJson<String>(json['sourceTable']),
+      rowId: serializer.fromJson<String>(json['rowId']),
+      op: serializer.fromJson<String>(json['op']),
+      oldJson: serializer.fromJson<String>(json['oldJson']),
+      newJson: serializer.fromJson<String?>(json['newJson']),
+      changedBy: serializer.fromJson<String?>(json['changedBy']),
+      changedAt: serializer.fromJson<DateTime>(json['changedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'sourceTable': serializer.toJson<String>(sourceTable),
+      'rowId': serializer.toJson<String>(rowId),
+      'op': serializer.toJson<String>(op),
+      'oldJson': serializer.toJson<String>(oldJson),
+      'newJson': serializer.toJson<String?>(newJson),
+      'changedBy': serializer.toJson<String?>(changedBy),
+      'changedAt': serializer.toJson<DateTime>(changedAt),
+    };
+  }
+
+  EntryHistoryData copyWith({
+    String? id,
+    String? projectId,
+    String? sourceTable,
+    String? rowId,
+    String? op,
+    String? oldJson,
+    Value<String?> newJson = const Value.absent(),
+    Value<String?> changedBy = const Value.absent(),
+    DateTime? changedAt,
+  }) => EntryHistoryData(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    sourceTable: sourceTable ?? this.sourceTable,
+    rowId: rowId ?? this.rowId,
+    op: op ?? this.op,
+    oldJson: oldJson ?? this.oldJson,
+    newJson: newJson.present ? newJson.value : this.newJson,
+    changedBy: changedBy.present ? changedBy.value : this.changedBy,
+    changedAt: changedAt ?? this.changedAt,
+  );
+  EntryHistoryData copyWithCompanion(EntryHistoryCompanion data) {
+    return EntryHistoryData(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      sourceTable: data.sourceTable.present
+          ? data.sourceTable.value
+          : this.sourceTable,
+      rowId: data.rowId.present ? data.rowId.value : this.rowId,
+      op: data.op.present ? data.op.value : this.op,
+      oldJson: data.oldJson.present ? data.oldJson.value : this.oldJson,
+      newJson: data.newJson.present ? data.newJson.value : this.newJson,
+      changedBy: data.changedBy.present ? data.changedBy.value : this.changedBy,
+      changedAt: data.changedAt.present ? data.changedAt.value : this.changedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EntryHistoryData(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('sourceTable: $sourceTable, ')
+          ..write('rowId: $rowId, ')
+          ..write('op: $op, ')
+          ..write('oldJson: $oldJson, ')
+          ..write('newJson: $newJson, ')
+          ..write('changedBy: $changedBy, ')
+          ..write('changedAt: $changedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    sourceTable,
+    rowId,
+    op,
+    oldJson,
+    newJson,
+    changedBy,
+    changedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EntryHistoryData &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.sourceTable == this.sourceTable &&
+          other.rowId == this.rowId &&
+          other.op == this.op &&
+          other.oldJson == this.oldJson &&
+          other.newJson == this.newJson &&
+          other.changedBy == this.changedBy &&
+          other.changedAt == this.changedAt);
+}
+
+class EntryHistoryCompanion extends UpdateCompanion<EntryHistoryData> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> sourceTable;
+  final Value<String> rowId;
+  final Value<String> op;
+  final Value<String> oldJson;
+  final Value<String?> newJson;
+  final Value<String?> changedBy;
+  final Value<DateTime> changedAt;
+  final Value<int> rowid;
+  const EntryHistoryCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.sourceTable = const Value.absent(),
+    this.rowId = const Value.absent(),
+    this.op = const Value.absent(),
+    this.oldJson = const Value.absent(),
+    this.newJson = const Value.absent(),
+    this.changedBy = const Value.absent(),
+    this.changedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  EntryHistoryCompanion.insert({
+    required String id,
+    required String projectId,
+    required String sourceTable,
+    required String rowId,
+    required String op,
+    required String oldJson,
+    this.newJson = const Value.absent(),
+    this.changedBy = const Value.absent(),
+    required DateTime changedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       sourceTable = Value(sourceTable),
+       rowId = Value(rowId),
+       op = Value(op),
+       oldJson = Value(oldJson),
+       changedAt = Value(changedAt);
+  static Insertable<EntryHistoryData> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? sourceTable,
+    Expression<String>? rowId,
+    Expression<String>? op,
+    Expression<String>? oldJson,
+    Expression<String>? newJson,
+    Expression<String>? changedBy,
+    Expression<DateTime>? changedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (sourceTable != null) 'source_table': sourceTable,
+      if (rowId != null) 'row_id': rowId,
+      if (op != null) 'op': op,
+      if (oldJson != null) 'old_json': oldJson,
+      if (newJson != null) 'new_json': newJson,
+      if (changedBy != null) 'changed_by': changedBy,
+      if (changedAt != null) 'changed_at': changedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  EntryHistoryCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? sourceTable,
+    Value<String>? rowId,
+    Value<String>? op,
+    Value<String>? oldJson,
+    Value<String?>? newJson,
+    Value<String?>? changedBy,
+    Value<DateTime>? changedAt,
+    Value<int>? rowid,
+  }) {
+    return EntryHistoryCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      sourceTable: sourceTable ?? this.sourceTable,
+      rowId: rowId ?? this.rowId,
+      op: op ?? this.op,
+      oldJson: oldJson ?? this.oldJson,
+      newJson: newJson ?? this.newJson,
+      changedBy: changedBy ?? this.changedBy,
+      changedAt: changedAt ?? this.changedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (sourceTable.present) {
+      map['source_table'] = Variable<String>(sourceTable.value);
+    }
+    if (rowId.present) {
+      map['row_id'] = Variable<String>(rowId.value);
+    }
+    if (op.present) {
+      map['op'] = Variable<String>(op.value);
+    }
+    if (oldJson.present) {
+      map['old_json'] = Variable<String>(oldJson.value);
+    }
+    if (newJson.present) {
+      map['new_json'] = Variable<String>(newJson.value);
+    }
+    if (changedBy.present) {
+      map['changed_by'] = Variable<String>(changedBy.value);
+    }
+    if (changedAt.present) {
+      map['changed_at'] = Variable<DateTime>(changedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EntryHistoryCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('sourceTable: $sourceTable, ')
+          ..write('rowId: $rowId, ')
+          ..write('op: $op, ')
+          ..write('oldJson: $oldJson, ')
+          ..write('newJson: $newJson, ')
+          ..write('changedBy: $changedBy, ')
+          ..write('changedAt: $changedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -47078,6 +47660,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $CashMovesTable cashMoves = $CashMovesTable(this);
   late final $FloorProgressTable floorProgress = $FloorProgressTable(this);
+  late final $EntryHistoryTable entryHistory = $EntryHistoryTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -47156,6 +47739,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     staffAttendance,
     cashMoves,
     floorProgress,
+    entryHistory,
     syncOutbox,
   ];
 }
@@ -69975,6 +70559,293 @@ typedef $$FloorProgressTableProcessedTableManager =
       FloorProgressData,
       PrefetchHooks Function()
     >;
+typedef $$EntryHistoryTableCreateCompanionBuilder =
+    EntryHistoryCompanion Function({
+      required String id,
+      required String projectId,
+      required String sourceTable,
+      required String rowId,
+      required String op,
+      required String oldJson,
+      Value<String?> newJson,
+      Value<String?> changedBy,
+      required DateTime changedAt,
+      Value<int> rowid,
+    });
+typedef $$EntryHistoryTableUpdateCompanionBuilder =
+    EntryHistoryCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> sourceTable,
+      Value<String> rowId,
+      Value<String> op,
+      Value<String> oldJson,
+      Value<String?> newJson,
+      Value<String?> changedBy,
+      Value<DateTime> changedAt,
+      Value<int> rowid,
+    });
+
+class $$EntryHistoryTableFilterComposer
+    extends Composer<_$AppDatabase, $EntryHistoryTable> {
+  $$EntryHistoryTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceTable => $composableBuilder(
+    column: $table.sourceTable,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rowId => $composableBuilder(
+    column: $table.rowId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get op => $composableBuilder(
+    column: $table.op,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get oldJson => $composableBuilder(
+    column: $table.oldJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get newJson => $composableBuilder(
+    column: $table.newJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get changedBy => $composableBuilder(
+    column: $table.changedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get changedAt => $composableBuilder(
+    column: $table.changedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$EntryHistoryTableOrderingComposer
+    extends Composer<_$AppDatabase, $EntryHistoryTable> {
+  $$EntryHistoryTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceTable => $composableBuilder(
+    column: $table.sourceTable,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rowId => $composableBuilder(
+    column: $table.rowId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get op => $composableBuilder(
+    column: $table.op,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get oldJson => $composableBuilder(
+    column: $table.oldJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get newJson => $composableBuilder(
+    column: $table.newJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get changedBy => $composableBuilder(
+    column: $table.changedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get changedAt => $composableBuilder(
+    column: $table.changedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$EntryHistoryTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EntryHistoryTable> {
+  $$EntryHistoryTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceTable => $composableBuilder(
+    column: $table.sourceTable,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rowId =>
+      $composableBuilder(column: $table.rowId, builder: (column) => column);
+
+  GeneratedColumn<String> get op =>
+      $composableBuilder(column: $table.op, builder: (column) => column);
+
+  GeneratedColumn<String> get oldJson =>
+      $composableBuilder(column: $table.oldJson, builder: (column) => column);
+
+  GeneratedColumn<String> get newJson =>
+      $composableBuilder(column: $table.newJson, builder: (column) => column);
+
+  GeneratedColumn<String> get changedBy =>
+      $composableBuilder(column: $table.changedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get changedAt =>
+      $composableBuilder(column: $table.changedAt, builder: (column) => column);
+}
+
+class $$EntryHistoryTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EntryHistoryTable,
+          EntryHistoryData,
+          $$EntryHistoryTableFilterComposer,
+          $$EntryHistoryTableOrderingComposer,
+          $$EntryHistoryTableAnnotationComposer,
+          $$EntryHistoryTableCreateCompanionBuilder,
+          $$EntryHistoryTableUpdateCompanionBuilder,
+          (
+            EntryHistoryData,
+            BaseReferences<_$AppDatabase, $EntryHistoryTable, EntryHistoryData>,
+          ),
+          EntryHistoryData,
+          PrefetchHooks Function()
+        > {
+  $$EntryHistoryTableTableManager(_$AppDatabase db, $EntryHistoryTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EntryHistoryTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EntryHistoryTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EntryHistoryTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> sourceTable = const Value.absent(),
+                Value<String> rowId = const Value.absent(),
+                Value<String> op = const Value.absent(),
+                Value<String> oldJson = const Value.absent(),
+                Value<String?> newJson = const Value.absent(),
+                Value<String?> changedBy = const Value.absent(),
+                Value<DateTime> changedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => EntryHistoryCompanion(
+                id: id,
+                projectId: projectId,
+                sourceTable: sourceTable,
+                rowId: rowId,
+                op: op,
+                oldJson: oldJson,
+                newJson: newJson,
+                changedBy: changedBy,
+                changedAt: changedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String sourceTable,
+                required String rowId,
+                required String op,
+                required String oldJson,
+                Value<String?> newJson = const Value.absent(),
+                Value<String?> changedBy = const Value.absent(),
+                required DateTime changedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => EntryHistoryCompanion.insert(
+                id: id,
+                projectId: projectId,
+                sourceTable: sourceTable,
+                rowId: rowId,
+                op: op,
+                oldJson: oldJson,
+                newJson: newJson,
+                changedBy: changedBy,
+                changedAt: changedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$EntryHistoryTable, EntryHistoryData>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $EntryHistoryTable,
+                    EntryHistoryData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$EntryHistoryTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EntryHistoryTable,
+      EntryHistoryData,
+      $$EntryHistoryTableFilterComposer,
+      $$EntryHistoryTableOrderingComposer,
+      $$EntryHistoryTableAnnotationComposer,
+      $$EntryHistoryTableCreateCompanionBuilder,
+      $$EntryHistoryTableUpdateCompanionBuilder,
+      (
+        EntryHistoryData,
+        BaseReferences<_$AppDatabase, $EntryHistoryTable, EntryHistoryData>,
+      ),
+      EntryHistoryData,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -70390,6 +71261,8 @@ class $AppDatabaseManager {
       $$CashMovesTableTableManager(_db, _db.cashMoves);
   $$FloorProgressTableTableManager get floorProgress =>
       $$FloorProgressTableTableManager(_db, _db.floorProgress);
+  $$EntryHistoryTableTableManager get entryHistory =>
+      $$EntryHistoryTableTableManager(_db, _db.entryHistory);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }
@@ -71108,4 +71981,16 @@ class FloorProgressDaoManager {
   FloorProgressDaoManager(this._db);
   $$FloorProgressTableTableManager get floorProgress =>
       $$FloorProgressTableTableManager(_db.attachedDatabase, _db.floorProgress);
+}
+
+mixin _$EntryHistoryDaoMixin on DatabaseAccessor<AppDatabase> {
+  $EntryHistoryTable get entryHistory => attachedDatabase.entryHistory;
+  EntryHistoryDaoManager get managers => EntryHistoryDaoManager(this);
+}
+
+class EntryHistoryDaoManager {
+  final _$EntryHistoryDaoMixin _db;
+  EntryHistoryDaoManager(this._db);
+  $$EntryHistoryTableTableManager get entryHistory =>
+      $$EntryHistoryTableTableManager(_db.attachedDatabase, _db.entryHistory);
 }
