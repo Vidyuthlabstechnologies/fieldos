@@ -13,6 +13,10 @@ class Roles {
   static const member = 'member';
   static const viewer = 'viewer';
 
+  /// A subcontractor's own phone (free, restricted): not a company member
+  /// on the server, sees only their firm's work orders and claims.
+  static const subcontractor = 'subcontractor';
+
   /// Only an owner may configure installation-wide settings (e.g. the Sarvam
   /// API key) — matching the desktop app's authorization gap fix.
   static bool canManageSettings(String role) => role == owner;
@@ -28,6 +32,7 @@ class Roles {
   static String fromCloud(String cloudRole) => switch (cloudRole) {
         'owner' => owner,
         'project_manager' => manager,
+        'subcontractor' => subcontractor,
         _ => member,
       };
 

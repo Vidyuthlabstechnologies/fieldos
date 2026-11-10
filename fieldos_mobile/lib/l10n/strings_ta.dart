@@ -3,6 +3,8 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_commercial_ta.dart';
+
 const Map<String, String> stringsTa = {
   'Try again':
       'மீண்டும் முயற்சிக்கவும்',
@@ -2920,4 +2922,5 @@ const Map<String, String> stringsTa = {
       '{qty} ஏற்கப்பட்டது',
   '{qty} more than ordered':
       'ஆர்டரை விட {qty} அதிகம்',
+  ...commercialTa,
 };

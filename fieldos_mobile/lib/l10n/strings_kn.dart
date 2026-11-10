@@ -3,6 +3,8 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_commercial_kn.dart';
+
 const Map<String, String> stringsKn = {
   'Try again':
       'ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
@@ -2920,4 +2922,5 @@ const Map<String, String> stringsKn = {
       '{qty} ಸ್ವೀಕರಿಸಲಾಗಿದೆ',
   '{qty} more than ordered':
       'ಆರ್ಡರ್‌ಗಿಂತ {qty} ಹೆಚ್ಚು',
+  ...commercialKn,
 };

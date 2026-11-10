@@ -3,6 +3,8 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_commercial_mr.dart';
+
 const Map<String, String> stringsMr = {
   'Try again':
       'पुन्हा प्रयत्न करा',
@@ -2920,4 +2922,5 @@ const Map<String, String> stringsMr = {
       '{qty} स्वीकारले',
   '{qty} more than ordered':
       'ऑर्डरपेक्षा {qty} जास्त',
+  ...commercialMr,
 };
