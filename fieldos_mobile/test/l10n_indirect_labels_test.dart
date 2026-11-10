@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fieldos_mobile/agents/assistant_tools.dart';
 import 'package:fieldos_mobile/features/chat/project_chat_view.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart';
+import 'package:fieldos_mobile/features/dashboard/my_dashboard.dart' show kpiLibrary;
 import 'package:fieldos_mobile/features/inspections/inspections_screen.dart';
 import 'package:fieldos_mobile/features/labour/day_register.dart';
 import 'package:fieldos_mobile/features/money/money_book.dart';
@@ -47,6 +48,7 @@ void main() {
     'tool states': toolStateLabels.values,
     'report groups': reportGroupLabels.values,
     'report library periods': reportPeriodLabels.values,
+    'dashboard figures': [for (final k in kpiLibrary) k.title],
     'report titles': [for (final r in reportLibrary) r.title],
     'report descriptions': [for (final r in reportLibrary) r.about],
     'report columns': {

@@ -102,6 +102,21 @@ Who sees what:
 - **Where enquiries come from**: Enquiries and wins from each source, to see what is working. (owners and PMs)
 - **Quotations sent**: Quotations made for enquiries, and their status. (owners and PMs)
 
+## My figures on the dashboard
+
+The top of the Dashboard shows **My figures**: tiles each person picks and
+orders for themselves (Choose: tick, drag, Save; kept on the phone per
+person and company). There are 17 to choose from, such as spent, received
+and billed this month, material received, people-days, wages earned, late
+tasks, open issues, late deliveries, approvals waiting, tools overdue,
+punches away from site, arrived short, stock in stores, salaries this month,
+follow-ups due and open enquiries. Each is worked out from the matching
+library report over the sites the person can see, a tile with a problem in
+it turns red, and tapping it opens that report. A figure the person may not
+see (money received, salaries, sales, store value) is never offered.
+Default: spent, received, late tasks, open issues, late deliveries,
+approvals waiting.
+
 ## Your look on every PDF
 
 Settings > company: the logo (already there), **your line at the foot of
@@ -121,6 +136,7 @@ updates, and the headings and table heads of library reports.
 - `lib/features/reports/reports_library_screen.dart`: the screens and
   `reportRange`.
 - `lib/features/company/branding.dart`: footer text and colour.
+- `lib/features/dashboard/my_dashboard.dart`: My figures (`kpiLibrary`).
 
 ## Tests
 
@@ -129,5 +145,7 @@ updates, and the headings and table heads of library reports.
   who sees what, financial years, PDF and Excel, branding.
 - `test/reports_library_screen_test.dart`: search, sites and period on a
   phone; a site engineer's list; Telugu on a 320 px phone.
+- `test/my_dashboard_test.dart`: defaults, choice and order per person,
+  forbidden figures dropped, a tile turned off on a phone, Telugu at 320 px.
 - `test/l10n_indirect_labels_test.dart`: every report title, description,
   column and group has hi, te, ta, kn and mr labels.
