@@ -39,6 +39,7 @@ import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/features/money/cash_book_screen.dart';
 import 'package:fieldos_mobile/features/reports/pilot_scorecard_screen.dart';
 import 'package:fieldos_mobile/features/reports/rera_screen.dart';
+import 'package:fieldos_mobile/features/procurement/material_check_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
@@ -185,6 +186,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
               if (v == 'pilot') {
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => PilotScorecardScreen(project: widget.project)));
               }
+              if (v == 'materialcheck') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => MaterialCheckScreen(project: widget.project)));
+              }
               if (v == 'rera') {
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => ReraScreen(project: widget.project)));
               }
@@ -204,6 +208,14 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   child: ListTile(
                     leading: const Icon(Icons.insights_outlined),
                     title: Text(tr('Pilot scorecard')),
+                  ),
+                ),
+              if (Roles.canApprove(ref.watch(sessionProvider).role))
+                PopupMenuItem(
+                  value: 'materialcheck',
+                  child: ListTile(
+                    leading: const Icon(Icons.fact_check_outlined),
+                    title: Text(tr('Material check')),
                   ),
                 ),
               PopupMenuItem(

@@ -78,3 +78,28 @@ already records.
 
 The pack is the progress section only. It does not file anything with
 RERA and does not replace the architect's, engineer's or CA's forms.
+
+## Material check (no schema change)
+
+Site menu (owners and managers): **Material check**. It answers "did this
+site use the cement, sand, aggregate, bricks and steel the work needed?"
+
+- **Should have used** = each approved work measurement (at its approved
+  quantity; rejected and waiting ones don't count) × the norm for that kind
+  of work. A norm is picked by words in the measurement's description
+  (PCC, RCC/slab/column/beam/footing, brick, plaster, steel) and its unit.
+  PCC is checked before RCC so "PCC 1:4:8" isn't read as concrete.
+- **Used** = the site's material usage entries, matched by name with common
+  site words (OPC/PPC, M sand, jelly/20 mm, TMT). Units are converted:
+  cft, brass and cu m; sft and sq m; MT, quintal and kg. Usage in a unit
+  that can't be converted is shown apart, never guessed at.
+- **Flags.** More than the tolerance (5% unless changed) over is flagged red;
+  that much under is flagged as "usage may not be recorded". Measurements no
+  norm covers are listed as not checked.
+- **Norms** (Material norms, from the check's toolbar) start as nominal-mix
+  figures with a 50 kg bag: RCC M20 8.06 bags, 0.42 cu m sand, 0.84 cu m
+  aggregate per cu m; PCC 1:4:8 3.4 bags; brickwork in 1:6 500 bricks and
+  1.25 bags per cu m; 12 mm plaster in 1:6 0.065 bag per sq m; steel 1 kg per
+  kg. They are labelled as starting figures and each company sets its own.
+  They are kept on the phone (setting `material_norms:<companyId>`), not
+  synced.
