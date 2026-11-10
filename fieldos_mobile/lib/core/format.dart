@@ -61,14 +61,14 @@ bool isSameDay(DateTime a, DateTime b) {
 String fmtHours(Duration d) {
   final h = d.inHours;
   final m = (d.inMinutes % 60).toString().padLeft(2, '0');
-  return h == 0 ? '${d.inMinutes} min' : '$h h $m min';
+  return h == 0 ? trf('{m} min', {'m': d.inMinutes}) : trf('{h} h {m} min', {'h': h, 'm': m});
 }
 
 /// "2 min 05 s" for recording timers and durations.
 String fmtDuration(Duration d) {
   final m = d.inMinutes;
   final s = (d.inSeconds % 60).toString().padLeft(2, '0');
-  return m == 0 ? '${d.inSeconds} s' : '$m min $s s';
+  return m == 0 ? trf('{s} s', {'s': d.inSeconds}) : trf('{m} min {s} s', {'m': m, 's': s});
 }
 
 /// "0:42" or "12:05", for a running timer.

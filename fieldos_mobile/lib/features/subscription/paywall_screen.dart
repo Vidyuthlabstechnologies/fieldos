@@ -304,17 +304,20 @@ class _ProBadge extends StatelessWidget {
   }
 }
 
+/// What FieldOS Pro gives, as English keys shown through tr().
+const paywallBenefits = [
+  (Icons.mic_none_rounded, 'Speak daily reports in your own language'),
+  (Icons.groups_outlined, 'Labour, wages and materials in one place'),
+  (Icons.photo_camera_outlined, 'Photos, issues and team chat for every site'),
+  (Icons.cloud_off_outlined, 'Works offline, syncs when you are back online'),
+];
+
 class _Benefits extends StatelessWidget {
   const _Benefits({required this.count});
 
   final int count;
 
-  static const _items = [
-    (Icons.mic_none_rounded, 'Speak daily reports in your own language'),
-    (Icons.groups_outlined, 'Labour, wages and materials in one place'),
-    (Icons.photo_camera_outlined, 'Photos, issues and team chat for every site'),
-    (Icons.cloud_off_outlined, 'Works offline, syncs when you are back online'),
-  ];
+  static const _items = paywallBenefits;
 
   @override
   Widget build(BuildContext context) {

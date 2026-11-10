@@ -2426,4 +2426,327 @@ const Map<String, String> stringsKn = {
       'ಎಲ್ಲವನ್ನೂ ಅಳಿಸು',
   'No earlier chats yet. Your chats are kept on this phone.':
       'ಇನ್ನೂ ಹಳೆಯ ಸಂಭಾಷಣೆಗಳಿಲ್ಲ. ನಿಮ್ಮ ಸಂಭಾಷಣೆಗಳು ಈ ಫೋನ್‌ನಲ್ಲೇ ಇರುತ್ತವೆ.',
+  // 1.7.1 bug-hunt: labels that used to stay in English.
+  '1 open issue':
+      '1 ತೆರೆದ ಸಮಸ್ಯೆ',
+  '{n} open issues':
+      '{n} ತೆರೆದ ಸಮಸ್ಯೆಗಳು',
+  '1 worker punched in':
+      '1 ಕಾರ್ಮಿಕ ಪಂಚ್-ಇನ್ ಆಗಿದ್ದಾರೆ',
+  '{n} workers punched in':
+      '{n} ಕಾರ್ಮಿಕರು ಪಂಚ್-ಇನ್ ಆಗಿದ್ದಾರೆ',
+  'A material receipt is waiting for a decision':
+      'ಸಾಮಗ್ರಿ ರಸೀದಿ ನಿರ್ಧಾರಕ್ಕಾಗಿ ಕಾಯುತ್ತಿದೆ',
+  'A purchase order is waiting for a decision':
+      'ಒಂದು ಖರೀದಿ ಆದೇಶ (PO) ನಿರ್ಧಾರಕ್ಕಾಗಿ ಕಾಯುತ್ತಿದೆ',
+  'A request is waiting for a decision':
+      'ಒಂದು ವಿನಂತಿ ನಿರ್ಧಾರಕ್ಕಾಗಿ ಕಾಯುತ್ತಿದೆ',
+  'A site over budget is waiting for a decision':
+      'ಬಜೆಟ್ ಮೀರಿದ ಸೈಟ್ ನಿರ್ಧಾರಕ್ಕಾಗಿ ಕಾಯುತ್ತಿದೆ',
+  'A new code is on its way to {email}. Codes stop working after an hour.':
+      '{email}ಗೆ ಹೊಸ ಕೋಡ್ ಬರುತ್ತಿದೆ. ಕೋಡ್‌ಗಳು ಒಂದು ಗಂಟೆಯ ನಂತರ ಕೆಲಸ ಮಾಡುವುದಿಲ್ಲ.',
+  'A project':
+      'ಒಂದು ಪ್ರಾಜೆಕ್ಟ್',
+  'A purchase is already in progress. Wait for it to finish.':
+      'ಒಂದು ಖರೀದಿ ಈಗಾಗಲೇ ನಡೆಯುತ್ತಿದೆ. ಅದು ಮುಗಿಯುವವರೆಗೆ ಕಾಯಿರಿ.',
+  'Access codes are 10 or more letters and numbers. Type it exactly as you got it.':
+      'ಪ್ರವೇಶ ಕೋಡ್‌ನಲ್ಲಿ 10 ಅಥವಾ ಹೆಚ್ಚು ಅಕ್ಷರಗಳು ಮತ್ತು ಅಂಕೆಗಳು ಇರುತ್ತವೆ. ನಿಮಗೆ ಸಿಕ್ಕಂತೆಯೇ ಟೈಪ್ ಮಾಡಿ.',
+  'Account created for {email}.':
+      '{email}ಗಾಗಿ ಖಾತೆ ರಚಿಸಲಾಗಿದೆ.',
+  'Approval requested':
+      'ಅನುಮೋದನೆ ಕೇಳಲಾಗಿದೆ',
+  'Choose a new password of at least 6 characters.':
+      'ಕನಿಷ್ಠ 6 ಅಕ್ಷರಗಳ ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ಆರಿಸಿ.',
+  'Companies where you are the only member are deleted from the cloud with all their records. Companies with other members keep their records, and ownership passes to another member.':
+      'ನೀವು ಒಬ್ಬರೇ ಸದಸ್ಯರಾಗಿರುವ ಕಂಪನಿಗಳು ಅವುಗಳ ಎಲ್ಲಾ ದಾಖಲೆಗಳೊಂದಿಗೆ ಕ್ಲೌಡ್‌ನಿಂದ ಅಳಿಸಲ್ಪಡುತ್ತವೆ. ಇತರ ಸದಸ್ಯರಿರುವ ಕಂಪನಿಗಳ ದಾಖಲೆಗಳು ಉಳಿಯುತ್ತವೆ, ಮಾಲೀಕತ್ವ ಇನ್ನೊಬ್ಬ ಸದಸ್ಯರಿಗೆ ಹೋಗುತ್ತದೆ.',
+  'Could not sign in. Try again.':
+      'ಸೈನ್ ಇನ್ ಆಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'Data on this phone is not deleted. Uninstall the app to remove it.':
+      'ಈ ಫೋನ್‌ನಲ್ಲಿರುವ ಡೇಟಾ ಅಳಿಸಲ್ಪಡುವುದಿಲ್ಲ. ಅದನ್ನು ತೆಗೆಯಲು ಆ್ಯಪ್ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ.',
+  'Edit item':
+      'ಐಟಂ ಬದಲಿಸಿ',
+  'Enter the join code from your company owner.':
+      'ನಿಮ್ಮ ಕಂಪನಿ ಮಾಲೀಕರು ನೀಡಿದ ಜಾಯಿನ್ ಕೋಡ್ ನಮೂದಿಸಿ.',
+  'Enter your email and a password of at least 6 characters.':
+      'ನಿಮ್ಮ ಇಮೇಲ್ ಮತ್ತು ಕನಿಷ್ಠ 6 ಅಕ್ಷರಗಳ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ.',
+  'Free access from the FieldOS team':
+      'FieldOS ತಂಡದಿಂದ ಉಚಿತ ಪ್ರವೇಶ',
+  'Free access from the FieldOS team until {date}':
+      '{date} ವರೆಗೆ FieldOS ತಂಡದಿಂದ ಉಚಿತ ಪ್ರವೇಶ',
+  'Free trial (will not renew)':
+      'ಉಚಿತ ಟ್ರಯಲ್ (ನವೀಕರಣವಾಗುವುದಿಲ್ಲ)',
+  'Free trial until {date} (will not renew)':
+      '{date} ವರೆಗೆ ಉಚಿತ ಟ್ರಯಲ್ (ನವೀಕರಣವಾಗುವುದಿಲ್ಲ)',
+  'Free trial until {date}, then paid':
+      '{date} ವರೆಗೆ ಉಚಿತ ಟ್ರಯಲ್, ನಂತರ ಪಾವತಿ',
+  'Free trial, then paid':
+      'ಉಚಿತ ಟ್ರಯಲ್, ನಂತರ ಪಾವತಿ',
+  'Get the {language} speech pack to work offline':
+      'ಇಂಟರ್ನೆಟ್ ಇಲ್ಲದೆ ಕೆಲಸ ಮಾಡಲು {language} ಸ್ಪೀಚ್ ಪ್ಯಾಕ್ ಪಡೆಯಿರಿ',
+  'Give the project a name, such as the site or building.':
+      'ಪ್ರಾಜೆಕ್ಟ್‌ಗೆ ಹೆಸರು ಕೊಡಿ, ಸೈಟ್ ಅಥವಾ ಕಟ್ಟಡದ ಹೆಸರಿನಂತೆ.',
+  'Headcount not given':
+      'ಹೆಡ್‌ಕೌಂಟ್ ನೀಡಿಲ್ಲ',
+  'If {email} has an account, a code is on its way. Type it below with your new password.':
+      '{email}ಗೆ ಖಾತೆ ಇದ್ದರೆ, ಕೋಡ್ ಬರುತ್ತಿದೆ. ಅದನ್ನು ಕೆಳಗೆ ನಿಮ್ಮ ಹೊಸ ಪಾಸ್‌ವರ್ಡ್‌ನೊಂದಿಗೆ ಟೈಪ್ ಮಾಡಿ.',
+  'Items':
+      'ಐಟಂಗಳು',
+  'Join company':
+      'ಕಂಪನಿಗೆ ಸೇರಿ',
+  'Joined {company}. Projects will appear after the first sync.':
+      '{company}ಗೆ ಸೇರಿದ್ದೀರಿ. ಮೊದಲ ಸಿಂಕ್ ನಂತರ ಪ್ರಾಜೆಕ್ಟ್‌ಗಳು ಕಾಣಿಸುತ್ತವೆ.',
+  'Keep the names under 200 characters.':
+      'ಹೆಸರುಗಳನ್ನು 200 ಅಕ್ಷರಗಳೊಳಗೆ ಇಡಿ.',
+  'Listening stopped':
+      'ಕೇಳುವುದು ನಿಂತಿದೆ',
+  'Listening · {time}':
+      'ಕೇಳುತ್ತಿದೆ · {time}',
+  'Location is blocked for FieldOS. Allow it in Android settings.':
+      'FieldOSಗೆ ಸ್ಥಳ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ. Android ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಅನುಮತಿ ನೀಡಿ.',
+  'Location is turned off. Turn on GPS and try again.':
+      'ಸ್ಥಳ ಆಫ್ ಆಗಿದೆ. GPS ಆನ್ ಮಾಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'Location permission was not given.':
+      'ಸ್ಥಳದ ಅನುಮತಿ ನೀಡಿಲ್ಲ.',
+  'Mark as not paid':
+      'ಪಾವತಿಸಿಲ್ಲ ಎಂದು ಗುರುತಿಸಿ',
+  'Mark as paid':
+      'ಪಾವತಿಸಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿ',
+  'Microphone is off for FieldOS':
+      'FieldOSಗೆ ಮೈಕ್ರೋಫೋನ್ ಆಫ್ ಆಗಿದೆ',
+  'New issue (critical)':
+      'ಹೊಸ ಸಮಸ್ಯೆ (ತುರ್ತು)',
+  'New issue (high)':
+      'ಹೊಸ ಸಮಸ್ಯೆ (ಹೆಚ್ಚು)',
+  'New issue (low)':
+      'ಹೊಸ ಸಮಸ್ಯೆ (ಕಡಿಮೆ)',
+  'New issue (medium)':
+      'ಹೊಸ ಸಮಸ್ಯೆ (ಮಧ್ಯಮ)',
+  'New join code created. The old code no longer works.':
+      'ಹೊಸ ಜಾಯಿನ್ ಕೋಡ್ ರಚಿಸಲಾಗಿದೆ. ಹಳೆಯ ಕೋಡ್ ಇನ್ನು ಕೆಲಸ ಮಾಡುವುದಿಲ್ಲ.',
+  'New password saved. Signed in as {email}.':
+      'ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ಉಳಿಸಲಾಗಿದೆ. {email} ಆಗಿ ಸೈನ್ ಇನ್ ಆಗಿದ್ದೀರಿ.',
+  'No active subscription':
+      'ಸಕ್ರಿಯ ಚಂದಾದಾರಿಕೆ ಇಲ್ಲ',
+  'No internet connection. Connect and try again.':
+      'ಇಂಟರ್ನೆಟ್ ಇಲ್ಲ. ಸಂಪರ್ಕಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'Not set':
+      'ಹೊಂದಿಸಿಲ್ಲ',
+  'One project for each site. Its daily reports, labour, materials, money and photos stay together.':
+      'ಪ್ರತಿ ಸೈಟ್‌ಗೆ ಒಂದು ಪ್ರಾಜೆಕ್ಟ್. ಅದರ ದೈನಂದಿನ ವರದಿಗಳು, ಕಾರ್ಮಿಕರು, ಸಾಮಗ್ರಿ, ಹಣ ಮತ್ತು ಫೋಟೋಗಳು ಒಟ್ಟಿಗೆ ಇರುತ್ತವೆ.',
+  'Payment problem: update your payment method in the store':
+      'ಪಾವತಿ ಸಮಸ್ಯೆ: ಸ್ಟೋರ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಪಾವತಿ ವಿಧಾನವನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಿ',
+  'Payment problem: update your payment method in the store before {date}':
+      'ಪಾವತಿ ಸಮಸ್ಯೆ: {date} ಒಳಗೆ ಸ್ಟೋರ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಪಾವತಿ ವಿಧಾನವನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಿ',
+  'Photo is on the phone that took it':
+      'ಫೋಟೋ ಅದನ್ನು ತೆಗೆದ ಫೋನ್‌ನಲ್ಲಿದೆ',
+  'Pick a time after they punched in ({time}).':
+      'ಪಂಚ್-ಇನ್ ({time}) ನಂತರದ ಸಮಯ ಆರಿಸಿ.',
+  'Put company on the cloud':
+      'ಕಂಪನಿಯನ್ನು ಕ್ಲೌಡ್‌ಗೆ ಹಾಕಿ',
+  'Quantity this bill':
+      'ಈ ಬಿಲ್‌ನ ಪ್ರಮಾಣ',
+  'Recording · {time} · tap to stop and send':
+      'ರೆಕಾರ್ಡಿಂಗ್ · {time} · ನಿಲ್ಲಿಸಿ ಕಳುಹಿಸಲು ಒತ್ತಿ',
+  'Sign in':
+      'ಸೈನ್ ಇನ್',
+  'Signed in as {email}.':
+      '{email} ಆಗಿ ಸೈನ್ ಇನ್ ಆಗಿದ್ದೀರಿ.',
+  'Signed out. This phone keeps working offline.':
+      'ಸೈನ್ ಔಟ್ ಆಗಿದೆ. ಈ ಫೋನ್ ಇಂಟರ್ನೆಟ್ ಇಲ್ಲದೆ ಕೆಲಸ ಮುಂದುವರಿಸುತ್ತದೆ.',
+  'Subscribed':
+      'ಚಂದಾದಾರರಾಗಿದ್ದೀರಿ',
+  'Subscribed until {date} (cancelled)':
+      '{date} ವರೆಗೆ ಚಂದಾದಾರಿಕೆ (ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ)',
+  'Subscribed, renews on {date}':
+      'ಚಂದಾದಾರರಾಗಿದ್ದೀರಿ, {date} ರಂದು ನವೀಕರಣವಾಗುತ್ತದೆ',
+  'Sync now':
+      'ಈಗ ಸಿಂಕ್ ಮಾಡಿ',
+  'Synced. 1 change sent, latest data received.':
+      'ಸಿಂಕ್ ಆಗಿದೆ. 1 ಬದಲಾವಣೆ ಕಳುಹಿಸಲಾಗಿದೆ, ಹೊಸ ಡೇಟಾ ಬಂದಿದೆ.',
+  'Synced. {n} changes sent, latest data received.':
+      'ಸಿಂಕ್ ಆಗಿದೆ. {n} ಬದಲಾವಣೆಗಳನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ, ಹೊಸ ಡೇಟಾ ಬಂದಿದೆ.',
+  'Tap the mic and speak':
+      'ಮೈಕ್ ಒತ್ತಿ ಮಾತನಾಡಿ',
+  'Tap to start recording':
+      'ರೆಕಾರ್ಡಿಂಗ್ ಆರಂಭಿಸಲು ಒತ್ತಿ',
+  'That code is not valid or has ended. Check it and try again, or ask whoever gave it to you.':
+      'ಈ ಕೋಡ್ ಸರಿಯಿಲ್ಲ ಅಥವಾ ಮುಗಿದಿದೆ. ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ, ಅಥವಾ ಕೊಟ್ಟವರನ್ನು ಕೇಳಿ.',
+  'That plan is no longer on sale. Please pick again.':
+      'ಈ ಪ್ಲಾನ್ ಈಗ ಮಾರಾಟದಲ್ಲಿಲ್ಲ. ಮತ್ತೆ ಆರಿಸಿ.',
+  'The FieldOS plans are not on sale in {store} yet. Please try again later, or send a bug report from the menu.':
+      'FieldOS ಪ್ಲಾನ್‌ಗಳು ಇನ್ನೂ {store}ನಲ್ಲಿ ಮಾರಾಟಕ್ಕಿಲ್ಲ. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ, ಅಥವಾ ಮೆನುವಿನಿಂದ ಬಗ್ ವರದಿ ಕಳುಹಿಸಿ.',
+  'The owner or a project manager decides these. You can see what is waiting.':
+      'ಇವುಗಳನ್ನು ಮಾಲೀಕರು ಅಥವಾ ಪ್ರಾಜೆಕ್ಟ್ ಮ್ಯಾನೇಜರ್ ನಿರ್ಧರಿಸುತ್ತಾರೆ. ಏನು ಕಾಯುತ್ತಿದೆ ಎಂದು ನೀವು ನೋಡಬಹುದು.',
+  'The phone stopped listening. Tap Try again, or type the report.':
+      'ಫೋನ್ ಕೇಳುವುದನ್ನು ನಿಲ್ಲಿಸಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ ಒತ್ತಿ, ಅಥವಾ ವರದಿ ಟೈಪ್ ಮಾಡಿ.',
+  'There is no internet, and the offline speech pack for {language} is not on this phone yet. Connect once, then download it: Google app › Settings › Voice › Offline speech recognition › {englishName}. After that, voice reports work anywhere on site.':
+      'ಇಂಟರ್ನೆಟ್ ಇಲ್ಲ, ಮತ್ತು {language} ಆಫ್‌ಲೈನ್ ಸ್ಪೀಚ್ ಪ್ಯಾಕ್ ಇನ್ನೂ ಈ ಫೋನ್‌ನಲ್ಲಿಲ್ಲ. ಒಮ್ಮೆ ಸಂಪರ್ಕಿಸಿ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ: Google ಆ್ಯಪ್ › Settings › Voice › Offline speech recognition › {englishName}. ಅದರ ನಂತರ ಧ್ವನಿ ವರದಿಗಳು ಸೈಟ್‌ನಲ್ಲಿ ಎಲ್ಲಿಯಾದರೂ ಕೆಲಸ ಮಾಡುತ್ತವೆ.',
+  'This iPhone needs internet to recognise {language} speech. Connect and try again, or type the report.':
+      'ಈ iPhoneಗೆ {language} ಮಾತು ಗುರುತಿಸಲು ಇಂಟರ್ನೆಟ್ ಬೇಕು. ಸಂಪರ್ಕಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ, ಅಥವಾ ವರದಿ ಟೈಪ್ ಮಾಡಿ.',
+  'This needs internet for {language}':
+      '{language}ಗೆ ಇಂಟರ್ನೆಟ್ ಬೇಕು',
+  'This permanently deletes {email} from FieldOS cloud.':
+      'ಇದು {email} ಅನ್ನು FieldOS ಕ್ಲೌಡ್‌ನಿಂದ ಶಾಶ್ವತವಾಗಿ ಅಳಿಸುತ್ತದೆ.',
+  'This phone can\'t do {language} yet':
+      'ಈ ಫೋನ್ ಇನ್ನೂ {language} ಮಾಡಲಾರದು',
+  'This phone can\'t turn {language} speech into text itself, so FieldOS will record you and send the recording to Sarvam when you stop. This needs internet.':
+      'ಈ ಫೋನ್ {language} ಮಾತನ್ನು ಸ್ವತಃ ಪಠ್ಯವಾಗಿಸಲಾರದು, ಆದ್ದರಿಂದ FieldOS ನಿಮ್ಮನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ, ನೀವು ನಿಲ್ಲಿಸಿದಾಗ ರೆಕಾರ್ಡಿಂಗ್ ಅನ್ನು Sarvamಗೆ ಕಳುಹಿಸುತ್ತದೆ. ಇದಕ್ಕೆ ಇಂಟರ್ನೆಟ್ ಬೇಕು.',
+  'This phone has no speech recognition':
+      'ಈ ಫೋನ್‌ನಲ್ಲಿ ಮಾತು ಗುರುತಿಸುವಿಕೆ ಇಲ್ಲ',
+  'This phone is not allowed to make purchases. Check the payment settings or parental controls in {store}.':
+      'ಈ ಫೋನ್‌ನಿಂದ ಖರೀದಿಗೆ ಅನುಮತಿ ಇಲ್ಲ. {store}ನಲ್ಲಿ ಪಾವತಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅಥವಾ ಪೇರೆಂಟಲ್ ಕಂಟ್ರೋಲ್‌ಗಳನ್ನು ನೋಡಿ.',
+  'This plan is not on sale in your country right now.':
+      'ಈ ಪ್ಲಾನ್ ಈಗ ನಿಮ್ಮ ದೇಶದಲ್ಲಿ ಮಾರಾಟದಲ್ಲಿಲ್ಲ.',
+  'This {store} account already pays for FieldOS for someone else. Write to us and we will sort it out.':
+      'ಈ {store} ಖಾತೆ ಈಗಾಗಲೇ ಬೇರೆಯವರಿಗಾಗಿ FieldOSಗೆ ಪಾವತಿಸುತ್ತಿದೆ. ನಮಗೆ ಬರೆಯಿರಿ, ನಾವು ಸರಿಪಡಿಸುತ್ತೇವೆ.',
+  'Turning your recording into text…':
+      'ನಿಮ್ಮ ರೆಕಾರ್ಡಿಂಗ್ ಅನ್ನು ಪಠ್ಯವಾಗಿಸುತ್ತಿದೆ…',
+  'Turning your recording into text… {n} of {total}':
+      'ನಿಮ್ಮ ರೆಕಾರ್ಡಿಂಗ್ ಅನ್ನು ಪಠ್ಯವಾಗಿಸುತ್ತಿದೆ… {total}ರಲ್ಲಿ {n}',
+  'Type the code from the email: it is 6 digits.':
+      'ಇಮೇಲ್‌ನಲ್ಲಿ ಬಂದ ಕೋಡ್ ಟೈಪ್ ಮಾಡಿ: ಅದು 6 ಅಂಕೆಗಳು.',
+  'Type the code we emailed to {email}, and the new password for your cloud account.':
+      '{email}ಗೆ ಕಳುಹಿಸಿದ ಕೋಡ್ ಮತ್ತು ನಿಮ್ಮ ಕ್ಲೌಡ್ ಖಾತೆಯ ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ಟೈಪ್ ಮಾಡಿ.',
+  'Type the code we emailed to {email}. It can take a minute to arrive; look in spam too.':
+      '{email}ಗೆ ಕಳುಹಿಸಿದ ಕೋಡ್ ಟೈಪ್ ಮಾಡಿ. ಬರಲು ಒಂದು ನಿಮಿಷ ಆಗಬಹುದು; ಸ್ಪ್ಯಾಮ್‌ನಲ್ಲೂ ನೋಡಿ.',
+  'Type your email above first, then tap "Forgot password?" again.':
+      'ಮೊದಲು ಮೇಲೆ ನಿಮ್ಮ ಇಮೇಲ್ ಟೈಪ್ ಮಾಡಿ, ನಂತರ "ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿರಾ?" ಮತ್ತೆ ಒತ್ತಿ.',
+  'We sent a code to {email}. Type it below to finish creating your account.':
+      'ನಾವು {email}ಗೆ ಕೋಡ್ ಕಳುಹಿಸಿದ್ದೇವೆ. ಖಾತೆ ರಚನೆ ಮುಗಿಸಲು ಅದನ್ನು ಕೆಳಗೆ ಟೈಪ್ ಮಾಡಿ.',
+  'Work measured this bill':
+      'ಈ ಬಿಲ್‌ನಲ್ಲಿ ಅಳೆದ ಕೆಲಸ',
+  'Working for someone else\'s company?':
+      'ಬೇರೆಯವರ ಕಂಪನಿಗಾಗಿ ಕೆಲಸ ಮಾಡುತ್ತಿದ್ದೀರಾ?',
+  'Your cloud account is deleted. This phone keeps working offline.':
+      'ನಿಮ್ಮ ಕ್ಲೌಡ್ ಖಾತೆ ಅಳಿಸಲಾಗಿದೆ. ಈ ಫೋನ್ ಇಂಟರ್ನೆಟ್ ಇಲ್ಲದೆ ಕೆಲಸ ಮುಂದುವರಿಸುತ್ತದೆ.',
+  'Your payment is waiting for approval, for example in your UPI app. FieldOS opens by itself once {store} confirms it.':
+      'ನಿಮ್ಮ ಪಾವತಿ ಅನುಮೋದನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ, ಉದಾಹರಣೆಗೆ ನಿಮ್ಮ UPI ಆ್ಯಪ್‌ನಲ್ಲಿ. {store} ದೃಢಪಡಿಸಿದ ಕೂಡಲೇ FieldOS ತಾನಾಗಿಯೇ ತೆರೆಯುತ್ತದೆ.',
+  'about {amount}':
+      'ಸುಮಾರು {amount}',
+  'never':
+      'ಎಂದೂ ಇಲ್ಲ',
+  'raised on {date}':
+      '{date} ರಂದು ಎತ್ತಲಾಗಿದೆ',
+  'raised today':
+      'ಇಂದು ಎತ್ತಲಾಗಿದೆ',
+  'raised yesterday':
+      'ನಿನ್ನೆ ಎತ್ತಲಾಗಿದೆ',
+  'this account':
+      'ಈ ಖಾತೆ',
+  'your company':
+      'ನಿಮ್ಮ ಕಂಪನಿ',
+  '{amount} a day':
+      'ದಿನಕ್ಕೆ {amount}',
+  '{company} is on the cloud. Share the join code with your team.':
+      '{company} ಕ್ಲೌಡ್‌ನಲ್ಲಿದೆ. ನಿಮ್ಮ ತಂಡದೊಂದಿಗೆ ಜಾಯಿನ್ ಕೋಡ್ ಹಂಚಿಕೊಳ್ಳಿ.',
+  '{day}, marked {mark}':
+      '{day}, {mark} ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ',
+  '{day}, {h} h':
+      '{day}, {h} ಗಂ',
+  '{day}, {h} h, no punch-out':
+      '{day}, {h} ಗಂ, ಪಂಚ್-ಔಟ್ ಇಲ್ಲ',
+  '{email} already has an account, and that password is not right for it. Try again, or tap "Forgot password?" to choose a new one.':
+      '{email}ಗೆ ಈಗಾಗಲೇ ಖಾತೆ ಇದೆ, ಈ ಪಾಸ್‌ವರ್ಡ್ ಅದಕ್ಕೆ ಸರಿಯಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ, ಅಥವಾ ಹೊಸದನ್ನು ಆರಿಸಲು "ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿರಾ?" ಒತ್ತಿ.',
+  '{email} is no longer on the team.':
+      '{email} ಇನ್ನು ತಂಡದಲ್ಲಿಲ್ಲ.',
+  '{email} will stop getting this company\'s projects and cannot send anything new. Work they already recorded stays.':
+      '{email}ಗೆ ಈ ಕಂಪನಿಯ ಪ್ರಾಜೆಕ್ಟ್‌ಗಳು ಸಿಗುವುದು ನಿಲ್ಲುತ್ತದೆ, ಹೊಸದನ್ನು ಕಳುಹಿಸಲಾಗುವುದಿಲ್ಲ. ಅವರು ಈಗಾಗಲೇ ದಾಖಲಿಸಿದ ಕೆಲಸ ಉಳಿಯುತ್ತದೆ.',
+  '{h} h {m} min':
+      '{h} ಗಂ {m} ನಿ',
+  '{m} min':
+      '{m} ನಿ',
+  '{m} min {s} s':
+      '{m} ನಿ {s} ಸೆ',
+  '{s} s':
+      '{s} ಸೆ',
+  '{name} is ready':
+      '{name} ಸಿದ್ಧವಾಗಿದೆ',
+  '{name}: out at {time} on {date}':
+      '{name}: {date} ರಂದು {time}ಕ್ಕೆ ಹೊರಗೆ',
+  '{n} new updates from your team':
+      'ನಿಮ್ಮ ತಂಡದಿಂದ {n} ಹೊಸ ಅಪ್‌ಡೇಟ್‌ಗಳು',
+  '{sent} sent, {waiting} waiting. They will retry on the next sync.':
+      '{sent} ಕಳುಹಿಸಲಾಗಿದೆ, {waiting} ಕಾಯುತ್ತಿವೆ. ಮುಂದಿನ ಸಿಂಕ್‌ನಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸುತ್ತವೆ.',
+  '{store} could not complete that. Please try again, or send a bug report from the menu.':
+      '{store} ಅದನ್ನು ಪೂರ್ಣಗೊಳಿಸಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ, ಅಥವಾ ಮೆನುವಿನಿಂದ ಬಗ್ ವರದಿ ಕಳುಹಿಸಿ.',
+  '{store} had a problem with that. Please try again in a minute.':
+      '{store}ನಲ್ಲಿ ಇದರಲ್ಲಿ ಸಮಸ್ಯೆಯಾಯಿತು. ಒಂದು ನಿಮಿಷದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  '{store} is having a problem right now. Please try again in a minute.':
+      '{store}ನಲ್ಲಿ ಈಗ ಸಮಸ್ಯೆ ಇದೆ. ಒಂದು ನಿಮಿಷದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'Speak daily reports in your own language':
+      'ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲೇ ದೈನಂದಿನ ವರದಿ ಹೇಳಿ',
+  'Labour, wages and materials in one place':
+      'ಕಾರ್ಮಿಕರು, ಕೂಲಿ ಮತ್ತು ಸಾಮಗ್ರಿ ಒಂದೇ ಕಡೆ',
+  'Photos, issues and team chat for every site':
+      'ಪ್ರತಿ ಸೈಟ್‌ಗೆ ಫೋಟೋಗಳು, ಸಮಸ್ಯೆಗಳು ಮತ್ತು ತಂಡದ ಚಾಟ್',
+  'Works offline, syncs when you are back online':
+      'ಇಂಟರ್ನೆಟ್ ಇಲ್ಲದೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ, ಇಂಟರ್ನೆಟ್ ಬಂದಾಗ ಸಿಂಕ್ ಆಗುತ್ತದೆ',
+  'Sunny':
+      'ಬಿಸಿಲು',
+  'Cloudy':
+      'ಮೋಡ',
+  'Rain':
+      'ಮಳೆ',
+  'Heavy rain':
+      'ಭಾರೀ ಮಳೆ',
+  'Light rain':
+      'ಹಗುರ ಮಳೆ',
+  'Hot':
+      'ಸೆಕೆ',
+  'Windy':
+      'ಗಾಳಿ',
+  'Cold':
+      'ಚಳಿ',
+  'Mason':
+      'ಮೇಸ್ತ್ರಿ',
+  'Helper':
+      'ಸಹಾಯಕ',
+  'Carpenter':
+      'ಬಡಗಿ',
+  'Bar bender':
+      'ಬಾರ್ ಬೆಂಡರ್',
+  'Electrician':
+      'ಎಲೆಕ್ಟ್ರಿಷಿಯನ್',
+  'Plumber':
+      'ಪ್ಲಂಬರ್',
+  'Painter':
+      'ಪೇಂಟರ್',
+  'Welder':
+      'ವೆಲ್ಡರ್',
+  'Tiler':
+      'ಟೈಲ್ಸ್ ಕೆಲಸಗಾರ',
+  'Labourer':
+      'ಕೂಲಿಕಾರ',
+  'Supervisor':
+      'ಮೇಲ್ವಿಚಾರಕ',
+  'Driver':
+      'ಚಾಲಕ',
+  'Operator':
+      'ಆಪರೇಟರ್',
+  'Fitter':
+      'ಫಿಟ್ಟರ್',
+  'Cash':
+      'ನಗದು',
+  'UPI':
+      'UPI',
+  'Bank transfer':
+      'ಬ್ಯಾಂಕ್ ವರ್ಗಾವಣೆ',
+  'Cheque':
+      'ಚೆಕ್',
+  'Pass':
+      'ಸರಿ',
+  'Fail':
+      'ದೋಷ',
+  'Not needed':
+      'ಅಗತ್ಯವಿಲ್ಲ',
+  'Safety':
+      'ಸುರಕ್ಷತೆ',
+  'Quality':
+      'ಗುಣಮಟ್ಟ',
+  'Structural':
+      'ರಚನೆ',
+  'Environmental':
+      'ಪರಿಸರ',
+  'Final':
+      'ಅಂತಿಮ',
 };

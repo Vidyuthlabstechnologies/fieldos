@@ -27,6 +27,13 @@ class RegisterRow {
   double get cost => units * (worker.dailyWage ?? 0);
 }
 
+/// Trades people type most often. Shown through tr(), so a worker saved as
+/// "Mason" reads in the app's language; other trades show as typed.
+const commonTrades = [
+  'Mason', 'Helper', 'Carpenter', 'Bar bender', 'Electrician', 'Plumber', 'Painter', 'Welder', 'Tiler',
+  'Labourer', 'Supervisor', 'Driver', 'Operator', 'Fitter', 'Other',
+];
+
 /// "Mason" and "mason " are one trade; workers without one are "Other".
 String tradeOf(Worker w) {
   final r = w.role?.trim() ?? '';

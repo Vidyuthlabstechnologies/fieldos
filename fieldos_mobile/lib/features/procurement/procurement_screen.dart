@@ -266,7 +266,7 @@ class _RfqTab extends ConsumerWidget {
                           title: Text(r.materialName),
                           subtitle: Text([
                             '${fmtQty(r.quantity)} ${r.unit}',
-                            if (r.estimatedAmount != null) 'about ${rupees(r.estimatedAmount!)}',
+                            if (r.estimatedAmount != null) trf('about {amount}', {'amount': rupees(r.estimatedAmount!)}),
                             _statusLabel(r.status),
                           ].join(' · ')),
                           trailing: r.status == 'pending'

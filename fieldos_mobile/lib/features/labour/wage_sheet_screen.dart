@@ -80,7 +80,11 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                   icon: const Icon(Icons.chevron_left),
                   tooltip: tr('Previous week'),
                   onPressed: () => setState(() => _from = _from.subtract(const Duration(days: 7)))),
-              Text(_range(), style: const TextStyle(fontWeight: FontWeight.w600)),
+              // The week can be long in Tamil or with large text: it wraps
+              // between the arrows instead of pushing "next week" off screen.
+              Expanded(
+                child: Text(_range(), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w600)),
+              ),
               IconButton(
                   icon: const Icon(Icons.chevron_right),
                   tooltip: tr('Next week'),

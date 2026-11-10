@@ -30,7 +30,7 @@ class _EquipmentViewState extends ConsumerState<EquipmentView> {
     final equipmentList = ref.watch(equipmentProvider(widget.projectId));
     return Column(
       children: [
-        _sectionHeader(context, 'Equipment', () => _addEquipment(context, ref)),
+        _sectionHeader(context, tr('Equipment'), () => _addEquipment(context, ref)),
         if (equipmentList.value?.any(isHired) ?? false)
           _HireSummary(equipment: equipmentList.value!, projectId: widget.projectId),
         Expanded(

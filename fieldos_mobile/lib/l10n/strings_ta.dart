@@ -2426,4 +2426,327 @@ const Map<String, String> stringsTa = {
       'அனைத்தையும் நீக்கு',
   'No earlier chats yet. Your chats are kept on this phone.':
       'இன்னும் பழைய உரையாடல்கள் இல்லை. உங்கள் உரையாடல்கள் இந்த ஃபோனிலேயே இருக்கும்.',
+  // 1.7.1 bug-hunt: labels that used to stay in English.
+  '1 open issue':
+      '1 திறந்த பிரச்சினை',
+  '{n} open issues':
+      '{n} திறந்த பிரச்சினைகள்',
+  '1 worker punched in':
+      '1 தொழிலாளர் பஞ்ச்-இன் செய்தார்',
+  '{n} workers punched in':
+      '{n} தொழிலாளர்கள் பஞ்ச்-இன் செய்தனர்',
+  'A material receipt is waiting for a decision':
+      'பொருள் ரசீது முடிவுக்காக காத்திருக்கிறது',
+  'A purchase order is waiting for a decision':
+      'ஒரு கொள்முதல் ஆணை (PO) முடிவுக்காக காத்திருக்கிறது',
+  'A request is waiting for a decision':
+      'ஒரு கோரிக்கை முடிவுக்காக காத்திருக்கிறது',
+  'A site over budget is waiting for a decision':
+      'பட்ஜெட்டைத் தாண்டிய சைட் முடிவுக்காக காத்திருக்கிறது',
+  'A new code is on its way to {email}. Codes stop working after an hour.':
+      '{email}-க்கு புதிய குறியீடு வருகிறது. குறியீடுகள் ஒரு மணி நேரத்திற்குப் பிறகு வேலை செய்யாது.',
+  'A project':
+      'ஒரு ப்ராஜெக்ட்',
+  'A purchase is already in progress. Wait for it to finish.':
+      'ஒரு வாங்குதல் ஏற்கனவே நடக்கிறது. அது முடியும் வரை காத்திருங்கள்.',
+  'Access codes are 10 or more letters and numbers. Type it exactly as you got it.':
+      'அணுகல் குறியீட்டில் 10 அல்லது அதற்கு மேற்பட்ட எழுத்துகளும் எண்களும் இருக்கும். கிடைத்தபடியே தட்டச்சு செய்யுங்கள்.',
+  'Account created for {email}.':
+      '{email}-க்கு கணக்கு உருவாக்கப்பட்டது.',
+  'Approval requested':
+      'ஒப்புதல் கோரப்பட்டது',
+  'Choose a new password of at least 6 characters.':
+      'குறைந்தது 6 எழுத்துகள் கொண்ட புதிய கடவுச்சொல்லைத் தேர்ந்தெடுங்கள்.',
+  'Companies where you are the only member are deleted from the cloud with all their records. Companies with other members keep their records, and ownership passes to another member.':
+      'நீங்கள் மட்டுமே உறுப்பினராக உள்ள நிறுவனங்கள் அவற்றின் எல்லா பதிவுகளுடன் கிளவுடிலிருந்து நீக்கப்படும். பிற உறுப்பினர்கள் உள்ள நிறுவனங்களின் பதிவுகள் இருக்கும், உரிமை வேறு உறுப்பினருக்குச் செல்லும்.',
+  'Could not sign in. Try again.':
+      'உள்நுழைய முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+  'Data on this phone is not deleted. Uninstall the app to remove it.':
+      'இந்த ஃபோனில் உள்ள தரவு நீக்கப்படாது. அதை அகற்ற ஆப்பை அன்இன்ஸ்டால் செய்யுங்கள்.',
+  'Edit item':
+      'உருப்படியைத் திருத்து',
+  'Enter the join code from your company owner.':
+      'உங்கள் நிறுவன உரிமையாளர் தந்த சேர்வு குறியீட்டை உள்ளிடுங்கள்.',
+  'Enter your email and a password of at least 6 characters.':
+      'உங்கள் மின்னஞ்சலையும் குறைந்தது 6 எழுத்து கடவுச்சொல்லையும் உள்ளிடுங்கள்.',
+  'Free access from the FieldOS team':
+      'FieldOS குழுவின் இலவச அணுகல்',
+  'Free access from the FieldOS team until {date}':
+      '{date} வரை FieldOS குழுவின் இலவச அணுகல்',
+  'Free trial (will not renew)':
+      'இலவச சோதனை (புதுப்பிக்கப்படாது)',
+  'Free trial until {date} (will not renew)':
+      '{date} வரை இலவச சோதனை (புதுப்பிக்கப்படாது)',
+  'Free trial until {date}, then paid':
+      '{date} வரை இலவச சோதனை, பிறகு கட்டணம்',
+  'Free trial, then paid':
+      'இலவச சோதனை, பிறகு கட்டணம்',
+  'Get the {language} speech pack to work offline':
+      'இணையம் இல்லாமல் வேலை செய்ய {language} பேச்சு தொகுப்பைப் பெறுங்கள்',
+  'Give the project a name, such as the site or building.':
+      'ப்ராஜெக்ட்டுக்கு ஒரு பெயர் கொடுங்கள், சைட் அல்லது கட்டடத்தின் பெயர் போல.',
+  'Headcount not given':
+      'ஆட்கள் எண்ணிக்கை தரப்படவில்லை',
+  'If {email} has an account, a code is on its way. Type it below with your new password.':
+      '{email}-க்கு கணக்கு இருந்தால், குறியீடு வருகிறது. அதை கீழே உங்கள் புதிய கடவுச்சொல்லுடன் தட்டச்சு செய்யுங்கள்.',
+  'Items':
+      'உருப்படிகள்',
+  'Join company':
+      'நிறுவனத்தில் சேர்',
+  'Joined {company}. Projects will appear after the first sync.':
+      '{company}-இல் சேர்ந்தீர்கள். முதல் சிங்க்கிற்குப் பிறகு ப்ராஜெக்ட்கள் தெரியும்.',
+  'Keep the names under 200 characters.':
+      'பெயர்களை 200 எழுத்துகளுக்குள் வையுங்கள்.',
+  'Listening stopped':
+      'கேட்பது நின்றுவிட்டது',
+  'Listening · {time}':
+      'கேட்கிறது · {time}',
+  'Location is blocked for FieldOS. Allow it in Android settings.':
+      'FieldOS-க்கு இருப்பிடம் தடுக்கப்பட்டுள்ளது. Android அமைப்புகளில் அனுமதி தாருங்கள்.',
+  'Location is turned off. Turn on GPS and try again.':
+      'இருப்பிடம் அணைக்கப்பட்டுள்ளது. GPS-ஐ இயக்கி மீண்டும் முயற்சிக்கவும்.',
+  'Location permission was not given.':
+      'இருப்பிட அனுமதி தரப்படவில்லை.',
+  'Mark as not paid':
+      'செலுத்தவில்லை எனக் குறி',
+  'Mark as paid':
+      'செலுத்தியதாகக் குறி',
+  'Microphone is off for FieldOS':
+      'FieldOS-க்கு மைக்ரோஃபோன் அணைக்கப்பட்டுள்ளது',
+  'New issue (critical)':
+      'புதிய பிரச்சினை (மிக முக்கியம்)',
+  'New issue (high)':
+      'புதிய பிரச்சினை (அதிகம்)',
+  'New issue (low)':
+      'புதிய பிரச்சினை (குறைவு)',
+  'New issue (medium)':
+      'புதிய பிரச்சினை (நடுத்தரம்)',
+  'New join code created. The old code no longer works.':
+      'புதிய சேர்வு குறியீடு உருவாக்கப்பட்டது. பழைய குறியீடு இனி வேலை செய்யாது.',
+  'New password saved. Signed in as {email}.':
+      'புதிய கடவுச்சொல் சேமிக்கப்பட்டது. {email} ஆக உள்நுழைந்துள்ளீர்கள்.',
+  'No active subscription':
+      'செயலில் உள்ள சந்தா இல்லை',
+  'No internet connection. Connect and try again.':
+      'இணைய இணைப்பு இல்லை. இணைத்து மீண்டும் முயற்சிக்கவும்.',
+  'Not set':
+      'அமைக்கப்படவில்லை',
+  'One project for each site. Its daily reports, labour, materials, money and photos stay together.':
+      'ஒவ்வொரு சைட்டுக்கும் ஒரு ப்ராஜெக்ட். அதன் தினசரி அறிக்கைகள், கூலியாட்கள், பொருட்கள், பணம், புகைப்படங்கள் எல்லாம் ஒன்றாக இருக்கும்.',
+  'Payment problem: update your payment method in the store':
+      'கட்டணப் பிரச்சினை: ஸ்டோரில் உங்கள் கட்டண முறையைப் புதுப்பிக்கவும்',
+  'Payment problem: update your payment method in the store before {date}':
+      'கட்டணப் பிரச்சினை: {date}-க்கு முன் ஸ்டோரில் உங்கள் கட்டண முறையைப் புதுப்பிக்கவும்',
+  'Photo is on the phone that took it':
+      'புகைப்படம் அதை எடுத்த ஃபோனில் உள்ளது',
+  'Pick a time after they punched in ({time}).':
+      'பஞ்ச்-இன் ({time}) நேரத்திற்குப் பிறகான நேரத்தைத் தேர்ந்தெடுங்கள்.',
+  'Put company on the cloud':
+      'நிறுவனத்தை கிளவுடில் வை',
+  'Quantity this bill':
+      'இந்த பில் அளவு',
+  'Recording · {time} · tap to stop and send':
+      'பதிவு · {time} · நிறுத்தி அனுப்ப தட்டவும்',
+  'Sign in':
+      'உள்நுழை',
+  'Signed in as {email}.':
+      '{email} ஆக உள்நுழைந்துள்ளீர்கள்.',
+  'Signed out. This phone keeps working offline.':
+      'வெளியேறிவிட்டீர்கள். இந்த ஃபோன் இணையம் இல்லாமல் தொடர்ந்து வேலை செய்யும்.',
+  'Subscribed':
+      'சந்தா உள்ளது',
+  'Subscribed until {date} (cancelled)':
+      '{date} வரை சந்தா (ரத்து செய்யப்பட்டது)',
+  'Subscribed, renews on {date}':
+      'சந்தா உள்ளது, {date} அன்று புதுப்பிக்கப்படும்',
+  'Sync now':
+      'இப்போது சிங்க் செய்',
+  'Synced. 1 change sent, latest data received.':
+      'சிங்க் ஆனது. 1 மாற்றம் அனுப்பப்பட்டது, புதிய தரவு வந்தது.',
+  'Synced. {n} changes sent, latest data received.':
+      'சிங்க் ஆனது. {n} மாற்றங்கள் அனுப்பப்பட்டன, புதிய தரவு வந்தது.',
+  'Tap the mic and speak':
+      'மைக்கைத் தட்டி பேசுங்கள்',
+  'Tap to start recording':
+      'பதிவைத் தொடங்க தட்டவும்',
+  'That code is not valid or has ended. Check it and try again, or ask whoever gave it to you.':
+      'இந்தக் குறியீடு சரியில்லை அல்லது முடிந்துவிட்டது. சரிபார்த்து மீண்டும் முயற்சிக்கவும், அல்லது கொடுத்தவரிடம் கேளுங்கள்.',
+  'That plan is no longer on sale. Please pick again.':
+      'இந்தத் திட்டம் இப்போது விற்பனையில் இல்லை. மீண்டும் தேர்ந்தெடுங்கள்.',
+  'The FieldOS plans are not on sale in {store} yet. Please try again later, or send a bug report from the menu.':
+      'FieldOS திட்டங்கள் இன்னும் {store}-இல் விற்பனைக்கு வரவில்லை. பின்னர் முயற்சிக்கவும், அல்லது மெனுவிலிருந்து பிழை அறிக்கை அனுப்புங்கள்.',
+  'The owner or a project manager decides these. You can see what is waiting.':
+      'இவற்றை உரிமையாளர் அல்லது ப்ராஜெக்ட் மேனேஜர் முடிவு செய்வார். காத்திருப்பவற்றை நீங்கள் பார்க்கலாம்.',
+  'The phone stopped listening. Tap Try again, or type the report.':
+      'ஃபோன் கேட்பதை நிறுத்திவிட்டது. மீண்டும் முயற்சி என்பதைத் தட்டவும், அல்லது அறிக்கையைத் தட்டச்சு செய்யுங்கள்.',
+  'There is no internet, and the offline speech pack for {language} is not on this phone yet. Connect once, then download it: Google app › Settings › Voice › Offline speech recognition › {englishName}. After that, voice reports work anywhere on site.':
+      'இணையம் இல்லை, {language} ஆஃப்லைன் பேச்சு தொகுப்பு இன்னும் இந்த ஃபோனில் இல்லை. ஒருமுறை இணைத்து பதிவிறக்குங்கள்: Google ஆப் › Settings › Voice › Offline speech recognition › {englishName}. அதன் பிறகு குரல் அறிக்கைகள் சைட்டில் எங்கும் வேலை செய்யும்.',
+  'This iPhone needs internet to recognise {language} speech. Connect and try again, or type the report.':
+      'இந்த iPhone-க்கு {language} பேச்சை அறிய இணையம் தேவை. இணைத்து மீண்டும் முயற்சிக்கவும், அல்லது அறிக்கையைத் தட்டச்சு செய்யுங்கள்.',
+  'This needs internet for {language}':
+      '{language}-க்கு இணையம் தேவை',
+  'This permanently deletes {email} from FieldOS cloud.':
+      'இது {email}-ஐ FieldOS கிளவுடிலிருந்து நிரந்தரமாக நீக்கும்.',
+  'This phone can\'t do {language} yet':
+      'இந்த ஃபோனால் இன்னும் {language} முடியாது',
+  'This phone can\'t turn {language} speech into text itself, so FieldOS will record you and send the recording to Sarvam when you stop. This needs internet.':
+      'இந்த ஃபோனால் {language} பேச்சைத் தானே உரையாக மாற்ற முடியாது, எனவே FieldOS உங்களைப் பதிவுசெய்து, நீங்கள் நிறுத்தியதும் பதிவை Sarvam-க்கு அனுப்பும். இதற்கு இணையம் தேவை.',
+  'This phone has no speech recognition':
+      'இந்த ஃபோனில் பேச்சு அறிதல் இல்லை',
+  'This phone is not allowed to make purchases. Check the payment settings or parental controls in {store}.':
+      'இந்த ஃபோனில் வாங்க அனுமதி இல்லை. {store}-இல் கட்டண அமைப்புகள் அல்லது பெற்றோர் கட்டுப்பாடுகளைப் பாருங்கள்.',
+  'This plan is not on sale in your country right now.':
+      'இந்தத் திட்டம் இப்போது உங்கள் நாட்டில் விற்பனையில் இல்லை.',
+  'This {store} account already pays for FieldOS for someone else. Write to us and we will sort it out.':
+      'இந்த {store} கணக்கு ஏற்கனவே வேறொருவருக்காக FieldOS-க்குச் செலுத்துகிறது. எங்களுக்கு எழுதுங்கள், சரிசெய்வோம்.',
+  'Turning your recording into text…':
+      'உங்கள் பதிவை உரையாக மாற்றுகிறது…',
+  'Turning your recording into text… {n} of {total}':
+      'உங்கள் பதிவை உரையாக மாற்றுகிறது… {total}-இல் {n}',
+  'Type the code from the email: it is 6 digits.':
+      'மின்னஞ்சலில் வந்த குறியீட்டைத் தட்டச்சு செய்யுங்கள்: அது 6 இலக்கங்கள்.',
+  'Type the code we emailed to {email}, and the new password for your cloud account.':
+      '{email}-க்கு அனுப்பிய குறியீட்டையும் உங்கள் கிளவுட் கணக்கின் புதிய கடவுச்சொல்லையும் தட்டச்சு செய்யுங்கள்.',
+  'Type the code we emailed to {email}. It can take a minute to arrive; look in spam too.':
+      '{email}-க்கு அனுப்பிய குறியீட்டைத் தட்டச்சு செய்யுங்கள். வர ஒரு நிமிடம் ஆகலாம்; ஸ்பேமிலும் பாருங்கள்.',
+  'Type your email above first, then tap "Forgot password?" again.':
+      'முதலில் மேலே உங்கள் மின்னஞ்சலைத் தட்டச்சு செய்து, பிறகு "கடவுச்சொல் மறந்துவிட்டதா?" என்பதை மீண்டும் தட்டவும்.',
+  'We sent a code to {email}. Type it below to finish creating your account.':
+      '{email}-க்கு குறியீடு அனுப்பியுள்ளோம். கணக்கை உருவாக்கி முடிக்க அதை கீழே தட்டச்சு செய்யுங்கள்.',
+  'Work measured this bill':
+      'இந்த பில்லில் அளக்கப்பட்ட வேலை',
+  'Working for someone else\'s company?':
+      'வேறொருவரின் நிறுவனத்துக்காக வேலை செய்கிறீர்களா?',
+  'Your cloud account is deleted. This phone keeps working offline.':
+      'உங்கள் கிளவுட் கணக்கு நீக்கப்பட்டது. இந்த ஃபோன் இணையம் இல்லாமல் தொடர்ந்து வேலை செய்யும்.',
+  'Your payment is waiting for approval, for example in your UPI app. FieldOS opens by itself once {store} confirms it.':
+      'உங்கள் கட்டணம் ஒப்புதலுக்காக காத்திருக்கிறது, உதாரணமாக உங்கள் UPI ஆப்பில். {store} உறுதி செய்தவுடன் FieldOS தானாகத் திறக்கும்.',
+  'about {amount}':
+      'சுமார் {amount}',
+  'never':
+      'ஒருபோதும் இல்லை',
+  'raised on {date}':
+      '{date} அன்று எழுப்பப்பட்டது',
+  'raised today':
+      'இன்று எழுப்பப்பட்டது',
+  'raised yesterday':
+      'நேற்று எழுப்பப்பட்டது',
+  'this account':
+      'இந்தக் கணக்கு',
+  'your company':
+      'உங்கள் நிறுவனம்',
+  '{amount} a day':
+      'நாளொன்றுக்கு {amount}',
+  '{company} is on the cloud. Share the join code with your team.':
+      '{company} கிளவுடில் உள்ளது. உங்கள் குழுவுடன் சேர்வு குறியீட்டைப் பகிருங்கள்.',
+  '{day}, marked {mark}':
+      '{day}, {mark} எனக் குறிக்கப்பட்டது',
+  '{day}, {h} h':
+      '{day}, {h} மணி',
+  '{day}, {h} h, no punch-out':
+      '{day}, {h} மணி, பஞ்ச்-அவுட் இல்லை',
+  '{email} already has an account, and that password is not right for it. Try again, or tap "Forgot password?" to choose a new one.':
+      '{email}-க்கு ஏற்கனவே கணக்கு உள்ளது, இந்தக் கடவுச்சொல் அதற்குச் சரியில்லை. மீண்டும் முயற்சிக்கவும், அல்லது புதியதைத் தேர்ந்தெடுக்க "கடவுச்சொல் மறந்துவிட்டதா?" என்பதைத் தட்டவும்.',
+  '{email} is no longer on the team.':
+      '{email} இனி குழுவில் இல்லை.',
+  '{email} will stop getting this company\'s projects and cannot send anything new. Work they already recorded stays.':
+      '{email}-க்கு இந்த நிறுவனத்தின் ப்ராஜெக்ட்கள் கிடைப்பது நிற்கும், புதிதாக எதையும் அனுப்ப முடியாது. அவர்கள் ஏற்கனவே பதிவுசெய்த வேலை இருக்கும்.',
+  '{h} h {m} min':
+      '{h} மணி {m} நிமி',
+  '{m} min':
+      '{m} நிமி',
+  '{m} min {s} s':
+      '{m} நிமி {s} வி',
+  '{s} s':
+      '{s} வி',
+  '{name} is ready':
+      '{name} தயார்',
+  '{name}: out at {time} on {date}':
+      '{name}: {date} அன்று {time}-க்கு வெளியே',
+  '{n} new updates from your team':
+      'உங்கள் குழுவிடமிருந்து {n} புதிய அப்டேட்கள்',
+  '{sent} sent, {waiting} waiting. They will retry on the next sync.':
+      '{sent} அனுப்பப்பட்டன, {waiting} காத்திருக்கின்றன. அடுத்த சிங்க்கில் மீண்டும் முயற்சிக்கும்.',
+  '{store} could not complete that. Please try again, or send a bug report from the menu.':
+      '{store}-ஆல் அதை முடிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும், அல்லது மெனுவிலிருந்து பிழை அறிக்கை அனுப்புங்கள்.',
+  '{store} had a problem with that. Please try again in a minute.':
+      '{store}-இல் அதில் பிரச்சினை ஏற்பட்டது. ஒரு நிமிடம் கழித்து மீண்டும் முயற்சிக்கவும்.',
+  '{store} is having a problem right now. Please try again in a minute.':
+      '{store}-இல் இப்போது பிரச்சினை உள்ளது. ஒரு நிமிடம் கழித்து மீண்டும் முயற்சிக்கவும்.',
+  'Speak daily reports in your own language':
+      'உங்கள் மொழியிலேயே தினசரி அறிக்கையைப் பேசுங்கள்',
+  'Labour, wages and materials in one place':
+      'கூலியாட்கள், கூலி, பொருட்கள் ஒரே இடத்தில்',
+  'Photos, issues and team chat for every site':
+      'ஒவ்வொரு சைட்டுக்கும் புகைப்படங்கள், பிரச்சினைகள், குழு அரட்டை',
+  'Works offline, syncs when you are back online':
+      'இணையம் இல்லாமல் வேலை செய்யும், இணையம் வந்ததும் சிங்க் ஆகும்',
+  'Sunny':
+      'வெயில்',
+  'Cloudy':
+      'மேகமூட்டம்',
+  'Rain':
+      'மழை',
+  'Heavy rain':
+      'கனமழை',
+  'Light rain':
+      'லேசான மழை',
+  'Hot':
+      'வெப்பம்',
+  'Windy':
+      'காற்று',
+  'Cold':
+      'குளிர்',
+  'Mason':
+      'கொத்தனார்',
+  'Helper':
+      'உதவியாளர்',
+  'Carpenter':
+      'தச்சர்',
+  'Bar bender':
+      'கம்பி வளைப்பவர்',
+  'Electrician':
+      'மின்சாரப் பணியாளர்',
+  'Plumber':
+      'பிளம்பர்',
+  'Painter':
+      'பெயிண்டர்',
+  'Welder':
+      'வெல்டர்',
+  'Tiler':
+      'டைல்ஸ் பணியாளர்',
+  'Labourer':
+      'கூலியாள்',
+  'Supervisor':
+      'மேற்பார்வையாளர்',
+  'Driver':
+      'ஓட்டுநர்',
+  'Operator':
+      'ஆபரேட்டர்',
+  'Fitter':
+      'ஃபிட்டர்',
+  'Cash':
+      'ரொக்கம்',
+  'UPI':
+      'UPI',
+  'Bank transfer':
+      'வங்கிப் பரிமாற்றம்',
+  'Cheque':
+      'காசோலை',
+  'Pass':
+      'சரி',
+  'Fail':
+      'தோல்வி',
+  'Not needed':
+      'தேவையில்லை',
+  'Safety':
+      'பாதுகாப்பு',
+  'Quality':
+      'தரம்',
+  'Structural':
+      'கட்டமைப்பு',
+  'Environmental':
+      'சுற்றுச்சூழல்',
+  'Final':
+      'இறுதி',
 };

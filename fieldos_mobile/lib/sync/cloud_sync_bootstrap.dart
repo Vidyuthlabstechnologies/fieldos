@@ -10,6 +10,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/notification_service.dart';
 import 'package:fieldos_mobile/features/tasks/team_roster.dart';
@@ -95,7 +96,7 @@ class CloudSyncBootstrap {
     _queued.clear();
     final notifications = _ref.read(notificationServiceProvider);
     if (batch.length > maxAlertsPerRun) {
-      await notifications.show('FieldOS', '${batch.length} new updates from your team');
+      await notifications.show('FieldOS', trf('{n} new updates from your team', {'n': batch.length}));
       return;
     }
     for (final a in batch) {

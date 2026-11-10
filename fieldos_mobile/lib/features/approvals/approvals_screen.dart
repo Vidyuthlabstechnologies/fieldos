@@ -42,9 +42,10 @@ class ApprovalsScreen extends ConsumerWidget {
                   itemCount: items.length + (canDecide ? 0 : 1),
                   itemBuilder: (context, i) {
                     if (!canDecide && i == 0) {
-                      return const Padding(
-                        padding: EdgeInsets.fromLTRB(4, 0, 4, 12),
-                        child: FormMessage('The owner or a project manager decides these. You can see what is waiting.',
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
+                        child: FormMessage(
+                            tr('The owner or a project manager decides these. You can see what is waiting.'),
                             error: false),
                       );
                     }
@@ -59,7 +60,7 @@ class ApprovalsScreen extends ConsumerWidget {
                             Text(approvalLabel(a.entityType), style: Theme.of(context).textTheme.titleMedium),
                             const SizedBox(height: 2),
                             Text(
-                              '${names[a.projectId] ?? 'A project'} · raised ${_when(a.createdAt)}',
+                              '${names[a.projectId] ?? tr('A project')} · ${raisedWhen(a.createdAt)}',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -128,17 +129,25 @@ class ApprovalsScreen extends ConsumerWidget {
   }
 }
 
-/// "today", "yesterday" or "on 3 Nov".
-String _when(DateTime t) {
-  final day = fmtDay(t);
-  return day == 'Today' || day == 'Yesterday' ? day.toLowerCase() : 'on $day';
+/// "raised today", "raised yesterday" or "raised on 3 Nov", in the app's
+/// language. (It used to compare the already-translated day with the
+/// English word, so other languages read "raised on आज".)
+String raisedWhen(DateTime t, {DateTime? now}) {
+  final n = (now ?? DateTime.now()).toLocal();
+  final l = t.toLocal();
+  final days = DateTime(n.year, n.month, n.day).difference(DateTime(l.year, l.month, l.day)).inDays;
+  return switch (days) {
+    0 => tr('raised today'),
+    1 => tr('raised yesterday'),
+    _ => trf('raised on {date}', {'date': fmtDate(l, short: true, now: n)}),
+  };
 }
 
 String approvalLabel(String type) => switch (type) {
       'budget_overrun' => tr('Site over budget'),
       'purchase_order' => tr('Purchase order'),
       'material_receipt' => tr('Material received'),
-      _ => '${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}',
+      _ => tr('${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}'),
     };
 
 /// Raise a budget-overrun approval for a project (the dashboard's "Ask for
