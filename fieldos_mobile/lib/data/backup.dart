@@ -31,7 +31,8 @@ const backupFormat = 1;
 const _countedTables = [
   'companies', 'projects', 'tasks', 'dpr_entries', 'workers', 'labour_attendance', 'site_expenses',
   'material_receipts', 'payments_received', 'client_bills', 'suppliers', 'purchase_orders', 'close_reviews',
-  'work_measurements', 'supplier_invoices', 'sync_outbox',
+  'work_measurements', 'supplier_invoices', 'cost_codes', 'work_claims', 'work_certifications', 'variations',
+  'variation_decisions', 'sync_outbox',
 ];
 
 /// (table, column) pairs that hold a path to a file on the phone.
@@ -40,6 +41,7 @@ const _fileColumns = [
   ('expense_attachments', 'file_path'),
   ('receipt_attachments', 'file_path'),
   ('documents', 'file_path'),
+  ('commercial_attachments', 'file_path'),
 ];
 
 class BackupProblem implements Exception {

@@ -21,6 +21,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/procurement/po_share.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_screens.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_tools.dart';
+import 'package:fieldos_mobile/features/procurement/quote_compare_screen.dart';
 import 'package:fieldos_mobile/features/procurement/rate_hint.dart';
 import 'package:fieldos_mobile/features/procurement/supplier_statement_screen.dart';
 import 'package:fieldos_mobile/features/procurement/supplier_import.dart';
@@ -300,6 +301,15 @@ class _SuppliersTab extends ConsumerWidget {
 
 // --- RFQ ------------------------------------------------------------------
 
+/// Quotes entered for each purchase request of a site.
+final supplierQuoteCountsProvider = FutureProvider.autoDispose.family<Map<String, int>, String>((ref, projectId) async {
+  final out = <String, int>{};
+  for (final q in await ref.watch(appDatabaseProvider).supplierQuoteDao.forProject(projectId)) {
+    out[q.requestId] = (out[q.requestId] ?? 0) + 1;
+  }
+  return out;
+});
+
 class _RfqTab extends ConsumerWidget {
   const _RfqTab(
       {required this.projectId, required this.companyId, required this.userId});
@@ -311,6 +321,7 @@ class _RfqTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final requests = ref.watch(requestsProvider(projectId));
     final suppliers = ref.watch(suppliersProvider(companyId));
+    final quoteCounts = ref.watch(supplierQuoteCountsProvider(projectId)).value ?? const <String, int>{};
     return Column(
       children: [
         _sectionHeader(context, tr('Purchase requests (RFQ)'), () => _add(context, ref)),
@@ -320,7 +331,7 @@ class _RfqTab extends ConsumerWidget {
                 ? MitraEmpty(tr('No RFQs yet.'))
                 : ListView(
                     children: [
-                      for (final r in rows) _requestTile(context, ref, r, suppliers),
+                      for (final r in rows) _requestTile(context, ref, r, suppliers, quoteCounts),
                     ],
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -333,7 +344,8 @@ class _RfqTab extends ConsumerWidget {
 
   /// A request over the owner's approval amounts waits for its approvals
   /// before it can become a PO.
-  Widget _requestTile(BuildContext context, WidgetRef ref, PurchaseRequest r, AsyncValue<List<Supplier>> suppliers) {
+  Widget _requestTile(BuildContext context, WidgetRef ref, PurchaseRequest r, AsyncValue<List<Supplier>> suppliers,
+      Map<String, int> quoteCounts) {
     final chain = r.status == 'pending'
         ? chainViewFor(ref,
             companyId: companyId,
@@ -345,11 +357,20 @@ class _RfqTab extends ConsumerWidget {
         : null;
     final waiting = chain != null && !chain.status.complete;
     return ListTile(
+      key: Key('request-${r.id}'),
+      onTap: () async {
+        await Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => QuoteCompareScreen(requestId: r.id, companyId: companyId, userId: userId)));
+        ref.invalidate(requestsProvider(projectId));
+        ref.invalidate(supplierQuoteCountsProvider(projectId));
+      },
       title: Text(r.materialName),
       subtitle: Text([
         '${fmtQty(r.quantity)} ${r.unit}',
         if (r.estimatedAmount != null) trf('about {amount}', {'amount': rupees(r.estimatedAmount!)}),
         waiting ? chain.status.label : _statusLabel(r.status),
+        if ((quoteCounts[r.id] ?? 0) > 0)
+          (quoteCounts[r.id] == 1 ? tr('1 quote') : trf('{n} quotes', {'n': quoteCounts[r.id]!})),
       ].join(' · ')),
       trailing: r.status != 'pending' || chain == null
           ? null
@@ -534,6 +555,7 @@ class _PoTab extends ConsumerWidget {
         _poStage(o, poProgress(o, requests.where((r) => r.id == o.requestId).firstOrNull, receipts)),
         if (chain != null && chain.status.required.isNotEmpty) chain.status.label,
         if (poIsLate(o, now)) trf('late since {date}', {'date': fmtDate(o.deliveryDate!, short: true)}),
+        if (o.status == 'acknowledged' && o.dispatchedOn != null) _onTheWay(o),
       ].join(' · ')),
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
         if (waiting && chain.signAs != null)
@@ -558,7 +580,7 @@ class _PoTab extends ConsumerWidget {
             icon: const Icon(Icons.share_outlined),
             onPressed: () => _sharePo(ref, o, suppliers),
           ),
-        if (o.status == 'issued')
+        if (o.status == 'issued' || o.status == 'acknowledged')
           FilledButton(
             child: Text(tr('Receive')),
             onPressed: () => _receive(context, ref, o, requests.where((r) => r.id == o.requestId).firstOrNull,
@@ -684,6 +706,18 @@ String _poTitle(PurchaseOrder o, PurchaseRequest? request) {
       ? tr('Purchase order')
       : [request.materialName.trim(), fmtQty(request.quantity), request.unit.trim()].where((e) => e.isNotEmpty).join(' ');
   return o.totalAmount == null ? what : '$what · ${rupees(o.totalAmount!)}';
+}
+
+/// What the supplier said from their free portal when they sent it.
+String _onTheWay(PurchaseOrder o) {
+  final vehicle = o.dispatchVehicle?.trim() ?? '';
+  final note = o.supplierNote?.trim() ?? '';
+  return [
+    vehicle.isEmpty
+        ? trf('on the way since {date}', {'date': fmtDate(o.dispatchedOn!, short: true)})
+        : trf('on the way in {vehicle} since {date}', {'vehicle': vehicle, 'date': fmtDate(o.dispatchedOn!, short: true)}),
+    if (note.isNotEmpty) note,
+  ].join(' · ');
 }
 
 /// "Sent to supplier", or how much of it has come when it came in parts.

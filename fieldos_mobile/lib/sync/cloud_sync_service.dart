@@ -161,6 +161,35 @@ class CloudSyncService {
     return CloudCompany(companyId: m['company_id'] as String, role: m['role'] as String, name: m['name'] as String?);
   }
 
+  /// A subcontractor's phone: joins with the code the builder's owner or
+  /// PM shared. The subcontractor does not join the company; they see only
+  /// their own firm's work orders and the outcome of their claims (see
+  /// 20261110100000_commercial_controls.sql). Errors as [joinCompany].
+  Future<SubcontractorLink> joinAsSubcontractor(String code) async {
+    final res = await client.rpc('join_as_subcontractor', params: {'p_code': code});
+    final m = Map<String, dynamic>.from(res as Map);
+    switch (m['error']) {
+      case null:
+        break;
+      case 'too_many_attempts':
+        throw const PostgrestException(message: 'too many join attempts', code: 'P0001');
+      case 'invalid_join_code':
+        throw const PostgrestException(message: 'invalid join code', code: 'P0002');
+      case final Object other:
+        throw PostgrestException(message: '$other');
+    }
+    return SubcontractorLink(
+      subcontractorId: m['subcontractor_id'] as String,
+      subcontractorName: m['subcontractor_name'] as String,
+      companyId: m['company_id'] as String,
+      companyName: m['company_name'] as String? ?? 'Company',
+    );
+  }
+
+  /// Owner or PM: the code one subcontractor joins with.
+  Future<String> subcontractorAccessCode(String subcontractorId) async =>
+      await client.rpc('subcontractor_access_code', params: {'p_subcontractor_id': subcontractorId}) as String;
+
   Future<List<CloudMember>> roster(String companyId) async {
     final rows = await client.rpc('company_roster', params: {'p_company_id': companyId}) as List;
     return [
@@ -317,6 +346,19 @@ class CloudSyncService {
     await engine.pullAll();
     return pushResult;
   }
+}
+
+class SubcontractorLink {
+  const SubcontractorLink({
+    required this.subcontractorId,
+    required this.subcontractorName,
+    required this.companyId,
+    required this.companyName,
+  });
+  final String subcontractorId;
+  final String subcontractorName;
+  final String companyId;
+  final String companyName;
 }
 
 class AccountDeletion {

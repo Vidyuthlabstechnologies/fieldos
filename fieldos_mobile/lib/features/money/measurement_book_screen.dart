@@ -10,6 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/commercial/commercial_data.dart' show commercialDataProvider;
+import 'package:fieldos_mobile/features/commercial/commercial_rules.dart' show clientBillableVariations;
+import 'package:fieldos_mobile/features/commercial/commercial_widgets.dart' show NumField, parseNum;
 import 'package:fieldos_mobile/features/money/billing_calc.dart';
 import 'package:fieldos_mobile/features/money/billing_reconcile.dart';
 import 'package:fieldos_mobile/features/money/bills_view.dart';
@@ -182,12 +185,53 @@ class _MeasurementBookScreenState extends ConsumerState<MeasurementBookScreen> {
     );
   }
 
+  /// Approved client instructions and design changes not yet billed, with
+  /// the client's rate the person enters (the variation register holds our
+  /// cost, not the client's price). Null when the person cancels.
+  Future<List<ApprovedExtra>?> _variationExtras(List<List<BillLine>> earlier) async {
+    final data = await ref.read(commercialDataProvider(_pid).future);
+    final before = previousQuantities(earlier);
+    final open = clientBillableVariations(data).where((v) {
+      final key = '${v.description.toLowerCase()}|${v.unit.toLowerCase()}';
+      return v.qty - (before[key] ?? 0) > 0.0005;
+    }).toList();
+    if (open.isEmpty || !mounted) return const [];
+    final rates = {for (final v in open) v.variation.id: TextEditingController()};
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('Approved variations to bill')),
+        content: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(tr('Enter the client rate for each one to bill now. Leave a rate empty to leave it for a later bill.')),
+            for (final v in open)
+              NumField(
+                controller: rates[v.variation.id]!,
+                label: '${v.description} · ${fmtQty(v.qty)} ${v.unit}',
+                suffix: '₹/${v.unit}',
+              ),
+          ]),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Next'))),
+        ],
+      ),
+    );
+    if (ok != true) return null;
+    return [
+      for (final v in open)
+        if ((parseNum(rates[v.variation.id]!.text) ?? 0) > 0)
+          ApprovedExtra(description: v.description, unit: v.unit, qty: v.qty, rate: parseNum(rates[v.variation.id]!.text)!),
+    ];
+  }
+
   Future<void> _bill(MeasurementBook book) async {
     final bills = await ref.read(billsProvider(_pid).future);
-    final draft = nextRaLines(
-      approved: book.approved,
-      earlierBills: bills.where((b) => b.kind == 'ra').map((b) => decodeLines(b.linesJson)),
-    );
+    final earlier = bills.where((b) => b.kind == 'ra').map((b) => decodeLines(b.linesJson)).toList();
+    final extras = await _variationExtras(earlier);
+    if (extras == null || !mounted) return;
+    final draft = nextRaLines(approved: book.approved, earlierBills: earlier, extras: extras);
     if (!mounted) return;
     if (draft.lines.isEmpty) {
       showSnack(

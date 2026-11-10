@@ -7,12 +7,15 @@ import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/features/project/site_notes_screen.dart';
+import 'package:fieldos_mobile/features/portals/portal_share.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart';
+import 'package:fieldos_mobile/features/daily/today_screen.dart';
+import 'package:fieldos_mobile/features/commercial/commercial_screens.dart';
 import 'package:fieldos_mobile/features/team/site_team_screen.dart';
 import 'package:fieldos_mobile/features/money/measurement_book_screen.dart';
 import 'package:fieldos_mobile/features/procurement/supplier_invoices_screen.dart';
@@ -155,10 +158,15 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
             onSelected: (v) {
               if (v == 'stage') _changeStage();
               if (v == 'report') openPeriodReport(context, widget.project);
+              if (v == 'today') openToday(context, widget.project);
               if (v == 'close') {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => WeekCloseScreen(project: widget.project, weekOf: DateTime.now()),
                 ));
+              }
+              if (v == 'commercial') {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => CommercialScreen(project: widget.project)));
               }
               if (v == 'measure') {
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => MeasurementBookScreen(project: widget.project)));
@@ -170,6 +178,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => SiteTeamScreen(project: widget.project)));
               }
               if (v == 'excel') exportProjectToExcel(context, ref, widget.project);
+              if (v == 'client') shareClientAccess(context, ref, widget.project);
               if (v == 'notes') {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => SiteNotesScreen(projectId: widget.project.id, siteName: widget.project.name),
@@ -185,10 +194,24 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 ),
               ),
               PopupMenuItem(
+                value: 'today',
+                child: ListTile(
+                  leading: const Icon(Icons.today_outlined),
+                  title: Text(tr("Today's report")),
+                ),
+              ),
+              PopupMenuItem(
                 value: 'close',
                 child: ListTile(
                   leading: const Icon(Icons.fact_check_outlined),
                   title: Text(tr('Weekly close')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'commercial',
+                child: ListTile(
+                  leading: const Icon(Icons.handshake_outlined),
+                  title: Text(tr('Work orders, variations and cost')),
                 ),
               ),
               PopupMenuItem(
@@ -212,6 +235,15 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   title: Text(tr('Site team')),
                 ),
               ),
+              if (Roles.canApprove(ref.read(sessionProvider).role))
+                PopupMenuItem(
+                  key: const Key('menu-share-client'),
+                  value: 'client',
+                  child: ListTile(
+                    leading: const Icon(Icons.person_pin_circle_outlined),
+                    title: Text(tr('Share with the client')),
+                  ),
+                ),
               PopupMenuItem(
                 value: 'report',
                 child: ListTile(
@@ -807,7 +839,11 @@ class _DprPhotosBlockState extends ConsumerState<DprPhotosBlock> {
     for (final p in photos.where((p) => p.photoPath == path)) {
       await db.dprDao.deletePhoto(p.id);
     }
-    if (mounted) setState(() => _photos = _load());
+    if (!mounted) return;
+    final next = _load();
+    setState(() {
+      _photos = next;
+    });
   }
 
   @override

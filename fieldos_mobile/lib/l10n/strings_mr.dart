@@ -3,6 +3,11 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_commercial_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_crm_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_wh_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_daily_mr.dart';
+
 const Map<String, String> stringsMr = {
   'Try again':
       'पुन्हा प्रयत्न करा',
@@ -3266,4 +3271,8 @@ const Map<String, String> stringsMr = {
       'प्रत्येक मंजुरी, रद्द आणि पेमेंट, कोणी आणि केव्हा केले, एका फाइलमध्ये',
   'Nothing has been recorded yet.':
       'अजून काहीही नोंदवले नाही.',
+  ...commercialMr,
+  ...crmMr,
+  ...warehouseMr,
+  ...dailyMr,
 };

@@ -85,7 +85,7 @@ Future<Uint8List> buildVoucherPdf({
           ],
           pw.Expanded(
             child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-              t(companyName, size: 15, bold: true),
+              t(companyName, size: 15, bold: true, color: brandInk(branding)),
               pw.SizedBox(height: 2),
               t('Site: $siteName', color: _muted),
             ]),
@@ -132,9 +132,9 @@ Future<Uint8List> buildVoucherPdf({
           pw.SizedBox(width: 28),
           signature('Approved by'),
         ]),
-        if (branding.showFooter) ...[
+        if (branding.hasFooter) ...[
           pw.SizedBox(height: 8),
-          t('Made with FieldOS', size: 7, color: _muted, align: pw.TextAlign.right),
+          t(branding.footerLine, size: 7, color: _muted, align: pw.TextAlign.right),
         ],
       ],
     ),

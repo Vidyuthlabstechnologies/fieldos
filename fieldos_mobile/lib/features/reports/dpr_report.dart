@@ -23,6 +23,7 @@ import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
+import 'package:fieldos_mobile/features/money/bill_pdf.dart' show pdfSafe;
 
 const _navy = PdfColor.fromInt(0xFF112A4A);
 const _amber = PdfColor.fromInt(0xFFF5A524);
@@ -270,7 +271,7 @@ Future<Uint8List> buildDprPdf({
         ? pw.Container(
             margin: const pw.EdgeInsets.only(bottom: 14),
             padding: const pw.EdgeInsets.fromLTRB(14, 12, 16, 12),
-            decoration: pw.BoxDecoration(color: _navy, borderRadius: pw.BorderRadius.circular(8)),
+            decoration: pw.BoxDecoration(color: brandInk(branding, _navy), borderRadius: pw.BorderRadius.circular(8)),
             child: pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.center, children: [
               if (branding.logo != null)
                 pw.Container(
@@ -303,11 +304,13 @@ Future<Uint8List> buildDprPdf({
     footer: (ctx) => pw.Padding(
       padding: const pw.EdgeInsets.only(top: 8),
       child: pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-        if (branding.showFooter)
+        if (branding.hasFooter)
           pw.Row(children: [
-            pw.CustomPaint(size: const PdfPoint(11, 11), painter: (c, s) => _paintHat(c, s.x, line: _navy)),
-            pw.SizedBox(width: 4),
-            pw.Text('Made with FieldOS', style: const pw.TextStyle(fontSize: 8, color: _muted)),
+            if (branding.showFooter) ...[
+              pw.CustomPaint(size: const PdfPoint(11, 11), painter: (c, s) => _paintHat(c, s.x, line: _navy)),
+              pw.SizedBox(width: 4),
+            ],
+            pw.Text(pdfSafe(branding.footerLine), style: const pw.TextStyle(fontSize: 8, color: _muted)),
           ])
         else
           pw.SizedBox(),

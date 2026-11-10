@@ -161,7 +161,10 @@ void main() {
       await pumpApp(tester, container, DashboardScreen(companyId: companyId, companyName: 'Sri Sai Constructions'));
       expect(find.text('No budget yet'), findsOneWidget);
       expect(find.text('Over budget'), findsNothing);
-      expect(find.text('₹1,25,000'), findsOneWidget);
+      // The site's card shows what was spent (My figures may show it too).
+      final spent = find.text('₹1,25,000');
+      final inFigures = find.descendant(of: find.byKey(const Key('kpi-spent')), matching: spent);
+      expect(spent.evaluate().length - inFigures.evaluate().length, 1);
       expect(find.text('Ask for approval'), findsNothing);
       expect(tester.takeException(), isNull);
     });

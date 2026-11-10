@@ -1,6 +1,6 @@
 /// Per-project cost-health summary for the multi-site dashboard: budget (from
 /// the reconciled BOQ), actual spend (expenses + material receipts + work-order
-/// billing), variance/status (via [CostControlAgent]), plus open issues and DPR
+/// billing + material moved in from stores, less material sent on), variance/status (via [CostControlAgent]), plus open issues and DPR
 /// counts. One object powers the whole dashboard card.
 library;
 
@@ -8,6 +8,7 @@ import 'package:fieldos_mobile/agents/cost_control_agent.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/estimation/project_boq.dart';
 import 'package:fieldos_mobile/features/project/task_plan.dart';
+import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart' show siteTransferValue;
 
 /// Spent so far scaled up to the whole job by the share of work done.
 double? forecastAtCompletion(double spent, int progressPct) {
@@ -70,6 +71,10 @@ class ProjectCostSummary {
     for (final w in workOrders) {
       actuals.add({'costHeadId': null, 'amount': w.billedAmount});
     }
+    // Material from the company store (or another site) carries its value
+    // here; material this site sent on is taken off.
+    final moved = siteTransferValue(await db.warehouseDao.movesForSite(project.id), project.id);
+    if (moved != 0) actuals.add({'costHeadId': null, 'amount': moved});
 
     final report = await CostControlAgent().run({'budget': boq, 'actuals': actuals});
     final d = report.data;

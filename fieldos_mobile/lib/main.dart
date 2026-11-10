@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/features/security/app_lock.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/services/billing_service.dart' show BillingConfig;
 import 'package:fieldos_mobile/services/bug_report_service.dart';
+import 'package:fieldos_mobile/services/notification_service.dart' show appNavigatorKey;
 import 'package:fieldos_mobile/sync/sync_config.dart';
 
 void main() {
@@ -85,6 +86,7 @@ class AppWithMaterial extends ConsumerWidget {
     final language = currentLanguage;
     return MaterialApp(
       title: 'FieldOS',
+      navigatorKey: appNavigatorKey,
       // Date pickers, dialogs' OK/Cancel and the like in the same language.
       locale: language.locale,
       supportedLocales: [for (final l in AppLanguage.values) l.locale],

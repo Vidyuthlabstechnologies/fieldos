@@ -189,6 +189,12 @@ Map<String, dynamic> workOrderToSupabaseJson(WorkOrder w) => {
       'agreed_amount': w.agreedAmount,
       'billed_amount': w.billedAmount,
       'status': w.status,
+      // v16 columns go only when set, so a work order without them still
+      // syncs to a cloud that doesn't have 20261110100000 yet.
+      if (w.unit != null) 'unit': w.unit,
+      if (w.contractQty != null) 'contract_qty': w.contractQty,
+      if (w.rate != null) 'rate': w.rate,
+      if (w.costCodeId != null) 'cost_code_id': w.costCodeId,
     };
 
 Map<String, dynamic> approvalToSupabaseJson(Approval a) => {
@@ -285,6 +291,7 @@ Map<String, dynamic> purchaseOrderToSupabaseJson(PurchaseOrder o) => {
       'status': o.status,
       'notes': o.notes,
       'created_by': o.raisedBy,
+      if (o.costCodeId != null) 'cost_code_id': o.costCodeId,
     };
 
 /// Documents sync the file itself through Supabase Storage (bucket
@@ -452,6 +459,10 @@ WorkOrdersCompanion workOrderFromSupabaseJson(Map<String, dynamic> row) => WorkO
       agreedAmount: Value((row['agreed_amount'] as num?)?.toDouble()),
       billedAmount: Value((row['billed_amount'] as num?)?.toDouble() ?? 0),
       status: Value(row['status'] as String? ?? 'active'),
+      unit: _ifSent(row, 'unit', (v) => v as String?),
+      contractQty: _ifSent(row, 'contract_qty', (v) => v == null ? null : _num(v)),
+      rate: _ifSent(row, 'rate', (v) => v == null ? null : _num(v)),
+      costCodeId: _ifSent(row, 'cost_code_id', (v) => v as String?),
     );
 
 ApprovalsCompanion approvalFromSupabaseJson(Map<String, dynamic> row) => ApprovalsCompanion.insert(
@@ -551,6 +562,10 @@ PurchaseOrdersCompanion purchaseOrderFromSupabaseJson(Map<String, dynamic> row) 
       deliveryDate: Value(row['delivery_date'] == null ? null : DateTime.parse(row['delivery_date'] as String)),
       status: Value(row['status'] as String? ?? 'issued'),
       notes: Value(row['notes'] as String?),
+      costCodeId: _ifSent(row, 'cost_code_id', (v) => v as String?),
+      dispatchedOn: _ifSent(row, 'dispatched_on', (v) => v == null ? null : DateTime.parse(v as String)),
+      dispatchVehicle: _ifSent(row, 'dispatch_vehicle', (v) => v as String?),
+      supplierNote: _ifSent(row, 'supplier_note', (v) => v as String?),
     );
 
 Map<String, dynamic> projectMessageToSupabaseJson(ProjectMessage m) => {
@@ -594,6 +609,11 @@ Map<String, dynamic> attendanceToSupabaseJson(LabourAttendanceData a) => {
       'lat': a.lat,
       'lng': a.lng,
       'within_geofence': a.withinGeofence,
+      // Only when set, so punches without them still sync to a server
+      // that has not had the selfie attendance migration yet.
+      if (a.photoId != null) 'photo_id': a.photoId,
+      if (a.distanceM != null) 'distance_m': a.distanceM,
+      if (a.accuracyM != null) 'accuracy_m': a.accuracyM,
     };
 
 LabourAttendanceCompanion attendanceFromSupabaseJson(Map<String, dynamic> row) => LabourAttendanceCompanion(
@@ -607,6 +627,9 @@ LabourAttendanceCompanion attendanceFromSupabaseJson(Map<String, dynamic> row) =
       lat: Value((row['lat'] as num?)?.toDouble()),
       lng: Value((row['lng'] as num?)?.toDouble()),
       withinGeofence: Value(row['within_geofence'] as bool?),
+      photoId: Value(row['photo_id'] as String?),
+      distanceM: Value((row['distance_m'] as num?)?.toDouble()),
+      accuracyM: Value((row['accuracy_m'] as num?)?.toDouble()),
     );
 
 Map<String, dynamic> siteExpenseToSupabaseJson(SiteExpense e) => {
@@ -619,6 +642,7 @@ Map<String, dynamic> siteExpenseToSupabaseJson(SiteExpense e) => {
       'recorded_by': e.recordedBy,
       'note': e.note,
       'worker_id': e.workerId,
+      if (e.costCodeId != null) 'cost_code_id': e.costCodeId,
       // v10 money-book columns go only when set. Entries made on v10 always
       // carry a voucher number, so 20261109000000_money_book.sql must be in
       // the cloud before a v10 build ships; older rows sync either way.
@@ -670,6 +694,7 @@ SiteExpensesCompanion siteExpenseFromSupabaseJson(Map<String, dynamic> row) => S
       voidReason: _ifSent(row, 'void_reason', (v) => v as String?),
       editedAt: _ifSent(row, 'edited_at', (v) => v == null ? null : _parseTs(v)),
       editedBy: _ifSent(row, 'edited_by', (v) => v as String?),
+      costCodeId: _ifSent(row, 'cost_code_id', (v) => v as String?),
     );
 
 Map<String, dynamic> materialReceiptToSupabaseJson(MaterialReceipt r) => {
@@ -958,6 +983,194 @@ CloseReviewsCompanion closeReviewFromSupabaseJson(Map<String, dynamic> row) => C
           : Value(DateTime.parse(row['created_at'] as String).toLocal()),
     );
 
+// --- v16: commercial controls ----------------------------------------------
+
+DateTime? _localTs(Object? v) => v == null ? null : DateTime.parse(v as String).toLocal();
+
+Map<String, dynamic> costCodeToSupabaseJson(CostCode c) => {
+      'id': c.id,
+      'project_id': c.projectId,
+      'code': c.code,
+      'name': c.name,
+      'original_budget': c.originalBudget,
+      'uncommitted_estimate': c.uncommittedEstimate,
+      'sort_order': c.sortOrder,
+      'updated_at': _timestamp(c.updatedAt.toUtc()),
+    };
+
+CostCodesCompanion costCodeFromSupabaseJson(Map<String, dynamic> row) => CostCodesCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      code: row['code'] as String,
+      name: row['name'] as String,
+      originalBudget: Value(_num(row['original_budget'])),
+      uncommittedEstimate: Value(_num(row['uncommitted_estimate'] ?? 0)),
+      sortOrder: Value((row['sort_order'] as num?)?.toInt() ?? 0),
+      updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
+    );
+
+Map<String, dynamic> workClaimToSupabaseJson(WorkClaim c) => {
+      'id': c.id,
+      'project_id': c.projectId,
+      'work_order_id': c.workOrderId,
+      'qty': c.qty,
+      'location': c.location,
+      'note': c.note,
+      'submitted_by': c.submittedBy,
+      'created_at': _timestamp(c.createdAt.toUtc()),
+    };
+
+WorkClaimsCompanion workClaimFromSupabaseJson(Map<String, dynamic> row) => WorkClaimsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      workOrderId: row['work_order_id'] as String,
+      qty: _num(row['qty']),
+      location: Value(row['location'] as String?),
+      note: Value(row['note'] as String?),
+      submittedBy: row['submitted_by'] as String,
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+Map<String, dynamic> workCertificationToSupabaseJson(WorkCertification c) => {
+      'id': c.id,
+      'project_id': c.projectId,
+      'work_order_id': c.workOrderId,
+      'claim_id': c.claimId,
+      'accepted_qty': c.acceptedQty,
+      'rejected_qty': c.rejectedQty,
+      'variation_id': c.variationId,
+      'note': c.note,
+      'certified_by': c.certifiedBy,
+      'created_at': _timestamp(c.createdAt.toUtc()),
+    };
+
+WorkCertificationsCompanion workCertificationFromSupabaseJson(Map<String, dynamic> row) =>
+    WorkCertificationsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      workOrderId: row['work_order_id'] as String,
+      claimId: row['claim_id'] as String,
+      acceptedQty: Value(_num(row['accepted_qty'] ?? 0)),
+      rejectedQty: Value(_num(row['rejected_qty'] ?? 0)),
+      variationId: Value(row['variation_id'] as String?),
+      note: Value(row['note'] as String?),
+      certifiedBy: row['certified_by'] as String,
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+Map<String, dynamic> variationToSupabaseJson(Variation v) => {
+      'id': v.id,
+      'project_id': v.projectId,
+      'work_order_id': v.workOrderId,
+      'cost_code_id': v.costCodeId,
+      'title': v.title,
+      'origin': v.origin,
+      'source_claim_id': v.sourceClaimId,
+      'qty': v.qty,
+      'unit': v.unit,
+      'estimated_cost': v.estimatedCost,
+      'schedule_days': v.scheduleDays,
+      'owner_id': v.ownerId,
+      'note': v.note,
+      'raised_by': v.raisedBy,
+      'created_at': _timestamp(v.createdAt.toUtc()),
+    };
+
+VariationsCompanion variationFromSupabaseJson(Map<String, dynamic> row) => VariationsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      workOrderId: Value(row['work_order_id'] as String?),
+      costCodeId: Value(row['cost_code_id'] as String?),
+      title: row['title'] as String,
+      origin: row['origin'] as String,
+      sourceClaimId: Value(row['source_claim_id'] as String?),
+      qty: Value(row['qty'] == null ? null : _num(row['qty'])),
+      unit: Value(row['unit'] as String?),
+      estimatedCost: Value(_num(row['estimated_cost'] ?? 0)),
+      scheduleDays: Value((row['schedule_days'] as num?)?.toInt() ?? 0),
+      ownerId: Value(row['owner_id'] as String?),
+      note: Value(row['note'] as String?),
+      raisedBy: row['raised_by'] as String,
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+Map<String, dynamic> variationDecisionToSupabaseJson(VariationDecision d) => {
+      'id': d.id,
+      'variation_id': d.variationId,
+      'project_id': d.projectId,
+      'decision': d.decision,
+      'approved_qty': d.approvedQty,
+      'approved_cost': d.approvedCost,
+      'note': d.note,
+      'decided_by': d.decidedBy,
+      'created_at': _timestamp(d.createdAt.toUtc()),
+    };
+
+VariationDecisionsCompanion variationDecisionFromSupabaseJson(Map<String, dynamic> row) =>
+    VariationDecisionsCompanion.insert(
+      id: row['id'] as String,
+      variationId: row['variation_id'] as String,
+      projectId: row['project_id'] as String,
+      decision: row['decision'] as String,
+      approvedQty: Value(row['approved_qty'] == null ? null : _num(row['approved_qty'])),
+      approvedCost: Value(row['approved_cost'] == null ? null : _num(row['approved_cost'])),
+      note: Value(row['note'] as String?),
+      decidedBy: row['decided_by'] as String,
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+/// {projectId}/claims|certifications|variations/{id}.ext. Claim photos sit
+/// under claims/ so a subcontractor's storage policy can reach them.
+String commercialStoragePath(CommercialAttachment a) =>
+    '${a.projectId}/${a.parentKind == 'claim' ? 'claims' : a.parentKind == 'certification' ? 'certifications' : 'variations'}/${a.id}${_ext(a.filePath)}';
+
+Map<String, dynamic> commercialAttachmentToSupabaseJson(CommercialAttachment a) => {
+      'id': a.id,
+      'project_id': a.projectId,
+      'parent_kind': a.parentKind,
+      'parent_id': a.parentId,
+      'file_path': commercialStoragePath(a),
+      'mime_type': a.mimeType,
+      '_local_file_path': a.filePath,
+    };
+
+CommercialAttachmentsCompanion commercialAttachmentFromSupabaseJson(Map<String, dynamic> row,
+        {required String localPath}) =>
+    CommercialAttachmentsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      parentKind: row['parent_kind'] as String,
+      parentId: row['parent_id'] as String,
+      filePath: localPath,
+      mimeType: row['mime_type'] as String? ?? attachmentMimeType(localPath),
+    );
+
+Map<String, dynamic> exceptionActionToSupabaseJson(ExceptionAction a) => {
+      'id': a.id,
+      'project_id': a.projectId,
+      'exception_key': a.exceptionKey,
+      'action': a.action,
+      'owner_id': a.ownerId,
+      'due_on': a.dueOn,
+      'note': a.note,
+      'fingerprint': a.fingerprint,
+      'acted_by': a.actedBy,
+      'created_at': _timestamp(a.createdAt.toUtc()),
+    };
+
+ExceptionActionsCompanion exceptionActionFromSupabaseJson(Map<String, dynamic> row) => ExceptionActionsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      exceptionKey: row['exception_key'] as String,
+      action: row['action'] as String,
+      ownerId: Value(row['owner_id'] as String?),
+      dueOn: Value(row['due_on'] as String?),
+      note: Value(row['note'] as String?),
+      fingerprint: Value(row['fingerprint'] as String?),
+      actedBy: row['acted_by'] as String,
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
 // --- Site team and access (app schema v17, 20261110210000_site_roles.sql)
 
 Map<String, dynamic> projectMemberToSupabaseJson(ProjectMember m) => {
@@ -1112,6 +1325,487 @@ SupplierInvoicesCompanion supplierInvoiceFromSupabaseJson(Map<String, dynamic> r
       createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
     );
 
+// --- v21: CRM ----------------------------------------------------------------
+
+Map<String, dynamic> crmLeadToSupabaseJson(CrmLead l) => {
+      'id': l.id,
+      'company_id': l.companyId,
+      'name': l.name,
+      'phone': l.phone,
+      'email': l.email,
+      'location': l.location,
+      'source': l.source,
+      'work_type': l.workType,
+      'estimated_value': l.estimatedValue,
+      'stage': l.stage,
+      'lost_reason': l.lostReason,
+      'owner_id': l.ownerId,
+      'created_by': l.createdBy,
+      'next_follow_up': _timestamp(l.nextFollowUp?.toUtc()),
+      'notes': l.notes,
+      'project_id': l.projectId,
+      'created_at': _timestamp(l.createdAt.toUtc()),
+      'updated_at': _timestamp(l.updatedAt.toUtc()),
+    };
+
+CrmLeadsCompanion crmLeadFromSupabaseJson(Map<String, dynamic> row) => CrmLeadsCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      name: row['name'] as String,
+      phone: Value(row['phone'] as String?),
+      email: Value(row['email'] as String?),
+      location: Value(row['location'] as String?),
+      source: Value(row['source'] as String? ?? 'other'),
+      workType: Value(row['work_type'] as String?),
+      estimatedValue: Value((row['estimated_value'] as num?)?.toDouble()),
+      stage: Value(row['stage'] as String? ?? 'new'),
+      lostReason: Value(row['lost_reason'] as String?),
+      ownerId: Value(row['owner_id'] as String?),
+      nextFollowUp: Value(_localTs(row['next_follow_up'])),
+      notes: Value(row['notes'] as String?),
+      projectId: Value(row['project_id'] as String?),
+      createdBy: row['created_by'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+      updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
+    );
+
+Map<String, dynamic> crmActivityToSupabaseJson(CrmActivity a) => {
+      'id': a.id,
+      'company_id': a.companyId,
+      'lead_id': a.leadId,
+      'kind': a.kind,
+      'note': a.note,
+      'by_user': a.byUser,
+      'created_at': _timestamp(a.createdAt.toUtc()),
+    };
+
+CrmActivitiesCompanion crmActivityFromSupabaseJson(Map<String, dynamic> row) => CrmActivitiesCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      leadId: row['lead_id'] as String,
+      kind: row['kind'] as String,
+      note: row['note'] as String,
+      byUser: row['by_user'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+Map<String, dynamic> crmQuoteToSupabaseJson(CrmQuote q) => {
+      'id': q.id,
+      'company_id': q.companyId,
+      'lead_id': q.leadId,
+      'quote_number': q.quoteNumber,
+      'quote_date': _timestamp(q.quoteDate.toUtc()),
+      'valid_until': _timestamp(q.validUntil?.toUtc()),
+      'status': q.status,
+      'lines': jsonDecode(q.linesJson),
+      'gst_rate': q.gstRate,
+      'inter_state': q.interState,
+      'discount': q.discount,
+      'total': q.total,
+      'terms': q.terms,
+      'created_by': q.createdBy,
+      'created_at': _timestamp(q.createdAt.toUtc()),
+      'updated_at': _timestamp(q.updatedAt.toUtc()),
+    };
+
+CrmQuotesCompanion crmQuoteFromSupabaseJson(Map<String, dynamic> row) => CrmQuotesCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      leadId: row['lead_id'] as String,
+      quoteNumber: row['quote_number'] as String,
+      quoteDate: _localTs(row['quote_date'])!,
+      validUntil: Value(_localTs(row['valid_until'])),
+      status: Value(row['status'] as String? ?? 'draft'),
+      linesJson: Value(row['lines'] is String ? row['lines'] as String : jsonEncode(row['lines'] ?? const [])),
+      gstRate: Value((row['gst_rate'] as num? ?? 18).toDouble()),
+      interState: Value(row['inter_state'] as bool? ?? false),
+      discount: Value((row['discount'] as num? ?? 0).toDouble()),
+      total: Value((row['total'] as num? ?? 0).toDouble()),
+      terms: Value(row['terms'] as String?),
+      createdBy: row['created_by'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+      updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
+    );
+
+// --- v22: stores, stock moves, tools, staff salaries --------------------------
+
+double? _dbl(Object? v) => (v as num?)?.toDouble();
+
+Map<String, dynamic> storeToSupabaseJson(Store s) => {
+      'id': s.id,
+      'company_id': s.companyId,
+      'name': s.name,
+      'location': s.location,
+      'archived': s.archived,
+      'created_by': s.createdBy,
+      'created_at': _timestamp(s.createdAt.toUtc()),
+    };
+
+StoresCompanion storeFromSupabaseJson(Map<String, dynamic> row) => StoresCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      name: row['name'] as String,
+      location: Value(row['location'] as String?),
+      archived: Value(row['archived'] as bool? ?? false),
+      createdBy: row['created_by'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+Map<String, dynamic> stockMoveToSupabaseJson(StockMove m) => {
+      'id': m.id,
+      'company_id': m.companyId,
+      'kind': m.kind,
+      'from_store_id': m.fromStoreId,
+      'from_project_id': m.fromProjectId,
+      'to_store_id': m.toStoreId,
+      'to_project_id': m.toProjectId,
+      'supplier_name': m.supplierName,
+      'material_name': m.materialName,
+      'unit': m.unit,
+      'quantity': m.quantity,
+      'rate': m.rate,
+      'status': m.status,
+      'received_qty': m.receivedQty,
+      'vehicle': m.vehicle,
+      'note': m.note,
+      'sent_by': m.sentBy,
+      'sent_on': _timestamp(m.sentOn.toUtc()),
+      'received_by': m.receivedBy,
+      'received_on': _timestamp(m.receivedOn?.toUtc()),
+      'created_at': _timestamp(m.createdAt.toUtc()),
+    };
+
+StockMovesCompanion stockMoveFromSupabaseJson(Map<String, dynamic> row) => StockMovesCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      kind: row['kind'] as String,
+      fromStoreId: Value(row['from_store_id'] as String?),
+      fromProjectId: Value(row['from_project_id'] as String?),
+      toStoreId: Value(row['to_store_id'] as String?),
+      toProjectId: Value(row['to_project_id'] as String?),
+      supplierName: Value(row['supplier_name'] as String?),
+      materialName: row['material_name'] as String,
+      unit: Value(row['unit'] as String?),
+      quantity: _dbl(row['quantity'])!,
+      rate: Value(_dbl(row['rate'])),
+      status: Value(row['status'] as String? ?? 'received'),
+      receivedQty: Value(_dbl(row['received_qty'])),
+      vehicle: Value(row['vehicle'] as String?),
+      note: Value(row['note'] as String?),
+      sentBy: row['sent_by'] as String? ?? '',
+      sentOn: _localTs(row['sent_on'])!,
+      receivedBy: Value(row['received_by'] as String?),
+      receivedOn: Value(_localTs(row['received_on'])),
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+Map<String, dynamic> toolToSupabaseJson(Tool t) => {
+      'id': t.id,
+      'company_id': t.companyId,
+      'name': t.name,
+      'code': t.code,
+      'category': t.category,
+      'value': t.value,
+      'store_id': t.storeId,
+      'condition': t.condition,
+      'notes': t.notes,
+      'created_by': t.createdBy,
+      'created_at': _timestamp(t.createdAt.toUtc()),
+      'updated_at': _timestamp(t.updatedAt.toUtc()),
+    };
+
+ToolsCompanion toolFromSupabaseJson(Map<String, dynamic> row) => ToolsCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      name: row['name'] as String,
+      code: Value(row['code'] as String?),
+      category: Value(row['category'] as String?),
+      value: Value(_dbl(row['value'])),
+      storeId: Value(row['store_id'] as String?),
+      condition: Value(row['condition'] as String? ?? 'in_use'),
+      notes: Value(row['notes'] as String?),
+      createdBy: row['created_by'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+      updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
+    );
+
+Map<String, dynamic> toolIssueToSupabaseJson(ToolIssue i) => {
+      'id': i.id,
+      'company_id': i.companyId,
+      'tool_id': i.toolId,
+      'project_id': i.projectId,
+      'issued_to': i.issuedTo,
+      'worker_id': i.workerId,
+      'issued_by': i.issuedBy,
+      'issued_on': _timestamp(i.issuedOn.toUtc()),
+      'due_back': _timestamp(i.dueBack?.toUtc()),
+      'returned_on': _timestamp(i.returnedOn?.toUtc()),
+      'return_condition': i.returnCondition,
+      'recover_amount': i.recoverAmount,
+      'note': i.note,
+      'created_at': _timestamp(i.createdAt.toUtc()),
+    };
+
+ToolIssuesCompanion toolIssueFromSupabaseJson(Map<String, dynamic> row) => ToolIssuesCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      toolId: row['tool_id'] as String,
+      projectId: Value(row['project_id'] as String?),
+      issuedTo: row['issued_to'] as String,
+      workerId: Value(row['worker_id'] as String?),
+      issuedBy: row['issued_by'] as String? ?? '',
+      issuedOn: _localTs(row['issued_on'])!,
+      dueBack: Value(_localTs(row['due_back'])),
+      returnedOn: Value(_localTs(row['returned_on'])),
+      returnCondition: Value(row['return_condition'] as String?),
+      recoverAmount: Value(_dbl(row['recover_amount'])),
+      note: Value(row['note'] as String?),
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+Map<String, dynamic> staffMemberToSupabaseJson(StaffMember s) => {
+      'id': s.id,
+      'company_id': s.companyId,
+      'name': s.name,
+      'phone': s.phone,
+      'designation': s.designation,
+      'project_id': s.projectId,
+      'basic': s.basic,
+      'hra': s.hra,
+      'other_allowance': s.otherAllowance,
+      'pf': s.pf,
+      'esi': s.esi,
+      'pt_state': s.ptState,
+      'uan': s.uan,
+      'joined_on': _timestamp(s.joinedOn?.toUtc()),
+      'active': s.active,
+      'created_at': _timestamp(s.createdAt.toUtc()),
+      'updated_at': _timestamp(s.updatedAt.toUtc()),
+      if (s.userId != null) 'user_id': s.userId,
+    };
+
+StaffMembersCompanion staffMemberFromSupabaseJson(Map<String, dynamic> row) => StaffMembersCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      name: row['name'] as String,
+      phone: Value(row['phone'] as String?),
+      designation: Value(row['designation'] as String?),
+      projectId: Value(row['project_id'] as String?),
+      basic: _dbl(row['basic'])!,
+      hra: Value(_dbl(row['hra']) ?? 0),
+      otherAllowance: Value(_dbl(row['other_allowance']) ?? 0),
+      pf: Value(row['pf'] as bool? ?? true),
+      esi: Value(row['esi'] as bool? ?? true),
+      ptState: Value(row['pt_state'] as String? ?? 'TS'),
+      uan: Value(row['uan'] as String?),
+      joinedOn: Value(_localTs(row['joined_on'])),
+      active: Value(row['active'] as bool? ?? true),
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+      updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
+      userId: Value(row['user_id'] as String?),
+    );
+
+Map<String, dynamic> staffAdvanceToSupabaseJson(StaffAdvance a) => {
+      'id': a.id,
+      'company_id': a.companyId,
+      'staff_id': a.staffId,
+      'amount': a.amount,
+      'given_on': _timestamp(a.givenOn.toUtc()),
+      'note': a.note,
+      'created_by': a.createdBy,
+      'created_at': _timestamp(a.createdAt.toUtc()),
+    };
+
+StaffAdvancesCompanion staffAdvanceFromSupabaseJson(Map<String, dynamic> row) => StaffAdvancesCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      staffId: row['staff_id'] as String,
+      amount: _dbl(row['amount'])!,
+      givenOn: _localTs(row['given_on'])!,
+      note: Value(row['note'] as String?),
+      createdBy: row['created_by'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+Map<String, dynamic> payrollLineToSupabaseJson(PayrollLine l) => {
+      'id': l.id,
+      'company_id': l.companyId,
+      'staff_id': l.staffId,
+      'month': l.month,
+      'days_in_month': l.daysInMonth,
+      'paid_days': l.paidDays,
+      'basic': l.basic,
+      'hra': l.hra,
+      'other_allowance': l.otherAllowance,
+      'gross': l.gross,
+      'pf_employee': l.pfEmployee,
+      'esi_employee': l.esiEmployee,
+      'pt': l.pt,
+      'advance_recovery': l.advanceRecovery,
+      'other_deduction': l.otherDeduction,
+      'net': l.net,
+      'pf_employer': l.pfEmployer,
+      'esi_employer': l.esiEmployer,
+      'status': l.status,
+      'paid_on': _timestamp(l.paidOn?.toUtc()),
+      'paid_mode': l.paidMode,
+      'project_id': l.projectId,
+      'expense_id': l.expenseId,
+      'created_by': l.createdBy,
+      'created_at': _timestamp(l.createdAt.toUtc()),
+      'updated_at': _timestamp(l.updatedAt.toUtc()),
+    };
+
+PayrollLinesCompanion payrollLineFromSupabaseJson(Map<String, dynamic> row) => PayrollLinesCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      staffId: row['staff_id'] as String,
+      month: row['month'] as String,
+      daysInMonth: (row['days_in_month'] as num).toInt(),
+      paidDays: _dbl(row['paid_days'])!,
+      basic: _dbl(row['basic'])!,
+      hra: _dbl(row['hra']) ?? 0,
+      otherAllowance: _dbl(row['other_allowance']) ?? 0,
+      gross: _dbl(row['gross'])!,
+      pfEmployee: _dbl(row['pf_employee']) ?? 0,
+      esiEmployee: _dbl(row['esi_employee']) ?? 0,
+      pt: _dbl(row['pt']) ?? 0,
+      advanceRecovery: _dbl(row['advance_recovery']) ?? 0,
+      otherDeduction: _dbl(row['other_deduction']) ?? 0,
+      net: _dbl(row['net'])!,
+      pfEmployer: _dbl(row['pf_employer']) ?? 0,
+      esiEmployer: _dbl(row['esi_employer']) ?? 0,
+      status: Value(row['status'] as String? ?? 'draft'),
+      paidOn: Value(_localTs(row['paid_on'])),
+      paidMode: Value(row['paid_mode'] as String?),
+      projectId: Value(row['project_id'] as String?),
+      expenseId: Value(row['expense_id'] as String?),
+      createdBy: row['created_by'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+      updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
+    );
+
+// --- v23: supplier quotes -----------------------------------------------------
+
+Map<String, dynamic> supplierQuoteToSupabaseJson(SupplierQuote q) => {
+      'id': q.id,
+      'project_id': q.projectId,
+      'request_id': q.requestId,
+      'vendor_id': q.supplierId,
+      'rate': q.rate,
+      'gst_pct': q.gstPct,
+      'transport': q.transport,
+      'delivery_days': q.deliveryDays,
+      'payment_terms': q.paymentTerms,
+      'valid_until': _timestamp(q.validUntil?.toUtc()),
+      'notes': q.notes,
+      'status': q.status,
+      'po_id': q.poId,
+      'created_by': q.createdBy,
+      'created_at': _timestamp(q.createdAt.toUtc()),
+    };
+
+SupplierQuotesCompanion supplierQuoteFromSupabaseJson(Map<String, dynamic> row) => SupplierQuotesCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      requestId: row['request_id'] as String,
+      supplierId: row['vendor_id'] as String,
+      rate: _dbl(row['rate'])!,
+      gstPct: Value(_dbl(row['gst_pct']) ?? 18),
+      transport: Value(_dbl(row['transport']) ?? 0),
+      deliveryDays: Value((row['delivery_days'] as num?)?.toInt()),
+      paymentTerms: Value(row['payment_terms'] as String?),
+      validUntil: Value(_localTs(row['valid_until'])),
+      notes: Value(row['notes'] as String?),
+      status: Value(row['status'] as String? ?? 'received'),
+      poId: Value(row['po_id'] as String?),
+      createdBy: row['created_by'] as String? ?? '',
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+// --- Selfie and geofence attendance ------------------------------------------
+
+/// {projectId}/attendance/{id}.jpg, so the site's storage policy covers it.
+String attendancePhotoStoragePath(AttendancePhoto p) => '${p.projectId}/attendance/${p.id}${_ext(p.filePath)}';
+
+Map<String, dynamic> attendancePhotoToSupabaseJson(AttendancePhoto p) => {
+      'id': p.id,
+      'project_id': p.projectId,
+      'file_path': attendancePhotoStoragePath(p),
+      'mime_type': p.mimeType,
+      'taken_by': p.takenBy,
+      'taken_at': _timestamp(p.takenAt.toUtc()),
+      'lat': p.lat,
+      'lng': p.lng,
+      '_local_file_path': p.filePath,
+    };
+
+AttendancePhotosCompanion attendancePhotoFromSupabaseJson(Map<String, dynamic> row, {required String localPath}) =>
+    AttendancePhotosCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      filePath: localPath,
+      mimeType: Value(row['mime_type'] as String? ?? 'image/jpeg'),
+      takenBy: row['taken_by'] as String,
+      takenAt: _localTs(row['taken_at'])!,
+      lat: Value(_dbl(row['lat'])),
+      lng: Value(_dbl(row['lng'])),
+    );
+
+Map<String, dynamic> staffAttendanceToSupabaseJson(StaffAttendanceData a) => {
+      'id': a.id,
+      'company_id': a.companyId,
+      'project_id': a.projectId,
+      'user_id': a.userId,
+      'day': a.day,
+      'check_in': _timestamp(a.checkIn.toUtc()),
+      'check_out': _timestamp(a.checkOut?.toUtc()),
+      'in_lat': a.inLat,
+      'in_lng': a.inLng,
+      'in_accuracy_m': a.inAccuracyM,
+      'in_distance_m': a.inDistanceM,
+      'in_photo_id': a.inPhotoId,
+      'within_geofence': a.withinGeofence,
+      'out_lat': a.outLat,
+      'out_lng': a.outLng,
+      'out_distance_m': a.outDistanceM,
+      'out_photo_id': a.outPhotoId,
+      'out_within': a.outWithin,
+      'status': a.status,
+      'reason': a.reason,
+      'reviewed_by': a.reviewedBy,
+      'reviewed_at': _timestamp(a.reviewedAt?.toUtc()),
+      'review_note': a.reviewNote,
+      'created_at': _timestamp(a.createdAt.toUtc()),
+    };
+
+StaffAttendanceCompanion staffAttendanceFromSupabaseJson(Map<String, dynamic> row) => StaffAttendanceCompanion.insert(
+      id: row['id'] as String,
+      companyId: row['company_id'] as String,
+      projectId: row['project_id'] as String,
+      userId: row['user_id'] as String,
+      day: (row['day'] as String).substring(0, 10),
+      checkIn: _localTs(row['check_in'])!,
+      checkOut: Value(_localTs(row['check_out'])),
+      inLat: Value(_dbl(row['in_lat'])),
+      inLng: Value(_dbl(row['in_lng'])),
+      inAccuracyM: Value(_dbl(row['in_accuracy_m'])),
+      inDistanceM: Value(_dbl(row['in_distance_m'])),
+      inPhotoId: Value(row['in_photo_id'] as String?),
+      withinGeofence: Value(row['within_geofence'] as bool?),
+      outLat: Value(_dbl(row['out_lat'])),
+      outLng: Value(_dbl(row['out_lng'])),
+      outDistanceM: Value(_dbl(row['out_distance_m'])),
+      outPhotoId: Value(row['out_photo_id'] as String?),
+      outWithin: Value(row['out_within'] as bool?),
+      status: Value(row['status'] as String? ?? 'pending'),
+      reason: Value(row['reason'] as String?),
+      reviewedBy: Value(row['reviewed_by'] as String?),
+      reviewedAt: Value(_localTs(row['reviewed_at'])),
+      reviewNote: Value(row['review_note'] as String?),
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
 Map<String, dynamic> approvalRuleToSupabaseJson(ApprovalRule r) => {
       'id': r.id,
       'company_id': r.companyId,
@@ -1161,3 +1855,70 @@ ApprovalStepsCompanion approvalStepFromSupabaseJson(Map<String, dynamic> r) => A
       createdAt: r['created_at'] == null ? const Value.absent() : Value(DateTime.parse(r['created_at'] as String).toLocal()),
     );
 
+
+// --- v19: daily site close --------------------------------------------------
+
+Map<String, dynamic> siteDayEventToSupabaseJson(SiteDayEvent e) => {
+      'id': e.id,
+      'project_id': e.projectId,
+      'work_date': e.workDate,
+      'kind': e.kind,
+      'site_closed': e.siteClosed,
+      'no_deliveries': e.noDeliveries,
+      'no_expenses': e.noExpenses,
+      'reason': e.reason,
+      'note': e.note,
+      'fingerprint': e.fingerprint,
+      'amount': e.amount,
+      'item_ref': e.itemRef,
+      'recorded_by': e.recordedBy,
+      'created_at': _timestamp(e.createdAt.toUtc()),
+    };
+
+SiteDayEventsCompanion siteDayEventFromSupabaseJson(Map<String, dynamic> row) => SiteDayEventsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      workDate: row['work_date'] as String,
+      kind: row['kind'] as String,
+      siteClosed: Value(row['site_closed'] as bool? ?? false),
+      noDeliveries: Value(row['no_deliveries'] as bool? ?? false),
+      noExpenses: Value(row['no_expenses'] as bool? ?? false),
+      reason: Value(row['reason'] as String?),
+      note: Value(row['note'] as String?),
+      fingerprint: Value(row['fingerprint'] as String?),
+      amount: Value((row['amount'] as num?)?.toDouble()),
+      itemRef: Value(row['item_ref'] as String?),
+      recordedBy: row['recorded_by'] as String,
+      createdAt: row['created_at'] == null ? const Value.absent() : Value(_localTs(row['created_at'])!),
+    );
+
+Map<String, dynamic> siteCloseSettingToSupabaseJson(SiteCloseSetting s) => {
+      'id': s.id,
+      'project_id': s.projectId,
+      'cutoff_minutes': s.cutoffMinutes,
+      'supervisor_id': s.supervisorId,
+      'backup_id': s.backupId,
+      'backup_until': s.backupUntil,
+      'updated_by': s.updatedBy,
+      'updated_at': _timestamp(s.updatedAt.toUtc()),
+    };
+
+SiteCloseSettingsCompanion siteCloseSettingFromSupabaseJson(Map<String, dynamic> row) =>
+    SiteCloseSettingsCompanion.insert(
+      id: row['id'] as String,
+      projectId: row['project_id'] as String,
+      cutoffMinutes: Value((row['cutoff_minutes'] as num?)?.toInt() ?? 19 * 60),
+      supervisorId: Value(row['supervisor_id'] as String?),
+      backupId: Value(row['backup_id'] as String?),
+      backupUntil: Value(row['backup_until'] as String?),
+      updatedBy: row['updated_by'] as String,
+      updatedAt: row['updated_at'] == null ? const Value.absent() : Value(_localTs(row['updated_at'])!),
+    );
+
+MemberSyncStatusCompanion memberSyncStatusFromSupabaseJson(Map<String, dynamic> row) =>
+    MemberSyncStatusCompanion.insert(
+      userId: row['user_id'] as String,
+      companyId: row['company_id'] as String,
+      lastSyncedAt: _localTs(row['last_synced_at'])!,
+      pending: Value((row['pending_count'] as num?)?.toInt() ?? 0),
+    );

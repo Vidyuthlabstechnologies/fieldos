@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/auth/auth_service.dart' show Roles;
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/attendance/attendance_screens.dart';
 import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/portfolio/portfolio_screen.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart';
+import 'package:fieldos_mobile/features/daily/daily_reports_screen.dart';
+import 'package:fieldos_mobile/features/daily/today_home_card.dart';
+import 'package:fieldos_mobile/features/commercial/exceptions_screen.dart';
+import 'package:fieldos_mobile/features/crm/crm_screen.dart';
+import 'package:fieldos_mobile/features/payroll/payroll_screen.dart';
+import 'package:fieldos_mobile/features/reports/reports_library_screen.dart';
+import 'package:fieldos_mobile/features/warehouse/warehouse_screen.dart';
 import 'package:fieldos_mobile/features/assistant/assistant_screen.dart';
 import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
@@ -113,9 +122,31 @@ class HomeScreen extends ConsumerWidget {
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => ApprovalsScreen(companyId: company.id)));
                 case 'portfolio':
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => PortfolioScreen(companyId: company.id)));
+                case 'daily':
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (_) => DailyReportsScreen(companyId: company.id)));
                 case 'close':
                   Navigator.of(context)
                       .push(MaterialPageRoute(builder: (_) => WeeklyCloseListScreen(companyId: company.id)));
+                case 'exceptions':
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (_) => CommercialExceptionsScreen(companyId: company.id)));
+                case 'leads':
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => LeadsScreen(companyId: company.id)));
+                case 'reports':
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => ReportsLibraryScreen(companyId: company.id)));
+                case 'stores':
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => WarehouseScreen(companyId: company.id, userId: session.user!.id)));
+                case 'my-attendance':
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => MyAttendanceScreen(companyId: company.id, userId: session.user!.id)));
+                case 'staff-attendance':
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => StaffAttendanceScreen(companyId: company.id, userId: session.user!.id)));
+                case 'salaries':
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => StaffSalariesScreen(companyId: company.id, userId: session.user!.id)));
                 case 'brief':
                   openOwnerBrief(context, companyId: company.id, companyName: company.name);
                 case 'payables':
@@ -150,8 +181,53 @@ class HomeScreen extends ConsumerWidget {
                   value: 'portfolio',
                   child: ListTile(leading: Icon(Icons.domain_outlined), title: Text(tr('All sites')))),
               PopupMenuItem(
+                  value: 'daily',
+                  child: ListTile(leading: Icon(Icons.today_outlined), title: Text(tr('Daily reports')))),
+              PopupMenuItem(
                   value: 'close',
                   child: ListTile(leading: Icon(Icons.fact_check_outlined), title: Text(tr('Weekly close')))),
+              PopupMenuItem(
+                  value: 'reports',
+                  child: ListTile(leading: const Icon(Icons.summarize_outlined), title: Text(tr('Reports')))),
+              PopupMenuItem(
+                  value: 'exceptions',
+                  child: ListTile(leading: Icon(Icons.rule_folder_outlined), title: Text(tr('Commercial exceptions')))),
+              // Sales are the owner's and managers' business; the server
+              // hides leads from everyone else too.
+              if (Roles.canApprove(session.role))
+                PopupMenuItem(
+                    value: 'leads',
+                    child: ListTile(
+                        leading: const Icon(Icons.handshake_outlined),
+                        title: Text(tr('Leads and quotes')),
+                        trailing: Consumer(builder: (context, ref, _) {
+                          final due = ref.watch(crmDueProvider(company.id)).value ?? 0;
+                          return due == 0 ? const SizedBox.shrink() : Badge.count(count: due);
+                        }))),
+              if (Roles.canApprove(session.role))
+                PopupMenuItem(
+                    value: 'stores',
+                    child: ListTile(leading: const Icon(Icons.warehouse_outlined), title: Text(tr('Stores and tools')))),
+              PopupMenuItem(
+                  value: 'my-attendance',
+                  child: ListTile(leading: const Icon(Icons.camera_front_outlined), title: Text(tr('My attendance')))),
+              if (Roles.canApprove(session.role))
+                PopupMenuItem(
+                    value: 'staff-attendance',
+                    child: ListTile(
+                        leading: const Icon(Icons.how_to_reg_outlined),
+                        title: Text(tr('Staff attendance')),
+                        trailing: Consumer(builder: (context, ref, _) {
+                          final rows = ref.watch(companyAttendanceProvider(company.id)).value?.rows ?? const [];
+                          final waiting = rows.where((r) => r.status == 'pending').length;
+                          return waiting == 0 ? const SizedBox.shrink() : Badge.count(count: waiting);
+                        }))),
+              // Salaries are private: owners and managers only, here and on
+              // the server.
+              if (Roles.canApprove(session.role))
+                PopupMenuItem(
+                    value: 'salaries',
+                    child: ListTile(leading: const Icon(Icons.badge_outlined), title: Text(tr('Staff salaries')))),
               PopupMenuItem(
                   value: 'brief',
                   child: ListTile(leading: Icon(Icons.wb_twilight_outlined), title: Text(tr('Site brief')))),
@@ -333,6 +409,9 @@ class _ProjectList extends StatelessWidget {
         ),
         // The day's four jobs as big picture buttons, one tap each.
         QuickActions(projects: projects),
+        // The day's report: what is still to send (or, for a manager, which
+        // sites' reports came in). Above the brief so it is seen first.
+        TodayHomeCard(companyId: company.id),
         TodayBriefCard(companyId: company.id, companyName: company.name),
         const SectionHeader('Projects'),
         for (final p in sorted) ...[

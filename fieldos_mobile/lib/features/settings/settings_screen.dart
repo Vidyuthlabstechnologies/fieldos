@@ -534,6 +534,57 @@ class _BrandingTilesState extends ConsumerState<_BrandingTiles> {
     await _reload();
   }
 
+  Future<void> _editFooter() async {
+    final ctl = TextEditingController(text: _branding?.footerText ?? '');
+    final text = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('Your line at the foot of PDFs')),
+        content: TextField(
+          key: const Key('footer-text'),
+          controller: ctl,
+          maxLength: footerTextMax,
+          decoration: InputDecoration(hintText: tr('e.g. 98480 12345 | www.saibuilders.in')),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Cancel'))),
+          FilledButton(key: const Key('footer-save'), onPressed: () => Navigator.pop(ctx, ctl.text), child: Text(tr('Save'))),
+        ],
+      ),
+    );
+    ctl.dispose();
+    if (text == null) return;
+    await setFooterText(ref.read(appDatabaseProvider), widget.companyId, text);
+    await _reload();
+  }
+
+  Future<void> _pickAccent() async {
+    final picked = await showModalBottomSheet<int>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Wrap(spacing: 12, runSpacing: 12, children: [
+            for (final c in brandColours)
+              InkWell(
+                key: Key('accent-$c'),
+                customBorder: const CircleBorder(),
+                onTap: () => Navigator.pop(ctx, c),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Color(c),
+                  child: (_branding?.accent ?? brandColours.first) == c ? const Icon(Icons.check, color: Colors.white) : null,
+                ),
+              ),
+          ]),
+        ),
+      ),
+    );
+    if (picked == null) return;
+    await setAccent(ref.read(appDatabaseProvider), widget.companyId, picked == brandColours.first ? null : picked);
+    await _reload();
+  }
+
   @override
   Widget build(BuildContext context) {
     final b = _branding;
@@ -571,6 +622,20 @@ class _BrandingTilesState extends ConsumerState<_BrandingTiles> {
                 await setShowFooter(ref.read(appDatabaseProvider), widget.companyId, v);
                 await _reload();
               },
+      ),
+      ListTile(
+        key: const Key('settings-footer-text'),
+        leading: const Icon(Icons.notes_outlined),
+        title: Text(tr('Your line at the foot of PDFs')),
+        subtitle: Text((b?.footerText ?? '').isEmpty ? tr('Phone, website, registration or a tagline') : b!.footerText),
+        onTap: b == null ? null : _editFooter,
+      ),
+      ListTile(
+        key: const Key('settings-accent'),
+        leading: CircleAvatar(radius: 12, backgroundColor: Color(b?.accent ?? brandColours.first)),
+        title: Text(tr('Your colour on PDFs')),
+        subtitle: Text(tr('For the company name and headings')),
+        onTap: b == null ? null : _pickAccent,
       ),
     ]);
   }

@@ -4,16 +4,17 @@
 /// feeding the cost engine's labour-productivity view.
 library;
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/geo.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/attendance/attendance_camera.dart';
+import 'package:fieldos_mobile/features/attendance/staff_attendance.dart' show geoCheck;
 import 'package:fieldos_mobile/features/labour/attendance_list.dart';
 import 'package:fieldos_mobile/features/labour/day_register.dart';
 import 'package:fieldos_mobile/features/labour/day_register_screen.dart';
@@ -22,17 +23,7 @@ import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
-/// Great-circle distance in metres between two coordinates.
-double haversineMeters(double lat1, double lng1, double lat2, double lng2) {
-  const r = 6371000.0;
-  final dLat = _rad(lat2 - lat1);
-  final dLng = _rad(lng2 - lng1);
-  final a = sin(dLat / 2) * sin(dLat / 2) +
-      cos(_rad(lat1)) * cos(_rad(lat2)) * sin(dLng / 2) * sin(dLng / 2);
-  return r * 2 * atan2(sqrt(a), sqrt(1 - a));
-}
-
-double _rad(double deg) => deg * pi / 180;
+export 'package:fieldos_mobile/core/geo.dart' show haversineMeters;
 
 class LabourView extends ConsumerStatefulWidget {
   const LabourView(
@@ -133,6 +124,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
     final workers = await ref.read(workersProvider(widget.projectId).future);
     final activeWorkers = workers.where((w) => w.status == 'active').toList();
     String? selectedWorkerId;
+    String? photoPath;
     if (!context.mounted) return;
     final ok = await showDialog<bool>(
       context: context,
@@ -165,6 +157,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
               ],
               TextField(controller: name, decoration: InputDecoration(labelText: tr('Worker name'))),
               GpsFields(lat: lat, lng: lng),
+              PunchPhotoButton(onTaken: (p) => photoPath = p),
             ],
           ),
           actions: [
@@ -178,10 +171,8 @@ class _LabourViewState extends ConsumerState<LabourView> {
 
     final latV = double.tryParse(lat.text);
     final lngV = double.tryParse(lng.text);
-    final g = geofence.value;
-    final within = (g != null && latV != null && lngV != null)
-        ? haversineMeters(latV, lngV, g.centerLat, g.centerLng) <= g.radiusMeters
-        : null;
+    final geo = geoCheck(latV, lngV, geofence.value);
+    final photoId = await _keepPhoto(photoPath, latV, lngV);
 
     await ref.read(appDatabaseProvider).attendanceDao.punchIn(LabourAttendanceCompanion.insert(
           id: const Uuid().v4(),
@@ -192,9 +183,21 @@ class _LabourViewState extends ConsumerState<LabourView> {
           punchIn: DateTime.now(),
           lat: Value(latV),
           lng: Value(lngV),
-          withinGeofence: Value(within),
+          withinGeofence: Value(geo.within),
+          distanceM: Value(geo.distanceM),
+          photoId: Value(photoId),
         ));
     ref.invalidate(attendanceProvider(widget.projectId));
+  }
+
+  /// Keeps the punch photo, if one was taken; its id goes on the punches.
+  Future<String?> _keepPhoto(String? path, double? lat, double? lng) async {
+    if (path == null) return null;
+    final row = await ref
+        .read(appDatabaseProvider)
+        .staffAttendanceDao
+        .addPhoto(projectId: widget.projectId, filePath: path, by: widget.userId, lat: lat, lng: lng);
+    return row.id;
   }
 
   /// Morning roll call: tick everyone who turned up and punch them all in
@@ -221,6 +224,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
     final picked = <String>{...candidates.map((w) => w.id)};
     final lat = TextEditingController();
     final lng = TextEditingController();
+    String? photoPath;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -242,6 +246,7 @@ class _LabourViewState extends ConsumerState<LabourView> {
                   onChanged: (v) => set(() => v == true ? picked.add(w.id) : picked.remove(w.id)),
                 ),
               GpsFields(lat: lat, lng: lng),
+              PunchPhotoButton(group: true, onTaken: (p) => photoPath = p),
             ]),
           ),
           actions: [
@@ -254,10 +259,9 @@ class _LabourViewState extends ConsumerState<LabourView> {
     if (ok != true || picked.isEmpty || !context.mounted) return;
     final latV = double.tryParse(lat.text);
     final lngV = double.tryParse(lng.text);
-    final g = geofence.value;
-    final within = (g != null && latV != null && lngV != null)
-        ? haversineMeters(latV, lngV, g.centerLat, g.centerLng) <= g.radiusMeters
-        : null;
+    final geo = geoCheck(latV, lngV, geofence.value);
+    // One roll-call photo stands for everyone punched in together.
+    final photoId = await _keepPhoto(photoPath, latV, lngV);
     final now = DateTime.now();
     final dao = ref.read(appDatabaseProvider).attendanceDao;
     for (final w in candidates.where((w) => picked.contains(w.id))) {
@@ -270,7 +274,9 @@ class _LabourViewState extends ConsumerState<LabourView> {
         punchIn: now,
         lat: Value(latV),
         lng: Value(lngV),
-        withinGeofence: Value(within),
+        withinGeofence: Value(geo.within),
+        distanceM: Value(geo.distanceM),
+        photoId: Value(photoId),
       ));
     }
     ref.invalidate(attendanceProvider(widget.projectId));
@@ -516,6 +522,45 @@ class _TodayHeadcount extends ConsumerWidget {
         key: const Key('today-headcount'),
         [trf('Today: {n} on site', {'n': present}), ...parts].join(' · '),
         style: Theme.of(context).textTheme.titleSmall,
+      ),
+    );
+  }
+}
+
+/// "Add photo": the worker at punch-in, or the whole roll call at once.
+class PunchPhotoButton extends ConsumerStatefulWidget {
+  const PunchPhotoButton({super.key, required this.onTaken, this.group = false});
+  final ValueChanged<String> onTaken;
+  final bool group;
+
+  @override
+  ConsumerState<PunchPhotoButton> createState() => _PunchPhotoButtonState();
+}
+
+class _PunchPhotoButtonState extends ConsumerState<PunchPhotoButton> {
+  String? _path;
+
+  @override
+  Widget build(BuildContext context) {
+    final taken = _path != null;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton.icon(
+        key: const Key('punch-photo'),
+        icon: Icon(taken ? Icons.check_circle : Icons.photo_camera_outlined),
+        label: Text(taken
+            ? tr('Photo added')
+            : widget.group
+                ? tr('Add a photo of everyone')
+                : tr('Add a photo')),
+        onPressed: () async {
+          final p = await ref.read(attendanceCameraProvider).take(selfie: false);
+          if (p == null || !mounted) return;
+          setState(() {
+            _path = p;
+          });
+          widget.onTaken(p);
+        },
       ),
     );
   }

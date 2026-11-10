@@ -9,7 +9,11 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/crm/crm_rules.dart' show isOpenStage;
+import 'package:fieldos_mobile/features/daily/day_close.dart';
+import 'package:fieldos_mobile/features/daily/day_close_data.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart' show canSeeMoneyIn;
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -67,12 +71,41 @@ class ReminderSettings {
 }
 
 class PlannedReminder {
-  const PlannedReminder({required this.id, required this.at, required this.title, required this.body});
+  const PlannedReminder({required this.id, required this.at, required this.title, required this.body, this.payload});
   final int id;
   final DateTime at;
   final String title;
   final String body;
+
+  /// What a tap opens (`today:<projectId>` for a site's Today checklist).
+  final String? payload;
 }
+
+/// One site's daily close reminder for this person, at the site's cutoff.
+class SiteCloseReminder {
+  const SiteCloseReminder({
+    required this.projectId,
+    required this.siteName,
+    required this.cutoffMinutes,
+    required this.days,
+    this.sentToday = false,
+    this.missingToday = const [],
+  });
+  final String projectId;
+  final String siteName;
+  final int cutoffMinutes;
+
+  /// Days from today (0 = today) this person is the one expected to send
+  /// it (the supervisor, or the backup while covering).
+  final Set<int> days;
+  final bool sentToday;
+
+  /// What today's checklist still misses, in the app's language.
+  final List<String> missingToday;
+}
+
+/// Sites get one reminder each (ids reminderIdBase + 150 + site * 7 + day).
+const maxCloseReminderSites = 7;
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -88,13 +121,37 @@ List<PlannedReminder> planReminders({
   required bool reportedToday,
   required List<Task> openTasks,
   bool isOwner = false,
+  List<({String name, DateTime at})> followUps = const [],
   int days = 7,
+  List<SiteCloseReminder> closeReminders = const [],
+  bool dailyCloseInUse = false,
 }) {
   final out = <PlannedReminder>[];
   final today = _day(now);
   for (var i = 0; i < days; i++) {
     final day = today.add(Duration(days: i));
-    if (settings.reportOn && runningSites > 0 && !(i == 0 && reportedToday)) {
+    // One reminder per site, to the one person expected to send it, at the
+    // site's own cutoff, listing what is missing. Once a company uses the
+    // daily close, the general evening nudge stops: escalation goes to the
+    // manager's exceptions, not more reminders to everyone.
+    if (settings.reportOn) {
+      for (var s = 0; s < closeReminders.length && s < maxCloseReminderSites; s++) {
+        final c = closeReminders[s];
+        if (!c.days.contains(i) || (i == 0 && c.sentToday)) continue;
+        final at = day.add(Duration(minutes: c.cutoffMinutes));
+        if (!at.isAfter(now)) continue;
+        out.add(PlannedReminder(
+          id: reminderIdBase + 150 + s * 7 + i,
+          at: at,
+          title: trf("Today's report · {site}", {'site': c.siteName}),
+          body: i == 0 && c.missingToday.isNotEmpty
+              ? trf('Still to do: {items}. Tap to finish it.', {'items': c.missingToday.join(', ')})
+              : tr('Tap to see what is still to do. Quiet day? Mark it in seconds.'),
+          payload: 'today:${c.projectId}',
+        ));
+      }
+    }
+    if (settings.reportOn && runningSites > 0 && !dailyCloseInUse && !(i == 0 && reportedToday)) {
       final at = day.add(Duration(minutes: settings.reportMinutes));
       if (at.isAfter(now)) {
         out.add(
@@ -135,6 +192,22 @@ List<PlannedReminder> planReminders({
           ),
         );
       }
+    }
+    // Leads to call back that day (owners and managers only), with the
+    // ones already late folded into today's.
+    final calls = followUps.where((f) => i == 0 ? !_day(f.at).isAfter(day) : _day(f.at) == day).toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
+    final callAt = day.add(const Duration(hours: 9, minutes: 30));
+    if (calls.isNotEmpty && callAt.isAfter(now)) {
+      final names = calls.take(3).map((f) => f.name).join(', ');
+      out.add(
+        PlannedReminder(
+          id: reminderIdBase + 150 + i,
+          at: callAt,
+          title: calls.length == 1 ? tr('1 lead to follow up today') : trf('{n} leads to follow up today', {'n': calls.length}),
+          body: calls.length > 3 ? trf('{names} and {n} more', {'names': names, 'n': calls.length - 3}) : names,
+        ),
+      );
     }
   }
   return out..sort((a, b) => a.at.compareTo(b.at));
@@ -177,13 +250,45 @@ class ReminderScheduler {
           break;
         }
       }
+      final me = _ref.read(sessionProvider).user?.id;
+      final role = _ref.read(sessionProvider).role;
+      final canRecord = role != null && Roles.canWrite(role) && role != Roles.subcontractor;
+      final close = <SiteCloseReminder>[];
+      var closeInUse = false;
+      for (final p in running) {
+        final r = await SiteRecords.load(_db, p);
+        if (r.trackingStart != null) closeInUse = true;
+        if (me == null) continue;
+        final days = {
+          for (var i = 0; i < 7; i++)
+            if (r.setup.remindsUser(me, today.add(Duration(days: i)), canRecord: canRecord)) i
+        };
+        if (days.isEmpty) continue;
+        final d = r.day(today);
+        close.add(SiteCloseReminder(
+          projectId: p.id,
+          siteName: p.name,
+          cutoffMinutes: r.setup.cutoffMinutes,
+          days: days,
+          sentToday: d.isSubmitted,
+          missingToday: missingItems(d.snapshot, const NothingMarks()).map(checkLabel).toList(),
+        ));
+      }
       final plan = planReminders(
         now: t,
         settings: s,
         runningSites: running.length,
         reportedToday: reported,
+        closeReminders: close,
+        dailyCloseInUse: closeInUse,
         openTasks: s.tasksOn ? await _db.taskDao.openForCompany(company.id) : const [],
         isOwner: canSeeMoneyIn(_ref.read(sessionProvider).role),
+        followUps: Roles.canApprove(_ref.read(sessionProvider).role)
+            ? [
+                for (final l in await _db.crmDao.leadsFor(company.id))
+                  if (isOpenStage(l.stage) && l.nextFollowUp != null) (name: l.name, at: l.nextFollowUp!),
+              ]
+            : const [],
       );
       if (plan.isNotEmpty) await notifications.init();
       await notifications.replaceScheduled(plan);
