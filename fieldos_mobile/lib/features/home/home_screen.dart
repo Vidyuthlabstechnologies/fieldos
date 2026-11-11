@@ -5,6 +5,7 @@ import 'package:fieldos_mobile/auth/auth_service.dart' show Roles;
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/execution/execution_portfolio_screen.dart';
 import 'package:fieldos_mobile/features/attendance/attendance_screens.dart';
 import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
@@ -129,6 +130,9 @@ class HomeScreen extends ConsumerWidget {
                 case 'close':
                   Navigator.of(context)
                       .push(MaterialPageRoute(builder: (_) => WeeklyCloseListScreen(companyId: company.id)));
+                case 'execution':
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (_) => ExecutionPortfolioScreen(companyId: company.id)));
                 case 'exceptions':
                   Navigator.of(context)
                       .push(MaterialPageRoute(builder: (_) => CommercialExceptionsScreen(companyId: company.id)));
@@ -190,6 +194,9 @@ class HomeScreen extends ConsumerWidget {
               PopupMenuItem(
                   value: 'reports',
                   child: ListTile(leading: const Icon(Icons.summarize_outlined), title: Text(tr('Reports')))),
+              PopupMenuItem(
+                  value: 'execution',
+                  child: ListTile(leading: Icon(Icons.date_range_outlined), title: Text(tr('Site execution across sites')))),
               PopupMenuItem(
                   value: 'exceptions',
                   child: ListTile(leading: Icon(Icons.rule_folder_outlined), title: Text(tr('Commercial exceptions')))),

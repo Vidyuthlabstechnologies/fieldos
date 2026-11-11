@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_execution_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_hi.dart';
@@ -2395,6 +2396,7 @@ const Map<String, String> stringsHi = {
   'Nothing has been recorded yet.':
       'अभी तक कुछ दर्ज नहीं हुआ।',
   ...commercialHi,
+  ...executionHi,
   ...crmHi,
   ...warehouseHi,
   ...dailyHi,
