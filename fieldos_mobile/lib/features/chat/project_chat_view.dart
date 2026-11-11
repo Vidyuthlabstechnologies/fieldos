@@ -13,12 +13,20 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/services/chat_block_service.dart';
 import 'package:fieldos_mobile/services/message_report_service.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 final projectMessagesProvider = StreamProvider.autoDispose.family<List<ProjectMessage>, String>(
   (ref, projectId) => ref.watch(appDatabaseProvider).messageDao.watchForProject(projectId),
+);
+
+/// People blocked in chat on this phone (issue #152).
+final chatBlockServiceProvider = Provider<ChatBlockService>((ref) => ChatBlockService(ref.watch(appDatabaseProvider)));
+
+final blockedSendersProvider = FutureProvider.autoDispose<Map<String, String>>(
+  (ref) => ref.watch(chatBlockServiceProvider).blocked(),
 );
 
 /// Messages this phone has reported: shown folded away for the reporter.
@@ -89,15 +97,30 @@ class _ProjectChatViewState extends ConsumerState<ProjectChatView> {
       context: context,
       showDragHandle: true,
       builder: (ctx) => SafeArea(
-        child: ListTile(
-          leading: const Icon(Icons.flag_outlined),
-          title: Text(tr('Report this message')),
-          subtitle: Text(tr('The FieldOS team reviews it. The sender is not told who reported it.')),
-          onTap: () => Navigator.pop(ctx, 'report'),
-        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(
+            leading: const Icon(Icons.flag_outlined),
+            title: Text(tr('Report this message')),
+            subtitle: Text(tr('The FieldOS team reviews it. The sender is not told who reported it.')),
+            onTap: () => Navigator.pop(ctx, 'report'),
+          ),
+          ListTile(
+            key: const Key('chat-block'),
+            leading: const Icon(Icons.block),
+            title: Text(trf('Block {name}', {'name': m.senderName})),
+            subtitle: Text(tr('Hide their chat messages on this phone')),
+            onTap: () => Navigator.pop(ctx, 'block'),
+          ),
+        ]),
       ),
     );
-    if (pick != 'report' || !mounted) return;
+    if (!mounted) return;
+    if (pick == 'block') return _block(m);
+    if (pick != 'report') return;
+    await _report(m);
+  }
+
+  Future<void> _report(ProjectMessage m) async {
     final sent = await showDialog<bool>(
       context: context,
       builder: (_) => ReportMessageDialog(messageId: m.id),
@@ -107,6 +130,32 @@ class _ProjectChatViewState extends ConsumerState<ProjectChatView> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(tr('Thanks. We review reports within 24 hours.'))));
+    }
+  }
+
+  Future<void> _block(ProjectMessage m) async {
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(trf('Block {name}?', {'name': m.senderName})),
+        content: Text(tr(
+            'Their chat messages will be hidden on this phone. They stay in the company, and their site records are not hidden. You can unblock them in Settings › Blocked people.')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Cancel'))),
+          TextButton(onPressed: () => Navigator.pop(ctx, 'block_report'), child: Text(tr('Block and report'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, 'block'), child: Text(tr('Block'))),
+        ],
+      ),
+    );
+    if (choice == null || !mounted) return;
+    await ref.read(chatBlockServiceProvider).block(m.senderId, m.senderName);
+    ref.invalidate(blockedSendersProvider);
+    if (!mounted) return;
+    if (choice == 'block_report') {
+      await _report(m);
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(trf('{name} is blocked on this phone.', {'name': m.senderName}))));
     }
   }
 
@@ -122,6 +171,7 @@ class _ProjectChatViewState extends ConsumerState<ProjectChatView> {
     final messages = ref.watch(projectMessagesProvider(widget.projectId));
     final signedIn = ref.watch(cloudSyncServiceProvider).isSignedIn;
     final reported = ref.watch(reportedMessagesProvider).value ?? const <String>{};
+    final blocked = ref.watch(blockedSendersProvider).value ?? const <String, String>{};
 
     return Column(
       children: [
@@ -134,7 +184,8 @@ class _ProjectChatViewState extends ConsumerState<ProjectChatView> {
           const LinearProgressIndicator(minHeight: 2),
         Expanded(
           child: messages.when(
-            data: (list) {
+            data: (all) {
+              final list = [for (final m in all) if (m.senderId == me || !blocked.containsKey(m.senderId)) m];
               if (list.isEmpty) {
                 return Center(child: Text(tr('No messages yet. Say what is happening on site.')));
               }

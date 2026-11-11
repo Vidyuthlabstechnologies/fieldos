@@ -5,6 +5,7 @@
 
 export const BUG_LABEL = "bug-report";
 export const MESSAGE_LABEL = "message-report";
+export const CRASH_LABEL = "crash";
 export const REASONS: Record<string, string> = {
   abuse: "Abuse or harassment",
   spam: "Spam or fraud",
@@ -59,7 +60,11 @@ export function bugIssue(r: BugReport): Issue {
     "**Recent errors in the app**\n" + (r.recent_errors ? fence(r.recent_errors) : "none recorded"),
     `<sub>bug_reports id ${r.id}</sub>`,
   ].join("\n\n");
-  return { title: `Bug report: ${firstLine}`, body, labels: [BUG_LABEL] };
+  // Sent by the app on its own after a crash (issue #153): "[crash <hash>] ...".
+  const crash = /^\[crash [0-9a-f]{8}\]/.test(r.message);
+  return crash
+    ? { title: `Crash: ${firstLine.replace(/^\[crash [0-9a-f]{8}\]\s*/, "")}`, body, labels: [BUG_LABEL, CRASH_LABEL] }
+    : { title: `Bug report: ${firstLine}`, body, labels: [BUG_LABEL] };
 }
 
 export function messageIssue(r: MessageReport): Issue {

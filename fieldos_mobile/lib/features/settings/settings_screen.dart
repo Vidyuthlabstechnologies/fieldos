@@ -14,6 +14,7 @@ import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/approvals/approval_rules_screen.dart';
+import 'package:fieldos_mobile/features/chat/blocked_people_screen.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
@@ -22,6 +23,7 @@ import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
 import 'package:fieldos_mobile/features/settings/backup_actions.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/services/bug_report_service.dart' show BugReportService;
 import 'package:fieldos_mobile/services/speech_service.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 import 'package:fieldos_mobile/core/text_size.dart';
@@ -297,6 +299,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             subtitle: Text(tr('Ask for a 4-digit PIN when FieldOS opens or comes back after a minute')),
             value: ref.watch(appLockOnProvider).value ?? false,
             onChanged: _toggleLock,
+          ),
+          const SectionHeader('Privacy', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
+          const _CrashReportsTile(),
+          ListTile(
+            key: const Key('settings-blocked-people'),
+            leading: const Icon(Icons.block),
+            title: Text(tr('Blocked people')),
+            subtitle: Text(tr('People whose chat messages are hidden on this phone')),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BlockedPeopleScreen())),
           ),
           const SectionHeader('Voice reports', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
           ListTile(
@@ -638,5 +650,29 @@ class _BrandingTilesState extends ConsumerState<_BrandingTiles> {
         onTap: b == null ? null : _pickAccent,
       ),
     ]);
+  }
+}
+
+/// "Send crash details" (issue #153): on unless turned off.
+final crashReportsOnProvider = FutureProvider.autoDispose<bool>(
+    (ref) async => (await ref.watch(appDatabaseProvider).settingsDao.get(BugReportService.crashSettingKey)) != '0');
+
+class _CrashReportsTile extends ConsumerWidget {
+  const _CrashReportsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final on = ref.watch(crashReportsOnProvider).value ?? true;
+    return SwitchListTile(
+      key: const Key('settings-crash-reports'),
+      secondary: const Icon(Icons.bug_report_outlined),
+      title: Text(tr('Send crash details')),
+      subtitle: Text(tr('If FieldOS crashes, send the error to the FieldOS team so it gets fixed. No site data is sent.')),
+      value: on,
+      onChanged: (v) async {
+        await ref.read(appDatabaseProvider).settingsDao.set(BugReportService.crashSettingKey, v ? '1' : '0');
+        ref.invalidate(crashReportsOnProvider);
+      },
+    );
   }
 }

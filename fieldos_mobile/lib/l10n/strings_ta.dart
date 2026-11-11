@@ -2358,6 +2358,36 @@ const Map<String, String> stringsTa = {
       'இப்போதே புதுப்பிக்கவும்',
   'Open the App Store and update FieldOS.':
       'App Store-ஐத் திறந்து FieldOS-ஐப் புதுப்பிக்கவும்.',
+  'Block {name}':
+      '{name}-ஐத் தடு',
+  'Hide their chat messages on this phone':
+      'அவர்களின் அரட்டைச் செய்திகளை இந்த ஃபோனில் மறை',
+  'Block {name}?':
+      '{name}-ஐத் தடுக்கவா?',
+  'Their chat messages will be hidden on this phone. They stay in the company, and their site records are not hidden. You can unblock them in Settings › Blocked people.':
+      'அவர்களின் அரட்டைச் செய்திகள் இந்த ஃபோனில் மறைக்கப்படும். அவர்கள் நிறுவனத்தில் தொடர்வார்கள், அவர்களின் தளப் பதிவுகள் மறைக்கப்படாது. அமைப்புகள் › தடுக்கப்பட்டவர்கள் என்பதில் தடையை நீக்கலாம்.',
+  'Block and report':
+      'தடுத்துப் புகாரளி',
+  'Block':
+      'தடு',
+  '{name} is blocked on this phone.':
+      '{name} இந்த ஃபோனில் தடுக்கப்பட்டார்.',
+  'Blocked people':
+      'தடுக்கப்பட்டவர்கள்',
+  'Nobody is blocked. To block someone, press and hold one of their chat messages.':
+      'யாரும் தடுக்கப்படவில்லை. ஒருவரைத் தடுக்க, அவர்களின் அரட்டைச் செய்தியை அழுத்திப் பிடிக்கவும்.',
+  'Their chat messages are hidden on this phone. They stay in the company, and their site records are not hidden.':
+      'அவர்களின் அரட்டைச் செய்திகள் இந்த ஃபோனில் மறைக்கப்பட்டுள்ளன. அவர்கள் நிறுவனத்தில் தொடர்கிறார்கள், அவர்களின் தளப் பதிவுகள் மறைக்கப்படாது.',
+  'Unblock':
+      'தடையை நீக்கு',
+  'People whose chat messages are hidden on this phone':
+      'இந்த ஃபோனில் அரட்டைச் செய்திகள் மறைக்கப்பட்டவர்கள்',
+  'Privacy':
+      'தனியுரிமை',
+  'Send crash details':
+      'செயலிழப்பு விவரங்களை அனுப்பு',
+  'If FieldOS crashes, send the error to the FieldOS team so it gets fixed. No site data is sent.':
+      'FieldOS செயலிழந்தால், சரிசெய்ய அந்தப் பிழையை FieldOS குழுவுக்கு அனுப்பு. தளத் தரவு எதுவும் அனுப்பப்படாது.',
   'Your role in this company does not allow that. Ask the owner.':
       'இந்த நிறுவனத்தில் உங்கள் பங்குக்கு இதற்கு அனுமதி இல்லை. உரிமையாளரிடம் கேளுங்கள்.',
   'Your subscription is on this phone.':

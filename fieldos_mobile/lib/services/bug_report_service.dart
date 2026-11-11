@@ -31,6 +31,43 @@ class RecentErrors {
   static void clearForTest() => _items.clear();
 }
 
+/// Uncaught errors go here as well as to [RecentErrors] (issue #153). The
+/// app points [sink] at [BugReportService.reportCrash] once it starts, so a
+/// crash is saved on the phone and sent as a bug report when online.
+class CrashLog {
+  CrashLog._();
+  static void Function(Object error, StackTrace? stack)? sink;
+  static bool _busy = false;
+
+  static void record(Object error, StackTrace? stack) {
+    final s = sink;
+    if (s == null || _busy) return; // never report a failure of the reporting itself
+    _busy = true;
+    try {
+      s(error, stack);
+    } catch (_) {
+    } finally {
+      _busy = false;
+    }
+  }
+}
+
+/// A short, stable id for a crash: the error's type and its first three
+/// stack frames, so the same crash on many phones is one issue.
+String crashHash(Object error, StackTrace? stack) {
+  final frames = (stack?.toString() ?? '')
+      .split('\n')
+      .map((l) => l.replaceFirst(RegExp(r'^#\d+\s+'), '').trim())
+      .where((l) => l.isNotEmpty)
+      .take(3)
+      .join('|');
+  var h = 0x811c9dc5;
+  for (final c in '${error.runtimeType}|$frames'.codeUnits) {
+    h = ((h ^ c) * 0x01000193) & 0xffffffff;
+  }
+  return h.toRadixString(16).padLeft(8, '0');
+}
+
 class BugReport {
   const BugReport({required this.message, this.contactEmail, required this.appVersion, required this.platform, this.recentErrors});
 
@@ -93,6 +130,38 @@ class BugReportService {
       await _save([...await _queue(), r]);
       return BugReportOutcome.queued;
     }
+  }
+
+  static const crashSettingKey = 'send_crash_details';
+  static const _crashHashesKey = 'crash_hashes_sent';
+
+  /// "Send crash details" in Settings; on unless turned off.
+  Future<bool> crashReportsOn() async => (await db.settingsDao.get(crashSettingKey)) != '0';
+
+  Future<void> setCrashReports(bool on) => db.settingsDao.set(crashSettingKey, on ? '1' : '0');
+
+  /// Sends (or keeps for [flush]) one report for an uncaught error, once
+  /// per kind of crash on this phone. No project data: only the error,
+  /// where it happened, and the app and phone versions. Returns whether a
+  /// report was made.
+  Future<bool> reportCrash(Object error, StackTrace? stack,
+      {required String appVersion, required String platform}) async {
+    if (!await crashReportsOn()) return false;
+    final hash = crashHash(error, stack);
+    final raw = await db.settingsDao.get(_crashHashesKey);
+    final sent = raw == null || raw.isEmpty ? <String>[] : [for (final v in jsonDecode(raw) as List) v as String];
+    if (sent.contains(hash)) return false;
+    sent.add(hash);
+    await db.settingsDao.set(_crashHashesKey, jsonEncode(sent.length > 50 ? sent.sublist(sent.length - 50) : sent));
+    final firstLine = error.toString().split('\n').first;
+    final frames = (stack?.toString() ?? '').split('\n').take(12).join('\n');
+    await submit(BugReport(
+      message: '[crash $hash] ${error.runtimeType}: ${firstLine.length > 200 ? firstLine.substring(0, 200) : firstLine}',
+      appVersion: appVersion,
+      platform: platform,
+      recentErrors: '$error\n$frames',
+    ));
+    return true;
   }
 
   /// Sends reports that were written offline. Call on app start / resume.

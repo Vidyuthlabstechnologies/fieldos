@@ -10,7 +10,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-import { fileAll, type Issue, MESSAGE_LABEL } from "./core.ts";
+import { CRASH_LABEL, fileAll, type Issue, MESSAGE_LABEL } from "./core.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -36,7 +36,7 @@ async function ensureLabel(name: string) {
   if (labelsReady.has(name)) return;
   const res = await gh(`labels/${encodeURIComponent(name)}`);
   if (res.status === 404) {
-    const color = name === MESSAGE_LABEL ? "b60205" : "d73a4a";
+    const color = name === MESSAGE_LABEL ? "b60205" : name === CRASH_LABEL ? "5319e7" : "d73a4a";
     await gh("labels", { method: "POST", body: JSON.stringify({ name, color }) });
   } else {
     await res.body?.cancel();

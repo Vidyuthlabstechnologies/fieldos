@@ -35,6 +35,12 @@ Deno.test("issues read like the ones the old script filed, and user text can't b
   assert(m.body.includes("(the message has been deleted)"));
 });
 
+Deno.test("a crash the app sent on its own is titled and labelled as a crash", () => {
+  const c = bugIssue({ ...bug, message: "[crash 0a1b2c3d] StateError: Bad state: no element" });
+  assertEquals(c.title, "Crash: StateError: Bad state: no element");
+  assertEquals(c.labels, ["bug-report", "crash"]);
+});
+
 Deno.test("files every waiting report; one GitHub failure leaves only that one for next time", async () => {
   const marked: string[] = [];
   let next = 100;
