@@ -8,11 +8,9 @@ with its own local auth, its own local database, and its own port of the
 BOQ estimation/reconciliation engine, built specifically for site-level use
 where connectivity can't be assumed.
 
-**This supersedes the earlier Capacitor-based approach** (`frontend/android/`,
-`frontend/capacitor.config.ts`, `frontend/MOBILE.md`), which wrapped the
-Next.js web frontend in a WebView. That code is still present on disk for
-reference but is not the maintained mobile path going forward — see
-`frontend/MOBILE.md` for its deprecation note.
+**This supersedes the earlier Capacitor-based approach**, which wrapped the
+Next.js web frontend in a WebView. That code was removed in November 2026
+(issue #155).
 
 ## Architecture
 
@@ -149,7 +147,3 @@ before any change — as of this writing it's 27/27 passing.
 - Extract the estimation/reconciliation rules into a single shared
   specification (or generate one implementation from the other) so the
   Python and Dart implementations can't silently diverge
-- Decide the long-term fate of `frontend/android/` / Capacitor — either
-  formally retire it (delete the generated Android project, keep
-  `frontend/MOBILE.md` purely as a historical note) or find it a distinct
-  purpose that doesn't overlap with this app

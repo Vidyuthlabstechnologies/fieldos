@@ -1,0 +1,9 @@
+# Netlify response headers (issue #150). The owner dashboard is a sign-in
+# page, so no other site may frame it and no outside script may run here.
+# style-src keeps 'unsafe-inline' for the style="..." attributes in pages.
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; media-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://qybjzrrledxzhrbamdcq.supabase.co; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'

@@ -1,0 +1,75 @@
+name: functions-deploy
+
+# One click from the Actions tab puts the small edge functions live on the
+# production Supabase project (the AI assistant has its own,
+# ai-assistant-deploy). Run supabase-deploy first, so their SQL exists.
+#
+#   account-cleanup    removes a deleted company's files (issue #139)
+#   report-to-github   turns in-app bug and message reports into issues (#142)
+#
+# Repo secrets it uses (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_URL, SUPABASE_ACCESS_TOKEN   already set for supabase-deploy
+#   GITHUB_ISSUES_TOKEN                   a fine-grained personal access token:
+#                                         this repository only, Issues: Read and write.
+#                                         Without it reports wait in the database.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      GITHUB_ISSUES_TOKEN: ${{ secrets.GITHUB_ISSUES_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the secrets are set
+        run: |
+          missing=""
+          for name in SUPABASE_URL SUPABASE_ACCESS_TOKEN; do
+            [ -z "${!name}" ] && missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repo secrets:$missing"
+            exit 1
+          fi
+          [ -z "$GITHUB_ISSUES_TOKEN" ] && echo "::warning::GITHUB_ISSUES_TOKEN is not set: bug and message reports will wait in the database until it is."
+          ref=$(echo "$SUPABASE_URL" | sed -E 's#^https?://([^.]+)\.supabase\.co.*#\1#')
+          if [ "$ref" = "$SUPABASE_URL" ] || [ -z "$ref" ]; then
+            echo "::error::SUPABASE_URL should look like https://abcdefghijkl.supabase.co"
+            exit 1
+          fi
+          echo "PROJECT_REF=$ref" >> "$GITHUB_ENV"
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 3.0.0
+
+      - name: Copy the token into the function's secrets
+        if: env.GITHUB_ISSUES_TOKEN != ''
+        run: |
+          umask 077
+          f=$(mktemp)
+          printf 'GITHUB_ISSUES_TOKEN=%s\nGITHUB_REPOSITORY=%s\n' "$GITHUB_ISSUES_TOKEN" "$GITHUB_REPOSITORY" > "$f"
+          supabase secrets set --project-ref "$PROJECT_REF" --env-file "$f" --yes
+          rm -f "$f"
+
+      - name: Deploy the functions
+        run: |
+          for f in account-cleanup report-to-github; do
+            supabase functions deploy "$f" --project-ref "$PROJECT_REF" --use-api --yes
+          done
+
+      - name: Check they are live
+        run: |
+          for f in account-cleanup report-to-github; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -X GET "$SUPABASE_URL/functions/v1/$f")
+            echo "$f answers $code to a request with no key"
+            [ "$code" = "404" ] && { echo "::error::$f is not deployed"; exit 1; }
+          done
+          true

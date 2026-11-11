@@ -315,6 +315,12 @@ class CloudSyncService {
   /// afterwards. Data on this phone is untouched.
   Future<AccountDeletion> deleteAccount() async {
     final res = Map<String, dynamic>.from(await client.rpc('delete_my_account') as Map);
+    // The deleted sites' photos, selfies and documents (issue #139): the
+    // server queued their folders; this asks it to remove the files now.
+    // Best effort -- any later call drains the queue too.
+    try {
+      await client.functions.invoke('account-cleanup').timeout(const Duration(seconds: 20));
+    } catch (_) {}
     try {
       await client.auth.signOut(scope: SignOutScope.local);
     } catch (_) {

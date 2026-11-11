@@ -1,11 +1,16 @@
+import 'dart:async';
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/features/commercial/subcontractor_portal.dart';
 import 'package:fieldos_mobile/features/portals/portal_screens.dart';
 import 'package:fieldos_mobile/features/daily/today_screen.dart';
+import 'package:fieldos_mobile/services/bug_report_service.dart' show CrashLog;
 import 'package:fieldos_mobile/services/notification_service.dart';
 import 'package:fieldos_mobile/features/auth/login_screen.dart';
 import 'package:fieldos_mobile/features/company/company_setup_screen.dart';
@@ -34,6 +39,15 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     ref.read(bugReportServiceProvider).flush().catchError((_) => 0);
+    final reports = ref.read(bugReportServiceProvider);
+    CrashLog.sink = (error, stack) => unawaited(() async {
+          try {
+            final info = await PackageInfo.fromPlatform();
+            await reports.reportCrash(error, stack,
+                appVersion: '${info.version}+${info.buildNumber}',
+                platform: '${Platform.operatingSystem} ${Platform.operatingSystemVersion}');
+          } catch (_) {}
+        }());
     Future.microtask(() => ref.read(reminderSchedulerProvider).refresh());
     NotificationService.onTap = _openFromReminder;
   }
@@ -49,6 +63,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    CrashLog.sink = null;
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

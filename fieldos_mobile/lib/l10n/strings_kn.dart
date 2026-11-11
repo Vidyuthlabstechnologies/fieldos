@@ -2358,6 +2358,36 @@ const Map<String, String> stringsKn = {
       'ಈಗಲೇ ಅಪ್‌ಡೇಟ್ ಮಾಡಿ',
   'Open the App Store and update FieldOS.':
       'App Store ತೆರೆದು FieldOS ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಿ.',
+  'Block {name}':
+      '{name} ಅವರನ್ನು ಬ್ಲಾಕ್ ಮಾಡಿ',
+  'Hide their chat messages on this phone':
+      'ಅವರ ಚಾಟ್ ಸಂದೇಶಗಳನ್ನು ಈ ಫೋನ್‌ನಲ್ಲಿ ಮರೆಮಾಡಿ',
+  'Block {name}?':
+      '{name} ಅವರನ್ನು ಬ್ಲಾಕ್ ಮಾಡಬೇಕೆ?',
+  'Their chat messages will be hidden on this phone. They stay in the company, and their site records are not hidden. You can unblock them in Settings › Blocked people.':
+      'ಅವರ ಚಾಟ್ ಸಂದೇಶಗಳು ಈ ಫೋನ್‌ನಲ್ಲಿ ಮರೆಯಾಗುತ್ತವೆ. ಅವರು ಕಂಪನಿಯಲ್ಲೇ ಇರುತ್ತಾರೆ, ಅವರ ಸೈಟ್ ದಾಖಲೆಗಳು ಮರೆಯಾಗುವುದಿಲ್ಲ. ಸೆಟ್ಟಿಂಗ್ಸ್ › ಬ್ಲಾಕ್ ಮಾಡಿದವರು ಇಲ್ಲಿ ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಬಹುದು.',
+  'Block and report':
+      'ಬ್ಲಾಕ್ ಮಾಡಿ ವರದಿ ಮಾಡಿ',
+  'Block':
+      'ಬ್ಲಾಕ್ ಮಾಡಿ',
+  '{name} is blocked on this phone.':
+      '{name} ಈ ಫೋನ್‌ನಲ್ಲಿ ಬ್ಲಾಕ್ ಆಗಿದ್ದಾರೆ.',
+  'Blocked people':
+      'ಬ್ಲಾಕ್ ಮಾಡಿದವರು',
+  'Nobody is blocked. To block someone, press and hold one of their chat messages.':
+      'ಯಾರೂ ಬ್ಲಾಕ್ ಆಗಿಲ್ಲ. ಯಾರನ್ನಾದರೂ ಬ್ಲಾಕ್ ಮಾಡಲು ಅವರ ಚಾಟ್ ಸಂದೇಶವನ್ನು ಒತ್ತಿ ಹಿಡಿಯಿರಿ.',
+  'Their chat messages are hidden on this phone. They stay in the company, and their site records are not hidden.':
+      'ಅವರ ಚಾಟ್ ಸಂದೇಶಗಳು ಈ ಫೋನ್‌ನಲ್ಲಿ ಮರೆಯಾಗಿವೆ. ಅವರು ಕಂಪನಿಯಲ್ಲೇ ಇರುತ್ತಾರೆ, ಅವರ ಸೈಟ್ ದಾಖಲೆಗಳು ಮರೆಯಾಗುವುದಿಲ್ಲ.',
+  'Unblock':
+      'ಅನ್‌ಬ್ಲಾಕ್ ಮಾಡಿ',
+  'People whose chat messages are hidden on this phone':
+      'ಈ ಫೋನ್‌ನಲ್ಲಿ ಚಾಟ್ ಸಂದೇಶಗಳು ಮರೆಯಾಗಿರುವವರು',
+  'Privacy':
+      'ಗೌಪ್ಯತೆ',
+  'Send crash details':
+      'ಕ್ರ್ಯಾಶ್ ವಿವರಗಳನ್ನು ಕಳುಹಿಸಿ',
+  'If FieldOS crashes, send the error to the FieldOS team so it gets fixed. No site data is sent.':
+      'FieldOS ಕ್ರ್ಯಾಶ್ ಆದರೆ, ಸರಿಪಡಿಸಲು ಆ ದೋಷವನ್ನು FieldOS ತಂಡಕ್ಕೆ ಕಳುಹಿಸಿ. ಯಾವುದೇ ಸೈಟ್ ಡೇಟಾ ಹೋಗುವುದಿಲ್ಲ.',
   'Your role in this company does not allow that. Ask the owner.':
       'ಈ ಕಂಪನಿಯಲ್ಲಿ ನಿಮ್ಮ ಪಾತ್ರಕ್ಕೆ ಇದಕ್ಕೆ ಅನುಮತಿ ಇಲ್ಲ. ಮಾಲೀಕರನ್ನು ಕೇಳಿ.',
   'Your subscription is on this phone.':

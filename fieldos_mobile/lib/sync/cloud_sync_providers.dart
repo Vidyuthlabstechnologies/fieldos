@@ -53,7 +53,8 @@ final cloudSyncClientProvider = Provider<SupabaseClient>((ref) {
 /// in with the same FieldOS account as Team & sync.
 final aiBackendProvider = Provider<AiBackend>((ref) => SupabaseAiBackend(
       client: ref.watch(cloudSyncAvailableProvider) ? ref.watch(cloudSyncClientProvider) : null,
-      subscriberId: () => ref.read(billingServiceProvider).customerId(),
+      subscriberId: () => ref.read(billingServiceProvider).customerId(
+          linkTo: ref.read(cloudSyncAvailableProvider) ? ref.read(cloudSyncClientProvider).auth.currentUser?.id : null),
     ));
 
 /// The server's minimum app build (issue #146), shared by sync and the

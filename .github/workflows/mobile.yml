@@ -1,11 +1,8 @@
 name: mobile
 
+# Started by hand only (issue #149): the owner keeps GitHub Actions off, so
+# nothing runs on push or PR. Run the same checks locally (AGENTS.md).
 on:
-  push:
-    branches: [master]
-    paths: ['fieldos_mobile/**', 'supabase/**', '.github/workflows/mobile.yml']
-  pull_request:
-    paths: ['fieldos_mobile/**', 'supabase/**', '.github/workflows/mobile.yml']
   workflow_dispatch:
     inputs:
       ios:

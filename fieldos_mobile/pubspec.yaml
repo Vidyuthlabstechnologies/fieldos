@@ -2,7 +2,7 @@ name: fieldos_mobile
 description: "FieldOS Mobile — offline-first agentic construction platform (Flutter)."
 publish_to: 'none'
 
-version: 1.7.4+19
+version: 1.7.5+20
 
 environment:
   sdk: ^3.12.2
@@ -35,8 +35,9 @@ dependencies:
   # Voice reports. The phone's own speech recognition (Google's on Android,
   # Apple's on iPhone) does the listening: free, and offline once the
   # language's speech pack is on the phone. Sarvam (dio + record) is only a
-  # fallback for phones that can't recognise the chosen language, and only
-  # when an owner has added their own key.
+  # fallback for phones that can't recognise the chosen language; it goes
+  # through FieldOS's server, which holds the one shared key (nobody enters
+  # a key in the app).
   speech_to_text: ^7.5.0
   dio: ^5.11.1
   record: ^7.1.1

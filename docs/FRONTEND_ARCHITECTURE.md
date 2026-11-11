@@ -27,7 +27,7 @@ frontend/
 │   │   └── estimations/
 │   │       ├── page.tsx        # List + create
 │   │       └── detail/page.tsx # BOQ + PDF export
-│   └── settings/page.tsx       # Sarvam key + portability
+│   └── settings/page.tsx       # Sarvam key (desktop only) + portability
 ├── components/
 │   ├── Sidebar.tsx             # Navigation (responsive, collapsible)
 │   ├── DashboardWidget.tsx     # Metrics cards
@@ -51,7 +51,6 @@ frontend/
 │   ├── sw.js                   # Service Worker
 │   └── icons/                  # PWA icons (72-512px)
 ├── next.config.mjs             # Next.js config (static export)
-├── capacitor.config.ts         # Capacitor config (deprecated path, see frontend/MOBILE.md)
 ├── tsconfig.json               # TypeScript strict mode
 ├── tailwind.config.ts          # Tailwind config
 └── package.json
@@ -237,7 +236,7 @@ npx serve out
 
 # The real production consumer of frontend/out/ is the Tauri desktop shell
 # (npx tauri build, from the repo root -- see docs/DEPLOYMENT.md), not a
-# web server. `npx cap sync` (Capacitor) is deprecated -- see frontend/MOBILE.md.
+# web server. The old Capacitor wrapper was removed (issue #155).
 ```
 
 ## TypeScript Config

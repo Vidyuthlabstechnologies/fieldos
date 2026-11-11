@@ -94,7 +94,9 @@ void main() {
     await pumpApp(tester, container, DailyReportsScreen(companyId: p.companyId));
     expect(find.text('Tower B'), findsOneWidget);
     if (cutoff >= 1) {
-      expect(find.textContaining('Report not received · last synced Today, 12:00 am'), findsOneWidget);
+      // Today's line (and, before the next-morning cut-off, yesterday's
+      // too: it isn't counted as missed until then).
+      expect(find.textContaining('Report not received · last synced Today, 12:00 am'), findsWidgets);
       expect(find.textContaining('0 submitted, 1 not received'), findsOneWidget);
     }
     expect(find.textContaining('0 people'), findsNothing);

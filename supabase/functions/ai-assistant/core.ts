@@ -100,6 +100,9 @@ export function errorResponse(e: HttpError) {
   return json(e.status, { error: e.code, message: e.message });
 }
 
+/** RevenueCat customers the FieldOS team makes for access codes (app: accessCodePrefix). */
+export const ACCESS_CODE_PREFIX = "access_";
+
 export async function handle(req: Request, deps: Deps): Promise<Response> {
   try {
     return await route(req, deps);
@@ -135,8 +138,15 @@ async function route(req: Request, deps: Deps): Promise<Response> {
     if (!deps.configured.revenuecat) {
       throw new HttpError(503, "not_configured", "The assistant is not switched on yet. Please try again later.");
     }
+    // The plan belongs to the signed-in FieldOS account: the app logs
+    // RevenueCat in as the Supabase user id (issue #138). A customer id sent
+    // by the phone is only taken when it is an access code customer, which
+    // the FieldOS team makes and switches on itself; anyone else's id is
+    // ignored, so learning a paying customer's id opens nothing.
     const subscriber = typeof body.subscriber_id === "string" ? body.subscriber_id.trim() : "";
-    if (!subscriber || subscriber.length > 200 || !(await deps.hasPlan(subscriber))) {
+    const accessCode = subscriber.startsWith(ACCESS_CODE_PREFIX) && subscriber.length <= 60 &&
+      /^access_[A-Z0-9]{10,40}$/.test(subscriber);
+    if (!(await deps.hasPlan(user.id)) && !(accessCode && (await deps.hasPlan(subscriber)))) {
       throw new HttpError(
         402,
         "no_plan",

@@ -15,10 +15,6 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 5
     labels: ["dependencies", "frontend"]
-    # frontend/android/ is a deprecated Capacitor wrapper (see
-    # frontend/MOBILE.md) -- don't spend Dependabot PRs on it.
-    ignore:
-      - dependency-name: "@capacitor/*"
 
   # Desktop shell (Tauri CLI, installed via the root package.json).
   - package-ecosystem: "npm"

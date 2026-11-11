@@ -1,6 +1,6 @@
 /// The privacy policy and terms of use the app carries, so they can be read
 /// offline and before any account exists. Keep both in step with
-/// docs/store/privacy-policy.html and docs/store/terms-of-use.html (the
+/// website/privacy-policy.html and website/terms-of-use.html (the
 /// published copies).
 library;
 
@@ -20,79 +20,140 @@ class LegalDocument {
 
 const privacyPolicy = LegalDocument(
   title: 'Privacy policy',
-  updated: '8 November 2026',
+  updated: '11 November 2026',
   intro:
-      'FieldOS is made by ML Dynamic Solutions Private Limited. FieldOS stores the projects, reports, photos, '
-      'attendance and other site records you create on your phone. If you sign in to Team & sync, those records, '
-      'your email address and the name you entered are also stored in our cloud database (Supabase, region: Mumbai, '
-      "India) so that the members of your company can see them. Only members of your company can read your "
-      "company's data.",
+      'FieldOS is made by ML Dynamic Solutions Private Limited. FieldOS stores the projects, reports, '
+      'photos, attendance and other site records you create on your phone. If you sign in to Team & sync, '
+      'those records, your email address and the name you entered are also stored in our cloud database '
+      '(Supabase, region: Mumbai, India), so that the people your company works with can see what is meant '
+      'for them.',
   sections: [
     LegalSection(
+      'Who can see your company\'s data',
+      '• Members of your company see the company\'s sites and records, limited by their role. For example, '
+          'only owners and project managers see salaries, leads and the change history.\n\n• Subcontractors, '
+          'suppliers and the client see only what the company shares with them, and only after they join with '
+          'a code an owner or project manager gave them. A subcontractor sees their own work orders and '
+          'claims. A supplier sees the price requests and orders sent to them. A site\'s client sees that '
+          'site\'s progress, its photos and the bills sent to them. They never see the rest of the '
+          'company.\n\n• The FieldOS team does not look at company data, except to fix a problem you report or '
+          'when the law requires it.',
+    ),
+    LegalSection(
       'Location',
-      'Your location is read only when you punch a worker in or out, set a site location, or take a site photo with '
-          'the in-app camera (the date, time and position are printed on the photo). It is saved with that record. It '
+      'Your location is read only when you check yourself in or out, punch a worker in or out, set a site '
+          'location, or take a site photo with the in-app camera (the date, time and position are printed on '
+          'the photo). It is saved with that record, so the company can see the work was done at the site. It '
           'is never tracked in the background.',
     ),
     LegalSection(
+      'Attendance photos and selfies',
+      'When staff check in or out, the app takes a selfie with the front camera and saves it with the '
+          'time, the site and the GPS position. A supervisor can also take a photo when punching workers in. '
+          'The photos are part of the company\'s attendance records: the owner and project managers of that '
+          'company can see them, and they are used only to confirm attendance. FieldOS does not use face '
+          'recognition.',
+    ),
+    LegalSection(
+      'Salaries, workers and leads',
+      'Companies use FieldOS to keep their own records about other people: workers\' names, attendance and '
+          'wages, staff salaries and advances, and leads (the name, phone number and enquiry of a possible '
+          'customer). The company decides what it records and why. FieldOS stores and processes these records '
+          'only on the company\'s behalf, and only owners and project managers can see salaries and leads.',
+    ),
+    LegalSection(
+      'Change history',
+      'When someone changes or deletes a money or progress record, FieldOS keeps who did it, when, and the '
+          'old and new values, so the company can check its records. Owners, project managers and the accounts '
+          'team can see this history.',
+    ),
+    LegalSection(
       'Voice reports',
-      "Voice reports use your phone's own speech recognition: Google's on Android and Apple's on iPhone. When the "
-          "language's offline speech pack is on the phone, your speech is turned into text on the phone. Otherwise "
-          "the phone's speech service may send it to Google or Apple to be recognised, under their privacy policies. "
-          'FieldOS does not record or keep your voice.\n\n'
-          "Only if your phone can't recognise the language you chose, and you are signed in to Team & sync, FieldOS "
-          'records your report and sends the recording through its own server to Sarvam AI (sarvam.ai) to be turned '
-          'into text. FieldOS does not keep the recording afterwards.\n\n'
-          'Translating a report to English happens on the phone, using Google ML Kit. The language pack is downloaded '
-          'from Google once, and the text of your report is never sent. ML Kit does send Google diagnostic details so '
-          'that Google can maintain it: the phone model and system version, the app version, an identifier for this '
+      'Voice reports use your phone\'s own speech recognition: Google\'s on Android and Apple\'s on '
+          'iPhone. When the language\'s offline speech pack is on the phone, your speech is turned into text '
+          'on the phone. Otherwise the phone\'s speech service may send it to Google or Apple to be '
+          'recognised, under their privacy policies. FieldOS does not record or keep your voice.\n\nOnly if '
+          'your phone can\'t recognise the language you chose, and you are signed in to Team & sync, FieldOS '
+          'records your report and sends the recording through its own server to Sarvam AI (sarvam.ai) to be '
+          'turned into text. FieldOS does not keep the recording afterwards.\n\nTranslating a report to '
+          'English happens on the phone, using Google ML Kit. The language pack is downloaded from Google '
+          'once, and the text of your report is never sent. ML Kit does send Google diagnostic details so that '
+          'Google can maintain it: the phone model and system version, the app version, an identifier for this '
           'installation, the languages chosen, and how long translation took.',
     ),
     LegalSection(
       'AI assistant',
-      'When you use Ask FieldOS, what you type or say, and the site details the assistant needs to answer (such as '
-          'project names, workers, tasks and amounts on this phone), go through FieldOS\'s server to Anthropic '
-          '(anthropic.com), whose Claude model works out the reply. Anthropic\'s commercial terms do not let it use '
-          'this to train its models. If Anthropic is unavailable, the same goes instead to Sarvam AI (sarvam.ai), '
-          'which runs a DeepSeek model for the reply. FieldOS keeps only a count of how much each account uses the '
-          'assistant each day and month, not the conversation. Nothing is saved to your records until you tap Save '
-          'on the card the assistant shows.',
+      'When you use Ask FieldOS, what you type or say, and the site details the assistant needs to answer '
+          '(such as project names, workers, tasks and amounts on this phone), go through FieldOS\'s server to '
+          'Anthropic (anthropic.com), whose Claude model works out the reply. Anthropic\'s commercial terms do '
+          'not let it use this to train its models. If Anthropic is unavailable, the same goes instead to '
+          'Sarvam AI (sarvam.ai), which runs a DeepSeek model for the reply. FieldOS keeps only a count of how '
+          'much each account uses the assistant each day and month, not the conversation. Nothing is saved to '
+          'your records until you tap Save on the card the assistant shows.',
     ),
     LegalSection(
       'Maps',
-      "Map tiles are loaded from OpenStreetMap. Their servers can see your device's IP address, as with any web "
-          'request.',
+      'Map tiles are loaded from OpenStreetMap. Their servers can see your device\'s IP address, as with '
+          'any web request.',
     ),
     LegalSection(
       'Payments',
-      'The FieldOS subscription is bought through Google Play or the Apple App Store, which handle your card or UPI '
-          'details. FieldOS never sees them. RevenueCat (revenuecat.com) receives the purchase record from the store so '
-          'that the app can check your subscription.',
+      'The FieldOS subscription is bought through Google Play or the Apple App Store, which handle your '
+          'card or UPI details. FieldOS never sees them. RevenueCat (revenuecat.com) receives the purchase '
+          'record from the store, linked to your FieldOS account id, so that the app and the assistant can '
+          'check your subscription. Company plans are invoiced directly by ML Dynamic Solutions.',
     ),
     LegalSection(
-      'Bug reports',
-      'If you use "Report a bug", we receive what you type, the email address you give (optional), the app version, '
-          "your phone's operating system version and the app's last few error messages. No project data, photos or "
-          'contacts are included. Reports are stored in our cloud database and copied to our private issue tracker on '
-          'GitHub so that we can fix the problem.\n\n'
-          'If you use "Report this message" in project chat, we receive the reported message, the name it was '
-          'sent under, the reason you picked, anything you add, and your account id. The sender is not told who '
-          'reported it. Reports are stored in our cloud database and copied to our private issue tracker on '
-          'GitHub so that we can review them within 24 hours.\n\n'
-          'Apart from what this policy describes, nothing about how you use FieldOS leaves your phone. We do not sell '
-          'data or show ads.',
+      'Bug reports and crash details',
+      'If you use "Report a bug", we receive what you type, the email address you give (optional), the app '
+          'version, your phone\'s operating system version and the app\'s last few error messages. No project '
+          'data, photos or contacts are included. Reports are stored in our cloud database and copied to our '
+          'private issue tracker on GitHub so that we can fix the problem.\n\nIf the app crashes and "Send '
+          'crash details" is on in Settings (you can turn it off at any time), the next time you are online '
+          'the app sends the error, where in the app it happened, the app version and the phone\'s system '
+          'version, the same way as a bug report. No project data is included.\n\nIf you use "Report this '
+          'message" in project chat, we receive the reported message, the name it was sent under, the reason '
+          'you picked, anything you add, and your account id. The sender is not told who reported it. Reports '
+          'are stored in our cloud database and copied to our private issue tracker on GitHub so that we can '
+          'review them within 24 hours. You can also block a teammate, which hides their chat messages on your '
+          'phone.\n\nApart from what this policy describes, nothing about how you use FieldOS leaves your '
+          'phone. We do not sell data or show ads.',
+    ),
+    LegalSection(
+      'How long we keep data',
+      '• Company records stay as long as the company uses FieldOS, and are deleted with the account as '
+          'described below.\n\n• Bug, crash and message reports are kept only as long as needed to fix or '
+          'review them, and never more than 12 months.\n\n• Deleted data can remain in our hosting provider\'s '
+          'automatic backups for up to 30 days before they are overwritten.',
     ),
     LegalSection(
       'Deleting data',
-      'In the app, open Team & sync and tap "Delete my cloud account". A company where you are the only member is '
-          'deleted with all its records. In a company with other members, the records you added stay with that '
-          'company, your name is removed from its team chat, and ownership passes to another member. You can also ask '
-          'for deletion by emailing info@mldynamic.com. Uninstalling the app removes the data on the phone.',
+      'In the app, open Team & sync and tap "Delete my cloud account". A company where you are the only '
+          'member is deleted with all its records and files: site photos, selfies, documents and claim photos. '
+          'In a company with other members, the records you added (including your attendance) stay with that '
+          'company, because they are its work records. Your name is removed from its team chat, ownership '
+          'passes to another member, and your portal access and assistant usage are deleted. You can also ask '
+          'for deletion by emailing info@mldynamic.com. Uninstalling the app removes the data on the phone. '
+          'See Delete your account.',
+    ),
+    LegalSection(
+      'Your rights',
+      'Under India\'s Digital Personal Data Protection Act, 2023, you can ask us for a summary of the '
+          'personal data we hold about you, ask us to correct or complete it, ask us to erase it, and nominate '
+          'someone to act for you. Email info@mldynamic.com from the address on your account. If your data is '
+          'in a company\'s records (for example as a worker or a lead), we pass your request to that company, '
+          'which decides about its own records, and we tell you that we have done so.',
+    ),
+    LegalSection(
+      'Grievance officer',
+      'For any complaint about your personal data, write to the Grievance Officer, ML Dynamic Solutions '
+          'Private Limited, at info@mldynamic.com with "Privacy grievance" in the subject. We reply within 30 '
+          'days. If you are not satisfied, you can complain to the Data Protection Board of India.',
     ),
     LegalSection(
       'Contact',
-      'info@mldynamic.com, ML Dynamic Solutions Private Limited, 606, 6th Floor, Gowra Fountainhead, Patrika Nagar, '
-          'Madhapur, Hi-Tech City, Hyderabad, Telangana 500081, India.',
+      'info@mldynamic.com, ML Dynamic Solutions Private Limited, 606, 6th Floor, Gowra Fountainhead, '
+          'Patrika Nagar, Madhapur, Hi-Tech City, Hyderabad, Telangana 500081, India.',
     ),
   ],
 );

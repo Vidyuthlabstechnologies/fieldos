@@ -2358,6 +2358,36 @@ const Map<String, String> stringsMr = {
       'आता अपडेट करा',
   'Open the App Store and update FieldOS.':
       'App Store उघडा आणि FieldOS अपडेट करा.',
+  'Block {name}':
+      '{name} यांना ब्लॉक करा',
+  'Hide their chat messages on this phone':
+      'त्यांचे चॅट संदेश या फोनवर लपवा',
+  'Block {name}?':
+      '{name} यांना ब्लॉक करायचे?',
+  'Their chat messages will be hidden on this phone. They stay in the company, and their site records are not hidden. You can unblock them in Settings › Blocked people.':
+      'त्यांचे चॅट संदेश या फोनवर लपवले जातील. ते कंपनीत राहतील, आणि त्यांच्या साइट नोंदी लपवल्या जाणार नाहीत. सेटिंग्ज › ब्लॉक केलेले लोक येथे अनब्लॉक करता येईल.',
+  'Block and report':
+      'ब्लॉक करा आणि तक्रार करा',
+  'Block':
+      'ब्लॉक करा',
+  '{name} is blocked on this phone.':
+      '{name} या फोनवर ब्लॉक आहेत.',
+  'Blocked people':
+      'ब्लॉक केलेले लोक',
+  'Nobody is blocked. To block someone, press and hold one of their chat messages.':
+      'कोणीही ब्लॉक नाही. एखाद्याला ब्लॉक करण्यासाठी त्यांचा चॅट संदेश दाबून धरा.',
+  'Their chat messages are hidden on this phone. They stay in the company, and their site records are not hidden.':
+      'त्यांचे चॅट संदेश या फोनवर लपवले आहेत. ते कंपनीत राहतात, आणि त्यांच्या साइट नोंदी लपवल्या जात नाहीत.',
+  'Unblock':
+      'अनब्लॉक करा',
+  'People whose chat messages are hidden on this phone':
+      'ज्यांचे चॅट संदेश या फोनवर लपवले आहेत',
+  'Privacy':
+      'गोपनीयता',
+  'Send crash details':
+      'क्रॅशची माहिती पाठवा',
+  'If FieldOS crashes, send the error to the FieldOS team so it gets fixed. No site data is sent.':
+      'FieldOS क्रॅश झाल्यास, दुरुस्तीसाठी ती चूक FieldOS टीमला पाठवा. साइटचा कोणताही डेटा पाठवला जात नाही.',
   'Your role in this company does not allow that. Ask the owner.':
       'या कंपनीतील तुमच्या भूमिकेला याची परवानगी नाही. मालकाला विचारा.',
   'Your subscription is on this phone.':
