@@ -1,12 +1,12 @@
 name: bug-reports
 
-# Every 15 minutes, turns new reports from the app's "Report a bug" page
+# Turns new reports from the app's "Report a bug" page
 # into GitHub issues labelled bug-report. Uses the same SUPABASE_URL and
 # SUPABASE_ACCESS_TOKEN secrets as supabase-deploy; the service role key is
 # fetched here at run time and never stored in the repo or the app.
+# Manual backfill only (issue #142): new reports are filed by the
+# report-to-github edge function, with no Actions minutes.
 on:
-  schedule:
-    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:

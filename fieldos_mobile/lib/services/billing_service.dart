@@ -124,13 +124,22 @@ class BillingService {
     return raw == null || raw.isEmpty ? null : DateTime.tryParse(raw);
   }
 
-  /// This phone's RevenueCat customer id. FieldOS's server asks RevenueCat
-  /// about it before the AI assistant answers. Null when payments aren't
-  /// set up in this build.
-  Future<String?> customerId() async {
+  /// This phone's RevenueCat customer id. Null when payments aren't set up
+  /// in this build.
+  ///
+  /// With [linkTo] (the signed-in FieldOS account's id), RevenueCat is first
+  /// logged in as that account, which carries this phone's purchases over.
+  /// FieldOS's server checks the plan on the signed-in account, never on an
+  /// id the phone sends (issue #138); a phone on an access code keeps it.
+  Future<String?> customerId({String? linkTo}) async {
     try {
       await _configure();
-      return await Purchases.appUserID;
+      final current = await Purchases.appUserID;
+      if (linkTo == null || linkTo.isEmpty || current == linkTo || current.startsWith(accessCodePrefix)) {
+        return current;
+      }
+      await _remember((await Purchases.logIn(linkTo)).customerInfo);
+      return linkTo;
     } catch (_) {
       return null;
     }

@@ -90,9 +90,8 @@ also asks for Speech Recognition the first time someone speaks a report.
 
 ## 4. Privacy policy and terms (publish these files)
 
-Publish `docs/store/privacy-policy.html` and `docs/store/terms-of-use.html`
-as they are (any static host works, for example GitHub Pages or an S3
-bucket). The app carries the same text in
+The published copies are `website/privacy-policy.html` and
+`website/terms-of-use.html` (live on the Netlify site). The app carries the same text in
 `fieldos_mobile/lib/features/legal/legal_texts.dart`, so people can read it
 offline and before signing in; keep the three in step when one changes.
 

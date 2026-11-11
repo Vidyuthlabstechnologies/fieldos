@@ -1,6 +1,6 @@
 /// In-app bug reports. A report goes straight to the cloud's bug_reports
-/// table (anyone may insert, nobody may read back), and a scheduled GitHub
-/// workflow turns each one into an issue for the team to fix. If the phone
+/// table (anyone may insert, nobody may read back), and the report-to-github
+/// edge function turns each one into an issue for the team to fix. If the phone
 /// is offline the report waits on the phone and is sent on the next try.
 library;
 
@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/services/report_filing.dart';
 
 /// The last few errors the app hit, attached to a bug report so a fix
 /// doesn't depend on the reporter describing a stack trace.
@@ -80,6 +81,7 @@ class BugReportService {
     final c = client;
     if (c == null) throw StateError('no cloud configured');
     await c.from('bug_reports').insert(r.toJson());
+    nudgeReportFiling(c);
   }
 
   /// Sends now if possible, otherwise keeps it for [flush].

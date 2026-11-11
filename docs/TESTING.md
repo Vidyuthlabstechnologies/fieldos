@@ -294,6 +294,6 @@ dev`/`uvicorn --reload`):
 - [ ] Documents: upload, version increment, category filter
 - [ ] Workers: add/edit/deactivate (owner/PM only), daily attendance
 - [ ] Estimations: BOQ with volume/area/steel, reconciliation against a real source spreadsheet
-- [ ] Settings: Sarvam key, project export/import
+- [ ] Settings (desktop app): Sarvam key, project export/import
 - [ ] Mobile (Flutter): install, register, and exercise the same feature set standalone (remember: it does not sync with the desktop app's data — see docs/MOBILE_GUIDE.md)
 - [ ] Full installer re-verification: install the packaged `.exe`/`.msi` fresh and confirm the new migration + all 8 newer routers work against a real, freshly-provisioned database (this has NOT been re-verified since the materials/workers/documents/procurement/equipment/inspections/realtime/billing routers and their migration landed — see project history)

@@ -10,10 +10,10 @@ name: launch-readiness
 # repo, so this is how everyone else sees where issues #50 and #51 stand.
 #
 # Fails only when a secret that IS set is wrong; missing ones just show ⬜.
+# Started by hand only (issue #149): the owner keeps GitHub Actions off, so
+# nothing runs on push or PR. Run the same checks locally (AGENTS.md).
 on:
   workflow_dispatch:
-  pull_request:
-    paths: ['tools/launch_readiness.py', '.github/workflows/launch-readiness.yml']
 
 permissions:
   contents: read

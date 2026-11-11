@@ -10,8 +10,8 @@ before assuming otherwise) with:
 - **Frontend**: Next.js 16 (App Router, static export), React, TypeScript,
   Tailwind CSS
 - **Mobile**: Flutter, native, fully offline with its own local database —
-  see `fieldos_mobile/` and `docs/MOBILE_GUIDE.md`. An earlier Capacitor
-  wrapper (`frontend/android/`) is deprecated; don't build on it.
+  see `fieldos_mobile/` and `docs/MOBILE_GUIDE.md`. (The old Capacitor
+  wrapper was removed in November 2026, issue #155.)
 - **Real-time**: WebSocket per-project rooms (desktop app only; the Flutter
   mobile app has no connection to the backend at all yet)
 - **Voice AI**: Sarvam AI for Indic language voice DPR, only when the
@@ -218,6 +218,12 @@ class NewModelOut(BaseModel):
 - When a release ships with a new `schemaVersion`, add its fixture as `tool/upgrade_fixtures/README.md` describes.
 - When a server change would break older app builds, raise the minimum build instead of letting them sync wrongly: `update public.app_config set min_build_android = <build>, min_build_ios = <build>, message = '<short reason>';` (service role, SQL editor). Phones below it stop syncing and show an Update banner on Home; their work stays on the phone (`lib/sync/app_version_gate.dart`). Set it back to 0 to switch it off.
 
+## Repo rules (FieldOS team)
+- **No GitHub Actions runs without the owner's OK.** Every workflow is `workflow_dispatch` only (issue #149). Run the checks locally instead: `flutter analyze` and `flutter test` in `fieldos_mobile/`, `deno test` in each `supabase/functions/*`, `pytest`, and the SQL tests in `supabase/tests/` against a local Postgres.
+- **Production migrations get one line in issue #132**, never a new issue. Apply them with the `supabase-deploy` workflow (owner's OK), then `isolation-check`.
+- **Supabase and RevenueCat setup work is assigned to `bahumanyarg11`** on GitHub.
+- **Legal texts have one source:** `website/privacy-policy.html` and `website/terms-of-use.html`. The app's copy (`fieldos_mobile/lib/features/legal/legal_texts.dart`) must say the same; `docs/store/` only points there. Never describe them as lawyer-reviewed.
+
 ## Testing Requirements
 
 ### Backend
@@ -290,7 +296,6 @@ fieldos/
 │   ├── components/         # Reusable UI
 │   ├── lib/                # API, auth, pdf, realtime
 │   ├── public/             # PWA assets
-│   └── android/            # Capacitor Android (deprecated -- see frontend/MOBILE.md)
 ├── fieldos_mobile/         # Native Flutter mobile app (canonical mobile strategy)
 ├── src-tauri/              # Desktop shell (Rust/Tauri) -- packages the installer
 ├── importers/              # One-off scripts: real client Excel BOQ -> FieldOS project-export JSON
