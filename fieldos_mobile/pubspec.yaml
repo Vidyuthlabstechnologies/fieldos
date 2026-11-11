@@ -40,7 +40,7 @@ dependencies:
   # a key in the app).
   speech_to_text: ^7.5.0
   dio: ^5.11.1
-  record: ^7.1.1
+  record: ^7.1.2
 
   # On-device translation of a Hindi/Telugu/... report into English for
   # the PDF and the client. Google ML Kit: free, offline after a one-time
