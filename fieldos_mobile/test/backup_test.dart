@@ -74,6 +74,52 @@ void main() {
     await live.close();
   });
 
+  test('the cloud sign-in never goes into a backup, and an old backup that has it does not bring it back', () async {
+    final (db, _) = await seeded();
+    const session = '{"access_token":"secret-access","refresh_token":"secret-refresh"}';
+    await db.settingsDao.set('cloud_session', session);
+    await db.settingsDao.set('voice_language', 'te');
+    final zip = File(p.join(dir.path, 'out', 'fieldos-backup.zip'));
+    await writeBackup(db, zip, workDir: dir);
+    // The live phone keeps its own sign-in.
+    expect(await db.settingsDao.get('cloud_session'), session);
+    await db.close();
+
+    final raw = utf8.decode(zip.readAsBytesSync(), allowMalformed: true);
+    final dbBytes = ZipDecoder().decodeBytes(zip.readAsBytesSync()).findFile('fieldos.sqlite')!.content as List<int>;
+    final inside = latin1.decode(dbBytes);
+    expect(inside.contains('secret-refresh'), isFalse, reason: 'not even in a free page');
+    expect(raw.contains('secret-refresh'), isFalse);
+
+    // A backup made by an older version, with the sign-in still inside.
+    final oldDbPath = p.join(dir.path, 'old', 'fieldos.sqlite');
+    Directory(p.dirname(oldDbPath)).createSync(recursive: true);
+    final old = AppDatabase(NativeDatabase(File(oldDbPath)));
+    await old.companyDao.create('Old backup co');
+    await old.settingsDao.set('cloud_session', session);
+    final oldCopy = File(p.join(dir.path, 'old', 'copy.sqlite'));
+    await old.customStatement('VACUUM INTO ?', [oldCopy.path]);
+    final oldZip = File(p.join(dir.path, 'old', 'old-backup.zip'));
+    final good = ZipDecoder().decodeBytes(zip.readAsBytesSync());
+    final manifest = jsonDecode(utf8.decode(good.findFile('manifest.json')!.content as List<int>)) as Map<String, dynamic>;
+    manifest['counts'] = {'companies': 1};
+    manifest['files'] = <String, String>{};
+    oldZip.writeAsBytesSync(ZipEncoder().encode(Archive()
+      ..addFile(ArchiveFile.bytes('fieldos.sqlite', oldCopy.readAsBytesSync()))
+      ..addFile(ArchiveFile.string('manifest.json', jsonEncode(manifest)))));
+    await old.close();
+
+    final livePath = p.join(dir.path, 'phone3', 'fieldos.sqlite');
+    Directory(p.dirname(livePath)).createSync(recursive: true);
+    await stageRestore(oldZip,
+        databasePath: livePath, filesDir: Directory(p.join(dir.path, 'phone3', 'files')), appSchemaVersion: db.schemaVersion);
+    expect(applyStagedRestore(livePath), isTrue);
+    final live = AppDatabase(NativeDatabase(File(livePath)));
+    expect((await live.select(live.companies).get()).single.name, 'Old backup co');
+    expect(await live.settingsDao.get('cloud_session'), isNull);
+    await live.close();
+  });
+
   Future<File> rewrite(File zip, void Function(Archive a, Map<String, dynamic> manifest) change) async {
     final a = ZipDecoder().decodeBytes(zip.readAsBytesSync());
     final manifest = jsonDecode(utf8.decode(a.findFile('manifest.json')!.content as List<int>)) as Map<String, dynamic>;

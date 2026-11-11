@@ -144,7 +144,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 38;
+  int get schemaVersion => 39;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -363,6 +363,13 @@ class AppDatabase extends _$AppDatabase {
           if (from < 38) {
             // Change history on money and material entries, pulled only.
             await _createTableIfMissing(m, entryHistory);
+          }
+          if (from < 39) {
+            // The v17 step added project_members.updated_at with DEFAULT 0
+            // (SQLite can't add a column defaulting to the current time), so
+            // on upgraded phones a member saved without it was dated 1970.
+            // Rebuild the table as a fresh install has it; rows are kept.
+            await m.alterTable(TableMigration(projectMembers));
           }
         },
       );

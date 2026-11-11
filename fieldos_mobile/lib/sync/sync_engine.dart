@@ -23,6 +23,7 @@ import 'package:http/http.dart' show ClientException;
 import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'app_version_gate.dart';
 import 'sync_mappers.dart';
 
 class SyncPushResult {
@@ -84,11 +85,17 @@ class SyncEngine {
   /// tests can point at a temp dir -- [localDocumentsDirectory] needs
   /// path_provider's platform channels, which don't exist under
   /// TestWidgetsFlutterBinding.
-  SyncEngine({required this.db, required this.client, Future<Directory> Function()? resolveDocumentsDirectory})
+  SyncEngine(
+      {required this.db, required this.client, Future<Directory> Function()? resolveDocumentsDirectory, this.versionGate})
       : _resolveDocumentsDirectory = resolveDocumentsDirectory ?? localDocumentsDirectory;
 
   final AppDatabase db;
   final SupabaseClient client;
+
+  /// When set, a build older than the server's minimum (issue #146) stops
+  /// before touching the server: [pushPending] and [pullAll] throw
+  /// [AppUpdateRequired] and the outbox stays as it is on the phone.
+  final AppVersionGate? versionGate;
   final Future<Directory> Function() _resolveDocumentsDirectory;
 
   RealtimeChannel? _tasksChannel;
@@ -194,7 +201,12 @@ class SyncEngine {
   /// the server refused), wait for the next run so per-record order holds;
   /// unrelated work goes through. A network failure stops the run without
   /// counting against the entry: being offline must never park a write.
-  Future<SyncPushResult> pushPending() => _synchronized(() async {
+  Future<SyncPushResult> pushPending() async {
+    await versionGate?.requireSupported();
+    return _pushPending();
+  }
+
+  Future<SyncPushResult> _pushPending() => _synchronized(() async {
         final entries = await db.syncOutboxDao.pending();
         var succeeded = 0;
         final blocked = <String>{};
@@ -372,7 +384,12 @@ class SyncEngine {
   ///    caps an unpaged select at 1,000 rows by default, so a company's
   ///    1,001st DPR or task simply never reached a second phone.
   ///  - Unsent work and the local-only sample site are never removed.
-  Future<void> pullAll() => _synchronized(() async {
+  Future<void> pullAll() async {
+    await versionGate?.requireSupported();
+    return _pullAll();
+  }
+
+  Future<void> _pullAll() => _synchronized(() async {
         final dirty = await db.syncOutboxDao.dirtyKeys();
         final keep = {...dirty.map((k) => k.substring(k.indexOf(':') + 1)), ...await db.syncOutboxDao.localOnlyIds()};
         final cursorKey = 'sync_cursor:${client.auth.currentUser?.id}';

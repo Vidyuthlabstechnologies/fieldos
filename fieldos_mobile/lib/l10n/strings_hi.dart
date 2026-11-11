@@ -1456,6 +1456,14 @@ const Map<String, String> stringsHi = {
       'आपका प्लान',
   'This needs a FieldOS server update that is on its way. Your work is safe on the phone; try again in a day or two.':
       'FieldOS सर्वर अपडेट जल्द आ रहा है, यह उसके बाद चलेगा। आपका काम फ़ोन पर सुरक्षित है; एक-दो दिन में फिर कोशिश करें।',
+  'Update FieldOS to keep syncing. Everything you enter is saved on this phone and goes up once you update.':
+      'सिंक जारी रखने के लिए FieldOS अपडेट करें। आप जो भी भरते हैं वह इस फ़ोन पर सेव रहता है और अपडेट के बाद ऊपर चला जाता है।',
+  'A newer FieldOS is needed':
+      'FieldOS का नया वर्ज़न चाहिए',
+  'Update now':
+      'अभी अपडेट करें',
+  'Open the App Store and update FieldOS.':
+      'App Store खोलें और FieldOS अपडेट करें।',
   'Your role in this company does not allow that. Ask the owner.':
       'इस कंपनी में आपकी भूमिका में इसकी अनुमति नहीं है। मालिक से पूछें।',
   'Your subscription is on this phone.':
