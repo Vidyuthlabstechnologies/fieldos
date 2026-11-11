@@ -1603,3 +1603,234 @@ class EntryHistory extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+// --- v40: site execution (FOS-205 to FOS-209) -------------------------------
+// See supabase/migrations/20261112100000_site_execution.sql. Synced through
+// the generic mappers in sync/site_execution_sync.dart (one snake_case
+// column on the server per field here).
+
+/// Something a task needs before it can start: material, a drawing, an
+/// answer to an RFI, a hold point release, labour, a permit (FOS-205).
+class TaskConstraints extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get taskId => text().withLength(min: 1, max: 36)();
+
+  /// material | drawing | rfi | hold_point | labour | equipment | permit | predecessor | other
+  TextColumn get kind => text().withLength(min: 1, max: 20)();
+  TextColumn get description => text().withLength(min: 1, max: 300)();
+  TextColumn get ownerId => text().withLength(max: 64).nullable()();
+
+  /// yyyy-mm-dd: when it must be cleared for the task to start on time.
+  TextColumn get needBy => text().withLength(max: 10).nullable()();
+
+  /// The RFI, drawing or hold point it waits on, if any: it clears itself
+  /// when that record does.
+  TextColumn get linkId => text().withLength(max: 36).nullable()();
+  DateTimeColumn get clearedAt => dateTime().nullable()();
+  TextColumn get clearedBy => text().withLength(max: 64).nullable()();
+  TextColumn get clearNote => text().withLength(max: 300).nullable()();
+  TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A drawing in the site's register (FOS-206). Its revisions hold the files.
+class Drawings extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get number => text().withLength(min: 1, max: 40)();
+  TextColumn get title => text().withLength(min: 1, max: 200)();
+
+  /// architectural | structural | mep | landscape | other
+  TextColumn get discipline => text().withLength(min: 1, max: 20).withDefault(const Constant('architectural'))();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// One revision of a drawing, with its file. Only the latest approved
+/// revision is shown on site; older ones stay in the register.
+class DrawingRevisions extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get drawingId => text().withLength(min: 1, max: 36)();
+  TextColumn get rev => text().withLength(min: 1, max: 10)();
+  TextColumn get filePath => text().withLength(min: 1, max: 500)();
+  TextColumn get mimeType => text().withLength(max: 100)();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+
+  /// pending | approved | rejected
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('pending'))();
+  TextColumn get decidedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get decidedAt => dateTime().nullable()();
+  TextColumn get decisionNote => text().withLength(max: 300).nullable()();
+  TextColumn get uploadedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A request for information to the designer or client (FOS-206).
+class Rfis extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get question => text().withLength(min: 1, max: 1000)();
+  TextColumn get drawingId => text().withLength(max: 36).nullable()();
+  TextColumn get taskId => text().withLength(max: 36).nullable()();
+
+  /// Who must answer: a person in the company, or a name outside it.
+  TextColumn get assigneeId => text().withLength(max: 64).nullable()();
+  TextColumn get askedOf => text().withLength(max: 120).nullable()();
+
+  /// yyyy-mm-dd
+  TextColumn get dueOn => text().withLength(max: 10).nullable()();
+  TextColumn get answer => text().withLength(max: 1000).nullable()();
+  TextColumn get answeredBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get answeredAt => dateTime().nullable()();
+
+  /// open | answered | closed
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('open'))();
+  TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A quality hold point: work at this place does not go on until it is
+/// inspected and released (FOS-207).
+class HoldPoints extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get title => text().withLength(min: 1, max: 200)();
+  TextColumn get taskId => text().withLength(max: 36).nullable()();
+  TextColumn get unitId => text().withLength(max: 36).nullable()();
+
+  /// Block, floor, zone or grid as people on site say it.
+  TextColumn get location => text().withLength(max: 120).nullable()();
+
+  /// pending | released | rejected
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('pending'))();
+  TextColumn get decidedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get decidedAt => dateTime().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A defect or snag, from raised to fixed to closed (FOS-207).
+class Defects extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get unitId => text().withLength(max: 36).nullable()();
+  TextColumn get location => text().withLength(max: 120).nullable()();
+  TextColumn get description => text().withLength(min: 1, max: 500)();
+
+  /// minor | major | critical
+  TextColumn get severity => text().withLength(min: 1, max: 10).withDefault(const Constant('minor'))();
+  TextColumn get assigneeId => text().withLength(max: 64).nullable()();
+  TextColumn get subcontractorId => text().withLength(max: 36).nullable()();
+
+  /// yyyy-mm-dd
+  TextColumn get dueOn => text().withLength(max: 10).nullable()();
+
+  /// open | fixed | closed. A fix that does not pass goes back to open.
+  TextColumn get status => text().withLength(min: 1, max: 10).withDefault(const Constant('open'))();
+  TextColumn get fixedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get fixedAt => dateTime().nullable()();
+  TextColumn get fixNote => text().withLength(max: 300).nullable()();
+  TextColumn get closedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get closedAt => dateTime().nullable()();
+  IntColumn get reopenCount => integer().withDefault(const Constant(0))();
+  TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Photos for defects (before and after), hold points and RFIs.
+class ExecutionPhotos extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// defect | defect_fix | hold_point | rfi
+  TextColumn get parentKind => text().withLength(min: 1, max: 20)();
+  TextColumn get parentId => text().withLength(min: 1, max: 36)();
+  TextColumn get filePath => text().withLength(min: 1, max: 500)();
+  TextColumn get mimeType => text().withLength(max: 100)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A flat, villa, shop or zone that is handed over on its own (FOS-208).
+class HandoverUnits extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get block => text().withLength(max: 60).nullable()();
+  TextColumn get floor => text().withLength(max: 30).nullable()();
+  TextColumn get name => text().withLength(min: 1, max: 60)();
+  TextColumn get handedTo => text().withLength(max: 120).nullable()();
+  DateTimeColumn get handedOverAt => dateTime().nullable()();
+  TextColumn get handedOverBy => text().withLength(max: 64).nullable()();
+  TextColumn get handoverNote => text().withLength(max: 300).nullable()();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// One line of a unit's handover checklist.
+class HandoverChecks extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get unitId => text().withLength(min: 1, max: 36)();
+  TextColumn get item => text().withLength(min: 1, max: 200)();
+  BoolColumn get done => boolean().withDefault(const Constant(false))();
+  TextColumn get doneBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get doneAt => dateTime().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// The company's own standard lists, used on every site (FOS-209): hold
+/// points every slab gets, the handover checklist every flat gets.
+class CompanyStandards extends Table {
+  TextColumn get id => text()();
+  TextColumn get companyId => text().withLength(min: 1, max: 36)();
+
+  /// hold_point | handover_check
+  TextColumn get kind => text().withLength(min: 1, max: 20)();
+  TextColumn get item => text().withLength(min: 1, max: 200)();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

@@ -24,6 +24,7 @@ import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'app_version_gate.dart';
+import 'site_execution_sync.dart';
 import 'sync_mappers.dart';
 
 class SyncPushResult {
@@ -163,6 +164,7 @@ class SyncEngine {
     'inspector_id', 'approver_id', 'assignee_id', 'sender_id', 'user_id', 'recorded_by', 'edited_by',
     'decided_by', 'submitted_by', 'holder_id', 'certified_by', 'raised_by', 'owner_id', 'acted_by', 'measured_by', 'by_user',
     'sent_by', 'issued_by', 'taken_by', 'reviewed_by', 'supervisor_id', 'backup_id', 'updated_by', 'changed_by',
+    ...siteExecutionUserColumns,
   };
 
   Map<String, dynamic> _toRemoteIds(Map<String, dynamic> data) =>
@@ -251,6 +253,8 @@ class SyncEngine {
     'site_receipt_attachments': 'file_path',
     'commercial_attachments': 'file_path',
     'attendance_photos': 'file_path',
+    'site_drawing_revisions': 'file_path',
+    'site_execution_photos': 'file_path',
   };
 
   /// The Storage bucket every synced file lives in. Its policies key access
@@ -538,6 +542,21 @@ class SyncEngine {
         await db.commercialDao.upsertAttachment(commercialAttachmentFromSupabaseJson(r, localPath: local));
       }
     },
+        for (final t in siteExecutionTables.keys)
+          t: (r) async {
+            if (!siteExecutionFileFolders.containsKey(t)) {
+              return db.siteExecutionDao.upsertFromRemote(t, executionFromRemote(t, r));
+            }
+            final mine = await db
+                .customSelect('SELECT file_path AS f FROM ${siteExecutionTables[t]} WHERE id = ?',
+                    variables: [Variable<String>(r['id'] as String)])
+                .getSingleOrNull();
+            final kept = mine?.read<String>('f');
+            final local = kept != null && File(kept).existsSync()
+                ? kept
+                : await _downloadFile(r['file_path'] as String, r['id'] as String);
+            if (local != null) await db.siteExecutionDao.upsertFromRemote(t, executionFromRemote(t, r, localPath: local));
+          },
         'crm_leads': (r) => db.crmDao.upsertLeadFromRemote(crmLeadFromSupabaseJson(r)),
         'crm_activities': (r) => db.crmDao.upsertActivityFromRemote(crmActivityFromSupabaseJson(r)),
         'crm_quotes': (r) => db.crmDao.upsertQuoteFromRemote(crmQuoteFromSupabaseJson(r)),
@@ -777,6 +796,7 @@ class SyncEngine {
 
   /// Server table -> this phone's Drift table.
   static const localTableNames = {
+    ...siteExecutionTables,
     'projects': 'projects',
     'tasks': 'tasks',
     'dpr_entries': 'dpr_entries',
@@ -857,6 +877,7 @@ class SyncEngine {
     'site_bill_allocations', 'site_supplier_invoices', 'site_approval_steps', 'site_close_settings', 'site_day_events',
     'site_cash_moves', 'site_floor_progress', 'entry_history',
     'attendance_photos', 'staff_attendance',
+    ...siteExecutionProjectScoped,
   };
 
   /// Children found through their parent, for removing a whole site or
@@ -896,7 +917,8 @@ class SyncEngine {
             t == 'expense_attachments' ||
             t == 'site_receipt_attachments' ||
             t == 'commercial_attachments' ||
-            t == 'attendance_photos') {
+            t == 'attendance_photos' ||
+            siteExecutionFileFolders.containsKey(t)) {
           final column = t == 'dpr_photos' ? 'photo_path' : 'file_path';
           final files = await db
               .customSelect('SELECT $column AS f FROM $local WHERE $where',
