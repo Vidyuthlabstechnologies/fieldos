@@ -74,7 +74,7 @@ dependencies:
   # binding dependency, so the sync engine's push/pull logic can be tested
   # with real network calls in `flutter test`'s fast Dart VM runner against
   # the local dev instance, not just an emulator-only integration test.
-  supabase: ^2.7.0
+  supabase: ^2.16.5
 
   # On-device alerts for a colleague's new issue / approval request / chat
   # message arriving through sync. Local notifications, not FCM push: no
