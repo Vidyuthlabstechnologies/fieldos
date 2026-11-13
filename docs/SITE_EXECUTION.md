@@ -88,6 +88,11 @@ records in `lib/data/site_execution_dao.dart`; sync mapping in
 - Approving a revision, releasing a hold point and handing over need
   `is_project_owner_or_pm`; company standards need
   `is_company_owner_or_pm`.
+- Who raised, added or uploaded a record never changes, and a decision's
+  who-column (fixer, checker, approver, answerer, ticker, hander-over)
+  changes only with the decision itself. So a fixer cannot rename the fixer
+  and then close their own defect.
+- Photos are evidence: added as the signed-in user, never edited after.
 - Records cannot move to another site.
 - Everything else is open to anyone with access to the site
   (`has_project_access`).

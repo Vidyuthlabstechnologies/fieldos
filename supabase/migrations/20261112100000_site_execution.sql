@@ -243,6 +243,15 @@ begin
     end if;
   end if;
 
+  -- Who raised, added or uploaded a record never changes, so a decision
+  -- rule keyed on a person cannot be dodged by rewriting who that was.
+  if tg_op = 'UPDATE' and (
+       (to_jsonb(new) ->> 'raised_by') is distinct from (to_jsonb(old) ->> 'raised_by')
+       or (to_jsonb(new) ->> 'created_by') is distinct from (to_jsonb(old) ->> 'created_by')
+       or (to_jsonb(new) ->> 'uploaded_by') is distinct from (to_jsonb(old) ->> 'uploaded_by')) then
+    raise exception 'Who raised a record cannot change.' using errcode = '42501';
+  end if;
+
   case tg_table_name
   when 'site_task_constraints' then
     if tg_op = 'INSERT' and new.raised_by is distinct from me then
@@ -250,6 +259,10 @@ begin
     end if;
     if new.cleared_at is not null and (tg_op = 'INSERT' or old.cleared_at is null) and new.cleared_by is distinct from me then
       raise exception 'Constraints are cleared as yourself.' using errcode = '42501';
+    end if;
+    if tg_op = 'UPDATE' and old.cleared_at is not null
+       and (new.cleared_at is distinct from old.cleared_at or new.cleared_by is distinct from old.cleared_by) then
+      raise exception 'A cleared constraint stays cleared as it was.' using errcode = '42501';
     end if;
 
   when 'site_drawings' then
@@ -280,6 +293,8 @@ begin
         if not manager or new.decided_by is distinct from me then
           raise exception 'Only the owner or a project manager approves a drawing.' using errcode = '42501';
         end if;
+      elsif new.decided_by is distinct from old.decided_by or new.decided_at is distinct from old.decided_at then
+        raise exception 'This revision has already been decided.' using errcode = '42501';
       end if;
     end if;
 
@@ -289,6 +304,10 @@ begin
     end if;
     if new.answer is not null and (tg_op = 'INSERT' or old.answer is distinct from new.answer)
        and new.answered_by is distinct from me then
+      raise exception 'RFIs are answered as yourself.' using errcode = '42501';
+    end if;
+    if tg_op = 'UPDATE' and new.answer is not distinct from old.answer
+       and new.answered_by is distinct from old.answered_by then
       raise exception 'RFIs are answered as yourself.' using errcode = '42501';
     end if;
 
@@ -304,6 +323,8 @@ begin
       if not manager or new.decided_by is distinct from me then
         raise exception 'Only the owner or a project manager releases a hold point.' using errcode = '42501';
       end if;
+    elsif tg_op = 'UPDATE' and new.decided_by is distinct from old.decided_by then
+      raise exception 'Only the owner or a project manager releases a hold point.' using errcode = '42501';
     end if;
 
   when 'site_defects' then
@@ -320,7 +341,8 @@ begin
           raise exception 'A defect is marked fixed as yourself.' using errcode = '42501';
         end if;
       elsif old.status = 'fixed' and new.status = 'closed' then
-        if new.closed_by is distinct from me or new.closed_by = old.fixed_by then
+        if new.closed_by is distinct from me or new.closed_by = old.fixed_by
+           or new.fixed_by is distinct from old.fixed_by then
           raise exception 'Someone other than the person who fixed it checks the fix.' using errcode = '42501';
         end if;
       elsif old.status = 'fixed' and new.status = 'open' then
@@ -330,10 +352,17 @@ begin
       else
         raise exception 'A defect goes open, fixed, then closed.' using errcode = '42501';
       end if;
+    elsif new.fixed_by is distinct from old.fixed_by or new.closed_by is distinct from old.closed_by then
+      -- Otherwise the fixer could name someone else as the fixer and then
+      -- close their own fix.
+      raise exception 'Someone other than the person who fixed it checks the fix.' using errcode = '42501';
     end if;
 
   when 'site_handover_checks' then
     if new.done and (tg_op = 'INSERT' or not old.done) and new.done_by is distinct from me then
+      raise exception 'Checks are ticked as yourself.' using errcode = '42501';
+    end if;
+    if tg_op = 'UPDATE' and new.done = old.done and new.done_by is distinct from old.done_by then
       raise exception 'Checks are ticked as yourself.' using errcode = '42501';
     end if;
     if tg_op = 'UPDATE' and old.done is distinct from new.done
@@ -346,7 +375,8 @@ begin
       raise exception 'Units are added as yourself.' using errcode = '42501';
     end if;
     if tg_op = 'UPDATE' and old.handed_over_at is not null
-       and (new.handed_over_at is distinct from old.handed_over_at or new.handed_to is distinct from old.handed_to) then
+       and (new.handed_over_at is distinct from old.handed_over_at or new.handed_to is distinct from old.handed_to
+            or new.handed_over_by is distinct from old.handed_over_by) then
       raise exception 'This unit is already handed over.' using errcode = '42501';
     end if;
     if new.handed_over_at is not null and (tg_op = 'INSERT' or old.handed_over_at is null) then
@@ -365,6 +395,14 @@ begin
       if n > 0 then
         raise exception 'This unit has % checklist lines not done.', n using errcode = '23514';
       end if;
+    end if;
+
+  when 'site_execution_photos' then
+    -- Evidence: added as yourself, never edited afterwards.
+    if tg_op = 'INSERT' then
+      new.uploaded_by := me;
+    else
+      raise exception 'A photo cannot be changed. Add a new one.' using errcode = '42501';
     end if;
 
   when 'company_standards' then
@@ -387,11 +425,9 @@ begin
     execute format('drop trigger if exists %I on %I', t || '_stamp', t);
     execute format('create trigger %I before insert or update on %I for each row execute function site_execution_stamp()',
                    t || '_stamp', t);
-    if t <> 'site_execution_photos' then
-      execute format('drop trigger if exists %I on %I', t || '_guard', t);
-      execute format('create trigger %I before insert or update on %I for each row execute function site_execution_guard()',
-                     t || '_guard', t);
-    end if;
+    execute format('drop trigger if exists %I on %I', t || '_guard', t);
+    execute format('create trigger %I before insert or update on %I for each row execute function site_execution_guard()',
+                   t || '_guard', t);
     execute format('drop trigger if exists %I on %I', t || '_log_sync_change', t);
     execute format('create trigger %I after insert or update or delete on %I for each row execute function log_sync_change()',
                    t || '_log_sync_change', t);

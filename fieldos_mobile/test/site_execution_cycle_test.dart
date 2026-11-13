@@ -112,6 +112,16 @@ void main() {
     await expectLater(
         engineer.client.from('site_defects').update({'status': 'closed', 'closed_by': eid}).eq('id', crack.id).select(),
         throwsA(isA<PostgrestException>().having((x) => x.message, 'message', contains('Someone other than'))));
+    // Nor by naming the PM as the fixer first and then closing it.
+    final pidForFix = pm.remoteUserId;
+    await expectLater(
+        engineer.client.from('site_defects').update({'fixed_by': pidForFix}).eq('id', crack.id).select(),
+        throwsA(isA<PostgrestException>().having((x) => x.message, 'message', contains('Someone other than'))));
+    // Photo evidence is never edited after it is added.
+    final crackPhoto = (await loadExecutionData(engineer.db, site.id)).photosOf(crack.id, 'defect').single;
+    await expectLater(
+        engineer.client.from('site_execution_photos').update({'parent_kind': 'rfi'}).eq('id', crackPhoto.id).select(),
+        throwsA(isA<PostgrestException>().having((x) => x.message, 'message', contains('cannot be changed'))));
 
     // The server won't hand over a flat with a defect still open, whatever
     // the phone thinks.
