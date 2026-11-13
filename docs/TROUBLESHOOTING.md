@@ -184,9 +184,7 @@ and standalone — it has no connection to the FastAPI backend, so backend/
 WebSocket/CORS troubleshooting below doesn't apply to it. See
 `docs/MOBILE_GUIDE.md` for the full picture, including that gap.
 
-(The older Capacitor-based wrapper at `frontend/android/` is deprecated —
-see `frontend/MOBILE.md` — its build/keystore/gradle issues aren't
-maintained guidance anymore.)
+(The old Capacitor wrapper (`frontend/android/`) was removed in November 2026 (issue #155).)
 
 ### Analyzer/build errors
 

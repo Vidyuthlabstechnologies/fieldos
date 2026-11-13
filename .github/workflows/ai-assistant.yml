@@ -7,12 +7,9 @@ name: ai-assistant
 #         secrets: the real prompt and tools are accepted, Claude answers and
 #         picks the right action, each key works. A missing secret is listed
 #         and its test skipped. Costs a few paise per run.
+# Started by hand only (issue #149): the owner keeps GitHub Actions off, so
+# nothing runs on push or PR. Run the same checks locally (AGENTS.md).
 on:
-  push:
-    branches: [master]
-    paths: ['supabase/functions/**', 'supabase/migrations/**', 'supabase/tests/**', '.github/workflows/ai-assistant.yml']
-  pull_request:
-    paths: ['supabase/functions/**', 'supabase/migrations/**', 'supabase/tests/**', '.github/workflows/ai-assistant.yml']
   workflow_dispatch:
 
 permissions:
@@ -33,6 +30,11 @@ jobs:
       - run: deno lint
       - run: deno check index.ts live_test.ts
       - run: deno test core_test.ts
+      - name: account-cleanup and report-to-github
+        run: |
+          for f in account-cleanup report-to-github; do
+            (cd ../$f && deno fmt --check && deno lint && deno check index.ts && deno test core_test.ts)
+          done
 
   db:
     runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
@@ -45,6 +47,11 @@ jobs:
         run: supabase start
       - name: Allowance checks
         run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -f supabase/tests/ai_usage_test.sql
+      - name: Account deletion and report filing checks
+        run: |
+          for t in delete_account_test report_filing_test; do
+            psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/$t.sql
+          done
       - name: Table grants, row level security and SECURITY DEFINER checks
         run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/grants_test.sql
 

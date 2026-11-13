@@ -10,7 +10,7 @@ FieldOS is a comprehensive construction site management platform designed for fi
 - **Voice-first**: Voice-to-text for daily progress reports (DPR)
 - **Precision**: Decimal-based calculations for BOQ/estimations (no floating-point errors)
 - **Local-first**: SQLite on the desktop app, a local drift/SQLite database on mobile — no shared server, no sync between them yet (see `docs/MOBILE_GUIDE.md`)
-- **Mobile-native**: a native Flutter app (`fieldos_mobile/`) with its own offline auth and local database. An earlier Capacitor/Next.js wrapper (`frontend/android/`) still exists on disk but is deprecated — see `frontend/MOBILE.md`.
+- **Mobile-native**: a native Flutter app (`fieldos_mobile/`) with its own offline auth and local database. An earlier Capacitor/Next.js wrapper was removed in November 2026 (issue #155).
 
 ## Tech Stack
 
@@ -76,7 +76,6 @@ fieldos/
 │   │   ├── auth.ts         # Token management
 │   │   ├── pdf.ts          # PDF generation
 │   │   └── realtime.ts     # WebSocket hook
-│   ├── android/             # Capacitor Android project (deprecated, see frontend/MOBILE.md)
 │   └── public/             # PWA assets
 ├── fieldos_mobile/          # Native Flutter mobile app (canonical mobile strategy)
 │   └── lib/

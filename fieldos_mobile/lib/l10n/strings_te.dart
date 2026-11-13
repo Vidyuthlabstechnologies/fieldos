@@ -1467,6 +1467,36 @@ const Map<String, String> stringsTe = {
       'ఇప్పుడే అప్‌డేట్ చేయండి',
   'Open the App Store and update FieldOS.':
       'App Store తెరిచి FieldOS‌ను అప్‌డేట్ చేయండి.',
+  'Block {name}':
+      '{name}‌ను బ్లాక్ చేయండి',
+  'Hide their chat messages on this phone':
+      'వారి చాట్ సందేశాలను ఈ ఫోన్‌లో దాచండి',
+  'Block {name}?':
+      '{name}‌ను బ్లాక్ చేయాలా?',
+  'Their chat messages will be hidden on this phone. They stay in the company, and their site records are not hidden. You can unblock them in Settings › Blocked people.':
+      'వారి చాట్ సందేశాలు ఈ ఫోన్‌లో దాచబడతాయి. వారు కంపెనీలోనే ఉంటారు, వారి సైట్ రికార్డులు దాచబడవు. సెట్టింగ్‌లు › బ్లాక్ చేసినవారు లో అన్‌బ్లాక్ చేయవచ్చు.',
+  'Block and report':
+      'బ్లాక్ చేసి రిపోర్ట్ చేయండి',
+  'Block':
+      'బ్లాక్ చేయండి',
+  '{name} is blocked on this phone.':
+      '{name} ఈ ఫోన్‌లో బ్లాక్ అయ్యారు.',
+  'Blocked people':
+      'బ్లాక్ చేసినవారు',
+  'Nobody is blocked. To block someone, press and hold one of their chat messages.':
+      'ఎవరూ బ్లాక్ కాలేదు. ఎవరినైనా బ్లాక్ చేయడానికి వారి చాట్ సందేశాన్ని నొక్కి పట్టుకోండి.',
+  'Their chat messages are hidden on this phone. They stay in the company, and their site records are not hidden.':
+      'వారి చాట్ సందేశాలు ఈ ఫోన్‌లో దాచబడ్డాయి. వారు కంపెనీలోనే ఉంటారు, వారి సైట్ రికార్డులు దాచబడవు.',
+  'Unblock':
+      'అన్‌బ్లాక్ చేయండి',
+  'People whose chat messages are hidden on this phone':
+      'ఈ ఫోన్‌లో చాట్ సందేశాలు దాచబడినవారు',
+  'Privacy':
+      'గోప్యత',
+  'Send crash details':
+      'క్రాష్ వివరాలు పంపండి',
+  'If FieldOS crashes, send the error to the FieldOS team so it gets fixed. No site data is sent.':
+      'FieldOS క్రాష్ అయితే, సరిచేయడానికి ఆ లోపాన్ని FieldOS బృందానికి పంపండి. సైట్ డేటా ఏదీ పంపబడదు.',
   'Your role in this company does not allow that. Ask the owner.':
       'ఈ కంపెనీలో మీ పాత్రకు దీనికి అనుమతి లేదు. ఓనర్‌ను అడగండి.',
   'Your subscription is on this phone.':

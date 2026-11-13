@@ -59,9 +59,7 @@ Frontend: http://localhost:3000
 ### 3. Mobile (Flutter)
 
 The mobile app is a native Flutter app at `fieldos_mobile/` — a separate
-project from `frontend/`, not a wrapper around it. (There's an older
-Capacitor-based wrapper still on disk at `frontend/android/`; it's
-deprecated — see `frontend/MOBILE.md`. Don't build on it.)
+project from `frontend/`, not a wrapper around it. (The old Capacitor wrapper (`frontend/android/`) was removed in November 2026 (issue #155).)
 
 ```bash
 cd C:\Users\varsh\OneDrive\Documents\0002construction\fieldos_mobile
@@ -277,8 +275,6 @@ on a clean checkout.
 - `cd fieldos_mobile && flutter clean && flutter pub get` for a clean slate
 - If you touched `lib/data/tables.dart`, regenerate drift's generated code:
   `dart run build_runner build --delete-conflicting-outputs`
-- (The old Capacitor path — `npx cap sync`, `capacitor.config.ts` — is
-  deprecated; see `frontend/MOBILE.md`.)
 
 ### WebSocket connection fails
 - Ensure backend has `realtime.router` registered

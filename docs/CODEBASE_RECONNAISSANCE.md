@@ -174,7 +174,7 @@ Coverage matrix (see also §6/§7):
 
 **CODE.** Next.js 16 app router, static export (`output: "export"`), no dynamic route segments — every project-scoped page uses a `?id=` query string plus a `*Gate`/`Suspense` wrapper (a direct consequence of static export). No global state library; every page is local `useState`/`useEffect` against `frontend/lib/api.ts`.
 
-Fully wired end-to-end (UI → API client → endpoint → model): login/register, dashboard (embedded widget), tasks (embedded), DPR (embedded, incl. voice), materials (incl. photos), workers + attendance, documents (upload/list only — see §13), procurement (the most completely wired feature area — every backend endpoint has a frontend caller across a 6-tab vendor→requisition→RFQ→quote→PO→GRN flow), equipment (mostly — no delete UI), inspections (create/list/photos — no complete/update-item UI), settings (Sarvam key only), project export/import.
+Fully wired end-to-end (UI → API client → endpoint → model): login/register, dashboard (embedded widget), tasks (embedded), DPR (embedded, incl. voice), materials (incl. photos), workers + attendance, documents (upload/list only — see §13), procurement (the most completely wired feature area — every backend endpoint has a frontend caller across a 6-tab vendor→requisition→RFQ→quote→PO→GRN flow), equipment (mostly — no delete UI), inspections (create/list/photos — no complete/update-item UI), settings (Sarvam key only; desktop app, the mobile app has no key setting), project export/import.
 
 **Confirmed NOT IMPLEMENTED in the frontend despite full backend support**: Issues (zero UI beyond a dashboard count — `listIssues` is defined and never called), Billing/Stripe (zero UI — `listPlans`/`createCheckoutSession`/etc. all defined, never called), Realtime/WebSocket (a complete `useProjectWebSocket` hook exists in `frontend/lib/realtime.ts` and is never imported anywhere), Company member management (no UI, and per §5, no backend route either).
 
@@ -202,7 +202,7 @@ Feature classification:
 | Documents | **NOT IMPLEMENTED** |
 | Photo capture | **DATABASE ONLY** — a `DprPhotos` table and DAO exist, no camera package in `pubspec.yaml`, no UI calls them |
 | Voice/audio | IMPLEMENTED (local recording always; Sarvam transcription requires internet + a configured key) |
-| Settings | IMPLEMENTED, narrow (Sarvam key only, owner-gated) |
+| Settings | IMPLEMENTED, narrow (Sarvam key only, owner-gated; desktop app only) |
 
 Beyond the requested list: a real multi-level **Approvals** queue exists (including an automatic budget-overrun approval), a **Subcontractor** directory exists, and lightweight offline **agents** (`lib/agents/`) do keyword-based DPR issue/delay detection and cost-head linking that has **no equivalent on the backend at all** (not a duplication — a genuine mobile-only capability).
 

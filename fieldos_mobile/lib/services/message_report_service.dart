@@ -11,6 +11,7 @@ import 'dart:io';
 import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/services/report_filing.dart';
 
 enum ReportReason { abuse, spam, inappropriate, other }
 
@@ -66,6 +67,7 @@ class MessageReportService {
           ? 'No internet connection. Connect and try again.'
           : 'The report did not go through. Please try again in a minute, or write to info@mldynamic.com.');
     }
+    nudgeReportFiling(c);
     await _remember(messageId);
   }
 }

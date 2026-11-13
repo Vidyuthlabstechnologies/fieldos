@@ -1465,6 +1465,36 @@ const Map<String, String> stringsHi = {
       'अभी अपडेट करें',
   'Open the App Store and update FieldOS.':
       'App Store खोलें और FieldOS अपडेट करें।',
+  'Block {name}':
+      '{name} को ब्लॉक करें',
+  'Hide their chat messages on this phone':
+      'इनके चैट संदेश इस फ़ोन पर छिपाएँ',
+  'Block {name}?':
+      '{name} को ब्लॉक करें?',
+  'Their chat messages will be hidden on this phone. They stay in the company, and their site records are not hidden. You can unblock them in Settings › Blocked people.':
+      'इनके चैट संदेश इस फ़ोन पर छिप जाएँगे। ये कंपनी में बने रहेंगे, और इनके साइट रिकॉर्ड नहीं छिपेंगे। आप सेटिंग्स › ब्लॉक किए गए लोग में इन्हें अनब्लॉक कर सकते हैं।',
+  'Block and report':
+      'ब्लॉक करें और रिपोर्ट करें',
+  'Block':
+      'ब्लॉक करें',
+  '{name} is blocked on this phone.':
+      '{name} इस फ़ोन पर ब्लॉक हैं।',
+  'Blocked people':
+      'ब्लॉक किए गए लोग',
+  'Nobody is blocked. To block someone, press and hold one of their chat messages.':
+      'कोई ब्लॉक नहीं है। किसी को ब्लॉक करने के लिए उनके किसी चैट संदेश को दबाकर रखें।',
+  'Their chat messages are hidden on this phone. They stay in the company, and their site records are not hidden.':
+      'इनके चैट संदेश इस फ़ोन पर छिपे हैं। ये कंपनी में बने रहते हैं, और इनके साइट रिकॉर्ड नहीं छिपते।',
+  'Unblock':
+      'अनब्लॉक करें',
+  'People whose chat messages are hidden on this phone':
+      'जिन लोगों के चैट संदेश इस फ़ोन पर छिपे हैं',
+  'Privacy':
+      'निजता',
+  'Send crash details':
+      'क्रैश की जानकारी भेजें',
+  'If FieldOS crashes, send the error to the FieldOS team so it gets fixed. No site data is sent.':
+      'FieldOS क्रैश हो तो गड़बड़ी FieldOS टीम को भेजें ताकि वह ठीक हो। साइट का कोई डेटा नहीं जाता।',
   'Your role in this company does not allow that. Ask the owner.':
       'इस कंपनी में आपकी भूमिका में इसकी अनुमति नहीं है। मालिक से पूछें।',
   'Your subscription is on this phone.':

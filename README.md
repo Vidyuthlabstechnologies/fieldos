@@ -155,10 +155,7 @@ coverage and exact mechanism. To exercise that locally you'll also need
 the Supabase CLI and Docker running (`supabase start` from the repo root)
 — see "Tests" below.
 
-(An earlier Capacitor-based wrapper around the Next.js frontend also exists
-at `frontend/android/` — it's deprecated in favor of the native Flutter
-app; see [frontend/MOBILE.md](frontend/MOBILE.md) for details. Don't build
-on it.)
+(The old Capacitor wrapper (`frontend/android/`) was removed in November 2026 (issue #155).)
 
 ## Tests
 
@@ -305,9 +302,7 @@ See [docs/MOBILE_GUIDE.md](docs/MOBILE_GUIDE.md) for the full picture.
   yet).
 - `fieldos/alembic/` — migrations. Config file is `alembic.ini` at the repo
   root, not inside this directory — always run with `-c alembic.ini`.
-- `frontend/` — Next.js app (static export), the desktop app's UI. Also
-  contains a deprecated Capacitor Android wrapper (`frontend/android/`,
-  `capacitor.config.ts`) — see `frontend/MOBILE.md`.
+- `frontend/` — Next.js app (static export), the desktop app's UI.
 - `fieldos_mobile/` — native Flutter mobile app, the active development
   target. Fully offline-capable with its own local auth/database; never
   connects to the FastAPI backend, but does sync device-to-device via

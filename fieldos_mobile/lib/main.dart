@@ -21,10 +21,12 @@ void main() {
   final previous = FlutterError.onError;
   FlutterError.onError = (details) {
     RecentErrors.record(details.exception, details.stack);
+    if (!details.silent) CrashLog.record(details.exception, details.stack);
     previous?.call(details);
   };
   PlatformDispatcher.instance.onError = (error, stack) {
     RecentErrors.record(error, stack);
+    CrashLog.record(error, stack);
     return false;
   };
   // The brand font's licence, listed with the packages' licences.

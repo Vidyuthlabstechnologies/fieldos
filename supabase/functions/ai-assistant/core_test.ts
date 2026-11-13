@@ -60,7 +60,7 @@ function fakeDeps(over: Partial<Deps> = {}) {
   let spent = 0;
   const deps: Deps = {
     userFromToken: (t) => Promise.resolve(t === "good" ? { id: "u1" } : null),
-    hasPlan: (s) => Promise.resolve(s === "paid"),
+    hasPlan: (s) => Promise.resolve(s === "u1" || s === "access_REVIEWER123"),
     hasCompanyPlan: () => Promise.resolve(false),
     takeUsage: (u, k, a, l) => {
       calls.usage.push([u, k, a, l]);
@@ -181,12 +181,37 @@ Deno.test("chat: no session is refused before anything is spent", async () => {
 });
 
 Deno.test("chat: no plan is refused", async () => {
-  const { deps, calls } = fakeDeps();
-  for (const sub of ["free", undefined, "x".repeat(300)]) {
+  const { deps, calls } = fakeDeps({ hasPlan: (s) => Promise.resolve(s === "paid" || s === "access_NOTACTIVE12") });
+  for (const sub of ["free", undefined, "x".repeat(300), "access_NOTACTIVE"]) {
     const res = await handle(post({ action: "chat", subscriber_id: sub, messages: hello }), deps);
     assertEquals(res.status, 402);
   }
   assertEquals(calls.claude.length, 0);
+});
+
+Deno.test("chat: another user's subscriber id is refused; the plan must be on this account", async () => {
+  // "paid" is someone else's RevenueCat customer with an active plan.
+  const { deps, calls } = fakeDeps({ hasPlan: (s) => Promise.resolve(s === "paid") });
+  const res = await handle(post({ action: "chat", subscriber_id: "paid", messages: hello }), deps);
+  assertEquals(res.status, 402);
+  assertEquals(calls.claude.length, 0);
+});
+
+Deno.test("chat: a plan on the signed-in account works with any subscriber id, and access codes still work", async () => {
+  const { deps } = fakeDeps();
+  assertEquals(
+    (await handle(post({ action: "chat", subscriber_id: "$RCAnonymousID:x", messages: hello }), deps)).status,
+    200,
+  );
+  const { deps: d2 } = fakeDeps({ hasPlan: (s) => Promise.resolve(s === "access_REVIEWER123") });
+  assertEquals(
+    (await handle(post({ action: "chat", subscriber_id: "access_REVIEWER123", messages: hello }), d2)).status,
+    200,
+  );
+  assertEquals(
+    (await handle(post({ action: "chat", subscriber_id: "access_reviewer123", messages: hello }), d2)).status,
+    402,
+  );
 });
 
 Deno.test("chat: a company plan lets a member in with no store subscription", async () => {

@@ -41,15 +41,7 @@ Your browser can't play this video. <a href="assets/video/fieldos-guide.mp4">Dow
 <ol class="chapters" aria-label="Chapters"><li><button type="button" data-t="0"><time>0:00</time>Welcome</button></li><li><button type="button" data-t="9.92"><time>0:09</time>1. Your sites</button></li><li><button type="button" data-t="25.96"><time>0:25</time>2. Ask FieldOS</button></li><li><button type="button" data-t="44.93"><time>0:44</time>3. Tasks and daily reports</button></li><li><button type="button" data-t="64.31"><time>1:04</time>4. Labour and wages</button></li><li><button type="button" data-t="78.91"><time>1:18</time>5. Money and material</button></li><li><button type="button" data-t="95.96"><time>1:35</time>6. For the owner</button></li><li><button type="button" data-t="117.56"><time>1:57</time>7. Your language</button></li><li><button type="button" data-t="135.41"><time>2:15</time>8. Take the tour</button></li><li><button type="button" data-t="145.35"><time>2:25</time>Start your free trial</button></li></ol>
 <p style="margin-top:28px">Still stuck? Use <b>Report a bug</b> in the app, or email <a href="mailto:info@mldynamic.com?subject=FieldOS%20help">info@mldynamic.com</a>. See the <a href="support.html">support page</a>.</p>
 </div></section>
-<script>
-document.querySelectorAll('.chapters button').forEach(function (b) {
-  b.addEventListener('click', function () {
-    var v = document.getElementById('guide');
-    v.currentTime = parseFloat(b.dataset.t);
-    v.play();
-  });
-});
-</script>
+<script src="assets/guide.js"></script>
 </main>
 <footer class="site-footer">
   <div class="wrap">

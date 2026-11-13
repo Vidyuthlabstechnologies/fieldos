@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">FieldOS</string>
-    <string name="title_activity_main">FieldOS</string>
-    <string name="package_name">com.fieldos.app</string>
-    <string name="custom_url_scheme">com.fieldos.app</string>
-</resources>

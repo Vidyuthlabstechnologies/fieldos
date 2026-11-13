@@ -46,8 +46,7 @@ instance the user has to pay for.
 
 ```
 fieldos/              FastAPI backend (desktop-only, SQLite) — see docs/PROJECT_OVERVIEW.md
-frontend/              Next.js frontend (desktop-only, wrapped by Tauri) — legacy Capacitor
-                        Android wrapper also lives here (frontend/android/), deprecated
+frontend/              Next.js frontend (desktop-only, wrapped by Tauri)
 src-tauri/              Desktop shell (Rust/Tauri) → ships as a Windows installer
 fieldos_mobile/         Native Flutter mobile app — THE ACTIVE, CANONICAL MOBILE PATH
 supabase/                Postgres schema + RLS policies for cross-device sync (local Docker
