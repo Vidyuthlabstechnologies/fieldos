@@ -14,6 +14,8 @@
 # Lines that are blank, comments, or have an empty value are skipped, so a
 # partly filled file sets only what it has. ANDROID_KEYSTORE_FILE (a path to
 # the upload .keystore/.jks) is base64-encoded into ANDROID_KEYSTORE_BASE64.
+# PLAY_SERVICE_ACCOUNT_FILE (a path to the Play service account's .json key)
+# is read into PLAY_SERVICE_ACCOUNT_JSON.
 set -euo pipefail
 
 FILE=${1:-launch-secrets.env}
@@ -26,7 +28,8 @@ REPO=${REPO:-$(gh repo view --json nameWithOwner -q .nameWithOwner)}
 NAMES="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD \
 REVENUECAT_ANDROID_KEY REVENUECAT_IOS_KEY REVENUECAT_SECRET_KEY \
 ANTHROPIC_API_KEY SARVAM_API_KEY \
-ANDROID_KEYSTORE_BASE64 ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD ANDROID_STORE_PASSWORD"
+ANDROID_KEYSTORE_BASE64 ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD ANDROID_STORE_PASSWORD \
+PLAY_SERVICE_ACCOUNT_JSON"
 
 # Plain KEY=VALUE parsing rather than `source`: passwords may contain $ or
 # quotes, and nothing in the file should ever run as shell. Values land in
@@ -48,6 +51,12 @@ if [ -n "${LS_ANDROID_KEYSTORE_FILE:-}" ] && [ -z "${LS_ANDROID_KEYSTORE_BASE64:
   ks=$LS_ANDROID_KEYSTORE_FILE
   [ -f "$ks" ] || { echo "ANDROID_KEYSTORE_FILE points to $ks, which does not exist." >&2; exit 1; }
   LS_ANDROID_KEYSTORE_BASE64=$(base64 < "$ks" | tr -d '\n')
+fi
+
+if [ -n "${LS_PLAY_SERVICE_ACCOUNT_FILE:-}" ] && [ -z "${LS_PLAY_SERVICE_ACCOUNT_JSON:-}" ]; then
+  sa=$LS_PLAY_SERVICE_ACCOUNT_FILE
+  [ -f "$sa" ] || { echo "PLAY_SERVICE_ACCOUNT_FILE points to $sa, which does not exist." >&2; exit 1; }
+  LS_PLAY_SERVICE_ACCOUNT_JSON=$(cat "$sa")
 fi
 
 set_count=0

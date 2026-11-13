@@ -46,6 +46,9 @@ GROUPS = {
     ],
 }
 KEYSTORE_SECRETS = GROUPS["Android upload signing"]
+# Only the play-upload workflow needs this; builds work without it.
+PLAY_GROUP = "Google Play upload (play-upload workflow)"
+GROUPS[PLAY_GROUP] = ["PLAY_SERVICE_ACCOUNT_JSON"]
 
 
 @dataclass
@@ -138,6 +141,25 @@ def check_revenuecat_key(name: str, value: str) -> Result:
         if other != name and v.startswith(p):
             return Result(name, FAIL, f"this is the {s} key, in the wrong secret")
     return Result(name, WARN, f"expected a key starting with {prefix}")
+
+
+def check_play_service_account(value: str) -> Result:
+    name = "PLAY_SERVICE_ACCOUNT_JSON"
+    if not value:
+        return Result(name, MISSING, "service account JSON key for automatic Play uploads (docs/PLAY_STORE_LAUNCH.md section 10)")
+    try:
+        data = json.loads(value)
+    except ValueError:
+        return Result(name, FAIL, "not valid JSON; paste the whole downloaded .json file")
+    if not isinstance(data, dict) or data.get("type") != "service_account":
+        return Result(name, FAIL, "not a service account key (expected \"type\": \"service_account\")")
+    if not data.get("private_key") or not data.get("client_email"):
+        return Result(name, FAIL, "the key file is incomplete (no private_key or client_email)")
+    email = str(data["client_email"])
+    if not email.endswith(".iam.gserviceaccount.com"):
+        return Result(name, WARN, "client_email is not a service account address")
+    # The email is not secret (Play Console lists it under Users and permissions).
+    return Result(name, OK, f"key for {email}; it must be invited in Play Console with release permission")
 
 
 def _keytool_ok(args: list[str]) -> bool:
@@ -328,7 +350,7 @@ def next_steps(sections: list[tuple[str, list[Result]]]) -> list[str]:
     if any(r.status == FAIL for _, rs in sections for r in rs):
         steps.append("Fix every ❌ before tagging a release; the release workflow builds with whatever is set.")
     if not steps:
-        steps.append("Everything checks out. Tag or run the release workflow, then upload the .aab to internal testing.")
+        steps.append("Everything checks out. Run the play-upload workflow (closed testing, draft), then press Send for review in Play Console.")
     return steps
 
 
@@ -347,6 +369,7 @@ def main(argv: list[str]) -> int:
             check_revenuecat_key(n, env(n, "")) for n in GROUPS["RevenueCat (paywall and 3-day trial)"]
         ]),
         ("Android upload signing", check_keystore(*(env(n, "") for n in KEYSTORE_SECRETS))),
+        (PLAY_GROUP, [check_play_service_account(env("PLAY_SERVICE_ACCOUNT_JSON", ""))]),
     ]
     online = "--offline" not in argv
     if online and project_ref(url) and check_anon_key(anon, url).status == OK:

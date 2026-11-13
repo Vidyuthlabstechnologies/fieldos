@@ -16,7 +16,7 @@ Everything needed to publish `fieldos_mobile/` on Google Play. Items marked
 | 5 | Publish the privacy policy (section 4) at a public URL, e.g. a published Google Doc or the company website. Play requires the URL. | **(you)** |
 | 6 | Play Console developer account for ML Dynamic Solutions Private Limited. | done |
 | 7 | Tag a release: `git tag v1.1.0 && git push origin v1.1.0`. The workflow builds the signed `.aab` and drafts a GitHub Release with it. | either |
-| 8 | Upload the `.aab` to an **internal testing** track first, install on 2+ real phones, run the smoke test in section 6, then promote to closed testing and production. New personal accounts must run a closed test with 12+ testers for 14 days before production; organisation accounts are exempt. | **(you)** |
+| 8 | Upload the `.aab` (by hand, or with the **play-upload** workflow once set up: section 10) to an **internal testing** track first, install on 2+ real phones, run the smoke test in section 6, then promote to closed testing and production. New personal accounts must run a closed test with 12+ testers for 14 days before production; organisation accounts are exempt. | **(you)** |
 
 ## 2. Store listing
 
@@ -298,3 +298,78 @@ its summary table says what is missing or wrong without showing any value.
 | An access code says it is not valid | The code's customer has no active `fieldos_pro` grant, or the code was typed differently. | RevenueCat → Customers → `access_<CODE>` (capitals, no spaces or dashes) → check the promotional entitlement and its end date (section 7a). |
 | Trial unlocks, but the app locks again straight after | The `fieldos_pro` entitlement is not attached to the product that was bought. | RevenueCat → Entitlements → `fieldos_pro` → attach every store product. |
 | `launch-readiness` is red | Only ever because a secret that *is* set is the wrong kind of value (❌ rows). Missing secrets never fail it. | Fix the ❌ rows; the Note column says what was expected. |
+
+## 10. Automatic uploads to Play (play-upload workflow)
+
+`.github/workflows/play-upload.yml` builds the signed App Bundle from the
+commit it runs on, checks it (package `com.mldynamic.fieldos`, versionCode
+from `pubspec.yaml`, signed with the upload key: `tool/android/verify_bundle.sh`)
+and uploads it to Play. It runs only when started by hand (Actions tab ->
+play-upload -> Run workflow). Defaults: **closed testing (`alpha`) track, as a
+draft**, so nothing reaches testers until someone presses **Send for review**
+in Play Console. Production is not offered; promote in Play Console.
+
+### One-time setup (owner, about 10 minutes)
+
+**Shortcut: reuse the Sangam service account.** The same Play developer
+account already has a service account key for the Sangam app (secret
+`PLAY_SERVICE_ACCOUNT_JSON` in the `play-store` environment of
+Vidyuthlabstechnologies/sangam, Google Cloud project number 1004791580676).
+GitHub secrets never cross repos, so to reuse it:
+(a) enable the Play API in that project:
+https://console.developers.google.com/apis/api/androidpublisher.googleapis.com/overview?project=1004791580676
+(Sangam's 2026-11-11 upload failed on exactly this);
+(b) in Play Console -> Users and permissions, open that service account and
+make sure FieldOS is ticked with **Release apps to testing tracks**;
+(c) add the same .json as `PLAY_SERVICE_ACCOUNT_JSON` here, ideally once as an
+**organisation** secret shared with both repos:
+https://github.com/organizations/Vidyuthlabstechnologies/settings/secrets/actions/new
+(repository access: fieldos and sangam). Then skip to step 6 below.
+
+1. **Turn on the Play API** in the Google Cloud project `vidyuthlabs`:
+   https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com?project=vidyuthlabs
+   -> **Enable** (it may already say "API enabled" from RevenueCat; that's fine).
+2. **Make a service account just for uploads:**
+   https://console.cloud.google.com/iam-admin/serviceaccounts/create?project=vidyuthlabs
+   Name `fieldos-play-upload` -> **Create and continue** -> skip the role
+   (Play permissions are given in Play Console, not here) -> **Done**.
+3. **Download its key:** click the new account -> **Keys** -> **Add key** ->
+   **Create new key** -> **JSON** -> **Create**. A `.json` file downloads.
+   If Google says key creation is disabled by an organisation policy, tell
+   the agent; the account must then live in another project.
+4. **Let it upload in Play Console:** https://play.google.com/console ->
+   **Users and permissions** -> **Invite new users**. Email: the service
+   account's address (`fieldos-play-upload@vidyuthlabs.iam.gserviceaccount.com`,
+   also shown in the JSON as `client_email`). **App permissions** -> **Add app**
+   -> FieldOS -> tick **Release apps to testing tracks** (leave production and
+   admin unticked) -> **Apply** -> **Invite user**. No email confirmation is
+   needed for a service account.
+5. **Add it to GitHub:**
+   https://github.com/Vidyuthlabstechnologies/fieldos/settings/secrets/actions/new
+   Name `PLAY_SERVICE_ACCOUNT_JSON`, value: open the `.json` file in Notepad,
+   select all, copy, paste. **Add secret**. Then delete the `.json` file from
+   your computer. (Or put its path in `launch-secrets.env` as
+   `PLAY_SERVICE_ACCOUNT_FILE` and run `tools/set_launch_secrets.sh`.)
+6. Run **launch-readiness**: the "Google Play upload" row should be ✅.
+
+Play needs a few minutes (sometimes up to a day) after step 4 before the new
+account's uploads are accepted.
+
+### Each release
+
+1. Bump `version:` in `fieldos_mobile/pubspec.yaml` (the number after `+`
+   must be higher than any build already in Play) and merge to `master`.
+2. Run **play-upload** on `master` (track `alpha`, status `draft`).
+3. Play Console -> Test and release -> Closed testing -> the track -> **Edit
+   release** -> **Next** -> **Save and publish** / **Send for review**.
+
+### When it fails
+
+| Message in the "Upload to Google Play" step | Fix |
+|---|---|
+| `PLAY_SERVICE_ACCOUNT_JSON is not set` | Setup step 5. |
+| `Google Play Android Developer API has not been used in project …` | Setup step 1, in the project named in the message; wait 5 minutes. |
+| `The caller does not have permission` / 403 | Setup step 4: the account isn't invited for FieldOS, or Play hasn't picked it up yet (wait, then re-run). |
+| `APK specifies a version code that has already been used` | That build is already in Play (maybe uploaded by hand). Bump the `+N` in pubspec.yaml. |
+| `Package not found` | Wrong app: the bundle must be `com.mldynamic.fieldos`. |
+| "Check the bundle" step fails | The build isn't signed with the upload key, or the version doesn't match pubspec. Never upload it by hand either. |
