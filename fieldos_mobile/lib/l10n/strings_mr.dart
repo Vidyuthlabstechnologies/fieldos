@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_execution_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_mr.dart';
@@ -3319,6 +3320,7 @@ const Map<String, String> stringsMr = {
   'Nothing has been recorded yet.':
       'अजून काहीही नोंदवले नाही.',
   ...commercialMr,
+  ...executionMr,
   ...crmMr,
   ...warehouseMr,
   ...dailyMr,

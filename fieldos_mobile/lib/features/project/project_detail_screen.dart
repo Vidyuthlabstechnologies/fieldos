@@ -6,6 +6,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/features/execution/execution_screens.dart';
 import 'package:fieldos_mobile/features/project/site_notes_screen.dart';
 import 'package:fieldos_mobile/features/portals/portal_share.dart';
 import 'package:fieldos_mobile/core/brand.dart';
@@ -179,6 +180,10 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   builder: (_) => WeekCloseScreen(project: widget.project, weekOf: DateTime.now()),
                 ));
               }
+              if (v == 'execution') {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => SiteExecutionScreen(project: widget.project)));
+              }
               if (v == 'commercial') {
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (_) => CommercialScreen(project: widget.project)));
@@ -273,6 +278,13 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 child: ListTile(
                   leading: const Icon(Icons.fact_check_outlined),
                   title: Text(tr('Weekly close')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'execution',
+                child: ListTile(
+                  leading: const Icon(Icons.date_range_outlined),
+                  title: Text(tr('Lookahead, drawings, quality and handover')),
                 ),
               ),
               PopupMenuItem(

@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_kn.dart';
+import 'package:fieldos_mobile/l10n/strings_execution_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_kn.dart';
@@ -3319,6 +3320,7 @@ const Map<String, String> stringsKn = {
   'Nothing has been recorded yet.':
       'ಇನ್ನೂ ಏನೂ ದಾಖಲಾಗಿಲ್ಲ.',
   ...commercialKn,
+  ...executionKn,
   ...crmKn,
   ...warehouseKn,
   ...dailyKn,

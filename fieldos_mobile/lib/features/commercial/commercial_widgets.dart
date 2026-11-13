@@ -47,7 +47,7 @@ class KeyValue extends StatelessWidget {
       child: Row(children: [
         Expanded(child: Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant))),
         const SizedBox(width: 12),
-        Text(value, style: style, textAlign: TextAlign.end),
+        Flexible(child: Text(value, style: style, textAlign: TextAlign.end)),
       ]),
     );
   }

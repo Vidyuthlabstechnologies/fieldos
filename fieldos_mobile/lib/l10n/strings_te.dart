@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_commercial_te.dart';
+import 'package:fieldos_mobile/l10n/strings_execution_te.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_te.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_te.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_te.dart';
@@ -2427,6 +2428,7 @@ const Map<String, String> stringsTe = {
   'Nothing has been recorded yet.':
       'ఇంకా ఏదీ నమోదు కాలేదు.',
   ...commercialTe,
+  ...executionTe,
   ...crmTe,
   ...warehouseTe,
   ...dailyTe,

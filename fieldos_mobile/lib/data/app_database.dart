@@ -25,6 +25,8 @@ import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart' show BillLine, encodeLines;
 import 'package:fieldos_mobile/l10n/language.dart' show trf;
 import 'package:fieldos_mobile/data/backup.dart';
+import 'package:fieldos_mobile/data/site_execution_dao.dart';
+export 'package:fieldos_mobile/data/site_execution_dao.dart' show SiteExecutionDao, ExecutionRefused;
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
 
 import 'tables.dart';
@@ -113,6 +115,16 @@ String? _clip(String? s, int max) {
   CashMoves,
   FloorProgress,
   EntryHistory,
+  TaskConstraints,
+  Drawings,
+  DrawingRevisions,
+  Rfis,
+  HoldPoints,
+  Defects,
+  ExecutionPhotos,
+  HandoverUnits,
+  HandoverChecks,
+  CompanyStandards,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -144,7 +156,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 39;
+  int get schemaVersion => 40;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -371,6 +383,25 @@ class AppDatabase extends _$AppDatabase {
             // Rebuild the table as a fresh install has it; rows are kept.
             await m.alterTable(TableMigration(projectMembers));
           }
+          if (from < 40) {
+            // Site execution (FOS-205 to FOS-209): lookahead constraints,
+            // drawings and RFIs, hold points and defects, handover, and the
+            // company's standard lists.
+            for (final TableInfo t in [
+              taskConstraints,
+              drawings,
+              drawingRevisions,
+              rfis,
+              holdPoints,
+              defects,
+              executionPhotos,
+              handoverUnits,
+              handoverChecks,
+              companyStandards,
+            ]) {
+              await _createTableIfMissing(m, t);
+            }
+          }
         },
       );
 
@@ -465,6 +496,7 @@ class AppDatabase extends _$AppDatabase {
   NoteDao get noteDao => NoteDao(this);
   CloseDao get closeDao => CloseDao(this);
   CommercialDao get commercialDao => CommercialDao(this);
+  SiteExecutionDao get siteExecutionDao => SiteExecutionDao(this);
   CrmDao get crmDao => CrmDao(this);
   WarehouseDao get warehouseDao => WarehouseDao(this);
   PayrollDao get payrollDao => PayrollDao(this);
