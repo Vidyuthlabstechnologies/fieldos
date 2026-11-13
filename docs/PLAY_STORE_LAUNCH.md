@@ -311,6 +311,21 @@ in Play Console. Production is not offered; promote in Play Console.
 
 ### One-time setup (owner, about 10 minutes)
 
+**Shortcut: reuse the Sangam service account.** The same Play developer
+account already has a service account key for the Sangam app (secret
+`PLAY_SERVICE_ACCOUNT_JSON` in the `play-store` environment of
+Vidyuthlabstechnologies/sangam, Google Cloud project number 1004791580676).
+GitHub secrets never cross repos, so to reuse it:
+(a) enable the Play API in that project:
+https://console.developers.google.com/apis/api/androidpublisher.googleapis.com/overview?project=1004791580676
+(Sangam's 2026-11-11 upload failed on exactly this);
+(b) in Play Console -> Users and permissions, open that service account and
+make sure FieldOS is ticked with **Release apps to testing tracks**;
+(c) add the same .json as `PLAY_SERVICE_ACCOUNT_JSON` here, ideally once as an
+**organisation** secret shared with both repos:
+https://github.com/organizations/Vidyuthlabstechnologies/settings/secrets/actions/new
+(repository access: fieldos and sangam). Then skip to step 6 below.
+
 1. **Turn on the Play API** in the Google Cloud project `vidyuthlabs`:
    https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com?project=vidyuthlabs
    -> **Enable** (it may already say "API enabled" from RevenueCat; that's fine).
