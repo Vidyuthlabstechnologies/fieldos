@@ -228,3 +228,26 @@ def test_bug_reports_readable_rows_fail(monkeypatch, tmp_path):
         else (200, [{"message": "someone's report"}])))
     rows = {r.name: r for r in lr.cloud_checks(URL, "sb_publishable_x", str(tmp_path))}
     assert rows["Table bug_reports"].status == lr.FAIL and "READ" in rows["Table bug_reports"].note
+
+
+def test_play_service_account_key_must_be_a_whole_service_account_json():
+    good = json.dumps({"type": "service_account", "client_email": "fieldos-play@vidyuthlabs.iam.gserviceaccount.com",
+                       "private_key": "-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----\n"})
+    r = lr.check_play_service_account(good)
+    assert r.status == lr.OK and "fieldos-play@" in r.note and "PRIVATE KEY" not in r.note
+    assert lr.check_play_service_account("").status == lr.MISSING
+    assert lr.check_play_service_account("{not json").status == lr.FAIL
+    assert lr.check_play_service_account(json.dumps({"type": "authorized_user"})).status == lr.FAIL
+    assert lr.check_play_service_account(json.dumps({"type": "service_account"})).status == lr.FAIL
+
+
+def test_report_never_prints_the_play_private_key(monkeypatch, capsys):
+    for name in [n for names in lr.GROUPS.values() for n in names]:
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
+    monkeypatch.setenv("PLAY_SERVICE_ACCOUNT_JSON", json.dumps({
+        "type": "service_account", "client_email": "x@p.iam.gserviceaccount.com",
+        "private_key": "very_distinctive_private_key"}))
+    assert lr.main(["--offline"]) == 0
+    out = capsys.readouterr().out
+    assert "very_distinctive_private_key" not in out and "PLAY_SERVICE_ACCOUNT_JSON" in out

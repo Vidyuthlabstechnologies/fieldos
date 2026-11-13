@@ -220,6 +220,7 @@ class NewModelOut(BaseModel):
 
 ## Repo rules (FieldOS team)
 - **No GitHub Actions runs without the owner's OK.** Every workflow is `workflow_dispatch` only (issue #149). Run the checks locally instead: `flutter analyze` and `flutter test` in `fieldos_mobile/`, `deno test` in each `supabase/functions/*`, `pytest`, and the SQL tests in `supabase/tests/` against a local Postgres.
+- **Play uploads go through the `play-upload` workflow** (owner's OK for each run): closed testing (`alpha`) as a draft by default, never production. It checks package, versionCode and upload-key SHA-1 first (`fieldos_mobile/tool/android/verify_bundle.sh`). Setup and failure table: docs/PLAY_STORE_LAUNCH.md section 10.
 - **Production migrations get one line in issue #132**, never a new issue. Apply them with the `supabase-deploy` workflow (owner's OK), then `isolation-check`.
 - **Supabase and RevenueCat setup work is assigned to `bahumanyarg11`** on GitHub.
 - **Legal texts have one source:** `website/privacy-policy.html` and `website/terms-of-use.html`. The app's copy (`fieldos_mobile/lib/features/legal/legal_texts.dart`) must say the same; `docs/store/` only points there. Never describe them as lawyer-reviewed.

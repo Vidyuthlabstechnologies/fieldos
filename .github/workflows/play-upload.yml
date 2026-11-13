@@ -1,0 +1,205 @@
+name: play-upload
+
+# Builds the signed FieldOS App Bundle from this commit and uploads it to
+# Google Play, so nobody has to download an .aab and drag it into Play
+# Console by hand.
+#
+# Started by hand only (Actions tab -> play-upload -> Run workflow), like
+# every workflow here (issue #149). Never on push, tag or PR.
+#
+# Safe by default:
+#   - Track defaults to closed testing ("alpha"). Production is not offered:
+#     promoting to production stays a click in Play Console.
+#   - Status defaults to "draft": the release appears in Play Console but
+#     nothing reaches testers until someone presses "Send for review" /
+#     "Start rollout" there.
+#   - "build only" builds and checks the bundle and uploads nothing.
+#   - Before uploading it checks the bundle is com.mldynamic.fieldos,
+#     carries the versionCode from pubspec.yaml, and is signed with the
+#     upload key (SHA-1 in repo variable UPLOAD_KEY_SHA1, default below).
+#
+# Needs the release secrets (SUPABASE_URL, SUPABASE_ANON_KEY,
+# REVENUECAT_ANDROID_KEY, the four ANDROID_* signing secrets) plus
+# PLAY_SERVICE_ACCOUNT_JSON: the JSON key of a Google Cloud service account
+# invited in Play Console with "Release to testing tracks". Setup steps:
+# docs/PLAY_STORE_LAUNCH.md section 10. launch-readiness checks the key.
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play track. alpha = closed testing; "build only" uploads nothing'
+        type: choice
+        options:
+          - alpha
+          - internal
+          - beta
+          - build only
+        default: alpha
+      status:
+        description: 'draft = you press "Send for review" in Play Console; completed = sent straight away'
+        type: choice
+        options:
+          - draft
+          - completed
+        default: draft
+
+# Two uploads at once would fight over the same Play "edit".
+concurrency:
+  group: play-upload
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  PACKAGE_NAME: com.mldynamic.fieldos
+  # The upload key's certificate fingerprint (public, not a secret).
+  UPLOAD_KEY_SHA1: ${{ vars.UPLOAD_KEY_SHA1 || '93:C0:C1:A6:14:D8:2E:C3:29:02:FF:C2:10:F0:9D:D8:18:7E:4D:A4' }}
+
+jobs:
+  build-and-upload:
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: fieldos_mobile
+    steps:
+      # Resolved in bash from the raw input, never with `|| 'alpha'`: that
+      # would turn "build only" into a real upload if the input were empty.
+      - name: Work out what to do
+        id: plan
+        working-directory: .
+        env:
+          TRACK: ${{ inputs.track }}
+          STATUS: ${{ inputs.status }}
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          case "$TRACK" in
+            alpha|internal|beta) upload=true ;;
+            "build only")        upload=false ;;
+            *) echo "::error::unknown track '$TRACK'"; exit 1 ;;
+          esac
+          case "$STATUS" in draft|completed) ;; *) echo "::error::unknown status '$STATUS'"; exit 1 ;; esac
+          if [ "$upload" = true ] && [ -z "$PLAY_JSON" ]; then
+            echo "::error::PLAY_SERVICE_ACCOUNT_JSON is not set, so nothing can be uploaded. Add it (docs/PLAY_STORE_LAUNCH.md section 10) or pick 'build only'."
+            exit 1
+          fi
+          echo "upload=$upload" >> "$GITHUB_OUTPUT"
+          echo "Track: $TRACK, status: $STATUS, upload: $upload"
+
+      - uses: actions/checkout@v7
+
+      - name: Free disk space
+        if: runner.environment == 'github-hosted'
+        working-directory: .
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/.ghcup /opt/ghc /opt/hostedtoolcache/CodeQL /usr/share/swift \
+            /usr/local/share/powershell /usr/local/share/chromium /usr/local/share/boost
+          sudo docker image prune --all --force > /dev/null 2>&1 || true
+          df -h /
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        if: runner.environment != 'github-hosted'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.9
+          channel: stable
+          cache: true
+
+      - name: Read the version from pubspec.yaml
+        id: version
+        run: |
+          full=$(sed -n 's/^version: *\([0-9.]*+[0-9]*\).*/\1/p' pubspec.yaml)
+          [ -n "$full" ] || { echo "::error::no version: x.y.z+N line in pubspec.yaml"; exit 1; }
+          echo "name=${full%+*}" >> "$GITHUB_OUTPUT"
+          echo "code=${full#*+}" >> "$GITHUB_OUTPUT"
+          echo "Version ${full%+*}, versionCode ${full#*+}"
+
+      - name: Write release keystore from secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          for v in ANDROID_KEYSTORE_BASE64 ANDROID_STORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            [ -n "${!v}" ] || { echo "::error::signing secret $v is missing; Play only accepts the upload key"; exit 1; }
+          done
+          umask 077
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/fieldos-upload.keystore
+          {
+            echo "storeFile=fieldos-upload.keystore"
+            echo "storePassword=$ANDROID_STORE_PASSWORD"
+            echo "keyAlias=$ANDROID_KEY_ALIAS"
+            echo "keyPassword=$ANDROID_KEY_PASSWORD"
+          } > android/app/key.properties
+
+      # Same script as the release workflow: it refuses to build without the
+      # production Supabase project, the RevenueCat Google key and the upload
+      # key, so a broken build can never reach Play.
+      - name: Build release App Bundle
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          REVENUECAT_ANDROID_KEY: ${{ secrets.REVENUECAT_ANDROID_KEY }}
+          REVENUECAT_IOS_KEY: ${{ secrets.REVENUECAT_IOS_KEY }}
+          GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
+          PRIVACY_POLICY_URL: ${{ vars.PRIVACY_POLICY_URL || 'https://fieldos-mldynamic.netlify.app/privacy-policy.html' }}
+          TERMS_URL: ${{ vars.TERMS_URL || 'https://fieldos-mldynamic.netlify.app/terms-of-use.html' }}
+        run: bash tool/android/build_store_release.sh
+
+      - name: Remove the keystore from the runner
+        if: always()
+        run: rm -f android/app/fieldos-upload.keystore android/app/key.properties
+
+      - name: Check the bundle before it goes anywhere
+        env:
+          VERSION_CODE: ${{ steps.version.outputs.code }}
+        run: bash tool/android/verify_bundle.sh build/app/outputs/bundle/release/app-release.aab
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: fieldos-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}
+          path: |
+            fieldos_mobile/build/app/outputs/bundle/release/app-release.aab
+            fieldos_mobile/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload to Google Play
+        if: steps.plan.outputs.upload == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ env.PACKAGE_NAME }}
+          releaseFiles: fieldos_mobile/build/app/outputs/bundle/release/app-release.aab
+          releaseName: ${{ steps.version.outputs.name }} (${{ steps.version.outputs.code }})
+          track: ${{ inputs.track }}
+          status: ${{ inputs.status }}
+
+      - name: Summary
+        if: always()
+        working-directory: .
+        env:
+          TRACK: ${{ inputs.track }}
+          STATUS: ${{ inputs.status }}
+          UPLOADED: ${{ steps.plan.outputs.upload }}
+          NAME: ${{ steps.version.outputs.name }}
+          CODE: ${{ steps.version.outputs.code }}
+        run: |
+          {
+            echo "## FieldOS $NAME ($CODE)"
+            echo
+            echo "- Package: \`$PACKAGE_NAME\`"
+            if [ "$UPLOADED" = true ] && [ "${{ job.status }}" = success ]; then
+              echo "- Uploaded to the **$TRACK** track as **$STATUS**."
+              [ "$STATUS" = draft ] && echo "- Next: Play Console -> Test and release -> the $TRACK track -> Edit release -> Send for review."
+            elif [ "$UPLOADED" = true ]; then
+              echo "- Upload to **$TRACK** did **not** finish. See docs/PLAY_STORE_LAUNCH.md section 10 for the usual causes."
+            else
+              echo "- Build only: nothing was uploaded. The .aab is in this run's artifacts."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
