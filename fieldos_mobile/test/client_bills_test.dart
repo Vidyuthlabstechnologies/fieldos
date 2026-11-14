@@ -104,6 +104,27 @@ void main() {
     });
   });
 
+  test('tax invoice numbers follow rule 46: up to 16 letters, digits, - and /', () {
+    expect(isValidInvoiceNumber('INV-0001'), isTrue);
+    expect(isValidInvoiceNumber('2026-27/INV/0012'), isTrue);
+    expect(isValidInvoiceNumber('2026-27/INVOICE/00012'), isFalse);
+    expect(isValidInvoiceNumber('INV 1'), isFalse);
+    expect(isValidInvoiceNumber('INV#1'), isFalse);
+    expect(isValidInvoiceNumber(''), isFalse);
+  });
+
+  test('the bill heading and place of supply follow the GST registration', () {
+    expect(invoiceTitle(ourGstin: '', gstRate: 0), 'INVOICE');
+    expect(invoiceTitle(ourGstin: '36ABCDE1234F1Z5', gstRate: 18), 'TAX INVOICE');
+    expect(invoiceTitle(ourGstin: '36ABCDE1234F1Z5', gstRate: 0), 'BILL OF SUPPLY');
+    expect(placeOfSupply(ourGstin: '36ABCDE1234F1Z5', clientGstin: '29ABCDE1234F1Z5', interState: false),
+        ('Telangana', '36'));
+    expect(placeOfSupply(ourGstin: '36ABCDE1234F1Z5', clientGstin: '29ABCDE1234F1Z5', interState: true),
+        ('Karnataka', '29'));
+    expect(placeOfSupply(ourGstin: '36ABCDE1234F1Z5', interState: true), isNull);
+    expect(placeOfSupply(ourGstin: '', interState: false), isNull);
+  });
+
   test('GSTIN shape and inter-state check', () {
     expect(isValidGstin('36ABCDE1234F1Z5'), isTrue);
     expect(isValidGstin(' 36abcde1234f1z5 '), isTrue);

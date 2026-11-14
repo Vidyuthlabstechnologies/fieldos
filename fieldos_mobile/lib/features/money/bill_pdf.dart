@@ -56,7 +56,8 @@ Future<Uint8List> buildBillPdf({
   final totals = billTotals(lines,
       gstRate: bill.gstRate, interState: bill.interState, retentionPct: bill.retentionPct, tdsPct: bill.tdsPct);
   final isRa = bill.kind == 'ra';
-  final title = isRa ? 'RUNNING ACCOUNT BILL' : 'TAX INVOICE';
+  final title = isRa ? 'RUNNING ACCOUNT BILL' : invoiceTitle(ourGstin: profile.gstin, gstRate: bill.gstRate);
+  final isTaxInvoice = title == 'TAX INVOICE';
   final doc = pw.Document(title: '$title ${bill.billNumber}', creator: 'FieldOS');
 
   pw.Widget t(String s, {double size = 9, bool bold = false, PdfColor color = _ink, pw.TextAlign? align}) => pw.Text(
@@ -108,6 +109,7 @@ Future<Uint8List> buildBillPdf({
   final rate = fmtQty(bill.gstRate);
   final halfRate = fmtQty(bill.gstRate / 2);
   final client = bill.clientName;
+  final pos = placeOfSupply(ourGstin: profile.gstin, clientGstin: bill.clientGstin, interState: bill.interState);
 
   doc.addPage(pw.MultiPage(
     pageFormat: PdfPageFormat.a4,
@@ -147,8 +149,7 @@ Future<Uint8List> buildBillPdf({
               t('Bill to', color: _muted),
               t(client, bold: true),
               if ((bill.clientGstin ?? '').isNotEmpty) t('GSTIN: ${bill.clientGstin}'),
-              if ((bill.clientGstin ?? '').length >= 2 && gstStates[bill.clientGstin!.substring(0, 2)] != null)
-                t('Place of supply: ${gstStates[bill.clientGstin!.substring(0, 2)]} (${bill.clientGstin!.substring(0, 2)})'),
+              if (pos != null) t('Place of supply: ${pos.$1} (${pos.$2})'),
             ]),
           ),
           pw.Expanded(
@@ -195,12 +196,19 @@ Future<Uint8List> buildBillPdf({
           pw.Expanded(child: t('Scan with any UPI app to pay ${_money(totals.netPayable)} to ${profile.upiId.trim()}.')),
         ]),
       ],
+      if (isTaxInvoice) ...[pw.SizedBox(height: 6), t('Tax payable on reverse charge: No', color: _muted)],
       if ((bill.notes ?? '').trim().isNotEmpty) ...[pw.SizedBox(height: 10), t(bill.notes!.trim(), color: _muted)],
       pw.SizedBox(height: 36),
-      pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-        t('Client / engineer-in-charge', color: _muted),
-        t('For $companyName', color: _muted),
-      ]),
+      pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            t('Client / engineer-in-charge', color: _muted),
+            pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
+              t('For $companyName', color: _muted),
+              if (isTaxInvoice) t('Authorised signatory', color: _muted),
+            ]),
+          ]),
     ],
   ));
   return doc.save();

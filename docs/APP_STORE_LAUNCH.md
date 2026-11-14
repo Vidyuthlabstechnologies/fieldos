@@ -14,6 +14,7 @@ order of the owner's steps in Apple's websites.
 | Subscriptions through Apple only, no unlock codes (3.1.1) | RevenueCat with `REVENUECAT_IOS_KEY`; the "Enter access code" menu is Android only. |
 | Restore, price, length, trial and cancel wording, Terms and Privacy links on the paywall (3.1.2) | `lib/features/subscription/paywall_screen.dart` |
 | In-app account deletion (5.1.1(v)) | Team & sync > Delete account |
+| Asks before sending personal data to third-party AI (5.1.2(i)): Ask FieldOS shows who gets what (Anthropic, USA; Sarvam AI, India) and waits for "I agree"; Settings › Your privacy takes it back | `lib/features/assistant/assistant_screen.dart`, `lib/features/legal/privacy_notice.dart` |
 | Privacy manifest | `ios/Runner/PrivacyInfo.xcprivacy` (no tracking; data types match "App Privacy" below) |
 | Permission texts | `ios/Runner/Info.plist`: camera, photos, location while in use, microphone, speech recognition |
 | Export compliance | `ITSAppUsesNonExemptEncryption = false` in Info.plist (only the HTTPS built into iOS) |

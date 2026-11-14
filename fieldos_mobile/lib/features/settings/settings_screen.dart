@@ -18,6 +18,7 @@ import 'package:fieldos_mobile/features/chat/blocked_people_screen.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
+import 'package:fieldos_mobile/features/legal/privacy_rights_screen.dart';
 import 'package:fieldos_mobile/features/subscription/my_subscription_sheet.dart';
 import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
 import 'package:fieldos_mobile/features/settings/backup_actions.dart';
@@ -385,6 +386,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
 
           const SectionHeader('About', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
+          ListTile(
+            key: const Key('settings-your-privacy'),
+            leading: const Icon(Icons.shield_outlined),
+            title: Text(tr('Your privacy')),
+            subtitle: Text(tr('What is collected and why, your rights, and the AI assistant permission')),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PrivacyRightsScreen())),
+          ),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
             title: Text(tr('Privacy policy')),

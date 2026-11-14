@@ -36,6 +36,18 @@ StaffMember _staff({double basic = 18000, double hra = 7000, double other = 3000
 
 void main() {
   group('pay rules', () {
+    test('labour codes: allowances above half the pay count towards the PF wage', () {
+      // Basic 6,000 of 20,000: half the pay (10,000) is the PF wage.
+      expect(pfWageFor(basic: 6000, gross: 20000), 10000);
+      // Basic already above half: the basic stays.
+      expect(pfWageFor(basic: 12000, gross: 20000), 12000);
+      // Never above the Rs 15,000 ceiling.
+      expect(pfWageFor(basic: 9000, gross: 40000), 15000);
+      final p = computePay(_staff(basic: 6000, hra: 8000, other: 6000, esi: false), days: 30, paidDays: 30);
+      expect(p.pfEmployee, 1200);
+      expect(p.pfEmployer, 1200);
+    });
+
     test('above the ESI limit: PF on Rs 15,000 of basic, PT 200', () {
       final p = computePay(_staff(), days: 30, paidDays: 30);
       expect(p.gross, 28000);
