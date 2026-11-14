@@ -3436,4 +3436,7 @@ const Map<String, String> stringsKn = {
   'That is a different account. Use {email}.': 'ಅದು ಬೇರೆ ಖಾತೆ. {email} ಬಳಸಿ.',
   'That did not go through. Check the internet and try again.': 'ಅದು ಆಗಲಿಲ್ಲ. ಇಂಟರ್ನೆಟ್ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
   'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'ಈ ಫೋನ್‌ನಲ್ಲಿ ಈಗ PIN ಮರುಹೊಂದಿಸಲು ಆಗುವುದಿಲ್ಲ. ಅದಕ್ಕೆ ಇಂಟರ್ನೆಟ್ ಮತ್ತು ಈ ಫೋನ್ ನಿಮ್ಮ FieldOS ಕ್ಲೌಡ್ ಖಾತೆಗೆ ಸೈನ್ ಇನ್ ಆಗಿರಬೇಕು. ಅಲ್ಲಿಯವರೆಗೆ PIN ಲಾಕ್ ಹಾಗೆಯೇ ಇರುತ್ತದೆ.',
+  '{amount}/hr': '{amount}/ಗಂಟೆ',
+  '{amount} an hour': 'ಗಂಟೆಗೆ {amount}',
+  'OT {h} h, {amount}': 'ಓವರ್‌ಟೈಮ್ {h} ಗಂ, {amount}',
 };

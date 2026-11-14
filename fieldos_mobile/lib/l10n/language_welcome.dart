@@ -40,11 +40,15 @@ class LanguageWelcomeScreen extends ConsumerWidget {
           children: [
             const Center(child: Mitra(mood: MitraMood.wave, size: 120)),
             const SizedBox(height: 12),
+            // English on purpose, before anything is picked; set
+            // left-to-right so an Arabic or Urdu phone doesn't move the "?".
             Text('Which language do you speak?',
-                textAlign: TextAlign.center, style: theme.textTheme.headlineSmall),
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.ltr,
+                style: theme.textTheme.headlineSmall),
             const SizedBox(height: 6),
             Text(
-              'మీ భాష ఏది? · आपकी भाषा? · உங்கள் மொழி? · ನಿಮ್ಮ ಭಾಷೆ? · तुमची भाषा?',
+              _askLine(),
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
@@ -52,6 +56,7 @@ class LanguageWelcomeScreen extends ConsumerWidget {
             Text(
               'Mitra will talk with you in it, mixed with English. You can change it any time in Settings.',
               textAlign: TextAlign.center,
+              textDirection: TextDirection.ltr,
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 20),
@@ -111,3 +116,28 @@ class _LanguageTile extends StatelessWidget {
     );
   }
 }
+
+/// "Your language?" in each language this market's app offers, so the UAE
+/// app asks in Arabic, Urdu and Malayalam rather than in India's languages.
+/// Each part is a bidi isolate, so Arabic and Urdu keep their place in the
+/// line on any phone.
+const _askIn = {
+  'hi': 'आपकी भाषा?',
+  'te': 'మీ భాష ఏది?',
+  'ta': 'உங்கள் மொழி?',
+  'kn': 'ನಿಮ್ಮ ಭಾಷೆ?',
+  'mr': 'तुमची भाषा?',
+  'es': '¿Tu idioma?',
+  'ms': 'Bahasa anda?',
+  'zh': '你的语言？',
+  'ar': 'ما لغتك؟',
+  'ur': 'آپ کی زبان؟',
+  'ml': 'നിങ്ങളുടെ ഭാഷ?',
+  'pl': 'Twój język?',
+  'ro': 'Limba ta?',
+};
+
+String _askLine() => [
+      for (final l in AppLanguage.offered)
+        if (_askIn[l.code] case final q?) '\u2068$q\u2069',
+    ].join(' · ');

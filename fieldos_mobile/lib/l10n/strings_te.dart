@@ -2545,4 +2545,7 @@ const Map<String, String> stringsTe = {
   'That is a different account. Use {email}.': 'అది వేరే ఖాతా. {email} వాడండి.',
   'That did not go through. Check the internet and try again.': 'అది జరగలేదు. ఇంటర్నెట్ చూసి మళ్ళీ ప్రయత్నించండి.',
   'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'ఈ ఫోన్‌లో ఇప్పుడు PIN రీసెట్ చేయలేము. దానికి ఇంటర్నెట్, మరియు ఈ ఫోన్ మీ FieldOS క్లౌడ్ ఖాతాలో సైన్ ఇన్ అయి ఉండాలి. అప్పటివరకు PIN లాక్ అలాగే ఉంటుంది.',
+  '{amount}/hr': '{amount}/గంట',
+  '{amount} an hour': 'గంటకు {amount}',
+  'OT {h} h, {amount}': 'ఓవర్‌టైమ్ {h} గం, {amount}',
 };

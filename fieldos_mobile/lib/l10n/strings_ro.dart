@@ -3116,4 +3116,7 @@ const stringsRo = <String, String>{
   'Use my password': 'Folosește parola mea',
   'We emailed a code to {email}. The email calls it a password reset code; your password stays the same.': 'Ți-am trimis un cod pe {email}. În e-mail apare ca un cod de resetare a parolei; parola ta rămâne aceeași.',
   '{h} h double time': '{h} ore la tarif dublu',
+  '{amount}/hr': '{amount}/oră',
+  '{amount} an hour': '{amount} pe oră',
+  'OT {h} h, {amount}': 'Ore suplimentare {h} h, {amount}',
 };

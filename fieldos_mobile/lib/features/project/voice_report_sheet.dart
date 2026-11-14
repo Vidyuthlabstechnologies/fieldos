@@ -17,6 +17,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/speech_service.dart';
@@ -107,8 +108,11 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
     setState(() {});
   }
 
+  /// Only in the Indian app: elsewhere the privacy policies promise that
+  /// FieldOS never records the voice, so no recording leaves for Sarvam.
   Future<void> _maybeSwitchToSarvam() async {
-    final can = _language.sarvamCode != null && await ref.read(voiceDprAgentProvider).canUseSarvam();
+    final can = isIndia &&
+        _language.sarvamCode != null && await ref.read(voiceDprAgentProvider).canUseSarvam();
     if (can && mounted) setState(() => _mode = _Mode.sarvam);
   }
 

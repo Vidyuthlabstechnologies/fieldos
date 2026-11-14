@@ -3096,4 +3096,7 @@ const stringsAr = <String, String>{
   'That is a different account. Use {email}.': 'هذا حساب مختلف. استخدم {email}.',
   'That did not go through. Check the internet and try again.': 'لم يتم ذلك. تحقق من الإنترنت وحاول مرة أخرى.',
   'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'لا يمكن إعادة تعيين رمز PIN على هذا الهاتف الآن. يتطلب ذلك الإنترنت وأن يكون هذا الهاتف مسجّل الدخول إلى حسابك السحابي في FieldOS. حتى ذلك الحين، يبقى قفل PIN كما هو.',
+  '{amount}/hr': '{amount}/ساعة',
+  '{amount} an hour': '{amount} في الساعة',
+  'OT {h} h, {amount}': 'عمل إضافي {h} ساعة، {amount}',
 };

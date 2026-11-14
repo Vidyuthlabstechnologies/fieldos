@@ -3446,4 +3446,7 @@ const Map<String, String> stringsTa = {
   'That is a different account. Use {email}.': 'அது வேறு கணக்கு. {email} ஐப் பயன்படுத்துங்கள்.',
   'That did not go through. Check the internet and try again.': 'அது நடக்கவில்லை. இணையத்தைச் சரிபார்த்து மீண்டும் முயலுங்கள்.',
   'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'இந்த ஃபோனில் இப்போது PIN ஐ மீட்டமைக்க முடியாது. அதற்கு இணையமும், இந்த ஃபோன் உங்கள் FieldOS கிளவுட் கணக்கில் உள்நுழைந்திருப்பதும் தேவை. அதுவரை PIN பூட்டு அப்படியே இருக்கும்.',
+  '{amount}/hr': '{amount}/மணி',
+  '{amount} an hour': 'மணிக்கு {amount}',
+  'OT {h} h, {amount}': 'கூடுதல் நேரம் {h} மணி, {amount}',
 };

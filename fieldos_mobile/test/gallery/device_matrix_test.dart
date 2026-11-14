@@ -27,6 +27,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/core/brand.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -87,13 +88,16 @@ final _deviceName = _env['MATRIX_DEVICE'] ?? 'android_medium';
 final Device _device = devices[_deviceName]!;
 final _scale = double.parse(_env['MATRIX_SCALE'] ?? '1.0');
 final _dark = _env['MATRIX_DARK'] == '1';
+// MATRIX_MARKET=us|my|ae|uk lays the screens out as that country's app
+// (its money, wording and languages); default India.
+final _market = Market.fromId(_env['MATRIX_MARKET']) ?? Market.india;
 final _lang = AppLanguage.fromCode(_env['MATRIX_LANG']) ?? AppLanguage.en;
 final _shots = _env['MATRIX_SHOTS'] == '1';
 final _a11y = _env['MATRIX_A11Y'] != '0';
 // Contrast is sampled from the rendered pixels, which misreads small
 // anti-aliased text, so it is opt-in; theme_contrast_test checks the colours.
 final _contrast = _env['MATRIX_CONTRAST'] == '1';
-final _setting = '${_deviceName}_x${_scale}_${_dark ? 'dark' : 'light'}_${_lang.code}';
+final _setting = '${_market == Market.india ? '' : '${_market.id}_'}${_deviceName}_x${_scale}_${_dark ? 'dark' : 'light'}_${_lang.code}';
 final _outDir = Directory('${_env['MATRIX_OUT'] ?? 'build/matrix'}/$_setting');
 
 var _fontsLoaded = false;
@@ -117,9 +121,15 @@ Future<void> _loadFonts() async {
   await load('MaterialIcons', ['$flutterRoot/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf']);
   await load('Roboto', ['$flutterRoot/bin/cache/artifacts/material_fonts/Roboto-Regular.ttf']);
   final indic = _env['INDIC_FONTS'];
+  // Phones bring a Chinese font of their own; Brand doesn't name one. For a
+  // Chinese run, load the test machine's CJK font (CJK_FONT) in Kannada's
+  // slot of the fallback list, which a Chinese screen never uses.
+  final cjk = _env['CJK_FONT'];
+  if (cjk != null && _lang.code == 'zh') await load('NotoSansKannada', [cjk]);
   if (indic != null) {
     for (final f in Brand.fontFallback) {
       final file = File('$indic/$f.ttf');
+      if (cjk != null && _lang.code == 'zh' && f == 'NotoSansKannada') continue;
       if (file.existsSync()) await load(f, [file.path]);
     }
   }
@@ -183,6 +193,8 @@ void main() {
 
   for (final entry in _screens.entries) {
     testWidgets('$_setting ${entry.key}', (tester) async {
+      debugSetMarket(_market);
+      addTearDown(() => debugSetMarket(Market.india));
       final issues = results[entry.key] = [];
       // Real soft shadows, as on a phone, not test-mode black outlines.
       debugDisableShadows = false;
@@ -208,6 +220,11 @@ void main() {
         final company = await session.createCompany('Sri Sai Constructions');
         project = await createSampleProject(db, companyId: company.id, userId: container.read(sessionProvider).user!.id);
         await db.settingsDao.set(tourSeenKey, '1');
+        // As if the person picked the language and turned on "Show screens
+        // in it", so screens that load the saved choice don't fall back to
+        // English.
+        await db.settingsDao.set(languageSettingKey, _lang.code);
+        await db.settingsDao.set(screensInLanguageKey, _lang == AppLanguage.en ? '0' : '1');
       });
 
       setCurrentLanguage(_lang);

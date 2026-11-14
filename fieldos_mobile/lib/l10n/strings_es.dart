@@ -3086,4 +3086,7 @@ const Map<String, String> stringsEs = {
   'That is a different account. Use {email}.': 'Esa es otra cuenta. Usa {email}.',
   'That did not go through. Check the internet and try again.': 'No se pudo completar. Revisa la conexión a internet e inténtalo de nuevo.',
   'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'El PIN no se puede restablecer en este teléfono ahora. Para eso hace falta internet y que este teléfono tenga iniciada la sesión en tu cuenta en la nube de FieldOS. Hasta entonces, el bloqueo con PIN sigue igual.',
+  '{amount}/hr': '{amount}/h',
+  '{amount} an hour': '{amount} la hora',
+  'OT {h} h, {amount}': 'Horas extra {h} h, {amount}',
 };

@@ -3093,4 +3093,7 @@ const stringsZh = <String, String>{
   'That is a different account. Use {email}.': '这是另一个账户。请使用 {email}。',
   'That did not go through. Check the internet and try again.': '未能完成。请检查网络后重试。',
   'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': '此手机现在无法重置 PIN。这需要联网，并且此手机已登录您的 FieldOS 云账户。在此之前，PIN 锁保持不变。',
+  '{amount}/hr': '{amount}/小时',
+  '{amount} an hour': '每小时 {amount}',
+  'OT {h} h, {amount}': '加班 {h} 小时，{amount}',
 };

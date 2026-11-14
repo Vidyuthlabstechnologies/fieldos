@@ -3093,4 +3093,7 @@ const stringsMs = <String, String>{
   'That is a different account. Use {email}.': 'Itu akaun lain. Guna {email}.',
   'That did not go through. Check the internet and try again.': 'Tidak berjaya. Semak internet dan cuba lagi.',
   'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'PIN tidak boleh diset semula pada telefon ini sekarang. Ia memerlukan internet dan telefon ini dilog masuk ke akaun awan FieldOS anda. Sehingga itu, kunci PIN kekal seperti sedia ada.',
+  '{amount}/hr': '{amount}/jam',
+  '{amount} an hour': '{amount} sejam',
+  'OT {h} h, {amount}': 'Lebih masa {h} jam, {amount}',
 };

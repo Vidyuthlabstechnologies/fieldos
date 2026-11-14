@@ -440,12 +440,24 @@ class _GuideCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.labelLarge?.copyWith(color: scheme.onSurfaceVariant)),
                 ),
-                if (onBack != null) TextButton(onPressed: onBack, child: Text(tr('Back'))),
-                const SizedBox(width: 6),
-                FilledButton.icon(
-                  onPressed: onNext,
-                  icon: const Icon(Icons.arrow_forward),
-                  label: Text(index == 0 ? tr('Show me') : tr('Next')),
+                // With long words and very large text (Malayalam at 200%)
+                // Back and Next stack instead of overflowing, at full size.
+                Flexible(
+                  flex: 3,
+                  child: OverflowBar(
+                    alignment: MainAxisAlignment.end,
+                    overflowAlignment: OverflowBarAlignment.end,
+                    spacing: 6,
+                    overflowSpacing: 4,
+                    children: [
+                      if (onBack != null) TextButton(onPressed: onBack, child: Text(tr('Back'))),
+                      FilledButton.icon(
+                        onPressed: onNext,
+                        icon: const Icon(Icons.arrow_forward),
+                        label: Text(index == 0 ? tr('Show me') : tr('Next')),
+                      ),
+                    ],
+                  ),
                 ),
               ]),
           ],

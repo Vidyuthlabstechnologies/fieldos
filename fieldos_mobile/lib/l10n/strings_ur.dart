@@ -3096,4 +3096,7 @@ const stringsUr = <String, String>{
   'That is a different account. Use {email}.': 'یہ کوئی دوسرا اکاؤنٹ ہے۔ {email} استعمال کریں۔',
   'That did not go through. Check the internet and try again.': 'یہ نہیں ہو سکا۔ انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔',
   'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'اس فون پر ابھی PIN ری سیٹ نہیں ہو سکتا۔ اس کے لیے انٹرنیٹ اور اس فون کا آپ کے FieldOS کلاؤڈ اکاؤنٹ میں سائن ان ہونا ضروری ہے۔ تب تک PIN لاک جیسا ہے ویسا ہی رہے گا۔',
+  '{amount}/hr': '{amount}/گھنٹہ',
+  '{amount} an hour': '{amount} فی گھنٹہ',
+  'OT {h} h, {amount}': 'اوور ٹائم {h} گھنٹے، {amount}',
 };

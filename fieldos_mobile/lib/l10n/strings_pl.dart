@@ -3116,4 +3116,7 @@ const stringsPl = <String, String>{
   'Use my password': 'Użyj mojego hasła',
   'We emailed a code to {email}. The email calls it a password reset code; your password stays the same.': 'Wysłaliśmy kod na {email}. W wiadomości nazywa się on kodem resetu hasła; Twoje hasło się nie zmienia.',
   '{h} h double time': '{h} godz. za podwójną stawkę',
+  '{amount}/hr': '{amount}/godz.',
+  '{amount} an hour': '{amount} za godzinę',
+  'OT {h} h, {amount}': 'Nadgodziny {h} godz., {amount}',
 };
