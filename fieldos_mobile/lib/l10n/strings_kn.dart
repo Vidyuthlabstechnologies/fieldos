@@ -3,6 +3,7 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_consent_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_commercial_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_execution_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_kn.dart';
@@ -12,6 +13,7 @@ import 'package:fieldos_mobile/l10n/strings_proof_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_privacy_kn.dart';
 
 const Map<String, String> stringsKn = {
+  ...consentKn,
   'Try again':
       'ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
   'Approvals':

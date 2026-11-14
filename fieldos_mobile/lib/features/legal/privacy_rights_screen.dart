@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/features/attendance/attendance_consent.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
 import 'package:fieldos_mobile/features/legal/privacy_notice.dart';
@@ -27,6 +28,7 @@ class PrivacyRightsScreen extends ConsumerStatefulWidget {
 class _PrivacyRightsScreenState extends ConsumerState<PrivacyRightsScreen> {
   late AppLanguage _noticeLanguage = spokenLanguage;
   bool? _aiAllowed;
+  bool? _checkInAllowed;
 
   String get _userId => ref.read(sessionProvider).user?.id ?? '';
 
@@ -35,6 +37,9 @@ class _PrivacyRightsScreenState extends ConsumerState<PrivacyRightsScreen> {
     super.initState();
     aiConsentGiven(ref.read(appDatabaseProvider), _userId).then((v) {
       if (mounted) setState(() => _aiAllowed = v);
+    });
+    attendanceConsentGiven(ref.read(appDatabaseProvider), _userId).then((v) {
+      if (mounted) setState(() => _checkInAllowed = v);
     });
   }
 
@@ -106,6 +111,19 @@ class _PrivacyRightsScreenState extends ConsumerState<PrivacyRightsScreen> {
                   : (v) async {
                       await setAiConsent(ref.read(appDatabaseProvider), _userId, v);
                       if (mounted) setState(() => _aiAllowed = v);
+                    },
+            ),
+            SwitchListTile(
+              key: const Key('privacy-checkin-consent'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(tr('Photo and location for my attendance')),
+              subtitle: Text(tr('Read once at each check-in and check-out, never in the background')),
+              value: _checkInAllowed ?? false,
+              onChanged: _checkInAllowed == null
+                  ? null
+                  : (v) async {
+                      await setAttendanceConsent(ref.read(appDatabaseProvider), _userId, v);
+                      if (mounted) setState(() => _checkInAllowed = v);
                     },
             ),
             if (hasCompany)

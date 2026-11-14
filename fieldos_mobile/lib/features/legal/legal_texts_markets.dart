@@ -80,8 +80,8 @@ final usPrivacyPolicy = adaptLegal(
     ),
     'Attendance photos and selfies': const LegalSection(
       'Photo check-in',
-      'If your company turns on photo check-in, the app takes a photo with the front camera when staff clock in '
-          'or out, and saves it with the time, the job and the GPS position. The photos are part of the '
+      'When staff clock in or out, the app takes a photo with the front camera '
+          'and saves it with the time, the job and the GPS position. The photos are part of the '
           'company\'s time records: the owner and project managers of that company can see them, and they are '
           'used only to confirm who was on the job. FieldOS does not use face recognition, does not make a face '
           'template or any other biometric identifier from the photo, and does not compare faces. The app tells '
@@ -149,8 +149,8 @@ final usPrivacyPolicy = adaptLegal(
     'How long we keep data': const LegalSection(
       'How long we keep data',
       '• Company records stay as long as the company uses FieldOS, and are deleted with the account as '
-          'described below.\n\n• Check-in photos are deleted after the period the company sets (90 days unless '
-          'it chooses otherwise).\n\n• Bug, crash and message reports are kept only as long as needed to fix or '
+          'described below.\n\n• Check-in photos are part of the company\'s time records: they stay with those records '
+          'and are deleted with them.\n\n• Bug, crash and message reports are kept only as long as needed to fix or '
           'review them, and never more than 12 months.\n\n• Deleted data can remain in our hosting provider\'s '
           'automatic backups for up to 30 days before they are overwritten.',
     ),
@@ -173,6 +173,13 @@ final usPrivacyPolicy = adaptLegal(
       'Questions or requests about privacy: info@mldynamic.com with "Privacy" in the subject. $_contact',
     ),
   },
+  add: const [
+    LegalSection(
+      'Do Not Track',
+      'FieldOS does not track you across other apps or websites, so it works the same whether or not your '
+          'browser or phone sends a Do Not Track or Global Privacy Control signal. There is nothing to opt out of.',
+    ),
+  ],
 );
 
 final usTermsOfUse = adaptLegal(
@@ -267,8 +274,8 @@ final myPrivacyPolicy = adaptLegal(
   replace: {
     'Attendance photos and selfies': const LegalSection(
       'Attendance photos and selfies',
-      'If your company turns on selfie attendance, the app takes a photo with the front camera when staff check in '
-          'or out, and saves it with the time, the site and the GPS position. A supervisor can also take a photo '
+      'When staff check in or out, the app takes a photo with the front camera '
+          'and saves it with the time, the site and the GPS position. A supervisor can also take a photo '
           'when punching workers in. The photos are part of the company\'s attendance records: only the owner and '
           'project managers of that company can see them, and they are used only to confirm attendance. FieldOS '
           'does not use face recognition, and makes no face template or other biometric data from the photo. The '
@@ -321,8 +328,8 @@ final myPrivacyPolicy = adaptLegal(
       'How long we keep data',
       '• Company records stay as long as the company uses FieldOS, and are deleted with the account as described '
           'below. Employers must keep wage and attendance records for at least 6 years under the Employment Act '
-          '1955, so export them before you delete an account.\n\n• Attendance selfies are deleted after the '
-          'period the company sets (90 days unless it chooses otherwise); the attendance record itself stays.'
+          '1955, so export them before you delete an account.\n\n• Attendance selfies are part of the company\'s '
+          'attendance records: they stay with those records and are deleted with them.'
           '\n\n• Bug, crash and message reports are kept only as long as needed to fix or review them, and never '
           'more than 12 months.\n\n• Deleted data can remain in our hosting provider\'s automatic backups for up '
           'to 30 days before they are overwritten.',
@@ -335,8 +342,8 @@ final myPrivacyPolicy = adaptLegal(
           'Email info@mldynamic.com from the address on your account, or use Settings, Your privacy. We reply '
           'within 21 days. If your data is in a company\'s records (for example as a worker or a lead), we pass '
           'your request to that company, which decides about its own records, and tell you we have done so. '
-          'Withdrawing consent does not affect what was done before: turn off the AI assistant or crash details, '
-          'or delete your cloud account.',
+          'Withdrawing consent does not affect what was done before: turn off the AI assistant, crash details or '
+          'the photo and location for your attendance, or delete your cloud account.',
     ),
     'Grievance officer': const LegalSection(
       'Privacy contact and complaints',

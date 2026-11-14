@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/features/attendance/attendance_consent.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -101,9 +102,24 @@ class _MyAttendanceScreenState extends ConsumerState<MyAttendanceScreen> {
   String? _gpsNote;
   bool _busy = false;
 
+  /// Whether this person agreed to the check-in notice; null while it is
+  /// read. No GPS or camera before they agree.
+  bool? _agreed;
+
   @override
   void initState() {
     super.initState();
+    attendanceConsentGiven(ref.read(appDatabaseProvider), widget.userId).then((v) {
+      if (!mounted) return;
+      setState(() => _agreed = v);
+      if (v) _locate();
+    });
+  }
+
+  Future<void> _agree() async {
+    await setAttendanceConsent(ref.read(appDatabaseProvider), widget.userId, true);
+    if (!mounted) return;
+    setState(() => _agreed = true);
     _locate();
   }
 
@@ -253,7 +269,9 @@ class _MyAttendanceScreenState extends ConsumerState<MyAttendanceScreen> {
     final now = DateTime.now();
     return Scaffold(
       appBar: AppBar(title: Text(tr('My attendance'))),
-      body: sitesAsync.when(
+      body: _agreed != true
+          ? (_agreed == null ? const SizedBox.shrink() : _CheckInNotice(onAgree: _agree))
+          : sitesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => ErrorState(error: e, stack: st),
         data: (sites) {
@@ -384,6 +402,39 @@ class _MyAttendanceScreenState extends ConsumerState<MyAttendanceScreen> {
         },
       ),
     );
+  }
+}
+
+/// Shown once, before the first check-in: what is read, why, who sees it.
+class _CheckInNotice extends StatelessWidget {
+  const _CheckInNotice({required this.onAgree});
+  final VoidCallback onAgree;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ListView(padding: const EdgeInsets.fromLTRB(24, 32, 24, 24), children: [
+      Icon(Icons.verified_user_outlined, size: 56, color: theme.colorScheme.primary),
+      const SizedBox(height: 16),
+      Text(tr('Before your first check-in'), textAlign: TextAlign.center, style: theme.textTheme.titleLarge),
+      const SizedBox(height: 12),
+      Text(
+        tr('When you check in or out, FieldOS reads your location once and takes a photo with the front camera, so '
+            'your company can see you were at the site. Both are saved with your attendance record, and only the '
+            'owner and project managers see them. Your location is never tracked in the background, and the photo '
+            'is never used for face recognition.'),
+        style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        tr('If you do not agree, ask your supervisor to mark your attendance instead.'),
+        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+      ),
+      const SizedBox(height: 20),
+      FilledButton(key: const Key('checkin-agree'), onPressed: onAgree, child: Text(tr('I agree'))),
+      const SizedBox(height: 8),
+      OutlinedButton(onPressed: () => Navigator.of(context).maybePop(), child: Text(tr('Not now'))),
+    ]);
   }
 }
 
