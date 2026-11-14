@@ -133,6 +133,8 @@ const _askIn = {
   'ar': 'ما لغتك؟',
   'ur': 'آپ کی زبان؟',
   'ml': 'നിങ്ങളുടെ ഭാഷ?',
+  'pl': 'Twój język?',
+  'ro': 'Limba ta?',
 };
 
 String _askLine() => [
