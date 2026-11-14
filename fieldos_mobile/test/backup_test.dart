@@ -159,4 +159,41 @@ void main() {
         await rewrite(zip, (a, _) => a.addFile(ArchiveFile.bytes('fieldos.sqlite', utf8.encode('garbage' * 200)))), 'damaged');
     expect(filesDir.existsSync() ? filesDir.listSync() : const [], isEmpty, reason: 'no files left behind');
   });
+
+  test('photos not yet synced still go up from the phone a backup is restored on', () async {
+    // The phone is lost before it reached signal: the bill and the
+    // morning selfie are still queued for the cloud when the backup is made.
+    final (db, _) = await seeded();
+    final site = (await db.select(db.projects).get()).single;
+    final selfie = File(p.join(dir.path, 'phone1', 'selfie.jpg'))..writeAsBytesSync([0xff, 0xd8, 1, 2, 3]);
+    final photo = await db.staffAttendanceDao.addPhoto(projectId: site.id, filePath: selfie.path, by: 'me');
+    final zip = File(p.join(dir.path, 'out', 'fieldos-backup.zip'));
+    final made = await writeBackup(db, zip, workDir: dir);
+    expect(made.files, 2, reason: 'the selfie is in the backup too');
+    final version = db.schemaVersion;
+    await db.close();
+
+    final livePath = p.join(dir.path, 'phone2', 'fieldos.sqlite');
+    Directory(p.dirname(livePath)).createSync(recursive: true);
+    await stageRestore(zip,
+        databasePath: livePath, filesDir: Directory(p.join(dir.path, 'phone2', 'files')), appSchemaVersion: version);
+    expect(applyStagedRestore(livePath), isTrue);
+    final live = AppDatabase(NativeDatabase(File(livePath)));
+    final restored = (await live.staffAttendanceDao.photoById(photo.id))!;
+    expect(restored.filePath, startsWith(p.join(dir.path, 'phone2', 'files')));
+    expect(File(restored.filePath).readAsBytesSync(), [0xff, 0xd8, 1, 2, 3]);
+
+    // What the sync engine uploads: every queued file must be on this phone.
+    final queued = [
+      for (final e in await live.syncOutboxDao.pending())
+        if ((jsonDecode(e.payload) as Map).containsKey('_local_file_path'))
+          (jsonDecode(e.payload) as Map)['_local_file_path'] as String
+    ];
+    expect(queued, hasLength(2));
+    for (final f in queued) {
+      expect(f, startsWith(p.join(dir.path, 'phone2', 'files')));
+      expect(File(f).existsSync(), isTrue, reason: '$f is not on this phone');
+    }
+    await live.close();
+  });
 }

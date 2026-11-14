@@ -33,6 +33,22 @@ void main() {
       expect(pending.every((e) => e.retryCount == 0), isTrue);
     });
 
+    test('a write queued after the phone clock went back still goes after the one before it', () async {
+      final db = AppDatabase.memory();
+      // Queued while the phone's clock was a day fast...
+      await db.syncOutboxDao.enqueue(
+          targetTable: 'tasks', recordId: 't1', operation: 'insert', payloadJson: '{"id":"t1"}');
+      await db.customStatement("UPDATE sync_outbox SET created_at = created_at + 86400");
+      // ...then the network corrected it, and the task was edited.
+      await db.syncOutboxDao.enqueue(
+          targetTable: 'tasks', recordId: 't1', operation: 'update', payloadJson: '{"id":"t1","progress":50}');
+
+      final pending = await db.syncOutboxDao.pending();
+      expect(pending.map((e) => e.operation), ['insert', 'update'],
+          reason: 'the update would be refused if it reached the server before the insert');
+      await db.close();
+    });
+
     test('markSynced removes the entry', () async {
       final db = AppDatabase.memory();
       await db.syncOutboxDao.enqueue(

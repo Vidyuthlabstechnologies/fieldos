@@ -2429,7 +2429,11 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
   Future<List<SyncOutboxData>> pending() {
     return (select(syncOutbox)
           ..where((o) => o.retryCount.isSmallerThanValue(syncOutboxMaxRetries))
-          ..orderBy([(o) => OrderingTerm.asc(o.createdAt)]))
+          // By id, not created_at: the phone's clock can be set back (or
+          // corrected by the network) between two writes, and created_at
+          // has whole-second precision, so an edit could sort before the
+          // insert it follows and be refused by the server.
+          ..orderBy([(o) => OrderingTerm.asc(o.id)]))
         .get();
   }
 

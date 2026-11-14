@@ -81,6 +81,16 @@ bool isTransientSyncError(Object e) =>
     (e is StorageException && (e.statusCode == null || (int.tryParse(e.statusCode!) ?? 0) >= 500)) ||
     (e is PostgrestException && e.code != null && RegExp(r'^5\d\d$').hasMatch(e.code!));
 
+/// The sign-in, not the write: the access token expired and could not be
+/// refreshed (offline for over an hour, so the refresh itself failed, or
+/// the session was revoked), or PostgREST refused the token. Every entry
+/// would fail the same way, so such a failure stops the run and never
+/// counts toward parking.
+bool isAuthSyncError(Object e) =>
+    e is AuthException ||
+    (e is PostgrestException && (e.code == 'PGRST301' || e.code == 'PGRST302' || e.code == 'PGRST303')) ||
+    (e is StorageException && e.message.toLowerCase().contains('jwt'));
+
 class SyncEngine {
   /// Where downloaded document files are written. Injectable so Dart-VM
   /// tests can point at a temp dir -- [localDocumentsDirectory] needs
@@ -224,7 +234,7 @@ class SyncEngine {
             await db.syncOutboxDao.markSynced(entry.id);
             succeeded++;
           } catch (e) {
-            if (isTransientSyncError(e)) {
+            if (isTransientSyncError(e) || isAuthSyncError(e)) {
               await db.syncOutboxDao.noteTransientFailure(entry.id, e.toString());
               break;
             }
@@ -398,20 +408,29 @@ class SyncEngine {
         final keep = {...dirty.map((k) => k.substring(k.indexOf(':') + 1)), ...await db.syncOutboxDao.localOnlyIds()};
         final cursorKey = 'sync_cursor:${client.auth.currentUser?.id}';
         final cursor = int.tryParse(await db.settingsDao.get(cursorKey) ?? '');
+        // Where the next read of the log starts (see _pullChanges): at or
+        // below the cursor, so lines still being committed are not skipped.
+        final settledKey = 'sync_cursor_settled:${client.auth.currentUser?.id}';
+        final settled = int.tryParse(await db.settingsDao.get(settledKey) ?? '');
         // A backend without 20261110020000_incremental_sync.sql yet: full
         // pulls, as before, until it is deployed.
         final floor = await _rpcIntOrNull('sync_changes_floor');
         if (floor == null) {
           await _pullEverything(dirty, keep);
-        } else if (cursor != null && cursor >= floor) {
-          final next = await _pullChanges(cursor, dirty, keep);
-          await db.settingsDao.set(cursorKey, '$next');
+        } else if (cursor != null && settled != null && cursor >= floor) {
+          // (No settled mark: the cursor was left by a build that read the
+          // log newest first and could skip lines, so one full pull.)
+          final from = settled > cursor ? cursor : (settled < floor ? floor : settled);
+          final (:next, settled: newSettled) = await _pullChanges(from, dirty, keep);
+          await db.settingsDao.set(cursorKey, '${next > cursor ? next : cursor}');
+          await db.settingsDao.set(settledKey, '$newSettled');
         } else {
           // Lines logged while the full pull runs are applied again next
           // time, which is harmless (every apply is an upsert or a delete).
           final head = await _rpcInt('sync_changes_head');
           await _pullEverything(dirty, keep);
           await db.settingsDao.set(cursorKey, '$head');
+          await db.settingsDao.set(settledKey, '$head');
         }
         final portalSites = await _pullSubcontractorSites();
         await _dropProjectsNoLongerShared({...keep, ...portalSites});
@@ -701,25 +720,51 @@ class SyncEngine {
     }
   }
 
+  /// How long a line of the change log may stay out of sight after the
+  /// lines numbered above it are visible. A sequence number is taken when
+  /// the row is written but the line is only seen once its transaction
+  /// commits, so a slow write's line can appear behind a newer one the
+  /// phone has already read. Server statements time out well within this.
+  static const changeLogSettleTime = Duration(minutes: 5);
+
   /// Only what changed since [cursor]: changed rows fetched by id, deleted
-  /// ones removed. Returns the new cursor.
-  Future<int> _pullChanges(int cursor, Set<String> dirty, Set<String> keep) async {
+  /// ones removed. Returns the newest line read, and where the next read
+  /// starts: before the lines of the last [changeLogSettleTime] (by the
+  /// server's clock, so the phone's clock does not matter), which are read
+  /// again next time in case a line among them was still being committed.
+  Future<({int next, int settled})> _pullChanges(int cursor, Set<String> dirty, Set<String> keep) async {
     final last = <String, ({String table, String op})>{};
+    final lines = <({int seq, DateTime? at})>[];
     var next = cursor;
     while (true) {
       final page = await client
           .from('sync_changes')
-          .select('seq, table_name, row_id, op')
+          .select('seq, table_name, row_id, op, changed_at')
           .gt('seq', next)
-          .order('seq')
+          // Oldest first. order() is newest first by default, which set the
+          // cursor to the oldest new line (so it crept one line a pull) and,
+          // with more than a page waiting, skipped the older lines for good.
+          .order('seq', ascending: true)
           .limit(pullPageSize);
       for (final c in page) {
         next = (c['seq'] as num).toInt();
+        lines.add((seq: next, at: DateTime.tryParse(c['changed_at'] as String? ?? '')));
         last['${c['table_name']}:${c['row_id']}'] = (table: c['table_name'] as String, op: c['op'] as String);
       }
       if (page.length < pullPageSize) break;
     }
-    if (last.isEmpty) return next;
+    var settled = cursor;
+    final times = [for (final l in lines) l.at].whereType<DateTime>();
+    if (times.isNotEmpty) {
+      final newest = times.reduce((a, b) => a.isAfter(b) ? a : b);
+      for (final l in lines) {
+        if (l.at == null || !l.at!.isBefore(newest.subtract(changeLogSettleTime))) break;
+        settled = l.seq;
+      }
+    } else {
+      settled = next;
+    }
+    if (last.isEmpty) return (next: next, settled: settled);
 
     final changed = <String, List<String>>{};
     final deleted = <({String table, String id})>[];
@@ -757,7 +802,7 @@ class SyncEngine {
       if (keep.contains(d.id) || dirty.contains(SyncOutboxDao.key(d.table, d.id))) continue;
       await _deleteLocal(d.table, d.id);
     }
-    return next;
+    return (next: next, settled: settled);
   }
 
   /// A site this account can no longer see (taken off it, removed from the
@@ -782,14 +827,23 @@ class SyncEngine {
     }
   }
 
-  Future<List<String>> _fetchIds(String table) async {
-    final out = <String>[];
-    var from = 0;
+  Future<List<String>> _fetchIds(String table) async =>
+      [for (final r in await _fetchPaged(table, 'id')) r['id'] as String];
+
+  /// Every visible row of [table], [pullPageSize] at a time, each page
+  /// after the last id read (not at an offset: a row deleted on the server
+  /// mid-pull shifted every later row back by one, so one row was never
+  /// read, and the full pull then removed it from the phone).
+  Future<List<Map<String, dynamic>>> _fetchPaged(String table, String columns) async {
+    final out = <Map<String, dynamic>>[];
+    String? after;
     while (true) {
-      final rows = await client.from(table).select('id').order('id').range(from, from + pullPageSize - 1);
-      out.addAll(rows.map((r) => r['id'] as String));
+      var query = client.from(table).select(columns);
+      if (after != null) query = query.gt('id', after);
+      final rows = await query.order('id', ascending: true).limit(pullPageSize);
+      out.addAll(rows);
       if (rows.length < pullPageSize) break;
-      from += pullPageSize;
+      after = rows.last['id'] as String;
     }
     return out;
   }
@@ -964,17 +1018,8 @@ class SyncEngine {
   /// 1,000-row cap so a full page is never mistaken for the last one.
   static const pullPageSize = 500;
 
-  Future<List<Map<String, dynamic>>> _fetchAll(String table) async {
-    final out = <Map<String, dynamic>>[];
-    var from = 0;
-    while (true) {
-      final rows = await client.from(table).select().order('id').range(from, from + pullPageSize - 1);
-      out.addAll(rows.map(_toLocalIds));
-      if (rows.length < pullPageSize) break;
-      from += pullPageSize;
-    }
-    return out;
-  }
+  Future<List<Map<String, dynamic>>> _fetchAll(String table) async =>
+      (await _fetchPaged(table, '*')).map(_toLocalIds).toList();
 
   /// Tables whose arrival from a colleague is worth an on-device alert.
   static const notifiableTables = {'issues', 'approvals', 'project_messages'};
