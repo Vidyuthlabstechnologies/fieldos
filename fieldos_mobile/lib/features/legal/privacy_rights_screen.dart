@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/core/brand.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/export/export_action.dart';
 import 'package:fieldos_mobile/features/legal/legal_screen.dart';
@@ -131,7 +132,10 @@ class _PrivacyRightsScreenState extends ConsumerState<PrivacyRightsScreen> {
                 tr('Name someone to act for me'),
                 'Privacy request: nominate a person',
               ),
-              (Icons.report_gmailerrorred_outlined, tr('Complain to the Grievance Officer'), 'Privacy grievance'),
+              if (isIndia)
+                (Icons.report_gmailerrorred_outlined, tr('Complain to the Grievance Officer'), 'Privacy grievance')
+              else
+                (Icons.report_gmailerrorred_outlined, tr('Appeal a privacy decision'), 'Privacy appeal'),
             ])
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -142,10 +146,15 @@ class _PrivacyRightsScreenState extends ConsumerState<PrivacyRightsScreen> {
               ),
             const SizedBox(height: 8),
             Text(
-              tr(
-                'Write from the email address on your account. We reply within 30 days. If you are not satisfied, '
-                'you can complain to the Data Protection Board of India.',
-              ),
+              isIndia
+                  ? tr(
+                      'Write from the email address on your account. We reply within 30 days. If you are not '
+                      'satisfied, you can complain to the Data Protection Board of India.',
+                    )
+                  : tr(
+                      'Write from the email address on your account. We reply within 45 days. If you are not '
+                      'satisfied, you can appeal, and then contact the authority for privacy where you live.',
+                    ),
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
           ],
