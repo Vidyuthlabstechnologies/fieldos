@@ -107,6 +107,9 @@ filters its characters. PDFs stay in English.
   not added to the total, and the PDF carries HMRC's wording with the VAT
   in pounds and pence (`reverseChargeLine`). The flag is stored as `DRC`
   in the SAC column, which only India uses, so no migration was needed.
+- **CIS rates** (`TaxRegime.withholdingRates`): one tap for gross payment
+  status 0%, registered 20% or not registered 30%; the subcontractor's
+  status itself comes from HMRC verification, which FieldOS does not do.
 - UK English swaps (site diary, application for payment, delivery note,
   sign in/out, hourly pay) are in `market_terms.dart`.
 
@@ -133,12 +136,18 @@ private-sector workers.
   to the Commissioner within 72 hours, 21-day replies, a notice in English
   and Bahasa Melayu; Malaysian law with AIAC arbitration; the customer as
   data controller). The UAE has its own (PDPL, Federal Decree-Law 45/2021:
-  Articles 22-23 transfers with consent at sign-up, no face recognition,
-  DIFC/ADGM check; terms under Indian law with a carve-out for mandatory
-  UAE rights and DIAC arbitration for company plans; the Arabic version of
-  both is still to be made). The UK still shows India's until its own is
-  written, and `marketLegalReady` is false for it:
-  do not publish those apps before it is true. All of these are drafts that
+  Articles 22-23 transfers under contract (no consent is claimed, since the
+  login line only links the texts), selfies kept with attendance records,
+  no face recognition, DIFC/ADGM check; terms under Indian law with a
+  carve-out for mandatory UAE rights and DIAC arbitration for company plans;
+  the Arabic version of both is still to be made). The UK has its own (UK
+  GDPR and DPA 2018: lawful bases, IDTA / UK Addendum transfers to India and
+  the USA, ICO breach notice in 72 hours, one-month replies, complaints to
+  the ICO, a notice in English, Polish and Romanian; terms under the law of
+  England and Wales, B2B only, the Article 28 processor terms built in).
+  Owner actions before the UK app ships: appoint the Article 27 UK
+  representative and name them in the notice, and pay the ICO data
+  protection fee. All of these are drafts that
   need a lawyer in that country; never call them lawyer-reviewed.
   The published pages (`PRIVACY_POLICY_URL`, `TERMS_URL`) are build defines,
   so each market's store build points at its own pages.

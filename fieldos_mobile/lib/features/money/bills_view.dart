@@ -820,6 +820,19 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               ),
             ],
           ]),
+          if (market.tax.withholdingRates.isNotEmpty)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(top: 8),
+              child: Wrap(spacing: 8, runSpacing: 4, children: [
+                for (final w in market.tax.withholdingRates)
+                  ChoiceChip(
+                    key: Key('withholding-${fmtQty(w.pct)}'),
+                    label: Text(tr(w.label)),
+                    selected: _pct(_tds) == w.pct,
+                    onSelected: (_) => setState(() => _tds.text = fmtQty(w.pct)),
+                  ),
+              ]),
+            ),
           SectionHeader(_kind == 'ra' ? tr('Work measured this bill') : tr('Items')),
           if (_lines.isEmpty && hasEarlier)
             OutlinedButton.icon(

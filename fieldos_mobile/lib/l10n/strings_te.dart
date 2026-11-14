@@ -2511,4 +2511,8 @@ const Map<String, String> stringsTe = {
   'No CIS is taken off this line': 'ఈ లైన్ నుండి CIS తీసివేయబడదు',
   '{tax} (reverse charge, not added)': '{tax} (రివర్స్ ఛార్జ్, జోడించలేదు)',
   'below the minimum wage of {amount}/hr': 'కనీస వేతనం {amount}/గంట కంటే తక్కువ',
+  'Write from the email address on your account. We reply within one month. If you are not satisfied, you can complain to the Information Commissioner\'s Office.': 'మీ ఖాతా ఈమెయిల్ చిరునామా నుండి రాయండి. మేము ఒక నెలలోపు జవాబిస్తాము. మీకు సంతృప్తి లేకపోతే, Information Commissioner\'s Officeకి ఫిర్యాదు చేయవచ్చు.',
+  'Gross payment status (0%)': 'గ్రాస్ పేమెంట్ స్టేటస్ (0%)',
+  'Registered (20%)': 'నమోదైనవారు (20%)',
+  'Not registered (30%)': 'నమోదు కానివారు (30%)',
 };

@@ -3061,4 +3061,9 @@ const stringsMl = <String, String>{
   'No CIS is taken off this line': 'ഈ വരിയിൽ നിന്ന് CIS പിടിക്കില്ല',
   '{tax} (reverse charge, not added)': '{tax} (റിവേഴ്സ് ചാർജ്, ചേർത്തിട്ടില്ല)',
   'below the minimum wage of {amount}/hr': 'മിനിമം വേതനം {amount}/മണിക്കൂറിൽ താഴെ',
+  'Your location and a selfie when you check in or out, and your location when you punch a worker in, set a site location or take a site photo, to show the work was done at the site. The app asks you first. Never in the background. FieldOS does not use face recognition.': 'നിങ്ങൾ ചെക്ക് ഇൻ അല്ലെങ്കിൽ ചെക്ക് ഔട്ട് ചെയ്യുമ്പോൾ നിങ്ങളുടെ ലൊക്കേഷനും ഒരു സെൽഫിയും, ഒരു തൊഴിലാളിയെ പഞ്ച് ഇൻ ചെയ്യുമ്പോഴോ സൈറ്റ് ലൊക്കേഷൻ സജ്ജമാക്കുമ്പോഴോ സൈറ്റ് ഫോട്ടോ എടുക്കുമ്പോഴോ നിങ്ങളുടെ ലൊക്കേഷനും, ജോലി സൈറ്റിൽ നടന്നുവെന്ന് കാണിക്കാൻ. ആപ്പ് ആദ്യം നിങ്ങളോട് ചോദിക്കും. ഒരിക്കലും പശ്ചാത്തലത്തിൽ ഇല്ല. FieldOS മുഖം തിരിച്ചറിയൽ ഉപയോഗിക്കുന്നില്ല.',
+  'Write from the email address on your account. We reply within one month. If you are not satisfied, you can complain to the Information Commissioner\'s Office.': 'നിങ്ങളുടെ അക്കൗണ്ടിലെ ഇമെയിൽ വിലാസത്തിൽ നിന്ന് എഴുതുക. ഒരു മാസത്തിനകം ഞങ്ങൾ മറുപടി നൽകും. തൃപ്തരല്ലെങ്കിൽ, Information Commissioner\'s Office-ൽ പരാതി നൽകാം.',
+  'Gross payment status (0%)': 'ഗ്രോസ് പേയ്‌മെന്റ് സ്റ്റാറ്റസ് (0%)',
+  'Registered (20%)': 'രജിസ്റ്റർ ചെയ്തവർ (20%)',
+  'Not registered (30%)': 'രജിസ്റ്റർ ചെയ്യാത്തവർ (30%)',
 };

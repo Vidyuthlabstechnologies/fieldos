@@ -3412,4 +3412,9 @@ const Map<String, String> stringsTa = {
   'No CIS is taken off this line': 'இந்த வரியிலிருந்து CIS பிடிக்கப்படாது',
   '{tax} (reverse charge, not added)': '{tax} (ரிவர்ஸ் சார்ஜ், சேர்க்கப்படவில்லை)',
   'below the minimum wage of {amount}/hr': 'குறைந்தபட்ச ஊதியம் {amount}/மணி நேரத்தை விடக் குறைவு',
+  'Your location and a selfie when you check in or out, and your location when you punch a worker in, set a site location or take a site photo, to show the work was done at the site. The app asks you first. Never in the background. FieldOS does not use face recognition.': 'நீங்கள் உள்ளே அல்லது வெளியே பதிவு செய்யும்போது உங்கள் இருப்பிடமும் ஒரு செல்ஃபியும், தொழிலாளரைப் பதிவு செய்யும்போது, தள இருப்பிடத்தை அமைக்கும்போது அல்லது தளப் புகைப்படம் எடுக்கும்போது உங்கள் இருப்பிடமும், வேலை தளத்தில் நடந்தது என்பதைக் காட்ட. செயலி முதலில் உங்களிடம் கேட்கும். பின்னணியில் ஒருபோதும் இல்லை. FieldOS முக அடையாளத்தைப் பயன்படுத்துவதில்லை.',
+  'Write from the email address on your account. We reply within one month. If you are not satisfied, you can complain to the Information Commissioner\'s Office.': 'உங்கள் கணக்கின் மின்னஞ்சல் முகவரியிலிருந்து எழுதுங்கள். ஒரு மாதத்திற்குள் பதிலளிப்போம். திருப்தி இல்லையெனில், Information Commissioner\'s Office-இல் புகார் செய்யலாம்.',
+  'Gross payment status (0%)': 'மொத்தப் பணம் பெறும் நிலை (0%)',
+  'Registered (20%)': 'பதிவு பெற்றவர் (20%)',
+  'Not registered (30%)': 'பதிவு பெறாதவர் (30%)',
 };

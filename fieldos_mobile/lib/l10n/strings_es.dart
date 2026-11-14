@@ -3052,4 +3052,8 @@ const Map<String, String> stringsEs = {
   'No CIS is taken off this line': 'No se retiene CIS en esta línea',
   '{tax} (reverse charge, not added)': '{tax} (inversión del sujeto pasivo, no sumado)',
   'below the minimum wage of {amount}/hr': 'por debajo del salario mínimo de {amount}/h',
+  'Write from the email address on your account. We reply within one month. If you are not satisfied, you can complain to the Information Commissioner\'s Office.': 'Escribe desde el correo de tu cuenta. Respondemos en un mes. Si no quedas satisfecho, puedes reclamar ante la Information Commissioner\'s Office.',
+  'Gross payment status (0%)': 'Pago bruto (0%)',
+  'Registered (20%)': 'Registrado (20%)',
+  'Not registered (30%)': 'No registrado (30%)',
 };

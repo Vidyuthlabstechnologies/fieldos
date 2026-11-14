@@ -177,6 +177,10 @@ class _PrivacyRightsScreenState extends ConsumerState<PrivacyRightsScreen> {
                     'Write from the email address on your account. We reply within 21 days. If you are not '
                     'satisfied, you can complain to the Personal Data Protection Commissioner of Malaysia.',
                   ),
+                Market.uk => tr(
+                    'Write from the email address on your account. We reply within one month. If you are not '
+                    'satisfied, you can complain to the Information Commissioner\'s Office.',
+                  ),
                 _ => tr(
                     'Write from the email address on your account. We reply within 45 days. If you are not '
                     'satisfied, you can appeal, and then contact the authority for privacy where you live.',
