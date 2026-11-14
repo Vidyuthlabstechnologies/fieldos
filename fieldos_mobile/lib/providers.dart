@@ -69,8 +69,10 @@ final sessionProvider = NotifierProvider<SessionNotifier, SessionState>(SessionN
 final projectsProvider =
     FutureProvider.autoDispose.family<List<Project>, String>((ref, companyId) async {
   final db = ref.watch(appDatabaseProvider);
+  // Watched before any await: a Ref can't be used after an async gap.
+  final session = ref.watch(sessionProvider);
   final all = await db.projectDao.forCompany(companyId);
-  final visible = await mySiteIds(db, ref.watch(sessionProvider), companyId);
+  final visible = await mySiteIds(db, session, companyId);
   return [for (final p in all) if (visible.contains(p.id)) p];
 });
 
