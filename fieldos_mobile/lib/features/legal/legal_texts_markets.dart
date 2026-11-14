@@ -12,15 +12,14 @@ library;
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/features/legal/legal_texts.dart';
 
-/// The policy this build shows. Markets whose own text is not written yet
-/// get null, and [marketLegalReady] is false for them: their store build
-/// must not ship (test/market_legal_test.dart checks the US one exists).
+/// The policy this build shows: every market has its own draft
+/// (test/market_legal_test.dart checks each one's law and wording).
 LegalDocument get marketPrivacyPolicy => switch (currentMarket) {
   Market.india => privacyPolicy,
   Market.us => usPrivacyPolicy,
   Market.malaysia => myPrivacyPolicy,
   Market.uae => aePrivacyPolicy,
-  _ => privacyPolicy,
+  Market.uk => ukPrivacyPolicy,
 };
 
 LegalDocument get marketTermsOfUse => switch (currentMarket) {
@@ -28,11 +27,11 @@ LegalDocument get marketTermsOfUse => switch (currentMarket) {
   Market.us => usTermsOfUse,
   Market.malaysia => myTermsOfUse,
   Market.uae => aeTermsOfUse,
-  _ => termsOfUse,
+  Market.uk => ukTermsOfUse,
 };
 
 /// Whether this market has its own legal texts yet.
-bool get marketLegalReady => const {Market.india, Market.us, Market.malaysia, Market.uae}.contains(currentMarket);
+bool get marketLegalReady => const {Market.india, Market.us, Market.malaysia, Market.uae, Market.uk}.contains(currentMarket);
 
 /// [base] with sections replaced by heading ([replace]; a null value drops
 /// the section) and [add] appended before the contact section.
@@ -467,12 +466,13 @@ final aePrivacyPolicy = adaptLegal(
   replace: {
     'Attendance photos and selfies': const LegalSection(
       'Attendance photos and selfies',
-      'If your company uses selfie attendance, the app takes a photo with the front camera when staff check in or '
-          'out, and saves it with the time, the site and the GPS position. A supervisor can also take a photo when '
-          'punching workers in. The photos are part of the company\'s attendance records: only the owner and project '
-          'managers of that company can see them, and they are used only to confirm attendance, never for anything '
-          'else. FieldOS does not use face recognition, and makes no face template or other biometric data from the '
-          'photo. Your company should tell each worker before the first photo, in a language they understand.',
+      'When staff check in or out, the app takes a photo with the front camera and saves it with the time, the '
+          'site and the GPS position. A supervisor can also take a photo when punching workers in. The photos are '
+          'part of the company\'s attendance records: only the owner and project managers of that company can see '
+          'them, and they are used only to confirm attendance, never for anything else. FieldOS does not use face '
+          'recognition, and makes no face template or other biometric data from the photo. The app tells each person '
+          'this and asks them to agree before their first check-in. They can turn it off at any time in Settings, '
+          'Your privacy, and a supervisor then marks their attendance instead.',
     ),
     'Salaries, workers and leads': const LegalSection(
       'Salaries, workers and leads',
@@ -497,8 +497,8 @@ final aePrivacyPolicy = adaptLegal(
           'RevenueCat (USA) for checking subscriptions, GitHub (USA) for our private copy of bug and message reports, '
           'and Google and Apple for sign-in, speech and the stores. We send personal data to these places under '
           'Articles 22 and 23 of the PDPL: each service gets only what this policy describes for it, under a contract '
-          'that limits it to providing its service and requires it to protect the data to the PDPL\'s standard, and '
-          'by creating an account you agree to these transfers. If your company is in a free zone with its own data '
+          'that limits it to providing its service and requires it to protect the data to the PDPL\'s standard. '
+          'If your company is in a free zone with its own data '
           'law (DIFC or ADGM), tell us before you use FieldOS. We will update this policy before the place where '
           'your records are stored changes.',
     ),
@@ -519,8 +519,8 @@ final aePrivacyPolicy = adaptLegal(
       'How long we keep data',
       '• Company records stay as long as the company uses FieldOS, and are deleted with the account as described '
           'below. Employers must keep wage records for the period UAE labour law sets, so export them before you '
-          'delete an account.\n\n• Attendance selfies are deleted after the period the company sets (12 months unless '
-          'it chooses otherwise); the attendance record itself stays.\n\n• Bug, crash and message reports are kept '
+          'delete an account.\n\n• Attendance selfies are part of the company\'s attendance records: they stay with '
+          'those records and are deleted with them.\n\n• Bug, crash and message reports are kept '
           'only as long as needed to fix or review them, and never more than 12 months.\n\n• Deleted data can remain '
           'in our hosting provider\'s automatic backups for up to 30 days before they are overwritten.',
     ),
@@ -532,7 +532,8 @@ final aePrivacyPolicy = adaptLegal(
           'Email info@mldynamic.com from the address on your account, or use Settings, Your privacy. We reply within '
           '30 days. If your data is in a company\'s records (for example as a worker or a lead), we pass your request '
           'to that company, which decides about its own records, and tell you we have done so. You can withdraw '
-          'your consent at any time: turn off the AI assistant or crash details, or delete your cloud account. '
+          'your consent at any time: turn off the AI assistant, crash details, or the photo and location for your '
+          'attendance in Settings, Your privacy, or delete your cloud account. '
           'Withdrawing does not affect what was done before.',
     ),
     'Grievance officer': const LegalSection(
@@ -627,6 +628,198 @@ final aeTermsOfUse = adaptLegal(
           'attendance selfies and location, and that you have a lawful basis for it. We will tell you within 72 hours '
           'of a breach that affects your company\'s data, help you answer requests from the people in your records, '
           'and delete your company\'s data when your account is deleted.',
+    ),
+    '20. Contact us': const LegalSection('20. Contact us', _contact),
+  },
+);
+
+final ukPrivacyPolicy = adaptLegal(
+  privacyPolicy,
+  intro: 'FieldOS is made by ML Dynamic Solutions Private Limited, a company based in India ("we", "us"). This privacy '
+      'notice is for the FieldOS app for the United Kingdom, and is given under the UK General Data Protection '
+      'Regulation (UK GDPR) and the Data Protection Act 2018. We are the controller of your account data. FieldOS '
+      'stores the projects, site diaries, photos, attendance and other site records you create on your phone. If you '
+      'sign in to Team & sync, those records, your email address and the name you entered are also stored in our cloud '
+      'database (Supabase, region: Mumbai, India), so that the people your company works with can see what is meant '
+      'for them. Our representative in the UK under Article 27 of the UK GDPR will be named in this notice before the '
+      'UK app is published.',
+  replace: {
+    'Attendance photos and selfies': const LegalSection(
+      'Attendance photos and selfies',
+      'When staff sign in or out on site, the app takes a photo with the front camera and saves it with the time, the '
+          'site and the GPS position. A supervisor can also take a photo when signing operatives in. The photos are part '
+          'of the company\'s attendance records: only the owner and project managers of that company can see them, and '
+          'they are used only to confirm attendance, never for anything else. FieldOS does not use face recognition, '
+          'and makes no face template or other biometric data from the photo, so it is not special category data. The '
+          'app tells each person this and asks them to agree before their first sign-in. They can turn it off at any '
+          'time in Settings, Your privacy, and a supervisor then marks their attendance instead.',
+    ),
+    'Salaries, workers and leads': const LegalSection(
+      'Pay, operatives and leads',
+      'Companies use FieldOS to keep their own records about other people: operatives\' names, attendance, hours and '
+          'pay, staff salaries and advances, CSCS card and right to work details, subcontractors\' CIS details, and '
+          'leads (the name, phone number and enquiry of a possible customer). The company decides what it records and '
+          'why, and is the controller of those records; FieldOS processes them only on the company\'s behalf, as its '
+          'processor. Only owners and project managers can see pay and leads, and ID numbers are shown masked in lists.',
+    ),
+    'Voice reports': const LegalSection(
+      'Voice reports',
+      'Voice reports use your phone\'s own speech recognition: Google\'s on Android and Apple\'s on iPhone. When the '
+          'language\'s offline speech pack is on the phone, your speech is turned into text on the phone. Otherwise the '
+          'phone\'s speech service may send it to Google or Apple to be recognised, under their privacy policies. '
+          'FieldOS does not record or keep your voice in the UK app.',
+    ),
+    'Payments': const LegalSection(
+      'Payments',
+      'The FieldOS subscription is bought through Google Play or the Apple App Store, which handle your card or other '
+          'payment details and the VAT. FieldOS never sees them. RevenueCat (revenuecat.com, USA) receives the purchase '
+          'record from the store, linked to your FieldOS account id, so that the app and the assistant can check your '
+          'subscription.',
+    ),
+    'Where your data is processed': const LegalSection(
+      'Where your data is processed',
+      'Why we use your data (the lawful basis): to provide FieldOS to you and your company under our contract; for our '
+          'legitimate interests in keeping FieldOS secure, fixing faults and answering reports; and with your consent '
+          'for the AI assistant, crash details and the photo and location for your attendance, which you can withdraw '
+          'at any time.\n\nYour cloud records are stored by Supabase in Mumbai, India, outside the UK. A few other '
+          'services we use are run from other countries: Anthropic (USA) for the AI assistant, with Sarvam AI (India) '
+          'as its backup, RevenueCat (USA) for checking subscriptions, GitHub (USA) for our private copy of bug and '
+          'message reports, and Google and Apple for sign-in, speech and the stores. India has no UK adequacy decision, '
+          'so we send personal data there, and to US services that are not certified under the UK Extension to the '
+          'EU-US Data Privacy Framework, under the ICO\'s International Data Transfer Agreement or the UK Addendum to '
+          'the EU standard contractual clauses, with a transfer risk assessment. Each service gets only what this '
+          'notice describes for it. You can ask us for a copy of these safeguards. We will update this notice before '
+          'the place where your records are stored changes.',
+    ),
+    'Keeping data safe': const LegalSection(
+      'Keeping data safe',
+      'We protect data with encryption in transit, access limited by role, and checks that keep each company\'s '
+          'records apart. If a breach of personal data is likely to put people at risk, we will tell the Information '
+          'Commissioner\'s Office (ICO) within 72 hours of finding it, tell your company, and tell you without undue '
+          'delay if the risk to you is high.',
+    ),
+    'Children': const LegalSection(
+      'Children',
+      'FieldOS is for people aged 18 and over, for business use, and we do not knowingly collect personal data of '
+          'children. Do not record a child of compulsory school age as an operative on a building site: UK law does not '
+          'allow them to work there.',
+    ),
+    'How long we keep data': const LegalSection(
+      'How long we keep data',
+      '• Company records stay as long as the company uses FieldOS, and are deleted with the account as described '
+          'below. Employers must keep payroll and CIS records for at least 3 years after the end of the tax year, and '
+          'VAT records for 6 years, so export them before you delete an account.\n\n• Attendance selfies are part of '
+          'the company\'s attendance records: they stay with those records and are deleted with them.\n\n• Bug, crash '
+          'and message reports are kept only as long as needed to fix or review them, and never more than 12 months.'
+          '\n\n• Deleted data can remain in our hosting provider\'s automatic backups for up to 30 days before they are '
+          'overwritten.',
+    ),
+    'Your rights': const LegalSection(
+      'Your rights',
+      'Under the UK GDPR you can ask us for the personal data we hold about you and a copy of it, ask us to correct or '
+          'erase it, ask us to restrict processing, object to processing based on our legitimate interests, and ask us '
+          'to send it to another organisation in a machine-readable form. FieldOS makes no decision about you by '
+          'automated means alone. Email info@mldynamic.com from the address on your account, or use Settings, Your '
+          'privacy. We reply within one month; if a request is complex we may take up to two more months, and will tell '
+          'you why within the first month. If your data is in a company\'s records (for example as an operative or a '
+          'lead), that company is the controller: we pass your request to it and tell you we have done so. You can '
+          'withdraw your consent at any time: turn off the AI assistant, crash details, or the photo and location for '
+          'your attendance in Settings, Your privacy, or delete your cloud account. Withdrawing does not affect what was '
+          'done before.',
+    ),
+    'Grievance officer': const LegalSection(
+      'Privacy contact and complaints',
+      'For any question or complaint about your personal data, write to our privacy contact at info@mldynamic.com with '
+          '"Privacy" in the subject. If you are not satisfied with our answer, you can complain to the Information '
+          'Commissioner\'s Office (ico.org.uk, 0303 123 1113).',
+    ),
+    'Contact': const LegalSection(
+      'Contact',
+      'Questions or requests about privacy: info@mldynamic.com with "Privacy" in the subject. $_contact',
+    ),
+  },
+);
+
+final ukTermsOfUse = adaptLegal(
+  termsOfUse,
+  intro: 'These terms of use ("terms") are an agreement between you and ML Dynamic Solutions Private Limited, a '
+      'company incorporated in India ("we", "us"), which makes the FieldOS app for the United Kingdom and its cloud '
+      'service ("FieldOS"). By creating an account, starting a free trial or using FieldOS, you agree to these terms. '
+      'The privacy notice explains how we use personal data. FieldOS is made for businesses: if you use it for a '
+      'company, you confirm that you may accept these terms for it, and "you" includes that company. If you do not '
+      'agree, do not use FieldOS.',
+  replace: {
+    '1. Who can use FieldOS': const LegalSection(
+      '1. Who can use FieldOS',
+      'You must be at least 18 years old. FieldOS is made for contractors, builders and their site teams, for use in '
+          'their trade or business, not as consumers.',
+    ),
+    '3. Subscription, free trial and payment': const LegalSection(
+      '3. Subscription, free trial and payment',
+      'FieldOS needs a FieldOS Pro subscription, bought through Google Play or the Apple App Store, monthly or yearly at '
+          'the price in pounds the store shows before you pay, including VAT.\n\nNew subscribers get one 3-day free '
+          'trial, where the store offers it to them. Unless you cancel before the trial ends, the first payment is taken '
+          'when it ends. The subscription then renews automatically for the same period at the price then current, '
+          'until you cancel. Cancel at least 24 hours before the end of a period, in your Google Play or App Store '
+          'subscriptions, to avoid the next charge. Uninstalling the app does not cancel a subscription.\n\nThe store '
+          'takes the payment, and refunds are handled by the store under its own policies. If we change the price, the '
+          'store tells you before the new price applies, and you can cancel before then. If a payment fails or a '
+          'subscription ends, FieldOS cannot be used until you subscribe again. Your records are not deleted, and are '
+          'there again when you resubscribe.',
+    ),
+    '5. Team chat and other shared content': const LegalSection(
+      '5. Team chat and other shared content',
+      'Project chat, photos, comments and other content you share are seen by the other members of your company. We do '
+          'not allow objectionable content or abusive users. Do not post or share anything that:\n\n• threatens, '
+          'harasses, bullies or abuses anyone, or attacks people for their race, religion, sex, sexual orientation, '
+          'disability, age or any other protected characteristic;\n• is sexual, obscene, violent or hateful, or involves '
+          'a child in any harmful way;\n• is spam, a scam or fraud, or asks for money under false pretences;\n• is false '
+          'or misleading in a way meant to harm someone, or impersonates another person;\n• shares someone\'s private '
+          'information or photos without their permission;\n• infringes anyone\'s copyright, trade mark or other '
+          'rights; or\n• breaks any UK law.',
+    ),
+    '8. Check the numbers': const LegalSection(
+      '8. Check the numbers',
+      'FieldOS helps with estimates, quantities, pay, hours, applications for payment, VAT, the domestic reverse charge, '
+          'CIS deductions, retention, attendance and reports, and its AI assistant answers questions and fills in '
+          'records for you to confirm. These can contain mistakes, and FieldOS does not know every term of your '
+          'contract. Check figures before you rely on them. FieldOS is a record-keeping aid, not engineering, legal, '
+          'payroll, tax or accounting advice: it does not verify subcontractors with HMRC, file CIS or VAT returns, '
+          'run payroll or Real Time Information, or decide whether the reverse charge applies to a supply. Those duties '
+          'remain yours as the contractor or employer.',
+    ),
+    '14. Limits on our liability': const LegalSection(
+      '14. Limits on our liability',
+      'As far as the law allows, we are not liable for indirect or consequential loss, or for loss of profit, business, '
+          'contracts or data, arising from your use of FieldOS. Our total liability to you for all claims about FieldOS '
+          'is limited to the amount you paid for FieldOS in the 12 months before the event that led to the claim.'
+          '\n\nNothing in these terms limits or excludes liability for death or personal injury caused by negligence, '
+          'for fraud or fraudulent misrepresentation, or any other liability that cannot be limited or excluded under '
+          'the law of England and Wales.',
+    ),
+    '16. Changes to these terms': const LegalSection(
+      '16. Changes to these terms',
+      'We may update these terms, for example when the law or FieldOS changes. The date at the top shows the current '
+          'version. We will tell you in the app at least 30 days before a change that matters to you takes effect. If '
+          'you do not agree, you can cancel before then; if you keep using FieldOS after that, the new terms apply.',
+    ),
+    '17. Law and disputes': const LegalSection(
+      '17. Law and disputes',
+      'These terms are governed by the law of England and Wales. If you have a complaint, please write to us first at '
+          'info@mldynamic.com so we can try to settle it; most problems can be solved this way within 30 days. If it is '
+          'not settled, the courts of England and Wales have jurisdiction, except that if your business is in Scotland '
+          'or Northern Ireland you may also bring a claim in the courts there.',
+    ),
+    '18. Grievance officer': const LegalSection(
+      '18. Your operatives\' personal data',
+      'Your company is the controller of the personal data it records about its operatives, staff, subcontractors and '
+          'leads, and we process it only on your documented instructions, to run FieldOS, as the privacy notice '
+          'describes. These terms are our data processing agreement under Article 28 of the UK GDPR: our staff who '
+          'handle it are bound by confidentiality, we keep it secure, we use the sub-processors the privacy notice '
+          'lists and tell you before we add one, we help you answer requests from the people in your records, we tell '
+          'you without undue delay of a breach that affects your company\'s data, and we delete it when your account is '
+          'deleted. You confirm that you have told those people what is recorded and why, including for attendance '
+          'selfies and location, and that you have a lawful basis for it.',
     ),
     '20. Contact us': const LegalSection('20. Contact us', _contact),
   },

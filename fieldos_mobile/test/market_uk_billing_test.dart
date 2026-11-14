@@ -102,4 +102,16 @@ void main() {
       expect(trIn(l, 'Amount (₹)'), contains('£'), reason: l.code);
     }
   });
+
+  test('CIS rates: gross payment 0%, registered 20%, not registered 30%', () {
+    debugSetMarket(Market.uk);
+    expect([for (final w in market.tax.withholdingRates) w.pct], [0, 20, 30]);
+    for (final l in AppLanguage.values.where((l) => l != AppLanguage.en)) {
+      for (final w in market.tax.withholdingRates) {
+        expect(trIn(l, w.label), isNot(w.label), reason: '${l.code}: ${w.label}');
+      }
+    }
+    debugSetMarket(Market.india);
+    expect(market.tax.withholdingRates, isEmpty, reason: 'India types its TDS rate');
+  });
 }

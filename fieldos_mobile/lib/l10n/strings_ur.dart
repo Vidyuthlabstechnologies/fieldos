@@ -3061,4 +3061,9 @@ const stringsUr = <String, String>{
   'No CIS is taken off this line': 'اس لائن سے CIS نہیں کٹتا',
   '{tax} (reverse charge, not added)': '{tax} (ریورس چارج، شامل نہیں)',
   'below the minimum wage of {amount}/hr': 'کم از کم اجرت {amount}/گھنٹہ سے کم',
+  'Your location and a selfie when you check in or out, and your location when you punch a worker in, set a site location or take a site photo, to show the work was done at the site. The app asks you first. Never in the background. FieldOS does not use face recognition.': 'حاضری لگاتے یا چھٹی درج کرتے وقت آپ کی لوکیشن اور ایک سیلفی، اور کسی مزدور کا پنچ لگانے، سائٹ کی لوکیشن طے کرنے یا سائٹ کی تصویر لینے پر آپ کی لوکیشن، یہ دکھانے کے لیے کہ کام سائٹ پر ہوا۔ ایپ پہلے آپ سے پوچھتی ہے۔ کبھی پس منظر میں نہیں۔ FieldOS چہرے کی شناخت استعمال نہیں کرتا۔',
+  'Write from the email address on your account. We reply within one month. If you are not satisfied, you can complain to the Information Commissioner\'s Office.': 'اپنے اکاؤنٹ والے ای میل پتے سے لکھیں۔ ہم ایک مہینے کے اندر جواب دیتے ہیں۔ اگر آپ مطمئن نہیں ہیں تو Information Commissioner\'s Office میں شکایت کر سکتے ہیں۔',
+  'Gross payment status (0%)': 'گراس پیمنٹ اسٹیٹس (0%)',
+  'Registered (20%)': 'رجسٹرڈ (20%)',
+  'Not registered (30%)': 'غیر رجسٹرڈ (30%)',
 };

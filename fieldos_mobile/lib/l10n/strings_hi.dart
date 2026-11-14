@@ -2517,4 +2517,9 @@ const Map<String, String> stringsHi = {
   'No CIS is taken off this line': 'इस लाइन से CIS नहीं कटता',
   '{tax} (reverse charge, not added)': '{tax} (रिवर्स चार्ज, जोड़ा नहीं गया)',
   'below the minimum wage of {amount}/hr': 'न्यूनतम मज़दूरी {amount}/घंटा से कम',
+  'Your location and a selfie when you check in or out, and your location when you punch a worker in, set a site location or take a site photo, to show the work was done at the site. The app asks you first. Never in the background. FieldOS does not use face recognition.': 'चेक इन या चेक आउट करते समय आपकी लोकेशन और एक सेल्फ़ी, और किसी मज़दूर को पंच इन करने, साइट की लोकेशन सेट करने या साइट की फ़ोटो लेने पर आपकी लोकेशन, यह दिखाने के लिए कि काम साइट पर हुआ। ऐप पहले आपसे पूछता है। बैकग्राउंड में कभी नहीं। FieldOS चेहरा पहचान (face recognition) का इस्तेमाल नहीं करता।',
+  'Write from the email address on your account. We reply within one month. If you are not satisfied, you can complain to the Information Commissioner\'s Office.': 'अपने अकाउंट वाले ईमेल पते से लिखें। हम एक महीने के अंदर जवाब देते हैं। अगर आप संतुष्ट नहीं हैं, तो Information Commissioner\'s Office में शिकायत कर सकते हैं।',
+  'Gross payment status (0%)': 'ग्रॉस पेमेंट स्टेटस (0%)',
+  'Registered (20%)': 'रजिस्टर्ड (20%)',
+  'Not registered (30%)': 'रजिस्टर्ड नहीं (30%)',
 };

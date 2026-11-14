@@ -3403,4 +3403,8 @@ const Map<String, String> stringsMr = {
   'No CIS is taken off this line': 'या ओळीतून CIS कापला जात नाही',
   '{tax} (reverse charge, not added)': '{tax} (रिव्हर्स चार्ज, जोडलेला नाही)',
   'below the minimum wage of {amount}/hr': 'किमान वेतन {amount}/तास पेक्षा कमी',
+  'Write from the email address on your account. We reply within one month. If you are not satisfied, you can complain to the Information Commissioner\'s Office.': 'तुमच्या खात्याच्या ईमेल पत्त्यावरून लिहा. आम्ही एका महिन्याच्या आत उत्तर देतो. समाधान न झाल्यास, तुम्ही Information Commissioner\'s Office कडे तक्रार करू शकता.',
+  'Gross payment status (0%)': 'ग्रॉस पेमेंट स्थिती (0%)',
+  'Registered (20%)': 'नोंदणीकृत (20%)',
+  'Not registered (30%)': 'नोंदणी नसलेले (30%)',
 };

@@ -3061,4 +3061,9 @@ const stringsAr = <String, String>{
   'No CIS is taken off this line': 'لا يُخصم CIS من هذا البند',
   '{tax} (reverse charge, not added)': '{tax} (احتساب عكسي، غير مضاف)',
   'below the minimum wage of {amount}/hr': 'أقل من الحد الأدنى للأجر {amount}/ساعة',
+  'Your location and a selfie when you check in or out, and your location when you punch a worker in, set a site location or take a site photo, to show the work was done at the site. The app asks you first. Never in the background. FieldOS does not use face recognition.': 'موقعك الجغرافي وصورة سيلفي عند تسجيل الدخول أو الخروج، وموقعك عند تسجيل حضور عامل أو تحديد موقع الموقع أو التقاط صورة للموقع، لإثبات أن العمل تم في الموقع. يطلب التطبيق موافقتك أولًا. ولا يحدث ذلك في الخلفية أبدًا. لا يستخدم FieldOS التعرف على الوجه.',
+  'Write from the email address on your account. We reply within one month. If you are not satisfied, you can complain to the Information Commissioner\'s Office.': 'اكتب من عنوان البريد الإلكتروني المسجل في حسابك. نرد خلال شهر واحد. إذا لم تكن راضيًا، يمكنك تقديم شكوى إلى Information Commissioner\'s Office.',
+  'Gross payment status (0%)': 'حالة الدفع الإجمالي (0%)',
+  'Registered (20%)': 'مسجل (20%)',
+  'Not registered (30%)': 'غير مسجل (30%)',
 };

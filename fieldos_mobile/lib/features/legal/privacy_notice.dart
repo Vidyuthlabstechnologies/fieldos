@@ -28,6 +28,7 @@ List<NoticeItem> get privacyNoticeItems => switch (currentMarket) {
   Market.us => usPrivacyNoticeItems,
   Market.malaysia => myPrivacyNoticeItems,
   Market.uae => aePrivacyNoticeItems,
+  Market.uk => ukPrivacyNoticeItems,
   _ => indiaPrivacyNoticeItems,
 };
 
@@ -140,8 +141,8 @@ const myPrivacyNoticeItems = [
   ),
   NoticeItem(
     'Location and selfies',
-    'Your location, and a selfie if your company uses selfie attendance, only when you check in or out, punch a '
-        'worker in, set a site location or take a site photo, to show the work was done at the site. Never in the '
+    'Your location and a selfie when you check in or out, and your location when you punch a worker in, set a site '
+        'location or take a site photo, to show the work was done at the site. The app asks you first. Never in the '
         'background. FieldOS does not use face recognition.',
   ),
   NoticeItem(
@@ -190,8 +191,8 @@ const aePrivacyNoticeItems = [
   ),
   NoticeItem(
     'Location and selfies',
-    'Your location, and a selfie if your company uses selfie attendance, only when you check in or out, punch a '
-        'worker in, set a site location or take a site photo, to show the work was done at the site. Never in the '
+    'Your location and a selfie when you check in or out, and your location when you punch a worker in, set a site '
+        'location or take a site photo, to show the work was done at the site. The app asks you first. Never in the '
         'background. FieldOS does not use face recognition.',
   ),
   NoticeItem(
@@ -223,6 +224,56 @@ const aePrivacyNoticeItems = [
     'Complaints',
     'Write to info@mldynamic.com with "Privacy" in the subject. If you are not satisfied, you can complain to the UAE '
         'data protection authority.',
+  ),
+];
+
+/// UK: the UK GDPR notice, read in English, Polish or Romanian.
+const ukPrivacyNoticeItems = [
+  NoticeItem(
+    'Your account',
+    'Your name, email address and the company you join, so that you can sign in and work with your team.',
+  ),
+  NoticeItem(
+    'Site records',
+    'Projects, site diaries, photos, attendance, pay, CSCS cards and other records your company keeps. They stay on '
+        'this phone, and in our cloud in Mumbai, India when Team & sync is on, so that your team can see them. Your '
+        'company is the controller of these records and decides what it keeps.',
+  ),
+  NoticeItem(
+    'Location and selfies',
+    'Your location and a selfie when you sign in or out on site, and your location when you set a site location or '
+        'take a site photo, to show the work was done at the site. The app asks you first. Never in the background. '
+        'FieldOS does not use face recognition.',
+  ),
+  NoticeItem(
+    'The AI assistant',
+    'Only when you use it: what you ask, and the site details needed to answer, go to Anthropic in the USA (or Sarvam '
+        'AI in India as a backup) to work out the reply. They do not use it to train their models.',
+  ),
+  NoticeItem(
+    'Paying for FieldOS',
+    'Google Play or the App Store take the payment. RevenueCat in the USA gets the purchase record so the app can '
+        'check your plan. We never see card details.',
+  ),
+  NoticeItem(
+    'Data sent outside the UK',
+    'Our cloud is in India, and the services above are in India and the USA. Each gets only what it needs, under the '
+        'UK\'s approved transfer contracts.',
+  ),
+  NoticeItem(
+    'Your choices',
+    'You can stop the AI assistant, turn off crash details or the attendance photo, export your records or delete '
+        'your cloud account at any time. Stopping does not change what was done before.',
+  ),
+  NoticeItem(
+    'Your rights under the UK GDPR',
+    'Ask us for a copy of your data, to correct or erase it, to restrict or object to its use, or to send it to '
+        'another organisation. Write to info@mldynamic.com. We reply within one month.',
+  ),
+  NoticeItem(
+    'Complaints',
+    'Write to info@mldynamic.com with "Privacy" in the subject. If you are not satisfied, you can complain to the '
+        'Information Commissioner\'s Office (ico.org.uk).',
   ),
 ];
 

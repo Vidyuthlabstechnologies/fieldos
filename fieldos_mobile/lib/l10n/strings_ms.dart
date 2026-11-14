@@ -3058,4 +3058,9 @@ const stringsMs = <String, String>{
   'No CIS is taken off this line': 'Tiada CIS dipotong daripada baris ini',
   '{tax} (reverse charge, not added)': '{tax} (caj songsang, tidak ditambah)',
   'below the minimum wage of {amount}/hr': 'di bawah gaji minimum {amount}/jam',
+  'Your location and a selfie when you check in or out, and your location when you punch a worker in, set a site location or take a site photo, to show the work was done at the site. The app asks you first. Never in the background. FieldOS does not use face recognition.': 'Lokasi anda dan swafoto apabila anda daftar masuk atau keluar, dan lokasi anda apabila anda merekod masuk pekerja, menetapkan lokasi tapak atau mengambil foto tapak, untuk menunjukkan kerja dibuat di tapak. Aplikasi bertanya kepada anda dahulu. Tidak sekali-kali di latar belakang. FieldOS tidak menggunakan pengecaman wajah.',
+  'Write from the email address on your account. We reply within one month. If you are not satisfied, you can complain to the Information Commissioner\'s Office.': 'Tulis daripada alamat e-mel akaun anda. Kami membalas dalam masa sebulan. Jika anda tidak berpuas hati, anda boleh mengadu kepada Information Commissioner\'s Office.',
+  'Gross payment status (0%)': 'Status bayaran kasar (0%)',
+  'Registered (20%)': 'Berdaftar (20%)',
+  'Not registered (30%)': 'Tidak berdaftar (30%)',
 };

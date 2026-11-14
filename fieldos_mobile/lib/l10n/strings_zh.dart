@@ -3058,4 +3058,9 @@ const stringsZh = <String, String>{
   'No CIS is taken off this line': '此行不扣 CIS',
   '{tax} (reverse charge, not added)': '{tax}（反向征税，未计入）',
   'below the minimum wage of {amount}/hr': '低于最低工资 {amount}/小时',
+  'Your location and a selfie when you check in or out, and your location when you punch a worker in, set a site location or take a site photo, to show the work was done at the site. The app asks you first. Never in the background. FieldOS does not use face recognition.': '签到或签退时读取您的位置并拍一张自拍；为工人打卡、设定工地位置或拍摄工地照片时读取您的位置，用来证明工作在工地完成。应用会先征求您的同意。绝不在后台读取。FieldOS 不使用人脸识别。',
+  'Write from the email address on your account. We reply within one month. If you are not satisfied, you can complain to the Information Commissioner\'s Office.': '请用账户的电子邮件地址来信。我们会在一个月内回复。如不满意，您可以向 Information Commissioner\'s Office 投诉。',
+  'Gross payment status (0%)': '总额付款身份 (0%)',
+  'Registered (20%)': '已注册 (20%)',
+  'Not registered (30%)': '未注册 (30%)',
 };

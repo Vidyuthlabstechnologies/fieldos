@@ -54,11 +54,50 @@ void main() {
     }
   });
 
-  test('markets without their own texts yet fall back and say so', () {
-    for (final m in [Market.uk]) {
+  test('every market has its own texts', () {
+    for (final m in Market.values) {
       debugSetMarket(m);
-      expect(marketLegalReady, isFalse, reason: m.name);
+      expect(marketLegalReady, isTrue, reason: m.name);
     }
+  });
+
+  test('the UK texts follow the UK GDPR and the law of England and Wales', () {
+    debugSetMarket(Market.uk);
+    expect(privacyNoticeItems, same(ukPrivacyNoticeItems));
+    final policy = _all(marketPrivacyPolicy), terms = _all(marketTermsOfUse);
+    for (final text in [policy, terms, privacyNoticeKeys.join('\n')]) {
+      for (final word in ['Data Protection Board', 'DPDP', 'Grievance', 'Information Technology Act', 'UPI', 'GST',
+          'PDPA', 'PDPL', 'Malaysia', 'UAE', 'Hyderabad, Telangana have', 'rupee', '₹', 'selfie attendance',
+          '12 months unless']) {
+        expect(text, isNot(contains(word)), reason: '"$word" in a UK text');
+      }
+    }
+    for (final want in ['UK GDPR', 'Data Protection Act 2018', 'Article 27', 'International Data Transfer Agreement',
+        'one month', 'Information Commissioner', 'face recognition', 'Mumbai, India', '72 hours']) {
+      expect(policy, contains(want));
+    }
+    for (final want in ['England and Wales', 'Article 28', 'HMRC', 'reverse charge', 'death or personal injury']) {
+      expect(terms, contains(want));
+    }
+    final numbers = [for (final s in marketTermsOfUse.sections) int.parse(s.heading.split('.').first)];
+    expect(numbers, List.generate(numbers.length, (i) => i + 1));
+  });
+
+  test('the UK notice reads in Polish and Romanian', () {
+    debugSetMarket(Market.uk);
+    for (final l in [AppLanguage.pl, AppLanguage.ro]) {
+      final missing = privacyNoticeKeys.where((k) => !hasTranslation(l, k)).toList();
+      expect(missing, isEmpty, reason: l.name);
+    }
+  });
+
+  test('UAE: selfies stay with the attendance records, and no transfer consent is claimed', () {
+    debugSetMarket(Market.uae);
+    final policy = _all(marketPrivacyPolicy);
+    expect(policy, isNot(contains('12 months unless')));
+    expect(policy, isNot(contains('agree to these transfers')));
+    expect(policy, isNot(contains('If your company uses selfie attendance')));
+    expect(policy, contains('photo and location for your'));
   });
 
   test('the Malaysian texts follow the PDPA and Malaysian law', () {

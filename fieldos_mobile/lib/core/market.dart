@@ -69,7 +69,13 @@ class TaxRegime {
     this.reverseChargeNote,
     this.onlyWhenRegistered = true,
     this.withholdingOnLabourOnly = false,
+    this.withholdingRates = const [],
   });
+
+  /// The legal withholding rates, as one-tap choices beside the field
+  /// (UK CIS: gross payment 0%, registered 20%, unregistered 30%). Empty
+  /// where the rate is typed (India's TDS varies by section).
+  final List<WithholdingRate> withholdingRates;
 
   /// The withholding is worked out on labour only, leaving out lines
   /// marked as materials (UK CIS: materials, plant hire and VAT are not
@@ -105,6 +111,15 @@ class TaxRegime {
   /// The line a reverse-charge invoice must carry, where the law has one
   /// (UK construction services since March 2021). Null elsewhere.
   final String? reverseChargeNote;
+}
+
+/// One legal withholding rate, offered as a choice on a bill.
+class WithholdingRate {
+  const WithholdingRate(this.label, this.pct);
+
+  /// "Registered (20%)": a label key, translated in every table.
+  final String label;
+  final double pct;
 }
 
 /// When paid hours become overtime, and at what rate. Thresholds of null
@@ -462,6 +477,14 @@ const _uk = MarketConfig(
     reverseChargeNote: 'Reverse charge: Customer to account to HMRC for the reverse charge VAT of {amount} at {rate}%. '
         '(S55A VATA 1994 applies.)',
     withholdingOnLabourOnly: true,
+    // Finance Act 2004 s.61 and the CIS regulations: 20% for a registered
+    // subcontractor, 30% when HMRC cannot verify them, none with gross
+    // payment status.
+    withholdingRates: [
+      WithholdingRate('Gross payment status (0%)', 0),
+      WithholdingRate('Registered (20%)', 20),
+      WithholdingRate('Not registered (30%)', 30),
+    ],
   ),
   // Working Time Regulations cap the average week at 48 hours (workers
   // can opt out) but set no overtime premium.
