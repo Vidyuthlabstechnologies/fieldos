@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase/supabase.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/home/home_screen.dart';
@@ -40,6 +41,20 @@ void main() {
       expect(await db.expenseDao.forProject(p.id), hasLength(3));
       expect(await db.paymentDao.forProject(p.id), hasLength(1));
       expect(await sampleProjectId(db, 'c'), p.id);
+    });
+
+    test("each market's sample is in its own money: day or hourly pay, smaller sums", () async {
+      final india = await createSampleProject(db, companyId: 'in', userId: 'u', now: now);
+      expect((await db.workerDao.forProject(india.id)).map((w) => w.dailyWage), contains(900));
+      expect((await db.paymentDao.forProject(india.id)).single.amount, 300000);
+      for (final (m, top) in [(Market.us, 32.0), (Market.uk, 22.0), (Market.malaysia, 150.0), (Market.uae, 120.0)]) {
+        debugSetMarket(m);
+        addTearDown(() => debugSetMarket(Market.india));
+        final p = await createSampleProject(db, companyId: m.id, userId: 'u', now: now);
+        final wages = (await db.workerDao.forProject(p.id)).map((w) => w.dailyWage ?? 0);
+        expect(wages.reduce((a, b) => a > b ? a : b), top, reason: m.id);
+        expect((await db.paymentDao.forProject(p.id)).single.amount, 30000, reason: m.id);
+      }
     });
 
     test('a second tap gives back the same sample', () async {

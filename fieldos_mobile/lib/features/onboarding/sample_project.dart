@@ -100,13 +100,15 @@ Future<Project> createSampleProject(
     }
 
     final workers = <Worker>[];
-    for (final (name, role, wage) in [
-      ('Ramesh', 'Mason', 900.0),
-      ('Venkat', 'Bar bender', 850.0),
-      ('Anil', 'Carpenter', 850.0),
-      ('Suresh', 'Helper', 600.0),
-      ('Lakshmi', 'Helper', 600.0),
-    ]) {
+    final pay = _sampleWages[currentMarket.id] ?? _sampleWages['in']!;
+    for (final (i, (name, role)) in [
+      ('Ramesh', 'Mason'),
+      ('Venkat', 'Bar bender'),
+      ('Anil', 'Carpenter'),
+      ('Suresh', 'Helper'),
+      ('Lakshmi', 'Helper'),
+    ].indexed) {
+      final wage = pay[i];
       workers.add(
         await db.workerDao.create(
           WorkersCompanion.insert(
@@ -176,7 +178,7 @@ Future<Project> createSampleProject(
         materialName: 'Cement (OPC 53)',
         quantity: 50,
         unit: const Value('bags'),
-        amount: 19500,
+        amount: 19500 * _k,
         receivedBy: userId,
         receivedOn: d(-6),
       ),
@@ -188,7 +190,7 @@ Future<Project> createSampleProject(
         materialName: 'TMT steel 12mm',
         quantity: 1.2,
         unit: const Value('t'),
-        amount: 78000,
+        amount: 78000 * _k,
         receivedBy: userId,
         receivedOn: d(-10),
       ),
@@ -198,7 +200,7 @@ Future<Project> createSampleProject(
       PaymentsReceivedCompanion.insert(
         id: uuid.v4(),
         projectId: projectId,
-        amount: 300000,
+        amount: 300000 * _k,
         receivedOn: d(-28),
         fromParty: sampleClient,
         mode: 'bank',
@@ -207,9 +209,9 @@ Future<Project> createSampleProject(
       ),
     );
     for (final (category, amount, day, note) in [
-      ('Transport', 1800.0, -6, 'Cement from the dealer'),
-      ('Food & tea', 250.0, -1, null),
-      ('Labour', 4400.0, -1, 'Yesterday\'s wages'),
+      ('Transport', 1800.0 * _k, -6, 'Cement from the dealer'),
+      ('Food & tea', 250.0 * _k, -1, null),
+      ('Labour', isIndia ? 4400.0 : _yesterdaysWages(pay), -1, 'Yesterday\'s wages'),
     ]) {
       await db.expenseDao.create(
         SiteExpensesCompanion.insert(
@@ -226,6 +228,24 @@ Future<Project> createSampleProject(
     return project;
   });
 }
+
+/// The sample crew's pay in this market's money: a day wage in India,
+/// Malaysia and the UAE, an hourly rate in the US and the UK (above the
+/// UK National Living Wage). Mason, bar bender, carpenter, two helpers.
+const _sampleWages = <String, List<double>>{
+  'in': [900, 850, 850, 600, 600],
+  'us': [32, 30, 30, 20, 20],
+  'uk': [22, 20, 20, 14, 14],
+  'my': [150, 140, 140, 100, 100],
+  'ae': [120, 110, 110, 80, 80],
+};
+
+/// India's sample amounts (advance, cement, steel, tea) are about ten
+/// times what they are in the other currencies, as with the ₹5,000 in labels.
+double get _k => isIndia ? 1.0 : 0.1;
+
+/// One full day for the whole crew: 8 hours where pay is hourly.
+double _yesterdaysWages(List<double> pay) => pay.fold(0.0, (a, w) => a + w) * (market.payHourly ? 8 : 1);
 
 /// Deletes the sample project and everything under it from this phone.
 Future<void> removeSampleProject(AppDatabase db, String companyId) async {
