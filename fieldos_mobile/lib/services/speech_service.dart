@@ -15,6 +15,8 @@ import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
+
 /// A language a site report can be spoken in.
 class SpeechLanguage {
   const SpeechLanguage(this.code, this.name, this.englishName, {this.sarvamCode, this.translateCode});
@@ -38,7 +40,7 @@ class SpeechLanguage {
   String get label => isEnglish ? englishName : '$name · $englishName';
 }
 
-const speechLanguages = <SpeechLanguage>[
+const _indiaSpeech = <SpeechLanguage>[
   SpeechLanguage('en-IN', 'English', 'English', sarvamCode: 'en-IN'),
   SpeechLanguage('hi-IN', 'हिन्दी', 'Hindi', sarvamCode: 'hi-IN', translateCode: 'hi'),
   SpeechLanguage('te-IN', 'తెలుగు', 'Telugu', sarvamCode: 'te-IN', translateCode: 'te'),
@@ -52,6 +54,41 @@ const speechLanguages = <SpeechLanguage>[
   SpeechLanguage('or-IN', 'ଓଡ଼ିଆ', 'Odia', sarvamCode: 'od-IN'),
   SpeechLanguage('ur-IN', 'اردو', 'Urdu', translateCode: 'ur'),
 ];
+
+const _hi = SpeechLanguage('hi-IN', 'हिन्दी', 'Hindi', sarvamCode: 'hi-IN', translateCode: 'hi');
+const _ta = SpeechLanguage('ta-IN', 'தமிழ்', 'Tamil', sarvamCode: 'ta-IN', translateCode: 'ta');
+const _ml = SpeechLanguage('ml-IN', 'മലയാളം', 'Malayalam', sarvamCode: 'ml-IN');
+
+/// The languages a report can be spoken in, in this build's market, its
+/// English first. The codes match [speechCodeFor] so the app's language
+/// picks its voice. Outside India the phone's recognizer is the only one
+/// (no Sarvam fallback), and Indian languages keep their -IN voices,
+/// which is what phones carry for them.
+List<SpeechLanguage> get speechLanguages => switch (currentMarket) {
+      Market.india => _indiaSpeech,
+      Market.us => const [
+          SpeechLanguage('en-US', 'English', 'English'),
+          SpeechLanguage('es-US', 'Español', 'Spanish'),
+        ],
+      Market.malaysia => const [
+          SpeechLanguage('en-MY', 'English', 'English'),
+          SpeechLanguage('ms-MY', 'Bahasa Melayu', 'Malay'),
+          SpeechLanguage('zh-CN', '中文', 'Chinese'),
+          _ta,
+        ],
+      Market.uae => const [
+          SpeechLanguage('en-AE', 'English', 'English'),
+          SpeechLanguage('ar-AE', 'العربية', 'Arabic'),
+          _hi,
+          SpeechLanguage('ur-PK', 'اردو', 'Urdu', translateCode: 'ur'),
+          _ml,
+        ],
+      Market.uk => const [
+          SpeechLanguage('en-GB', 'English', 'English'),
+          SpeechLanguage('pl-PL', 'Polski', 'Polish'),
+          SpeechLanguage('ro-RO', 'Română', 'Romanian'),
+        ],
+    };
 
 SpeechLanguage speechLanguageFor(String? code) =>
     speechLanguages.firstWhere((l) => l.code == code, orElse: () => speechLanguages.first);
