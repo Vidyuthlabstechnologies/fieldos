@@ -3024,4 +3024,8 @@ const Map<String, String> stringsEs = {
   'Too many wrong PINs. Wait {time}.': 'Demasiados PIN incorrectos. Espera {time}.',
   'Tries left before sign-out: {n}': 'Intentos antes de cerrar sesión: {n}',
   'Too many wrong PINs. The app lock is off. Log in again with your password.': 'Demasiados PIN incorrectos. Se quitó el bloqueo. Inicia sesión de nuevo con tu contraseña.',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      'Sin conexión hace más de 7 días. Conéctese a internet para seguir haciendo cambios. Puede ver todo.',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      'El plan de su empresa terminó. Conéctese a internet para comprobarlo. Puede ver todo.',
 };

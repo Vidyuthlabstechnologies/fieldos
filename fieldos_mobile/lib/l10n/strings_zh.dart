@@ -3022,4 +3022,8 @@ const stringsZh = <String, String>{
   'Too many wrong PINs. Wait {time}.': 'PIN 错误次数过多。请等 {time}。',
   'Tries left before sign-out: {n}': '退出登录前剩余次数：{n}',
   'Too many wrong PINs. The app lock is off. Log in again with your password.': 'PIN 错误次数过多。应用锁已关闭。请用密码重新登录。',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      '已离线超过 7 天。请连接互联网以继续修改。您仍可查看所有内容。',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      '贵公司的套餐已结束。请连接互联网查看。您仍可查看所有内容。',
 };

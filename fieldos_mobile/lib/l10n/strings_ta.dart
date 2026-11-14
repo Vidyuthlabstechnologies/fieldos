@@ -3376,4 +3376,8 @@ const Map<String, String> stringsTa = {
   'Too many wrong PINs. Wait {time}.': 'பல தவறான PIN. {time} காத்திருங்கள்.',
   'Tries left before sign-out: {n}': 'வெளியேறும் முன் மீதி முயற்சிகள்: {n}',
   'Too many wrong PINs. The app lock is off. Log in again with your password.': 'பல தவறான PIN. ஆப் பூட்டு நீக்கப்பட்டது. கடவுச்சொல்லுடன் மீண்டும் உள்நுழையவும்.',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      '7 நாட்களுக்கு மேல் ஆஃப்லைன். மாற்றங்கள் செய்ய இணையத்துடன் இணைக்கவும். எல்லாவற்றையும் பார்க்கலாம்.',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      'உங்கள் நிறுவனத் திட்டம் முடிந்தது. சரிபார்க்க இணையத்துடன் இணைக்கவும். எல்லாவற்றையும் பார்க்கலாம்.',
 };

@@ -3022,4 +3022,8 @@ const stringsMs = <String, String>{
   'Too many wrong PINs. Wait {time}.': 'Terlalu banyak PIN salah. Tunggu {time}.',
   'Tries left before sign-out: {n}': 'Cubaan sebelum log keluar: {n}',
   'Too many wrong PINs. The app lock is off. Log in again with your password.': 'Terlalu banyak PIN salah. Kunci aplikasi dimatikan. Log masuk semula dengan kata laluan anda.',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      'Luar talian lebih 7 hari. Sambung ke internet untuk terus membuat perubahan. Anda masih boleh melihat semuanya.',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      'Pelan syarikat anda telah tamat. Sambung ke internet untuk menyemaknya. Anda masih boleh melihat semuanya.',
 };

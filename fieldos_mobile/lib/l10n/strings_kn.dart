@@ -3376,4 +3376,8 @@ const Map<String, String> stringsKn = {
   'Too many wrong PINs. Wait {time}.': 'ಹಲವು ತಪ್ಪು PIN. {time} ಕಾಯಿರಿ.',
   'Tries left before sign-out: {n}': 'ಸೈನ್ ಔಟ್‌ಗೆ ಮುನ್ನ ಉಳಿದ ಪ್ರಯತ್ನಗಳು: {n}',
   'Too many wrong PINs. The app lock is off. Log in again with your password.': 'ಹಲವು ತಪ್ಪು PIN. ಆ್ಯಪ್ ಲಾಕ್ ತೆಗೆಯಲಾಗಿದೆ. ಪಾಸ್‌ವರ್ಡ್‌ನಿಂದ ಮತ್ತೆ ಲಾಗಿನ್ ಆಗಿ.',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      '7 ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಆಫ್‌ಲೈನ್. ಬದಲಾವಣೆ ಮಾಡಲು ಇಂಟರ್ನೆಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ. ನೀವು ಎಲ್ಲವನ್ನೂ ನೋಡಬಹುದು.',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      'ನಿಮ್ಮ ಕಂಪನಿ ಪ್ಲಾನ್ ಮುಗಿದಿದೆ. ಪರಿಶೀಲಿಸಲು ಇಂಟರ್ನೆಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ. ನೀವು ಎಲ್ಲವನ್ನೂ ನೋಡಬಹುದು.',
 };

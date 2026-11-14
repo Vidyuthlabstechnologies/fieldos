@@ -23,6 +23,7 @@ import 'package:http/http.dart' show ClientException;
 import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/services/company_plan.dart' show siteLimitMessageFor;
 import 'app_version_gate.dart';
 import 'site_execution_sync.dart';
 import 'sync_mappers.dart';
@@ -90,6 +91,35 @@ bool isAuthSyncError(Object e) =>
     e is AuthException ||
     (e is PostgrestException && (e.code == 'PGRST301' || e.code == 'PGRST302' || e.code == 'PGRST303')) ||
     (e is StorageException && e.message.toLowerCase().contains('jwt'));
+
+/// Marks an outbox entry's error as the company plan's site limit; the
+/// rest of the text is the message for people.
+const siteLimitErrorPrefix = 'site_limit_reached:';
+
+/// The server refused a site past the company plan's site limit
+/// ('site_limit_reached: limit 3, active 3', SQLSTATE P0001): the limit and
+/// the active sites it counted (null when the message lacks them), or null
+/// for any other error.
+({int? limit, int? active, String raw})? siteLimitOf(Object e) {
+  if (e is! PostgrestException || !e.message.startsWith('site_limit_reached')) return null;
+  if (e.code != null && e.code != 'P0001') return null;
+  final m = RegExp(r'limit (\d+), active (\d+)').firstMatch(e.message);
+  return (limit: int.tryParse(m?.group(1) ?? ''), active: int.tryParse(m?.group(2) ?? ''), raw: e.message);
+}
+
+/// What people are told about a site the server refused for the limit.
+String siteLimitRefusal(({int? limit, int? active, String raw}) refused) {
+  final limit = refused.limit;
+  final active = refused.active;
+  return limit == null || active == null ? refused.raw : siteLimitMessageFor(limit, active);
+}
+
+/// The plain reason a parked entry's [SyncOutboxData.lastError] gives, when
+/// the server refused it for the site limit; null otherwise.
+String? siteLimitReasonOf(String? lastError) =>
+    lastError != null && lastError.startsWith(siteLimitErrorPrefix)
+        ? lastError.substring(siteLimitErrorPrefix.length).trim()
+        : null;
 
 class SyncEngine {
   /// Where downloaded document files are written. Injectable so Dart-VM
@@ -215,7 +245,9 @@ class SyncEngine {
   /// counting against the entry: being offline must never park a write.
   Future<SyncPushResult> pushPending() async {
     await versionGate?.requireSupported();
-    return _pushPending();
+    // Sending what was saved earlier is allowed in read-only mode
+    // (lib/data/write_guard.dart): it is how the phone catches up.
+    return WriteGuard.serverSync(_pushPending);
   }
 
   Future<SyncPushResult> _pushPending() => _synchronized(() async {
@@ -237,6 +269,16 @@ class SyncEngine {
             if (isTransientSyncError(e) || isAuthSyncError(e)) {
               await db.syncOutboxDao.noteTransientFailure(entry.id, e.toString());
               break;
+            }
+            if (siteLimitOf(e) case final limit?) {
+              // The company plan's site limit, enforced by the server
+              // (20261114130000_site_limit_enforced.sql). Retrying can't
+              // help until a site is completed or the plan grows: park it
+              // now with the plain reason (Team & sync shows it, and
+              // "Retry failed" sends it again).
+              await db.syncOutboxDao.park(entry.id, '$siteLimitErrorPrefix ${siteLimitRefusal(limit)}');
+              blocked.add(entry.recordId);
+              continue;
             }
             if (e is SyncWaitingForServerException) {
               // The table is not on this backend yet (its migration is still
@@ -400,7 +442,8 @@ class SyncEngine {
   ///  - Unsent work and the local-only sample site are never removed.
   Future<void> pullAll() async {
     await versionGate?.requireSupported();
-    return _pullAll();
+    // The server's rows, written in read-only mode too.
+    return WriteGuard.serverSync(_pullAll);
   }
 
   Future<void> _pullAll() => _synchronized(() async {
@@ -1050,7 +1093,7 @@ class SyncEngine {
           schema: 'public',
           table: 'tasks',
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'project_id', value: projectId),
-          callback: (payload) async {
+          callback: (payload) => WriteGuard.serverSync(() async {
             if (payload.eventType == PostgresChangeEvent.delete) {
               // Filtered channels get no usable delete payload (Realtime
               // can't apply a filter or RLS to a deleted row). Deletes come
@@ -1061,7 +1104,7 @@ class SyncEngine {
             if (!await _acceptRealtime('tasks', row)) return;
             await db.taskDao.upsertFromRemote(taskFromSupabaseJson(row));
             onTasksChanged?.call();
-          },
+          }),
         );
     _tasksChannel = channel;
     await _awaitJoin(channel, label: 'tasks-$projectId');
@@ -1076,13 +1119,13 @@ class SyncEngine {
           schema: 'public',
           table: 'projects',
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'company_id', value: companyId),
-          callback: (payload) async {
+          callback: (payload) => WriteGuard.serverSync(() async {
             if (payload.eventType == PostgresChangeEvent.delete) return;
             final row = _toLocalIds(payload.newRecord);
             if (!await _acceptRealtime('projects', row)) return;
             await db.projectDao.upsertFromRemote(projectFromSupabaseJson(row));
             onProjectsChanged?.call();
-          },
+          }),
         );
     _projectsChannel = channel;
     await _awaitJoin(channel, label: 'projects-$companyId');
@@ -1098,13 +1141,13 @@ class SyncEngine {
           schema: 'public',
           table: 'vendors',
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'company_id', value: companyId),
-          callback: (payload) async {
+          callback: (payload) => WriteGuard.serverSync(() async {
             if (payload.eventType == PostgresChangeEvent.delete) return;
             final row = _toLocalIds(payload.newRecord);
             if (!await _acceptRealtime('vendors', row)) return;
             await db.supplierDao.upsertFromRemote(supplierFromSupabaseJson(row));
             onVendorsChanged?.call();
-          },
+          }),
         );
     _vendorsChannel = channel;
     await _awaitJoin(channel, label: 'vendors-$companyId');
@@ -1119,13 +1162,13 @@ class SyncEngine {
           schema: 'public',
           table: 'dpr_entries',
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'project_id', value: projectId),
-          callback: (payload) async {
+          callback: (payload) => WriteGuard.serverSync(() async {
             if (payload.eventType == PostgresChangeEvent.delete) return;
             final row = _toLocalIds(payload.newRecord);
             if (!await _acceptRealtime('dpr_entries', row)) return;
             await db.dprDao.upsertFromRemote(dprEntryFromSupabaseJson(row));
             onDprEntriesChanged?.call();
-          },
+          }),
         );
     _dprEntriesChannel = channel;
     await _awaitJoin(channel, label: 'dpr-entries-$projectId');
@@ -1140,13 +1183,13 @@ class SyncEngine {
           schema: 'public',
           table: 'issues',
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'project_id', value: projectId),
-          callback: (payload) async {
+          callback: (payload) => WriteGuard.serverSync(() async {
             if (payload.eventType == PostgresChangeEvent.delete) return;
             final row = _toLocalIds(payload.newRecord);
             if (!await _acceptRealtime('issues', row)) return;
             await db.issueDao.upsertFromRemote(issueFromSupabaseJson(row));
             onIssuesChanged?.call();
-          },
+          }),
         );
     _issuesChannel = channel;
     await _awaitJoin(channel, label: 'issues-$projectId');
@@ -1170,12 +1213,12 @@ class SyncEngine {
           schema: 'public',
           table: 'project_messages',
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'project_id', value: projectId),
-          callback: (payload) async {
+          callback: (payload) => WriteGuard.serverSync(() async {
             final row = _toLocalIds(payload.newRecord);
             if (!await _acceptRealtime('project_messages', row)) return;
             await db.messageDao.upsertFromRemote(projectMessageFromSupabaseJson(row));
             onMessagesChanged?.call();
-          },
+          }),
         );
     _messagesChannel = channel;
     await _awaitJoin(channel, label: 'messages-$projectId');

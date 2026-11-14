@@ -2482,4 +2482,8 @@ const Map<String, String> stringsHi = {
   'Too many wrong PINs. Wait {time}.': 'बहुत गलत PIN। {time} रुकें।',
   'Tries left before sign-out: {n}': 'साइन आउट से पहले बची कोशिशें: {n}',
   'Too many wrong PINs. The app lock is off. Log in again with your password.': 'बहुत गलत PIN। ऐप लॉक हट गया। पासवर्ड से फिर लॉग इन करें।',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      '7 दिन से ज़्यादा ऑफ़लाइन। बदलाव करते रहने के लिए इंटरनेट से जुड़ें। आप सब कुछ देख सकते हैं।',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      'आपकी कंपनी का प्लान ख़त्म हो गया है। जाँचने के लिए इंटरनेट से जुड़ें। आप सब कुछ देख सकते हैं।',
 };

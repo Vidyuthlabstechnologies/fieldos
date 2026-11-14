@@ -3376,4 +3376,8 @@ const Map<String, String> stringsMr = {
   'Too many wrong PINs. Wait {time}.': 'खूप चुकीचे PIN. {time} थांबा.',
   'Tries left before sign-out: {n}': 'साइन आउटपूर्वी उरलेले प्रयत्न: {n}',
   'Too many wrong PINs. The app lock is off. Log in again with your password.': 'खूप चुकीचे PIN. ॲप लॉक काढले. पासवर्डने पुन्हा लॉग इन करा.',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      '7 दिवसांपेक्षा जास्त ऑफलाइन. बदल करत राहण्यासाठी इंटरनेटला जोडा. तुम्ही सगळे पाहू शकता.',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      'तुमच्या कंपनीचा प्लान संपला आहे. तपासण्यासाठी इंटरनेटला जोडा. तुम्ही सगळे पाहू शकता.',
 };

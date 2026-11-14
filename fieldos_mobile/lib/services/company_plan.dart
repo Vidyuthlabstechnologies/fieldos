@@ -108,6 +108,14 @@ CompanyPlan? planForCompany(List<CompanyPlan> plans, String? companyId) {
 String? siteLimitMessage(CompanyPlan? plan, int activeSites) {
   final limit = plan?.siteLimit;
   if (limit == null || activeSites < limit) return null;
+  return siteLimitMessageFor(limit, activeSites);
+}
+
+/// The site-limit message for [limit] sites with [activeSites] open: on the
+/// phone's own check, and when the server refuses a site the phone sent
+/// (it counts every site of the company, including ones this phone has not
+/// pulled yet).
+String siteLimitMessageFor(int limit, int activeSites) {
   return 'Your company plan covers $limit active site${limit == 1 ? '' : 's'}, and $activeSites are open. '
       'Mark a finished site Completed to start this one, or ask your company owner about adding sites to the plan.';
 }
@@ -129,6 +137,13 @@ class CompanyPlanService {
   static const _plansKey = 'company_plans';
   static const _untilKey = 'company_plan_until';
 
+  /// When the server last answered my_company_plans (phone time, UTC).
+  static const _checkedKey = 'company_plan_checked_at';
+
+  /// The latest time this phone has seen since that answer, so a clock
+  /// moved back later is noticed too.
+  static const _seenKey = 'company_plan_seen_at';
+
   /// The server's answer, or null when it can't be asked right now
   /// (offline, or the saved sign-in can't be refreshed yet). An empty list
   /// means none: no cloud account, or no plan.
@@ -146,16 +161,20 @@ class CompanyPlanService {
         return const [];
       }
       final plans = parseCompanyPlans(await service.client.rpc('my_company_plans'));
-      await remember(plans);
+      await remember(plans, checkedAt: DateTime.now());
       return plans;
     } catch (_) {
       return null;
     }
   }
 
-  /// Keeps [plans] as the last answer (the server's, or a test's).
-  Future<void> remember(List<CompanyPlan> plans) async {
+  /// Keeps [plans] as the last answer (the server's, or a test's), given
+  /// at [checkedAt] (now when not given): the start of the 7 days offline.
+  Future<void> remember(List<CompanyPlan> plans, {DateTime? checkedAt}) async {
+    final at = (checkedAt ?? DateTime.now()).toUtc().toIso8601String();
     await db.settingsDao.set(_plansKey, jsonEncode([for (final p in plans) p.toJson()]));
+    await db.settingsDao.set(_checkedKey, at);
+    await db.settingsDao.set(_seenKey, at);
     DateTime? until;
     for (final p in plans) {
       // Covered through the whole last day.
@@ -173,17 +192,73 @@ class CompanyPlanService {
     return raw == null || raw.isEmpty ? null : DateTime.tryParse(raw);
   }
 
+  Future<DateTime?> _time(String key) async {
+    final raw = await db.settingsDao.get(key);
+    return raw == null || raw.isEmpty ? null : DateTime.tryParse(raw);
+  }
+
   /// Whether a company plan lets this phone in, from [live] (null when the
-  /// server couldn't be asked) and the last remembered answer.
-  Future<Access> access({required List<CompanyPlan>? live, required DateTime now}) async => accessFor(
-        billingSetUp: true,
-        live: live == null ? null : SubscriptionState(active: live.isNotEmpty),
-        lastPaidUntil: await lastCoveredUntil(),
-        now: now,
-      );
+  /// server couldn't be asked) and the last remembered answer. Offline, see
+  /// [offlineCompanyAccess]: fully usable for 7 days after the last answer
+  /// (never past the plan's last day), then read-only until the server is
+  /// reached again.
+  Future<Access> access({required List<CompanyPlan>? live, required DateTime now}) async {
+    if (live != null) return live.isNotEmpty ? Access.allowed : Access.blocked;
+    final until = await lastCoveredUntil();
+    var checked = await _time(_checkedKey);
+    if (checked == null && until != null) {
+      // A phone that remembered a plan before this rule (no time kept):
+      // the 7 days start now, once.
+      checked = now;
+      await db.settingsDao.set(_checkedKey, now.toUtc().toIso8601String());
+    }
+    final seen = await _time(_seenKey);
+    if (seen == null || now.isAfter(seen)) await db.settingsDao.set(_seenKey, now.toUtc().toIso8601String());
+    return offlineCompanyAccess(coveredUntil: until, lastChecked: checked, latestSeen: seen, now: now);
+  }
+
+  /// Why the phone is read-only now, for the banner (call after [access]
+  /// said [Access.readOnly]).
+  Future<ReadOnlyReason> readOnlyReason(DateTime now) async {
+    final until = await lastCoveredUntil();
+    return until != null && !now.isBefore(until) ? ReadOnlyReason.planEnded : ReadOnlyReason.offlineTooLong;
+  }
 
   Future<String?> checkNewActiveSite(String companyId, {String? reopening}) =>
       newActiveSiteBlocked(db, companyId, reopening: reopening);
+}
+
+/// How long a phone on a company plan stays fully usable with no answer
+/// from the server. After that it is read-only until it reaches the server.
+const companyPlanOfflineDays = Duration(days: 7);
+
+/// Small clock corrections (the network setting the time) are not a clock
+/// moved back.
+const clockSkewAllowance = Duration(minutes: 10);
+
+/// A company plan's access with no answer from the server.
+/// [coveredUntil]: the end of the remembered plan's last day (null: no plan
+/// last time, so blocked). [lastChecked]: when the server last answered.
+/// [latestSeen]: the latest time this phone has seen since then.
+///
+/// Fully usable while now is within 7 days of [lastChecked] and before
+/// [coveredUntil]; read-only otherwise, until the server answers again. A
+/// clock set back (now before [lastChecked], or before [latestSeen]) counts
+/// as expired: read-only. A clock set forward just ends the 7 days early.
+Access offlineCompanyAccess({
+  required DateTime? coveredUntil,
+  required DateTime? lastChecked,
+  DateTime? latestSeen,
+  required DateTime now,
+}) {
+  if (coveredUntil == null) return Access.blocked;
+  if (lastChecked == null) return Access.readOnly;
+  final earliestOk = now.add(clockSkewAllowance);
+  if (earliestOk.isBefore(lastChecked)) return Access.readOnly;
+  if (latestSeen != null && earliestOk.isBefore(latestSeen)) return Access.readOnly;
+  final fullUntil = lastChecked.add(companyPlanOfflineDays);
+  if (now.isBefore(fullUntil) && now.isBefore(coveredUntil)) return Access.allowed;
+  return Access.readOnly;
 }
 
 /// The company plans this phone last heard of (kept by [CompanyPlanService]).

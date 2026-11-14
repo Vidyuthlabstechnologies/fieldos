@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/features/subscription/subscription_gate.dart' show ReadOnlyBanner;
 import 'package:fieldos_mobile/app.dart';
 import 'package:fieldos_mobile/core/release_config.dart';
 import 'package:fieldos_mobile/core/text_size.dart';
@@ -98,7 +99,7 @@ class AppWithMaterial extends ConsumerWidget {
         final media = MediaQuery.of(context);
         return MediaQuery(
           data: media.copyWith(textScaler: combinedTextScaler(media.textScaler, size)),
-          child: TabletZoom(child: SystemNavBarSafeArea(child: AppLockGate(child: child ?? const SizedBox.shrink()))),
+          child: TabletZoom(child: SystemNavBarSafeArea(child: AppLockGate(child: ReadOnlyBanner(child: child ?? const SizedBox.shrink())))),
         );
       },
       debugShowCheckedModeBanner: false,

@@ -2484,4 +2484,8 @@ const Map<String, String> stringsTe = {
   'Too many wrong PINs. Wait {time}.': 'చాలా తప్పు PINలు. {time} ఆగండి.',
   'Tries left before sign-out: {n}': 'సైన్ అవుట్‌కు ముందు మిగిలిన ప్రయత్నాలు: {n}',
   'Too many wrong PINs. The app lock is off. Log in again with your password.': 'చాలా తప్పు PINలు. యాప్ లాక్ తీసేశాం. పాస్‌వర్డ్‌తో మళ్ళీ లాగిన్ అవ్వండి.',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      '7 రోజులకు పైగా ఆఫ్‌లైన్. మార్పులు చేయడానికి ఇంటర్నెట్‌కు కనెక్ట్ అవ్వండి. మీరు అన్నీ చూడగలరు.',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      'మీ కంపెనీ ప్లాన్ ముగిసింది. చూసుకోవడానికి ఇంటర్నెట్‌కు కనెక్ట్ అవ్వండి. మీరు అన్నీ చూడగలరు.',
 };
