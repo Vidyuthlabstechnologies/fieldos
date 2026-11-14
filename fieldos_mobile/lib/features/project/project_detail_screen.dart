@@ -350,32 +350,42 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
             ],
           ),
         ],
-        bottom: TabBar(
-          controller: _tabs,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          // These tabs sit on the navy bar, so they set their own colours
-          // rather than the theme's on-page ones.
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor: Brand.amber,
-          indicatorWeight: 3,
-          indicatorSize: TabBarIndicatorSize.tab,
-          dividerColor: Colors.transparent,
-          tabs: [
-            Tab(text: tr('Tasks'), icon: Icon(Icons.checklist)),
-            Tab(text: tr('DPR'), icon: Icon(Icons.edit_note)),
-            Tab(text: tr('Issues'), icon: Icon(Icons.report_problem)),
-            Tab(text: tr('Chat'), icon: Icon(Icons.forum)),
-            Tab(text: tr('Procure'), icon: Icon(Icons.shopping_cart)),
-            Tab(text: tr('Labour'), icon: Icon(Icons.people)),
-            Tab(text: tr('Money'), icon: Icon(Icons.currency_rupee)),
-            Tab(text: tr('Equipment'), icon: Icon(Icons.construction)),
-            Tab(text: tr('Inspections'), icon: Icon(Icons.fact_check)),
-            Tab(text: tr('Documents'), icon: Icon(Icons.folder)),
-            Tab(text: tr('Workers'), icon: Icon(Icons.badge)),
-            Tab(text: tr('Estimation'), icon: Icon(Icons.calculate)),
-          ],
+        // Tabs are a fixed 72 dp tall: with the phone's text at 200% their
+        // labels were cut off and ran into each other, so they grow only a
+        // little with the text size. The screens under them grow in full.
+        bottom: PreferredSize(
+          // An icon-and-text tab (72) plus the 3 dp indicator, as TabBar sizes itself.
+          preferredSize: const Size.fromHeight(72 + 3),
+          child: MediaQuery.withClampedTextScaling(
+            maxScaleFactor: 1.3,
+            child: TabBar(
+              controller: _tabs,
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              // These tabs sit on the navy bar, so they set their own colours
+              // rather than the theme's on-page ones.
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white70,
+              indicatorColor: Brand.amber,
+              indicatorWeight: 3,
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: Colors.transparent,
+              tabs: [
+                Tab(text: tr('Tasks'), icon: Icon(Icons.checklist)),
+                Tab(text: tr('DPR'), icon: Icon(Icons.edit_note)),
+                Tab(text: tr('Issues'), icon: Icon(Icons.report_problem)),
+                Tab(text: tr('Chat'), icon: Icon(Icons.forum)),
+                Tab(text: tr('Procure'), icon: Icon(Icons.shopping_cart)),
+                Tab(text: tr('Labour'), icon: Icon(Icons.people)),
+                Tab(text: tr('Money'), icon: Icon(Icons.currency_rupee)),
+                Tab(text: tr('Equipment'), icon: Icon(Icons.construction)),
+                Tab(text: tr('Inspections'), icon: Icon(Icons.fact_check)),
+                Tab(text: tr('Documents'), icon: Icon(Icons.folder)),
+                Tab(text: tr('Workers'), icon: Icon(Icons.badge)),
+                Tab(text: tr('Estimation'), icon: Icon(Icons.calculate)),
+              ],
+            ),
+          ),
         ),
       ),
       body: Column(
