@@ -362,7 +362,8 @@ double retentionPctWithinLimit({
   if (room <= 0) return 0;
   final wanted = gross * pct / 100;
   if (wanted <= room + 0.005) return pct;
-  // Rounded down to 4 places so the money never goes over the limit.
-  return (room / gross * 100 * 10000).floorToDouble() / 10000;
+  // Rounded down to 3 places, as the bill's % field shows it (fmtQty), so
+  // the money never goes over the limit once the field is read back.
+  return (room / gross * 100 * 1000).floorToDouble() / 1000;
 }
 

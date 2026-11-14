@@ -17,6 +17,7 @@ import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/export/xlsx_writer.dart';
+import 'package:fieldos_mobile/features/money/billing_calc.dart' show billKinds;
 import 'package:fieldos_mobile/features/money/money_book.dart' show gstSplit, voucherLabel;
 import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
 
@@ -157,9 +158,9 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
           marketText('Amount (₹)'),
           marketText('Before GST (₹)'),
           marketText('GST %'),
-          marketText('CGST (₹)'),
-          marketText('SGST (₹)'),
-          marketText('IGST (₹)'),
+          // Outside India the tax is one line (kept as IGST), named after it.
+          if (isIndia) ...[marketText('CGST (₹)'), marketText('SGST (₹)')],
+          isIndia ? marketText('IGST (₹)') : marketText('GST (₹)'),
           'Note',
           'Status',
           'Entered by',
@@ -178,8 +179,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
                 e.amount,
                 gst?.taxable,
                 gst == null ? null : e.gstPct,
-                gst?.cgst,
-                gst?.sgst,
+                if (isIndia) ...[gst?.cgst, gst?.sgst],
                 gst?.igst,
                 e.note,
                 _status(e.voided, e.voidReason),
@@ -203,13 +203,13 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
     if (showMoneyIn)
       XlsxSheet(
         'Client bills',
-        h(['Bill no.', 'Date', 'Type', 'Client', 'Client GSTIN', marketText('Gross (₹)'), marketText('GST %'), marketText('Net payable (₹)'), 'Status']),
+        h(['Bill no.', 'Date', 'Type', 'Client', isIndia ? 'Client GSTIN' : "Client's ${market.tax.registrationLabel}", marketText('Gross (₹)'), marketText('GST %'), marketText('Net payable (₹)'), 'Status']),
         [
           for (final b in bills..sort((a, b) => newest(a.billDate, b.billDate)))
             r(b.projectId, [
               b.billNumber,
               b.billDate,
-              b.kind == 'tax_invoice' ? 'Tax invoice' : marketText('RA bill'),
+              b.kind == 'tax_invoice' ? billKinds['tax_invoice'] : (isIndia ? 'RA bill' : market.progressBillName),
               b.clientName,
               b.clientGstin,
               b.gross,
@@ -388,7 +388,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
       ]),
     XlsxSheet(
         'Suppliers',
-        ['Name', 'Contact person', 'Phone', 'Email', 'GSTIN', 'Category', 'Address', if (showMoneyIn) marketText('Opening balance (₹)')]
+        ['Name', 'Contact person', 'Phone', 'Email', market.tax.registrationLabel, 'Category', 'Address', if (showMoneyIn) marketText('Opening balance (₹)')]
             .toList(),
         [
           for (final s in suppliers)

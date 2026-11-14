@@ -47,11 +47,16 @@ class PayCalendar {
   bool isHoliday(DateTime day) => holidays.contains(DateTime(day.year, day.month, day.day));
   bool isRestDay(DateTime day) => restDays.contains(day.weekday);
 
-  /// A punched day's [credit] (0, ½ or 1 day) as days of pay.
-  double creditFor(DateTime day, double credit) {
+  /// A punched day's [credit] (0, ½ or 1 day) as days of pay. [hours],
+  /// when every punch of the day was closed, decides the rest day: more
+  /// than half the normal hours (8) is 2 days even below a full day's 7.
+  double creditFor(DateTime day, double credit, {double? hours}) {
     if (credit <= 0 || !market.premiumRestAndHolidayPay) return credit;
     if (isHoliday(day)) return 3;
-    if (isRestDay(day)) return credit >= 1 ? 2 : 1;
+    if (isRestDay(day)) {
+      final half = (market.overtime.dailyHours ?? overtimeAfterHours) / 2;
+      return credit >= 1 || (hours != null && hours > half) ? 2 : 1;
+    }
     return credit;
   }
 }
@@ -257,7 +262,7 @@ WageSheet buildWageSheet({
       // A hand mark for the day decides its pay; the hours stay on show.
       final mark = line.workerId == null ? null : marked[line.workerId]?[day.key];
       // A hand mark is the supervisor's own call (2× and 3× included).
-      final credit = mark ?? calendar.creditFor(day.key, dayCredit(hours, hasOpenPunch: open));
+      final credit = mark ?? calendar.creditFor(day.key, dayCredit(hours, hasOpenPunch: open), hours: open ? null : hours);
       if (day.key.isBefore(from)) {
         line.earnedBefore += credit * (line.dailyWage ?? 0);
       } else if (day.key.isBefore(to)) {

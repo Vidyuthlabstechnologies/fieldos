@@ -27,7 +27,7 @@ const reminderSettingsKey = 'reminders';
 
 /// Notification ids used for reminders, so they can all be replaced.
 const reminderIdBase = 1000;
-const reminderIdCount = 220;
+const reminderIdCount = 221;
 
 class ReminderSettings {
   const ReminderSettings({

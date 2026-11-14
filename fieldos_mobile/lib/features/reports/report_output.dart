@@ -10,6 +10,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/export/xlsx_writer.dart';
@@ -92,7 +93,7 @@ Future<Uint8List> buildReportPdf({
           child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
             t(companyName, size: 14, bold: true, color: accent),
             if (profile.address.trim().isNotEmpty) t(profile.address.trim(), color: _muted),
-            if (profile.gstin.trim().isNotEmpty) t('GSTIN ${profile.gstin.trim()}', color: _muted),
+            if (profile.gstin.trim().isNotEmpty) t('${market.tax.registrationLabel} ${profile.gstin.trim()}', color: _muted),
           ]),
         ),
         pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
