@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/attendance/attendance_camera.dart';
+import 'package:fieldos_mobile/features/attendance/attendance_consent.dart';
 import 'package:fieldos_mobile/features/attendance/attendance_screens.dart';
 import 'package:fieldos_mobile/features/payroll/payroll_rules.dart' show monthKey;
 import 'package:fieldos_mobile/features/payroll/payroll_screen.dart';
@@ -22,8 +23,12 @@ import 'package:fieldos_mobile/services/location_service.dart';
 class _FakeLocation extends LocationService {
   _FakeLocation(this.fix);
   LocationFix? fix;
+  int reads = 0;
   @override
-  Future<LocationFix> currentFix() async => fix ?? (throw const LocationUnavailable('Location is turned off.'));
+  Future<LocationFix> currentFix() async {
+    reads++;
+    return fix ?? (throw const LocationUnavailable('Location is turned off.'));
+  }
 }
 
 class _FakeCamera implements AttendanceCamera {
@@ -41,7 +46,7 @@ void main() {
   const away = LocationFix(17.4600, 78.3800, 10);
 
   Future<(ProviderContainer, AppDatabase, String, String, _FakeLocation, _FakeCamera)> setUpCompany(WidgetTester tester,
-      {LocationFix? fix}) async {
+      {LocationFix? fix, bool agreed = true}) async {
     final db = AppDatabase.memory();
     final location = _FakeLocation(fix);
     final camera = _FakeCamera();
@@ -60,6 +65,7 @@ void main() {
       await session.register(username: 'meena', name: 'Meena Rao', password: '123456');
       companyId = (await session.createCompany('Sri Sai Constructions')).id;
       userId = container.read(sessionProvider).user!.id;
+      if (agreed) await setAttendanceConsent(db, userId, true);
       for (final (id, name) in [('p-1', 'Narapally'), ('p-2', 'Kompally')]) {
         await db.projectDao.create(ProjectsCompanion.insert(id: id, companyId: companyId, name: name, status: const Value('active')));
       }
@@ -89,6 +95,22 @@ void main() {
 
   Future<List<StaffAttendanceData>> rows(WidgetTester tester, AppDatabase db, String companyId) async =>
       (await tester.runAsync(() => db.staffAttendanceDao.forCompany(companyId)))!;
+
+  testWidgets('no location or photo before the person agrees to the check-in notice', (tester) async {
+    final (container, db, companyId, userId, location, camera) =
+        await setUpCompany(tester, fix: inside, agreed: false);
+    await pumpApp(tester, container, MyAttendanceScreen(companyId: companyId, userId: userId));
+    expect(find.text('Before your first check-in'), findsOneWidget);
+    expect(find.byKey(const Key('check-in')), findsNothing);
+    expect(location.reads, 0);
+    expect(camera.taken, isEmpty);
+
+    await tester.tap(find.byKey(const Key('checkin-agree')));
+    await settle(tester);
+    expect(location.reads, greaterThan(0));
+    expect(find.byKey(const Key('check-in')), findsOneWidget);
+    expect(await tester.runAsync(() => attendanceConsentGiven(db, userId)), isTrue);
+  });
 
   testWidgets('at the site: the nearest site is chosen, check in with a selfie, then out', (tester) async {
     final (container, db, companyId, userId, _, camera) = await setUpCompany(tester, fix: inside);

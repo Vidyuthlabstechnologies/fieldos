@@ -3,7 +3,10 @@
 /// Keyed by the Indian English text, like every table (see language.dart).
 library;
 
+import 'package:fieldos_mobile/l10n/strings_consent_zh.dart';
+
 const stringsZh = <String, String>{
+  ...consentZh,
   'Try again': '重试',
   'Approvals': '审批',
   'Nothing waiting': '没有待处理事项',

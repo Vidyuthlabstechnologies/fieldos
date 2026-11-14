@@ -3,7 +3,10 @@
 /// Keyed by the Indian English text, like every table (see language.dart).
 library;
 
+import 'package:fieldos_mobile/l10n/strings_consent_ar.dart';
+
 const stringsAr = <String, String>{
+  ...consentAr,
   'Try again': 'حاول مرة أخرى',
   'Approvals': 'الموافقات',
   'Nothing waiting': 'لا شيء بانتظارك',

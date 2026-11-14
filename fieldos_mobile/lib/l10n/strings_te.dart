@@ -3,6 +3,7 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_consent_te.dart';
 import 'package:fieldos_mobile/l10n/strings_commercial_te.dart';
 import 'package:fieldos_mobile/l10n/strings_execution_te.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_te.dart';
@@ -12,6 +13,7 @@ import 'package:fieldos_mobile/l10n/strings_proof_te.dart';
 import 'package:fieldos_mobile/l10n/strings_privacy_te.dart';
 
 const Map<String, String> stringsTe = {
+  ...consentTe,
   'Try again': 'మళ్ళీ ప్రయత్నించండి',
   'Approvals': 'ఆమోదాలు',
   'Nothing waiting': 'ఏమీ పెండింగ్ లేదు',

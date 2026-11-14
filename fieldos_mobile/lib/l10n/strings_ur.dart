@@ -3,7 +3,10 @@
 /// Keyed by the Indian English text, like every table (see language.dart).
 library;
 
+import 'package:fieldos_mobile/l10n/strings_consent_ur.dart';
+
 const stringsUr = <String, String>{
+  ...consentUr,
   'Try again': 'دوبارہ کوشش کریں',
   'Approvals': 'منظوریاں',
   'Nothing waiting': 'کچھ زیرِ التوا نہیں',

@@ -5,7 +5,10 @@
 /// native speaker's review before launch.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_consent_es.dart';
+
 const Map<String, String> stringsEs = {
+  ...consentEs,
   'Try again': 'Intenta de nuevo',
   'Approvals': 'Aprobaciones',
   'Nothing waiting': 'Nada pendiente',
