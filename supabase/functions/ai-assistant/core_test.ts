@@ -454,6 +454,15 @@ Deno.test("entitlementActive", () => {
   assert(!entitlementActive(s("2026-11-01T00:00:00Z"), now));
   assert(!entitlementActive({ subscriber: { entitlements: {} } }, now));
   assert(!entitlementActive(null, now));
+  // A payment that failed: the store's grace period keeps the plan on, as in the app.
+  const grace = (until: string | null) => ({
+    subscriber: {
+      entitlements: { fieldos_pro: { expires_date: "2026-11-05T00:00:00Z", grace_period_expires_date: until } },
+    },
+  });
+  assert(entitlementActive(grace("2026-11-20T00:00:00Z"), now));
+  assert(!entitlementActive(grace("2026-11-08T00:00:00Z"), now));
+  assert(!entitlementActive(grace(null), now));
 });
 
 Deno.test("limitsFromEnv falls back on bad values", () => {

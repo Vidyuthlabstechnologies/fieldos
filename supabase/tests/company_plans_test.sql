@@ -120,6 +120,37 @@ begin
   if json_array_length(public.my_company_plans()) <> 0 then raise exception 'a stranger saw a plan'; end if;
 end $$;
 
+-- People join only with the join code (join_company) or as a company's
+-- creator (ensure_company). A project manager can't write membership rows
+-- directly: not to make another account of theirs the owner, and not to
+-- put an outsider under the company plan.
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c1', true);
+select set_member_role('00000000-0000-0000-0000-00000000c0a1', '00000000-0000-0000-0000-0000000000c2', 'project_manager');
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c2', true);
+do $$
+begin
+  begin
+    insert into company_members (company_id, user_id, role)
+    values ('00000000-0000-0000-0000-00000000c0a1', '00000000-0000-0000-0000-0000000000c4', 'owner');
+    raise exception 'a project manager made another account the owner';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    insert into company_members (company_id, user_id, role)
+    values ('00000000-0000-0000-0000-00000000c0a1', '00000000-0000-0000-0000-0000000000c4', 'site_engineer');
+    raise exception 'a project manager added an outsider without the join code';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+reset role;
+do $$
+begin
+  if public.company_plan_covers('00000000-0000-0000-0000-0000000000c4') then
+    raise exception 'an outsider ended up under the company plan';
+  end if;
+end $$;
+set local role authenticated;
+
 -- The unconfirmed account can't claim the pilot granted to its email.
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c3', true);
 do $$
