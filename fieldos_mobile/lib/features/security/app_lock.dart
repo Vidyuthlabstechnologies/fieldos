@@ -2,7 +2,9 @@
 /// after a minute or more in the background, so a phone left on a site
 /// table doesn't show the company's money and wages. The PIN is stored
 /// only as a salted hash (the same hashing as passwords). Someone who
-/// forgets it logs in again with their password, which clears it.
+/// forgets it signs in to their cloud account again to choose a new one
+/// (lib/features/security/pin_reset.dart); without that, the waits below
+/// stand.
 ///
 /// Wrong PINs: four digits are only 10,000 guesses, so after
 /// [PinLockout.freeTries] wrong ones in a row the pad waits 30 seconds,
@@ -19,6 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/core/crypto.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/security/pin_reset.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
@@ -140,6 +143,11 @@ class AppLock {
     await _save(PinLockout.none);
   }
 
+  /// Clears the wrong-PIN count and wait, keeping the PIN. Only for after
+  /// the person has signed in to their account again (Forgot PIN): it is
+  /// the one way past a wait other than waiting.
+  Future<void> clearLockout() => _save(PinLockout.none);
+
   /// Whether [pin] is the PIN. Counts nothing; the PIN pad uses [attempt].
   Future<bool> check(String pin) async {
     final stored = await _db.settingsDao.get(appLockPinKey);
@@ -224,6 +232,9 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
   /// log-in screen.
   bool _forcedOut = false;
 
+  /// Forgot PIN, while it is open.
+  PinReset? _reset;
+
   @override
   void initState() {
     super.initState();
@@ -234,6 +245,7 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _reset?.dispose();
     _view.dispose();
     super.dispose();
   }
@@ -319,6 +331,15 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
   }
 
   Widget _pad() {
+    final reset = _reset;
+    if (reset != null) {
+      return ForgotPinScreen(
+        key: ObjectKey(reset),
+        reset: reset,
+        onDone: () => _closeReset(unlock: true),
+        onCancel: () => _closeReset(unlock: false),
+      );
+    }
     if (_forcedOut) {
       return _SignedOutNotice(
         onOk: () {
@@ -366,11 +387,31 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
     );
   }
 
-  Future<void> _forgot() async {
-    await ref.read(appLockProvider).turnOff();
-    await ref.read(sessionProvider.notifier).logout();
-    ref.invalidate(appLockOnProvider);
-    if (mounted) setState(() => _locked = false);
+  /// Forgot PIN: nothing is cleared or signed out here. The count and the
+  /// wait stay until [PinReset] has signed in to the account again.
+  void _forgot() {
+    if (_reset != null) return;
+    _reset = PinReset(lock: ref.read(appLockProvider), reauth: ref.read(accountReauthProvider))..start();
+    _view.value++;
+  }
+
+  Future<void> _closeReset({required bool unlock}) async {
+    final reset = _reset;
+    _reset = null;
+    // After the frame: the screen that called this is still building.
+    WidgetsBinding.instance.addPostFrameCallback((_) => reset?.dispose());
+    if (unlock) {
+      _show(wait: Duration.zero);
+      if (mounted) setState(() => _locked = false);
+      return;
+    }
+    // Back to the pad with the wait as it stands now, not as it was.
+    final lock = ref.read(appLockProvider);
+    final state = await lock.lockout();
+    if (!mounted) return;
+    _show(wait: state.remaining(lock.now()), triesLeft: _warnTries(state.triesLeft));
+    _waitSerial++;
+    _view.value++;
   }
 }
 
@@ -600,7 +641,7 @@ class _PinPadState extends State<PinPad> {
                   TextButton(
                     onPressed: widget.onForgot,
                     style: TextButton.styleFrom(foregroundColor: Colors.white70),
-                    child: Text(tr('Forgot PIN? Log in again with your password')),
+                    child: Text(tr('Forgot PIN?')),
                   ),
                 ],
               ],
@@ -613,38 +654,50 @@ class _PinPadState extends State<PinPad> {
 }
 
 /// Settings: asks for a new PIN twice. Returns the PIN, or null.
-Future<String?> askNewPin(BuildContext context) async {
-  String? first;
-  var mismatch = false;
-  return Navigator.of(context).push<String>(
-    MaterialPageRoute(
-      fullscreenDialog: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => PinPad(
-          key: ValueKey('${first == null}$mismatch'),
-          title: first != null
-              ? tr('Enter the same PIN again')
-              : mismatch
-              ? tr('The PINs did not match. Choose again.')
-              : tr('Choose a 4-digit PIN'),
-          onCancel: () => Navigator.of(ctx).pop(),
-          onSubmit: (pin) async {
-            if (first == null) {
-              setState(() => first = pin);
-              return true;
-            }
-            if (pin != first) {
-              setState(() {
-                first = null;
-                mismatch = true;
-              });
-              return false;
-            }
-            Navigator.of(ctx).pop(pin);
-            return true;
-          },
-        ),
-      ),
-    ),
+Future<String?> askNewPin(BuildContext context) => Navigator.of(context).push<String>(
+  MaterialPageRoute(
+    fullscreenDialog: true,
+    builder: (ctx) => NewPinPad(onChosen: (pin) async => Navigator.of(ctx).pop(pin), onCancel: () => Navigator.of(ctx).pop()),
+  ),
+);
+
+/// A new PIN, typed twice; starts over when the two differ.
+class NewPinPad extends StatefulWidget {
+  const NewPinPad({super.key, required this.onChosen, this.onCancel});
+  final Future<void> Function(String pin) onChosen;
+  final VoidCallback? onCancel;
+
+  @override
+  State<NewPinPad> createState() => _NewPinPadState();
+}
+
+class _NewPinPadState extends State<NewPinPad> {
+  String? _first;
+  bool _mismatch = false;
+
+  @override
+  Widget build(BuildContext context) => PinPad(
+    key: ValueKey('${_first == null}$_mismatch'),
+    title: _first != null
+        ? tr('Enter the same PIN again')
+        : _mismatch
+        ? tr('The PINs did not match. Choose again.')
+        : tr('Choose a 4-digit PIN'),
+    onCancel: widget.onCancel,
+    onSubmit: (pin) async {
+      if (_first == null) {
+        setState(() => _first = pin);
+        return true;
+      }
+      if (pin != _first) {
+        setState(() {
+          _first = null;
+          _mismatch = true;
+        });
+        return false;
+      }
+      await widget.onChosen(pin);
+      return true;
+    },
   );
 }

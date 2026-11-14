@@ -11,6 +11,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/page_format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/money/bill_pdf.dart' show BillingProfile, pdfSafe;
@@ -70,7 +71,7 @@ Future<Uint8List> buildPayslipPdf({
   final days = line.paidDays == line.paidDays.roundToDouble() ? line.paidDays.toInt().toString() : fmtQty(line.paidDays);
 
   doc.addPage(pw.Page(
-    pageFormat: PdfPageFormat.a4,
+    pageFormat: marketPageFormat(),
     margin: const pw.EdgeInsets.all(32),
     build: (_) => pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.stretch, children: [
       pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [

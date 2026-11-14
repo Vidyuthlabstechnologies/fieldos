@@ -13,6 +13,7 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/market.dart';
+import 'package:fieldos_mobile/core/page_format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
@@ -118,7 +119,7 @@ Future<Uint8List> buildBillPdf({
   final pos = placeOfSupply(ourGstin: profile.gstin, clientGstin: bill.clientGstin, interState: bill.interState);
 
   doc.addPage(pw.MultiPage(
-    pageFormat: PdfPageFormat.a4,
+    pageFormat: marketPageFormat(),
     margin: const pw.EdgeInsets.all(32),
     footer: branding.hasFooter || market.billFooterNote != null
         ? (ctx) => pw.Row(children: [

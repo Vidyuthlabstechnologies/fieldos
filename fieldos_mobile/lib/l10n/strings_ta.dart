@@ -850,8 +850,6 @@ const Map<String, String> stringsTa = {
       'தவறான PIN. மீண்டும் முயலுங்கள்.',
   'Delete':
       'நீக்கு',
-  'Forgot PIN? Log in again with your password':
-      'PIN மறந்ததா? கடவுச்சொல்லுடன் மீண்டும் உள்நுழையுங்கள்',
   'Enter the same PIN again':
       'அதே PIN-ஐ மீண்டும் உள்ளிடுங்கள்',
   'The PINs did not match. Choose again.':
@@ -3434,4 +3432,16 @@ const Map<String, String> stringsTa = {
   'Cut from pay: {items}': 'சம்பளத்திலிருந்து பிடித்தம்: {items}',
   'Employer pays: {items}': 'நிறுவனம் செலுத்துவது: {items}',
   'Net pay {amount}': 'கைக்கு வரும் சம்பளம் {amount}',
+  // Forgot PIN: signing in to the cloud account again.
+  'Forgot PIN?': 'PIN மறந்துவிட்டதா?',
+  'Confirm it is you': 'இது நீங்கள்தான் என உறுதிசெய்யுங்கள்',
+  'To choose a new PIN, sign in again to {email}.': 'புதிய PIN தேர்ந்தெடுக்க, {email} இல் மீண்டும் உள்நுழையுங்கள்.',
+  'Use my password': 'என் கடவுச்சொல்லைப் பயன்படுத்து',
+  'Email me a code': 'எனக்குக் குறியீட்டை மின்னஞ்சல் செய்',
+  'We emailed a code to {email}. The email calls it a password reset code; your password stays the same.': '{email} க்குக் குறியீட்டை மின்னஞ்சல் செய்தோம். மின்னஞ்சலில் அது கடவுச்சொல் மீட்டமைப்புக் குறியீடு எனப்படும்; உங்கள் கடவுச்சொல் மாறாது.',
+  'That password is not right.': 'அந்தக் கடவுச்சொல் சரியில்லை.',
+  'That code is wrong or has expired.': 'அந்தக் குறியீடு தவறு அல்லது காலாவதியானது.',
+  'That is a different account. Use {email}.': 'அது வேறு கணக்கு. {email} ஐப் பயன்படுத்துங்கள்.',
+  'That did not go through. Check the internet and try again.': 'அது நடக்கவில்லை. இணையத்தைச் சரிபார்த்து மீண்டும் முயலுங்கள்.',
+  'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'இந்த ஃபோனில் இப்போது PIN ஐ மீட்டமைக்க முடியாது. அதற்கு இணையமும், இந்த ஃபோன் உங்கள் FieldOS கிளவுட் கணக்கில் உள்நுழைந்திருப்பதும் தேவை. அதுவரை PIN பூட்டு அப்படியே இருக்கும்.',
 };

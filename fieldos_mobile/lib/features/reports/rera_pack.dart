@@ -17,6 +17,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/page_format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/money/bill_pdf.dart' show pdfSafe;
@@ -259,7 +260,7 @@ Future<Uint8List> buildReraPackPdf(ReraPack pack,
   final atStart = {for (final f in pack.floorsAtStart) '${f.block}\u0000${f.floor}': f.pct};
 
   doc.addPage(pw.MultiPage(
-    pageFormat: PdfPageFormat.a4,
+    pageFormat: marketPageFormat(),
     margin: const pw.EdgeInsets.all(30),
     footer: (ctx) => pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
       pw.Expanded(child: t(branding.footerLine, size: 7, color: _muted)),

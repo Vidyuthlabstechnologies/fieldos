@@ -13,6 +13,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/page_format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/close/week_close.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
@@ -154,7 +155,7 @@ Future<Uint8List> buildWeekClosePack({
   }
 
   doc.addPage(pw.MultiPage(
-    pageFormat: PdfPageFormat.a4,
+    pageFormat: marketPageFormat(),
     margin: const pw.EdgeInsets.all(28),
     footer: (ctx) => pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
       t(branding.footerLine, size: 7, color: _muted),
@@ -266,7 +267,7 @@ Future<Uint8List> buildWeekClosePack({
 
   if (images.isNotEmpty) {
     doc.addPage(pw.MultiPage(
-      pageFormat: PdfPageFormat.a4,
+      pageFormat: marketPageFormat(),
       margin: const pw.EdgeInsets.all(28),
       build: (ctx) => [
         t('Supporting photos', size: 12, bold: true),

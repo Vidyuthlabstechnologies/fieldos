@@ -850,8 +850,6 @@ const Map<String, String> stringsMr = {
       'चुकीचा PIN. पुन्हा प्रयत्न करा.',
   'Delete':
       'हटवा',
-  'Forgot PIN? Log in again with your password':
-      'PIN विसरलात? पासवर्डने पुन्हा लॉग इन करा',
   'Enter the same PIN again':
       'तोच PIN पुन्हा टाका',
   'The PINs did not match. Choose again.':
@@ -3424,4 +3422,16 @@ const Map<String, String> stringsMr = {
   'Cut from pay: {items}': 'पगारातून कपात: {items}',
   'Employer pays: {items}': 'कंपनी भरते: {items}',
   'Net pay {amount}': 'हातात पगार {amount}',
+  // Forgot PIN: signing in to the cloud account again.
+  'Forgot PIN?': 'PIN विसरलात?',
+  'Confirm it is you': 'हे तुम्हीच आहात याची खात्री करा',
+  'To choose a new PIN, sign in again to {email}.': 'नवा PIN निवडण्यासाठी {email} मध्ये पुन्हा साइन इन करा.',
+  'Use my password': 'माझा पासवर्ड वापरा',
+  'Email me a code': 'मला कोड ईमेल करा',
+  'We emailed a code to {email}. The email calls it a password reset code; your password stays the same.': 'आम्ही {email} वर कोड ईमेल केला आहे. ईमेलमध्ये त्याला पासवर्ड रीसेट कोड म्हटले आहे; तुमचा पासवर्ड तोच राहील.',
+  'That password is not right.': 'तो पासवर्ड बरोबर नाही.',
+  'That code is wrong or has expired.': 'तो कोड चुकीचा आहे किंवा त्याची मुदत संपली आहे.',
+  'That is a different account. Use {email}.': 'हे दुसरे खाते आहे. {email} वापरा.',
+  'That did not go through. Check the internet and try again.': 'ते झाले नाही. इंटरनेट तपासा आणि पुन्हा प्रयत्न करा.',
+  'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'या फोनवर आता PIN रीसेट करता येत नाही. त्यासाठी इंटरनेट आणि हा फोन तुमच्या FieldOS क्लाउड खात्यात साइन इन असणे आवश्यक आहे. तोपर्यंत PIN लॉक जसा आहे तसाच राहील.',
 };
