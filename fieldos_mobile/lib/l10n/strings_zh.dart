@@ -3,10 +3,12 @@
 /// Keyed by the Indian English text, like every table (see language.dart).
 library;
 
+import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_zh.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 
 const stringsZh = <String, String>{
+  ...scheduleZh,
   ...consentZh,
   ...overtimeZh,
   'Try again': '重试',

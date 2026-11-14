@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/features/execution/execution_screens.dart';
+import 'package:fieldos_mobile/features/schedule/gantt_screen.dart';
 import 'package:fieldos_mobile/features/project/site_notes_screen.dart';
 import 'package:fieldos_mobile/features/portals/portal_share.dart';
 import 'package:fieldos_mobile/core/brand.dart';
@@ -181,6 +182,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   builder: (_) => WeekCloseScreen(project: widget.project, weekOf: DateTime.now()),
                 ));
               }
+              if (v == 'schedule') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => GanttScreen(project: widget.project)));
+              }
               if (v == 'execution') {
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (_) => SiteExecutionScreen(project: widget.project)));
@@ -282,6 +286,13 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 child: ListTile(
                   leading: const Icon(Icons.fact_check_outlined),
                   title: Text(tr('Weekly close')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'schedule',
+                child: ListTile(
+                  leading: const Icon(Icons.view_timeline_outlined),
+                  title: Text(tr('Schedule (Gantt chart)')),
                 ),
               ),
               PopupMenuItem(

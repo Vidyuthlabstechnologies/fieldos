@@ -3,7 +3,10 @@
 /// Keyed by the Indian English text, like every table (see language.dart).
 library;
 
+import 'package:fieldos_mobile/l10n/strings_schedule.dart';
+
 const stringsRo = <String, String>{
+  ...scheduleRo,
   'Try again': 'Încearcă din nou',
   'Approvals': 'Aprobări',
   'Nothing waiting': 'Nimic în așteptare',

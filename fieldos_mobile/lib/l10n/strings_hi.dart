@@ -3,6 +3,7 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 import 'package:fieldos_mobile/l10n/strings_commercial_hi.dart';
@@ -14,6 +15,7 @@ import 'package:fieldos_mobile/l10n/strings_proof_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_privacy_hi.dart';
 
 const Map<String, String> stringsHi = {
+  ...scheduleHi,
   ...consentHi,
   ...overtimeHi,
   'Try again': 'फिर से कोशिश करें',
