@@ -199,9 +199,16 @@ String trf(String english, Map<String, Object> args) {
   // into the sentence is isolated, so the bidi algorithm doesn't scatter
   // its parts ("AED 780 40").
   final isolate = currentLanguage.rightToLeft;
-  args.forEach((k, v) => s = s.replaceAll('{$k}', isolate ? '\u2068$v\u2069' : '$v'));
+  args.forEach((k, v) => s = s.replaceAll('{$k}', isolate ? rtlIsolate('$v') : '$v'));
   return s;
 }
+
+/// [v] isolated for an Arabic or Urdu sentence (see [trf]), with a number
+/// kept on the line of the word before it: a line that breaks inside
+/// "Plot 14" lays the 14 out at the far end of the next line.
+String rtlIsolate(String v) => '\u2068${v.replaceAllMapped(_wordThenNumber, (m) => '${m[1]}\u00A0${m[2]}')}\u2069';
+
+final _wordThenNumber = RegExp(r'(\S) (\d)');
 
 /// The phone's own language when FieldOS has it, else English: the first
 /// launch offers it first, but nothing changes until the person taps.

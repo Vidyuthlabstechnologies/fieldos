@@ -101,7 +101,7 @@ void main() {
 
   test('in Arabic and Urdu a filled-in amount is kept in its own direction', () {
     setCurrentLanguage(AppLanguage.ar);
-    expect(trf('{amount}/day', {'amount': 'AED 100'}), contains('\u2068AED 100\u2069'));
+    expect(trf('{amount}/day', {'amount': 'AED 100'}), contains('\u2068AED\u00A0100\u2069'));
     setCurrentLanguage(AppLanguage.hi);
     expect(trf('{amount}/day', {'amount': '₹100'}), isNot(contains('\u2068')));
   });
@@ -120,5 +120,12 @@ void main() {
     debugSetMarket(Market.us);
     expect(trIn(AppLanguage.en, 'Daily reports'), 'Daily logs');
     expect(trIn(AppLanguage.ml, 'OT {h} h'), isNot(contains('OT')));
+  });
+
+  test('in Arabic a site name keeps "Plot 14" on one line', () {
+    setCurrentLanguage(AppLanguage.ar);
+    final s = trf('Expense {amount} for {category} at {site}', {'amount': 'AED 780', 'category': 'cement', 'site': 'JVC Villa, Plot 14'});
+    expect(s, contains('\u2068JVC Villa, Plot\u00A014\u2069'));
+    expect(s, contains('\u2068AED\u00A0780\u2069'));
   });
 }

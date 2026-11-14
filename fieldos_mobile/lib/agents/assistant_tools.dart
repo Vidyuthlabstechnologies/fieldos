@@ -213,7 +213,7 @@ class AssistantTools {
 
   String _noteSuffix(Map<String, dynamic> i) {
     final n = _str(i, 'note');
-    return n == null ? '' : ' · $n';
+    return n == null ? '' : ' · ${currentLanguage.rightToLeft ? rtlIsolate(n) : n}';
   }
 
   // ---------------------------------------------------------------------------
