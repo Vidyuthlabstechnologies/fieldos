@@ -59,7 +59,7 @@ Future<Uint8List> buildBillPdf({
   final isRa = bill.kind == 'ra';
   final title = isRa
       ? market.progressBillTitle
-      : (isIndia ? invoiceTitle(ourGstin: profile.gstin, gstRate: bill.gstRate) : market.invoiceTitle);
+      : (isIndia ? invoiceTitle(ourGstin: profile.gstin, gstRate: bill.gstRate) : marketInvoiceTitle(ourTaxId: profile.gstin));
   final isTaxInvoice = title == 'TAX INVOICE';
   final regLabel = isIndia ? 'GSTIN' : market.tax.registrationLabel;
   final doc = pw.Document(title: '$title ${bill.billNumber}', creator: 'FieldOS');

@@ -121,6 +121,38 @@ class OvertimeRule {
   final String note;
 }
 
+/// A season when outdoor work must stop in the middle of the day (the UAE
+/// midday break, Ministerial Resolution on working hours in summer):
+/// [fromMonth]/[fromDay] to [toMonth]/[toDay] inclusive, from [startMinute]
+/// to [endMinute] past midnight, local time.
+class MiddayBreak {
+  const MiddayBreak({
+    required this.fromMonth,
+    required this.fromDay,
+    required this.toMonth,
+    required this.toDay,
+    required this.startMinute,
+    required this.endMinute,
+  });
+
+  final int fromMonth, fromDay, toMonth, toDay, startMinute, endMinute;
+
+  /// Whether [day] falls in the season.
+  bool inSeason(DateTime day) {
+    final d = day.month * 100 + day.day;
+    return d >= fromMonth * 100 + fromDay && d <= toMonth * 100 + toDay;
+  }
+
+  /// Whether [t] (local) is inside the break on a day in the season.
+  bool covers(DateTime t) {
+    final m = t.hour * 60 + t.minute;
+    return inSeason(t) && m >= startMinute && m < endMinute;
+  }
+
+  /// The last day of the season in [year].
+  DateTime seasonEnd(int year) => DateTime(year, toMonth, toDay);
+}
+
 /// A national minimum wage the wage sheet checks daily rates against.
 class MinimumWage {
   const MinimumWage({required this.monthly, required this.hourly, required this.daily, this.note = ''});
@@ -169,7 +201,11 @@ class MarketConfig {
     this.premiumRestAndHolidayPay = false,
     this.retentionLimitOfContractPct,
     this.minimumWage,
+    this.middayBreak,
   });
+
+  /// Outdoor work stops at midday in summer (UAE). Null elsewhere.
+  final MiddayBreak? middayBreak;
 
   /// The national minimum wage, where the app checks daily rates against
   /// it (Malaysia). Null where it varies by state or is hourly only.
@@ -394,6 +430,9 @@ const _uae = MarketConfig(
   progressBillName: 'Interim payment application',
   progressBillTitle: 'INTERIM PAYMENT APPLICATION',
   invoiceTitle: 'TAX INVOICE',
+  // MOHRE midday break: no outdoor work in the sun from 12:30 to 3:00 pm,
+  // 15 June to 15 September (fines up to AED 50,000 for a group).
+  middayBreak: MiddayBreak(fromMonth: 6, fromDay: 15, toMonth: 9, toDay: 15, startMinute: 750, endMinute: 900),
 );
 
 const _uk = MarketConfig(

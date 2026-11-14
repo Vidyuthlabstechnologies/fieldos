@@ -85,6 +85,16 @@ read Arabic-Indic (٠-٩) and Urdu (۰-۹) digits: `westernDigits` in
 `core/format.dart`, and `WesternDigitsFormatter` first in any field that
 filters its characters. PDFs stay in English.
 
+## UAE site rules
+
+- **Midday break** (`MarketConfig.middayBreak`): 12:30 to 3:00 pm, 15 June
+  to 15 September. The labour tab shows the season, and a punch-in inside
+  the window asks first (indoor, shaded or exempt work only). Hours are
+  not cut automatically.
+- **TRN** on bills: 15 digits, stored without spaces or dashes
+  (`normaliseTaxId`, `validTaxId`). A bill is a TAX INVOICE only when the
+  company has its TRN (`marketInvoiceTitle`); without it, an INVOICE.
+
 ## Minimum wage
 
 Malaysia's wage sheet flags any daily rate under the Minimum Wages Order
@@ -104,8 +114,12 @@ and the US's vary by state, and the UAE sets none for most private-sector worker
   amended in 2024: section 129 transfers to India and the USA, breach notice
   to the Commissioner within 72 hours, 21-day replies, a notice in English
   and Bahasa Melayu; Malaysian law with AIAC arbitration; the customer as
-  data controller). The UAE and the UK still show India's until theirs are
-  written, and `marketLegalReady` is false for them:
+  data controller). The UAE has its own (PDPL, Federal Decree-Law 45/2021:
+  Articles 22-23 transfers with consent at sign-up, no face recognition,
+  DIFC/ADGM check; terms under Indian law with a carve-out for mandatory
+  UAE rights and DIAC arbitration for company plans; the Arabic version of
+  both is still to be made). The UK still shows India's until its own is
+  written, and `marketLegalReady` is false for it:
   do not publish those apps before it is true. All of these are drafts that
   need a lawyer in that country; never call them lawyer-reviewed.
   The published pages (`PRIVACY_POLICY_URL`, `TERMS_URL`) are build defines,

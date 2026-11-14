@@ -2496,4 +2496,11 @@ const Map<String, String> stringsTe = {
   'Add the federal and state holidays your company gives, from the gazette for your state.': 'మీ కంపెనీ ఇచ్చే ఫెడరల్, రాష్ట్ర సెలవులను మీ రాష్ట్ర గెజిట్ నుండి జోడించండి.',
   'below the minimum wage of {amount}/day': 'కనీస వేతనం {amount}/రోజు కంటే తక్కువ',
   'Write from the email address on your account. We reply within 21 days. If you are not satisfied, you can complain to the Personal Data Protection Commissioner of Malaysia.': 'మీ ఖాతాలోని ఈమెయిల్ చిరునామా నుండి రాయండి. 21 రోజుల్లో జవాబిస్తాం. సంతృప్తి లేకపోతే మలేషియా వ్యక్తిగత డేటా రక్షణ కమిషనర్‌కు ఫిర్యాదు చేయవచ్చు.',
+  'Midday break season': 'మధ్యాహ్న విరామం సీజన్',
+  'No outdoor work from {from} to {to} until {end}. Give shade, water and rest.': '{end} వరకు ప్రతిరోజూ {from} నుండి {to} వరకు బయట పని లేదు. నీడ, నీళ్ళు, విశ్రాంతి ఇవ్వండి.',
+  'Midday break': 'మధ్యాహ్న విరామం',
+  'Outdoor work in the sun is not allowed from {from} to {to}, 15 June to 15 September. Punch in only for indoor or shaded work, or work that is exempt, such as a concrete pour that cannot stop.': 'జూన్ 15 నుండి సెప్టెంబర్ 15 వరకు, {from} నుండి {to} వరకు ఎండలో బయట పని చేయకూడదు. లోపలి పని, నీడలో పని, లేదా మినహాయింపు ఉన్న పని (ఆపలేని కాంక్రీట్ పోయడం లాంటిది) కోసం మాత్రమే పంచ్ ఇన్ చేయండి.',
+  'Indoor or exempt work': 'లోపలి పని లేదా మినహాయింపు ఉన్న పని',
+  'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': 'ఈ TRN సరిగ్గా లేనట్టుంది. దీనిలో 15 అంకెలు ఉంటాయి, ఉదాహరణకు 100123456700003.',
+  'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': 'మీ అకౌంట్‌లో ఉన్న ఈమెయిల్ అడ్రస్ నుండి రాయండి. మేము 30 రోజుల్లో జవాబిస్తాము. మీకు సంతృప్తి లేకపోతే, UAE డేటా రక్షణ అథారిటీకి ఫిర్యాదు చేయవచ్చు.',
 };

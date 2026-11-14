@@ -3397,4 +3397,11 @@ const Map<String, String> stringsTa = {
   'Minimum wage: RM1,700 a month (Minimum Wages Order 2025). In Sabah and Sarawak, the Sabah Labour Ordinance or the Sarawak Labour Ordinance applies instead of the Employment Act 1955 for overtime, rest days and holidays: check the rules for your site.': 'குறைந்தபட்ச ஊதியம்: மாதம் RM1,700 (குறைந்தபட்ச ஊதிய ஆணை 2025). சபா மற்றும் சரவாக்கில், கூடுதல் நேரம், ஓய்வு நாட்கள் மற்றும் விடுமுறைகளுக்கு வேலைவாய்ப்புச் சட்டம் 1955-க்குப் பதிலாக சபா தொழிலாளர் அவசரச் சட்டம் அல்லது சரவாக் தொழிலாளர் அவசரச் சட்டம் பொருந்தும்: உங்கள் தளத்துக்கான விதிகளைச் சரிபாருங்கள்.',
   'below the minimum wage of {amount}/day': 'குறைந்தபட்ச ஊதியமான {amount}/நாள் விடக் குறைவு',
   'Write from the email address on your account. We reply within 21 days. If you are not satisfied, you can complain to the Personal Data Protection Commissioner of Malaysia.': 'உங்கள் கணக்கின் மின்னஞ்சல் முகவரியிலிருந்து எழுதுங்கள். 21 நாட்களுக்குள் பதில் அளிப்போம். திருப்தி இல்லையென்றால், மலேசியாவின் தனிநபர் தரவுப் பாதுகாப்பு ஆணையரிடம் புகார் செய்யலாம்.',
+  'Midday break season': 'மதிய இடைவேளை சீசன்',
+  'No outdoor work from {from} to {to} until {end}. Give shade, water and rest.': '{end} வரை தினமும் {from} முதல் {to} வரை வெளியே வேலை இல்லை. நிழல், தண்ணீர், ஓய்வு கொடுங்கள்.',
+  'Midday break': 'மதிய இடைவேளை',
+  'Outdoor work in the sun is not allowed from {from} to {to}, 15 June to 15 September. Punch in only for indoor or shaded work, or work that is exempt, such as a concrete pour that cannot stop.': 'ஜூன் 15 முதல் செப்டம்பர் 15 வரை, {from} முதல் {to} வரை வெயிலில் வெளியே வேலை செய்யக்கூடாது. உள்ளே அல்லது நிழலில் செய்யும் வேலை, அல்லது விலக்கு உள்ள வேலைக்கு மட்டும் பஞ்ச் இன் செய்யுங்கள், உதாரணமாக நிறுத்த முடியாத கான்கிரீட் ஊற்றுதல்.',
+  'Indoor or exempt work': 'உள்ளே செய்யும் வேலை அல்லது விலக்கு உள்ள வேலை',
+  'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': 'இந்த TRN சரியாகத் தெரியவில்லை. இதில் 15 இலக்கங்கள் இருக்கும், உதாரணமாக 100123456700003.',
+  'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': 'உங்கள் கணக்கில் உள்ள ஈமெயில் முகவரியிலிருந்து எழுதுங்கள். 30 நாட்களுக்குள் பதில் தருவோம். உங்களுக்குத் திருப்தி இல்லையென்றால், UAE தரவு பாதுகாப்பு ஆணையத்திடம் புகார் செய்யலாம்.',
 };

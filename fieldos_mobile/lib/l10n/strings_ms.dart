@@ -3042,4 +3042,11 @@ const stringsMs = <String, String>{
   'Minimum wage: RM1,700 a month (Minimum Wages Order 2025). In Sabah and Sarawak, the Sabah Labour Ordinance or the Sarawak Labour Ordinance applies instead of the Employment Act 1955 for overtime, rest days and holidays: check the rules for your site.': 'Gaji minimum: RM1,700 sebulan (Perintah Gaji Minimum 2025). Di Sabah dan Sarawak, Ordinan Buruh Sabah atau Ordinan Buruh Sarawak terpakai dan bukannya Akta Kerja 1955 bagi kerja lebih masa, hari rehat dan cuti: semak peraturan bagi tapak anda.',
   'below the minimum wage of {amount}/day': 'di bawah gaji minimum {amount}/hari',
   'Write from the email address on your account. We reply within 21 days. If you are not satisfied, you can complain to the Personal Data Protection Commissioner of Malaysia.': 'Tulis daripada alamat e-mel akaun anda. Kami membalas dalam masa 21 hari. Jika anda tidak berpuas hati, anda boleh membuat aduan kepada Pesuruhjaya Perlindungan Data Peribadi Malaysia.',
+  'Midday break season': 'Musim rehat tengah hari',
+  'No outdoor work from {from} to {to} until {end}. Give shade, water and rest.': 'Tiada kerja luar dari {from} hingga {to} sehingga {end}. Beri tempat teduh, air dan rehat.',
+  'Midday break': 'Rehat tengah hari',
+  'Outdoor work in the sun is not allowed from {from} to {to}, 15 June to 15 September. Punch in only for indoor or shaded work, or work that is exempt, such as a concrete pour that cannot stop.': 'Kerja luar di bawah matahari tidak dibenarkan dari {from} hingga {to}, 15 Jun hingga 15 September. Daftar masuk hanya untuk kerja dalam bangunan atau di tempat teduh, atau kerja yang dikecualikan, seperti tuangan konkrit yang tidak boleh dihentikan.',
+  'Indoor or exempt work': 'Kerja dalam bangunan atau dikecualikan',
+  'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': 'TRN itu nampaknya tidak betul. Ia ada 15 digit, contohnya 100123456700003.',
+  'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': 'Tulis daripada alamat e-mel akaun anda. Kami balas dalam 30 hari. Jika anda tidak berpuas hati, anda boleh membuat aduan kepada pihak berkuasa perlindungan data UAE.',
 };

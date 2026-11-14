@@ -547,12 +547,12 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
 
   Future<void> _save(List<ClientBill> bills) async {
     final client = _client.text.trim();
-    final gstin = _clientGstin.text.trim().toUpperCase();
+    final gstin = normaliseTaxId(_clientGstin.text);
     final number = _number.text.trim().isEmpty ? nextBillNumber(bills.map((b) => b.billNumber), _kind) : _number.text.trim();
     final lines = _lines.where((l) => l.qty > 0).toList();
     String? error;
     if (client.isEmpty) error = tr('Who is the bill for? Add the client name.');
-    if (isIndia && gstin.isNotEmpty && !isValidGstin(gstin)) error = tr('That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.');
+    if (gstin.isNotEmpty && !validTaxId(gstin)) error = taxIdError;
     if (lines.isEmpty) error = tr('Add at least one item with a quantity.');
     if (_kind == 'tax_invoice' && !isValidInvoiceNumber(number)) {
       error = tr('A tax invoice number has up to 16 letters, digits, - or /, like INV-0001.');
@@ -618,6 +618,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
             TextField(
               controller: gstin,
               textCapitalization: TextCapitalization.characters,
+              textDirection: TextDirection.ltr,
               maxLength: isIndia ? 15 : 30,
               decoration: InputDecoration(labelText: isIndia ? tr('Your GSTIN') : tr(market.tax.registrationLabel)),
             ),
@@ -633,9 +634,9 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
       ),
     );
     if (ok != true) return;
-    final g = gstin.text.trim().toUpperCase();
-    if (isIndia && g.isNotEmpty && !isValidGstin(g)) {
-      if (mounted) showSnack(context, 'That GSTIN doesn\'t look right, so it wasn\'t saved.', error: true);
+    final g = normaliseTaxId(gstin.text);
+    if (g.isNotEmpty && !validTaxId(g)) {
+      if (mounted) showSnack(context, isIndia ? 'That GSTIN doesn\'t look right, so it wasn\'t saved.' : taxIdError, error: true);
       return;
     }
     await saveBillingProfile(ref.read(appDatabaseProvider), widget.project.companyId,
@@ -713,6 +714,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
           TextField(
             controller: _clientGstin,
             textCapitalization: TextCapitalization.characters,
+            // A registration number reads left to right, also in Arabic.
+            textDirection: TextDirection.ltr,
             maxLength: isIndia ? 15 : 30,
             decoration: InputDecoration(
                 labelText: isIndia
@@ -892,3 +895,7 @@ class _ContractSumFieldState extends ConsumerState<_ContractSumField> {
       );
 }
 
+/// The message when [validTaxId] fails.
+String get taxIdError => currentMarket == Market.uae
+    ? tr("That TRN doesn't look right. It has 15 digits, like 100123456700003.")
+    : tr('That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.');

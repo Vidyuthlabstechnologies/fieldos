@@ -3036,4 +3036,11 @@ const Map<String, String> stringsEs = {
   'Add the federal and state holidays your company gives, from the gazette for your state.': 'Agrega los feriados federales y estatales que da tu empresa, según el boletín oficial de tu estado.',
   'below the minimum wage of {amount}/day': 'por debajo del salario mínimo de {amount}/día',
   'Write from the email address on your account. We reply within 21 days. If you are not satisfied, you can complain to the Personal Data Protection Commissioner of Malaysia.': 'Escriba desde el correo electrónico de su cuenta. Respondemos en un plazo de 21 días. Si no queda satisfecho, puede presentar una queja ante el Comisionado de Protección de Datos Personales de Malasia.',
+  'Midday break season': 'Temporada de descanso del mediodía',
+  'No outdoor work from {from} to {to} until {end}. Give shade, water and rest.': 'No se trabaja al aire libre de {from} a {to} hasta {end}. Dé sombra, agua y descanso.',
+  'Midday break': 'Descanso del mediodía',
+  'Outdoor work in the sun is not allowed from {from} to {to}, 15 June to 15 September. Punch in only for indoor or shaded work, or work that is exempt, such as a concrete pour that cannot stop.': 'No se permite trabajar al aire libre bajo el sol de {from} a {to}, del 15 de junio al 15 de septiembre. Registre la entrada solo para trabajo bajo techo o a la sombra, o trabajo exento, como un colado de concreto que no se puede detener.',
+  'Indoor or exempt work': 'Trabajo bajo techo o exento',
+  'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': 'Ese TRN no parece correcto. Tiene 15 dígitos, como 100123456700003.',
+  'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': 'Escriba desde el correo electrónico de su cuenta. Respondemos en un plazo de 30 días. Si no está satisfecho, puede presentar una queja ante la autoridad de protección de datos de UAE (Emiratos Árabes Unidos).',
 };
