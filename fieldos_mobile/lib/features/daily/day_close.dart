@@ -497,6 +497,7 @@ WeekVerification verifyWeek({
   required List<SiteExpense> expenses,
   DateTime? since,
   PayCalendar calendar = const PayCalendar(),
+  OvertimePolicy? overtime,
 }) {
   final submitted = <String>{};
   for (final e in events) {
@@ -520,6 +521,7 @@ WeekVerification verifyWeek({
       to: d.add(const Duration(days: 1)),
       marks: marks,
       calendar: calendar,
+      overtime: overtime,
     );
     for (final l in sheet.lines) {
       if (l.earned > 0) perDay.putIfAbsent(l.key, () => {})[d] = l.earned;

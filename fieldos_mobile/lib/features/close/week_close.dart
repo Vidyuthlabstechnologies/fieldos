@@ -273,6 +273,7 @@ WeekClose buildWeekClose({
   Set<String> unconfirmedVouchers = const {},
   DateTime? now,
   PayCalendar calendar = const PayCalendar(),
+  OvertimePolicy? overtime,
 }) {
   final from = weekStart(weekOf);
   final to = addDays(from, 7);
@@ -286,7 +287,8 @@ WeekClose buildWeekClose({
       from: from,
       to: to,
       marks: marks,
-      calendar: calendar);
+      calendar: calendar,
+      overtime: overtime);
   final items = <CloseItem>[];
 
   // Wages: one item per worker who worked or was paid this week.
@@ -305,6 +307,7 @@ WeekClose buildWeekClose({
       detail: [
         trf('{n} days', {'n': days}),
         if (l.dailyWage != null) trf('earned {amount}', {'amount': rupees(l.earned)}),
+        if (l.overtimePay > 0) trf('OT pay {amount}', {'amount': rupees(l.overtimePay)}),
         if (l.paidInPeriod > 0) trf('paid {amount}', {'amount': rupees(l.paidInPeriod)}),
         if (l.balanceDue > 0.005) trf('due {amount}', {'amount': rupees(l.balanceDue)}),
       ].join(' · '),

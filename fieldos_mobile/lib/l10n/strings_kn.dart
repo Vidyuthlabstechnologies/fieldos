@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_kn.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 import 'package:fieldos_mobile/l10n/strings_commercial_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_execution_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_kn.dart';
@@ -14,6 +15,7 @@ import 'package:fieldos_mobile/l10n/strings_privacy_kn.dart';
 
 const Map<String, String> stringsKn = {
   ...consentKn,
+  ...overtimeKn,
   'Try again':
       'ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
   'Approvals':

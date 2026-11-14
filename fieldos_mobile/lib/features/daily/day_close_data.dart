@@ -11,7 +11,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/close/week_close.dart';
 import 'package:fieldos_mobile/features/close/week_close_data.dart';
 import 'package:fieldos_mobile/features/daily/day_close.dart';
-import 'package:fieldos_mobile/features/labour/wage_sheet.dart' show markDay, loadPayCalendar;
+import 'package:fieldos_mobile/features/labour/wage_sheet.dart' show markDay, loadPayCalendar, loadOvertimePolicy;
 import 'package:fieldos_mobile/providers.dart';
 
 /// Everything recorded on a site, loaded once for several days.
@@ -294,6 +294,7 @@ Future<WeekVerification> loadWeekVerification(AppDatabase db, WeekClose w) async
     expenses: r.expenses,
     since: r.trackingStart,
     calendar: await loadPayCalendar(db, w.project.companyId),
+    overtime: await loadOvertimePolicy(db, w.project.companyId),
   );
 }
 

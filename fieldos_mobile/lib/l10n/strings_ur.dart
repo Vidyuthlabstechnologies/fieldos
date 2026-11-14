@@ -4,9 +4,11 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_ur.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 
 const stringsUr = <String, String>{
   ...consentUr,
+  ...overtimeUr,
   'Try again': 'دوبارہ کوشش کریں',
   'Approvals': 'منظوریاں',
   'Nothing waiting': 'کچھ زیرِ التوا نہیں',

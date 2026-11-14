@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_ta.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 import 'package:fieldos_mobile/l10n/strings_commercial_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_execution_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_ta.dart';
@@ -14,6 +15,7 @@ import 'package:fieldos_mobile/l10n/strings_privacy_ta.dart';
 
 const Map<String, String> stringsTa = {
   ...consentTa,
+  ...overtimeTa,
   'Try again':
       'மீண்டும் முயற்சிக்கவும்',
   'Approvals':

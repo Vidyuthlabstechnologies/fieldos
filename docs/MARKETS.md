@@ -125,6 +125,30 @@ note says lower rates apply under 21 and to apprentices. Other markets set
 none here: India's and the US's vary by state, and the UAE sets none for most
 private-sector workers.
 
+## Overtime pay
+
+The wage sheet pays overtime (`wage_sheet.dart`, the "Overtime pay" section):
+
+- **Day-wage markets** (India, Malaysia, UAE): hours past the market's
+  normal day (`normalDayHours`, 8 in each; India's is the OSH Code 2020's,
+  in force since 21 Nov 2025) on a punched day are paid at day wage / 8 x
+  the company's rate, on top of the day. Defaults: India 2x, UAE 1.25x,
+  Malaysia 1.5x (and at least 2x on the rest day, 3x on a public holiday).
+  A day marked by hand keeps the mark and pays no overtime on top.
+- **UK** (by the hour): past the 48-hour week at the company's rate, 1x
+  unless set (no legal premium).
+- **US**: FLSA 1.5x past 40 hours a week, not editable. When the company's
+  state is California, `splitCaliforniaOvertime`: 1.5x past 8 hours a day,
+  2x past 12, the 7th day in a row in the week 1.5x for 8 hours and 2x
+  after, and 1.5x past 40 straight-time hours (daily overtime hours are not
+  counted towards the 40).
+
+The rate and the US state are company settings on the phone (app_settings,
+keys `overtime_multiplier:<company>` and `us_state:<company>`, like the pay
+calendar; not synced), set from the wage sheet's Overtime pay button. The
+overtime pay shows on the sheet, its WhatsApp text and the weekly close pack
+(Overtime column).
+
 ## Legal texts and prices
 
 - **Privacy policy, terms, privacy notice**: `lib/features/legal/legal_texts_markets.dart`

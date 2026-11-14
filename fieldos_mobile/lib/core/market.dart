@@ -340,9 +340,10 @@ const _india = MarketConfig(
     withholdingLabel: 'TDS',
     rateChoices: [0, 5, 12, 18],
   ),
-  // Factories Act / state rules: double the ordinary rate past 9 h a day
-  // or 48 h a week. Most sites pay daily wages and agree overtime on site.
-  overtime: OvertimeRule(dailyHours: 9, weeklyHours: 48, multiplier: 2, note: 'Overtime at twice the daily rate past 9 hours a day or 48 a week'),
+  // OSH Code 2020 (in force 21 Nov 2025, replacing the Factories Act's 9 h
+  // day): 8 hours a day, 48 a week, overtime at twice the ordinary rate.
+  // The wage sheet pays it on day wages at the company's rate (default 2x).
+  overtime: OvertimeRule(dailyHours: 8, weeklyHours: 48, multiplier: 2, note: 'Overtime at twice the ordinary rate past 8 hours a day or 48 a week (OSH Code 2020)'),
   phonePrefix: '+91',
   languageCodes: ['en', 'hi', 'te', 'ta', 'kn', 'mr'],
   postcodeLabel: 'PIN code',

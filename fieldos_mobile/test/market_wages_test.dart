@@ -1,7 +1,8 @@
 /// Hourly pay and legal overtime in the markets that pay by the hour (US:
 /// time and a half past 40 hours a week; UK: hours at the rate, no legal
 /// premium), and the daily overtime rule of the others. India's day-based
-/// wage sheet is covered by wage_sheet_and_stock_test.dart and unchanged.
+/// wage sheet is covered by wage_sheet_and_stock_test.dart, its overtime
+/// pay by overtime_pay_test.dart.
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -132,7 +133,7 @@ void main() {
     });
   });
 
-  test('India still pays by the day', () {
+  test('India still pays by the day, plus overtime past 8 hours', () {
     final sheet = buildWageSheet(
       workers: [_worker('r', 'Ramesh', 800)],
       punches: [_punch('r', mon.add(const Duration(hours: 9)), 10)],
@@ -140,6 +141,6 @@ void main() {
       from: mon,
       to: mon.add(const Duration(days: 7)),
     );
-    expect(sheet.lines.single.earned, 800);
+    expect(sheet.lines.single.earned, 800 + 2 * 100 * 2);
   });
 }

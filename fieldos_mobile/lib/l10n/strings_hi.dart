@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 import 'package:fieldos_mobile/l10n/strings_commercial_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_execution_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_hi.dart';
@@ -14,6 +15,7 @@ import 'package:fieldos_mobile/l10n/strings_privacy_hi.dart';
 
 const Map<String, String> stringsHi = {
   ...consentHi,
+  ...overtimeHi,
   'Try again': 'फिर से कोशिश करें',
   'Approvals': 'मंज़ूरियाँ',
   'Nothing waiting': 'कुछ बाकी नहीं',

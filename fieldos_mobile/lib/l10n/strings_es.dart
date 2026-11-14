@@ -6,9 +6,11 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_es.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 
 const Map<String, String> stringsEs = {
   ...consentEs,
+  ...overtimeEs,
   'Try again': 'Intenta de nuevo',
   'Approvals': 'Aprobaciones',
   'Nothing waiting': 'Nada pendiente',

@@ -4,9 +4,11 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_ms.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 
 const stringsMs = <String, String>{
   ...consentMs,
+  ...overtimeMs,
   'Try again': 'Cuba lagi',
   'Approvals': 'Kelulusan',
   'Nothing waiting': 'Tiada yang menunggu',

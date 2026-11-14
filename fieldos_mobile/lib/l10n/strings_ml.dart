@@ -4,9 +4,11 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_ml.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 
 const stringsMl = <String, String>{
   ...consentMl,
+  ...overtimeMl,
   'Try again': 'വീണ്ടും ശ്രമിക്കുക',
   'Approvals': 'അംഗീകാരങ്ങൾ',
   'Nothing waiting': 'ഒന്നും കാത്തിരിക്കുന്നില്ല',

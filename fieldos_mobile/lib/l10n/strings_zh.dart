@@ -4,9 +4,11 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_zh.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 
 const stringsZh = <String, String>{
   ...consentZh,
+  ...overtimeZh,
   'Try again': '重试',
   'Approvals': '审批',
   'Nothing waiting': '没有待处理事项',

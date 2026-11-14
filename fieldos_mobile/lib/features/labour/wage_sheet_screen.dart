@@ -6,6 +6,7 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/core/market.dart';
+import 'package:fieldos_mobile/features/labour/overtime_settings_screen.dart';
 import 'package:fieldos_mobile/features/labour/pay_calendar_screen.dart';
 import 'package:fieldos_mobile/features/labour/wage_contributions.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet.dart';
@@ -16,6 +17,16 @@ import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
 String _days(double d) => d == d.roundToDouble() ? d.toInt().toString() : d.toStringAsFixed(1);
 
+/// " + 2 h overtime ₹400" after the days × wage, where overtime is paid on
+/// day wages; empty when there is none.
+String overtimeShareText(WageLine l) =>
+    l.overtimePay > 0 ? ' + ${fmtQty(l.overtimeHours)} h overtime ${rupees(l.overtimePay, paise: true)}' : '';
+
+/// "5 h overtime", with California's double-time hours in it.
+String _hourlyOvertimeShareText(WageLine l) => l.doubleTimeHours > 0
+    ? '${fmtQty(l.overtimeHours)} h overtime, ${fmtQty(l.doubleTimeHours)} h of it double time'
+    : '${fmtQty(l.overtimeHours)} h overtime';
+
 /// The sheet as a WhatsApp message. Where crews are paid by the hour (US,
 /// UK) a line is the hours at the hourly rate: "45 h (5 h overtime) ×
 /// $30/hr", not "5 days × $30", which did not add up.
@@ -24,11 +35,13 @@ String wageSheetShareText(WageSheet s, {required String projectName, required St
   for (final l in s.lines.where((l) => l.days > 0 || l.paidInPeriod > 0 || l.balanceDue != 0)) {
     if (market.payHourly) {
       b.write('${l.name}: ${fmtQty(l.hours)} h');
-      if (l.overtimeHours > 0) b.write(' (${fmtQty(l.overtimeHours)} h overtime)');
+      if (l.overtimeHours > 0) b.write(' (${_hourlyOvertimeShareText(l)})');
       if (l.dailyWage != null) b.write(' × ${rupees(l.dailyWage!, paise: true)}/hr = ${rupees(l.earned, paise: true)}');
     } else {
       b.write('${l.name}: ${_days(l.days)} days');
-      if (l.dailyWage != null) b.write(' × ${rupees(l.dailyWage!, paise: true)} = ${rupees(l.earned, paise: true)}');
+      if (l.dailyWage != null) {
+        b.write(' × ${rupees(l.dailyWage!, paise: true)}${overtimeShareText(l)} = ${rupees(l.earned, paise: true)}');
+      }
     }
     if (l.paidInPeriod > 0) b.write(', paid ${rupees(l.paidInPeriod, paise: true)}');
     b.write(', due ${rupees(l.balanceDue, paise: true)}\n');
@@ -54,6 +67,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
   late DateTime _from = weekStart(DateTime.now());
   PayCalendar _cal = const PayCalendar();
   Map<String, WageContribution> _contrib = const {};
+  OvertimePolicy _ot = OvertimePolicy.marketDefault;
   DateTime get _to => addDays(_from, 7);
 
   Future<WageSheet> _load() async {
@@ -75,7 +89,13 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
       to: _to,
       marks: await db.attendanceDao.marksForProject(widget.projectId),
       calendar: _cal = await _calendar(db),
+      overtime: _ot = await _overtime(db),
     );
+  }
+
+  Future<OvertimePolicy> _overtime(AppDatabase db) async {
+    final p = await db.projectDao.byId(widget.projectId);
+    return p == null ? OvertimePolicy.marketDefault : loadOvertimePolicy(db, p.companyId);
   }
 
   Future<PayCalendar> _calendar(AppDatabase db) async {
@@ -110,6 +130,18 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                     if (mounted) setState(() {});
                   },
                 ),
+              IconButton(
+                key: const Key('overtime-pay'),
+                tooltip: tr('Overtime pay'),
+                icon: const Icon(Icons.more_time),
+                onPressed: () async {
+                  final p = await ref.read(appDatabaseProvider).projectDao.byId(widget.projectId);
+                  if (p == null || !context.mounted) return;
+                  await Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (_) => OvertimeSettingsScreen(companyId: p.companyId)));
+                  if (mounted) setState(() {});
+                },
+              ),
               if (sheet != null)
                 IconButton(
                   tooltip: tr('Share on WhatsApp'),
@@ -176,6 +208,9 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                                 trf(l.days == 1 ? '{n} day ({h} h)' : '{n} days ({h} h)',
                                     {'n': _days(l.days), 'h': l.hours.toStringAsFixed(1)}),
                                 if (l.overtimeHours > 0) trf('OT {h} h', {'h': l.overtimeHours.toStringAsFixed(1)}),
+                                if (l.doubleTimeHours > 0)
+                                  trf('{h} h double time', {'h': l.doubleTimeHours.toStringAsFixed(1)}),
+                                if (l.overtimePay > 0) trf('OT pay {amount}', {'amount': rupees(l.overtimePay, paise: true)}),
                                 if (l.dailyWage == null)
                                   tr('no daily wage set')
                                 else
@@ -230,6 +265,20 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                               textAlign: TextAlign.center,
                             ),
                           ),
+                          if (!market.payHourly)
+                            Padding(
+                              key: const Key('overtime-note'),
+                              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                              child: Text(
+                                [
+                                  trf('Hours past {h} in a day are overtime. The hourly rate is the day wage divided by {h}.',
+                                      {'h': fmtQty(normalDayHours)}),
+                                  trf('Overtime hours are paid at the hourly rate times {rate}.', {'rate': fmtQty(_ot.multiplier)}),
+                                ].join(' '),
+                                style: const TextStyle(fontSize: 12),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                           if (_contrib.isNotEmpty)
                             Padding(
                               key: const Key('contribution-note'),
