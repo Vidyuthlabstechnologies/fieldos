@@ -1515,6 +1515,16 @@ class BillDao extends DatabaseAccessor<AppDatabase> with _$BillDaoMixin {
         ..orderBy([(b) => OrderingTerm.desc(b.billDate), (b) => OrderingTerm.desc(b.createdAt)]))
       .get();
 
+  /// The tax invoice numbers on every site of [companyId]. One GSTIN, one
+  /// series (rule 46(b) of the CGST Rules): two sites may not both issue
+  /// INV-0001.
+  Future<List<String>> invoiceNumbersForCompany(String companyId) => customSelect(
+        'SELECT b.bill_number AS n FROM client_bills b JOIN projects p ON p.id = b.project_id '
+        "WHERE p.company_id = ? AND b.kind = 'tax_invoice'",
+        variables: [Variable.withString(companyId)],
+        readsFrom: {clientBills},
+      ).map((r) => r.read<String>('n')).get();
+
   Future<void> setStatus(String id, String status) {
     return transaction(() async {
       await (update(clientBills)..where((b) => b.id.equals(id))).write(ClientBillsCompanion(status: Value(status)));

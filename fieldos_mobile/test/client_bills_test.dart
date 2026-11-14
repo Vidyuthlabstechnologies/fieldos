@@ -139,6 +139,9 @@ void main() {
     expect(isValidGstin('36ABCDE1234F1Z5'), isTrue);
     expect(isValidGstin(' 36abcde1234f1z5 '), isTrue);
     expect(isValidGstin('99ABCDE1234F1Z5'), isFalse);
+    // 97 is "Other Territory" in the GST state code list (offshore areas).
+    expect(isValidGstin('97ABCDE1234F1Z5'), isTrue);
+    expect(placeOfSupply(ourGstin: '97ABCDE1234F1Z5', interState: false), ('Other Territory', '97'));
     expect(isValidGstin('36ABCDE1234F1X5'), isFalse);
     expect(isInterState('36ABCDE1234F1Z5', '37ABCDE1234F1Z5'), isTrue);
     expect(isInterState('36ABCDE1234F1Z5', '36ZZZZZ1234F1Z5'), isFalse);

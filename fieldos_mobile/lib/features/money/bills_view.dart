@@ -29,6 +29,10 @@ import 'package:fieldos_mobile/l10n/language.dart';
 final billsProvider = FutureProvider.autoDispose.family<List<ClientBill>, String>(
     (ref, projectId) => ref.watch(appDatabaseProvider).billDao.forProject(projectId));
 
+/// Tax invoice numbers on all the company's sites: one series per GSTIN.
+final companyInvoiceNumbersProvider = FutureProvider.autoDispose.family<List<String>, String>(
+    (ref, companyId) => ref.watch(appDatabaseProvider).billDao.invoiceNumbersForCompany(companyId));
+
 final billAllocationsProvider = FutureProvider.autoDispose.family<List<BillAllocation>, String>(
     (ref, projectId) => ref.watch(appDatabaseProvider).billingRecordsDao.allocationsFor(projectId));
 
@@ -548,7 +552,13 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
   Future<void> _save(List<ClientBill> bills) async {
     final client = _client.text.trim();
     final gstin = normaliseTaxId(_clientGstin.text);
-    final number = _number.text.trim().isEmpty ? nextBillNumber(bills.map((b) => b.billNumber), _kind) : _number.text.trim();
+    // A tax invoice number is used once across the company, not per site.
+    final taken = [
+      ...bills.map((b) => b.billNumber),
+      if (_kind == 'tax_invoice') ...await ref.read(companyInvoiceNumbersProvider(widget.project.companyId).future),
+    ];
+    if (!mounted) return;
+    final number = _number.text.trim().isEmpty ? nextBillNumber(taken, _kind) : _number.text.trim();
     final lines = _lines.where((l) => l.qty > 0).toList();
     String? error;
     if (client.isEmpty) error = tr('Who is the bill for? Add the client name.');
@@ -565,7 +575,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
           : trf('Add your {label} in "Your details on bills" first. Without it a bill cannot charge {tax}; pick None.',
               {'label': tr(market.tax.registrationLabel), 'tax': tr(market.tax.name)});
     }
-    if (bills.any((b) => b.billNumber.toLowerCase() == number.toLowerCase())) error = trf('Bill {number} already exists.', {'number': number});
+    if (taken.any((n) => n.toLowerCase() == number.toLowerCase())) error = trf('Bill {number} already exists.', {'number': number});
     if (error != null) {
       setState(() => _error = error);
       return;
@@ -652,7 +662,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     final previous = _previous(bills);
     final totals = billTotals(_lines,
         gstRate: _gstRate, interState: _interState, retentionPct: _pct(_retention), tdsPct: _pct(_tds));
-    final suggested = nextBillNumber(bills.map((b) => b.billNumber), _kind);
+    final invoiceNumbers = ref.watch(companyInvoiceNumbersProvider(widget.project.companyId)).value ?? const <String>[];
+    final suggested = nextBillNumber([...bills.map((b) => b.billNumber), if (_kind == 'tax_invoice') ...invoiceNumbers], _kind);
     if (!_numberTouched && _number.text != suggested) _number.text = suggested;
     final hasEarlier = bills.any((b) => b.kind == _kind);
 

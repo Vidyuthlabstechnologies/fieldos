@@ -4,14 +4,17 @@
 library;
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/market.dart';
+import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart';
 import 'package:fieldos_mobile/features/tour/guide_lines.dart';
 import 'package:fieldos_mobile/services/read_aloud.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/providers.dart';
 
 void main() {
   tearDown(() => debugSetMarket(Market.india));
@@ -167,6 +170,23 @@ void main() {
       expect(languageFromDevice(const [Locale('te', 'IN')]), AppLanguage.en);
       debugSetMarket(Market.india);
       expect(languageFromDevice(const [Locale('te', 'IN')]), AppLanguage.te);
+    });
+
+    test('a saved language this market does not offer (a backup from the UAE app) is not used', () async {
+      final db = AppDatabase.memory();
+      final container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
+      addTearDown(() async {
+        container.dispose();
+        await db.close();
+        setSpokenLanguage(AppLanguage.en);
+        setCurrentLanguage(AppLanguage.en);
+      });
+      await db.settingsDao.set(languageSettingKey, 'ar');
+      await db.settingsDao.set(screensInLanguageKey, '1');
+      container.read(languageProvider);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(container.read(languageProvider), AppLanguage.en);
+      expect(currentLanguage, AppLanguage.en);
     });
   });
 
