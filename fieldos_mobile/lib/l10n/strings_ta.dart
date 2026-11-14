@@ -3373,4 +3373,7 @@ const Map<String, String> stringsTa = {
   'Right to work (visa)': 'வேலை செய்யும் உரிமை (விசா)',
   'Contract sum': 'ஒப்பந்தத் தொகை',
   'Retention stops at {pct}% of it': 'தக்கவைப்பு இதன் {pct}% இல் நிற்கும்',
+  'Too many wrong PINs. Wait {time}.': 'பல தவறான PIN. {time} காத்திருங்கள்.',
+  'Tries left before sign-out: {n}': 'வெளியேறும் முன் மீதி முயற்சிகள்: {n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'பல தவறான PIN. ஆப் பூட்டு நீக்கப்பட்டது. கடவுச்சொல்லுடன் மீண்டும் உள்நுழையவும்.',
 };

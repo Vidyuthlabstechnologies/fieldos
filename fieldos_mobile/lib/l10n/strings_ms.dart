@@ -3019,4 +3019,7 @@ const stringsMs = <String, String>{
   'Right to work (visa)': 'Hak bekerja (visa)',
   'Contract sum': 'Jumlah kontrak',
   'Retention stops at {pct}% of it': 'Wang tahanan berhenti pada {pct}% daripadanya',
+  'Too many wrong PINs. Wait {time}.': 'Terlalu banyak PIN salah. Tunggu {time}.',
+  'Tries left before sign-out: {n}': 'Cubaan sebelum log keluar: {n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'Terlalu banyak PIN salah. Kunci aplikasi dimatikan. Log masuk semula dengan kata laluan anda.',
 };

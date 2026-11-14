@@ -3373,4 +3373,7 @@ const Map<String, String> stringsMr = {
   'Right to work (visa)': 'काम करण्याचा अधिकार (व्हिसा)',
   'Contract sum': 'करार रक्कम',
   'Retention stops at {pct}% of it': 'रिटेन्शन याच्या {pct}% वर थांबते',
+  'Too many wrong PINs. Wait {time}.': 'खूप चुकीचे PIN. {time} थांबा.',
+  'Tries left before sign-out: {n}': 'साइन आउटपूर्वी उरलेले प्रयत्न: {n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'खूप चुकीचे PIN. ॲप लॉक काढले. पासवर्डने पुन्हा लॉग इन करा.',
 };

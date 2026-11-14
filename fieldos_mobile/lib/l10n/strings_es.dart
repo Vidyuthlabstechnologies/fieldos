@@ -3021,4 +3021,7 @@ const Map<String, String> stringsEs = {
   'Right to work (visa)': 'Derecho a trabajar (visa)',
   'Contract sum': 'Monto del contrato',
   'Retention stops at {pct}% of it': 'La retención se detiene en el {pct}% de este',
+  'Too many wrong PINs. Wait {time}.': 'Demasiados PIN incorrectos. Espera {time}.',
+  'Tries left before sign-out: {n}': 'Intentos antes de cerrar sesión: {n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'Demasiados PIN incorrectos. Se quitó el bloqueo. Inicia sesión de nuevo con tu contraseña.',
 };

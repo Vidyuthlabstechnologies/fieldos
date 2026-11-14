@@ -3373,4 +3373,7 @@ const Map<String, String> stringsKn = {
   'Right to work (visa)': 'ಕೆಲಸ ಮಾಡುವ ಹಕ್ಕು (ವೀಸಾ)',
   'Contract sum': 'ಒಪ್ಪಂದದ ಮೊತ್ತ',
   'Retention stops at {pct}% of it': 'ರಿಟೆನ್ಷನ್ ಇದರ {pct}% ಗೆ ನಿಲ್ಲುತ್ತದೆ',
+  'Too many wrong PINs. Wait {time}.': 'ಹಲವು ತಪ್ಪು PIN. {time} ಕಾಯಿರಿ.',
+  'Tries left before sign-out: {n}': 'ಸೈನ್ ಔಟ್‌ಗೆ ಮುನ್ನ ಉಳಿದ ಪ್ರಯತ್ನಗಳು: {n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'ಹಲವು ತಪ್ಪು PIN. ಆ್ಯಪ್ ಲಾಕ್ ತೆಗೆಯಲಾಗಿದೆ. ಪಾಸ್‌ವರ್ಡ್‌ನಿಂದ ಮತ್ತೆ ಲಾಗಿನ್ ಆಗಿ.',
 };

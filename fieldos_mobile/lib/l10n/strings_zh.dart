@@ -3019,4 +3019,7 @@ const stringsZh = <String, String>{
   'Right to work (visa)': '工作权（签证）',
   'Contract sum': '合同总额',
   'Retention stops at {pct}% of it': '保留金最多为其 {pct}%',
+  'Too many wrong PINs. Wait {time}.': 'PIN 错误次数过多。请等 {time}。',
+  'Tries left before sign-out: {n}': '退出登录前剩余次数：{n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'PIN 错误次数过多。应用锁已关闭。请用密码重新登录。',
 };

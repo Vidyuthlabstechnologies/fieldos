@@ -2479,4 +2479,7 @@ const Map<String, String> stringsHi = {
   'Right to work (visa)': 'काम करने का अधिकार (वीज़ा)',
   'Contract sum': 'अनुबंध राशि',
   'Retention stops at {pct}% of it': 'रिटेंशन इसके {pct}% पर रुक जाता है',
+  'Too many wrong PINs. Wait {time}.': 'बहुत गलत PIN। {time} रुकें।',
+  'Tries left before sign-out: {n}': 'साइन आउट से पहले बची कोशिशें: {n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'बहुत गलत PIN। ऐप लॉक हट गया। पासवर्ड से फिर लॉग इन करें।',
 };
