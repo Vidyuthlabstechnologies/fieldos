@@ -20,6 +20,7 @@ const siteExecutionTables = {
   'site_handover_units': 'handover_units',
   'site_handover_checks': 'handover_checks',
   'company_standards': 'company_standards',
+  'worker_permits': 'worker_permits',
 };
 
 /// Tables whose rows are a file on the phone, uploaded to Storage under
@@ -32,7 +33,7 @@ const siteExecutionFileFolders = {
 /// Server tables scoped to a site (the rest is company-wide).
 const siteExecutionProjectScoped = {
   'site_task_constraints', 'site_drawings', 'site_drawing_revisions', 'site_rfis', 'site_hold_points',
-  'site_defects', 'site_execution_photos', 'site_handover_units', 'site_handover_checks',
+  'site_defects', 'site_execution_photos', 'site_handover_units', 'site_handover_checks', 'worker_permits',
 };
 
 /// Person columns on these tables, swapped between the phone's and the
@@ -107,6 +108,7 @@ Insertable<DataClass> executionFromRemote(String serverTable, Map<String, dynami
     'site_handover_units' => HandoverUnit.fromJson(camel, serializer: _iso),
     'site_handover_checks' => HandoverCheck.fromJson(camel, serializer: _iso),
     'company_standards' => CompanyStandard.fromJson(camel, serializer: _iso),
+    'worker_permits' => WorkerPermit.fromJson(camel, serializer: _iso),
     _ => throw ArgumentError('Not a site execution table: $serverTable'),
   };
   return d as Insertable<DataClass>;
@@ -124,5 +126,6 @@ TableInfo<Table, DataClass> executionTable(AppDatabase db, String serverTable) =
       'site_handover_units' => db.handoverUnits,
       'site_handover_checks' => db.handoverChecks,
       'company_standards' => db.companyStandards,
+      'worker_permits' => db.workerPermits,
       _ => throw ArgumentError('Not a site execution table: $serverTable'),
     } as TableInfo<Table, DataClass>;

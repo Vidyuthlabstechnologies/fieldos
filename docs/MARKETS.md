@@ -60,6 +60,19 @@ mm so weights work everywhere, and sees pounds), and parsing of typed
 quantities (`baseQty`). The material check uses Indian site-mix norms
 (cement bags, PCC 1:4:8), so the US app hides it.
 
+## Workers' permits and site cards
+
+Malaysia (PLKS, CIDB Green Card, passport, FOMEMA), UAE (work permit and
+visa, Emirates ID, passport) and UK (CSCS card, right to work) keep each
+worker's papers with an expiry date: `permitKinds` in
+`lib/features/workers/worker_permits.dart`, table `worker_permits` (synced
+through the site-execution mapper; server migration
+`supabase/migrations/20261114180000_worker_permits.sql`, to be deployed by
+the owner). Owners and managers get reminders 90, 60, 30 and 7 days before
+each date; an expired permit that blocks site work is a warning at
+punch-in, never a block on pay. Numbers show in full only to the owner and
+project managers. No health results are stored.
+
 ## Legal texts and prices
 
 - **Privacy policy, terms, privacy notice**: `lib/features/legal/legal_texts_markets.dart`

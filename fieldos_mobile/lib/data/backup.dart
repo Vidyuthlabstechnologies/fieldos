@@ -33,7 +33,7 @@ const _countedTables = [
   'material_receipts', 'payments_received', 'client_bills', 'suppliers', 'purchase_orders', 'close_reviews',
   'work_measurements', 'supplier_invoices', 'cost_codes', 'work_claims', 'work_certifications', 'variations',
   'variation_decisions', 'task_constraints', 'drawings', 'drawing_revisions', 'rfis', 'hold_points', 'defects',
-  'handover_units', 'sync_outbox',
+  'handover_units', 'worker_permits', 'sync_outbox',
 ];
 
 /// (table, column) pairs that hold a path to a file on the phone.

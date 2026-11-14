@@ -567,4 +567,52 @@ class SiteExecutionDao {
     }
     return out;
   }
+
+  // --- Workers' permits and site cards ----------------------------------------
+
+  Future<List<WorkerPermit>> permitsFor(String projectId) => (db.select(db.workerPermits)
+        ..where((p) => p.projectId.equals(projectId))
+        ..orderBy([(p) => OrderingTerm.asc(p.expiresOn)]))
+      .get();
+
+  /// Adds a permit, or updates the worker's one of that kind (a renewed
+  /// PLKS replaces the old date rather than piling up).
+  Future<WorkerPermit> savePermit({
+    required String projectId,
+    required String workerId,
+    required String kind,
+    required DateTime expiresOn,
+    required String by,
+    String? number,
+    String? note,
+    DateTime? now,
+  }) =>
+      db.transaction(() async {
+        final t = now ?? DateTime.now();
+        final day = DateTime(expiresOn.year, expiresOn.month, expiresOn.day);
+        final existing = await (db.select(db.workerPermits)
+              ..where((p) => p.workerId.equals(workerId) & p.kind.equals(kind)))
+            .getSingleOrNull();
+        if (existing == null) {
+          final row = await db.into(db.workerPermits).insertReturning(WorkerPermitsCompanion.insert(
+                id: _uuid.v4(),
+                projectId: projectId,
+                workerId: workerId,
+                kind: kind,
+                number: Value(_clip(number, 40)),
+                expiresOn: day,
+                note: Value(_clip(note, 200)),
+                createdBy: by,
+                createdAt: Value(t),
+                updatedAt: Value(t),
+              ));
+          await _queue('worker_permits', 'insert', row);
+          return row;
+        }
+        await (db.update(db.workerPermits)..where((p) => p.id.equals(existing.id))).write(WorkerPermitsCompanion(
+            number: Value(_clip(number, 40)), expiresOn: Value(day), note: Value(_clip(note, 200)), updatedAt: Value(t)));
+        final row = await (db.select(db.workerPermits)..where((p) => p.id.equals(existing.id))).getSingle();
+        await _queue('worker_permits', 'update', row);
+        return row;
+      });
 }

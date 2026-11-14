@@ -126,6 +126,7 @@ String? _clip(String? s, int max) {
   HandoverUnits,
   HandoverChecks,
   CompanyStandards,
+  WorkerPermits,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -157,7 +158,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 40;
+  int get schemaVersion => 41;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -402,6 +403,11 @@ class AppDatabase extends _$AppDatabase {
             ]) {
               await _createTableIfMissing(m, t);
             }
+          }
+          if (from < 41) {
+            // Workers' permits and site cards with expiry dates (Malaysia,
+            // UAE, UK apps).
+            await _createTableIfMissing(m, workerPermits);
           }
         },
       );
