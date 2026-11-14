@@ -204,7 +204,10 @@ class LanguageController extends Notifier<AppLanguage> {
 
   Future<void> _load() async {
     final settings = ref.read(appDatabaseProvider).settingsDao;
-    final saved = AppLanguage.fromCode(await settings.get(languageSettingKey));
+    var saved = AppLanguage.fromCode(await settings.get(languageSettingKey));
+    // A backup from another market's app can carry a language this build
+    // doesn't offer (Arabic in the Indian app): its screens aren't made for it.
+    if (saved != null && !AppLanguage.offered.contains(saved)) saved = null;
     final screens = await settings.get(screensInLanguageKey) == '1';
     if (!ref.mounted || _picked) return;
     _apply(saved ?? AppLanguage.en, screens);

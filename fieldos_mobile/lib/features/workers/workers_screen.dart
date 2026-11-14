@@ -146,7 +146,7 @@ class _WorkersViewState extends ConsumerState<WorkersView> {
     final existing = await ref.read(appDatabaseProvider).workerDao.forProject(widget.projectId);
     final same = findDuplicate(existing, name: name, phone: phone);
     if (same == null || !context.mounted) return true;
-    final samePhone = normalizePhone(phone).length >= 10 && normalizePhone(phone) == normalizePhone(same.phone);
+    final samePhone = normalizePhone(phone).length >= nationalPhoneLength && normalizePhone(phone) == normalizePhone(same.phone);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(

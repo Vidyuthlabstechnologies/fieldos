@@ -47,11 +47,16 @@ class PayCalendar {
   bool isHoliday(DateTime day) => holidays.contains(DateTime(day.year, day.month, day.day));
   bool isRestDay(DateTime day) => restDays.contains(day.weekday);
 
-  /// A punched day's [credit] (0, ½ or 1 day) as days of pay.
-  double creditFor(DateTime day, double credit) {
+  /// A punched day's [credit] (0, ½ or 1 day) as days of pay. [hours],
+  /// when every punch of the day was closed, decides the rest day: more
+  /// than half the normal hours (8) is 2 days even below a full day's 7.
+  double creditFor(DateTime day, double credit, {double? hours}) {
     if (credit <= 0 || !market.premiumRestAndHolidayPay) return credit;
     if (isHoliday(day)) return 3;
-    if (isRestDay(day)) return credit >= 1 ? 2 : 1;
+    if (isRestDay(day)) {
+      final half = (market.overtime.dailyHours ?? overtimeAfterHours) / 2;
+      return credit >= 1 || (hours != null && hours > half) ? 2 : 1;
+    }
     return credit;
   }
 }
@@ -196,8 +201,14 @@ DateTime _day(DateTime t) {
 /// Monday 00:00 of the week containing [t], local time.
 DateTime weekStart(DateTime t) {
   final d = _day(t);
-  return d.subtract(Duration(days: d.weekday - DateTime.monday));
+  return addDays(d, -(d.weekday - DateTime.monday));
 }
+
+/// The local midnight [n] calendar days from [day]'s. Adding
+/// `Duration(days: 7)` adds 168 hours, which lands an hour off midnight
+/// across a daylight-saving change (US, UK): the next Monday's punches
+/// then fell into the week before.
+DateTime addDays(DateTime day, int n) => DateTime(day.year, day.month, day.day + n);
 
 WageSheet buildWageSheet({
   required List<Worker> workers,
@@ -251,7 +262,7 @@ WageSheet buildWageSheet({
       // A hand mark for the day decides its pay; the hours stay on show.
       final mark = line.workerId == null ? null : marked[line.workerId]?[day.key];
       // A hand mark is the supervisor's own call (2× and 3× included).
-      final credit = mark ?? calendar.creditFor(day.key, dayCredit(hours, hasOpenPunch: open));
+      final credit = mark ?? calendar.creditFor(day.key, dayCredit(hours, hasOpenPunch: open), hours: open ? null : hours);
       if (day.key.isBefore(from)) {
         line.earnedBefore += credit * (line.dailyWage ?? 0);
       } else if (day.key.isBefore(to)) {

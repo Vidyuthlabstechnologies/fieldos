@@ -255,6 +255,7 @@ const gstStates = {
   '23': 'Madhya Pradesh', '24': 'Gujarat', '26': 'Dadra and Nagar Haveli and Daman and Diu', '27': 'Maharashtra',
   '29': 'Karnataka', '30': 'Goa', '31': 'Lakshadweep', '32': 'Kerala', '33': 'Tamil Nadu', '34': 'Puducherry',
   '35': 'Andaman and Nicobar Islands', '36': 'Telangana', '37': 'Andhra Pradesh', '38': 'Ladakh',
+  '97': 'Other Territory',
 };
 
 final _gstinPattern = RegExp(r'^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$');
@@ -279,9 +280,12 @@ bool isValidInvoiceNumber(String number) => RegExp(r'^[A-Za-z0-9/-]{1,16}$').has
 
 /// The heading of a bill that is not an RA bill. Only a GST-registered
 /// supplier issues a tax invoice; with no GST on the bill it is a bill of
-/// supply, and without a GSTIN a plain invoice.
+/// supply, and without a GSTIN a plain invoice. Elsewhere it is the
+/// market's title (TAX INVOICE in the UAE, VAT INVOICE in the UK), but only
+/// a registered business may use it: without a TRN or VAT number, INVOICE.
 String invoiceTitle({required String ourGstin, required double gstRate}) {
   if (ourGstin.trim().isEmpty) return 'INVOICE';
+  if (!isIndia) return market.invoiceTitle;
   return gstRate > 0 ? 'TAX INVOICE' : 'BILL OF SUPPLY';
 }
 
@@ -358,7 +362,8 @@ double retentionPctWithinLimit({
   if (room <= 0) return 0;
   final wanted = gross * pct / 100;
   if (wanted <= room + 0.005) return pct;
-  // Rounded down to 4 places so the money never goes over the limit.
-  return (room / gross * 100 * 10000).floorToDouble() / 10000;
+  // Rounded down to 3 places, as the bill's % field shows it (fmtQty), so
+  // the money never goes over the limit once the field is read back.
+  return (room / gross * 100 * 1000).floorToDouble() / 1000;
 }
 

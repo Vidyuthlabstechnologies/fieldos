@@ -79,7 +79,7 @@ Future<Uint8List> buildQuotePdf({
           child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
             t(companyName, size: 16, bold: true, color: brandInk(branding)),
             if (profile.address.trim().isNotEmpty) t(profile.address.trim(), color: _muted),
-            if (profile.gstin.trim().isNotEmpty) t('GSTIN: ${profile.gstin.trim().toUpperCase()}', color: _muted),
+            if (profile.gstin.trim().isNotEmpty) t('${market.tax.registrationLabel}: ${profile.gstin.trim().toUpperCase()}', color: _muted),
           ]),
         ),
         pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
@@ -165,7 +165,7 @@ Future<Uint8List> buildQuotePdf({
 /// The text sent with the PDF on WhatsApp or email.
 String quoteShareText(CrmQuote q, CrmLead lead, String companyName) {
   final valid = q.validUntil == null ? '' : ' Valid until ${fmtDate(q.validUntil!)}.';
-  return 'Namaste ${lead.name}, please find our quotation ${q.quoteNumber} for '
+  return '${isIndia ? 'Namaste' : 'Hello'} ${lead.name}, please find our quotation ${q.quoteNumber} for '
       '${(lead.workType ?? '').isEmpty ? 'the work' : lead.workType}: ${rupees(q.total, paise: true)} with ${market.tax.name}.$valid '
       '- $companyName';
 }

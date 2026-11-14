@@ -6,6 +6,7 @@ library;
 
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 
 const gstChoices = [0.0, 5.0, 12.0, 18.0, 28.0];
@@ -99,13 +100,13 @@ String rfqMessage({
   DateTime? needBy,
 }) {
   final b = StringBuffer()
-    ..writeln('Namaste, $companyName here.')
+    ..writeln('${isIndia ? 'Namaste' : 'Hello'}, $companyName here.')
     ..writeln('Please send your best rate for:')
     ..writeln('${request.materialName}: ${fmtQty(request.quantity)} ${request.unit}'.trim())
     ..writeln('Delivery to: $siteName${siteLocation == null || siteLocation.trim().isEmpty ? '' : ', ${siteLocation.trim()}'}');
   if (needBy != null) b.writeln('Needed by: ${fmtDate(needBy)}');
   b
-    ..writeln('Please mention the rate a unit, GST, transport, delivery days and payment terms.')
+    ..writeln('Please mention the rate a unit, ${market.tax.name}, transport, delivery days and payment terms.')
     ..write('Thank you.');
   return b.toString();
 }

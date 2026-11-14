@@ -172,8 +172,7 @@ class QuoteCompareScreen extends ConsumerWidget {
       await SharePlus.instance.share(ShareParams(text: text));
       return;
     }
-    var digits = choice.replaceAll(RegExp(r'\D'), '');
-    if (digits.length == 10) digits = '91$digits';
+    final digits = whatsAppNumber(choice);
     await launchUrl(Uri.parse('https://wa.me/$digits?text=${Uri.encodeComponent(text)}'),
         mode: LaunchMode.externalApplication);
   }

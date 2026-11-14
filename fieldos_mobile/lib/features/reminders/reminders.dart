@@ -27,7 +27,7 @@ const reminderSettingsKey = 'reminders';
 
 /// Notification ids used for reminders, so they can all be replaced.
 const reminderIdBase = 1000;
-const reminderIdCount = 220;
+const reminderIdCount = 221;
 
 class ReminderSettings {
   const ReminderSettings({
@@ -113,6 +113,15 @@ const maxCloseReminderSites = 7;
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 
+/// [minutes] after midnight on [day] by the clock. Adding a Duration would
+/// be an hour out on a day the clocks change (UK, US).
+DateTime _at(DateTime day, int minutes) => DateTime(day.year, day.month, day.day, 0, minutes);
+
+/// Calendar days from [from] to [to], on UTC dates so a 23- or 25-hour
+/// local day still counts as one.
+int _daysBetween(DateTime from, DateTime to) =>
+    DateTime.utc(to.year, to.month, to.day).difference(DateTime.utc(from.year, from.month, from.day)).inDays;
+
 /// The reminders for the next [days] days from [now], soonest first.
 ///
 /// [runningSites] is how many projects are active; with none, there is no
@@ -135,7 +144,7 @@ List<PlannedReminder> planReminders({
   final out = <PlannedReminder>[];
   final today = _day(now);
   for (var i = 0; i < days; i++) {
-    final day = today.add(Duration(days: i));
+    final day = DateTime(today.year, today.month, today.day + i);
     // One reminder per site, to the one person expected to send it, at the
     // site's own cutoff, listing what is missing. Once a company uses the
     // daily close, the general evening nudge stops: escalation goes to the
@@ -144,7 +153,7 @@ List<PlannedReminder> planReminders({
       for (var s = 0; s < closeReminders.length && s < maxCloseReminderSites; s++) {
         final c = closeReminders[s];
         if (!c.days.contains(i) || (i == 0 && c.sentToday)) continue;
-        final at = day.add(Duration(minutes: c.cutoffMinutes));
+        final at = _at(day, c.cutoffMinutes);
         if (!at.isAfter(now)) continue;
         out.add(PlannedReminder(
           id: reminderIdBase + 150 + s * 7 + i,
@@ -158,7 +167,7 @@ List<PlannedReminder> planReminders({
       }
     }
     if (settings.reportOn && runningSites > 0 && !dailyCloseInUse && !(i == 0 && reportedToday)) {
-      final at = day.add(Duration(minutes: settings.reportMinutes));
+      final at = _at(day, settings.reportMinutes);
       if (at.isAfter(now)) {
         out.add(
           PlannedReminder(
@@ -171,7 +180,7 @@ List<PlannedReminder> planReminders({
       }
     }
     if (settings.briefOn && isOwner && runningSites > 0) {
-      final at = day.add(const Duration(minutes: ReminderSettings.briefMinutes));
+      final at = _at(day, ReminderSettings.briefMinutes);
       if (at.isAfter(now)) {
         out.add(
           PlannedReminder(
@@ -186,7 +195,7 @@ List<PlannedReminder> planReminders({
     if (settings.tasksOn) {
       final due = openTasks.where((t) => t.dueDate != null && _day(t.dueDate!) == day).toList()
         ..sort((a, b) => a.title.compareTo(b.title));
-      final at = day.add(const Duration(hours: 8));
+      final at = _at(day, 8 * 60);
       if (due.isNotEmpty && at.isAfter(now)) {
         final names = due.take(3).map((t) => t.title).join(', ');
         out.add(
@@ -203,7 +212,7 @@ List<PlannedReminder> planReminders({
     // ones already late folded into today's.
     final calls = followUps.where((f) => i == 0 ? !_day(f.at).isAfter(day) : _day(f.at) == day).toList()
       ..sort((a, b) => a.name.compareTo(b.name));
-    final callAt = day.add(const Duration(hours: 9, minutes: 30));
+    final callAt = _at(day, 9 * 60 + 30);
     if (calls.isNotEmpty && callAt.isAfter(now)) {
       final names = calls.take(3).map((f) => f.name).join(', ');
       out.add(
@@ -220,7 +229,7 @@ List<PlannedReminder> planReminders({
     if (isIndia && isOwner && reraSites.isNotEmpty) {
       final ended = day.month % 3 == 1 && day.day == 1;
       final dueSoon = day.month % 3 == 1 && day.day == 10;
-      final at = day.add(const Duration(hours: 10));
+      final at = _at(day, 10 * 60);
       if ((ended || dueSoon) && at.isAfter(now)) {
         final names = reraSites.take(3).join(', ');
         out.add(PlannedReminder(
@@ -237,9 +246,9 @@ List<PlannedReminder> planReminders({
     // and managers: 90, 60, 30 and 7 days before each date, all of a day's
     // in one reminder.
     if (isOwner && permits.isNotEmpty) {
-      final due = permits.where((p) => permitReminderDays.contains(_day(p.expiresOn).difference(day).inDays)).toList()
+      final due = permits.where((p) => permitReminderDays.contains(_daysBetween(day, p.expiresOn))).toList()
         ..sort((a, b) => a.expiresOn.compareTo(b.expiresOn));
-      final at = day.add(const Duration(hours: 9));
+      final at = _at(day, 9 * 60);
       if (due.isNotEmpty && at.isAfter(now)) {
         final lines = [for (final p in due.take(3)) '${p.worker}: ${p.permit} ${fmtDate(p.expiresOn)}'].join(', ');
         out.add(PlannedReminder(
@@ -309,7 +318,7 @@ class ReminderScheduler {
         if (me == null) continue;
         final days = {
           for (var i = 0; i < 7; i++)
-            if (r.setup.remindsUser(me, today.add(Duration(days: i)), canRecord: canRecord)) i
+            if (r.setup.remindsUser(me, DateTime(today.year, today.month, today.day + i), canRecord: canRecord)) i
         };
         if (days.isEmpty) continue;
         final d = r.day(today);

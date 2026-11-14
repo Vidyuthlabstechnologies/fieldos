@@ -180,3 +180,21 @@ String _groupIndian(String whole) {
   if (rest.isNotEmpty) parts.insert(0, rest);
   return '${parts.join(',')},$last3';
 }
+
+/// Digits in a mobile number without the country code: 10 in India, the
+/// US and the UK (7700 900123), 9 in the UAE (50 123 4567), up to 10 in
+/// Malaysia.
+int get nationalPhoneLength => currentMarket == Market.uae ? 9 : 10;
+
+/// [phone] as wa.me wants it: country code and number, digits only. A
+/// number typed the local way ("050 123 4567", "07700 900123") gets this
+/// market's code in place of its leading 0; one with + or 00 keeps its own.
+String whatsAppNumber(String phone) {
+  final typed = westernDigits(phone.trim());
+  final d = typed.replaceAll(RegExp(r'\D'), '');
+  if (typed.startsWith('+')) return d;
+  if (d.startsWith('00')) return d.substring(2);
+  final cc = market.phonePrefix.substring(1);
+  if (d.startsWith(cc) && d.length > nationalPhoneLength) return d;
+  return '$cc${d.startsWith('0') ? d.substring(1) : d}';
+}
