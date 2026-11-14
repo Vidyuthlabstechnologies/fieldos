@@ -3325,4 +3325,10 @@ const Map<String, String> stringsKn = {
   ...warehouseKn,
   ...dailyKn,
   ...proofKn,
+  // Shown in the non-Indian apps (lib/core/market.dart); kept here for the coverage test.
+  "A Zoho Books file, with tax split out": "Zoho Books ಫೈಲ್, ತೆರಿಗೆ ಬೇರೆಯಾಗಿ",
+  "Add your tax number and address": "ನಿಮ್ಮ ತೆರಿಗೆ ಸಂಖ್ಯೆ, ವಿಳಾಸ ಸೇರಿಸಿ",
+  "Client's {label} (optional)": "ಕ್ಲೈಂಟ್ {label} (ಐಚ್ಛಿಕ)",
+  "Kept back by the client for the tax office": "ತೆರಿಗೆ ಕಚೇರಿಗಾಗಿ ಕ್ಲೈಂಟ್ ಇಟ್ಟುಕೊಳ್ಳುವುದು",
+  "{tax} rate": "{tax} ದರ",
 };

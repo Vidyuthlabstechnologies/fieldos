@@ -16,6 +16,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
+import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/money/bill_pdf.dart' show pdfSafe;
@@ -107,9 +109,9 @@ Future<Uint8List> buildVoucherPdf({
         if (e.note != null && e.note!.trim().isNotEmpty) row('Details', e.note!.trim()),
         if (e.mode != null) row('Mode', _modes[e.mode] ?? e.mode!),
         if (gst != null) ...[
-          row('Before GST', money(gst.taxable)),
+          row(marketText('Before GST'), money(gst.taxable)),
           if (gst.igst > 0)
-            row('IGST ${_pct(e.gstPct!)}', money(gst.igst))
+            row('$igstLabel ${_pct(e.gstPct!)}', money(gst.igst))
           else
             row('CGST + SGST', '${money(gst.cgst)} + ${money(gst.sgst)} (${_pct(e.gstPct!)})'),
         ],

@@ -8,6 +8,7 @@ library;
 import 'package:drift/drift.dart';
 
 import 'package:fieldos_mobile/features/attendance/staff_attendance.dart' show countsAsPresent, staffAttendanceStatusLabels;
+import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart' show isOpenStage, isFollowUpDue, leadValue;
 import 'package:fieldos_mobile/features/payroll/payroll_rules.dart' show advanceOwed, monthKey;
@@ -668,11 +669,11 @@ final List<ReportDef> reportLibrary = [
       );
     },
   ),
-  ReportDef('supplier-invoices', ReportGroup.material, 'Supplier invoices', 'Invoices entered against POs, with GST.', (d) {
+  ReportDef('supplier-invoices', ReportGroup.material, 'Supplier invoices', marketText('Invoices entered against POs, with GST.'), (d) {
     final xs = d.supplierInvoices.where((i) => !i.voided && d.inPeriod(i.invoiceDate)).toList()
       ..sort((a, b) => _byDate(a.invoiceDate, b.invoiceDate));
     return ReportTable(
-      ['Date', 'Site', 'Supplier', 'Invoice', 'Amount', 'GST'],
+      ['Date', 'Site', 'Supplier', 'Invoice', 'Amount', marketText('GST')],
       [
         for (final i in xs)
           [_day(i.invoiceDate), d.site(i.projectId), d.supplierName[i.supplierId] ?? '', i.invoiceNumber, i.amount, i.gstAmount],
@@ -841,7 +842,7 @@ final List<ReportDef> reportLibrary = [
   }, usesPeriod: false),
 
   // --- Money ---------------------------------------------------------------
-  ReportDef('expenses', ReportGroup.money, 'Expenses', 'Every payment made, with voucher number, mode and GST.', (d) {
+  ReportDef('expenses', ReportGroup.money, 'Expenses', marketText('Every payment made, with voucher number, mode and GST.'), (d) {
     final xs = d.expenses.where((e) => d.inPeriodDay(e.incurredOn)).toList()
       ..sort((a, b) => a.incurredOn.compareTo(b.incurredOn));
     return ReportTable(
@@ -926,13 +927,13 @@ final List<ReportDef> reportLibrary = [
       sumColumns: {1},
     );
   }),
-  ReportDef('gst-input', ReportGroup.money, 'GST on purchases', 'GST inside each payment that carries it, for your accountant.', (
+  ReportDef('gst-input', ReportGroup.money, marketText('GST on purchases'), marketText('GST inside each payment that carries it, for your accountant.'), (
     d,
   ) {
     final xs = d.expenses.where((e) => !e.voided && (e.gstPct ?? 0) > 0 && d.inPeriodDay(e.incurredOn)).toList()
       ..sort((a, b) => a.incurredOn.compareTo(b.incurredOn));
     return ReportTable(
-      ['Date', 'Site', 'Paid to', 'Amount', 'GST %', 'GST in it', 'Kind'],
+      ['Date', 'Site', 'Paid to', 'Amount', marketText('GST %'), marketText('GST in it'), 'Kind'],
       [
         for (final e in xs)
           [
@@ -974,7 +975,7 @@ final List<ReportDef> reportLibrary = [
               _day(b.billDate),
               d.site(b.projectId),
               b.billNumber,
-              b.kind == 'ra' ? 'Running bill' : 'Tax invoice',
+              b.kind == 'ra' ? marketText('Running bill') : 'Tax invoice',
               b.clientName,
               b.gross,
               b.netPayable,

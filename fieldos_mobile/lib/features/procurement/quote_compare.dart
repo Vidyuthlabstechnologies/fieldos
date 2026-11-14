@@ -4,6 +4,7 @@
 /// against the next one and against the estimate.
 library;
 
+import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 
@@ -86,7 +87,7 @@ String rfqMessage({
 /// What goes on the PO's notes when a quote is awarded.
 String awardNote(SupplierQuote q) => [
       'Quote: ${rupees(q.rate, paise: true)} a unit',
-      'GST ${fmtQty(q.gstPct)}%',
+      marketText('GST ${fmtQty(q.gstPct)}%'),
       if (q.transport > 0) 'transport ${rupees(q.transport)}',
       if (q.deliveryDays != null) 'delivery ${q.deliveryDays} days',
       if (q.paymentTerms != null) q.paymentTerms!,

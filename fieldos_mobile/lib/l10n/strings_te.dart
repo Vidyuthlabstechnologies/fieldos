@@ -2433,4 +2433,10 @@ const Map<String, String> stringsTe = {
   ...warehouseTe,
   ...dailyTe,
   ...proofTe,
+  // Shown in the non-Indian apps (lib/core/market.dart); kept here for the coverage test.
+  "A Zoho Books file, with tax split out": "Zoho Books ఫైల్, టాక్స్ వేరుగా",
+  "Add your tax number and address": "మీ టాక్స్ నంబర్, అడ్రస్ జోడించండి",
+  "Client's {label} (optional)": "క్లయింట్ {label} (ఐచ్ఛికం)",
+  "Kept back by the client for the tax office": "టాక్స్ ఆఫీస్ కోసం క్లయింట్ ఉంచుకునేది",
+  "{tax} rate": "{tax} రేటు",
 };

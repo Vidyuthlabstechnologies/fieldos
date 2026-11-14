@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -60,8 +61,9 @@ class _QuoteEditorState extends ConsumerState<QuoteEditorScreen> {
   late final _discount = TextEditingController(
       text: (_source?.discount ?? 0) == 0 ? '' : fmtQty(_source!.discount));
   late final _terms = TextEditingController(text: _source?.terms ?? defaultQuoteTerms);
-  late double _gst = _source?.gstRate ?? 18;
-  late bool _interState = _source?.interState ?? false;
+  late double _gst = _source?.gstRate ?? market.tax.defaultRate;
+  static final _rates = isIndia ? const [0.0, 5.0, 12.0, 18.0, 28.0] : market.tax.rateChoices;
+  late bool _interState = _source?.interState ?? !market.tax.splitsInsideState;
   late DateTime? _validUntil = widget.quote?.validUntil ?? DateTime.now().add(const Duration(days: 30));
   String? _error;
   bool _busy = false;
@@ -285,14 +287,14 @@ class _QuoteEditorState extends ConsumerState<QuoteEditorScreen> {
           Expanded(
             child: DropdownButtonFormField<double>(
               isExpanded: true,
-              initialValue: const [0.0, 5.0, 12.0, 18.0, 28.0].contains(_gst) ? _gst : 18,
-              decoration: InputDecoration(labelText: tr('GST')),
-              items: [for (final r in const [0.0, 5.0, 12.0, 18.0, 28.0]) DropdownMenuItem(value: r, child: Text('${fmtQty(r)}%'))],
-              onChanged: _locked ? null : (v) => setState(() => _gst = v ?? 18),
+              initialValue: _rates.contains(_gst) ? _gst : market.tax.defaultRate,
+              decoration: InputDecoration(labelText: tr(market.tax.name)),
+              items: [for (final r in _rates) DropdownMenuItem(value: r, child: Text('${fmtQty(r)}%'))],
+              onChanged: _locked ? null : (v) => setState(() => _gst = v ?? market.tax.defaultRate),
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
+          if (isIndia) const SizedBox(width: 8),
+          if (isIndia) Expanded(
             child: SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(tr('Other state (IGST)')),
@@ -332,7 +334,7 @@ class _QuoteEditorState extends ConsumerState<QuoteEditorScreen> {
               sum(tr('Subtotal'), t.subtotal),
               if (t.discount > 0) sum(tr('Less discount'), -t.discount),
               if (_interState)
-                sum('IGST ${fmtQty(_gst)}%', t.igst)
+                sum('$igstLabel ${fmtQty(_gst)}%', t.igst)
               else if (_gst > 0) ...[
                 sum('CGST $half%', t.cgst),
                 sum('SGST $half%', t.sgst),

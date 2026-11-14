@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart' show Roles;
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -232,7 +233,8 @@ class HomeScreen extends ConsumerWidget {
                         }))),
               // Salaries are private: owners and managers only, here and on
               // the server.
-              if (Roles.canApprove(session.role))
+              // Salaries here work out PF, ESI and professional tax: India only.
+              if (isIndia && Roles.canApprove(session.role))
                 PopupMenuItem(
                     value: 'salaries',
                     child: ListTile(leading: const Icon(Icons.badge_outlined), title: Text(tr('Staff salaries')))),

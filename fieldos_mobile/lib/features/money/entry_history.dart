@@ -4,6 +4,7 @@ library;
 
 import 'dart:convert';
 
+import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 
 /// The kinds of entry the server keeps history for, by server table.
@@ -40,7 +41,7 @@ String fieldLabel(String f) => switch (f) {
       'paid_to' => 'Paid to',
       'mode' => 'Paid by',
       'note' || 'notes' => 'Note',
-      'gst_pct' => 'GST %',
+      'gst_pct' => marketText('GST %'),
       'material_name' => 'Material',
       'quantity' || 'qty' => 'Quantity',
       'unit' => 'Unit',
@@ -56,7 +57,7 @@ String fieldLabel(String f) => switch (f) {
       'location' => 'Location',
       'invoice_number' => 'Invoice number',
       'bill_number' => 'Bill number',
-      'gst_amount' => 'GST',
+      'gst_amount' => marketText('GST'),
       'gross' => 'Gross',
       'net_payable' => 'Net payable',
       'status' => 'Status',

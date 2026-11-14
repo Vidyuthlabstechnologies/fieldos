@@ -10,6 +10,7 @@ import 'package:fieldos_mobile/features/money/money_view.dart' show canSeeMoneyI
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -346,7 +347,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               key: const Key('settings-export-accounts'),
               leading: const Icon(Icons.account_balance_outlined),
               title: Text(tr('Send to your accountant')),
-              subtitle: Text(tr('Tally vouchers or a Zoho Books file, with GST split out')),
+              subtitle: Text(isIndia
+                  ? tr('Tally vouchers or a Zoho Books file, with GST split out')
+                  : tr('A Zoho Books file, with tax split out')),
               onTap: () => showAccountsExport(context, ref),
             ),
           if (canSeeMoneyIn(session.role))

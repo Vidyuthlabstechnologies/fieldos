@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/features/execution/execution_screens.dart';
 import 'package:fieldos_mobile/features/project/site_notes_screen.dart';
@@ -245,7 +246,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                     title: Text(tr('Material check')),
                   ),
                 ),
-              PopupMenuItem(
+              if (isIndia) PopupMenuItem(
                 value: 'rera',
                 child: ListTile(
                   leading: const Icon(Icons.apartment_outlined),
