@@ -4,6 +4,7 @@
 /// still owed. Pure logic so the numbers can be tested.
 library;
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 
 /// Hours on site that count as a full day / half day.
@@ -26,6 +27,36 @@ double dayCredit(double closedHours, {required bool hasOpenPunch}) {
           ? 0.5
           : 0.0;
   return hasOpenPunch && credit < 0.5 ? 0.5 : credit;
+}
+
+/// Hours a hand-marked day stands for where crews are paid by the hour.
+const markedDayHours = 8.0;
+
+/// One worker's days split into straight-time and overtime hours by the
+/// market's rule ([OvertimeRule]): past [OvertimeRule.dailyHours] in a day,
+/// and past [OvertimeRule.weeklyHours] in a work week (Monday to Sunday),
+/// counted in date order so the hours that tip the week over 40 are the
+/// overtime ones. An hour is never counted as overtime twice.
+Map<DateTime, (double regular, double overtime)> splitOvertime(Map<DateTime, double> hoursByDay, OvertimeRule rule) {
+  final out = <DateTime, (double, double)>{};
+  final weekTotals = <DateTime, double>{};
+  for (final day in hoursByDay.keys.toList()..sort()) {
+    final h = hoursByDay[day]!;
+    var ot = rule.dailyHours == null ? 0.0 : (h - rule.dailyHours!).clamp(0, h).toDouble();
+    var regular = h - ot;
+    final week = weekStart(day);
+    final before = weekTotals[week] ?? 0;
+    if (rule.weeklyHours != null) {
+      final room = (rule.weeklyHours! - before).clamp(0, double.infinity).toDouble();
+      if (regular > room) {
+        ot += regular - room;
+        regular = room;
+      }
+    }
+    weekTotals[week] = before + regular;
+    out[day] = (regular, ot);
+  }
+  return out;
 }
 
 /// What a hand mark can say about a day, as days of pay.
@@ -78,12 +109,18 @@ class WageLine {
   double earnedBefore = 0;
   double paidBefore = 0;
 
-  double get earned => days * (dailyWage ?? 0);
+  /// Pay for hours, where the market pays by the hour (set by
+  /// [buildWageSheet]); null where pay goes by days.
+  double? hourlyEarned;
+  double hourlyEarnedBefore = 0;
+
+  /// [dailyWage] is the rate per hour where the market pays by the hour.
+  double get earned => hourlyEarned ?? days * (dailyWage ?? 0);
 
   /// Owed after this period: everything earned up to its end, minus
   /// everything paid up to its end. Negative means an advance not yet
   /// worked off.
-  double get balanceDue => earnedBefore + earned - paidBefore - paidInPeriod;
+  double get balanceDue => earnedBefore + hourlyEarnedBefore + earned - paidBefore - paidInPeriod;
 }
 
 class WageSheet {
@@ -198,6 +235,52 @@ WageSheet buildWageSheet({
     lineFor(w.id, w.name);
   }
 
+  if (market.payHourly) _payByTheHour(lines, days, marked, from, to);
+
   final sorted = lines.values.toList()..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   return WageSheet(from, to, sorted);
 }
+
+/// Hourly markets: every day's hours (a hand mark counts as
+/// [markedDayHours] per day of pay), split by the overtime rule, paid at
+/// the worker's hourly rate. Overtime shown is the legal overtime, weekly
+/// in the US, not the "past 8 hours" hint the daily-wage markets show.
+void _payByTheHour(Map<String, WageLine> lines, Map<String, Map<DateTime, List<LabourAttendanceData>>> punchDays,
+    Map<String, Map<DateTime, double>> marked, DateTime from, DateTime to) {
+  final rule = market.overtime;
+  for (final line in lines.values) {
+    final hoursByDay = <DateTime, double>{};
+    for (final MapEntry(key: day, value: ps) in (punchDays[line.key] ?? const {}).entries) {
+      var h = 0.0;
+      for (final p in ps) {
+        final out = p.punchOut;
+        final d = out == null ? null : out.difference(p.punchIn).inMinutes / 60.0;
+        if (d != null && d >= 0 && d <= longestShiftHours) h += d;
+      }
+      hoursByDay[day] = h;
+    }
+    final marks = line.workerId == null ? null : marked[line.workerId];
+    marks?.forEach((day, units) => hoursByDay[day] = units * markedDayHours);
+
+    final rate = line.dailyWage ?? 0;
+    var inPeriod = 0.0, before = 0.0, hours = 0.0, ot = 0.0;
+    splitOvertime(hoursByDay, rule).forEach((day, split) {
+      final pay = split.$1 * rate + split.$2 * rate * rule.multiplier;
+      if (day.isBefore(from)) {
+        before += pay;
+      } else if (day.isBefore(to)) {
+        inPeriod += pay;
+        hours += split.$1 + split.$2;
+        ot += split.$2;
+      }
+    });
+    line
+      ..hourlyEarned = _round2(inPeriod)
+      ..hourlyEarnedBefore = _round2(before)
+      ..earnedBefore = 0
+      ..hours = hours
+      ..overtimeHours = ot;
+  }
+}
+
+double _round2(double v) => (v * 100).roundToDouble() / 100;

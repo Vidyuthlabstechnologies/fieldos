@@ -81,6 +81,26 @@ void main() {
     expect(applyWordSwaps(Market.india, 'Labour'), 'Labour');
   });
 
+  test("each market's own languages have every label", () {
+    final labels = labelsInSource();
+    for (final m in Market.values.where((m) => m != Market.india)) {
+      debugSetMarket(m);
+      for (final l in AppLanguage.offered.where((l) => l != AppLanguage.en && !AppLanguage.indianLanguages.contains(l))) {
+        setCurrentLanguage(l);
+        final untranslated = labels.where((k) => !hasTranslation(l, k)).toList()..sort();
+        expect(untranslated, isEmpty, reason: '$m ${l.englishName} is missing ${untranslated.length} labels');
+      }
+    }
+  });
+
+  test('US Spanish says sales tax, not GST', () {
+    debugSetMarket(Market.us);
+    setCurrentLanguage(AppLanguage.es);
+    expect(tr('GST'), isNot(contains('GST')));
+    expect(tr('Amount (₹)'), contains(r'$'));
+    expect(tr('Cancel'), 'Cancelar');
+  });
+
   test('India is untouched by market wording', () {
     expect(tr('GST'), 'GST');
     expect(tr('Labour'), 'Labour');

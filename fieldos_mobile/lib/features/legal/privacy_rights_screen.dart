@@ -63,7 +63,7 @@ class _PrivacyRightsScreenState extends ConsumerState<PrivacyRightsScreen> {
               spacing: 6,
               runSpacing: 6,
               children: [
-                for (final l in AppLanguage.values)
+                for (final l in AppLanguage.offered)
                   ChoiceChip(
                     key: Key('notice-lang-${l.code}'),
                     label: Text(l.nativeName),

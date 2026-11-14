@@ -55,6 +55,13 @@ const Map<Market, Map<String, String>> marketWordSwaps = {
 /// The US app in American English. Labels hidden in the US build (RERA,
 /// PF/ESI salaries, UPI, Tally) need no entry; the test knows which.
 const _usEnglish = <String, String>{
+  // Crews are paid by the hour in the US (MarketConfig.payHourly): the
+  // worker's rate field holds the hourly rate.
+  'Daily wage': 'Hourly rate',
+  'Daily wage (₹)': r'Hourly rate ($)',
+  '{amount}/day': '{amount}/hr',
+  'A day counts as full at 7 hours on site and half at 3.5 hours, unless it was marked by hand on the day register. Tap a worker to pay wages or an advance.':
+      'Pay is the hours on the clock at the hourly rate, with time and a half past 40 hours in a work week (Monday to Sunday). A day marked by hand counts as 8 hours. Tap a worker to pay wages or an advance.',
   'DPR': 'Daily log',
   'GST': 'Sales tax',
   'GST %': 'Sales tax %',

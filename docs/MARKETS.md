@@ -6,7 +6,7 @@ FieldOS ships as a separate store app per country, all built from
 | Market | `FIELDOS_MARKET` | App / bundle id | Currency | Tax on bills | Units | Languages |
 |---|---|---|---|---|---|---|
 | India | `in` (default) | `com.mldynamic.fieldos` | ₹ INR, lakh grouping | GST (CGST+SGST / IGST), TDS | metric | en, hi, te, ta, kn, mr |
-| United States | `us` | `com.mldynamic.fieldos.us` | $ USD | Sales tax (default 0%) | imperial | en, es |
+| United States | `us` | `com.mldynamic.fieldos.us` | $ USD | Sales tax (default 0%), hourly pay, OT past 40 h/week | imperial (not yet) | en, es |
 | Malaysia | `my` | `com.mldynamic.fieldos.my` | RM MYR | SST 8% | metric | en, ms, zh, ta |
 | UAE | `ae` | `com.mldynamic.fieldos.ae` | AED | VAT 5% | metric | en, ar, hi, ur, ml |
 | United Kingdom | `uk` | `com.mldynamic.fieldos.uk` | £ GBP | VAT 20%, CIS, reverse charge | metric | en, pl, ro |

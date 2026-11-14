@@ -70,7 +70,7 @@ void main() {
         child: MaterialApp(
           theme: buildFieldOsTheme(Brightness.light),
           locale: lang.locale,
-          supportedLocales: [for (final l in AppLanguage.values) l.locale],
+          supportedLocales: [for (final l in AppLanguage.offered) l.locale],
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           home: home,
         ),
@@ -118,7 +118,7 @@ void main() {
         expect(find.text(tr('Password')), findsWidgets);
         expect(tr('Password'), isNot('Password'));
         // The three language buttons are there in their own scripts.
-        for (final l in AppLanguage.values) {
+        for (final l in AppLanguage.offered) {
           expect(find.text(l.nativeName), findsOneWidget);
         }
       });
