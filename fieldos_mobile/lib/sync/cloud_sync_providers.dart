@@ -87,6 +87,7 @@ final cloudSyncServiceProvider = Provider<CloudSyncService>((ref) {
     client: ref.watch(cloudSyncClientProvider),
     engine: ref.watch(cloudSyncEngineProvider),
     sessionStore: SettingsSessionStore(ref.watch(appDatabaseProvider)),
+    freshClient: _resolveConfig().createClient,
   );
   ref.onDispose(service.dispose);
   return service;

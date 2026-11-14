@@ -235,6 +235,8 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
 
   Future<void> _afterLinked(String companyId) async {
     await ref.read(cloudLinksProvider).link(companyId);
+    final service = ref.read(cloudSyncServiceProvider);
+    await recordLinkedAccount(ref.read(appDatabaseProvider), userId: service.userId, email: service.email);
     // Writes rejected before the company existed on the server were parked
     // after repeated failures; they can go through now.
     await ref.read(appDatabaseProvider).syncOutboxDao.retryParked();

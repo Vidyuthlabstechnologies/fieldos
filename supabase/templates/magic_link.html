@@ -1,0 +1,18 @@
+<!-- FieldOS sign-in code email (Supabase "Magic Link" template). The app's
+     Forgot PIN asks for this code to confirm it is the account owner
+     (signInWithOtp, shouldCreateUser false), so the email carries the code
+     rather than a link, and says nothing about a password. Hosted project:
+     paste this into Authentication > Email Templates > Magic Link, subject
+     "FieldOS verification code" (docs/SUPABASE_PRODUCTION_RUNBOOK.md,
+     section 3). -->
+<div style="font-family: Inter, Arial, sans-serif; max-width: 480px; margin: 0 auto; color: #13233A;">
+  <div style="background: #112A4A; color: #ffffff; padding: 20px 24px; border-radius: 12px 12px 0 0;">
+    <span style="font-size: 20px; font-weight: 700;">Field<span style="color: #F5A524;">OS</span></span>
+  </div>
+  <div style="border: 1px solid #DDE3EB; border-top: none; padding: 24px; border-radius: 0 0 12px 12px;">
+    <p style="margin: 0 0 12px;">Here is your FieldOS sign-in code for {{ .Email }}:</p>
+    <p style="font-size: 32px; font-weight: 700; letter-spacing: 6px; margin: 16px 0; color: #112A4A;">{{ .Token }}</p>
+    <p style="margin: 0 0 12px;">Type it in the FieldOS app where it asks for the code from the email. It works for one hour.</p>
+    <p style="margin: 0; color: #5B6B80; font-size: 13px;">If you did not ask for this, ignore this email: nobody can sign in without the code. Questions: info@mldynamic.com</p>
+  </div>
+</div>

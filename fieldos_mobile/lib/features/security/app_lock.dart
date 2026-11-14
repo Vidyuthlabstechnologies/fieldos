@@ -2,7 +2,8 @@
 /// after a minute or more in the background, so a phone left on a site
 /// table doesn't show the company's money and wages. The PIN is stored
 /// only as a salted hash (the same hashing as passwords). Someone who
-/// forgets it signs in to their cloud account again to choose a new one
+/// forgets it signs in to their cloud account again to choose a new one,
+/// or, on a phone with no cloud session, erases the phone
 /// (lib/features/security/pin_reset.dart); without that, the waits below
 /// stand.
 ///
@@ -24,6 +25,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/security/pin_reset.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/services/notification_service.dart' show appNavigatorKey;
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
@@ -315,6 +317,18 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
   /// the cloud account too (as Team sync's Sign out does), so only the
   /// password gets back in. The data on the phone is not touched.
   Future<void> _forceSignOut() async {
+    await _signOutEverywhere();
+    // Last, so a phone killed before here finishes the sign-out on launch.
+    await ref.read(appLockProvider).turnOff();
+    ref.invalidate(appLockOnProvider);
+    if (!mounted) return;
+    _forcedOut = true;
+    _show(wait: Duration.zero);
+  }
+
+  /// Stops sync, signs out of the cloud account and of the phone's own
+  /// account. Shared by the forced sign-out and erasing the phone.
+  Future<void> _signOutEverywhere() async {
     try {
       ref.read(cloudSyncBootstrapProvider).stop();
       if (ref.read(cloudSyncAvailableProvider)) await ref.read(cloudSyncServiceProvider).disableSync();
@@ -322,12 +336,25 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
       // Best effort: the local sign-out below is what stops the guessing.
     }
     await ref.read(sessionProvider.notifier).logout();
-    // Last, so a phone killed before here finishes the sign-out on launch.
-    await ref.read(appLockProvider).turnOff();
+  }
+
+  /// Forgot PIN with no cloud session, after the confirmation word: the
+  /// sign-out above, then every record, setting (the PIN, the cloud
+  /// session) and file on the phone, and back to first launch.
+  ///
+  /// Erase is only offered with no usable session, so disableSync has
+  /// nothing it could send; the outbox goes with the database.
+  Future<void> _erasePhone() async {
+    await _signOutEverywhere();
+    await ref.read(phoneEraserProvider).erase();
+    try {
+      // Reminders already planned would still name the erased sites.
+      await ref.read(notificationServiceProvider).replaceScheduled(const []).timeout(const Duration(seconds: 5));
+    } catch (_) {}
     ref.invalidate(appLockOnProvider);
-    if (!mounted) return;
-    _forcedOut = true;
-    _show(wait: Duration.zero);
+    ref.invalidate(sessionProvider);
+    ref.invalidate(languageChosenProvider);
+    appNavigatorKey.currentState?.popUntil((r) => r.isFirst);
   }
 
   Widget _pad() {
@@ -391,7 +418,8 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
   /// wait stay until [PinReset] has signed in to the account again.
   void _forgot() {
     if (_reset != null) return;
-    _reset = PinReset(lock: ref.read(appLockProvider), reauth: ref.read(accountReauthProvider))..start();
+    _reset = PinReset(lock: ref.read(appLockProvider), reauth: ref.read(accountReauthProvider), erase: _erasePhone)
+      ..start();
     _view.value++;
   }
 
@@ -401,6 +429,8 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
     // After the frame: the screen that called this is still building.
     WidgetsBinding.instance.addPostFrameCallback((_) => reset?.dispose());
     if (unlock) {
+      // Signed in again: a phone that had no session was not syncing.
+      if (reset?.step == PinResetStep.done) unawaited(ref.read(cloudSyncBootstrapProvider).ensureRunning().catchError((_) {}));
       _show(wait: Duration.zero);
       if (mounted) setState(() => _locked = false);
       return;

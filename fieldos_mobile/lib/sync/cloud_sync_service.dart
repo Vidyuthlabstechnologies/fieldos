@@ -89,7 +89,7 @@ abstract class SessionStore {
 }
 
 class CloudSyncService {
-  CloudSyncService({required this.client, required this.engine, this.sessionStore}) {
+  CloudSyncService({required this.client, required this.engine, this.sessionStore, this.freshClient}) {
     _authSub = client.auth.onAuthStateChange.listen((state) {
       // Token refreshes rotate the refresh token; persisting each one is
       // what lets the next app launch resume without a password prompt.
@@ -107,6 +107,14 @@ class CloudSyncService {
   final SupabaseClient client;
   final SyncEngine engine;
   final SessionStore? sessionStore;
+
+  /// Makes a second client for the same project that shares nothing with
+  /// [client]: no session, no saved session, no sync. Forgot PIN signs in
+  /// on it first ([signInAgainAs]), so an account that turns out not to be
+  /// this phone's never holds [client]'s session, not even for the moment
+  /// in which background sync could send the outbox under it. Null: no
+  /// fresh sign-in.
+  final SupabaseClient Function()? freshClient;
   StreamSubscription<AuthState>? _authSub;
 
   bool get isSignedIn => client.auth.currentSession != null;
@@ -347,14 +355,21 @@ class CloudSyncService {
     return _reauth(() => client.auth.signInWithPassword(email: email, password: password));
   }
 
-  /// Emails the account a one-time code for [reauthWithCode]. It is the
-  /// password-reset code (supabase/templates/recovery.html), the one code
-  /// email the project sends; checking it does not change the password.
+  /// Emails the account a one-time sign-in code for [reauthWithCode]. It
+  /// is Supabase's "Magic Link" email, which FieldOS words as a sign-in
+  /// code (supabase/templates/magic_link.html, subject "FieldOS
+  /// verification code"), not the password-reset one.
   Future<ReauthOutcome> sendReauthCode() async {
     final email = this.email;
     if (email == null) return ReauthOutcome.noSession;
+    return sendSignInCode(email);
+  }
+
+  /// A sign-in code for [email]; needs no session. An email with no
+  /// account is refused, never signed up.
+  Future<ReauthOutcome> sendSignInCode(String email) async {
     try {
-      await client.auth.resetPasswordForEmail(email);
+      await client.auth.signInWithOtp(email: email, shouldCreateUser: false);
       return ReauthOutcome.ok;
     } catch (e) {
       return _reauthFailure(e);
@@ -364,7 +379,7 @@ class CloudSyncService {
   Future<ReauthOutcome> reauthWithCode(String code) async {
     final email = this.email;
     if (email == null) return ReauthOutcome.noSession;
-    return _reauth(() => client.auth.verifyOTP(email: email, token: code.trim(), type: OtpType.recovery));
+    return _reauth(() => client.auth.verifyOTP(email: email, token: code.trim(), type: OtpType.email));
   }
 
   /// Google or Apple users: their provider's ID token, from running that
@@ -400,6 +415,40 @@ class CloudSyncService {
     }
     await _persist();
     return ReauthOutcome.ok;
+  }
+
+  /// Forgot PIN on a phone with no usable session: [signIn] runs on a
+  /// [freshClient], and its session moves onto this phone only when it is
+  /// [userId], the cloud account this phone's data was synced with. Any
+  /// other account is dropped unused: signing in to your own account must
+  /// not open somebody else's phone.
+  Future<ReauthOutcome> signInAgainAs({
+    required String userId,
+    required Future<void> Function(GoTrueClient auth) signIn,
+  }) async {
+    final make = freshClient;
+    if (make == null) return ReauthOutcome.noSession;
+    final fresh = make();
+    try {
+      try {
+        await signIn(fresh.auth);
+      } catch (e) {
+        return _reauthFailure(e);
+      }
+      final session = fresh.auth.currentSession;
+      if (session == null) return ReauthOutcome.failed;
+      if (session.user.id != userId) return ReauthOutcome.wrongAccount;
+      try {
+        await client.auth.recoverSession(jsonEncode(session.toJson()));
+      } catch (e) {
+        return _reauthFailure(e);
+      }
+      if (this.userId != userId) return ReauthOutcome.failed;
+      await _persist();
+      return ReauthOutcome.ok;
+    } finally {
+      await fresh.dispose();
+    }
   }
 
   static ReauthOutcome _reauthFailure(Object e) {

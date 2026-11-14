@@ -11,10 +11,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart' show CloudLinks;
 import 'package:fieldos_mobile/sync/cloud_sync_service.dart';
 
 String rosterKey(String companyId) => 'team_roster:$companyId';
 const cloudUserIdKey = 'cloud_user_id';
+
+/// The email of [cloudUserIdKey]'s account. Signing out of Team & sync
+/// keeps both: they say whose cloud account this phone's data goes with,
+/// which is what Forgot PIN asks for when the phone has no session.
+const cloudUserEmailKey = 'cloud_user_email';
 
 Future<void> saveRoster(AppDatabase db, String companyId, List<CloudMember> members, {String? myUserId}) async {
   await db.settingsDao.set(
@@ -23,7 +29,42 @@ Future<void> saveRoster(AppDatabase db, String companyId, List<CloudMember> memb
       for (final m in members) {'user_id': m.userId, 'email': m.email, 'role': m.role},
     ]),
   );
-  if (myUserId != null && myUserId.isNotEmpty) await db.settingsDao.set(cloudUserIdKey, myUserId);
+  if (myUserId != null && myUserId.isNotEmpty) {
+    await db.settingsDao.set(cloudUserIdKey, myUserId);
+    final me = members.where((m) => m.userId == myUserId).firstOrNull;
+    if (me != null && me.email.isNotEmpty) await db.settingsDao.set(cloudUserEmailKey, me.email);
+  }
+}
+
+/// Records [userId] as the cloud account this phone's data goes with.
+/// Called when a company on this phone is put on the cloud or joined.
+Future<void> recordLinkedAccount(AppDatabase db, {required String? userId, required String? email}) async {
+  if (userId == null || userId.isEmpty) return;
+  await db.settingsDao.set(cloudUserIdKey, userId);
+  if (email != null && email.isNotEmpty) await db.settingsDao.set(cloudUserEmailKey, email);
+}
+
+/// The cloud account this phone's data was linked to and synced with, or
+/// null when no company on the phone was ever put on the cloud (or the
+/// account was deleted, which unlinks them).
+Future<({String userId, String email})?> linkedCloudAccount(AppDatabase db) async {
+  if ((await CloudLinks(db).all()).isEmpty) return null;
+  final id = await db.settingsDao.get(cloudUserIdKey);
+  if (id == null || id.isEmpty) return null;
+  var email = await db.settingsDao.get(cloudUserEmailKey);
+  if (email == null || email.isEmpty) {
+    // Phones from before the email was kept: the saved team lists have it.
+    final links = await CloudLinks(db).all();
+    for (final companyId in links) {
+      final me = (await loadRoster(db, companyId)).where((m) => m.userId == id).firstOrNull;
+      if (me != null) {
+        email = me.email;
+        break;
+      }
+    }
+  }
+  if (email == null || email.isEmpty) return null;
+  return (userId: id, email: email);
 }
 
 Future<List<CloudMember>> loadRoster(AppDatabase db, String companyId) async {
