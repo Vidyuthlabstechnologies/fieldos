@@ -3333,4 +3333,13 @@ const Map<String, String> stringsMr = {
   "Client's {label} (optional)": "क्लायंटचा {label} (पर्यायी)",
   "Kept back by the client for the tax office": "कर कार्यालयासाठी क्लायंट राखून ठेवतो",
   "{tax} rate": "{tax} दर",
+  'Appeal a privacy decision': 'गोपनीयतेच्या निर्णयावर अपील करा',
+  'Write from the email address on your account. We reply within 45 days. If you are not satisfied, you can appeal, and then contact the authority for privacy where you live.': 'तुमच्या खात्यावरील ईमेल पत्त्यावरून लिहा. आम्ही 45 दिवसांत उत्तर देतो. तुमचे समाधान न झाल्यास तुम्ही अपील करू शकता, आणि मग तुमच्या भागातील गोपनीयता प्राधिकरणाशी संपर्क साधू शकता.',
+  'Bar size (#3 to #18)': 'सळई आकार (#3 ते #18)',
+  '{lb} lb per foot': 'प्रति फूट {lb} lb',
+  '{lb} lb for {ft} ft': '{ft} ft साठी {lb} lb',
+  'Standard rebar weights (ASTM A615). Bar #4 is 4/8 inch across.': 'सळईचे प्रमाणित वजन (ASTM A615). #4 सळई 4/8 इंच जाड असते.',
+  'count': 'संख्या',
+  'Foot': 'फूट',
+  'Hectare': 'हेक्टर',
 };

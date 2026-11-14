@@ -3333,4 +3333,13 @@ const Map<String, String> stringsKn = {
   "Client's {label} (optional)": "ಕ್ಲೈಂಟ್ {label} (ಐಚ್ಛಿಕ)",
   "Kept back by the client for the tax office": "ತೆರಿಗೆ ಕಚೇರಿಗಾಗಿ ಕ್ಲೈಂಟ್ ಇಟ್ಟುಕೊಳ್ಳುವುದು",
   "{tax} rate": "{tax} ದರ",
+  'Appeal a privacy decision': 'ಗೌಪ್ಯತೆ ನಿರ್ಧಾರದ ಮೇಲೆ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ',
+  'Write from the email address on your account. We reply within 45 days. If you are not satisfied, you can appeal, and then contact the authority for privacy where you live.': 'ನಿಮ್ಮ ಖಾತೆಯ ಇಮೇಲ್ ವಿಳಾಸದಿಂದ ಬರೆಯಿರಿ. ನಾವು 45 ದಿನಗಳಲ್ಲಿ ಉತ್ತರಿಸುತ್ತೇವೆ. ನಿಮಗೆ ತೃಪ್ತಿ ಇಲ್ಲದಿದ್ದರೆ, ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಬಹುದು, ನಂತರ ನಿಮ್ಮ ಪ್ರದೇಶದ ಗೌಪ್ಯತೆ ಪ್ರಾಧಿಕಾರವನ್ನು ಸಂಪರ್ಕಿಸಬಹುದು.',
+  'Bar size (#3 to #18)': 'ಸರಳು ಗಾತ್ರ (#3 ರಿಂದ #18)',
+  '{lb} lb per foot': 'ಪ್ರತಿ ಅಡಿಗೆ {lb} lb',
+  '{lb} lb for {ft} ft': '{ft} ft ಗೆ {lb} lb',
+  'Standard rebar weights (ASTM A615). Bar #4 is 4/8 inch across.': 'ಸರಳುಗಳ ಪ್ರಮಾಣಿತ ತೂಕ (ASTM A615). #4 ಸರಳು 4/8 ಇಂಚು ದಪ್ಪ.',
+  'count': 'ಎಣಿಕೆ',
+  'Foot': 'ಅಡಿ',
+  'Hectare': 'ಹೆಕ್ಟೇರ್',
 };

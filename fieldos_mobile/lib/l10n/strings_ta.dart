@@ -3333,4 +3333,13 @@ const Map<String, String> stringsTa = {
   "Client's {label} (optional)": "கிளையண்ட் {label} (விருப்பம்)",
   "Kept back by the client for the tax office": "வரி அலுவலகத்துக்காக கிளையண்ட் பிடித்து வைப்பது",
   "{tax} rate": "{tax} விகிதம்",
+  'Appeal a privacy decision': 'தனியுரிமை முடிவை மேல்முறையீடு செய்யுங்கள்',
+  'Write from the email address on your account. We reply within 45 days. If you are not satisfied, you can appeal, and then contact the authority for privacy where you live.': 'உங்கள் கணக்கில் உள்ள மின்னஞ்சல் முகவரியிலிருந்து எழுதுங்கள். 45 நாட்களுக்குள் பதில் அளிப்போம். திருப்தி இல்லையென்றால், மேல்முறையீடு செய்யலாம், பின்னர் உங்கள் பகுதியின் தனியுரிமை ஆணையத்தைத் தொடர்புகொள்ளலாம்.',
+  'Bar size (#3 to #18)': 'கம்பி அளவு (#3 முதல் #18)',
+  '{lb} lb per foot': 'ஒரு அடிக்கு {lb} lb',
+  '{lb} lb for {ft} ft': '{ft} ft க்கு {lb} lb',
+  'Standard rebar weights (ASTM A615). Bar #4 is 4/8 inch across.': 'கம்பியின் நிலையான எடைகள் (ASTM A615). #4 கம்பி 4/8 அங்குலம் தடிமன்.',
+  'count': 'எண்ணிக்கை',
+  'Foot': 'அடி',
+  'Hectare': 'ஹெக்டேர்',
 };

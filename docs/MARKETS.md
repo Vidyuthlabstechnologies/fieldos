@@ -6,7 +6,7 @@ FieldOS ships as a separate store app per country, all built from
 | Market | `FIELDOS_MARKET` | App / bundle id | Currency | Tax on bills | Units | Languages |
 |---|---|---|---|---|---|---|
 | India | `in` (default) | `com.mldynamic.fieldos` | ₹ INR, lakh grouping | GST (CGST+SGST / IGST), TDS | metric | en, hi, te, ta, kn, mr |
-| United States | `us` | `com.mldynamic.fieldos.us` | $ USD | Sales tax (default 0%), hourly pay, OT past 40 h/week | imperial (not yet) | en, es |
+| United States | `us` | `com.mldynamic.fieldos.us` | $ USD | Sales tax (default 0%), hourly pay, OT past 40 h/week | US customary (ft, cu yd, lb, rebar #) | en, es |
 | Malaysia | `my` | `com.mldynamic.fieldos.my` | RM MYR | SST 8% | metric | en, ms, zh, ta |
 | UAE | `ae` | `com.mldynamic.fieldos.ae` | AED | VAT 5% | metric | en, ar, hi, ur, ml |
 | United Kingdom | `uk` | `com.mldynamic.fieldos.uk` | £ GBP | VAT 20%, CIS, reverse charge | metric | en, pl, ro |
@@ -48,6 +48,17 @@ scripts) need `--flavor`, and the Indian app must keep building unchanged.
 - **Wording** that differs by country ("GST" -> "Sales tax", "DPR" ->
   "Daily log"): `lib/l10n/market_terms.dart`, looked up by `tr()` before the
   language tables. Labels stay keyed by their Indian English text.
+
+## Units
+
+Quantities are stored as typed (a BOQ line keeps its own unit). What
+changes by market: the unit converter's list (`unitGroups` in
+`purchase_tools.dart`: the US starts in feet, cubic yards and pounds, a ton
+is 2,000 lb and a cement bag 94 lb; India keeps brass, guntha and quintal),
+steel entries in estimates (the US types a bar size, #3 to #18, stored as
+mm so weights work everywhere, and sees pounds), and parsing of typed
+quantities (`baseQty`). The material check uses Indian site-mix norms
+(cement bags, PCC 1:4:8), so the US app hides it.
 
 ## Legal texts and prices
 

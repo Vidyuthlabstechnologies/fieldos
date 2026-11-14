@@ -107,6 +107,11 @@ const _usEnglish = <String, String>{
   'Running bill (RA)': 'Pay application',
   'Running bill': 'Pay application',
   'Work measured this bill': 'Work done this period',
+  // Estimates and the unit converter in US customary units.
+  'Raw unit (e.g. cft, m)': 'Raw unit (e.g. cu ft, ft)',
+  'Billing unit (e.g. cft, sqm)': 'Billing unit (e.g. cu yd, sq ft)',
+  'Nos': 'Count',
+  'Nos: {n}': 'Count: {n}',
   'This is a one-time download of about 30 MB. After that, {language} reports translate to English on this phone, with no internet and no cost.':
       'This is a one-time download of about 30 MB. After that, {language} logs translate to English on this phone, with no internet and no cost.',
 };
