@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/geo.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/attendance/attendance_camera.dart';
@@ -48,6 +49,22 @@ class _LabourViewState extends ConsumerState<LabourView> {
       children: [
         _GeofenceCard(projectId: widget.projectId),
         const SizedBox(height: 8),
+        if (market.middayBreak?.inSeason(DateTime.now()) ?? false) ...[
+          Card(
+            key: const Key('midday-break'),
+            color: Theme.of(context).colorScheme.tertiaryContainer,
+            child: ListTile(
+              leading: const Icon(Icons.wb_sunny_outlined),
+              title: Text(tr('Midday break season')),
+              subtitle: Text(trf('No outdoor work from {from} to {to} until {end}. Give shade, water and rest.', {
+                'from': fmtTime(DateTime(2000, 1, 1, 12, 30)),
+                'to': fmtTime(DateTime(2000, 1, 1, 15)),
+                'end': fmtDate(market.middayBreak!.seasonEnd(DateTime.now().year), short: true),
+              })),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
         Row(children: [
           Expanded(
             child: FilledButton.icon(
@@ -171,6 +188,8 @@ class _LabourViewState extends ConsumerState<LabourView> {
     if (ok != true || name.text.trim().isEmpty || !context.mounted) return;
     if (selectedWorkerId != null && permitKinds.isNotEmpty && !await _permitsAllowSite(context, selectedWorkerId!)) return;
     if (!context.mounted) return;
+    if ((market.middayBreak?.covers(DateTime.now()) ?? false) && !await _middayAllows(context)) return;
+    if (!context.mounted) return;
 
     final latV = double.tryParse(westernDigits(lat.text));
     final lngV = double.tryParse(westernDigits(lng.text));
@@ -210,6 +229,25 @@ class _LabourViewState extends ConsumerState<LabourView> {
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
           FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Punch in anyway'))),
+        ],
+      ),
+    );
+    return go == true;
+  }
+
+  /// During the midday break (UAE summer), a punch-in asks first: only
+  /// indoor or shaded work, or work the ministry exempts, may go on.
+  Future<bool> _middayAllows(BuildContext context) async {
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('Midday break')),
+        content: Text(trf(
+            'Outdoor work in the sun is not allowed from {from} to {to}, 15 June to 15 September. Punch in only for indoor or shaded work, or work that is exempt, such as a concrete pour that cannot stop.',
+            {'from': fmtTime(DateTime(2000, 1, 1, 12, 30)), 'to': fmtTime(DateTime(2000, 1, 1, 15))})),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Indoor or exempt work'))),
         ],
       ),
     );

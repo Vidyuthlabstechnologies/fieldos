@@ -3042,4 +3042,11 @@ const stringsZh = <String, String>{
   'Minimum wage: RM1,700 a month (Minimum Wages Order 2025). In Sabah and Sarawak, the Sabah Labour Ordinance or the Sarawak Labour Ordinance applies instead of the Employment Act 1955 for overtime, rest days and holidays: check the rules for your site.': '最低工资：每月 RM1,700（2025 年最低工资令）。在沙巴和砂拉越，加班、休息日和假日适用《沙巴劳工法令》或《砂拉越劳工法令》，而不是《1955 年雇佣法令》：请核对您工地适用的规定。',
   'below the minimum wage of {amount}/day': '低于最低工资 {amount}/天',
   'Write from the email address on your account. We reply within 21 days. If you are not satisfied, you can complain to the Personal Data Protection Commissioner of Malaysia.': '请用您账户的电子邮件地址来信。我们会在 21 天内回复。如您不满意，可向马来西亚个人数据保护专员投诉。',
+  'Midday break season': '午休季',
+  'No outdoor work from {from} to {to} until {end}. Give shade, water and rest.': '{end}前，每天{from}至{to}禁止户外作业。请提供遮阴、饮水和休息。',
+  'Midday break': '午休',
+  'Outdoor work in the sun is not allowed from {from} to {to}, 15 June to 15 September. Punch in only for indoor or shaded work, or work that is exempt, such as a concrete pour that cannot stop.': '6月15日至9月15日期间，{from}至{to}禁止在阳光下户外作业。只有室内或遮阴处的工作，或豁免工作（如不能中断的混凝土浇筑），才可打卡上班。',
+  'Indoor or exempt work': '室内或豁免工作',
+  'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': '该TRN似乎不正确。TRN为15位数字，例如100123456700003。',
+  'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': '请用您账户上的电子邮箱来信。我们会在30天内回复。如您不满意，可以向UAE（阿联酋）数据保护机构投诉。',
 };

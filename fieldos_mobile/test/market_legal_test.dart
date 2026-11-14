@@ -55,7 +55,7 @@ void main() {
   });
 
   test('markets without their own texts yet fall back and say so', () {
-    for (final m in [Market.uae, Market.uk]) {
+    for (final m in [Market.uk]) {
       debugSetMarket(m);
       expect(marketLegalReady, isFalse, reason: m.name);
     }
@@ -105,6 +105,35 @@ void main() {
   test('the Malaysian notice reads in Bahasa Melayu, Chinese and Tamil', () {
     debugSetMarket(Market.malaysia);
     for (final l in [AppLanguage.ms, AppLanguage.zh, AppLanguage.ta]) {
+      final missing = privacyNoticeKeys.where((k) => !hasTranslation(l, k)).toList();
+      expect(missing, isEmpty, reason: l.name);
+    }
+  });
+
+  test('the UAE texts follow the PDPL and keep mandatory UAE rights', () {
+    debugSetMarket(Market.uae);
+    expect(marketLegalReady, isTrue);
+    expect(privacyNoticeItems, same(aePrivacyNoticeItems));
+    final policy = _all(marketPrivacyPolicy), terms = _all(marketTermsOfUse);
+    for (final text in [policy, terms, privacyNoticeKeys.join('\n')]) {
+      for (final word in ['Data Protection Board', 'DPDP', 'Grievance', 'Information Technology Act', 'UPI',
+          'Consumer Protection Act, 2019', 'unity, integrity', 'GST', 'PDPA', 'Malaysia']) {
+        expect(text, isNot(contains(word)), reason: '"$word" in a UAE text');
+      }
+    }
+    for (final want in ['Decree-Law No. 45 of 2021', 'Articles 22 and 23', 'Mumbai, India', 'face recognition', 'DIFC']) {
+      expect(policy, contains(want));
+    }
+    for (final want in ['UAE law', 'Wage Protection System', 'midday break', 'controller', 'Dubai International Arbitration Centre']) {
+      expect(terms, contains(want));
+    }
+    final numbers = [for (final s in marketTermsOfUse.sections) int.parse(s.heading.split('.').first)];
+    expect(numbers, List.generate(numbers.length, (i) => i + 1));
+  });
+
+  test('the UAE notice reads in Arabic, Hindi, Urdu and Malayalam', () {
+    debugSetMarket(Market.uae);
+    for (final l in [AppLanguage.ar, AppLanguage.hi, AppLanguage.ur, AppLanguage.ml]) {
       final missing = privacyNoticeKeys.where((k) => !hasTranslation(l, k)).toList();
       expect(missing, isEmpty, reason: l.name);
     }

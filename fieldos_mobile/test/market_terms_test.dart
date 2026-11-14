@@ -37,7 +37,7 @@ const _hiddenOutsideIndia = {
   'Add your GSTIN, address and UPI id', 'Client GSTIN (optional)', 'Client is in another state (IGST)',
   'For building work, GST follows the state where the site is. Inside your state it splits into CGST and SGST',
   'Add your GSTIN in "Your details on bills" first. Without it a bill cannot charge GST; pick None.', 'Other state (IGST)', 'Supplier in another state (IGST)',
-  "That GSTIN doesn't look right, so it wasn't saved.", "That GSTIN doesn't look right. It has 15 characters, like 36ABCDE1234F1Z5.",
+"That GSTIN doesn't look right. It has 15 characters, like 36ABCDE1234F1Z5.",
   'Your GSTIN', 'UPI id for payments (optional)', 'TDS %',
   // Tally export: accounts sheet, isIndia.
   'Tally vouchers (XML)', 'Tally vouchers or a Zoho Books file, with GST split out',

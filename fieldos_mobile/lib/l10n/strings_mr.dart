@@ -3388,4 +3388,11 @@ const Map<String, String> stringsMr = {
   'Add the federal and state holidays your company gives, from the gazette for your state.': 'तुमची कंपनी देत असलेल्या संघीय आणि राज्य सुट्ट्या तुमच्या राज्याच्या राजपत्रातून जोडा.',
   'below the minimum wage of {amount}/day': 'किमान वेतन {amount}/दिवस पेक्षा कमी',
   'Write from the email address on your account. We reply within 21 days. If you are not satisfied, you can complain to the Personal Data Protection Commissioner of Malaysia.': 'तुमच्या खात्याच्या ईमेल पत्त्यावरून लिहा. आम्ही 21 दिवसांत उत्तर देतो. समाधान न झाल्यास तुम्ही मलेशियाच्या वैयक्तिक डेटा संरक्षण आयुक्तांकडे तक्रार करू शकता.',
+  'Midday break season': 'दुपारच्या ब्रेकचा सीझन',
+  'No outdoor work from {from} to {to} until {end}. Give shade, water and rest.': '{end} पर्यंत रोज {from} ते {to} बाहेर काम नाही. सावली, पाणी आणि विश्रांती द्या.',
+  'Midday break': 'दुपारचा ब्रेक',
+  'Outdoor work in the sun is not allowed from {from} to {to}, 15 June to 15 September. Punch in only for indoor or shaded work, or work that is exempt, such as a concrete pour that cannot stop.': '15 जून ते 15 सप्टेंबर, {from} ते {to} उन्हात बाहेर काम करायला परवानगी नाही. फक्त आतल्या किंवा सावलीतल्या कामासाठी, किंवा सूट असलेल्या कामासाठीच पंच इन करा, जसे थांबवता न येणारे काँक्रीट ओतणे.',
+  'Indoor or exempt work': 'आतले किंवा सूट असलेले काम',
+  'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': 'हा TRN बरोबर वाटत नाही. यात 15 अंक असतात, उदा. 100123456700003.',
+  'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': 'तुमच्या अकाउंटवरच्या ईमेल पत्त्यावरून लिहा. आम्ही 30 दिवसांत उत्तर देतो. तुमचे समाधान झाले नाही, तर तुम्ही UAE च्या डेटा संरक्षण प्राधिकरणाकडे तक्रार करू शकता.',
 };

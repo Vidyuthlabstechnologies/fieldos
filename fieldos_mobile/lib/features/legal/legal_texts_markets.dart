@@ -19,6 +19,7 @@ LegalDocument get marketPrivacyPolicy => switch (currentMarket) {
   Market.india => privacyPolicy,
   Market.us => usPrivacyPolicy,
   Market.malaysia => myPrivacyPolicy,
+  Market.uae => aePrivacyPolicy,
   _ => privacyPolicy,
 };
 
@@ -26,11 +27,12 @@ LegalDocument get marketTermsOfUse => switch (currentMarket) {
   Market.india => termsOfUse,
   Market.us => usTermsOfUse,
   Market.malaysia => myTermsOfUse,
+  Market.uae => aeTermsOfUse,
   _ => termsOfUse,
 };
 
 /// Whether this market has its own legal texts yet.
-bool get marketLegalReady => const {Market.india, Market.us, Market.malaysia}.contains(currentMarket);
+bool get marketLegalReady => const {Market.india, Market.us, Market.malaysia, Market.uae}.contains(currentMarket);
 
 /// [base] with sections replaced by heading ([replace]; a null value drops
 /// the section) and [add] appended before the contact section.
@@ -439,4 +441,186 @@ final myTermsOfUse = adaptLegal(
           'convenience; if it differs, the English text applies.',
     ),
   ],
+);
+
+/// UAE: Federal Decree-Law 45 of 2021 on personal data protection (PDPL),
+/// transfers abroad under Articles 22 and 23, no face recognition, the
+/// midday break and WPS left to the employer. The terms keep Indian law
+/// (the store-sold app, as in India) with a carve-out for mandatory UAE
+/// rights; enterprise contracts sold by invoice may agree DIAC arbitration.
+/// The Arabic version of both is still to be made before launch.
+final aePrivacyPolicy = adaptLegal(
+  privacyPolicy,
+  intro: 'FieldOS is made by ML Dynamic Solutions Private Limited, a company based in India. This policy is for the '
+      'FieldOS app for the United Arab Emirates, and is given under Federal Decree-Law No. 45 of 2021 on the '
+      'Protection of Personal Data (PDPL). FieldOS stores the projects, reports, photos, attendance and other site '
+      'records you create on your phone. If you sign in to Team & sync, those records, your email address and the '
+      'name you entered are also stored in our cloud database (Supabase, region: Mumbai, India), so that the people '
+      'your company works with can see what is meant for them.',
+  replace: {
+    'Attendance photos and selfies': const LegalSection(
+      'Attendance photos and selfies',
+      'If your company uses selfie attendance, the app takes a photo with the front camera when staff check in or '
+          'out, and saves it with the time, the site and the GPS position. A supervisor can also take a photo when '
+          'punching workers in. The photos are part of the company\'s attendance records: only the owner and project '
+          'managers of that company can see them, and they are used only to confirm attendance, never for anything '
+          'else. FieldOS does not use face recognition, and makes no face template or other biometric data from the '
+          'photo. Your company should tell each worker before the first photo, in a language they understand.',
+    ),
+    'Salaries, workers and leads': const LegalSection(
+      'Salaries, workers and leads',
+      'Companies use FieldOS to keep their own records about other people: workers\' names, attendance and wages, '
+          'staff salaries and advances, work permit, Emirates ID and passport details, and leads (the name, phone '
+          'number and enquiry of a possible customer). The company decides what it records and why, and is the '
+          'controller of those records; FieldOS processes them only on the company\'s behalf. Only owners and '
+          'project managers can see salaries and leads, and ID and passport numbers are shown masked in lists. A '
+          'worker supplied by a labour supply company is also that company\'s employee.',
+    ),
+    'Payments': const LegalSection(
+      'Payments',
+      'The FieldOS subscription is bought through Google Play or the Apple App Store, which handle your card or '
+          'other payment details and any VAT. FieldOS never sees them. RevenueCat (revenuecat.com, USA) receives the '
+          'purchase record from the store, linked to your FieldOS account id, so that the app and the assistant can '
+          'check your subscription.',
+    ),
+    'Where your data is processed': const LegalSection(
+      'Where your data is processed',
+      'Your cloud records are stored by Supabase in Mumbai, India, outside the UAE. A few other services we use are '
+          'run from other countries: Anthropic (USA) for the AI assistant, with Sarvam AI (India) as its backup, '
+          'RevenueCat (USA) for checking subscriptions, GitHub (USA) for our private copy of bug and message reports, '
+          'and Google and Apple for sign-in, speech and the stores. We send personal data to these places under '
+          'Articles 22 and 23 of the PDPL: each service gets only what this policy describes for it, under a contract '
+          'that limits it to providing its service and requires it to protect the data to the PDPL\'s standard, and '
+          'by creating an account you agree to these transfers. If your company is in a free zone with its own data '
+          'law (DIFC or ADGM), tell us before you use FieldOS. We will update this policy before the place where '
+          'your records are stored changes.',
+    ),
+    'Keeping data safe': const LegalSection(
+      'Keeping data safe',
+      'We protect data with encryption in transit, access limited by role, and checks that keep each company\'s '
+          'records apart. If a breach of personal data could harm your privacy, we will tell your company within 72 '
+          'hours, and tell you and the UAE data protection authority without delay what happened, what it means for '
+          'you and what we are doing about it.',
+    ),
+    'Children': const LegalSection(
+      'Children',
+      'FieldOS is for people aged 18 and over, for business use, and we do not knowingly collect personal data of '
+          'children. Do not record anyone under 18 as a worker on a building site: UAE law does not allow juveniles '
+          'to do dangerous work such as construction.',
+    ),
+    'How long we keep data': const LegalSection(
+      'How long we keep data',
+      '• Company records stay as long as the company uses FieldOS, and are deleted with the account as described '
+          'below. Employers must keep wage records for the period UAE labour law sets, so export them before you '
+          'delete an account.\n\n• Attendance selfies are deleted after the period the company sets (12 months unless '
+          'it chooses otherwise); the attendance record itself stays.\n\n• Bug, crash and message reports are kept '
+          'only as long as needed to fix or review them, and never more than 12 months.\n\n• Deleted data can remain '
+          'in our hosting provider\'s automatic backups for up to 30 days before they are overwritten.',
+    ),
+    'Your rights': const LegalSection(
+      'Your rights',
+      'Under the PDPL you can ask us for the personal data we hold about you and a copy of it, ask us to correct or '
+          'erase it, ask us to restrict or stop processing it, object to it, and ask us to send it to another '
+          'organisation in a machine-readable form. FieldOS makes no decision about you by automated means alone. '
+          'Email info@mldynamic.com from the address on your account, or use Settings, Your privacy. We reply within '
+          '30 days. If your data is in a company\'s records (for example as a worker or a lead), we pass your request '
+          'to that company, which decides about its own records, and tell you we have done so. You can withdraw '
+          'your consent at any time: turn off the AI assistant or crash details, or delete your cloud account. '
+          'Withdrawing does not affect what was done before.',
+    ),
+    'Grievance officer': const LegalSection(
+      'Privacy contact and complaints',
+      'For any question or complaint about your personal data, write to our privacy contact at info@mldynamic.com '
+          'with "Privacy" in the subject. If you are not satisfied with our answer, you can complain to the UAE data '
+          'protection authority.',
+    ),
+    'Contact': const LegalSection(
+      'Contact',
+      'Questions or requests about privacy: info@mldynamic.com with "Privacy" in the subject. $_contact',
+    ),
+  },
+);
+
+final aeTermsOfUse = adaptLegal(
+  termsOfUse,
+  intro: 'These terms of use ("terms") are an agreement between you and ML Dynamic Solutions Private Limited, a '
+      'company incorporated in India ("we", "us"), which makes the FieldOS app for the United Arab Emirates and its '
+      'cloud service ("FieldOS"). By creating an account, starting a free trial or using FieldOS, you agree to these '
+      'terms and to the privacy policy. If you use FieldOS for a company, you confirm that you may accept these terms '
+      'for it, and "you" includes that company. If you do not agree, do not use FieldOS.',
+  replace: {
+    '1. Who can use FieldOS': const LegalSection(
+      '1. Who can use FieldOS',
+      'You must be at least 18 years old and able to enter a binding contract. FieldOS is made for contractors, '
+          'builders and their site teams, for business use.',
+    ),
+    '3. Subscription, free trial and payment': const LegalSection(
+      '3. Subscription, free trial and payment',
+      'FieldOS needs a FieldOS Pro subscription, bought through Google Play or the Apple App Store, monthly or yearly '
+          'at the price in AED the store shows before you pay, including VAT.\n\nNew subscribers get one 3-day free '
+          'trial, where the store offers it to them. Unless you cancel before the trial ends, the first payment is '
+          'taken when it ends. The subscription then renews automatically for the same period at the price then '
+          'current, until you cancel. Cancel at least 24 hours before the end of a period, in your Google Play or App '
+          'Store subscriptions, to avoid the next charge. Uninstalling the app does not cancel a subscription.\n\nThe '
+          'store takes the payment, and refunds are handled by the store under its own policies. If we change the '
+          'price, the store tells you before the new price applies, and you can cancel before then. If a payment '
+          'fails or a subscription ends, FieldOS cannot be used until you subscribe again. Your records are not '
+          'deleted, and are there again when you resubscribe.',
+    ),
+    '5. Team chat and other shared content': const LegalSection(
+      '5. Team chat and other shared content',
+      'Project chat, photos, comments and other content you share are seen by the other members of your company. We '
+          'do not allow objectionable content or abusive users. Do not post or share anything that:\n\n• threatens, '
+          'harasses, bullies or abuses anyone, or attacks people for their religion, nationality, race, gender, '
+          'disability or any other part of who they are;\n• offends any religion, the UAE, its symbols or its leaders, '
+          'or public morals;\n• is sexual, obscene, violent or hateful, or involves a child in any harmful way;\n• is '
+          'spam, a scam or fraud, or asks for money under false pretences;\n• is false or misleading in a way meant to '
+          'harm someone, or impersonates another person;\n• shares someone\'s private information or photos without '
+          'their permission;\n• infringes anyone\'s copyright, trademark or other rights; or\n• breaks any UAE law, '
+          'including the laws on cybercrime and media.',
+    ),
+    '8. Check the numbers': const LegalSection(
+      '8. Check the numbers',
+      'FieldOS helps with estimates, quantities, wages, overtime, interim payment applications, VAT, retention, '
+          'attendance and reports, and its AI assistant answers questions and fills in records for you to confirm. '
+          'These can contain mistakes, and FieldOS does not know every rule in your contract or every decision of the '
+          'Ministry of Human Resources and Emiratisation. Check figures before you rely on them. FieldOS is a '
+          'record-keeping aid, not engineering, legal, payroll, tax or accounting advice: it does not pay salaries '
+          'through the Wage Protection System, file VAT returns or issue e-invoices through an accredited service '
+          'provider, and its warnings about the midday break do not make a site compliant. Those duties remain yours '
+          'as the employer or contractor.',
+    ),
+    '14. Limits on our liability': const LegalSection(
+      '14. Limits on our liability',
+      'As far as the law allows, we are not liable for indirect or consequential loss, or for loss of profit, '
+          'business, contracts or data, arising from your use of FieldOS. Our total liability to you for all claims '
+          'about FieldOS is limited to the amount you paid for FieldOS in the 12 months before the event that led to '
+          'the claim.\n\nNothing in these terms limits liability that cannot be limited by law, including liability '
+          'for fraud, or takes away any right you have under UAE law that cannot be excluded by contract.',
+    ),
+    '16. Changes to these terms': const LegalSection(
+      '16. Changes to these terms',
+      'We may update these terms, for example when the law or FieldOS changes. The date at the top shows the current '
+          'version. We will tell you in the app at least 30 days before a change that matters to you takes effect. If '
+          'you do not agree, you can cancel before then; if you keep using FieldOS after that, the new terms apply.',
+    ),
+    '17. Law and disputes': const LegalSection(
+      '17. Law and disputes',
+      'These terms are governed by the laws of India. If you have a complaint, please write to us first at '
+          'info@mldynamic.com so we can try to settle it; most problems can be solved this way within 30 days. If it '
+          'is not settled, the courts at Hyderabad, Telangana have jurisdiction, but nothing in this section takes '
+          'away a right you have under UAE law to bring a claim in the UAE. A company plan agreed in writing may '
+          'instead provide for arbitration under the rules of the Dubai International Arbitration Centre.',
+    ),
+    '18. Grievance officer': const LegalSection(
+      '18. Your workers\' personal data',
+      'Your company is the controller of the personal data it records about its workers, staff, subcontractors and '
+          'leads, and we process it only on your behalf, to run FieldOS, as the privacy policy describes. You confirm '
+          'that you have told those people what is recorded and why, in a language they understand, including for '
+          'attendance selfies and location, and that you have a lawful basis for it. We will tell you within 72 hours '
+          'of a breach that affects your company\'s data, help you answer requests from the people in your records, '
+          'and delete your company\'s data when your account is deleted.',
+    ),
+    '20. Contact us': const LegalSection('20. Contact us', _contact),
+  },
 );

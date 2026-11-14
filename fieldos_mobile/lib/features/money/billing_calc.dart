@@ -10,6 +10,7 @@ library;
 
 import 'dart:convert';
 
+import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/market.dart';
 
 /// The two kinds of client bill, named the way this market names them.
@@ -283,6 +284,33 @@ String invoiceTitle({required String ourGstin, required double gstRate}) {
   if (ourGstin.trim().isEmpty) return 'INVOICE';
   return gstRate > 0 ? 'TAX INVOICE' : 'BILL OF SUPPLY';
 }
+
+/// A UAE Tax Registration Number: 15 digits (FTA numbers start 100).
+/// Spaces and dashes, as printed on certificates, are allowed.
+bool isValidTrn(String trn) => RegExp(r'^\d{15}$').hasMatch(trn.replaceAll(RegExp(r'[\s-]'), ''));
+
+/// This market's tax registration number in the form it is stored: the
+/// GSTIN upper-cased in India, the TRN's 15 digits in the UAE, as typed
+/// elsewhere.
+String normaliseTaxId(String id) => switch (currentMarket) {
+      Market.india => id.trim().toUpperCase(),
+      Market.uae => westernDigits(id).replaceAll(RegExp(r'[\s-]'), ''),
+      _ => id.trim(),
+    };
+
+/// Whether [id] can be this market's registration number. Markets with
+/// no fixed format (SST, US, UK VAT kept free) accept anything.
+bool validTaxId(String id) => switch (currentMarket) {
+      Market.india => isValidGstin(id),
+      Market.uae => isValidTrn(id),
+      _ => true,
+    };
+
+/// The title of a bill that is not a running bill, outside India: a tax
+/// invoice only from a registered supplier (UAE FTA: a supplier without a
+/// TRN may not issue one).
+String marketInvoiceTitle({required String ourTaxId}) =>
+    market.tax.onlyWhenRegistered && ourTaxId.trim().isEmpty ? 'INVOICE' : market.invoiceTitle;
 
 bool isValidGstin(String gstin) {
   final g = gstin.trim().toUpperCase();

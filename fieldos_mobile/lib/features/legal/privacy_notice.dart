@@ -27,6 +27,7 @@ class NoticeItem {
 List<NoticeItem> get privacyNoticeItems => switch (currentMarket) {
   Market.us => usPrivacyNoticeItems,
   Market.malaysia => myPrivacyNoticeItems,
+  Market.uae => aePrivacyNoticeItems,
   _ => indiaPrivacyNoticeItems,
 };
 
@@ -172,6 +173,56 @@ const myPrivacyNoticeItems = [
     'Complaints',
     'Write to info@mldynamic.com with "Privacy" in the subject. If you are not satisfied, you can complain to the '
         'Personal Data Protection Commissioner of Malaysia.',
+  ),
+];
+
+/// UAE: the PDPL notice, read in English, Arabic, Hindi, Urdu or Malayalam.
+const aePrivacyNoticeItems = [
+  NoticeItem(
+    'Your account',
+    'Your name, email address and the company you join, so that you can sign in and work with your team.',
+  ),
+  NoticeItem(
+    'Site records',
+    'Projects, reports, photos, attendance, wages, work permits and other records your company keeps. They stay on '
+        'this phone, and in our cloud in Mumbai, India when Team & sync is on, so that your team can see them. Your '
+        'company decides what it records and is responsible for it.',
+  ),
+  NoticeItem(
+    'Location and selfies',
+    'Your location, and a selfie if your company uses selfie attendance, only when you check in or out, punch a '
+        'worker in, set a site location or take a site photo, to show the work was done at the site. Never in the '
+        'background. FieldOS does not use face recognition.',
+  ),
+  NoticeItem(
+    'The AI assistant',
+    'Only when you use it: what you ask, and the site details needed to answer, go to Anthropic in the USA (or Sarvam '
+        'AI in India as a backup) to work out the reply. They do not use it to train their models.',
+  ),
+  NoticeItem(
+    'Paying for FieldOS',
+    'Google Play or the App Store take the payment. RevenueCat in the USA gets the purchase record so the app can '
+        'check your plan. We never see card details.',
+  ),
+  NoticeItem(
+    'Data sent outside the UAE',
+    'Our cloud is in India, and the services above are in India and the USA. Each gets only what it needs, under a '
+        'contract that requires it to protect the data.',
+  ),
+  NoticeItem(
+    'Your choices',
+    'You can stop the AI assistant, turn off crash details, export your records or delete your cloud account at any '
+        'time. Stopping does not change what was done before.',
+  ),
+  NoticeItem(
+    'Your rights under the PDPL',
+    'Ask us for a copy of your data, to correct or erase it, to stop using it, or to send it to another organisation. '
+        'Write to info@mldynamic.com. We reply within 30 days.',
+  ),
+  NoticeItem(
+    'Complaints',
+    'Write to info@mldynamic.com with "Privacy" in the subject. If you are not satisfied, you can complain to the UAE '
+        'data protection authority.',
   ),
 ];
 
