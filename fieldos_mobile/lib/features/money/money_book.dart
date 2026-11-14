@@ -11,6 +11,7 @@ library;
 
 import 'dart:convert';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
@@ -18,7 +19,9 @@ import 'package:fieldos_mobile/l10n/language.dart';
 const defaultExpenseCategories = ['Material', 'Labour', 'Transport', 'Equipment hire', 'Food & tea', 'Fuel', 'Other'];
 
 /// GST rates offered as one tap.
-const gstRates = [5.0, 12.0, 18.0, 28.0];
+/// The tax rates offered on an expense, besides none.
+List<double> get gstRates =>
+    isIndia ? const [5.0, 12.0, 18.0, 28.0] : [for (final r in market.tax.rateChoices) if (r > 0) r];
 
 /// Rounds to paise, half up. The nudge keeps an exact half such as
 /// 263.025 (stored as 263.02499...) from rounding down.
@@ -41,6 +44,8 @@ class GstSplit {
 /// or all IGST for a supplier in another state. Rounded to paise so the
 /// parts always add back to the total.
 GstSplit gstSplit(double total, double ratePct, {bool interState = false}) {
+  // Outside India the tax is one line, kept in the IGST column.
+  if (!market.tax.splitsInsideState) interState = true;
   if (ratePct <= 0) return GstSplit(total: total, taxable: total, cgst: 0, sgst: 0, igst: 0);
   final taxable = _round2(total * 100 / (100 + ratePct));
   final tax = _round2(total - taxable);

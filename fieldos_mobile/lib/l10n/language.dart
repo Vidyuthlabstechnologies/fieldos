@@ -110,15 +110,18 @@ void _apply(AppLanguage spoken, bool screens) {
 /// The market's own wording comes first (lib/l10n/market_terms.dart), so
 /// "GST" reads "Sales tax" in the US app in English and in Spanish.
 String trIn(AppLanguage l, String english) {
+  if (currentMarket == Market.india) return _tables[l]?[english] ?? english;
   final terms = marketTerms[currentMarket];
-  if (terms != null) {
-    final own = terms[l.code]?[english];
-    if (own != null) return own;
-    if (_tables[l]?[english] case final t?) return t;
-    return terms['en']?[english] ?? english;
-  }
-  return _tables[l]?[english] ?? english;
+  var out = terms?[l.code]?[english] ?? _tables[l]?[english] ?? terms?['en']?[english];
+  out ??= applyWordSwaps(currentMarket, english);
+  // Labels written for India say "(₹)"; elsewhere that is the market's sign.
+  return out.contains('₹') ? out.replaceAll('₹', market.currencySymbol) : out;
 }
+
+/// [english] as this market writes it in English, for exports, PDFs and
+/// share text that stay in English whatever the screens are in: "GST %"
+/// is "Sales tax %" in the US app. India gets [english] back.
+String marketText(String english) => trIn(AppLanguage.en, english);
 
 /// [english] in the person's spoken language, for words read aloud.
 String trSpoken(String english) => trIn(_spoken, english);

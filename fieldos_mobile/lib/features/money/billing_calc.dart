@@ -12,7 +12,33 @@ import 'dart:convert';
 
 import 'package:fieldos_mobile/core/market.dart';
 
-const billKinds = {'ra': 'Running bill (RA)', 'tax_invoice': 'Tax invoice'};
+/// The two kinds of client bill, named the way this market names them.
+Map<String, String> get billKinds => {
+      'ra': market.progressBillName,
+      'tax_invoice': switch (currentMarket) {
+        Market.us => 'Invoice',
+        Market.uk => 'VAT invoice',
+        _ => 'Tax invoice',
+      },
+    };
+
+/// The tax lines on a bill: CGST + SGST or IGST in India, one line named
+/// after the market's tax ("Sales tax 8.25%", "VAT 20%") everywhere else.
+/// Outside India the single line is kept in the IGST column, so bills,
+/// sync and old exports need no new fields.
+List<(String, double)> taxLines(BillTotals t, {required double rate, required bool interState}) {
+  if (!market.tax.splitsInsideState) {
+    return rate > 0 || t.igst != 0 ? [('${market.tax.name} ${_pctLabel(rate)}%', t.igst)] : const [];
+  }
+  if (interState) return [('IGST ${_pctLabel(rate)}%', t.igst)];
+  if (rate <= 0) return const [];
+  return [('CGST ${_pctLabel(rate / 2)}%', t.cgst), ('SGST ${_pctLabel(rate / 2)}%', t.sgst)];
+}
+
+String _pctLabel(double v) {
+  if (v == v.roundToDouble()) return v.round().toString();
+  return v.toStringAsFixed(3).replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
+}
 
 /// Construction services SAC (works contract). Editable per bill.
 const defaultSac = '995411';
@@ -83,6 +109,8 @@ class BillTotals {
 /// [gstRate] is the full rate (18 means 18%). Inside the state it splits
 /// half CGST, half SGST; across states it is all IGST. Retention and TDS
 /// are taken on the value before GST, as contracts and section 194C do.
+/// Outside India there is no CGST/SGST split: the whole tax is one line
+/// (held in [BillTotals.igst]), whatever [interState] says.
 BillTotals billTotals(
   List<BillLine> lines, {
   double gstRate = 18,
@@ -90,6 +118,7 @@ BillTotals billTotals(
   double retentionPct = 0,
   double tdsPct = 0,
 }) {
+  if (!market.tax.splitsInsideState) interState = true;
   final gross = _round2(lines.fold<double>(0, (s, l) => s + l.amount));
   final tax = _round2(gross * gstRate / 100);
   final half = _round2(tax / 2);

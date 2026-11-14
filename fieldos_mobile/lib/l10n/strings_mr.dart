@@ -3327,4 +3327,10 @@ const Map<String, String> stringsMr = {
   ...dailyMr,
   ...proofMr,
   ...privacyMr,
+  // Shown in the non-Indian apps (lib/core/market.dart); kept here for the coverage test.
+  "A Zoho Books file, with tax split out": "Zoho Books फाइल, कर वेगळा करून",
+  "Add your tax number and address": "तुमचा कर क्रमांक आणि पत्ता जोडा",
+  "Client's {label} (optional)": "क्लायंटचा {label} (पर्यायी)",
+  "Kept back by the client for the tax office": "कर कार्यालयासाठी क्लायंट राखून ठेवतो",
+  "{tax} rate": "{tax} दर",
 };

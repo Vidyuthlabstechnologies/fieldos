@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
@@ -130,7 +131,7 @@ class BillsView extends ConsumerWidget {
                   leading: CircleAvatar(child: Icon(b.kind == 'ra' ? Icons.request_quote_outlined : Icons.receipt_outlined)),
                   title: Text('${b.billNumber} · ${rupees(b.netPayable)}'),
                   subtitle: Text([
-                    '${billKinds[b.kind]} · ${fmtDate(b.billDate)} · ${b.clientName}',
+                    '${tr(billKinds[b.kind] ?? '')} · ${fmtDate(b.billDate)} · ${b.clientName}',
                     if (byId[b.id] case final bal? when bal.paid > 0.005 && !bal.settled)
                       trf('{paid} received, {due} due', {'paid': rupees(bal.paid), 'due': rupees(bal.outstanding)}),
                     if (byId[b.id] case final bal? when bal.retentionHeld > 0.005)
@@ -271,7 +272,7 @@ class BillsView extends ConsumerWidget {
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           ListTile(
-            title: Text('${billKinds[b.kind]} ${b.billNumber}'),
+            title: Text('${tr(billKinds[b.kind] ?? '')} ${b.billNumber}'),
             subtitle: Text([
               trf('{amount} payable', {'amount': rupees(b.netPayable, paise: true)}),
               if (currentLanguage == AppLanguage.en) rupeesInWords(b.netPayable),
@@ -393,8 +394,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
   final _retention = TextEditingController(text: '5');
   final _tds = TextEditingController(text: '0');
   final _notes = TextEditingController();
-  double _gstRate = 18;
-  bool _interState = false;
+  double _gstRate = market.tax.defaultRate;
+  bool _interState = !market.tax.splitsInsideState;
   bool _interStateTouched = false;
   bool _numberTouched = false;
   final _lines = <BillLine>[];
@@ -417,7 +418,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
   }
 
   void _gstinChanged() {
-    if (_interStateTouched) return;
+    if (_interStateTouched || !isIndia) return;
     final ours = ref.read(billingProfileProvider(widget.project.companyId)).value?.gstin;
     final inter = isInterState(ours, _clientGstin.text);
     if (inter != _interState) setState(() => _interState = inter);
@@ -494,6 +495,35 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     });
   }
 
+  /// A sales tax rate typed by hand (US rates differ by state and city).
+  Future<double?> _askRate() async {
+    final c = TextEditingController(text: _gstRate > 0 ? fmtQty(_gstRate) : '');
+    final v = await showDialog<double>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(trf('{tax} rate', {'tax': tr(market.tax.name)})),
+        content: TextField(
+          controller: c,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(suffixText: '%'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Cancel'))),
+          FilledButton(
+            onPressed: () {
+              final r = double.tryParse(c.text.trim());
+              Navigator.pop(ctx, r == null || r < 0 || r > 100 ? null : r);
+            },
+            child: Text(tr('Save')),
+          ),
+        ],
+      ),
+    );
+    c.dispose();
+    return v;
+  }
+
   void _copyItems(List<ClientBill> bills) {
     final last = bills.where((b) => b.kind == _kind).firstOrNull;
     if (last == null) return;
@@ -518,13 +548,14 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     final lines = _lines.where((l) => l.qty > 0).toList();
     String? error;
     if (client.isEmpty) error = tr('Who is the bill for? Add the client name.');
-    if (gstin.isNotEmpty && !isValidGstin(gstin)) error = tr('That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.');
+    if (isIndia && gstin.isNotEmpty && !isValidGstin(gstin)) error = tr('That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.');
     if (lines.isEmpty) error = tr('Add at least one item with a quantity.');
     if (_kind == 'tax_invoice' && !isValidInvoiceNumber(number)) {
       error = tr('A tax invoice number has up to 16 letters, digits, - or /, like INV-0001.');
     }
     final ourGstin = ref.read(billingProfileProvider(widget.project.companyId)).value?.gstin ?? '';
-    if (_gstRate > 0 && ourGstin.trim().isEmpty) {
+    // GST law: only a registered supplier may charge it.
+    if (isIndia && _gstRate > 0 && ourGstin.trim().isEmpty) {
       error = tr('Add your GSTIN in "Your details on bills" first. Without it a bill cannot charge GST; pick None.');
     }
     if (bills.any((b) => b.billNumber.toLowerCase() == number.toLowerCase())) error = trf('Bill {number} already exists.', {'number': number});
@@ -569,11 +600,12 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
             TextField(
               controller: gstin,
               textCapitalization: TextCapitalization.characters,
-              maxLength: 15,
-              decoration: InputDecoration(labelText: tr('Your GSTIN')),
+              maxLength: isIndia ? 15 : 30,
+              decoration: InputDecoration(labelText: isIndia ? tr('Your GSTIN') : tr(market.tax.registrationLabel)),
             ),
             TextField(controller: address, maxLines: 3, decoration: InputDecoration(labelText: tr('Address'))),
-            TextField(controller: upi, decoration: InputDecoration(labelText: tr('UPI id for payments (optional)'))),
+            if (isIndia)
+              TextField(controller: upi, decoration: InputDecoration(labelText: tr('UPI id for payments (optional)'))),
           ]),
         ),
         actions: [
@@ -584,7 +616,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     );
     if (ok != true) return;
     final g = gstin.text.trim().toUpperCase();
-    if (g.isNotEmpty && !isValidGstin(g)) {
+    if (isIndia && g.isNotEmpty && !isValidGstin(g)) {
       if (mounted) showSnack(context, 'That GSTIN doesn\'t look right, so it wasn\'t saved.', error: true);
       return;
     }
@@ -610,7 +642,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
       body: SafeArea(
         child: ListView(padding: const EdgeInsets.fromLTRB(16, 12, 16, 32), children: [
           SegmentedButton<String>(
-            segments: [for (final e in billKinds.entries) ButtonSegment(value: e.key, label: Text(e.value))],
+            segments: [for (final e in billKinds.entries) ButtonSegment(value: e.key, label: Text(tr(e.value)))],
             selected: {_kind},
             showSelectedIcon: false,
             onSelectionChanged: (s) => setState(() {
@@ -623,7 +655,9 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
             child: ListTile(
               leading: const Icon(Icons.business_outlined),
               title: Text(tr('Your details on bills')),
-              subtitle: Text(profile.gstin.isEmpty ? tr('Add your GSTIN, address and UPI id') : 'GSTIN ${profile.gstin}'),
+              subtitle: Text(profile.gstin.isEmpty
+                  ? (isIndia ? tr('Add your GSTIN, address and UPI id') : tr('Add your tax number and address'))
+                  : '${isIndia ? 'GSTIN' : tr(market.tax.registrationLabel)} ${profile.gstin}'),
               trailing: const Icon(Icons.edit_outlined),
               onTap: () => _editProfile(profile),
             ),
@@ -661,24 +695,36 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
           TextField(
             controller: _clientGstin,
             textCapitalization: TextCapitalization.characters,
-            maxLength: 15,
-            decoration: InputDecoration(labelText: tr('Client GSTIN (optional)'), counterText: ''),
+            maxLength: isIndia ? 15 : 30,
+            decoration: InputDecoration(
+                labelText: isIndia
+                    ? tr('Client GSTIN (optional)')
+                    : trf("Client's {label} (optional)", {'label': tr(market.tax.registrationLabel)}),
+                counterText: ''),
           ),
           const SizedBox(height: 12),
-          Text('GST', style: theme.textTheme.labelLarge),
+          Text(tr(market.tax.name), style: theme.textTheme.labelLarge),
           const SizedBox(height: 6),
           SegmentedButton<double>(
             segments: [
-              ButtonSegment(value: 0, label: Text(tr('None'))),
-              ButtonSegment(value: 5, label: Text('5%')),
-              ButtonSegment(value: 12, label: Text('12%')),
-              ButtonSegment(value: 18, label: Text('18%')),
+              for (final r in market.tax.rateChoices)
+                ButtonSegment(value: r, label: Text(r == 0 ? tr('None') : '${fmtQty(r)}%')),
+              if (!market.tax.rateChoices.contains(_gstRate))
+                ButtonSegment(value: _gstRate, label: Text('${fmtQty(_gstRate)}%')),
+              if (!isIndia) ButtonSegment(value: -1, label: Text(tr('Other'))),
             ],
             selected: {_gstRate},
             showSelectedIcon: false,
-            onSelectionChanged: (s) => setState(() => _gstRate = s.first),
+            onSelectionChanged: (s) async {
+              if (s.first >= 0) {
+                setState(() => _gstRate = s.first);
+                return;
+              }
+              final typed = await _askRate();
+              if (typed != null) setState(() => _gstRate = typed);
+            },
           ),
-          SwitchListTile(
+          if (isIndia) SwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: Text(tr('Client is in another state (IGST)')),
             subtitle: Text(tr('For building work, GST follows the state where the site is. Inside your state it splits '
@@ -698,15 +744,21 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
                 decoration: InputDecoration(labelText: tr('Retention %'), helperText: tr('Held back by the client')),
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextField(
-                controller: _tds,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(labelText: tr('TDS %'), helperText: tr('Usually 1% or 2%')),
+            if (market.tax.withholdingLabel != null) ...[
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: _tds,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  onChanged: (_) => setState(() {}),
+                  decoration: isIndia
+                      ? InputDecoration(labelText: tr('TDS %'), helperText: tr('Usually 1% or 2%'))
+                      : InputDecoration(
+                          labelText: '${tr(market.tax.withholdingLabel!)} %',
+                          helperText: tr('Kept back by the client for the tax office')),
+                ),
               ),
-            ),
+            ],
           ]),
           SectionHeader(_kind == 'ra' ? tr('Work measured this bill') : tr('Items')),
           if (_lines.isEmpty && hasEarlier)
@@ -738,14 +790,11 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               padding: const EdgeInsets.all(14),
               child: Column(children: [
                 _row('Value of work', rupees(totals.gross, paise: true)),
-                if (_interState)
-                  _row('IGST ${fmtQty(_gstRate)}%', rupees(totals.igst, paise: true))
-                else if (_gstRate > 0) ...[
-                  _row('CGST ${fmtQty(_gstRate / 2)}%', rupees(totals.cgst, paise: true)),
-                  _row('SGST ${fmtQty(_gstRate / 2)}%', rupees(totals.sgst, paise: true)),
-                ],
+                for (final (label, amount) in taxLines(totals, rate: _gstRate, interState: _interState))
+                  _row(label, rupees(amount, paise: true)),
                 if (totals.retention > 0) _row('Less retention', '- ${rupees(totals.retention, paise: true)}'),
-                if (totals.tds > 0) _row('Less TDS', '- ${rupees(totals.tds, paise: true)}'),
+                if (totals.tds > 0)
+                  _row('Less ${market.tax.withholdingLabel ?? 'TDS'}', '- ${rupees(totals.tds, paise: true)}'),
                 const Divider(),
                 _row('Payable', rupees(totals.netPayable, paise: true), bold: true),
                 const SizedBox(height: 4),

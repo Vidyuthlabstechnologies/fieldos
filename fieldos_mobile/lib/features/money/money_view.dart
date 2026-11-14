@@ -19,6 +19,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'dart:io';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -549,7 +550,7 @@ class _ExpenseTile extends StatelessWidget {
         if (e.voucherNo != null) voucherLabel(e.voucherNo, provisional: provisional),
         shortDay(expenseDay(e)),
         if (e.mode != null) tr(paymentModes[e.mode] ?? e.mode!),
-        if ((e.gstPct ?? 0) > 0) 'GST ${_rate(e.gstPct!)}%',
+        if ((e.gstPct ?? 0) > 0) '${market.tax.name} ${_rate(e.gstPct!)}%',
         if (e.voided) tr('Cancelled'),
         if (e.note != null && e.note!.isNotEmpty) e.note!,
       ].join(' · ')),
@@ -635,7 +636,7 @@ class _ExpenseSheet extends StatelessWidget {
           if (gst != null) ...[
             row(tr('Before GST'), rupees(gst.taxable, paise: true)),
             if (gst.igst > 0)
-              row('IGST ${_rate(e.gstPct!)}%', rupees(gst.igst, paise: true))
+              row('$igstLabel ${_rate(e.gstPct!)}%', rupees(gst.igst, paise: true))
             else
               row('CGST + SGST ${_rate(e.gstPct!)}%',
                   '${rupees(gst.cgst, paise: true)} + ${rupees(gst.sgst, paise: true)}'),
@@ -795,7 +796,7 @@ Future<void> _exportExpenses(BuildContext context, List<SiteExpense> shown,
     ];
     final bytes = buildXlsx([
       XlsxSheet('Money spent', [
-        'Voucher', 'Date', 'Category', 'Paid to', 'Paid by', 'Amount (₹)', 'Before GST (₹)', 'GST (₹)', 'GST %',
+        'Voucher', 'Date', 'Category', 'Paid to', 'Paid by', marketText('Amount (₹)'), marketText('Before GST (₹)'), marketText('GST (₹)'), marketText('GST %'),
         'Note', 'Status',
       ], rows),
     ]);
@@ -1203,7 +1204,7 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
                 for (final r in gstRates)
                   ChoiceChip(
                     key: Key('gst-${r.toInt()}'),
-                    label: Text('${r.toInt()}%'),
+                    label: Text('${fmtQty(r)}%'),
                     selected: gst == r,
                     onSelected: (_) => set(() => gst = r),
                   ),
@@ -1216,7 +1217,7 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
                   value: includesGst,
                   onChanged: (v) => set(() => includesGst = v),
                 ),
-                SwitchListTile(
+                if (isIndia) SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   dense: true,
                   title: Text(tr('Supplier in another state (IGST)')),
@@ -1228,7 +1229,7 @@ Future<bool> addExpense(BuildContext context, WidgetRef ref,
                     key: const Key('expense-gst-split'),
                     split.igst > 0
                         ? '${rupees(split.total, paise: true)} = ${rupees(split.taxable, paise: true)}'
-                            ' + IGST ${rupees(split.igst, paise: true)}'
+                            ' + $igstLabel ${rupees(split.igst, paise: true)}'
                         : '${rupees(split.total, paise: true)} = ${rupees(split.taxable, paise: true)}'
                             ' + CGST ${rupees(split.cgst, paise: true)} + SGST ${rupees(split.sgst, paise: true)}',
                     style: muted,

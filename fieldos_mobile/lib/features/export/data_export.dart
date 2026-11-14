@@ -13,6 +13,7 @@ import 'package:drift/drift.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/export/xlsx_writer.dart';
 import 'package:fieldos_mobile/features/money/money_book.dart' show gstSplit, voucherLabel;
@@ -110,10 +111,10 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
         'Status',
         'Start',
         'End',
-        if (showMoneyIn) 'Received (₹)',
-        'Spent (₹)',
-        'Material bought (₹)',
-        if (showMoneyIn) ...['Balance (₹)', 'Billed to client (₹)'],
+        if (showMoneyIn) marketText('Received (₹)'),
+        marketText('Spent (₹)'),
+        marketText('Material bought (₹)'),
+        if (showMoneyIn) ...[marketText('Balance (₹)'), marketText('Billed to client (₹)')],
         'Workers',
         'Daily reports',
         'Open issues',
@@ -152,12 +153,12 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
           'Worker',
           'Paid to',
           'Mode',
-          'Amount (₹)',
-          'Before GST (₹)',
-          'GST %',
-          'CGST (₹)',
-          'SGST (₹)',
-          'IGST (₹)',
+          marketText('Amount (₹)'),
+          marketText('Before GST (₹)'),
+          marketText('GST %'),
+          marketText('CGST (₹)'),
+          marketText('SGST (₹)'),
+          marketText('IGST (₹)'),
           'Note',
           'Status',
           'Entered by',
@@ -186,7 +187,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
             }(),
         ]),
     if (showMoneyIn)
-      XlsxSheet('Money received', h(['Date', 'From', 'Mode', 'Amount (₹)', 'Note', 'Status', 'Entered by']), [
+      XlsxSheet('Money received', h(['Date', 'From', 'Mode', marketText('Amount (₹)'), 'Note', 'Status', 'Entered by']), [
         for (final e in received..sort((a, b) => newest(a.receivedOn, b.receivedOn)))
           r(e.projectId, [
             e.receivedOn,
@@ -201,13 +202,13 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
     if (showMoneyIn)
       XlsxSheet(
         'Client bills',
-        h(['Bill no.', 'Date', 'Type', 'Client', 'Client GSTIN', 'Gross (₹)', 'GST %', 'Net payable (₹)', 'Status']),
+        h(['Bill no.', 'Date', 'Type', 'Client', 'Client GSTIN', marketText('Gross (₹)'), marketText('GST %'), marketText('Net payable (₹)'), 'Status']),
         [
           for (final b in bills..sort((a, b) => newest(a.billDate, b.billDate)))
             r(b.projectId, [
               b.billNumber,
               b.billDate,
-              b.kind == 'tax_invoice' ? 'Tax invoice' : 'RA bill',
+              b.kind == 'tax_invoice' ? 'Tax invoice' : marketText('RA bill'),
               b.clientName,
               b.clientGstin,
               b.gross,
@@ -238,7 +239,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
             who(m.recordedBy),
           ]),
       ]),
-    XlsxSheet('Workers', h(['Name', 'Skill', 'Phone', 'Daily wage (₹)', 'Status', 'Added on']), [
+    XlsxSheet('Workers', h(['Name', 'Skill', 'Phone', marketText('Daily wage (₹)'), 'Status', 'Added on']), [
       for (final w in workers..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase())))
         r(w.projectId, [w.name, w.role, w.phone, w.dailyWage, _word(w.status), w.createdAt]),
     ]),
@@ -254,7 +255,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
       for (final i in issues..sort((a, b) => newest(a.createdAt, b.createdAt)))
         r(i.projectId, [i.createdAt, i.description, _word(i.severity), _word(i.status), i.resolvedAt]),
     ]),
-    XlsxSheet('Material received', h(['Date', 'Material', 'Quantity', 'Unit', 'Amount (₹)', 'Supplier', 'Note']), [
+    XlsxSheet('Material received', h(['Date', 'Material', 'Quantity', 'Unit', marketText('Amount (₹)'), 'Supplier', 'Note']), [
       for (final m in receipts..sort((a, b) => newest(a.receivedOn, b.receivedOn)))
         r(m.projectId, [
           m.receivedOn,
@@ -272,7 +273,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
     ]),
     XlsxSheet(
       'Purchase requests',
-      h(['Raised', 'Material', 'Quantity', 'Unit', 'Estimated (₹)', 'Urgency', 'Status', 'Note']),
+      h(['Raised', 'Material', 'Quantity', 'Unit', marketText('Estimated (₹)'), 'Urgency', 'Status', 'Note']),
       [
         for (final q in requests..sort((a, b) => newest(a.createdAt, b.createdAt)))
           r(q.projectId, [
@@ -287,7 +288,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
           ]),
       ],
     ),
-    XlsxSheet('Purchase orders', h(['PO no.', 'Raised', 'Supplier', 'Total (₹)', 'Delivery by', 'Status', 'Note']), [
+    XlsxSheet('Purchase orders', h(['PO no.', 'Raised', 'Supplier', marketText('Total (₹)'), 'Delivery by', 'Status', 'Note']), [
       for (final o in orders..sort((a, b) => newest(a.createdAt, b.createdAt)))
         r(o.projectId, [
           o.poNumber,
@@ -299,7 +300,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
           o.notes,
         ]),
     ]),
-    XlsxSheet('Work orders', h(['Work', 'Subcontractor', 'Agreed (₹)', 'Billed (₹)', 'Status', 'Created']), [
+    XlsxSheet('Work orders', h(['Work', 'Subcontractor', marketText('Agreed (₹)'), marketText('Billed (₹)'), 'Status', 'Created']), [
       for (final w in workOrders..sort((a, b) => newest(a.createdAt, b.createdAt)))
         r(w.projectId, [
           w.description,
@@ -318,8 +319,8 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
           'Model',
           'Registration',
           'Status',
-          'Daily rate (₹)',
-          'Rate per hour (₹)',
+          marketText('Daily rate (₹)'),
+          marketText('Rate per hour (₹)'),
           'Own or hired',
           'Hired from',
           'On site since',
@@ -345,7 +346,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
               e.notes,
             ]),
         ]),
-    XlsxSheet('Equipment logs', h(['Date', 'Equipment', 'Type', 'Hours', 'Cost (₹)', 'Note']), [
+    XlsxSheet('Equipment logs', h(['Date', 'Equipment', 'Type', 'Hours', marketText('Cost (₹)'), 'Note']), [
       for (final l in equipmentLogs.toList()..sort((a, b) => newest(a.logDate, b.logDate)))
         r(equipmentSite[l.equipmentId] ?? '', [
           l.logDate,
@@ -386,7 +387,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
       ]),
     XlsxSheet(
         'Suppliers',
-        ['Name', 'Contact person', 'Phone', 'Email', 'GSTIN', 'Category', 'Address', if (showMoneyIn) 'Opening balance (₹)']
+        ['Name', 'Contact person', 'Phone', 'Email', 'GSTIN', 'Category', 'Address', if (showMoneyIn) marketText('Opening balance (₹)')]
             .toList(),
         [
           for (final s in suppliers)

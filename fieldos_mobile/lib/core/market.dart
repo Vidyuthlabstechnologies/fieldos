@@ -64,9 +64,13 @@ class TaxRegime {
     required this.defaultRate,
     required this.registrationLabel,
     this.splitsInsideState = false,
+    required this.rateChoices,
     this.withholdingLabel,
     this.reverseChargeNote,
   });
+
+  /// The rates offered as one-tap choices on a bill, 0 (none) first.
+  final List<double> rateChoices;
 
   /// "GST", "Sales tax", "SST", "VAT".
   final String name;
@@ -129,6 +133,9 @@ class MarketConfig {
     required this.languageCodes,
     required this.postcodeLabel,
     required this.regionLabel,
+    required this.progressBillName,
+    required this.progressBillTitle,
+    required this.invoiceTitle,
     this.wordsAnd = false,
     this.currencyWordsFirst = true,
   });
@@ -173,6 +180,17 @@ class MarketConfig {
   /// "State", "Emirate", "County".
   final String regionLabel;
 
+  /// The running (progress) bill: "Running bill (RA)" in India, "Pay
+  /// application" in the US, "Application for payment" in the UK.
+  final String progressBillName;
+
+  /// Its heading on the PDF.
+  final String progressBillTitle;
+
+  /// The invoice's heading on the PDF: "TAX INVOICE", or "INVOICE" in the
+  /// US, where there is no tax-invoice format in law.
+  final String invoiceTitle;
+
   /// British-style "One Hundred and Five" in amounts in words.
   final bool wordsAnd;
 
@@ -198,6 +216,7 @@ const _india = MarketConfig(
     registrationLabel: 'GSTIN',
     splitsInsideState: true,
     withholdingLabel: 'TDS',
+    rateChoices: [0, 5, 12, 18],
   ),
   // Factories Act / state rules: double the ordinary rate past 9 h a day
   // or 48 h a week. Most sites pay daily wages and agree overtime on site.
@@ -206,6 +225,9 @@ const _india = MarketConfig(
   languageCodes: ['en', 'hi', 'te', 'ta', 'kn', 'mr'],
   postcodeLabel: 'PIN code',
   regionLabel: 'State',
+  progressBillName: 'Running bill (RA)',
+  progressBillTitle: 'RUNNING ACCOUNT BILL',
+  invoiceTitle: 'TAX INVOICE',
 );
 
 const _us = MarketConfig(
@@ -221,7 +243,7 @@ const _us = MarketConfig(
   units: UnitSystem.imperial,
   // No federal VAT; state and local sales tax, often 0 on lump-sum
   // construction contracts, so the default is 0 and each bill can set it.
-  tax: TaxRegime(name: 'Sales tax', defaultRate: 0, registrationLabel: 'Tax ID (EIN)'),
+  tax: TaxRegime(name: 'Sales tax', defaultRate: 0, registrationLabel: 'Tax ID (EIN)', rateChoices: [0, 6, 7, 8.25]),
   // FLSA: time and a half past 40 hours in a work week. California adds
   // daily overtime past 8 hours; the wage sheet notes it.
   overtime: OvertimeRule(weeklyHours: 40, multiplier: 1.5, note: 'Time and a half past 40 hours a week (FLSA). Some states, like California, also pay daily overtime.'),
@@ -229,6 +251,9 @@ const _us = MarketConfig(
   languageCodes: ['en', 'es'],
   postcodeLabel: 'ZIP code',
   regionLabel: 'State',
+  progressBillName: 'Pay application',
+  progressBillTitle: 'APPLICATION FOR PAYMENT',
+  invoiceTitle: 'INVOICE',
   currencyWordsFirst: false,
 );
 
@@ -243,9 +268,10 @@ const _malaysia = MarketConfig(
   dateOrder: DateOrder.dmy,
   clock24h: false,
   units: UnitSystem.metric,
-  // Service tax on construction services since 1 Jul 2025 (registered
-  // providers above the threshold); 8% is the general service tax rate.
-  tax: TaxRegime(name: 'SST', defaultRate: 8, registrationLabel: 'SST registration no.'),
+  // Service tax on construction services since 1 Jul 2025, at 6% for
+  // registered providers above the threshold (8% is the general rate for
+  // other services). Unregistered firms pick None.
+  tax: TaxRegime(name: 'SST', defaultRate: 6, registrationLabel: 'SST registration no.', rateChoices: [0, 6, 8]),
   // Employment Act 1955 (2022 amendment): 45 hours a week, 8 a day, at
   // 1.5x on a normal day.
   overtime: OvertimeRule(dailyHours: 8, weeklyHours: 45, multiplier: 1.5, note: 'Overtime at 1.5x past 8 hours a day or 45 a week (Employment Act 1955)'),
@@ -253,6 +279,10 @@ const _malaysia = MarketConfig(
   languageCodes: ['en', 'ms', 'zh', 'ta'],
   postcodeLabel: 'Postcode',
   regionLabel: 'State',
+  progressBillName: 'Progress claim',
+  progressBillTitle: 'PROGRESS CLAIM',
+  // Malaysia has no "tax invoice" since GST ended; SST bills are invoices.
+  invoiceTitle: 'INVOICE',
 );
 
 const _uae = MarketConfig(
@@ -266,7 +296,7 @@ const _uae = MarketConfig(
   dateOrder: DateOrder.dmy,
   clock24h: false,
   units: UnitSystem.metric,
-  tax: TaxRegime(name: 'VAT', defaultRate: 5, registrationLabel: 'TRN'),
+  tax: TaxRegime(name: 'VAT', defaultRate: 5, registrationLabel: 'TRN', rateChoices: [0, 5]),
   // Federal Decree-Law 33/2021: 8 hours a day, 48 a week; overtime at
   // least 25% more (50% between 10 pm and 4 am).
   overtime: OvertimeRule(dailyHours: 8, weeklyHours: 48, multiplier: 1.25, note: 'Overtime at 25% extra past 8 hours a day (50% from 10 pm to 4 am), UAE Labour Law'),
@@ -274,6 +304,9 @@ const _uae = MarketConfig(
   languageCodes: ['en', 'ar', 'hi', 'ur', 'ml'],
   postcodeLabel: '',
   regionLabel: 'Emirate',
+  progressBillName: 'Interim payment application',
+  progressBillTitle: 'INTERIM PAYMENT APPLICATION',
+  invoiceTitle: 'TAX INVOICE',
 );
 
 const _uk = MarketConfig(
@@ -292,6 +325,7 @@ const _uk = MarketConfig(
     defaultRate: 20,
     registrationLabel: 'VAT number',
     withholdingLabel: 'CIS',
+    rateChoices: [0, 5, 20],
     reverseChargeNote: 'Reverse charge: customer to account to HMRC for the VAT',
   ),
   // Working Time Regulations cap the average week at 48 hours (workers
@@ -301,6 +335,9 @@ const _uk = MarketConfig(
   languageCodes: ['en', 'pl', 'ro'],
   postcodeLabel: 'Postcode',
   regionLabel: 'County',
+  progressBillName: 'Application for payment',
+  progressBillTitle: 'APPLICATION FOR PAYMENT',
+  invoiceTitle: 'VAT INVOICE',
   wordsAnd: true,
   currencyWordsFirst: false,
 );
@@ -313,6 +350,15 @@ Market get currentMarket => _market;
 
 /// Its settings: shorthand for `currentMarket.config`.
 MarketConfig get market => _market.config;
+
+/// India-only parts of the app: GSTIN and CGST/SGST/IGST, TDS, UPI
+/// payment QR codes, RERA reports, PF/ESI/professional-tax payroll and
+/// Tally/Zoho exports. Hidden in every other market's app.
+bool get isIndia => _market == Market.india;
+
+/// What the one-line tax is called on screens and PDFs: IGST in India
+/// (where CGST + SGST is the other case), the tax's own name elsewhere.
+String get igstLabel => isIndia ? 'IGST' : market.tax.name;
 
 /// Tests switch market with this; the app never does (one build, one market).
 void debugSetMarket(Market m) => _market = m;

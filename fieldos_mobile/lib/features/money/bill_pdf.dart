@@ -57,8 +57,11 @@ Future<Uint8List> buildBillPdf({
   final totals = billTotals(lines,
       gstRate: bill.gstRate, interState: bill.interState, retentionPct: bill.retentionPct, tdsPct: bill.tdsPct);
   final isRa = bill.kind == 'ra';
-  final title = isRa ? 'RUNNING ACCOUNT BILL' : invoiceTitle(ourGstin: profile.gstin, gstRate: bill.gstRate);
+  final title = isRa
+      ? market.progressBillTitle
+      : (isIndia ? invoiceTitle(ourGstin: profile.gstin, gstRate: bill.gstRate) : market.invoiceTitle);
   final isTaxInvoice = title == 'TAX INVOICE';
+  final regLabel = isIndia ? 'GSTIN' : market.tax.registrationLabel;
   final doc = pw.Document(title: '$title ${bill.billNumber}', creator: 'FieldOS');
 
   pw.Widget t(String s, {double size = 9, bool bold = false, PdfColor color = _ink, pw.TextAlign? align}) => pw.Text(
@@ -107,8 +110,6 @@ Future<Uint8List> buildBillPdf({
         ]),
       );
 
-  final rate = fmtQty(bill.gstRate);
-  final halfRate = fmtQty(bill.gstRate / 2);
   final client = bill.clientName;
   final pos = placeOfSupply(ourGstin: profile.gstin, clientGstin: bill.clientGstin, interState: bill.interState);
 
@@ -131,7 +132,7 @@ Future<Uint8List> buildBillPdf({
           child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
             t(companyName, size: 16, bold: true, color: brandInk(branding)),
             if (profile.address.trim().isNotEmpty) t(profile.address.trim(), color: _muted),
-            if (profile.gstin.trim().isNotEmpty) t('GSTIN: ${profile.gstin.trim().toUpperCase()}', color: _muted),
+            if (profile.gstin.trim().isNotEmpty) t('$regLabel: ${profile.gstin.trim().toUpperCase()}', color: _muted),
           ]),
         ),
         pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
@@ -149,15 +150,15 @@ Future<Uint8List> buildBillPdf({
             child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
               t('Bill to', color: _muted),
               t(client, bold: true),
-              if ((bill.clientGstin ?? '').isNotEmpty) t('GSTIN: ${bill.clientGstin}'),
-              if (pos != null) t('Place of supply: ${pos.$1} (${pos.$2})'),
+              if ((bill.clientGstin ?? '').isNotEmpty) t('$regLabel: ${bill.clientGstin}'),
+              if (isIndia && pos != null) t('Place of supply: ${pos.$1} (${pos.$2})'),
             ]),
           ),
           pw.Expanded(
             child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
               t('Project', color: _muted),
               t(project.name, bold: true),
-              t('SAC ${bill.sac}'),
+              if (isIndia) t('SAC ${bill.sac}'),
             ]),
           ),
         ]),
@@ -172,19 +173,16 @@ Future<Uint8List> buildBillPdf({
       ),
       pw.SizedBox(height: 10),
       sumRow(isRa ? 'Value of work this bill' : 'Taxable value', _money(totals.gross)),
-      if (bill.interState)
-        sumRow('IGST @ $rate%', _money(totals.igst))
-      else if (bill.gstRate > 0) ...[
-        sumRow('CGST @ $halfRate%', _money(totals.cgst)),
-        sumRow('SGST @ $halfRate%', _money(totals.sgst)),
-      ],
-      sumRow('Total with GST', _money(totals.invoiceTotal), bold: true),
+      for (final (label, amount) in taxLines(totals, rate: bill.gstRate, interState: bill.interState))
+        sumRow(label.replaceFirst(' ', ' @ ', label.lastIndexOf(' ')), _money(amount)),
+      sumRow('Total with ${market.tax.name}', _money(totals.invoiceTotal), bold: true),
       if (totals.retention > 0) sumRow('Less retention @ ${fmtQty(bill.retentionPct)}%', '- ${_money(totals.retention)}'),
-      if (totals.tds > 0) sumRow('Less TDS @ ${fmtQty(bill.tdsPct)}%', '- ${_money(totals.tds)}'),
+      if (totals.tds > 0)
+        sumRow('Less ${market.tax.withholdingLabel ?? 'TDS'} @ ${fmtQty(bill.tdsPct)}%', '- ${_money(totals.tds)}'),
       if (totals.retention > 0 || totals.tds > 0) sumRow('Amount payable', _money(totals.netPayable), bold: true),
       pw.SizedBox(height: 6),
       t(rupeesInWords(totals.netPayable), bold: true),
-      if (profile.upiId.trim().isNotEmpty) ...[
+      if (isIndia && profile.upiId.trim().isNotEmpty) ...[
         pw.SizedBox(height: 12),
         pw.Row(children: [
           pw.BarcodeWidget(
@@ -197,7 +195,7 @@ Future<Uint8List> buildBillPdf({
           pw.Expanded(child: t('Scan with any UPI app to pay ${_money(totals.netPayable)} to ${profile.upiId.trim()}.')),
         ]),
       ],
-      if (isTaxInvoice) ...[pw.SizedBox(height: 6), t('Tax payable on reverse charge: No', color: _muted)],
+      if (isIndia && isTaxInvoice) ...[pw.SizedBox(height: 6), t('Tax payable on reverse charge: No', color: _muted)],
       if ((bill.notes ?? '').trim().isNotEmpty) ...[pw.SizedBox(height: 10), t(bill.notes!.trim(), color: _muted)],
       pw.SizedBox(height: 36),
       pw.Row(
@@ -246,7 +244,7 @@ Future<void> shareBill({
       branding: branding);
   final dir = await getTemporaryDirectory();
   final safe = bill.billNumber.replaceAll(RegExp(r'[^A-Za-z0-9\-]+'), '_');
-  final file = File('${dir.path}/${bill.kind == 'ra' ? 'RA_bill' : 'Invoice'}_$safe.pdf');
+  final file = File('${dir.path}/${bill.kind == 'ra' ? (isIndia ? 'RA_bill' : 'Progress_bill') : 'Invoice'}_$safe.pdf');
   await file.writeAsBytes(bytes);
   await SharePlus.instance.share(ShareParams(
     files: [XFile(file.path, mimeType: 'application/pdf')],

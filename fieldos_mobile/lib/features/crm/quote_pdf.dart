@@ -10,6 +10,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
@@ -140,7 +141,7 @@ Future<Uint8List> buildQuotePdf({
         sumRow('Taxable value', _money(totals.taxable)),
       ],
       if (quote.interState && quote.gstRate > 0)
-        sumRow('IGST @ ${fmtQty(quote.gstRate)}%', _money(totals.igst))
+        sumRow('$igstLabel @ ${fmtQty(quote.gstRate)}%', _money(totals.igst))
       else if (quote.gstRate > 0) ...[
         sumRow('CGST @ $half%', _money(totals.cgst)),
         sumRow('SGST @ $half%', _money(totals.sgst)),
@@ -165,7 +166,7 @@ Future<Uint8List> buildQuotePdf({
 String quoteShareText(CrmQuote q, CrmLead lead, String companyName) {
   final valid = q.validUntil == null ? '' : ' Valid until ${fmtDate(q.validUntil!)}.';
   return 'Namaste ${lead.name}, please find our quotation ${q.quoteNumber} for '
-      '${(lead.workType ?? '').isEmpty ? 'the work' : lead.workType}: ${rupees(q.total, paise: true)} with GST.$valid '
+      '${(lead.workType ?? '').isEmpty ? 'the work' : lead.workType}: ${rupees(q.total, paise: true)} with ${market.tax.name}.$valid '
       '- $companyName';
 }
 
