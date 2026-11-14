@@ -245,4 +245,6 @@ const guideVoices = <String, String>{
   'mr': 'nilesh_mr_conversation',
   // No Sarvam voice for Spanish: the phone's own voice reads it.
   'es': '',
+  'ms': '',
+  'zh': '',
 };

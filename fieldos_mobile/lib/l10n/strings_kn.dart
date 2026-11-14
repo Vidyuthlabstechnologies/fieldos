@@ -3346,4 +3346,5 @@ const Map<String, String> stringsKn = {
   'count': 'ಎಣಿಕೆ',
   'Foot': 'ಅಡಿ',
   'Hectare': 'ಹೆಕ್ಟೇರ್',
+  'Add your {label} in "Your details on bills" first. Without it a bill cannot charge {tax}; pick None.': 'ಮೊದಲು "ಬಿಲ್‌ಗಳಲ್ಲಿ ನಿಮ್ಮ ವಿವರಗಳು" ನಲ್ಲಿ ನಿಮ್ಮ {label} ಸೇರಿಸಿ. ಅದಿಲ್ಲದೆ ಬಿಲ್‌ನಲ್ಲಿ {tax} ವಿಧಿಸಲಾಗದು; None ಆಯ್ಕೆಮಾಡಿ.',
 };

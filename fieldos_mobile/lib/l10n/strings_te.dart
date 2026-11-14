@@ -2454,4 +2454,5 @@ const Map<String, String> stringsTe = {
   'count': 'లెక్క',
   'Foot': 'అడుగు',
   'Hectare': 'హెక్టారు',
+  'Add your {label} in "Your details on bills" first. Without it a bill cannot charge {tax}; pick None.': 'ముందు "బిల్లులపై మీ వివరాలు"లో మీ {label} జోడించండి. అది లేకుండా బిల్లుపై {tax} వేయలేరు; None ఎంచుకోండి.',
 };

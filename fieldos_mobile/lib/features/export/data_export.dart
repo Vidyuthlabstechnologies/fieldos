@@ -13,6 +13,7 @@ import 'package:drift/drift.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/export/xlsx_writer.dart';
@@ -409,7 +410,7 @@ Future<List<XlsxSheet>> buildExportSheets(AppDatabase db, ExportScope scope, {bo
   return sheets;
 }
 
-const _modes = {'cash': 'Cash', 'upi': 'UPI', 'bank': 'Bank transfer', 'cheque': 'Cheque'};
+Map<String, String> get _modes => {'cash': 'Cash', 'upi': market.instantPaymentName, 'bank': 'Bank transfer', 'cheque': 'Cheque'};
 
 /// "in_progress" → "In progress", so stored codes read as words in Excel.
 String? _word(String? code) {

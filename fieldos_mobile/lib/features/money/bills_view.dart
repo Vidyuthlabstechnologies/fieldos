@@ -558,8 +558,11 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     }
     final ourGstin = ref.read(billingProfileProvider(widget.project.companyId)).value?.gstin ?? '';
     // GST law: only a registered supplier may charge it.
-    if (isIndia && _gstRate > 0 && ourGstin.trim().isEmpty) {
-      error = tr('Add your GSTIN in "Your details on bills" first. Without it a bill cannot charge GST; pick None.');
+    if (market.tax.onlyWhenRegistered && _gstRate > 0 && ourGstin.trim().isEmpty) {
+      error = isIndia
+          ? tr('Add your GSTIN in "Your details on bills" first. Without it a bill cannot charge GST; pick None.')
+          : trf('Add your {label} in "Your details on bills" first. Without it a bill cannot charge {tax}; pick None.',
+              {'label': tr(market.tax.registrationLabel), 'tax': tr(market.tax.name)});
     }
     if (bills.any((b) => b.billNumber.toLowerCase() == number.toLowerCase())) error = trf('Bill {number} already exists.', {'number': number});
     if (error != null) {

@@ -2994,4 +2994,5 @@ const Map<String, String> stringsEs = {
   'Pound': 'Libra',
   'Ton (2,000 lb)': 'Tonelada corta (2,000 lb)',
   'Cement bag (94 lb)': 'Saco de cemento (94 lb)',
+  'Add your {label} in "Your details on bills" first. Without it a bill cannot charge {tax}; pick None.': 'Primero agrega tu {label} en "Tus datos en las facturas". Sin él, una factura no puede cobrar {tax}; elige Ninguno.',
 };

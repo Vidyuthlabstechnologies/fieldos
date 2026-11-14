@@ -117,7 +117,7 @@ void main() {
     test('each market words its currency', () {
       final cases = {
         Market.us: 'Twelve Thousand Five Hundred Dollars and Fifty Cents Only',
-        Market.malaysia: 'Ringgit Malaysia Twelve Thousand Five Hundred and Fifty Sen Only',
+        Market.malaysia: 'Ringgit Malaysia Twelve Thousand Five Hundred and Cents Fifty Only',
         Market.uae: 'UAE Dirhams Twelve Thousand Five Hundred and Fifty Fils Only',
         Market.uk: 'Twelve Thousand Five Hundred Pounds and Fifty Pence Only',
       };
@@ -152,6 +152,10 @@ void main() {
       // Tamil is Tamil wherever it is spoken from; the voice packs are ta-IN.
       expect(speechCodeFor(AppLanguage.ta), 'ta-IN');
       expect(speechCodeFor(AppLanguage.en), 'en-MY');
+      expect(AppLanguage.offered, [AppLanguage.en, AppLanguage.ms, AppLanguage.zh, AppLanguage.ta]);
+      expect(speechCodeFor(AppLanguage.ms), 'ms-MY');
+      expect(speechCodeFor(AppLanguage.zh), 'zh-CN');
+      expect(AppLanguage.zh.locale.scriptCode, 'Hans');
 
       debugSetMarket(Market.uae);
       expect(AppLanguage.offered, contains(AppLanguage.hi));

@@ -2452,4 +2452,5 @@ const Map<String, String> stringsHi = {
   'count': 'गिनती',
   'Foot': 'फ़ुट',
   'Hectare': 'हेक्टेयर',
+  'Add your {label} in "Your details on bills" first. Without it a bill cannot charge {tax}; pick None.': 'पहले "बिल पर आपका विवरण" में अपना {label} जोड़ें। इसके बिना बिल पर {tax} नहीं लग सकता; None चुनें।',
 };

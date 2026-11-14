@@ -235,6 +235,7 @@ String amountInWords(double amount) {
   final m = market;
   if (m.currencyWordsFirst) {
     final words = '${m.majorUnitWords} ${numberWords(major)}';
+    if (m.minorWordsFirst && minor != 0) return '$words and ${m.minorUnitWords} ${_belowHundred(minor)} Only';
     return minor == 0 ? '$words Only' : '$words and ${_belowHundred(minor)} ${m.minorUnitWords} Only';
   }
   final words = '${numberWords(major)} ${m.majorUnitWords}';

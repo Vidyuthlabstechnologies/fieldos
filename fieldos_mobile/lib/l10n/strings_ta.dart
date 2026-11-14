@@ -3346,4 +3346,5 @@ const Map<String, String> stringsTa = {
   'count': 'எண்ணிக்கை',
   'Foot': 'அடி',
   'Hectare': 'ஹெக்டேர்',
+  'Add your {label} in "Your details on bills" first. Without it a bill cannot charge {tax}; pick None.': 'முதலில் "பில்களில் உங்கள் விவரங்கள்" பகுதியில் உங்கள் {label} சேர்க்கவும். அது இல்லாமல் பில்லில் {tax} வசூலிக்க முடியாது; None தேர்வு செய்யவும்.',
 };
