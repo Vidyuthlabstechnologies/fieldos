@@ -68,7 +68,13 @@ class TaxRegime {
     this.withholdingLabel,
     this.reverseChargeNote,
     this.onlyWhenRegistered = true,
+    this.withholdingOnLabourOnly = false,
   });
+
+  /// The withholding is worked out on labour only, leaving out lines
+  /// marked as materials (UK CIS: materials, plant hire and VAT are not
+  /// liable to deduction).
+  final bool withholdingOnLabourOnly;
 
   /// Only a registered business may charge the tax (GST, SST, VAT): a bill
   /// with tax needs our registration number. False for US sales tax, which
@@ -379,7 +385,7 @@ const _malaysia = MarketConfig(
   // Sarawak Labour Ordinances govern overtime, rest days and holidays there.
   minimumWage: MinimumWage(
     monthly: 1700,
-    hourly: 8.17,
+    hourly: 8.72, // the Order's own hourly rate (RM1,700 x 12 / 52 / 45)
     daily: {6: 65.38, 5: 78.46, 4: 98.08},
     note: 'Minimum wage: RM1,700 a month (Minimum Wages Order 2025). In Sabah and Sarawak, the Sabah Labour '
         'Ordinance or the Sarawak Labour Ordinance applies instead of the Employment Act 1955 for overtime, rest '
@@ -453,7 +459,9 @@ const _uk = MarketConfig(
     registrationLabel: 'VAT number',
     withholdingLabel: 'CIS',
     rateChoices: [0, 5, 20],
-    reverseChargeNote: 'Reverse charge: customer to account to HMRC for the VAT',
+    reverseChargeNote: 'Reverse charge: Customer to account to HMRC for the reverse charge VAT of {amount} at {rate}%. '
+        '(S55A VATA 1994 applies.)',
+    withholdingOnLabourOnly: true,
   ),
   // Working Time Regulations cap the average week at 48 hours (workers
   // can opt out) but set no overtime premium.
@@ -463,6 +471,15 @@ const _uk = MarketConfig(
   postcodeLabel: 'Postcode',
   regionLabel: 'County',
   payHourly: true,
+  // National Living Wage from 1 April 2026, age 21 and over. Younger
+  // workers and apprentices have lower bands; the self-employed none.
+  minimumWage: MinimumWage(
+    monthly: 0,
+    hourly: 12.71,
+    daily: {},
+    note: 'National Living Wage: £12.71 an hour from age 21 (from 1 April 2026). Lower rates apply under 21 and to '
+        'apprentices; it does not apply to the genuinely self-employed.',
+  ),
   progressBillName: 'Application for payment',
   progressBillTitle: 'APPLICATION FOR PAYMENT',
   invoiceTitle: 'VAT INVOICE',

@@ -44,7 +44,8 @@ void main() {
     expect(validTaxId('36ABCDE1234F1Z5'), isTrue);
     expect(normaliseTaxId(' 36abcde1234f1z5 '), '36ABCDE1234F1Z5');
     debugSetMarket(Market.uk);
-    expect(validTaxId('GB123456789'), isTrue);
+    expect(validTaxId('GB980780684'), isTrue);
+    expect(validTaxId('GB123456789'), isFalse, reason: 'fails the HMRC check');
   });
 
   test('a tax invoice only from a supplier with a TRN', () {

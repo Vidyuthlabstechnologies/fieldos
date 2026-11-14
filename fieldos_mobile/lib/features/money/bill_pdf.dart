@@ -55,7 +55,11 @@ Future<Uint8List> buildBillPdf({
 }) async {
   final lines = decodeLines(bill.linesJson);
   final totals = billTotals(lines,
-      gstRate: bill.gstRate, interState: bill.interState, retentionPct: bill.retentionPct, tdsPct: bill.tdsPct);
+      gstRate: bill.gstRate,
+      interState: bill.interState,
+      retentionPct: bill.retentionPct,
+      tdsPct: bill.tdsPct,
+      reverseCharge: isReverseCharge(bill.sac));
   final isRa = bill.kind == 'ra';
   final title = isRa
       ? market.progressBillTitle
@@ -175,14 +179,22 @@ Future<Uint8List> buildBillPdf({
       pw.SizedBox(height: 10),
       sumRow(isRa ? 'Value of work this bill' : 'Taxable value', _money(totals.gross)),
       for (final (label, amount) in taxLines(totals, rate: bill.gstRate, interState: bill.interState))
-        sumRow(label.replaceFirst(' ', ' @ ', label.lastIndexOf(' ')), _money(amount)),
-      sumRow('Total with ${market.tax.name}', _money(totals.invoiceTotal), bold: true),
+        sumRow(
+            '${totals.reverseCharge ? 'Reverse charge ' : ''}${label.replaceFirst(' ', ' @ ', label.lastIndexOf(' '))}',
+            _money(amount)),
+      sumRow(totals.reverseCharge ? 'Total (reverse charge VAT not added)' : 'Total with ${market.tax.name}',
+          _money(totals.invoiceTotal),
+          bold: true),
       if (totals.retention > 0) sumRow('Less retention @ ${fmtQty(bill.retentionPct)}%', '- ${_money(totals.retention)}'),
       if (totals.tds > 0)
         sumRow('Less ${market.tax.withholdingLabel ?? 'TDS'} @ ${fmtQty(bill.tdsPct)}%', '- ${_money(totals.tds)}'),
       if (totals.retention > 0 || totals.tds > 0) sumRow('Amount payable', _money(totals.netPayable), bold: true),
       pw.SizedBox(height: 6),
       t(rupeesInWords(totals.netPayable), bold: true),
+      if (totals.reverseCharge) ...[
+        pw.SizedBox(height: 6),
+        t(reverseChargeLine(totals.gst, bill.gstRate)!, bold: true),
+      ],
       if (isIndia && profile.upiId.trim().isNotEmpty) ...[
         pw.SizedBox(height: 12),
         pw.Row(children: [

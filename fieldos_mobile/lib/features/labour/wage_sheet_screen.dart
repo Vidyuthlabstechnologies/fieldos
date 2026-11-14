@@ -157,7 +157,8 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                                 else
                                   trf('{amount}/day', {'amount': rupees(l.dailyWage!, paise: true)}),
                                 if (belowMinimumWage(l.dailyWage, _cal) case final min?)
-                                  trf('below the minimum wage of {amount}/day', {'amount': rupees(min, paise: true)}),
+                                  trf(market.payHourly ? 'below the minimum wage of {amount}/hr' : 'below the minimum wage of {amount}/day',
+                                      {'amount': rupees(min, paise: true)}),
                                 if (l.missingPunchOuts > 0)
                                   trf(l.missingPunchOuts == 1 ? '1 missing punch-out (half day)' : '{n} missing punch-outs (half days)',
                                       {'n': l.missingPunchOuts}),

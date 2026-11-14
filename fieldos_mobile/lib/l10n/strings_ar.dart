@@ -3055,4 +3055,10 @@ const stringsAr = <String, String>{
   'Your rights under the PDPL': 'حقوقك بموجب قانون PDPL',
   'Ask us for a copy of your data, to correct or erase it, to stop using it, or to send it to another organisation. Write to info@mldynamic.com. We reply within 30 days.': 'اطلب منا نسخة من بياناتك، أو تصحيحها أو حذفها، أو التوقف عن استخدامها، أو إرسالها إلى جهة أخرى. راسلنا على info@mldynamic.com. نرد خلال 30 يومًا.',
   'Write to info@mldynamic.com with "Privacy" in the subject. If you are not satisfied, you can complain to the UAE data protection authority.': 'راسلنا على info@mldynamic.com واكتب "Privacy" في الموضوع. إذا لم تكن راضيًا، يمكنك تقديم شكوى إلى الجهة المختصة بحماية البيانات في UAE (الإمارات).',
+  'CIS work for a VAT-registered contractor who is not the end user. The VAT is shown, and the customer pays it to HMRC.': 'أعمال CIS لمقاول مسجل في ضريبة القيمة المضافة وليس المستخدم النهائي. تظهر الضريبة، ويدفعها العميل إلى HMRC.',
+  'Domestic reverse charge': 'الاحتساب العكسي المحلي',
+  'Materials or plant hire': 'مواد أو استئجار معدات',
+  'No CIS is taken off this line': 'لا يُخصم CIS من هذا البند',
+  '{tax} (reverse charge, not added)': '{tax} (احتساب عكسي، غير مضاف)',
+  'below the minimum wage of {amount}/hr': 'أقل من الحد الأدنى للأجر {amount}/ساعة',
 };

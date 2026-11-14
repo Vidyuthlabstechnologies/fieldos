@@ -24,6 +24,8 @@ import 'package:fieldos_mobile/l10n/strings_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_ml.dart';
 import 'package:fieldos_mobile/l10n/strings_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_pl.dart';
+import 'package:fieldos_mobile/l10n/strings_ro.dart';
 import 'package:fieldos_mobile/l10n/strings_ms.dart';
 import 'package:fieldos_mobile/l10n/strings_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_te.dart';
@@ -43,7 +45,9 @@ enum AppLanguage {
   zh('zh', '中文', 'Chinese'),
   ar('ar', 'العربية', 'Arabic'),
   ur('ur', 'اردو', 'Urdu'),
-  ml('ml', 'മലയാളം', 'Malayalam');
+  ml('ml', 'മലയാളം', 'Malayalam'),
+  pl('pl', 'Polski', 'Polish'),
+  ro('ro', 'Română', 'Romanian');
 
   const AppLanguage(this.code, this.nativeName, this.englishName);
   final String code;
@@ -62,6 +66,10 @@ enum AppLanguage {
     // app is: those are the voice packs phones have.
     if (this == ml) return const Locale('ml', 'IN');
     if (this == ur) return const Locale('ur', 'PK');
+    // Polish and Romanian crews in the UK: the phones carry pl-PL and
+    // ro-RO voices, not -GB ones.
+    if (this == pl) return const Locale('pl', 'PL');
+    if (this == ro) return const Locale('ro', 'RO');
     return Locale(code, _indian.contains(this) ? 'IN' : currentMarket.countryCode);
   }
 
@@ -71,7 +79,7 @@ enum AppLanguage {
   static const indianLanguages = {hi, te, ta, kn, mr};
 
   /// Written in the Latin alphabet, so the phone voice reads it as is.
-  bool get latinScript => this == en || this == es || this == ms;
+  bool get latinScript => this == en || this == es || this == ms || this == pl || this == ro;
 
   /// Written right to left: the screens mirror (Arabic, Urdu).
   bool get rightToLeft => this == ar || this == ur;
@@ -107,6 +115,8 @@ const Map<AppLanguage, Map<String, String>> _tables = {
   AppLanguage.ar: stringsAr,
   AppLanguage.ur: stringsUr,
   AppLanguage.ml: stringsMl,
+  AppLanguage.pl: stringsPl,
+  AppLanguage.ro: stringsRo,
 };
 
 /// The speech code (BCP-47) for [l], for the phone's voice and its

@@ -405,6 +405,9 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
   double _gstRate = market.tax.defaultRate;
   bool _interState = !market.tax.splitsInsideState;
   bool _interStateTouched = false;
+
+  /// UK domestic reverse charge (CIS work for a VAT-registered contractor).
+  bool _reverseCharge = false;
   bool _numberTouched = false;
   final _lines = <BillLine>[];
   String? _error;
@@ -443,9 +446,10 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     final unit = TextEditingController(text: existing?.unit ?? '');
     final rate = TextEditingController(text: existing == null ? '' : fmtQty(existing.rate));
     final qty = TextEditingController(text: existing == null ? '' : fmtQty(existing.qty));
+    var materials = existing?.materials ?? false;
     final result = await showDialog<BillLine>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setDialog) => AlertDialog(
         title: Text(index == null ? tr('Add item') : tr('Edit item')),
         content: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -468,6 +472,14 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               inputFormatters: [const WesternDigitsFormatter(), FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
               decoration: InputDecoration(labelText: _kind == 'ra' ? tr('Quantity this bill') : tr('Quantity')),
             ),
+            if (market.tax.withholdingOnLabourOnly)
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                value: materials,
+                onChanged: (v) => setDialog(() => materials = v ?? false),
+                title: Text(tr('Materials or plant hire')),
+                subtitle: Text(tr('No CIS is taken off this line')),
+              ),
           ]),
         ),
         actions: [
@@ -486,12 +498,12 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               final r = parseTypedNumber(rate.text);
               final q = parseTypedNumber(qty.text);
               if (d.isEmpty || r == null || q == null || r < 0 || q < 0) return;
-              Navigator.pop(ctx, BillLine(description: d, unit: unit.text.trim(), rate: r, qty: q));
+              Navigator.pop(ctx, BillLine(description: d, unit: unit.text.trim(), rate: r, qty: q, materials: materials));
             },
             child: Text(tr('Save')),
           ),
         ],
-      ),
+      )),
     );
     if (result == null) return;
     setState(() {
@@ -539,13 +551,15 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
       _lines
         ..clear()
         ..addAll([
-          for (final l in decodeLines(last.linesJson)) BillLine(description: l.description, unit: l.unit, rate: l.rate, qty: 0),
+          for (final l in decodeLines(last.linesJson))
+            BillLine(description: l.description, unit: l.unit, rate: l.rate, qty: 0, materials: l.materials),
         ]);
       _client.text = last.clientName;
       _clientGstin.text = last.clientGstin ?? '';
       _gstRate = last.gstRate;
       _retention.text = fmtQty(last.retentionPct);
       _tds.text = fmtQty(last.tdsPct);
+      _reverseCharge = isReverseCharge(last.sac);
     });
   }
 
@@ -593,7 +607,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
       if (allowed != _pct(_retention)) _retention.text = fmtQty(allowed);
     }
     final totals = billTotals(lines,
-        gstRate: _gstRate, interState: _interState, retentionPct: _pct(_retention), tdsPct: _pct(_tds));
+        gstRate: _gstRate, interState: _interState, retentionPct: _pct(_retention), tdsPct: _pct(_tds), reverseCharge: _reverseCharge);
     await ref.read(appDatabaseProvider).billDao.create(ClientBillsCompanion.insert(
           id: const Uuid().v4(),
           projectId: widget.project.id,
@@ -607,6 +621,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
           interState: Value(_interState),
           retentionPct: Value(_pct(_retention)),
           tdsPct: Value(_pct(_tds)),
+          sac: Value(isIndia ? defaultSac : (totals.reverseCharge ? reverseChargeMark : '')),
           gross: totals.gross,
           netPayable: totals.netPayable,
           notes: Value(_notes.text.trim().isEmpty ? null : _notes.text.trim()),
@@ -661,7 +676,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     final profile = ref.watch(billingProfileProvider(widget.project.companyId)).value ?? const BillingProfile();
     final previous = _previous(bills);
     final totals = billTotals(_lines,
-        gstRate: _gstRate, interState: _interState, retentionPct: _pct(_retention), tdsPct: _pct(_tds));
+        gstRate: _gstRate, interState: _interState, retentionPct: _pct(_retention), tdsPct: _pct(_tds), reverseCharge: _reverseCharge);
     final invoiceNumbers = ref.watch(companyInvoiceNumbersProvider(widget.project.companyId)).value ?? const <String>[];
     final suggested = nextBillNumber([...bills.map((b) => b.billNumber), if (_kind == 'tax_invoice') ...invoiceNumbers], _kind);
     if (!_numberTouched && _number.text != suggested) _number.text = suggested;
@@ -767,6 +782,15 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               _interStateTouched = true;
             }),
           ),
+          if (market.tax.reverseChargeNote != null && _gstRate > 0)
+            SwitchListTile(
+              key: const Key('reverse-charge'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(tr('Domestic reverse charge')),
+              subtitle: Text(tr('CIS work for a VAT-registered contractor who is not the end user. The VAT is shown, and the customer pays it to HMRC.')),
+              value: _reverseCharge,
+              onChanged: (v) => setState(() => _reverseCharge = v),
+            ),
           Row(children: [
             Expanded(
               child: TextField(
@@ -827,7 +851,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
               child: Column(children: [
                 _row('Value of work', rupees(totals.gross, paise: true)),
                 for (final (label, amount) in taxLines(totals, rate: _gstRate, interState: _interState))
-                  _row(label, rupees(amount, paise: true)),
+                  _row(totals.reverseCharge ? trf('{tax} (reverse charge, not added)', {'tax': label}) : label,
+                      rupees(amount, paise: true)),
                 if (totals.retention > 0) _row('Less retention', '- ${rupees(totals.retention, paise: true)}'),
                 if (totals.tds > 0)
                   _row('Less ${market.tax.withholdingLabel ?? 'TDS'}', '- ${rupees(totals.tds, paise: true)}'),

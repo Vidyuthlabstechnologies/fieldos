@@ -2511,4 +2511,10 @@ const Map<String, String> stringsHi = {
   'Your rights under the PDPL': 'PDPL के तहत आपके अधिकार',
   'Ask us for a copy of your data, to correct or erase it, to stop using it, or to send it to another organisation. Write to info@mldynamic.com. We reply within 30 days.': 'अपने डेटा की कॉपी मांगने, उसे ठीक करवाने या मिटवाने, उसका इस्तेमाल बंद करवाने, या उसे किसी दूसरी संस्था को भेजने के लिए हमसे कहें। info@mldynamic.com पर लिखें। हम 30 दिनों में जवाब देते हैं।',
   'Write to info@mldynamic.com with "Privacy" in the subject. If you are not satisfied, you can complain to the UAE data protection authority.': 'info@mldynamic.com पर लिखें, विषय में "Privacy" लिखें। अगर आप संतुष्ट नहीं हैं, तो UAE की डेटा सुरक्षा अथॉरिटी में शिकायत कर सकते हैं।',
+  'CIS work for a VAT-registered contractor who is not the end user. The VAT is shown, and the customer pays it to HMRC.': 'VAT-पंजीकृत ठेकेदार के लिए CIS काम, जो अंतिम उपयोगकर्ता नहीं है। VAT दिखाया जाता है, और ग्राहक उसे HMRC को देता है।',
+  'Domestic reverse charge': 'घरेलू रिवर्स चार्ज',
+  'Materials or plant hire': 'सामग्री या मशीन किराया',
+  'No CIS is taken off this line': 'इस लाइन से CIS नहीं कटता',
+  '{tax} (reverse charge, not added)': '{tax} (रिवर्स चार्ज, जोड़ा नहीं गया)',
+  'below the minimum wage of {amount}/hr': 'न्यूनतम मज़दूरी {amount}/घंटा से कम',
 };

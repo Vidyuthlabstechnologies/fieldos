@@ -2505,4 +2505,10 @@ const Map<String, String> stringsTe = {
   'Indoor or exempt work': 'లోపలి పని లేదా మినహాయింపు ఉన్న పని',
   'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': 'ఈ TRN సరిగ్గా లేనట్టుంది. దీనిలో 15 అంకెలు ఉంటాయి, ఉదాహరణకు 100123456700003.',
   'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': 'మీ అకౌంట్‌లో ఉన్న ఈమెయిల్ అడ్రస్ నుండి రాయండి. మేము 30 రోజుల్లో జవాబిస్తాము. మీకు సంతృప్తి లేకపోతే, UAE డేటా రక్షణ అథారిటీకి ఫిర్యాదు చేయవచ్చు.',
+  'CIS work for a VAT-registered contractor who is not the end user. The VAT is shown, and the customer pays it to HMRC.': 'తుది వినియోగదారు కాని VAT నమోదిత కాంట్రాక్టర్ కోసం CIS పని. VAT చూపబడుతుంది, కస్టమర్ దాన్ని HMRCకి చెల్లిస్తారు.',
+  'Domestic reverse charge': 'దేశీయ రివర్స్ ఛార్జ్',
+  'Materials or plant hire': 'మెటీరియల్ లేదా యంత్రాల అద్దె',
+  'No CIS is taken off this line': 'ఈ లైన్ నుండి CIS తీసివేయబడదు',
+  '{tax} (reverse charge, not added)': '{tax} (రివర్స్ ఛార్జ్, జోడించలేదు)',
+  'below the minimum wage of {amount}/hr': 'కనీస వేతనం {amount}/గంట కంటే తక్కువ',
 };

@@ -250,4 +250,6 @@ const guideVoices = <String, String>{
   'ar': '',
   'ur': '',
   'ml': '',
+  'pl': '',
+  'ro': '',
 };

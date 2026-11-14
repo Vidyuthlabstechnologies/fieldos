@@ -3052,4 +3052,10 @@ const stringsZh = <String, String>{
   'Indoor or exempt work': '室内或豁免工作',
   'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': '该TRN似乎不正确。TRN为15位数字，例如100123456700003。',
   'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': '请用您账户上的电子邮箱来信。我们会在30天内回复。如您不满意，可以向UAE（阿联酋）数据保护机构投诉。',
+  'CIS work for a VAT-registered contractor who is not the end user. The VAT is shown, and the customer pays it to HMRC.': '为非最终用户的已注册增值税承包商做的 CIS 工程。显示增值税，由客户向 HMRC 缴纳。',
+  'Domestic reverse charge': '国内反向征税',
+  'Materials or plant hire': '材料或机械租赁',
+  'No CIS is taken off this line': '此行不扣 CIS',
+  '{tax} (reverse charge, not added)': '{tax}（反向征税，未计入）',
+  'below the minimum wage of {amount}/hr': '低于最低工资 {amount}/小时',
 };

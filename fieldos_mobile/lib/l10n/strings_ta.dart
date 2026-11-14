@@ -3406,4 +3406,10 @@ const Map<String, String> stringsTa = {
   'Indoor or exempt work': 'உள்ளே செய்யும் வேலை அல்லது விலக்கு உள்ள வேலை',
   'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': 'இந்த TRN சரியாகத் தெரியவில்லை. இதில் 15 இலக்கங்கள் இருக்கும், உதாரணமாக 100123456700003.',
   'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': 'உங்கள் கணக்கில் உள்ள ஈமெயில் முகவரியிலிருந்து எழுதுங்கள். 30 நாட்களுக்குள் பதில் தருவோம். உங்களுக்குத் திருப்தி இல்லையென்றால், UAE தரவு பாதுகாப்பு ஆணையத்திடம் புகார் செய்யலாம்.',
+  'CIS work for a VAT-registered contractor who is not the end user. The VAT is shown, and the customer pays it to HMRC.': 'இறுதிப் பயனர் அல்லாத VAT பதிவு பெற்ற ஒப்பந்ததாரருக்கான CIS வேலை. VAT காட்டப்படும், வாடிக்கையாளர் அதை HMRC-க்கு செலுத்துவார்.',
+  'Domestic reverse charge': 'உள்நாட்டு ரிவர்ஸ் சார்ஜ்',
+  'Materials or plant hire': 'பொருட்கள் அல்லது இயந்திர வாடகை',
+  'No CIS is taken off this line': 'இந்த வரியிலிருந்து CIS பிடிக்கப்படாது',
+  '{tax} (reverse charge, not added)': '{tax} (ரிவர்ஸ் சார்ஜ், சேர்க்கப்படவில்லை)',
+  'below the minimum wage of {amount}/hr': 'குறைந்தபட்ச ஊதியம் {amount}/மணி நேரத்தை விடக் குறைவு',
 };

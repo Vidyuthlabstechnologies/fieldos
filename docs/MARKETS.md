@@ -95,14 +95,32 @@ filters its characters. PDFs stay in English.
   (`normaliseTaxId`, `validTaxId`). A bill is a TAX INVOICE only when the
   company has its TRN (`marketInvoiceTitle`); without it, an INVOICE.
 
+## UK billing (VAT, CIS, reverse charge)
+
+- **VAT number** on bills: GB plus 9 digits (12 for a branch), with HMRC's
+  mod-97 check on both number series, or GBGD/GBHA (`isValidUkVat`). A
+  bill is a VAT INVOICE only with the company's VAT number.
+- **CIS** is the withholding (`TaxRegime.withholdingOnLabourOnly`): it is
+  taken off labour only. Each bill line has a "Materials or plant hire"
+  tick (`BillLine.materials`, stored in the lines JSON) that leaves it out.
+- **Domestic reverse charge**: a switch on the bill. The VAT is shown but
+  not added to the total, and the PDF carries HMRC's wording with the VAT
+  in pounds and pence (`reverseChargeLine`). The flag is stored as `DRC`
+  in the SAC column, which only India uses, so no migration was needed.
+- UK English swaps (site diary, application for payment, delivery note,
+  sign in/out, hourly pay) are in `market_terms.dart`.
+
 ## Minimum wage
 
 Malaysia's wage sheet flags any daily rate under the Minimum Wages Order
 2025 (RM1,700 a month: RM65.38 a day for a 6-day week, RM78.46 for 5,
 RM98.08 for 4, from the company's rest days) and notes under the sheet that
 Sabah and Sarawak have their own Labour Ordinances (`MarketConfig.minimumWage`,
-`belowMinimumWage` in `wage_sheet.dart`). Other markets set none here: India's
-and the US's vary by state, and the UAE sets none for most private-sector workers.
+`belowMinimumWage` in `wage_sheet.dart`). The UK checks hourly pay against the
+National Living Wage (£12.71 an hour from age 21, from 1 April 2026), and the
+note says lower rates apply under 21 and to apprentices. Other markets set
+none here: India's and the US's vary by state, and the UAE sets none for most
+private-sector workers.
 
 ## Legal texts and prices
 
