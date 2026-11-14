@@ -209,6 +209,7 @@ const _malaysiaEnglish = <String, String>{
 /// PF/ESI salaries, UPI, Tally) need no entry; the test knows which.
 const _usEnglish = <String, String>{
   'Daily report': 'Daily log',
+  'Daily reports': 'Daily logs',
   'Spending is {amount} over the BOQ budget.': 'Spending is {amount} over the estimate.',
   '{amount} spent without a BOQ item.': '{amount} spent without an estimate line.',
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.':

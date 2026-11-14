@@ -1217,7 +1217,7 @@ const stringsMl = <String, String>{
   'Earned {earned} · Paid {paid} · Still due {due}': 'സമ്പാദിച്ചത് {earned} · നൽകിയത് {paid} · ഇനി നൽകാനുള്ളത് {due}',
   '{n} day ({h} h)': '{n} ദിവസം ({h} മ.)',
   '{n} days ({h} h)': '{n} ദിവസം ({h} മ.)',
-  'OT {h} h': 'OT {h} മ.',
+  'OT {h} h': 'ഓവർടൈം {h} മണിക്കൂർ',
   'no daily wage set': 'ദിവസ വേതനം സെറ്റ് ചെയ്തിട്ടില്ല',
   '{amount}/day': '{amount}/ദിവസം',
   '1 missing punch-out (half day)': '1 പഞ്ച്-ഔട്ട് ഇല്ല (അര ദിവസം)',
