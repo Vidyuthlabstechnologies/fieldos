@@ -30,7 +30,8 @@ const _hiddenOutsideIndia = {
   'Upload to TS-RERA by {date}',
   // GST registration and the CGST/SGST/IGST split: bill, quote and expense forms, isIndia.
   'Add your GSTIN, address and UPI id', 'Client GSTIN (optional)', 'Client is in another state (IGST)',
-  'Inside the state, GST splits into CGST and SGST', 'Other state (IGST)', 'Supplier in another state (IGST)',
+  'For building work, GST follows the state where the site is. Inside your state it splits into CGST and SGST',
+  'Add your GSTIN in "Your details on bills" first. Without it a bill cannot charge GST; pick None.', 'Other state (IGST)', 'Supplier in another state (IGST)',
   "That GSTIN doesn't look right, so it wasn't saved.", "That GSTIN doesn't look right. It has 15 characters, like 36ABCDE1234F1Z5.",
   'Your GSTIN', 'UPI id for payments (optional)', 'TDS %',
   // Tally export: accounts sheet, isIndia.

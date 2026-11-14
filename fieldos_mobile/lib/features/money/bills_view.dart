@@ -548,13 +548,14 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     final lines = _lines.where((l) => l.qty > 0).toList();
     String? error;
     if (client.isEmpty) error = tr('Who is the bill for? Add the client name.');
-    if (gstin.isNotEmpty && !isValidGstin(gstin)) error = tr('That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.');
+    if (isIndia && gstin.isNotEmpty && !isValidGstin(gstin)) error = tr('That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.');
     if (lines.isEmpty) error = tr('Add at least one item with a quantity.');
     if (_kind == 'tax_invoice' && !isValidInvoiceNumber(number)) {
       error = tr('A tax invoice number has up to 16 letters, digits, - or /, like INV-0001.');
     }
     final ourGstin = ref.read(billingProfileProvider(widget.project.companyId)).value?.gstin ?? '';
-    if (_gstRate > 0 && ourGstin.trim().isEmpty) {
+    // GST law: only a registered supplier may charge it.
+    if (isIndia && _gstRate > 0 && ourGstin.trim().isEmpty) {
       error = tr('Add your GSTIN in "Your details on bills" first. Without it a bill cannot charge GST; pick None.');
     }
     if (bills.any((b) => b.billNumber.toLowerCase() == number.toLowerCase())) error = trf('Bill {number} already exists.', {'number': number});
