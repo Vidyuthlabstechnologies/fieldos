@@ -5,11 +5,13 @@ library;
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 
-/// The last 10 digits, so "+91 98480 12345", "098480-12345" and
-/// "9848012345" are the same phone.
+/// The last 10 digits (9 in the UAE: [nationalPhoneLength]), so
+/// "+91 98480 12345", "098480-12345" and "9848012345" are the same phone,
+/// as are "+971 50 123 4567" and "050 123 4567".
 String normalizePhone(String? phone) {
-  final digits = (phone ?? '').replaceAll(RegExp(r'\D'), '');
-  return digits.length > 10 ? digits.substring(digits.length - 10) : digits;
+  final digits = westernDigits(phone ?? '').replaceAll(RegExp(r'\D'), '');
+  final n = nationalPhoneLength;
+  return digits.length > n ? digits.substring(digits.length - n) : digits;
 }
 
 String _normName(String s) => s.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
@@ -18,7 +20,7 @@ String _normName(String s) => s.trim().toLowerCase().replaceAll(RegExp(r'\s+'), 
 /// (when one was given), else the same name.
 Worker? findDuplicate(Iterable<Worker> existing, {required String name, String? phone}) {
   final p = normalizePhone(phone);
-  if (p.length >= 10) {
+  if (p.length >= nationalPhoneLength) {
     for (final w in existing) {
       if (normalizePhone(w.phone) == p) return w;
     }

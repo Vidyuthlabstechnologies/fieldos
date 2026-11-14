@@ -19,6 +19,7 @@ const Map<Market, Map<String, Map<String, String>>> marketTerms = {
   Market.us: {'en': _usEnglish, 'es': _usSpanish},
   Market.malaysia: {'en': _malaysiaEnglish},
   Market.uae: {'en': _uaeEnglish},
+  Market.uk: {'en': _ukEnglish},
 };
 
 /// Whole-word swaps on English text, after the exact table: spelling and
@@ -27,6 +28,7 @@ const Map<Market, Map<String, Map<String, String>>> marketTerms = {
 const Map<Market, Map<String, String>> marketWordSwaps = {
   Market.malaysia: _malaysiaSwaps,
   Market.uae: _uaeSwaps,
+  Market.uk: _ukSwaps,
   Market.us: {
     'labour': 'labor',
     'labourer': 'laborer',
@@ -93,6 +95,50 @@ const _uaeEnglish = <String, String>{
   'Running bill': 'Interim payment application',
   'Every rupee on site': 'Every dirham on site',
   'Add ₹5,000 spent on cement': 'Add AED 500 spent on cement',
+};
+
+/// British English is the key language already; the trade words follow
+/// JCT contracts (application for payment, delivery note, VAT number).
+const _ukSwaps = {
+  'gst': 'VAT',
+  'gstin': 'VAT number',
+  'dpr': 'daily report',
+  'dprs': 'daily reports',
+  'challan': 'delivery note',
+  'challans': 'delivery notes',
+  'rupee': 'pound',
+  'rupees': 'pounds',
+};
+
+/// The UK app, on top of [_ukSwaps]. Crews are paid by the hour in the UK
+/// (MarketConfig.payHourly), so the worker's rate field holds the hourly
+/// rate and its labels must say so.
+const _ukEnglish = <String, String>{
+  'Daily wage': 'Hourly rate',
+  'Daily wage (₹)': 'Hourly rate (₹)',
+  '{amount}/day': '{amount}/hr',
+  '{amount} a day': '{amount} an hour',
+  'no daily wage set': 'no hourly rate set',
+  "No daily wage set, so wages can't be worked out": "No hourly rate set, so wages can't be worked out",
+  'Add workers with their trade and daily wage, then mark their days here.':
+      'Add workers with their trade and hourly rate, then mark their days here.',
+  'One worker per line: name, skill, phone, daily wage. Only the name is needed.':
+      'One worker per line: name, skill, phone, hourly rate. Only the name is needed.',
+  'A day counts as full at 7 hours on site and half at 3.5 hours, unless it was marked by hand on the day register. Tap a worker to pay wages or an advance.':
+      'Pay is the hours on the clock at the hourly rate. A day marked by hand counts as 8 hours. UK law sets no overtime rate; hours past 48 in a week show as overtime. Tap a worker to pay wages or an advance.',
+  'Make the next RA bill': 'Make the next application for payment',
+  'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
+      'Measure work done against the BOQ. Approved quantities go on the next application for payment.',
+  'Make running bills of measured work, or GST tax invoices, and send them as PDF. Previous and to-date quantities are worked out for you.':
+      'Make applications for payment for measured work, or VAT invoices, and send them as PDF. Previous and to-date quantities are worked out for you.',
+  'Note (e.g. RA bill 3)': 'Note (e.g. Application 3)',
+  'Running bill (RA)': 'Application for payment',
+  'Running bill': 'Application for payment',
+  'Approve it in your UPI or bank app. FieldOS opens by itself once {store} confirms the payment, usually within a few minutes.':
+      'Approve it in your bank app. FieldOS opens by itself once {store} confirms the payment, usually within a few minutes.',
+  'Your payment is waiting for approval, for example in your UPI app. FieldOS opens by itself once {store} confirms it.':
+      'Your payment is waiting for approval, for example in your bank app. FieldOS opens by itself once {store} confirms it.',
+  'Add ₹5,000 spent on cement': 'Add £500 spent on cement',
 };
 
 /// The Malaysia app in Malaysian English, on top of [_malaysiaSwaps].

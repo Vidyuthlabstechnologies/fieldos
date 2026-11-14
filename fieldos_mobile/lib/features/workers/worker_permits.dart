@@ -63,9 +63,12 @@ const permitDueSoonDays = 90;
 /// Reminders go out this many days before expiry.
 const permitReminderDays = [90, 60, 30, 7];
 
+/// Calendar days from [today] to the expiry date. Counted on UTC dates: a
+/// local day can be 23 or 25 hours where clocks change (UK, US), and
+/// inDays would then lose a day.
 int daysLeft(WorkerPermit p, DateTime today) {
-  final t = DateTime(today.year, today.month, today.day);
-  final e = DateTime(p.expiresOn.year, p.expiresOn.month, p.expiresOn.day);
+  final t = DateTime.utc(today.year, today.month, today.day);
+  final e = DateTime.utc(p.expiresOn.year, p.expiresOn.month, p.expiresOn.day);
   return e.difference(t).inDays;
 }
 

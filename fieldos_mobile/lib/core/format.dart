@@ -135,14 +135,6 @@ double? parseTypedNumber(String typed) {
   return v == null || !v.isFinite ? null : v;
 }
 
-/// A phone number as wa.me wants it: country code and number, digits
-/// only. A 10-digit number is taken as a local one and gets this market's
-/// code (+1 in the US, +91 in India); "+1 512 555 0134" keeps its own.
-String whatsAppNumber(String phone) {
-  final digits = westernDigits(phone).replaceAll(RegExp(r'\D'), '');
-  return digits.length == 10 ? '${market.phonePrefix.substring(1)}$digits' : digits;
-}
-
 /// An amount in this market's currency: "₹12,34,567" in India,
 /// "$1,234,567" in the US, "RM1,234,567", "AED 1,234,567", "£1,234,567".
 /// Whole units unless [cents] is true and the amount has some ("₹45.50").
@@ -187,4 +179,22 @@ String _groupIndian(String whole) {
   }
   if (rest.isNotEmpty) parts.insert(0, rest);
   return '${parts.join(',')},$last3';
+}
+
+/// Digits in a mobile number without the country code: 10 in India, the
+/// US and the UK (7700 900123), 9 in the UAE (50 123 4567), up to 10 in
+/// Malaysia.
+int get nationalPhoneLength => currentMarket == Market.uae ? 9 : 10;
+
+/// [phone] as wa.me wants it: country code and number, digits only. A
+/// number typed the local way ("050 123 4567", "07700 900123") gets this
+/// market's code in place of its leading 0; one with + or 00 keeps its own.
+String whatsAppNumber(String phone) {
+  final typed = westernDigits(phone.trim());
+  final d = typed.replaceAll(RegExp(r'\D'), '');
+  if (typed.startsWith('+')) return d;
+  if (d.startsWith('00')) return d.substring(2);
+  final cc = market.phonePrefix.substring(1);
+  if (d.startsWith(cc) && d.length > nationalPhoneLength) return d;
+  return '$cc${d.startsWith('0') ? d.substring(1) : d}';
 }

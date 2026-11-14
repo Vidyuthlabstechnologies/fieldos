@@ -280,9 +280,12 @@ bool isValidInvoiceNumber(String number) => RegExp(r'^[A-Za-z0-9/-]{1,16}$').has
 
 /// The heading of a bill that is not an RA bill. Only a GST-registered
 /// supplier issues a tax invoice; with no GST on the bill it is a bill of
-/// supply, and without a GSTIN a plain invoice.
+/// supply, and without a GSTIN a plain invoice. Elsewhere it is the
+/// market's title (TAX INVOICE in the UAE, VAT INVOICE in the UK), but only
+/// a registered business may use it: without a TRN or VAT number, INVOICE.
 String invoiceTitle({required String ourGstin, required double gstRate}) {
   if (ourGstin.trim().isEmpty) return 'INVOICE';
+  if (!isIndia) return market.invoiceTitle;
   return gstRate > 0 ? 'TAX INVOICE' : 'BILL OF SUPPLY';
 }
 
