@@ -342,8 +342,8 @@ final myPrivacyPolicy = adaptLegal(
           'Email info@mldynamic.com from the address on your account, or use Settings, Your privacy. We reply '
           'within 21 days. If your data is in a company\'s records (for example as a worker or a lead), we pass '
           'your request to that company, which decides about its own records, and tell you we have done so. '
-          'Withdrawing consent does not affect what was done before: turn off the AI assistant or crash details, '
-          'or delete your cloud account.',
+          'Withdrawing consent does not affect what was done before: turn off the AI assistant, crash details or '
+          'the photo and location for your attendance, or delete your cloud account.',
     ),
     'Grievance officer': const LegalSection(
       'Privacy contact and complaints',
