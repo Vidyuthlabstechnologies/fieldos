@@ -121,6 +121,23 @@ class OvertimeRule {
   final String note;
 }
 
+/// A national minimum wage the wage sheet checks daily rates against.
+class MinimumWage {
+  const MinimumWage({required this.monthly, required this.hourly, required this.daily, this.note = ''});
+
+  final double monthly;
+  final double hourly;
+
+  /// The daily rate by working days in the week (6, 5 or 4).
+  final Map<int, double> daily;
+
+  /// Shown under the wage sheet: which order, and where it does not apply.
+  final String note;
+
+  /// The minimum daily rate for a week of [workDays] working days.
+  double dailyFor(int workDays) => daily[workDays.clamp(4, 6)] ?? monthly / 26;
+}
+
 class MarketConfig {
   const MarketConfig({
     required this.currencyCode,
@@ -151,7 +168,12 @@ class MarketConfig {
     this.retentionDefaultPct = 5,
     this.premiumRestAndHolidayPay = false,
     this.retentionLimitOfContractPct,
+    this.minimumWage,
   });
+
+  /// The national minimum wage, where the app checks daily rates against
+  /// it (Malaysia). Null where it varies by state or is hourly only.
+  final MinimumWage? minimumWage;
 
   /// Work on the rest day and on public holidays earns more by law, and
   /// the wage sheet pays it from the company's pay calendar (Malaysia).
@@ -316,6 +338,17 @@ const _malaysia = MarketConfig(
   retentionDefaultPct: 10,
   retentionLimitOfContractPct: 5,
   premiumRestAndHolidayPay: true,
+  // Minimum Wages Order 2025, from 1 Feb 2025 (1 Aug 2025 for employers of
+  // fewer than five): RM1,700 a month, in all of Malaysia. The Sabah and
+  // Sarawak Labour Ordinances govern overtime, rest days and holidays there.
+  minimumWage: MinimumWage(
+    monthly: 1700,
+    hourly: 8.17,
+    daily: {6: 65.38, 5: 78.46, 4: 98.08},
+    note: 'Minimum wage: RM1,700 a month (Minimum Wages Order 2025). In Sabah and Sarawak, the Sabah Labour '
+        'Ordinance or the Sarawak Labour Ordinance applies instead of the Employment Act 1955 for overtime, rest '
+        'days and holidays: check the rules for your site.',
+  ),
   pdfCurrency: 'RM',
   indianGrouping: false,
   dateOrder: DateOrder.dmy,

@@ -28,7 +28,14 @@ void main() {
     expect(marketLegalReady, isTrue);
     final policy = _all(marketPrivacyPolicy), terms = _all(marketTermsOfUse);
     for (final text in [policy, terms, privacyNoticeKeys.join('\n')]) {
-      for (final word in ['Data Protection Board', 'DPDP', 'Grievance', 'Information Technology Act', 'UPI', 'Hyderabad courts']) {
+      for (final word in [
+        'Data Protection Board',
+        'DPDP',
+        'Grievance',
+        'Information Technology Act',
+        'UPI',
+        'Hyderabad courts',
+      ]) {
         expect(text, isNot(contains(word)), reason: '"$word" in a US text');
       }
     }
@@ -48,9 +55,58 @@ void main() {
   });
 
   test('markets without their own texts yet fall back and say so', () {
-    for (final m in [Market.malaysia, Market.uae, Market.uk]) {
+    for (final m in [Market.uae, Market.uk]) {
       debugSetMarket(m);
       expect(marketLegalReady, isFalse, reason: m.name);
+    }
+  });
+
+  test('the Malaysian texts follow the PDPA and Malaysian law', () {
+    debugSetMarket(Market.malaysia);
+    expect(marketLegalReady, isTrue);
+    expect(privacyNoticeItems, same(myPrivacyNoticeItems));
+    final policy = _all(marketPrivacyPolicy), terms = _all(marketTermsOfUse);
+    for (final text in [policy, terms, privacyNoticeKeys.join('\n')]) {
+      for (final word in [
+        'Data Protection Board',
+        'DPDP',
+        'Grievance',
+        'Information Technology Act',
+        'UPI',
+        'Hyderabad courts',
+        'Consumer Protection Act, 2019',
+        'unity, integrity',
+        'GST',
+      ]) {
+        expect(text, isNot(contains(word)), reason: '"$word" in a Malaysian text');
+      }
+    }
+    for (final want in [
+      'Personal Data Protection Act 2010',
+      'section 129',
+      '72 hours',
+      'Commissioner',
+      'Mumbai, India',
+      '21 days',
+      'Bahasa Melayu',
+    ]) {
+      expect(policy, contains(want));
+    }
+    for (final want in ['laws of Malaysia', 'AIAC', 'MyInvois', 'data controller', 'Sabah and Sarawak']) {
+      expect(terms, contains(want));
+    }
+    // The sections stay numbered in order, ending with the contact.
+    final numbers = [for (final s in marketTermsOfUse.sections) int.parse(s.heading.split('.').first)];
+    expect(numbers, List.generate(numbers.length, (i) => i + 1));
+    expect(marketTermsOfUse.sections.last.heading, '21. Contact us');
+    expect(marketPrivacyPolicy.sections.last.heading, 'Contact');
+  });
+
+  test('the Malaysian notice reads in Bahasa Melayu, Chinese and Tamil', () {
+    debugSetMarket(Market.malaysia);
+    for (final l in [AppLanguage.ms, AppLanguage.zh, AppLanguage.ta]) {
+      final missing = privacyNoticeKeys.where((k) => !hasTranslation(l, k)).toList();
+      expect(missing, isEmpty, reason: l.name);
     }
   });
 

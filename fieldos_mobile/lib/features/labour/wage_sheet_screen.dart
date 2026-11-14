@@ -28,6 +28,7 @@ class WageSheetScreen extends ConsumerStatefulWidget {
 
 class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
   late DateTime _from = weekStart(DateTime.now());
+  PayCalendar _cal = const PayCalendar();
   DateTime get _to => _from.add(const Duration(days: 7));
 
   Future<WageSheet> _load() async {
@@ -39,7 +40,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
       from: _from,
       to: _to,
       marks: await db.attendanceDao.marksForProject(widget.projectId),
-      calendar: await _calendar(db),
+      calendar: _cal = await _calendar(db),
     );
   }
 
@@ -144,6 +145,8 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                                   tr('no daily wage set')
                                 else
                                   trf('{amount}/day', {'amount': rupees(l.dailyWage!, paise: true)}),
+                                if (belowMinimumWage(l.dailyWage, _cal) case final min?)
+                                  trf('below the minimum wage of {amount}/day', {'amount': rupees(min, paise: true)}),
                                 if (l.missingPunchOuts > 0)
                                   trf(l.missingPunchOuts == 1 ? '1 missing punch-out (half day)' : '{n} missing punch-outs (half days)',
                                       {'n': l.missingPunchOuts}),
@@ -191,6 +194,16 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                               textAlign: TextAlign.center,
                             ),
                           ),
+                          if (market.minimumWage != null)
+                            Padding(
+                              key: const Key('minimum-wage-note'),
+                              padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+                              child: Text(
+                                tr(market.minimumWage!.note),
+                                style: const TextStyle(fontSize: 12),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                         ]),
             ),
           ]),

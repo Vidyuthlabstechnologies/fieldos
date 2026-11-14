@@ -2494,4 +2494,6 @@ const Map<String, String> stringsTe = {
   'Friday (Kelantan, Terengganu, Kedah)': 'శుక్రవారం (కెలంతాన్, తెరెంగాను, కెదా)',
   'Public holidays': 'ప్రభుత్వ సెలవులు',
   'Add the federal and state holidays your company gives, from the gazette for your state.': 'మీ కంపెనీ ఇచ్చే ఫెడరల్, రాష్ట్ర సెలవులను మీ రాష్ట్ర గెజిట్ నుండి జోడించండి.',
+  'below the minimum wage of {amount}/day': 'కనీస వేతనం {amount}/రోజు కంటే తక్కువ',
+  'Write from the email address on your account. We reply within 21 days. If you are not satisfied, you can complain to the Personal Data Protection Commissioner of Malaysia.': 'మీ ఖాతాలోని ఈమెయిల్ చిరునామా నుండి రాయండి. 21 రోజుల్లో జవాబిస్తాం. సంతృప్తి లేకపోతే మలేషియా వ్యక్తిగత డేటా రక్షణ కమిషనర్‌కు ఫిర్యాదు చేయవచ్చు.',
 };

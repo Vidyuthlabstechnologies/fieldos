@@ -146,15 +146,20 @@ class _PrivacyRightsScreenState extends ConsumerState<PrivacyRightsScreen> {
               ),
             const SizedBox(height: 8),
             Text(
-              isIndia
-                  ? tr(
-                      'Write from the email address on your account. We reply within 30 days. If you are not '
-                      'satisfied, you can complain to the Data Protection Board of India.',
-                    )
-                  : tr(
-                      'Write from the email address on your account. We reply within 45 days. If you are not '
-                      'satisfied, you can appeal, and then contact the authority for privacy where you live.',
-                    ),
+              switch (currentMarket) {
+                Market.india => tr(
+                    'Write from the email address on your account. We reply within 30 days. If you are not '
+                    'satisfied, you can complain to the Data Protection Board of India.',
+                  ),
+                Market.malaysia => tr(
+                    'Write from the email address on your account. We reply within 21 days. If you are not '
+                    'satisfied, you can complain to the Personal Data Protection Commissioner of Malaysia.',
+                  ),
+                _ => tr(
+                    'Write from the email address on your account. We reply within 45 days. If you are not '
+                    'satisfied, you can appeal, and then contact the authority for privacy where you live.',
+                  ),
+              },
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
           ],

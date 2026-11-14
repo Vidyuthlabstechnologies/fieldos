@@ -56,6 +56,17 @@ class PayCalendar {
   }
 }
 
+/// The market's minimum daily rate when [dailyWage] is under it, for a
+/// week with the calendar's rest days off; null when it is not (or the
+/// market sets no national minimum, or no wage is set).
+double? belowMinimumWage(double? dailyWage, PayCalendar calendar) {
+  final min = market.minimumWage;
+  if (min == null || dailyWage == null || dailyWage <= 0) return null;
+  final workDays = 7 - (calendar.restDays.isEmpty ? 1 : calendar.restDays.length);
+  final floor = min.dailyFor(workDays);
+  return dailyWage + 0.005 < floor ? floor : null;
+}
+
 /// Settings keys for a company's pay calendar.
 String restDayKey(String companyId) => 'rest_day:$companyId';
 String publicHolidaysKey(String companyId) => 'public_holidays:$companyId';

@@ -73,14 +73,27 @@ each date; an expired permit that blocks site work is a warning at
 punch-in, never a block on pay. Numbers show in full only to the owner and
 project managers. No health results are stored.
 
+## Minimum wage
+
+Malaysia's wage sheet flags any daily rate under the Minimum Wages Order
+2025 (RM1,700 a month: RM65.38 a day for a 6-day week, RM78.46 for 5,
+RM98.08 for 4, from the company's rest days) and notes under the sheet that
+Sabah and Sarawak have their own Labour Ordinances (`MarketConfig.minimumWage`,
+`belowMinimumWage` in `wage_sheet.dart`). Other markets set none here: India's
+and the US's vary by state, and the UAE sets none for most private-sector workers.
+
 ## Legal texts and prices
 
 - **Privacy policy, terms, privacy notice**: `lib/features/legal/legal_texts_markets.dart`
   adapts India's texts section by section (`adaptLegal`); the short notice
   in Settings > Your privacy is `privacyNoticeItems` in
   `lib/features/legal/privacy_notice.dart`. The US has its own (state privacy
-  laws, arbitration, Delaware law). Malaysia, UAE and the UK still show
-  India's until theirs are written, and `marketLegalReady` is false for them:
+  laws, arbitration, Delaware law). Malaysia has its own too (PDPA 2010 as
+  amended in 2024: section 129 transfers to India and the USA, breach notice
+  to the Commissioner within 72 hours, 21-day replies, a notice in English
+  and Bahasa Melayu; Malaysian law with AIAC arbitration; the customer as
+  data controller). The UAE and the UK still show India's until theirs are
+  written, and `marketLegalReady` is false for them:
   do not publish those apps before it is true. All of these are drafts that
   need a lawyer in that country; never call them lawyer-reviewed.
   The published pages (`PRIVACY_POLICY_URL`, `TERMS_URL`) are build defines,

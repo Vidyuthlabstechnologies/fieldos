@@ -2492,4 +2492,6 @@ const Map<String, String> stringsHi = {
   'Friday (Kelantan, Terengganu, Kedah)': 'शुक्रवार (केलंतन, तेरेंगानु, केदाह)',
   'Public holidays': 'सरकारी छुट्टियाँ',
   'Add the federal and state holidays your company gives, from the gazette for your state.': 'आपकी कंपनी जो संघीय और राज्य छुट्टियाँ देती है, अपने राज्य के गज़ट से जोड़ें।',
+  'below the minimum wage of {amount}/day': 'न्यूनतम मज़दूरी {amount}/दिन से कम',
+  'Write from the email address on your account. We reply within 21 days. If you are not satisfied, you can complain to the Personal Data Protection Commissioner of Malaysia.': 'अपने खाते के ईमेल पते से लिखें। हम 21 दिनों में जवाब देते हैं। संतुष्ट न हों तो आप मलेशिया के व्यक्तिगत डेटा संरक्षण आयुक्त से शिकायत कर सकते हैं।',
 };

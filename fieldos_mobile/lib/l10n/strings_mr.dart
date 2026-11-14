@@ -3386,4 +3386,6 @@ const Map<String, String> stringsMr = {
   'Friday (Kelantan, Terengganu, Kedah)': 'शुक्रवार (केलांतन, तेरेंगानू, केदाह)',
   'Public holidays': 'सार्वजनिक सुट्ट्या',
   'Add the federal and state holidays your company gives, from the gazette for your state.': 'तुमची कंपनी देत असलेल्या संघीय आणि राज्य सुट्ट्या तुमच्या राज्याच्या राजपत्रातून जोडा.',
+  'below the minimum wage of {amount}/day': 'किमान वेतन {amount}/दिवस पेक्षा कमी',
+  'Write from the email address on your account. We reply within 21 days. If you are not satisfied, you can complain to the Personal Data Protection Commissioner of Malaysia.': 'तुमच्या खात्याच्या ईमेल पत्त्यावरून लिहा. आम्ही 21 दिवसांत उत्तर देतो. समाधान न झाल्यास तुम्ही मलेशियाच्या वैयक्तिक डेटा संरक्षण आयुक्तांकडे तक्रार करू शकता.',
 };
