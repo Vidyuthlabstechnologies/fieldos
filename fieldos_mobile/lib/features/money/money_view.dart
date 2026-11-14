@@ -369,7 +369,7 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
                 ]),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 6, 4, 0),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 6, 4, 0),
                 child: Row(children: [
                   Expanded(
                     child: Text(
@@ -436,8 +436,8 @@ class _SpentTabState extends ConsumerState<_SpentTab> {
           ]));
         },
       ),
-      Positioned(
-        right: 16,
+      PositionedDirectional(
+        end: 16,
         bottom: 16,
         child: FloatingActionButton.extended(
           heroTag: 'Add expense',
@@ -558,7 +558,7 @@ class _ExpenseTile extends StatelessWidget {
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
         if (bills > 0)
           Padding(
-            padding: const EdgeInsets.only(right: 6),
+            padding: const EdgeInsetsDirectional.only(end: 6),
             child: Semantics(
               label: bills == 1 ? tr('1 bill attached') : trf('{n} bills attached', {'n': '$bills'}),
               child: Icon(Icons.attach_file, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
@@ -755,7 +755,7 @@ class _BreakdownBar extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(child: Text(tr(part.category), style: theme.textTheme.titleSmall)),
           Text(rupees(part.amount), style: const TextStyle(fontWeight: FontWeight.w600)),
-          SizedBox(width: 48, child: Text('$pct%', textAlign: TextAlign.right, style: theme.textTheme.bodySmall)),
+          SizedBox(width: 48, child: Text('$pct%', textAlign: TextAlign.end, style: theme.textTheme.bodySmall)),
         ]),
         const SizedBox(height: 6),
         ClipRRect(
@@ -910,8 +910,8 @@ class _ReceivedTabState extends ConsumerState<_ReceivedTab> {
           ]);
         },
       ),
-      Positioned(
-        right: 16,
+      PositionedDirectional(
+        end: 16,
         bottom: 16,
         child: FloatingActionButton.extended(
           heroTag: 'Add payment received',
@@ -1041,7 +1041,7 @@ String _cut(String s, int max) => s.length > max ? s.substring(0, max) : s;
 
 /// "1,250.50" or "1250.5" typed in a money field; null when it isn't a number.
 double? parseAmount(String typed) {
-  final v = double.tryParse(typed.trim().replaceAll(',', '').replaceAll('₹', '').replaceAll(currencySymbol, '').trim());
+  final v = double.tryParse(westernDigits(typed.trim().replaceAll(',', '').replaceAll('₹', '').replaceAll(currencySymbol, '').trim()));
   if (v == null || v.isNaN || v.isInfinite) return null;
   return (v * 100).roundToDouble() / 100;
 }

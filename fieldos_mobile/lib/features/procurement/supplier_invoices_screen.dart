@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/digits_input.dart';
 import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -103,19 +104,19 @@ class _SupplierInvoicesScreenState extends ConsumerState<SupplierInvoicesScreen>
               TextField(
                 controller: amount,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                inputFormatters: [const WesternDigitsFormatter(), FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
                 decoration: InputDecoration(labelText: tr('Invoice total with GST (₹)')),
               ),
               TextField(
                 controller: gst,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                inputFormatters: [const WesternDigitsFormatter(), FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
                 decoration: InputDecoration(labelText: tr('GST in it (₹, optional)')),
               ),
               TextField(
                 controller: qty,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                inputFormatters: [const WesternDigitsFormatter(), FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
                 decoration: InputDecoration(labelText: tr('Quantity invoiced (optional)')),
               ),
               const SizedBox(height: 8),

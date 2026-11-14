@@ -30,7 +30,7 @@ final quoteDataProvider = FutureProvider.autoDispose.family<QuoteData, ({String 
   );
 });
 
-double? _num(String s) => double.tryParse(s.trim().replaceAll(',', ''));
+double? _num(String s) => double.tryParse(westernDigits(s.trim().replaceAll(',', '')));
 
 class QuoteCompareScreen extends ConsumerWidget {
   const QuoteCompareScreen({super.key, required this.requestId, required this.companyId, required this.userId});
@@ -316,7 +316,7 @@ class _QuoteFormState extends ConsumerState<_QuoteForm> {
             rate: _num(_rate.text) ?? 0,
             gstPct: _gst,
             transport: _num(_transport.text) ?? 0,
-            deliveryDays: int.tryParse(_days.text.trim()),
+            deliveryDays: int.tryParse(westernDigits(_days.text.trim())),
             paymentTerms: _terms.text,
             notes: _notes.text,
             by: widget.userId,

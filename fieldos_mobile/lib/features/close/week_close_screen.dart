@@ -304,7 +304,7 @@ class _WeekCloseScreenState extends ConsumerState<WeekCloseScreen> {
           ],
         ),
       );
-      accepted = double.tryParse(c.text.trim().replaceAll(',', ''));
+      accepted = double.tryParse(westernDigits(c.text.trim().replaceAll(',', '')));
       c.dispose();
       if (ok != true) return;
       if (accepted == null || accepted < 0) {
@@ -501,7 +501,7 @@ class _WeekCloseScreenState extends ConsumerState<WeekCloseScreen> {
                           (_Show.all, tr('All'), w.items.length),
                         ])
                           Padding(
-                            padding: const EdgeInsets.only(right: 6),
+                            padding: const EdgeInsetsDirectional.only(end: 6),
                             child: ChoiceChip(
                               label: Text('$label ($n)'),
                               selected: _show == s,
@@ -514,7 +514,7 @@ class _WeekCloseScreenState extends ConsumerState<WeekCloseScreen> {
                         _show == _Show.review &&
                         w.waiting.any((i) => !i.hasFlags && actions.canApprove(i) && !isHeld(verification, i)))
                       Align(
-                        alignment: Alignment.centerLeft,
+                        alignment: AlignmentDirectional.centerStart,
                         child: TextButton.icon(
                           icon: const Icon(Icons.done_all),
                           label: Text(trf('Approve the {n} with no exceptions',
@@ -718,7 +718,7 @@ class _ItemCard extends StatelessWidget {
     final accepted = i.acceptedQty;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 8, 6),
+        padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 8, 6),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(
@@ -728,7 +728,7 @@ class _ItemCard extends StatelessWidget {
             ),
             if (i.amount != null && i.kind != CloseKind.attendance)
               Padding(
-                padding: const EdgeInsets.only(left: 8, right: 8),
+                padding: const EdgeInsetsDirectional.only(start: 8, end: 8),
                 child: Text(rupees(i.amount!), style: theme.textTheme.titleSmall),
               ),
           ]),

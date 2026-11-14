@@ -68,7 +68,7 @@ Future<Uint8List> buildReportPdf({
 
   pw.Widget cell(Object? v, int i, {bool bold = false, PdfColor color = _ink}) => pw.Padding(
         padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-        child: t(cellText(v, money: money[i]), bold: bold, color: color, align: numeric[i] ? pw.TextAlign.right : null),
+        child: t(cellText(v, money: money[i]), bold: bold, color: color, align: numeric[i] ? pw.TextAlign.end : null),
       );
 
   final totals = table.totals;

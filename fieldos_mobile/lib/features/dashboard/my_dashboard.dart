@@ -186,7 +186,7 @@ class _KpiTile extends StatelessWidget {
             const SizedBox(height: 6),
             FittedBox(
               fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: Text(kpiText(x.kpi, x.value),
                   style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: color)),
             ),

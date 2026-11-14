@@ -313,7 +313,7 @@ class _CompanyPlanCard extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.4),
             ),
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerEnd,
               child: TextButton.icon(
                 key: const Key('paywall-company-sign-in'),
                 icon: const Icon(Icons.login),
@@ -357,7 +357,7 @@ class _YourDataCard extends ConsumerWidget {
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.4),
             ),
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerEnd,
               child: TextButton.icon(
                 key: const Key('paywall-export'),
                 icon: const Icon(Icons.table_view_outlined),
@@ -522,7 +522,7 @@ class _PendingCard extends StatelessWidget {
             style: theme.textTheme.bodyMedium,
           ),
           Align(
-            alignment: Alignment.centerRight,
+            alignment: AlignmentDirectional.centerEnd,
             child: TextButton(onPressed: onCheck, child: Text(tr('Check again'))),
           ),
         ],

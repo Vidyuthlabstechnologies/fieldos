@@ -6,6 +6,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
@@ -23,7 +24,7 @@ class QuickAction {
 /// Labour, Money...
 List<QuickAction> quickActions() => [
       QuickAction(tr('Attendance'), Icons.how_to_reg_rounded, 5),
-      QuickAction(tr('Expense'), Icons.currency_rupee_rounded, 6),
+      QuickAction(tr('Expense'), currencyIcon, 6),
       QuickAction(tr('Daily report'), Icons.mic_rounded, 1),
       QuickAction(tr('Material'), Icons.local_shipping_rounded, 4),
     ];

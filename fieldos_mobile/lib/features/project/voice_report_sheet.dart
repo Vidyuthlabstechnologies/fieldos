@@ -527,7 +527,7 @@ class _ProblemCard extends StatelessWidget {
         ),
     };
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 8, 4),
+      padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 8, 4),
       decoration: BoxDecoration(
         color: theme.brightness == Brightness.dark ? const Color(0xFF4A3305) : Brand.warnSoft,
         borderRadius: BorderRadius.circular(12),

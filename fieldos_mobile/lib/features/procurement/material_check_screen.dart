@@ -276,7 +276,7 @@ class _MaterialNormsScreenState extends ConsumerState<MaterialNormsScreen> {
       ),
     );
     if (ok != true) return;
-    final vs = [for (final c in cs) double.tryParse(c.text.trim().replaceAll(',', ''))];
+    final vs = [for (final c in cs) double.tryParse(westernDigits(c.text.trim().replaceAll(',', '')))];
     if (vs.any((v) => v == null || v < 0 || v > 100000)) {
       if (mounted) showSnack(context, tr('Enter a number for each material'), error: true);
       return;

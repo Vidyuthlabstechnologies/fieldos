@@ -65,7 +65,7 @@ class ApprovalsScreen extends ConsumerWidget {
                     final note = a.decisionNote?.trim() ?? '';
                     return Card(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+                        padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 8, 8),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

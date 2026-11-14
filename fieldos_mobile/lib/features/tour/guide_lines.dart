@@ -247,4 +247,7 @@ const guideVoices = <String, String>{
   'es': '',
   'ms': '',
   'zh': '',
+  'ar': '',
+  'ur': '',
+  'ml': '',
 };

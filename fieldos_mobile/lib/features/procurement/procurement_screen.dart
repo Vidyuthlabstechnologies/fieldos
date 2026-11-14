@@ -696,7 +696,7 @@ class _PoTab extends ConsumerWidget {
 
 /// A typed number, with Indian thousands commas ("1,20,000") allowed, as
 /// the rate hint under the same fields already reads them.
-double? _num(String s) => double.tryParse(s.trim().replaceAll(',', ''));
+double? _num(String s) => double.tryParse(westernDigits(s.trim().replaceAll(',', '')));
 
 String _supName(AsyncValue<List<Supplier>> suppliers, String id) {
   for (final s in suppliers.value ?? const <Supplier>[]) {
@@ -768,7 +768,7 @@ class _GrnTab extends ConsumerWidget {
           : ListView(
               children: [
                 Align(
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
                     child: TextButton.icon(

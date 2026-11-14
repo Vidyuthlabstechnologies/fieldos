@@ -14,7 +14,7 @@ import 'package:fieldos_mobile/features/procurement/purchase_tools.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 
-double? _num(String s) => double.tryParse(s.trim().replaceAll(',', ''));
+double? _num(String s) => double.tryParse(westernDigits(s.trim().replaceAll(',', '')));
 
 /// The words for a check, kept apart so they can be tested.
 String rateCheckLine(RateCheck c, {required String? unit, double? qty}) {

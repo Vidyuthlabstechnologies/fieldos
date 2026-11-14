@@ -304,7 +304,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             if (!_registering)
               Align(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 child: TextButton(onPressed: _forgotPassword, child: Text(tr('Forgot password?'))),
               ),
             if (_error != null) ...[

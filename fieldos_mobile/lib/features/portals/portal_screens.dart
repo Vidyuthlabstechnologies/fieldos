@@ -234,7 +234,7 @@ class SupplierHomeScreen extends ConsumerWidget {
           rate: rateV,
           gstPct: parseTypedNumber(gst.text) ?? 18,
           transport: parseTypedNumber(transport.text) ?? 0,
-          deliveryDays: int.tryParse(days.text.trim()),
+          deliveryDays: int.tryParse(westernDigits(days.text.trim())),
           paymentTerms: terms.text);
       ref.invalidate(supplierPortalProvider);
       if (context.mounted) showSnack(context, tr('Price sent. The site compares it with the others.'));
@@ -334,7 +334,7 @@ class SupplierHomeScreen extends ConsumerWidget {
                                 ),
                               if (r.open && (r.quote == null || r.quote!.status == 'received'))
                                 Align(
-                                  alignment: Alignment.centerRight,
+                                  alignment: AlignmentDirectional.centerEnd,
                                   child: FilledButton.tonal(
                                     key: Key('price-${r.id}'),
                                     onPressed: () => _quote(context, ref, r),
@@ -379,7 +379,7 @@ class SupplierHomeScreen extends ConsumerWidget {
                               if (o.vehicle != null) Text(trf('Vehicle {v}', {'v': o.vehicle!}), style: theme.textTheme.bodySmall),
                               if (o.open)
                                 Align(
-                                  alignment: Alignment.centerRight,
+                                  alignment: AlignmentDirectional.centerEnd,
                                   child: FilledButton.tonal(
                                     key: Key('dispatch-${o.id}'),
                                     onPressed: () => _dispatch(context, ref, o),
@@ -531,7 +531,7 @@ class _UpdateCard extends ConsumerWidget {
               child: ListView(scrollDirection: Axis.horizontal, children: [
                 for (final p in update.photos)
                   Padding(
-                    padding: const EdgeInsets.only(right: 6),
+                    padding: const EdgeInsetsDirectional.only(end: 6),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
                       child: SizedBox(

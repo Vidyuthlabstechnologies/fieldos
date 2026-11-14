@@ -39,7 +39,7 @@ class _ApprovalRulesScreenState extends ConsumerState<ApprovalRulesScreen> {
 
   double? _value(String key) {
     final t = _fields[key]!.text.trim().replaceAll(',', '');
-    return t.isEmpty ? null : double.tryParse(t);
+    return t.isEmpty ? null : double.tryParse(westernDigits(t));
   }
 
   Future<void> _save() async {

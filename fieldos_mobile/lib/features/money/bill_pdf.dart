@@ -72,7 +72,7 @@ Future<Uint8List> buildBillPdf({
 
   pw.Widget cell(String s, {bool bold = false, bool right = false}) => pw.Padding(
         padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-        child: t(s, bold: bold, align: right ? pw.TextAlign.right : null),
+        child: t(s, bold: bold, align: right ? pw.TextAlign.end : null),
       );
 
   final headers = isRa
@@ -105,8 +105,8 @@ Future<Uint8List> buildBillPdf({
   pw.Widget sumRow(String label, String value, {bool bold = false}) => pw.Padding(
         padding: const pw.EdgeInsets.symmetric(vertical: 2),
         child: pw.Row(children: [
-          pw.Expanded(child: t(label, bold: bold, align: pw.TextAlign.right)),
-          pw.SizedBox(width: 100, child: t(value, bold: bold, align: pw.TextAlign.right)),
+          pw.Expanded(child: t(label, bold: bold, align: pw.TextAlign.end)),
+          pw.SizedBox(width: 100, child: t(value, bold: bold, align: pw.TextAlign.end)),
         ]),
       );
 

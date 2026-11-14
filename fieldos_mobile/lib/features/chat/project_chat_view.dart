@@ -213,7 +213,7 @@ class _ProjectChatViewState extends ConsumerState<ProjectChatView> {
         SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 4, 8, 8),
+            padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 8, 8),
             child: Row(
               children: [
                 Expanded(
@@ -248,7 +248,7 @@ class _Bubble extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final time = fmtDateTime(message.createdAt);
     return Align(
-      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: mine ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
       child: GestureDetector(
         onLongPress: onLongPress,
         child: Container(

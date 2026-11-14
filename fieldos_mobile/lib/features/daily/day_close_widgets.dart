@@ -143,7 +143,7 @@ class CheckTile extends StatelessWidget {
     };
     return Card(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+        padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 8, 8),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
             Icon(icon, color: color),
@@ -162,7 +162,7 @@ class CheckTile extends StatelessWidget {
           ]),
           if (editable && !marks.siteClosed && (onQuickWork != null || (nothing != null && item.count == 0)))
             Padding(
-              padding: const EdgeInsets.only(left: 36),
+              padding: const EdgeInsetsDirectional.only(start: 36),
               child: Wrap(spacing: 8, children: [
                 if (nothing != null && item.count == 0 && onNothing != null)
                   FilterChip(

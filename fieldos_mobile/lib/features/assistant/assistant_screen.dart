@@ -456,7 +456,7 @@ class _PastChatsState extends State<_PastChats> {
         constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.7),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 8, 8),
+            padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 8, 8),
             child: Row(children: [
               Expanded(child: Text(tr('Past chats'), style: theme.textTheme.titleLarge)),
               if (chats != null && chats.isNotEmpty)
@@ -697,7 +697,7 @@ class _ConfirmCard extends StatelessWidget {
       ConfirmState.failed => (Icons.error_outline, Brand.danger, tr('Could not save')),
     };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(34, 4, 0, 4),
+      padding: const EdgeInsetsDirectional.fromSTEB(34, 4, 0, 4),
       child: Card(
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
@@ -767,9 +767,9 @@ class _ScreenButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(34, 4, 0, 4),
+        padding: const EdgeInsetsDirectional.fromSTEB(34, 4, 0, 4),
         child: Align(
-          alignment: Alignment.centerLeft,
+          alignment: AlignmentDirectional.centerStart,
           child: FilledButton.tonalIcon(
             icon: const Icon(Icons.open_in_new, size: 18),
             label: Text(trf('Open {screen}', {'screen': label(link.screen)})),
@@ -811,7 +811,7 @@ class _Notice extends StatelessWidget {
           ]),
           if (action != null)
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerEnd,
               child: TextButton(onPressed: action.$2, child: Text(action.$1)),
             ),
         ]),
@@ -842,7 +842,7 @@ class _Composer extends StatelessWidget {
       elevation: 6,
       color: scheme.surface,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+        padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 8, 8),
         child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
           Expanded(
             child: TextField(
@@ -901,7 +901,7 @@ class AssistantEntry extends StatelessWidget {
       child: InkWell(
         onTap: () => openAssistant(context),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+          padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 8, 12),
           child: Row(children: [
             const _Avatar(size: 44),
             const SizedBox(width: 12),

@@ -49,7 +49,7 @@ void main() {
     setCurrentLanguage(AppLanguage.en);
   });
 
-  for (final (m, words) in [(Market.us, _indiaOnly), (Market.malaysia, _indiaOnlyBritish)]) {
+  for (final (m, words) in [(Market.us, _indiaOnly), (Market.malaysia, _indiaOnlyBritish), (Market.uae, _indiaOnlyBritish)]) {
     test('the ${m.name} app shows no India-only words', () {
       debugSetMarket(m);
       final leaks = <String>[];

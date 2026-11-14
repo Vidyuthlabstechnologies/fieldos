@@ -4,13 +4,14 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:fieldos_mobile/core/digits_input.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/commercial/commercial_rules.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
-double? parseNum(String s) => double.tryParse(s.replaceAll(',', '').trim());
+double? parseNum(String s) => double.tryParse(westernDigits(s).replaceAll(',', '').trim());
 
 class NumField extends StatelessWidget {
   const NumField({super.key, required this.controller, required this.label, this.suffix, this.helper, this.onChanged});
@@ -24,7 +25,7 @@ class NumField extends StatelessWidget {
   Widget build(BuildContext context) => TextField(
         controller: controller,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
+        inputFormatters: [const WesternDigitsFormatter(), FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
         decoration: InputDecoration(labelText: label, suffixText: suffix, helperText: helper),
         onChanged: onChanged,
       );

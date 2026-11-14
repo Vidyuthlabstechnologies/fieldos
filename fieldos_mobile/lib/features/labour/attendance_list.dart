@@ -184,7 +184,7 @@ class _PunchTile extends StatelessWidget {
           Flexible(child: Text(punch.workerName, maxLines: 1, overflow: TextOverflow.ellipsis)),
           if (punch.photoId != null)
             Padding(
-              padding: const EdgeInsets.only(left: 6),
+              padding: const EdgeInsetsDirectional.only(start: 6),
               child: Icon(Icons.photo_camera_outlined, size: 16, semanticLabel: tr('Photo taken')),
             ),
         ]),

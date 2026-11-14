@@ -136,7 +136,7 @@ Future<Uint8List> buildVoucherPdf({
         ]),
         if (branding.hasFooter) ...[
           pw.SizedBox(height: 8),
-          t(branding.footerLine, size: 7, color: _muted, align: pw.TextAlign.right),
+          t(branding.footerLine, size: 7, color: _muted, align: pw.TextAlign.end),
         ],
       ],
     ),

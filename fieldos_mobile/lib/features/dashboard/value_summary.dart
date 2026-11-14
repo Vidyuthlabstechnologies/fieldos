@@ -102,7 +102,7 @@ class ValueCard extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       color: theme.colorScheme.secondaryContainer,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 8, 16, 12),
+        padding: const EdgeInsetsDirectional.fromSTEB(8, 8, 16, 12),
         child: Row(children: [
           const Mitra(mood: MitraMood.chai, size: 72),
           const SizedBox(width: 8),

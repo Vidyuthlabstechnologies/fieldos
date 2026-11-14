@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/digits_input.dart';
 import 'package:fieldos_mobile/features/tasks/team_roster.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -403,7 +404,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         const SizedBox(height: 32),
         const Divider(),
         Align(
-          alignment: Alignment.centerLeft,
+          alignment: AlignmentDirectional.centerStart,
           child: TextButton.icon(
             onPressed: _busy ? null : _deleteAccount,
             icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
@@ -454,7 +455,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           autocorrect: false,
         ),
         Align(
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           child: TextButton(onPressed: _busy ? null : _forgotPassword, child: Text(tr('Forgot password?'))),
         ),
         FilledButton(onPressed: _busy ? null : _signIn, child: _busyOr(tr('Sign in'))),
@@ -481,7 +482,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         decoration: InputDecoration(labelText: tr('Code from the email'), prefixIcon: Icon(Icons.pin_outlined)),
         keyboardType: TextInputType.number,
         autofillHints: const [AutofillHints.oneTimeCode],
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
+        inputFormatters: [const WesternDigitsFormatter(), FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
         textInputAction: reset ? TextInputAction.next : TextInputAction.done,
         onSubmitted: reset ? null : (_) => _busy ? null : _submitCode(),
         autocorrect: false,

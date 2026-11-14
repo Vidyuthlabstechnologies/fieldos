@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/digits_input.dart';
 import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/agents/dpr_intake.dart';
 import 'package:fieldos_mobile/agents/site_report_parser.dart';
@@ -224,7 +225,7 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
       showSnack(context, 'Write or speak what was done before saving.', error: true);
       return;
     }
-    final manpower = int.tryParse(_manpower.text.trim()) ?? 0;
+    final manpower = int.tryParse(westernDigits(_manpower.text.trim())) ?? 0;
     final weather = _weather.text.trim();
     final issues = [
       for (final e in _issues.entries)
@@ -352,7 +353,7 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                   child: TextField(
                     controller: _manpower,
                     keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(4)],
+                    inputFormatters: [const WesternDigitsFormatter(), FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(4)],
                     onChanged: (_) => _manpowerTouched = true,
                     decoration: InputDecoration(labelText: tr('People on site'), prefixIcon: Icon(Icons.groups_outlined)),
                   ),
@@ -410,15 +411,15 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                 children: [
                   for (final p in _photos)
                     Padding(
-                      padding: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsetsDirectional.only(end: 8),
                       child: Stack(children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.file(File(p), width: 92, height: 92, fit: BoxFit.cover,
                               errorBuilder: (_, _, _) => Container(width: 92, height: 92, color: theme.colorScheme.surfaceContainer)),
                         ),
-                        Positioned(
-                          right: 2,
+                        PositionedDirectional(
+                          end: 2,
                           top: 2,
                           child: IconButton.filledTonal(
                             visualDensity: VisualDensity.compact,

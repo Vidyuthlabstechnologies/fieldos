@@ -724,7 +724,7 @@ class _VariationsTabState extends ConsumerState<_VariationsTab> {
           qty: order == null ? null : parseNum(qty.text),
           unit: d.orderById(order)?.unit,
           estimatedCost: parseNum(cost.text) ?? 0,
-          scheduleDays: int.tryParse(days.text.trim()) ?? 0,
+          scheduleDays: int.tryParse(westernDigits(days.text.trim())) ?? 0,
           note: note.text,
           photos: photos,
         );

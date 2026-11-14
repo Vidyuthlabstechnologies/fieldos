@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/digits_input.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -110,13 +111,13 @@ class _MeasurementBookScreenState extends ConsumerState<MeasurementBookScreen> {
               TextField(
                 controller: rate,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                inputFormatters: [const WesternDigitsFormatter(), FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
                 decoration: InputDecoration(labelText: tr('Rate (₹ per unit)')),
               ),
               TextField(
                 controller: qty,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.\-]'))],
+                inputFormatters: [const WesternDigitsFormatter(), FilteringTextInputFormatter.allow(RegExp(r'[0-9.\-]'))],
                 decoration: InputDecoration(
                     labelText: tr('Quantity measured'), helperText: tr('A minus quantity corrects an earlier one.')),
               ),
