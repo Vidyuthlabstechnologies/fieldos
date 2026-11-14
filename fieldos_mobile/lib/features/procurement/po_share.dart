@@ -20,9 +20,9 @@ String poShareText({
     if (request != null)
       'Material: ${[request.materialName.trim(), fmtQty(request.quantity), if (request.unit.trim().isNotEmpty) request.unit.trim()].join(' ')}',
     if (order.totalAmount != null) 'Amount: ${rupees(order.totalAmount!, paise: true)}',
-    if (order.deliveryDate != null) 'Deliver by: ${fmtDate(order.deliveryDate!)}',
+    if (order.deliveryDate != null) 'Deliver by: ${fmtDate(order.deliveryDate!, english: true)}',
     if ((order.notes ?? '').trim().isNotEmpty) 'Notes: ${order.notes!.trim()}',
-    'Dated ${fmtDate(order.createdAt)}',
+    'Dated ${fmtDate(order.createdAt, english: true)}',
     '',
     'Please confirm the delivery date by reply.',
   ];

@@ -1,19 +1,50 @@
 /// Dates and times the way people on site say them: "6 Nov 2026",
-/// "Today, 7:12 pm", "Yesterday". No locale package needed, and nothing
-/// here touches the network.
+/// "Today, 7:12 pm", "Yesterday". Nothing here touches the network.
+///
+/// On screen, a date follows the screens' language: "14 नव॰ 2026" in Hindi,
+/// "14 نوفمبر" in Arabic (with the same 0-9 digits as the money beside it).
+/// Documents for clients and suppliers (PDFs, WhatsApp texts to a vendor)
+/// stay English, and pass `english: true`.
 library;
+
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 const _months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+var _dateDataReady = false;
+
+/// The month written in the screens' language, or null for English (which
+/// keeps the hand-made "6 Nov" form below on every market).
+DateFormat? _localFormat(bool withYear) {
+  final lang = currentLanguage;
+  if (lang == AppLanguage.en) return null;
+  if (!_dateDataReady) {
+    // The bundled CLDR data: set up synchronously, no download.
+    initializeDateFormatting();
+    _dateDataReady = true;
+  }
+  final code = lang.code;
+  final f = withYear ? DateFormat.yMMMd(code) : DateFormat.MMMd(code);
+  // Arabic and Urdu would otherwise write the day in their own digits,
+  // beside amounts in 0-9.
+  return f..useNativeDigits = false;
+}
+
 /// "6 Nov 2026" (the year is left out for dates in the current year when
-/// [short] is true: "6 Nov"). In the US: "Nov 6, 2026" and "Nov 6".
-String fmtDate(DateTime d, {bool short = false, DateTime? now}) {
+/// [short] is true: "6 Nov"). In the US: "Nov 6, 2026" and "Nov 6". In
+/// the screens' language unless [english].
+String fmtDate(DateTime d, {bool short = false, DateTime? now, bool english = false}) {
   final l = d.toLocal();
   final n = (now ?? DateTime.now()).toLocal();
   final dropYear = short && l.year == n.year;
+  if (!english) {
+    final local = _localFormat(!dropYear);
+    if (local != null) return local.format(l);
+  }
   if (market.dateOrder == DateOrder.mdy) {
     final base = '${_months[l.month - 1]} ${l.day}';
     return dropYear ? base : '$base, ${l.year}';
@@ -40,29 +71,29 @@ String fmtDateNumeric(DateTime d) {
 }
 
 /// "Today, 7:12 pm", "Yesterday, 9:05 am" or "3 Nov, 6:40 pm".
-String fmtDateTime(DateTime d, {DateTime? now}) {
+String fmtDateTime(DateTime d, {DateTime? now, bool english = false}) {
   final l = d.toLocal();
   final n = (now ?? DateTime.now()).toLocal();
   final day = DateTime(l.year, l.month, l.day);
   final today = DateTime(n.year, n.month, n.day);
   final diff = today.difference(day).inDays;
   final label = switch (diff) {
-    0 => tr('Today'),
-    1 => tr('Yesterday'),
-    _ => fmtDate(l, short: true, now: n),
+    0 => english ? 'Today' : tr('Today'),
+    1 => english ? 'Yesterday' : tr('Yesterday'),
+    _ => fmtDate(l, short: true, now: n, english: english),
   };
   return '$label, ${fmtTime(l)}';
 }
 
 /// "Today", "Yesterday" or a date, for list headers and DPR rows.
-String fmtDay(DateTime d, {DateTime? now}) {
+String fmtDay(DateTime d, {DateTime? now, bool english = false}) {
   final l = d.toLocal();
   final n = (now ?? DateTime.now()).toLocal();
   final diff = DateTime(n.year, n.month, n.day).difference(DateTime(l.year, l.month, l.day)).inDays;
   return switch (diff) {
-    0 => tr('Today'),
-    1 => tr('Yesterday'),
-    _ => fmtDate(l, short: true, now: n),
+    0 => english ? 'Today' : tr('Today'),
+    1 => english ? 'Yesterday' : tr('Yesterday'),
+    _ => fmtDate(l, short: true, now: n, english: english),
   };
 }
 

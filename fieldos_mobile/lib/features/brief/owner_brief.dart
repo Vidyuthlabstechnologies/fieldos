@@ -218,7 +218,7 @@ const _levelWord = {BriefLevel.needsYou: '🔴 Needs you', BriefLevel.watch: '�
 String ownerBriefText(List<SiteBrief> briefs, {required String companyName, required DateTime day, bool showMoney = true}) {
   final t = briefTotals(briefs);
   final b = StringBuffer()
-    ..writeln('*$companyName – site brief, ${fmtDay(day)} ${fmtDate(day, short: true)}*')
+    ..writeln('*$companyName – site brief, ${fmtDay(day, english: true)} ${fmtDate(day, short: true, english: true)}*')
     ..writeln(
         '${briefs.length} ${briefs.length == 1 ? 'site' : 'sites'} · ${t.people} people on site · ${t.reported} of ${briefs.length} reported'
         '${showMoney ? ' · ${rupees(t.spent)} spent' : ''}');

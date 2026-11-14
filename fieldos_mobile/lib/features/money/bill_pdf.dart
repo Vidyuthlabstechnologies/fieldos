@@ -144,7 +144,7 @@ Future<Uint8List> buildBillPdf({
         pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
           t(title, size: 13, bold: true),
           t('No. ${bill.billNumber}'),
-          t('Date ${fmtDate(bill.billDate)}'),
+          t('Date ${fmtDate(bill.billDate, english: true)}'),
         ]),
       ]),
       pw.SizedBox(height: 14),

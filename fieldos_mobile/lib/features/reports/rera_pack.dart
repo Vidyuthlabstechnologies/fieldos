@@ -283,12 +283,12 @@ Future<Uint8List> buildReraPackPdf(ReraPack pack,
         pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
           t('QUARTERLY PROGRESS', size: 13, bold: true, color: accent),
           t('Quarter: ${pack.quarter.label}', color: _muted),
-          t('To upload by ${fmtDate(pack.quarter.dueBy)}', color: _muted),
-          t('Made on ${fmtDate(now ?? DateTime.now())}', size: 7, color: _muted),
+          t('To upload by ${fmtDate(pack.quarter.dueBy, english: true)}', color: _muted),
+          t('Made on ${fmtDate(now ?? DateTime.now(), english: true)}', size: 7, color: _muted),
         ]),
       ]),
       pw.Container(height: 2, color: accent, margin: const pw.EdgeInsets.symmetric(vertical: 8)),
-      h('1. Construction progress at ${fmtDate(pack.quarter.end)}'),
+      h('1. Construction progress at ${fmtDate(pack.quarter.end, english: true)}'),
       if (pack.floors.isEmpty)
         t('No floor progress recorded yet.', color: _muted)
       else ...[
@@ -309,7 +309,7 @@ Future<Uint8List> buildReraPackPdf(ReraPack pack,
                 cell(stageNames[f.stage] ?? f.stage),
                 cell(atStart.containsKey('${f.block}\u0000${f.floor}') ? '${atStart['${f.block}\u0000${f.floor}']}%' : '-'),
                 cell('${f.pct}%', bold: true),
-                cell(fmtDate(DateTime.parse(f.asOf))),
+                cell(fmtDate(DateTime.parse(f.asOf), english: true)),
               ]),
             for (final e in pack.byBlock.entries)
               pw.TableRow(decoration: const pw.BoxDecoration(color: _paper), children: [
@@ -331,7 +331,7 @@ Future<Uint8List> buildReraPackPdf(ReraPack pack,
           pw.Padding(
             padding: const pw.EdgeInsets.only(bottom: 3),
             child: pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-              pw.SizedBox(width: 62, child: t(fmtDate(d.entryDate.toLocal()), size: 8, color: _muted)),
+              pw.SizedBox(width: 62, child: t(fmtDate(d.entryDate.toLocal(), english: true), size: 8, color: _muted)),
               pw.Expanded(child: t(d.workSummary.replaceAll('\n', ' '), size: 8)),
             ]),
           ),
@@ -347,7 +347,7 @@ Future<Uint8List> buildReraPackPdf(ReraPack pack,
               width: 255,
               child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
                 pw.Image(i.image, height: 170, fit: pw.BoxFit.cover),
-                t('${fmtDate(i.on)}${i.caption == null || i.caption!.isEmpty ? '' : '  ${i.caption}'}', size: 7, color: _muted),
+                t('${fmtDate(i.on, english: true)}${i.caption == null || i.caption!.isEmpty ? '' : '  ${i.caption}'}', size: 7, color: _muted),
               ]),
             ),
         ]),

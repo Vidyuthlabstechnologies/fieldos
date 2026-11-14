@@ -245,7 +245,7 @@ Future<Uint8List> buildWorkOrderStatement({
       if (!f.existsSync() || !(lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png'))) continue;
       try {
         images.add((pw.MemoryImage(f.readAsBytesSync()),
-            '${a.parentKind == 'claim' ? 'Claim' : 'Certification'} of ${fmtDate(c.createdAt)}: ${_q(c.qty, unit)}'));
+            '${a.parentKind == 'claim' ? 'Claim' : 'Certification'} of ${fmtDate(c.createdAt, english: true)}: ${_q(c.qty, unit)}'));
       } catch (_) {}
     }
   }
@@ -274,7 +274,7 @@ Future<Uint8List> buildWorkOrderStatement({
         for (final c in d.certifications.where((c) => c.workOrderId == order.id))
           [
             d.certificateNo(c),
-            fmtDate(c.createdAt),
+            fmtDate(c.createdAt, english: true),
             _q(d.claimById(c.claimId)?.qty ?? 0, unit),
             _q(c.acceptedQty, unit),
             _q(c.rejectedQty, unit),
@@ -307,11 +307,11 @@ Future<Uint8List> buildWorkOrderStatement({
         ['Still on the order', _q(pos.remainingQty, unit), _money(pos.openCommitment)],
       ]),
       for (final c in claims) ...[
-        heading('Trace: claim of ${fmtDate(c.createdAt)}'),
+        heading('Trace: claim of ${fmtDate(c.createdAt, english: true)}'),
         for (final s in traceClaim(d, c))
           pw.Padding(
             padding: const pw.EdgeInsets.only(bottom: 2),
-            child: t('${fmtDateTime(s.at)}  ${s.english}${s.who == null ? '' : ' - ${who(s.who)}'}'
+            child: t('${fmtDateTime(s.at, english: true)}  ${s.english}${s.who == null ? '' : ' - ${who(s.who)}'}'
                 '${s.photos > 0 ? ' [${s.photos} photo${s.photos == 1 ? '' : 's'}]' : ''}'
                 '${(s.note ?? '').isEmpty ? '' : ' "${s.note}"'}'),
           ),

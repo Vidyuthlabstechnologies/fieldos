@@ -98,7 +98,7 @@ Future<Uint8List> buildVoucherPdf({
             t('No. ${voucherLabel(e.voucherNo)}', size: 12, bold: true),
             // Not yet numbered by the server: this copy's number may change.
             if (provisional) t('Provisional number', size: 9, color: _muted),
-            t('Date: ${fmtDate(expenseDay(e))}', color: _muted),
+            t('Date: ${fmtDate(expenseDay(e), english: true)}', color: _muted),
           ]),
         ]),
         pw.SizedBox(height: 10),

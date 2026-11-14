@@ -188,7 +188,8 @@ Future<PeriodReport> buildPeriodReport(AppDatabase db, Project project, ReportPe
   );
 }
 
-String periodRange(ReportPeriod p) => '${fmtDate(p.start, short: true)} to ${fmtDate(p.lastDay, short: true)}';
+String periodRange(ReportPeriod p) =>
+    '${fmtDate(p.start, short: true, english: true)} to ${fmtDate(p.lastDay, short: true, english: true)}';
 
 /// [periodRange] in the app's language, for the screen (shared messages
 /// stay in English).
@@ -218,7 +219,7 @@ String periodReportText(PeriodReport r, {required String companyName, bool showM
       ..writeln()
       ..writeln('*Day by day*');
     for (final d in r.days) {
-      b.writeln('${fmtDay(d.day)} ${fmtDate(d.day, short: true)}: ${d.text}${d.people > 0 ? ' (${d.people} people)' : ''}');
+      b.writeln('${fmtDay(d.day, english: true)} ${fmtDate(d.day, short: true, english: true)}: ${d.text}${d.people > 0 ? ' (${d.people} people)' : ''}');
     }
   }
   if (r.materials.isNotEmpty) {
