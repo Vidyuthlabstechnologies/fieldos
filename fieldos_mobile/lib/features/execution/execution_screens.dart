@@ -19,6 +19,7 @@ import 'package:fieldos_mobile/features/commercial/commercial_widgets.dart' show
 import 'package:fieldos_mobile/features/execution/drawing_sheet_screen.dart';
 import 'package:fieldos_mobile/features/execution/execution_data.dart';
 import 'package:fieldos_mobile/features/execution/execution_rules.dart';
+import 'package:fieldos_mobile/features/execution/submittals_tab.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
@@ -97,7 +98,7 @@ class SiteExecutionScreen extends ConsumerWidget {
     final data = ref.watch(executionDataProvider(project.id));
     final names = ref.watch(closeNamesProvider(project.companyId)).value ?? const <String, String>{};
     return DefaultTabController(
-      length: 5,
+      length: 6,
       initialIndex: initialTab,
       child: Scaffold(
         appBar: AppBar(
@@ -110,6 +111,7 @@ class SiteExecutionScreen extends ConsumerWidget {
               Tab(text: tr('RFIs')),
               Tab(text: tr('Quality')),
               Tab(text: tr('Handover')),
+              Tab(text: tr('Submittals')),
             ],
           ),
         ),
@@ -121,6 +123,7 @@ class SiteExecutionScreen extends ConsumerWidget {
               _RfisTab(project: project, data: d, names: names),
               _QualityTab(project: project, data: d, names: names),
               _HandoverTab(project: project, data: d, names: names),
+              SubmittalsTab(project: project, data: d, names: names),
             ],
           ),
           loading: () => const Center(child: CircularProgressIndicator()),

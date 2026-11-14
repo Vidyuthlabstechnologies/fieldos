@@ -22,6 +22,7 @@ const siteExecutionTables = {
   'company_standards': 'company_standards',
   'worker_permits': 'worker_permits',
   'site_drawing_pins': 'drawing_pins',
+  'site_submittals': 'submittals',
 };
 
 /// Tables whose rows are a file on the phone, uploaded to Storage under
@@ -35,7 +36,7 @@ const siteExecutionFileFolders = {
 const siteExecutionProjectScoped = {
   'site_task_constraints', 'site_drawings', 'site_drawing_revisions', 'site_rfis', 'site_hold_points',
   'site_defects', 'site_execution_photos', 'site_handover_units', 'site_handover_checks', 'worker_permits',
-  'site_drawing_pins',
+  'site_drawing_pins', 'site_submittals',
 };
 
 /// Person columns on these tables, swapped between the phone's and the
@@ -112,6 +113,7 @@ Insertable<DataClass> executionFromRemote(String serverTable, Map<String, dynami
     'company_standards' => CompanyStandard.fromJson(camel, serializer: _iso),
     'worker_permits' => WorkerPermit.fromJson(camel, serializer: _iso),
     'site_drawing_pins' => DrawingPin.fromJson(camel, serializer: _iso),
+    'site_submittals' => Submittal.fromJson(camel, serializer: _iso),
     _ => throw ArgumentError('Not a site execution table: $serverTable'),
   };
   return d as Insertable<DataClass>;
@@ -131,5 +133,6 @@ TableInfo<Table, DataClass> executionTable(AppDatabase db, String serverTable) =
       'company_standards' => db.companyStandards,
       'worker_permits' => db.workerPermits,
       'site_drawing_pins' => db.drawingPins,
+      'site_submittals' => db.submittals,
       _ => throw ArgumentError('Not a site execution table: $serverTable'),
     } as TableInfo<Table, DataClass>;

@@ -141,3 +141,31 @@ Code: `fieldos_mobile/lib/features/execution/drawing_sheet_screen.dart`,
 DAO `addPin` / `removePin`; phone table `drawing_pins` (schema v42);
 server `supabase/migrations/20261114220000_drawing_pins.sql`
 (`site_drawing_pins`, synced by the site-execution mapper).
+
+## Submittals
+
+The Submittals tab (last tab, so older tab indices stay put) is the register
+of shop drawings, product data, samples, mock-ups and method statements sent
+to the architect or consultant. Each one is numbered `SUB-n` in the order
+raised, shows who it is from and who reviews it, and is marked late when it
+is still waiting past its "needed by" day.
+
+- Raising one with a task adds a material constraint to that task ("Approval
+  of ..."), linked to the submittal. The lookahead shows the task as waiting
+  until the submittal is approved or approved as noted.
+- Only the owner or a project manager records the review: approved, approved
+  as noted, revise and resubmit, or rejected. Anything other than a plain
+  approval needs the reviewer's words.
+- Revise and resubmit or rejected can be sent again: the round goes up, the
+  last review moves to the history (`round|status|decided by|yyyy-mm-dd|note`),
+  and it waits for a new review.
+
+Server rules (`site_submittals_guard`, migration `20261114230000_submittals`):
+raised as yourself, starting submitted at round 1 with no history; site and
+raiser never change; a review only by a manager, as themselves, once per
+round; a resubmit only from revise/rejected, one round up, the decision
+cleared and the history grown; the history is append-only.
+
+Tests: `test/submittals_test.dart` (rules and the tab on a small phone in
+Hindi) and `test/submittals_cycle_test.dart` (two phones against the local
+stack).

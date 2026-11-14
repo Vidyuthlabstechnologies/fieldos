@@ -52184,7 +52184,7 @@ class ExecutionPhoto extends DataClass implements Insertable<ExecutionPhoto> {
   final String id;
   final String projectId;
 
-  /// defect | defect_fix | hold_point | rfi
+  /// defect | defect_fix | hold_point | rfi | submittal
   final String parentKind;
   final String parentId;
   final String filePath;
@@ -55905,6 +55905,1086 @@ class DrawingPinsCompanion extends UpdateCompanion<DrawingPin> {
   }
 }
 
+class $SubmittalsTable extends Submittals
+    with TableInfo<$SubmittalsTable, Submittal> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SubmittalsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 200,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('product_data'),
+  );
+  static const VerificationMeta _specSectionMeta = const VerificationMeta(
+    'specSection',
+  );
+  @override
+  late final GeneratedColumn<String> specSection = GeneratedColumn<String>(
+    'spec_section',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 40),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fromPartyMeta = const VerificationMeta(
+    'fromParty',
+  );
+  @override
+  late final GeneratedColumn<String> fromParty = GeneratedColumn<String>(
+    'from_party',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reviewerMeta = const VerificationMeta(
+    'reviewer',
+  );
+  @override
+  late final GeneratedColumn<String> reviewer = GeneratedColumn<String>(
+    'reviewer',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _requiredByMeta = const VerificationMeta(
+    'requiredBy',
+  );
+  @override
+  late final GeneratedColumn<String> requiredBy = GeneratedColumn<String>(
+    'required_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _drawingIdMeta = const VerificationMeta(
+    'drawingId',
+  );
+  @override
+  late final GeneratedColumn<String> drawingId = GeneratedColumn<String>(
+    'drawing_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 36),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _taskIdMeta = const VerificationMeta('taskId');
+  @override
+  late final GeneratedColumn<String> taskId = GeneratedColumn<String>(
+    'task_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 36),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _roundMeta = const VerificationMeta('round');
+  @override
+  late final GeneratedColumn<int> round = GeneratedColumn<int>(
+    'round',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('submitted'),
+  );
+  static const VerificationMeta _decisionNoteMeta = const VerificationMeta(
+    'decisionNote',
+  );
+  @override
+  late final GeneratedColumn<String> decisionNote = GeneratedColumn<String>(
+    'decision_note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 1000),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _decidedByMeta = const VerificationMeta(
+    'decidedBy',
+  );
+  @override
+  late final GeneratedColumn<String> decidedBy = GeneratedColumn<String>(
+    'decided_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _decidedAtMeta = const VerificationMeta(
+    'decidedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> decidedAt = GeneratedColumn<DateTime>(
+    'decided_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _historyMeta = const VerificationMeta(
+    'history',
+  );
+  @override
+  late final GeneratedColumn<String> history = GeneratedColumn<String>(
+    'history',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 8000),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _raisedByMeta = const VerificationMeta(
+    'raisedBy',
+  );
+  @override
+  late final GeneratedColumn<String> raisedBy = GeneratedColumn<String>(
+    'raised_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    title,
+    kind,
+    specSection,
+    fromParty,
+    reviewer,
+    requiredBy,
+    drawingId,
+    taskId,
+    round,
+    status,
+    decisionNote,
+    decidedBy,
+    decidedAt,
+    history,
+    raisedBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'submittals';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Submittal> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    }
+    if (data.containsKey('spec_section')) {
+      context.handle(
+        _specSectionMeta,
+        specSection.isAcceptableOrUnknown(
+          data['spec_section']!,
+          _specSectionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('from_party')) {
+      context.handle(
+        _fromPartyMeta,
+        fromParty.isAcceptableOrUnknown(data['from_party']!, _fromPartyMeta),
+      );
+    }
+    if (data.containsKey('reviewer')) {
+      context.handle(
+        _reviewerMeta,
+        reviewer.isAcceptableOrUnknown(data['reviewer']!, _reviewerMeta),
+      );
+    }
+    if (data.containsKey('required_by')) {
+      context.handle(
+        _requiredByMeta,
+        requiredBy.isAcceptableOrUnknown(data['required_by']!, _requiredByMeta),
+      );
+    }
+    if (data.containsKey('drawing_id')) {
+      context.handle(
+        _drawingIdMeta,
+        drawingId.isAcceptableOrUnknown(data['drawing_id']!, _drawingIdMeta),
+      );
+    }
+    if (data.containsKey('task_id')) {
+      context.handle(
+        _taskIdMeta,
+        taskId.isAcceptableOrUnknown(data['task_id']!, _taskIdMeta),
+      );
+    }
+    if (data.containsKey('round')) {
+      context.handle(
+        _roundMeta,
+        round.isAcceptableOrUnknown(data['round']!, _roundMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('decision_note')) {
+      context.handle(
+        _decisionNoteMeta,
+        decisionNote.isAcceptableOrUnknown(
+          data['decision_note']!,
+          _decisionNoteMeta,
+        ),
+      );
+    }
+    if (data.containsKey('decided_by')) {
+      context.handle(
+        _decidedByMeta,
+        decidedBy.isAcceptableOrUnknown(data['decided_by']!, _decidedByMeta),
+      );
+    }
+    if (data.containsKey('decided_at')) {
+      context.handle(
+        _decidedAtMeta,
+        decidedAt.isAcceptableOrUnknown(data['decided_at']!, _decidedAtMeta),
+      );
+    }
+    if (data.containsKey('history')) {
+      context.handle(
+        _historyMeta,
+        history.isAcceptableOrUnknown(data['history']!, _historyMeta),
+      );
+    }
+    if (data.containsKey('raised_by')) {
+      context.handle(
+        _raisedByMeta,
+        raisedBy.isAcceptableOrUnknown(data['raised_by']!, _raisedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_raisedByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Submittal map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Submittal(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      specSection: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}spec_section'],
+      ),
+      fromParty: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}from_party'],
+      ),
+      reviewer: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reviewer'],
+      ),
+      requiredBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}required_by'],
+      ),
+      drawingId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}drawing_id'],
+      ),
+      taskId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}task_id'],
+      ),
+      round: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}round'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      decisionNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decision_note'],
+      ),
+      decidedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decided_by'],
+      ),
+      decidedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}decided_at'],
+      ),
+      history: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}history'],
+      )!,
+      raisedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}raised_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SubmittalsTable createAlias(String alias) {
+    return $SubmittalsTable(attachedDatabase, alias);
+  }
+}
+
+class Submittal extends DataClass implements Insertable<Submittal> {
+  final String id;
+  final String projectId;
+  final String title;
+
+  /// shop_drawing | product_data | sample | mock_up | method_statement | other
+  final String kind;
+  final String? specSection;
+
+  /// The subcontractor or supplier it came from.
+  final String? fromParty;
+
+  /// Who reviews it (architect, consultant, client).
+  final String? reviewer;
+
+  /// yyyy-mm-dd
+  final String? requiredBy;
+  final String? drawingId;
+  final String? taskId;
+  final int round;
+
+  /// submitted | approved | approved_as_noted | revise_resubmit | rejected
+  final String status;
+  final String? decisionNote;
+  final String? decidedBy;
+  final DateTime? decidedAt;
+
+  /// Earlier reviews, one line each, oldest first. Only ever grows.
+  final String history;
+  final String raisedBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const Submittal({
+    required this.id,
+    required this.projectId,
+    required this.title,
+    required this.kind,
+    this.specSection,
+    this.fromParty,
+    this.reviewer,
+    this.requiredBy,
+    this.drawingId,
+    this.taskId,
+    required this.round,
+    required this.status,
+    this.decisionNote,
+    this.decidedBy,
+    this.decidedAt,
+    required this.history,
+    required this.raisedBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['title'] = Variable<String>(title);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || specSection != null) {
+      map['spec_section'] = Variable<String>(specSection);
+    }
+    if (!nullToAbsent || fromParty != null) {
+      map['from_party'] = Variable<String>(fromParty);
+    }
+    if (!nullToAbsent || reviewer != null) {
+      map['reviewer'] = Variable<String>(reviewer);
+    }
+    if (!nullToAbsent || requiredBy != null) {
+      map['required_by'] = Variable<String>(requiredBy);
+    }
+    if (!nullToAbsent || drawingId != null) {
+      map['drawing_id'] = Variable<String>(drawingId);
+    }
+    if (!nullToAbsent || taskId != null) {
+      map['task_id'] = Variable<String>(taskId);
+    }
+    map['round'] = Variable<int>(round);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || decisionNote != null) {
+      map['decision_note'] = Variable<String>(decisionNote);
+    }
+    if (!nullToAbsent || decidedBy != null) {
+      map['decided_by'] = Variable<String>(decidedBy);
+    }
+    if (!nullToAbsent || decidedAt != null) {
+      map['decided_at'] = Variable<DateTime>(decidedAt);
+    }
+    map['history'] = Variable<String>(history);
+    map['raised_by'] = Variable<String>(raisedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  SubmittalsCompanion toCompanion(bool nullToAbsent) {
+    return SubmittalsCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      title: Value(title),
+      kind: Value(kind),
+      specSection: specSection == null && nullToAbsent
+          ? const Value.absent()
+          : Value(specSection),
+      fromParty: fromParty == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fromParty),
+      reviewer: reviewer == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewer),
+      requiredBy: requiredBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(requiredBy),
+      drawingId: drawingId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(drawingId),
+      taskId: taskId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(taskId),
+      round: Value(round),
+      status: Value(status),
+      decisionNote: decisionNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decisionNote),
+      decidedBy: decidedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decidedBy),
+      decidedAt: decidedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decidedAt),
+      history: Value(history),
+      raisedBy: Value(raisedBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory Submittal.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Submittal(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      title: serializer.fromJson<String>(json['title']),
+      kind: serializer.fromJson<String>(json['kind']),
+      specSection: serializer.fromJson<String?>(json['specSection']),
+      fromParty: serializer.fromJson<String?>(json['fromParty']),
+      reviewer: serializer.fromJson<String?>(json['reviewer']),
+      requiredBy: serializer.fromJson<String?>(json['requiredBy']),
+      drawingId: serializer.fromJson<String?>(json['drawingId']),
+      taskId: serializer.fromJson<String?>(json['taskId']),
+      round: serializer.fromJson<int>(json['round']),
+      status: serializer.fromJson<String>(json['status']),
+      decisionNote: serializer.fromJson<String?>(json['decisionNote']),
+      decidedBy: serializer.fromJson<String?>(json['decidedBy']),
+      decidedAt: serializer.fromJson<DateTime?>(json['decidedAt']),
+      history: serializer.fromJson<String>(json['history']),
+      raisedBy: serializer.fromJson<String>(json['raisedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'title': serializer.toJson<String>(title),
+      'kind': serializer.toJson<String>(kind),
+      'specSection': serializer.toJson<String?>(specSection),
+      'fromParty': serializer.toJson<String?>(fromParty),
+      'reviewer': serializer.toJson<String?>(reviewer),
+      'requiredBy': serializer.toJson<String?>(requiredBy),
+      'drawingId': serializer.toJson<String?>(drawingId),
+      'taskId': serializer.toJson<String?>(taskId),
+      'round': serializer.toJson<int>(round),
+      'status': serializer.toJson<String>(status),
+      'decisionNote': serializer.toJson<String?>(decisionNote),
+      'decidedBy': serializer.toJson<String?>(decidedBy),
+      'decidedAt': serializer.toJson<DateTime?>(decidedAt),
+      'history': serializer.toJson<String>(history),
+      'raisedBy': serializer.toJson<String>(raisedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  Submittal copyWith({
+    String? id,
+    String? projectId,
+    String? title,
+    String? kind,
+    Value<String?> specSection = const Value.absent(),
+    Value<String?> fromParty = const Value.absent(),
+    Value<String?> reviewer = const Value.absent(),
+    Value<String?> requiredBy = const Value.absent(),
+    Value<String?> drawingId = const Value.absent(),
+    Value<String?> taskId = const Value.absent(),
+    int? round,
+    String? status,
+    Value<String?> decisionNote = const Value.absent(),
+    Value<String?> decidedBy = const Value.absent(),
+    Value<DateTime?> decidedAt = const Value.absent(),
+    String? history,
+    String? raisedBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => Submittal(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    title: title ?? this.title,
+    kind: kind ?? this.kind,
+    specSection: specSection.present ? specSection.value : this.specSection,
+    fromParty: fromParty.present ? fromParty.value : this.fromParty,
+    reviewer: reviewer.present ? reviewer.value : this.reviewer,
+    requiredBy: requiredBy.present ? requiredBy.value : this.requiredBy,
+    drawingId: drawingId.present ? drawingId.value : this.drawingId,
+    taskId: taskId.present ? taskId.value : this.taskId,
+    round: round ?? this.round,
+    status: status ?? this.status,
+    decisionNote: decisionNote.present ? decisionNote.value : this.decisionNote,
+    decidedBy: decidedBy.present ? decidedBy.value : this.decidedBy,
+    decidedAt: decidedAt.present ? decidedAt.value : this.decidedAt,
+    history: history ?? this.history,
+    raisedBy: raisedBy ?? this.raisedBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  Submittal copyWithCompanion(SubmittalsCompanion data) {
+    return Submittal(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      title: data.title.present ? data.title.value : this.title,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      specSection: data.specSection.present
+          ? data.specSection.value
+          : this.specSection,
+      fromParty: data.fromParty.present ? data.fromParty.value : this.fromParty,
+      reviewer: data.reviewer.present ? data.reviewer.value : this.reviewer,
+      requiredBy: data.requiredBy.present
+          ? data.requiredBy.value
+          : this.requiredBy,
+      drawingId: data.drawingId.present ? data.drawingId.value : this.drawingId,
+      taskId: data.taskId.present ? data.taskId.value : this.taskId,
+      round: data.round.present ? data.round.value : this.round,
+      status: data.status.present ? data.status.value : this.status,
+      decisionNote: data.decisionNote.present
+          ? data.decisionNote.value
+          : this.decisionNote,
+      decidedBy: data.decidedBy.present ? data.decidedBy.value : this.decidedBy,
+      decidedAt: data.decidedAt.present ? data.decidedAt.value : this.decidedAt,
+      history: data.history.present ? data.history.value : this.history,
+      raisedBy: data.raisedBy.present ? data.raisedBy.value : this.raisedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Submittal(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('title: $title, ')
+          ..write('kind: $kind, ')
+          ..write('specSection: $specSection, ')
+          ..write('fromParty: $fromParty, ')
+          ..write('reviewer: $reviewer, ')
+          ..write('requiredBy: $requiredBy, ')
+          ..write('drawingId: $drawingId, ')
+          ..write('taskId: $taskId, ')
+          ..write('round: $round, ')
+          ..write('status: $status, ')
+          ..write('decisionNote: $decisionNote, ')
+          ..write('decidedBy: $decidedBy, ')
+          ..write('decidedAt: $decidedAt, ')
+          ..write('history: $history, ')
+          ..write('raisedBy: $raisedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    title,
+    kind,
+    specSection,
+    fromParty,
+    reviewer,
+    requiredBy,
+    drawingId,
+    taskId,
+    round,
+    status,
+    decisionNote,
+    decidedBy,
+    decidedAt,
+    history,
+    raisedBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Submittal &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.title == this.title &&
+          other.kind == this.kind &&
+          other.specSection == this.specSection &&
+          other.fromParty == this.fromParty &&
+          other.reviewer == this.reviewer &&
+          other.requiredBy == this.requiredBy &&
+          other.drawingId == this.drawingId &&
+          other.taskId == this.taskId &&
+          other.round == this.round &&
+          other.status == this.status &&
+          other.decisionNote == this.decisionNote &&
+          other.decidedBy == this.decidedBy &&
+          other.decidedAt == this.decidedAt &&
+          other.history == this.history &&
+          other.raisedBy == this.raisedBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SubmittalsCompanion extends UpdateCompanion<Submittal> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> title;
+  final Value<String> kind;
+  final Value<String?> specSection;
+  final Value<String?> fromParty;
+  final Value<String?> reviewer;
+  final Value<String?> requiredBy;
+  final Value<String?> drawingId;
+  final Value<String?> taskId;
+  final Value<int> round;
+  final Value<String> status;
+  final Value<String?> decisionNote;
+  final Value<String?> decidedBy;
+  final Value<DateTime?> decidedAt;
+  final Value<String> history;
+  final Value<String> raisedBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const SubmittalsCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.specSection = const Value.absent(),
+    this.fromParty = const Value.absent(),
+    this.reviewer = const Value.absent(),
+    this.requiredBy = const Value.absent(),
+    this.drawingId = const Value.absent(),
+    this.taskId = const Value.absent(),
+    this.round = const Value.absent(),
+    this.status = const Value.absent(),
+    this.decisionNote = const Value.absent(),
+    this.decidedBy = const Value.absent(),
+    this.decidedAt = const Value.absent(),
+    this.history = const Value.absent(),
+    this.raisedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SubmittalsCompanion.insert({
+    required String id,
+    required String projectId,
+    required String title,
+    this.kind = const Value.absent(),
+    this.specSection = const Value.absent(),
+    this.fromParty = const Value.absent(),
+    this.reviewer = const Value.absent(),
+    this.requiredBy = const Value.absent(),
+    this.drawingId = const Value.absent(),
+    this.taskId = const Value.absent(),
+    this.round = const Value.absent(),
+    this.status = const Value.absent(),
+    this.decisionNote = const Value.absent(),
+    this.decidedBy = const Value.absent(),
+    this.decidedAt = const Value.absent(),
+    this.history = const Value.absent(),
+    required String raisedBy,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       title = Value(title),
+       raisedBy = Value(raisedBy);
+  static Insertable<Submittal> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? title,
+    Expression<String>? kind,
+    Expression<String>? specSection,
+    Expression<String>? fromParty,
+    Expression<String>? reviewer,
+    Expression<String>? requiredBy,
+    Expression<String>? drawingId,
+    Expression<String>? taskId,
+    Expression<int>? round,
+    Expression<String>? status,
+    Expression<String>? decisionNote,
+    Expression<String>? decidedBy,
+    Expression<DateTime>? decidedAt,
+    Expression<String>? history,
+    Expression<String>? raisedBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (title != null) 'title': title,
+      if (kind != null) 'kind': kind,
+      if (specSection != null) 'spec_section': specSection,
+      if (fromParty != null) 'from_party': fromParty,
+      if (reviewer != null) 'reviewer': reviewer,
+      if (requiredBy != null) 'required_by': requiredBy,
+      if (drawingId != null) 'drawing_id': drawingId,
+      if (taskId != null) 'task_id': taskId,
+      if (round != null) 'round': round,
+      if (status != null) 'status': status,
+      if (decisionNote != null) 'decision_note': decisionNote,
+      if (decidedBy != null) 'decided_by': decidedBy,
+      if (decidedAt != null) 'decided_at': decidedAt,
+      if (history != null) 'history': history,
+      if (raisedBy != null) 'raised_by': raisedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SubmittalsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? title,
+    Value<String>? kind,
+    Value<String?>? specSection,
+    Value<String?>? fromParty,
+    Value<String?>? reviewer,
+    Value<String?>? requiredBy,
+    Value<String?>? drawingId,
+    Value<String?>? taskId,
+    Value<int>? round,
+    Value<String>? status,
+    Value<String?>? decisionNote,
+    Value<String?>? decidedBy,
+    Value<DateTime?>? decidedAt,
+    Value<String>? history,
+    Value<String>? raisedBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SubmittalsCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      title: title ?? this.title,
+      kind: kind ?? this.kind,
+      specSection: specSection ?? this.specSection,
+      fromParty: fromParty ?? this.fromParty,
+      reviewer: reviewer ?? this.reviewer,
+      requiredBy: requiredBy ?? this.requiredBy,
+      drawingId: drawingId ?? this.drawingId,
+      taskId: taskId ?? this.taskId,
+      round: round ?? this.round,
+      status: status ?? this.status,
+      decisionNote: decisionNote ?? this.decisionNote,
+      decidedBy: decidedBy ?? this.decidedBy,
+      decidedAt: decidedAt ?? this.decidedAt,
+      history: history ?? this.history,
+      raisedBy: raisedBy ?? this.raisedBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (specSection.present) {
+      map['spec_section'] = Variable<String>(specSection.value);
+    }
+    if (fromParty.present) {
+      map['from_party'] = Variable<String>(fromParty.value);
+    }
+    if (reviewer.present) {
+      map['reviewer'] = Variable<String>(reviewer.value);
+    }
+    if (requiredBy.present) {
+      map['required_by'] = Variable<String>(requiredBy.value);
+    }
+    if (drawingId.present) {
+      map['drawing_id'] = Variable<String>(drawingId.value);
+    }
+    if (taskId.present) {
+      map['task_id'] = Variable<String>(taskId.value);
+    }
+    if (round.present) {
+      map['round'] = Variable<int>(round.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (decisionNote.present) {
+      map['decision_note'] = Variable<String>(decisionNote.value);
+    }
+    if (decidedBy.present) {
+      map['decided_by'] = Variable<String>(decidedBy.value);
+    }
+    if (decidedAt.present) {
+      map['decided_at'] = Variable<DateTime>(decidedAt.value);
+    }
+    if (history.present) {
+      map['history'] = Variable<String>(history.value);
+    }
+    if (raisedBy.present) {
+      map['raised_by'] = Variable<String>(raisedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SubmittalsCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('title: $title, ')
+          ..write('kind: $kind, ')
+          ..write('specSection: $specSection, ')
+          ..write('fromParty: $fromParty, ')
+          ..write('reviewer: $reviewer, ')
+          ..write('requiredBy: $requiredBy, ')
+          ..write('drawingId: $drawingId, ')
+          ..write('taskId: $taskId, ')
+          ..write('round: $round, ')
+          ..write('status: $status, ')
+          ..write('decisionNote: $decisionNote, ')
+          ..write('decidedBy: $decidedBy, ')
+          ..write('decidedAt: $decidedAt, ')
+          ..write('history: $history, ')
+          ..write('raisedBy: $raisedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -56557,6 +57637,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $WorkerPermitsTable workerPermits = $WorkerPermitsTable(this);
   late final $DrawingPinsTable drawingPins = $DrawingPinsTable(this);
+  late final $SubmittalsTable submittals = $SubmittalsTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -56648,6 +57729,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     companyStandards,
     workerPermits,
     drawingPins,
+    submittals,
     syncOutbox,
   ];
 }
@@ -83965,6 +85047,484 @@ typedef $$DrawingPinsTableProcessedTableManager =
       DrawingPin,
       PrefetchHooks Function()
     >;
+typedef $$SubmittalsTableCreateCompanionBuilder =
+    SubmittalsCompanion Function({
+      required String id,
+      required String projectId,
+      required String title,
+      Value<String> kind,
+      Value<String?> specSection,
+      Value<String?> fromParty,
+      Value<String?> reviewer,
+      Value<String?> requiredBy,
+      Value<String?> drawingId,
+      Value<String?> taskId,
+      Value<int> round,
+      Value<String> status,
+      Value<String?> decisionNote,
+      Value<String?> decidedBy,
+      Value<DateTime?> decidedAt,
+      Value<String> history,
+      required String raisedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SubmittalsTableUpdateCompanionBuilder =
+    SubmittalsCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> title,
+      Value<String> kind,
+      Value<String?> specSection,
+      Value<String?> fromParty,
+      Value<String?> reviewer,
+      Value<String?> requiredBy,
+      Value<String?> drawingId,
+      Value<String?> taskId,
+      Value<int> round,
+      Value<String> status,
+      Value<String?> decisionNote,
+      Value<String?> decidedBy,
+      Value<DateTime?> decidedAt,
+      Value<String> history,
+      Value<String> raisedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$SubmittalsTableFilterComposer
+    extends Composer<_$AppDatabase, $SubmittalsTable> {
+  $$SubmittalsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get specSection => $composableBuilder(
+    column: $table.specSection,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fromParty => $composableBuilder(
+    column: $table.fromParty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewer => $composableBuilder(
+    column: $table.reviewer,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get requiredBy => $composableBuilder(
+    column: $table.requiredBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get drawingId => $composableBuilder(
+    column: $table.drawingId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get taskId => $composableBuilder(
+    column: $table.taskId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get round => $composableBuilder(
+    column: $table.round,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get decisionNote => $composableBuilder(
+    column: $table.decisionNote,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get decidedBy => $composableBuilder(
+    column: $table.decidedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get decidedAt => $composableBuilder(
+    column: $table.decidedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get history => $composableBuilder(
+    column: $table.history,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get raisedBy => $composableBuilder(
+    column: $table.raisedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SubmittalsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SubmittalsTable> {
+  $$SubmittalsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get specSection => $composableBuilder(
+    column: $table.specSection,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fromParty => $composableBuilder(
+    column: $table.fromParty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewer => $composableBuilder(
+    column: $table.reviewer,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get requiredBy => $composableBuilder(
+    column: $table.requiredBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get drawingId => $composableBuilder(
+    column: $table.drawingId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get taskId => $composableBuilder(
+    column: $table.taskId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get round => $composableBuilder(
+    column: $table.round,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get decisionNote => $composableBuilder(
+    column: $table.decisionNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get decidedBy => $composableBuilder(
+    column: $table.decidedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get decidedAt => $composableBuilder(
+    column: $table.decidedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get history => $composableBuilder(
+    column: $table.history,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get raisedBy => $composableBuilder(
+    column: $table.raisedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SubmittalsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SubmittalsTable> {
+  $$SubmittalsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get specSection => $composableBuilder(
+    column: $table.specSection,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fromParty =>
+      $composableBuilder(column: $table.fromParty, builder: (column) => column);
+
+  GeneratedColumn<String> get reviewer =>
+      $composableBuilder(column: $table.reviewer, builder: (column) => column);
+
+  GeneratedColumn<String> get requiredBy => $composableBuilder(
+    column: $table.requiredBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get drawingId =>
+      $composableBuilder(column: $table.drawingId, builder: (column) => column);
+
+  GeneratedColumn<String> get taskId =>
+      $composableBuilder(column: $table.taskId, builder: (column) => column);
+
+  GeneratedColumn<int> get round =>
+      $composableBuilder(column: $table.round, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get decisionNote => $composableBuilder(
+    column: $table.decisionNote,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get decidedBy =>
+      $composableBuilder(column: $table.decidedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get decidedAt =>
+      $composableBuilder(column: $table.decidedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get history =>
+      $composableBuilder(column: $table.history, builder: (column) => column);
+
+  GeneratedColumn<String> get raisedBy =>
+      $composableBuilder(column: $table.raisedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SubmittalsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SubmittalsTable,
+          Submittal,
+          $$SubmittalsTableFilterComposer,
+          $$SubmittalsTableOrderingComposer,
+          $$SubmittalsTableAnnotationComposer,
+          $$SubmittalsTableCreateCompanionBuilder,
+          $$SubmittalsTableUpdateCompanionBuilder,
+          (
+            Submittal,
+            BaseReferences<_$AppDatabase, $SubmittalsTable, Submittal>,
+          ),
+          Submittal,
+          PrefetchHooks Function()
+        > {
+  $$SubmittalsTableTableManager(_$AppDatabase db, $SubmittalsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SubmittalsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SubmittalsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SubmittalsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String?> specSection = const Value.absent(),
+                Value<String?> fromParty = const Value.absent(),
+                Value<String?> reviewer = const Value.absent(),
+                Value<String?> requiredBy = const Value.absent(),
+                Value<String?> drawingId = const Value.absent(),
+                Value<String?> taskId = const Value.absent(),
+                Value<int> round = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> decisionNote = const Value.absent(),
+                Value<String?> decidedBy = const Value.absent(),
+                Value<DateTime?> decidedAt = const Value.absent(),
+                Value<String> history = const Value.absent(),
+                Value<String> raisedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SubmittalsCompanion(
+                id: id,
+                projectId: projectId,
+                title: title,
+                kind: kind,
+                specSection: specSection,
+                fromParty: fromParty,
+                reviewer: reviewer,
+                requiredBy: requiredBy,
+                drawingId: drawingId,
+                taskId: taskId,
+                round: round,
+                status: status,
+                decisionNote: decisionNote,
+                decidedBy: decidedBy,
+                decidedAt: decidedAt,
+                history: history,
+                raisedBy: raisedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String title,
+                Value<String> kind = const Value.absent(),
+                Value<String?> specSection = const Value.absent(),
+                Value<String?> fromParty = const Value.absent(),
+                Value<String?> reviewer = const Value.absent(),
+                Value<String?> requiredBy = const Value.absent(),
+                Value<String?> drawingId = const Value.absent(),
+                Value<String?> taskId = const Value.absent(),
+                Value<int> round = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> decisionNote = const Value.absent(),
+                Value<String?> decidedBy = const Value.absent(),
+                Value<DateTime?> decidedAt = const Value.absent(),
+                Value<String> history = const Value.absent(),
+                required String raisedBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SubmittalsCompanion.insert(
+                id: id,
+                projectId: projectId,
+                title: title,
+                kind: kind,
+                specSection: specSection,
+                fromParty: fromParty,
+                reviewer: reviewer,
+                requiredBy: requiredBy,
+                drawingId: drawingId,
+                taskId: taskId,
+                round: round,
+                status: status,
+                decisionNote: decisionNote,
+                decidedBy: decidedBy,
+                decidedAt: decidedAt,
+                history: history,
+                raisedBy: raisedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SubmittalsTable, Submittal>(table),
+                  BaseReferences<_$AppDatabase, $SubmittalsTable, Submittal>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SubmittalsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SubmittalsTable,
+      Submittal,
+      $$SubmittalsTableFilterComposer,
+      $$SubmittalsTableOrderingComposer,
+      $$SubmittalsTableAnnotationComposer,
+      $$SubmittalsTableCreateCompanionBuilder,
+      $$SubmittalsTableUpdateCompanionBuilder,
+      (Submittal, BaseReferences<_$AppDatabase, $SubmittalsTable, Submittal>),
+      Submittal,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -84405,6 +85965,8 @@ class $AppDatabaseManager {
       $$WorkerPermitsTableTableManager(_db, _db.workerPermits);
   $$DrawingPinsTableTableManager get drawingPins =>
       $$DrawingPinsTableTableManager(_db, _db.drawingPins);
+  $$SubmittalsTableTableManager get submittals =>
+      $$SubmittalsTableTableManager(_db, _db.submittals);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }

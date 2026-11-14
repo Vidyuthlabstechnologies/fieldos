@@ -1769,7 +1769,7 @@ class ExecutionPhotos extends Table {
   TextColumn get id => text()();
   TextColumn get projectId => text().withLength(min: 1, max: 36)();
 
-  /// defect | defect_fix | hold_point | rfi
+  /// defect | defect_fix | hold_point | rfi | submittal
   TextColumn get parentKind => text().withLength(min: 1, max: 20)();
   TextColumn get parentId => text().withLength(min: 1, max: 36)();
   TextColumn get filePath => text().withLength(min: 1, max: 500)();
@@ -1886,6 +1886,48 @@ class DrawingPins extends Table {
   TextColumn get createdBy => text().withLength(min: 1, max: 64)();
   DateTimeColumn get removedAt => dateTime().nullable()();
   TextColumn get removedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A submittal: a shop drawing, product data, sample, mock-up or method
+/// statement sent for the architect's or consultant's review before the
+/// work or the order goes ahead. Photos ride on [ExecutionPhotos]
+/// ('submittal'). Sent back, it goes again as the next [round]; earlier
+/// reviews are kept in [history].
+class Submittals extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get title => text().withLength(min: 1, max: 200)();
+
+  /// shop_drawing | product_data | sample | mock_up | method_statement | other
+  TextColumn get kind => text().withLength(min: 1, max: 20).withDefault(const Constant('product_data'))();
+  TextColumn get specSection => text().withLength(max: 40).nullable()();
+
+  /// The subcontractor or supplier it came from.
+  TextColumn get fromParty => text().withLength(max: 120).nullable()();
+
+  /// Who reviews it (architect, consultant, client).
+  TextColumn get reviewer => text().withLength(max: 120).nullable()();
+
+  /// yyyy-mm-dd
+  TextColumn get requiredBy => text().withLength(max: 10).nullable()();
+  TextColumn get drawingId => text().withLength(max: 36).nullable()();
+  TextColumn get taskId => text().withLength(max: 36).nullable()();
+  IntColumn get round => integer().withDefault(const Constant(1))();
+
+  /// submitted | approved | approved_as_noted | revise_resubmit | rejected
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('submitted'))();
+  TextColumn get decisionNote => text().withLength(max: 1000).nullable()();
+  TextColumn get decidedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get decidedAt => dateTime().nullable()();
+
+  /// Earlier reviews, one line each, oldest first. Only ever grows.
+  TextColumn get history => text().withLength(max: 8000).withDefault(const Constant(''))();
+  TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 

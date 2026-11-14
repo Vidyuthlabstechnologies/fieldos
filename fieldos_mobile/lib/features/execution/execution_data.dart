@@ -22,6 +22,7 @@ Future<ExecutionData> loadExecutionData(AppDatabase db, String projectId) async 
     units: await x.unitsFor(projectId),
     checks: await x.checksFor(projectId),
     pins: await x.pinsFor(projectId),
+    submittals: await x.submittalsFor(projectId),
   );
 }
 
