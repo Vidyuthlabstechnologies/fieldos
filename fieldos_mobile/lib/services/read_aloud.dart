@@ -14,6 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_tts/flutter_tts.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/features/tour/guide_lines.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
@@ -35,12 +36,16 @@ class ReadAloud {
     if (RegExp(r'[஀-௿]').hasMatch(text)) return 'ta-IN';
     if (RegExp(r'[ಀ-೿]').hasMatch(text)) return 'kn-IN';
     if (RegExp(r'[ऀ-ॿ]').hasMatch(text)) return lang == AppLanguage.mr ? 'mr-IN' : 'hi-IN';
-    return 'en-IN';
+    // Latin script: the person's language if it is written that way
+    // (Spanish in the US app), else English as this market speaks it.
+    return speechCodeFor(lang.latinScript ? lang : AppLanguage.en);
   }
 
   /// The guide line [key] in the person's language ([guideLines]), or
   /// [fallback] when there is none.
-  static String? guideText(String key, {String? fallback}) => guideLines[spokenLanguage.code]?[key] ?? fallback;
+  /// A market's own lines ('en_us') come before the language's.
+  static String? guideText(String key, {String? fallback}) =>
+      guideLines['${spokenLanguage.code}_${currentMarket.id}']?[key] ?? guideLines[spokenLanguage.code]?[key] ?? fallback;
 
   /// Says Mitra's guide line [key], or stops it if it is playing now.
   static Future<void> toggleGuide(String key, {String? fallback}) async {

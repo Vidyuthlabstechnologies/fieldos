@@ -41,6 +41,62 @@ const guideLines = <String, Map<String, String>>{
     'tour_11': "That's it, you're ready! Look around the sample site, or start your first real project. "
         'You can play this tour again from the menu any time.',
   },
+  // The US app (FIELDOS_MARKET=us): American wording, dollars, no GST or
+  // WhatsApp-first sharing. ReadAloud picks '<lang>_<market>' first.
+  'en_us': {
+    'greet': "English it is. I'm Mitra, and I'll keep things simple.",
+    'tour_0': "Hi! I'm Mitra, your jobsite buddy. Let me walk you through one day on a real job. "
+        'It takes two minutes, and your own data stays untouched.',
+    'tour_1': 'All your jobs are in one list. You can see right away which job is running behind. '
+        'Tap a job to open its tasks, crew, money and logs.',
+    'tour_2': "Can't find something? Tap Ask FieldOS at the top and just say it, like "
+        '"add 500 dollars for concrete". It checks with you once before it saves.',
+    'tour_3': "Start the morning with tasks. You see how far each one has gotten and what's slipping. "
+        "The footing pour is late, so it's already marked in red.",
+    'tour_4': 'Clock workers in as they show up, or clock in the whole crew at once. '
+        'Hours and overtime are worked out for you.',
+    'tour_5': 'The concrete just arrived. Create a purchase order, then receive what actually came. '
+        'A partial delivery keeps the order open, and stock updates itself.',
+    'tour_6': 'Every dollar on the job is here. Money in, money spent and the balance, by category. '
+        'Pay applications and invoices are made here too.',
+    'tour_7': 'Ran short on concrete for the columns. Log the issue once, with photos, '
+        'and it stays open until someone marks it fixed.',
+    'tour_8': 'At the end of the day, tap Speak report and just talk, in English or Spanish. '
+        'FieldOS writes the daily log and shares a PDF.',
+    'tour_9': "Payday is easy. The time card adds up each worker's hours, overtime, advances and what's still owed. "
+        'No calculator needed.',
+    'tour_10': 'Owners see every job in one place: spending against budget, progress and open problems. '
+        'Not a single phone call.',
+    'tour_11': "That's it, you're ready! Look around the sample job, or start your first real project. "
+        'You can play this tour again from the menu any time.',
+  },
+  'es': {
+    'greet': 'Español, perfecto. Soy Mitra, y te lo voy a hacer fácil.',
+    'tour_0': '¡Hola! Soy Mitra, tu compañero en la obra. Te enseño un día en una obra real. '
+        'Son dos minutos, y tus datos no se tocan.',
+    'tour_1': 'Todas tus obras están en una sola lista. Ves al instante cuál va atrasada. '
+        'Toca una obra para abrir sus tareas, cuadrilla, dinero y reportes.',
+    'tour_2': '¿No encuentras algo? Toca Ask FieldOS arriba y dilo, por ejemplo '
+        '"agrega 500 dólares de concreto". Te pregunta una vez antes de guardar.',
+    'tour_3': 'Empieza la mañana con las tareas. Ves cuánto lleva cada una y qué se está atrasando. '
+        'El colado de la zapata va tarde, por eso ya sale en rojo.',
+    'tour_4': 'Registra la entrada de cada trabajador cuando llega, o de toda la cuadrilla a la vez. '
+        'Las horas y las horas extra se calculan solas.',
+    'tour_5': 'Llegó el concreto. Haz una orden de compra y luego recibe lo que de verdad llegó. '
+        'Una entrega parcial deja la orden abierta, y el inventario se actualiza solo.',
+    'tour_6': 'Cada dólar de la obra está aquí. Lo que entra, lo que sale y el saldo, por categoría. '
+        'Aquí también se hacen las solicitudes de pago y las facturas.',
+    'tour_7': 'Faltó concreto para las columnas. Reporta el problema una vez, con fotos, '
+        'y queda abierto hasta que alguien lo marque como resuelto.',
+    'tour_8': 'Al final del día, toca Speak report y habla, en español o en inglés. '
+        'FieldOS escribe el reporte diario y comparte un PDF.',
+    'tour_9': 'El día de pago es fácil. La tarjeta de tiempo suma las horas, horas extra, adelantos y lo que se debe. '
+        'Sin calculadora.',
+    'tour_10': 'Los dueños ven todas las obras en un lugar: gasto contra presupuesto, avance y problemas abiertos. '
+        'Sin una sola llamada.',
+    'tour_11': '¡Listo, ya puedes empezar! Mira la obra de ejemplo, o crea tu primer proyecto real. '
+        'Puedes repetir este recorrido desde el menú cuando quieras.',
+  },
   'hi': {
     'greet': 'हिंदी चुनी. मैं Mitra हूँ, आपसे हिंदी और English मिलाकर बात करूँगा.',
     'tour_0': 'नमस्ते! मैं Mitra हूँ, आपका site buddy. Mr. Reddy के G+1 house पर एक दिन कैसा होता है, '
@@ -187,4 +243,6 @@ const guideVoices = <String, String>{
   'ta': 'vijay_ta_narration',
   'kn': 'chetan_kn_conversation',
   'mr': 'nilesh_mr_conversation',
+  // No Sarvam voice for Spanish: the phone's own voice reads it.
+  'es': '',
 };

@@ -138,6 +138,7 @@ class MarketConfig {
     required this.invoiceTitle,
     this.wordsAnd = false,
     this.currencyWordsFirst = true,
+    this.payHourly = false,
   });
 
   /// ISO 4217: 'INR', 'USD', 'MYR', 'AED', 'GBP'.
@@ -193,6 +194,11 @@ class MarketConfig {
 
   /// British-style "One Hundred and Five" in amounts in words.
   final bool wordsAnd;
+
+  /// Crews are paid by the hour (US, UK): a worker's rate is per hour, and
+  /// the wage sheet pays hours worked plus the overtime premium. Elsewhere
+  /// the rate is per day and a day counts as full or half.
+  final bool payHourly;
 
   /// "Rupees One Hundred Only" (India, Malaysia, UAE cheques) rather than
   /// "One Hundred Dollars" (US, UK).
@@ -251,6 +257,7 @@ const _us = MarketConfig(
   languageCodes: ['en', 'es'],
   postcodeLabel: 'ZIP code',
   regionLabel: 'State',
+  payHourly: true,
   progressBillName: 'Pay application',
   progressBillTitle: 'APPLICATION FOR PAYMENT',
   invoiceTitle: 'INVOICE',
@@ -335,6 +342,7 @@ const _uk = MarketConfig(
   languageCodes: ['en', 'pl', 'ro'],
   postcodeLabel: 'Postcode',
   regionLabel: 'County',
+  payHourly: true,
   progressBillName: 'Application for payment',
   progressBillTitle: 'APPLICATION FOR PAYMENT',
   invoiceTitle: 'VAT INVOICE',

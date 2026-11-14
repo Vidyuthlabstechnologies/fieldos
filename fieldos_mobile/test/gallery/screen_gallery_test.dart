@@ -165,7 +165,7 @@ void main() {
           debugShowCheckedModeBanner: false,
           theme: buildFieldOsTheme(Brightness.light),
           locale: lang.locale,
-          supportedLocales: [for (final l in AppLanguage.values) l.locale],
+          supportedLocales: [for (final l in AppLanguage.offered) l.locale],
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           builder: (context, child) => SystemNavBarSafeArea(child: child!),
           home: screen,

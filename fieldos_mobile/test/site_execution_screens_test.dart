@@ -79,7 +79,7 @@ void main() {
       child: MaterialApp(
         theme: buildFieldOsTheme(Brightness.light),
         locale: AppLanguage.hi.locale,
-        supportedLocales: [for (final l in AppLanguage.values) l.locale],
+        supportedLocales: [for (final l in AppLanguage.offered) l.locale],
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         home: home,
       ),

@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart';
+import 'package:fieldos_mobile/features/tour/guide_lines.dart';
+import 'package:fieldos_mobile/services/read_aloud.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 void main() {
@@ -162,6 +164,24 @@ void main() {
       debugSetMarket(Market.india);
       expect(languageFromDevice(const [Locale('te', 'IN')]), AppLanguage.te);
     });
+  });
+
+  test('the US app speaks US English and Spanish to Mitra', () {
+    debugSetMarket(Market.us);
+    expect(AppLanguage.offered, [AppLanguage.en, AppLanguage.es]);
+    expect(guideLines['en_us']!.keys.toSet(), guideLines['en']!.keys.toSet());
+    expect(guideLines['es']!.keys.toSet(), guideLines['en']!.keys.toSet());
+    setSpokenLanguage(AppLanguage.en);
+    expect(ReadAloud.guideText('tour_6'), contains('dollar'));
+    expect(ReadAloud.guideText('tour_6'), isNot(contains('GST')));
+    setSpokenLanguage(AppLanguage.es);
+    expect(ReadAloud.guideText('tour_0'), startsWith('¡Hola!'));
+    expect(ReadAloud.localeFor('Hola, ¿qué tal?'), 'es-US');
+    setSpokenLanguage(AppLanguage.en);
+    expect(ReadAloud.localeFor('Hello'), 'en-US');
+    debugSetMarket(Market.india);
+    expect(ReadAloud.localeFor('Hello'), 'en-IN');
+    expect(ReadAloud.guideText('tour_6'), contains('rupee'));
   });
 
   test('tax and overtime differ by market', () {

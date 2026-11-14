@@ -18,6 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/core/market.dart';
 
 import 'package:fieldos_mobile/l10n/market_terms.dart';
+import 'package:fieldos_mobile/l10n/strings_es.dart';
 import 'package:fieldos_mobile/l10n/strings_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_mr.dart';
@@ -31,7 +32,8 @@ enum AppLanguage {
   te('te', 'తెలుగు', 'Telugu'),
   ta('ta', 'தமிழ்', 'Tamil'),
   kn('kn', 'ಕನ್ನಡ', 'Kannada'),
-  mr('mr', 'मराठी', 'Marathi');
+  mr('mr', 'मराठी', 'Marathi'),
+  es('es', 'Español', 'Spanish');
 
   const AppLanguage(this.code, this.nativeName, this.englishName);
   final String code;
@@ -45,7 +47,13 @@ enum AppLanguage {
   /// market (en-US, en-GB).
   Locale get locale => Locale(code, _indian.contains(this) ? 'IN' : currentMarket.countryCode);
 
-  static const _indian = {hi, te, ta, kn, mr};
+  static const _indian = indianLanguages;
+
+  /// The languages of India, spoken -IN wherever the app is.
+  static const indianLanguages = {hi, te, ta, kn, mr};
+
+  /// Written in the Latin alphabet, so the phone voice reads it as is.
+  bool get latinScript => this == en || this == es;
 
   /// The languages this build's market offers, English first.
   static List<AppLanguage> get offered => [
@@ -72,6 +80,7 @@ const Map<AppLanguage, Map<String, String>> _tables = {
   AppLanguage.ta: stringsTa,
   AppLanguage.kn: stringsKn,
   AppLanguage.mr: stringsMr,
+  AppLanguage.es: stringsEs,
 };
 
 /// The speech code (BCP-47) for [l], for the phone's voice and its
@@ -105,6 +114,9 @@ void _apply(AppLanguage spoken, bool screens) {
   _screensOn = screens;
   _current = screens ? spoken : AppLanguage.en;
 }
+
+/// Whether [l]'s table has [english] (tests use this for coverage).
+bool hasTranslation(AppLanguage l, String english) => (_tables[l]?[english] ?? '').trim().isNotEmpty;
 
 /// [english] in language [l], or [english] when there is no translation.
 /// The market's own wording comes first (lib/l10n/market_terms.dart), so
