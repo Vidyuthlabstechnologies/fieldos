@@ -216,7 +216,6 @@ class MarketConfig {
     this.currencyWordsFirst = true,
     this.minorWordsFirst = false,
     this.payHourly = false,
-    this.payOvertimeOnDayRates = false,
     required this.instantPaymentName,
     this.billFooterNote,
     this.retentionDefaultPct = 5,
@@ -304,13 +303,6 @@ class MarketConfig {
   /// the rate is per day and a day counts as full or half.
   final bool payHourly;
 
-  /// Day-rated workers are paid the overtime premium for hours past
-  /// [OvertimeRule.dailyHours] in a day, at the daily rate over those
-  /// hours times [OvertimeRule.multiplier] (Malaysia's Employment Act
-  /// s.60A, UAE Labour Law Art. 19). False in India, where the sheet shows
-  /// the hours and the supervisor decides.
-  final bool payOvertimeOnDayRates;
-
   /// "and Cents Fifty Six Only" (Malaysia, as local accounting software
   /// prints it) rather than "and Fifty Six Paise Only".
   final bool minorWordsFirst;
@@ -348,9 +340,10 @@ const _india = MarketConfig(
     withholdingLabel: 'TDS',
     rateChoices: [0, 5, 12, 18],
   ),
-  // Factories Act / state rules: double the ordinary rate past 9 h a day
-  // or 48 h a week. Most sites pay daily wages and agree overtime on site.
-  overtime: OvertimeRule(dailyHours: 9, weeklyHours: 48, multiplier: 2, note: 'Overtime at twice the daily rate past 9 hours a day or 48 a week'),
+  // OSH Code 2020 (in force 21 Nov 2025, replacing the Factories Act's 9 h
+  // day): 8 hours a day, 48 a week, overtime at twice the ordinary rate.
+  // The wage sheet pays it on day wages at the company's rate (default 2x).
+  overtime: OvertimeRule(dailyHours: 8, weeklyHours: 48, multiplier: 2, note: 'Overtime at twice the ordinary rate past 8 hours a day or 48 a week (OSH Code 2020)'),
   phonePrefix: '+91',
   languageCodes: ['en', 'hi', 'te', 'ta', 'kn', 'mr'],
   postcodeLabel: 'PIN code',
@@ -425,7 +418,6 @@ const _malaysia = MarketConfig(
   tax: TaxRegime(name: 'SST', defaultRate: 6, registrationLabel: 'SST registration no.', rateChoices: [0, 6, 8]),
   // Employment Act 1955 (2022 amendment): 45 hours a week, 8 a day, at
   // 1.5x on a normal day.
-  payOvertimeOnDayRates: true,
   overtime: OvertimeRule(dailyHours: 8, weeklyHours: 45, multiplier: 1.5, note: 'Overtime at 1.5x past 8 hours a day or 45 a week (Employment Act 1955)'),
   phonePrefix: '+60',
   languageCodes: ['en', 'ms', 'zh', 'ta'],
@@ -452,7 +444,6 @@ const _uae = MarketConfig(
   tax: TaxRegime(name: 'VAT', defaultRate: 5, registrationLabel: 'TRN', rateChoices: [0, 5]),
   // Federal Decree-Law 33/2021: 8 hours a day, 48 a week; overtime at
   // least 25% more (50% between 10 pm and 4 am).
-  payOvertimeOnDayRates: true,
   overtime: OvertimeRule(dailyHours: 8, weeklyHours: 48, multiplier: 1.25, note: 'Overtime at 25% extra past 8 hours a day (50% from 10 pm to 4 am), UAE Labour Law'),
   phonePrefix: '+971',
   languageCodes: ['en', 'ar', 'hi', 'ur', 'ml'],

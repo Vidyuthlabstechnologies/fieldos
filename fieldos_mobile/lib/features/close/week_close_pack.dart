@@ -13,9 +13,11 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/page_format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/close/week_close.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
+import 'package:fieldos_mobile/features/labour/wage_sheet.dart' show WageLine;
 import 'package:fieldos_mobile/features/money/bill_pdf.dart' show pdfSafe;
 import 'package:fieldos_mobile/features/money/money_book.dart' show voucherLabel;
 
@@ -154,7 +156,7 @@ Future<Uint8List> buildWeekClosePack({
   }
 
   doc.addPage(pw.MultiPage(
-    pageFormat: PdfPageFormat.a4,
+    pageFormat: marketPageFormat(),
     margin: const pw.EdgeInsets.all(28),
     footer: (ctx) => pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
       t(branding.footerLine, size: 7, color: _muted),
@@ -187,12 +189,13 @@ Future<Uint8List> buildWeekClosePack({
       t('${w.items.length} items: ${w.approved.length} approved, ${w.sentBack.length} sent back, '
           '${w.waiting.length} to review. ${w.flagged.length} with exceptions.', color: _muted),
       heading('Wages and advances'),
-      table(['Worker', 'Days', 'Rate', 'Earned', 'Paid', 'Balance', 'Status', 'Exceptions'], [
+      table(['Worker', 'Days', 'Rate', 'Overtime', 'Earned', 'Paid', 'Balance', 'Status', 'Exceptions'], [
         for (final i in wages)
           [
             i.title,
             fmtQty(i.wage!.days),
             i.wage!.dailyWage == null ? '-' : _money(i.wage!.dailyWage!),
+            overtimeCell(i.wage!),
             _money(i.wage!.earned),
             _money(i.wage!.paidInPeriod),
             i.wage!.balanceDue < 0 ? 'Advance ${_money(-i.wage!.balanceDue)}' : _money(i.wage!.balanceDue),
@@ -266,7 +269,7 @@ Future<Uint8List> buildWeekClosePack({
 
   if (images.isNotEmpty) {
     doc.addPage(pw.MultiPage(
-      pageFormat: PdfPageFormat.a4,
+      pageFormat: marketPageFormat(),
       margin: const pw.EdgeInsets.all(28),
       build: (ctx) => [
         t('Supporting photos', size: 12, bold: true),
@@ -305,6 +308,14 @@ String _itemName(WeekClose w, CloseReview r) {
     }
   }
   return 'removed record';
+}
+
+/// The pack's overtime column: hours, and the pay on top of day wages
+/// where pay goes by days ("2 h, Rs. 400"); "-" with none.
+String overtimeCell(WageLine l) {
+  if (l.overtimeHours <= 0) return '-';
+  final h = '${fmtQty(l.overtimeHours)} h';
+  return l.overtimePay > 0 ? '$h, ${_money(l.overtimePay)}' : h;
 }
 
 /// The CSV next to the PDF, for accounts to load: one line per item.

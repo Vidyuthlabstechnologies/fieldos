@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 import 'package:fieldos_mobile/l10n/strings_commercial_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_execution_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_mr.dart';
@@ -14,6 +15,7 @@ import 'package:fieldos_mobile/l10n/strings_privacy_mr.dart';
 
 const Map<String, String> stringsMr = {
   ...consentMr,
+  ...overtimeMr,
   'Try again':
       'पुन्हा प्रयत्न करा',
   'Approvals':
@@ -850,8 +852,6 @@ const Map<String, String> stringsMr = {
       'चुकीचा PIN. पुन्हा प्रयत्न करा.',
   'Delete':
       'हटवा',
-  'Forgot PIN? Log in again with your password':
-      'PIN विसरलात? पासवर्डने पुन्हा लॉग इन करा',
   'Enter the same PIN again':
       'तोच PIN पुन्हा टाका',
   'The PINs did not match. Choose again.':
@@ -3407,6 +3407,35 @@ const Map<String, String> stringsMr = {
   'Gross payment status (0%)': 'ग्रॉस पेमेंट स्थिती (0%)',
   'Registered (20%)': 'नोंदणीकृत (20%)',
   'Not registered (30%)': 'नोंदणी नसलेले (30%)',
+  'Add the people on a monthly salary. Each month FieldOS works out their pay for the days worked, EPF, SOCSO, EIS and advance recovery, and makes the payslips.': 'मासिक पगारावरील लोक जोडा. दर महिन्याला FieldOS कामाच्या दिवसांचा पगार, EPF, SOCSO, EIS आणि उचल वसुली काढून पगार पावत्या बनवते.',
+  'EPF to pay': 'भरायचा EPF',
+  'SOCSO to pay': 'भरायचा SOCSO',
+  'EIS to pay': 'भरायचा EIS',
+  'EPF': 'EPF',
+  'SOCSO': 'SOCSO',
+  'EIS': 'EIS',
+  'Employer pays on top': 'कंपनी वरून भरते',
+  'Housing allowance (₹)': 'घरभाडे भत्ता (₹)',
+  'EPF (KWSP)': 'EPF (KWSP)',
+  'SOCSO and EIS': 'SOCSO आणि EIS',
+  'On pay up to ₹6,000 a month': 'महिना ₹6,000 पर्यंतच्या पगारावर',
+  'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO आणि EIS: कामगार {ee} · कंपनी {er}',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO आणि EIS या शीटमधील मजुरीवर काढले आहेत. ते महिन्याच्या मजुरीवर देय असतात, म्हणून भरण्यापूर्वी महिन्याच्या एकूण रकमेशी जुळवून पाहा. ज्या कामगाराचा PLKS परवाना नोंदलेला आहे तो परदेशी धरला जातो: EPF दोन्ही बाजूंनी 2%, SOCSO फक्त कामावरील दुखापत, EIS नाही.',
+  'Cut from pay: {items}': 'पगारातून कपात: {items}',
+  'Employer pays: {items}': 'कंपनी भरते: {items}',
+  'Net pay {amount}': 'हातात पगार {amount}',
+  // Forgot PIN: signing in to the cloud account again.
+  'Forgot PIN?': 'PIN विसरलात?',
+  'Confirm it is you': 'हे तुम्हीच आहात याची खात्री करा',
+  'To choose a new PIN, sign in again to {email}.': 'नवा PIN निवडण्यासाठी {email} मध्ये पुन्हा साइन इन करा.',
+  'Use my password': 'माझा पासवर्ड वापरा',
+  'Email me a code': 'मला कोड ईमेल करा',
+  'We emailed a code to {email}. The email calls it a password reset code; your password stays the same.': 'आम्ही {email} वर कोड ईमेल केला आहे. ईमेलमध्ये त्याला पासवर्ड रीसेट कोड म्हटले आहे; तुमचा पासवर्ड तोच राहील.',
+  'That password is not right.': 'तो पासवर्ड बरोबर नाही.',
+  'That code is wrong or has expired.': 'तो कोड चुकीचा आहे किंवा त्याची मुदत संपली आहे.',
+  'That is a different account. Use {email}.': 'हे दुसरे खाते आहे. {email} वापरा.',
+  'That did not go through. Check the internet and try again.': 'ते झाले नाही. इंटरनेट तपासा आणि पुन्हा प्रयत्न करा.',
+  'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'या फोनवर आता PIN रीसेट करता येत नाही. त्यासाठी इंटरनेट आणि हा फोन तुमच्या FieldOS क्लाउड खात्यात साइन इन असणे आवश्यक आहे. तोपर्यंत PIN लॉक जसा आहे तसाच राहील.',
   '{amount}/hr': '{amount}/तास',
   '{amount} an hour': 'तासाला {amount}',
   'OT {h} h, {amount}': 'ओव्हरटाइम {h} तास, {amount}',

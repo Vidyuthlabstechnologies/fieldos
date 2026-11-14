@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart' show Roles;
-import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -16,6 +15,7 @@ import 'package:fieldos_mobile/features/daily/daily_reports_screen.dart';
 import 'package:fieldos_mobile/features/daily/today_home_card.dart';
 import 'package:fieldos_mobile/features/commercial/exceptions_screen.dart';
 import 'package:fieldos_mobile/features/crm/crm_screen.dart';
+import 'package:fieldos_mobile/features/payroll/payroll_rules.dart' show payrollShown;
 import 'package:fieldos_mobile/features/payroll/payroll_screen.dart';
 import 'package:fieldos_mobile/features/reports/reports_library_screen.dart';
 import 'package:fieldos_mobile/features/warehouse/warehouse_screen.dart';
@@ -233,8 +233,9 @@ class HomeScreen extends ConsumerWidget {
                         }))),
               // Salaries are private: owners and managers only, here and on
               // the server.
-              // Salaries here work out PF, ESI and professional tax: India only.
-              if (isIndia && Roles.canApprove(session.role))
+              // Salaries here work out PF, ESI and professional tax (India)
+              // or EPF, SOCSO and EIS (Malaysia): those two markets only.
+              if (payrollShown && Roles.canApprove(session.role))
                 PopupMenuItem(
                     value: 'salaries',
                     child: ListTile(leading: const Icon(Icons.badge_outlined), title: Text(tr('Staff salaries')))),

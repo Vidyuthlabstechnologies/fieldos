@@ -14,6 +14,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/page_format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/dashboard/value_summary.dart'
@@ -239,7 +240,7 @@ Future<Uint8List> buildPilotScorecardPdf(PilotScorecard card,
       );
   final last = card.periods.last;
   doc.addPage(pw.Page(
-    pageFormat: PdfPageFormat.a4,
+    pageFormat: marketPageFormat(),
     margin: const pw.EdgeInsets.all(32),
     build: (_) => pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
       pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [

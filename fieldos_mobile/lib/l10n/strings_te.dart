@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_te.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 import 'package:fieldos_mobile/l10n/strings_commercial_te.dart';
 import 'package:fieldos_mobile/l10n/strings_execution_te.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_te.dart';
@@ -14,6 +15,7 @@ import 'package:fieldos_mobile/l10n/strings_privacy_te.dart';
 
 const Map<String, String> stringsTe = {
   ...consentTe,
+  ...overtimeTe,
   'Try again': 'మళ్ళీ ప్రయత్నించండి',
   'Approvals': 'ఆమోదాలు',
   'Nothing waiting': 'ఏమీ పెండింగ్ లేదు',
@@ -479,7 +481,6 @@ const Map<String, String> stringsTe = {
   'Enter your PIN': 'మీ PIN నమోదు చేయండి',
   'Wrong PIN. Try again.': 'PIN తప్పు. మళ్ళీ ప్రయత్నించండి.',
   'Delete': 'తొలగించండి',
-  'Forgot PIN? Log in again with your password': 'PIN మర్చిపోయారా? మీ పాస్‌వర్డ్‌తో మళ్ళీ లాగిన్ అవ్వండి',
   'Enter the same PIN again': 'అదే PIN మళ్ళీ నమోదు చేయండి',
   'The PINs did not match. Choose again.': 'రెండు PIN లు సరిపోలలేదు. మళ్ళీ ఎంచుకోండి.',
   'Choose a 4-digit PIN': '4 అంకెల PIN ఎంచుకోండి',
@@ -2515,6 +2516,35 @@ const Map<String, String> stringsTe = {
   'Gross payment status (0%)': 'గ్రాస్ పేమెంట్ స్టేటస్ (0%)',
   'Registered (20%)': 'నమోదైనవారు (20%)',
   'Not registered (30%)': 'నమోదు కానివారు (30%)',
+  'Add the people on a monthly salary. Each month FieldOS works out their pay for the days worked, EPF, SOCSO, EIS and advance recovery, and makes the payslips.': 'నెల జీతం ఉన్నవారిని చేర్చండి. ప్రతి నెలా FieldOS పని చేసిన రోజుల జీతం, EPF, SOCSO, EIS, అడ్వాన్స్ వసూలు లెక్కించి పేస్లిప్‌లు తయారు చేస్తుంది.',
+  'EPF to pay': 'కట్టాల్సిన EPF',
+  'SOCSO to pay': 'కట్టాల్సిన SOCSO',
+  'EIS to pay': 'కట్టాల్సిన EIS',
+  'EPF': 'EPF',
+  'SOCSO': 'SOCSO',
+  'EIS': 'EIS',
+  'Employer pays on top': 'కంపెనీ అదనంగా కడుతుంది',
+  'Housing allowance (₹)': 'ఇంటి భత్యం (₹)',
+  'EPF (KWSP)': 'EPF (KWSP)',
+  'SOCSO and EIS': 'SOCSO మరియు EIS',
+  'On pay up to ₹6,000 a month': 'నెలకు ₹6,000 వరకు జీతంపై',
+  'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO, EIS: కార్మికులు {ee} · కంపెనీ {er}',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO, EIS ఈ షీట్‌లోని కూలీపై లెక్కించారు. ఇవి నెల కూలీపై చెల్లించాలి, కాబట్టి కట్టే ముందు నెల మొత్తంతో సరిచూడండి. PLKS పర్మిట్ నమోదైన కార్మికుడిని విదేశీయుడిగా లెక్కిస్తారు: EPF ఇరువైపులా 2%, SOCSO పని గాయం మాత్రమే, EIS లేదు.',
+  'Cut from pay: {items}': 'జీతం నుండి కోత: {items}',
+  'Employer pays: {items}': 'కంపెనీ కడుతుంది: {items}',
+  'Net pay {amount}': 'చేతికి జీతం {amount}',
+  // Forgot PIN: signing in to the cloud account again.
+  'Forgot PIN?': 'PIN మర్చిపోయారా?',
+  'Confirm it is you': 'ఇది మీరేనని నిర్ధారించండి',
+  'To choose a new PIN, sign in again to {email}.': 'కొత్త PIN ఎంచుకోవడానికి {email} లో మళ్ళీ సైన్ ఇన్ అవ్వండి.',
+  'Use my password': 'నా పాస్‌వర్డ్ వాడండి',
+  'Email me a code': 'నాకు కోడ్ ఈమెయిల్ చేయండి',
+  'We emailed a code to {email}. The email calls it a password reset code; your password stays the same.': '{email} కి కోడ్ ఈమెయిల్ చేశాము. ఈమెయిల్‌లో దాన్ని పాస్‌వర్డ్ రీసెట్ కోడ్ అంటారు; మీ పాస్‌వర్డ్ మారదు.',
+  'That password is not right.': 'ఆ పాస్‌వర్డ్ సరైనది కాదు.',
+  'That code is wrong or has expired.': 'ఆ కోడ్ తప్పు లేదా గడువు ముగిసింది.',
+  'That is a different account. Use {email}.': 'అది వేరే ఖాతా. {email} వాడండి.',
+  'That did not go through. Check the internet and try again.': 'అది జరగలేదు. ఇంటర్నెట్ చూసి మళ్ళీ ప్రయత్నించండి.',
+  'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'ఈ ఫోన్‌లో ఇప్పుడు PIN రీసెట్ చేయలేము. దానికి ఇంటర్నెట్, మరియు ఈ ఫోన్ మీ FieldOS క్లౌడ్ ఖాతాలో సైన్ ఇన్ అయి ఉండాలి. అప్పటివరకు PIN లాక్ అలాగే ఉంటుంది.',
   '{amount}/hr': '{amount}/గంట',
   '{amount} an hour': 'గంటకు {amount}',
   'OT {h} h, {amount}': 'ఓవర్‌టైమ్ {h} గం, {amount}',

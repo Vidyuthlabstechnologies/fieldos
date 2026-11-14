@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_kn.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 import 'package:fieldos_mobile/l10n/strings_commercial_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_execution_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_kn.dart';
@@ -14,6 +15,7 @@ import 'package:fieldos_mobile/l10n/strings_privacy_kn.dart';
 
 const Map<String, String> stringsKn = {
   ...consentKn,
+  ...overtimeKn,
   'Try again':
       'ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
   'Approvals':
@@ -850,8 +852,6 @@ const Map<String, String> stringsKn = {
       'ತಪ್ಪು PIN. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
   'Delete':
       'ಅಳಿಸಿ',
-  'Forgot PIN? Log in again with your password':
-      'PIN ಮರೆತಿರಾ? ಪಾಸ್‌ವರ್ಡ್‌ನಿಂದ ಮತ್ತೆ ಲಾಗ್ ಇನ್ ಮಾಡಿ',
   'Enter the same PIN again':
       'ಅದೇ PIN ಮತ್ತೆ ಹಾಕಿ',
   'The PINs did not match. Choose again.':
@@ -3407,6 +3407,35 @@ const Map<String, String> stringsKn = {
   'Gross payment status (0%)': 'ಗ್ರಾಸ್ ಪೇಮೆಂಟ್ ಸ್ಥಿತಿ (0%)',
   'Registered (20%)': 'ನೋಂದಾಯಿತ (20%)',
   'Not registered (30%)': 'ನೋಂದಾಯಿತವಲ್ಲ (30%)',
+  'Add the people on a monthly salary. Each month FieldOS works out their pay for the days worked, EPF, SOCSO, EIS and advance recovery, and makes the payslips.': 'ತಿಂಗಳ ಸಂಬಳದವರನ್ನು ಸೇರಿಸಿ. ಪ್ರತಿ ತಿಂಗಳು FieldOS ಕೆಲಸ ಮಾಡಿದ ದಿನಗಳ ಸಂಬಳ, EPF, SOCSO, EIS ಮತ್ತು ಮುಂಗಡ ವಸೂಲಿಯನ್ನು ಲೆಕ್ಕ ಹಾಕಿ ಪೇಸ್ಲಿಪ್‌ಗಳನ್ನು ಮಾಡುತ್ತದೆ.',
+  'EPF to pay': 'ಕಟ್ಟಬೇಕಾದ EPF',
+  'SOCSO to pay': 'ಕಟ್ಟಬೇಕಾದ SOCSO',
+  'EIS to pay': 'ಕಟ್ಟಬೇಕಾದ EIS',
+  'EPF': 'EPF',
+  'SOCSO': 'SOCSO',
+  'EIS': 'EIS',
+  'Employer pays on top': 'ಕಂಪನಿ ಹೆಚ್ಚುವರಿಯಾಗಿ ಕಟ್ಟುತ್ತದೆ',
+  'Housing allowance (₹)': 'ಮನೆ ಭತ್ಯೆ (₹)',
+  'EPF (KWSP)': 'EPF (KWSP)',
+  'SOCSO and EIS': 'SOCSO ಮತ್ತು EIS',
+  'On pay up to ₹6,000 a month': 'ತಿಂಗಳಿಗೆ ₹6,000 ವರೆಗಿನ ಸಂಬಳದ ಮೇಲೆ',
+  'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO, EIS: ಕಾರ್ಮಿಕರು {ee} · ಕಂಪನಿ {er}',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO, EIS ಈ ಶೀಟ್‌ನ ಕೂಲಿಯ ಮೇಲೆ ಲೆಕ್ಕ ಹಾಕಲಾಗಿದೆ. ಇವು ತಿಂಗಳ ಕೂಲಿಯ ಮೇಲೆ ಕಟ್ಟಬೇಕಾದವು, ಆದ್ದರಿಂದ ಕಟ್ಟುವ ಮೊದಲು ತಿಂಗಳ ಒಟ್ಟು ಮೊತ್ತದೊಂದಿಗೆ ಹೋಲಿಸಿ. PLKS ಪರ್ಮಿಟ್ ದಾಖಲಾದ ಕಾರ್ಮಿಕರನ್ನು ವಿದೇಶಿ ಎಂದು ಪರಿಗಣಿಸಲಾಗುತ್ತದೆ: EPF ಎರಡೂ ಕಡೆ 2%, SOCSO ಕೆಲಸದ ಗಾಯ ಮಾತ್ರ, EIS ಇಲ್ಲ.',
+  'Cut from pay: {items}': 'ಸಂಬಳದಿಂದ ಕಡಿತ: {items}',
+  'Employer pays: {items}': 'ಕಂಪನಿ ಕಟ್ಟುತ್ತದೆ: {items}',
+  'Net pay {amount}': 'ಕೈಗೆ ಸಂಬಳ {amount}',
+  // Forgot PIN: signing in to the cloud account again.
+  'Forgot PIN?': 'PIN ಮರೆತಿರಾ?',
+  'Confirm it is you': 'ಇದು ನೀವೇ ಎಂದು ಖಚಿತಪಡಿಸಿ',
+  'To choose a new PIN, sign in again to {email}.': 'ಹೊಸ PIN ಆಯ್ಕೆ ಮಾಡಲು {email} ಗೆ ಮತ್ತೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.',
+  'Use my password': 'ನನ್ನ ಪಾಸ್‌ವರ್ಡ್ ಬಳಸಿ',
+  'Email me a code': 'ನನಗೆ ಕೋಡ್ ಇಮೇಲ್ ಮಾಡಿ',
+  'We emailed a code to {email}. The email calls it a password reset code; your password stays the same.': '{email} ಗೆ ಕೋಡ್ ಇಮೇಲ್ ಮಾಡಿದ್ದೇವೆ. ಇಮೇಲ್‌ನಲ್ಲಿ ಅದನ್ನು ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸುವ ಕೋಡ್ ಎನ್ನಲಾಗಿದೆ; ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಬದಲಾಗುವುದಿಲ್ಲ.',
+  'That password is not right.': 'ಆ ಪಾಸ್‌ವರ್ಡ್ ಸರಿಯಿಲ್ಲ.',
+  'That code is wrong or has expired.': 'ಆ ಕೋಡ್ ತಪ್ಪು ಅಥವಾ ಅವಧಿ ಮುಗಿದಿದೆ.',
+  'That is a different account. Use {email}.': 'ಅದು ಬೇರೆ ಖಾತೆ. {email} ಬಳಸಿ.',
+  'That did not go through. Check the internet and try again.': 'ಅದು ಆಗಲಿಲ್ಲ. ಇಂಟರ್ನೆಟ್ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'ಈ ಫೋನ್‌ನಲ್ಲಿ ಈಗ PIN ಮರುಹೊಂದಿಸಲು ಆಗುವುದಿಲ್ಲ. ಅದಕ್ಕೆ ಇಂಟರ್ನೆಟ್ ಮತ್ತು ಈ ಫೋನ್ ನಿಮ್ಮ FieldOS ಕ್ಲೌಡ್ ಖಾತೆಗೆ ಸೈನ್ ಇನ್ ಆಗಿರಬೇಕು. ಅಲ್ಲಿಯವರೆಗೆ PIN ಲಾಕ್ ಹಾಗೆಯೇ ಇರುತ್ತದೆ.',
   '{amount}/hr': '{amount}/ಗಂಟೆ',
   '{amount} an hour': 'ಗಂಟೆಗೆ {amount}',
   'OT {h} h, {amount}': 'ಓವರ್‌ಟೈಮ್ {h} ಗಂ, {amount}',

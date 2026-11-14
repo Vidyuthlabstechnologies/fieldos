@@ -8,7 +8,8 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/approvals/approval_chain.dart';
 import 'package:fieldos_mobile/features/close/week_close.dart';
-import 'package:fieldos_mobile/features/labour/wage_sheet.dart' show weekStart, markDay, loadPayCalendar;
+import 'package:fieldos_mobile/features/labour/wage_sheet.dart'
+    show weekStart, markDay, loadPayCalendar, loadOvertimePolicy;
 
 Future<WeekClose> loadWeekClose(AppDatabase db, Project project, DateTime weekOf,
     {Set<String> unconfirmedVouchers = const {}, DateTime? now}) async {
@@ -30,6 +31,7 @@ Future<WeekClose> loadWeekClose(AppDatabase db, Project project, DateTime weekOf
     unconfirmedVouchers: unconfirmedVouchers,
     now: now,
     calendar: await loadPayCalendar(db, project.companyId),
+    overtime: await loadOvertimePolicy(db, project.companyId),
   );
 }
 

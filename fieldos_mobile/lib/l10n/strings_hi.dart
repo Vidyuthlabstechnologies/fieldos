@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 import 'package:fieldos_mobile/l10n/strings_commercial_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_execution_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_hi.dart';
@@ -14,6 +15,7 @@ import 'package:fieldos_mobile/l10n/strings_privacy_hi.dart';
 
 const Map<String, String> stringsHi = {
   ...consentHi,
+  ...overtimeHi,
   'Try again': 'फिर से कोशिश करें',
   'Approvals': 'मंज़ूरियाँ',
   'Nothing waiting': 'कुछ बाकी नहीं',
@@ -477,7 +479,6 @@ const Map<String, String> stringsHi = {
   'Enter your PIN': 'अपना PIN डालें',
   'Wrong PIN. Try again.': 'गलत PIN। फिर कोशिश करें।',
   'Delete': 'मिटाएँ',
-  'Forgot PIN? Log in again with your password': 'PIN भूल गए? अपने पासवर्ड से फिर लॉग इन करें',
   'Enter the same PIN again': 'वही PIN फिर से डालें',
   'The PINs did not match. Choose again.': 'दोनों PIN मेल नहीं खाए। फिर से चुनें।',
   'Choose a 4-digit PIN': '4 अंकों का PIN चुनें',
@@ -2522,6 +2523,35 @@ const Map<String, String> stringsHi = {
   'Gross payment status (0%)': 'ग्रॉस पेमेंट स्टेटस (0%)',
   'Registered (20%)': 'रजिस्टर्ड (20%)',
   'Not registered (30%)': 'रजिस्टर्ड नहीं (30%)',
+  'Add the people on a monthly salary. Each month FieldOS works out their pay for the days worked, EPF, SOCSO, EIS and advance recovery, and makes the payslips.': 'मासिक तनख्वाह वाले लोगों को जोड़ें। हर महीने FieldOS काम के दिनों की तनख्वाह, EPF, SOCSO, EIS और एडवांस की वसूली निकालकर पे-स्लिप बनाता है।',
+  'EPF to pay': 'जमा करना है: EPF',
+  'SOCSO to pay': 'जमा करना है: SOCSO',
+  'EIS to pay': 'जमा करना है: EIS',
+  'EPF': 'EPF',
+  'SOCSO': 'SOCSO',
+  'EIS': 'EIS',
+  'Employer pays on top': 'कंपनी ऊपर से देती है',
+  'Housing allowance (₹)': 'मकान भत्ता (₹)',
+  'EPF (KWSP)': 'EPF (KWSP)',
+  'SOCSO and EIS': 'SOCSO और EIS',
+  'On pay up to ₹6,000 a month': '₹6,000 महीने तक की तनख्वाह पर',
+  'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO और EIS: मज़दूर {ee} · कंपनी {er}',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO और EIS इस शीट की मज़दूरी पर निकाले गए हैं। ये महीने की मज़दूरी पर देय होते हैं, इसलिए जमा करने से पहले महीने के कुल से मिला लें। जिस मज़दूर का PLKS परमिट दर्ज है उसे विदेशी माना जाता है: EPF दोनों तरफ़ 2%, SOCSO सिर्फ़ काम पर चोट का, EIS नहीं।',
+  'Cut from pay: {items}': 'तनख्वाह से कटा: {items}',
+  'Employer pays: {items}': 'कंपनी देती है: {items}',
+  'Net pay {amount}': 'हाथ में तनख्वाह {amount}',
+  // Forgot PIN: signing in to the cloud account again.
+  'Forgot PIN?': 'PIN भूल गए?',
+  'Confirm it is you': 'पुष्टि करें कि यह आप हैं',
+  'To choose a new PIN, sign in again to {email}.': 'नया PIN चुनने के लिए {email} में फिर से साइन इन करें।',
+  'Use my password': 'मेरा पासवर्ड इस्तेमाल करें',
+  'Email me a code': 'मुझे कोड ईमेल करें',
+  'We emailed a code to {email}. The email calls it a password reset code; your password stays the same.': 'हमने {email} पर एक कोड ईमेल किया है। ईमेल में इसे पासवर्ड रीसेट कोड कहा गया है; आपका पासवर्ड वही रहेगा।',
+  'That password is not right.': 'यह पासवर्ड सही नहीं है।',
+  'That code is wrong or has expired.': 'यह कोड गलत है या इसकी समय-सीमा खत्म हो गई है।',
+  'That is a different account. Use {email}.': 'यह कोई दूसरा अकाउंट है। {email} इस्तेमाल करें।',
+  'That did not go through. Check the internet and try again.': 'यह नहीं हो पाया। इंटरनेट जांचें और फिर से कोशिश करें।',
+  'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'इस फ़ोन पर अभी PIN रीसेट नहीं हो सकता। इसके लिए इंटरनेट चाहिए और यह फ़ोन आपके FieldOS क्लाउड अकाउंट में साइन इन होना चाहिए। तब तक PIN लॉक जैसा है वैसा ही रहेगा।',
   '{amount}/hr': '{amount}/घंटा',
   '{amount} an hour': '{amount} प्रति घंटा',
   'OT {h} h, {amount}': 'ओवरटाइम {h} घंटे, {amount}',

@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_consent_ta.dart';
+import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 import 'package:fieldos_mobile/l10n/strings_commercial_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_execution_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_crm_ta.dart';
@@ -14,6 +15,7 @@ import 'package:fieldos_mobile/l10n/strings_privacy_ta.dart';
 
 const Map<String, String> stringsTa = {
   ...consentTa,
+  ...overtimeTa,
   'Try again':
       'மீண்டும் முயற்சிக்கவும்',
   'Approvals':
@@ -850,8 +852,6 @@ const Map<String, String> stringsTa = {
       'தவறான PIN. மீண்டும் முயலுங்கள்.',
   'Delete':
       'நீக்கு',
-  'Forgot PIN? Log in again with your password':
-      'PIN மறந்ததா? கடவுச்சொல்லுடன் மீண்டும் உள்நுழையுங்கள்',
   'Enter the same PIN again':
       'அதே PIN-ஐ மீண்டும் உள்ளிடுங்கள்',
   'The PINs did not match. Choose again.':
@@ -3417,6 +3417,35 @@ const Map<String, String> stringsTa = {
   'Gross payment status (0%)': 'மொத்தப் பணம் பெறும் நிலை (0%)',
   'Registered (20%)': 'பதிவு பெற்றவர் (20%)',
   'Not registered (30%)': 'பதிவு பெறாதவர் (30%)',
+  'Add the people on a monthly salary. Each month FieldOS works out their pay for the days worked, EPF, SOCSO, EIS and advance recovery, and makes the payslips.': 'மாத சம்பளம் பெறுபவர்களைச் சேர்க்கவும். ஒவ்வொரு மாதமும் FieldOS வேலை செய்த நாட்களுக்கான சம்பளம், EPF, SOCSO, EIS, முன்பண வசூல் ஆகியவற்றைக் கணக்கிட்டு சம்பளச் சீட்டுகளை உருவாக்கும்.',
+  'EPF to pay': 'செலுத்த வேண்டிய EPF',
+  'SOCSO to pay': 'செலுத்த வேண்டிய SOCSO',
+  'EIS to pay': 'செலுத்த வேண்டிய EIS',
+  'EPF': 'EPF',
+  'SOCSO': 'SOCSO',
+  'EIS': 'EIS',
+  'Employer pays on top': 'நிறுவனம் கூடுதலாகச் செலுத்துவது',
+  'Housing allowance (₹)': 'வீட்டு வாடகைப் படி (₹)',
+  'EPF (KWSP)': 'EPF (KWSP)',
+  'SOCSO and EIS': 'SOCSO மற்றும் EIS',
+  'On pay up to ₹6,000 a month': 'மாதம் ₹6,000 வரையிலான சம்பளத்தில்',
+  'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO, EIS: தொழிலாளர்கள் {ee} · நிறுவனம் {er}',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO, EIS இந்தத் தாளில் உள்ள கூலியில் கணக்கிடப்பட்டவை. இவை மாதக் கூலியில் செலுத்த வேண்டியவை, எனவே செலுத்தும் முன் மாத மொத்தத்துடன் சரிபார்க்கவும். PLKS அனுமதி பதிவில் உள்ள தொழிலாளர் வெளிநாட்டவராகக் கணக்கிடப்படுவார்: EPF இருபுறமும் 2%, SOCSO வேலைக் காயம் மட்டும், EIS இல்லை.',
+  'Cut from pay: {items}': 'சம்பளத்திலிருந்து பிடித்தம்: {items}',
+  'Employer pays: {items}': 'நிறுவனம் செலுத்துவது: {items}',
+  'Net pay {amount}': 'கைக்கு வரும் சம்பளம் {amount}',
+  // Forgot PIN: signing in to the cloud account again.
+  'Forgot PIN?': 'PIN மறந்துவிட்டதா?',
+  'Confirm it is you': 'இது நீங்கள்தான் என உறுதிசெய்யுங்கள்',
+  'To choose a new PIN, sign in again to {email}.': 'புதிய PIN தேர்ந்தெடுக்க, {email} இல் மீண்டும் உள்நுழையுங்கள்.',
+  'Use my password': 'என் கடவுச்சொல்லைப் பயன்படுத்து',
+  'Email me a code': 'எனக்குக் குறியீட்டை மின்னஞ்சல் செய்',
+  'We emailed a code to {email}. The email calls it a password reset code; your password stays the same.': '{email} க்குக் குறியீட்டை மின்னஞ்சல் செய்தோம். மின்னஞ்சலில் அது கடவுச்சொல் மீட்டமைப்புக் குறியீடு எனப்படும்; உங்கள் கடவுச்சொல் மாறாது.',
+  'That password is not right.': 'அந்தக் கடவுச்சொல் சரியில்லை.',
+  'That code is wrong or has expired.': 'அந்தக் குறியீடு தவறு அல்லது காலாவதியானது.',
+  'That is a different account. Use {email}.': 'அது வேறு கணக்கு. {email} ஐப் பயன்படுத்துங்கள்.',
+  'That did not go through. Check the internet and try again.': 'அது நடக்கவில்லை. இணையத்தைச் சரிபார்த்து மீண்டும் முயலுங்கள்.',
+  'The PIN cannot be reset on this phone now. That needs the internet and this phone signed in to your FieldOS cloud account. Until then, the PIN lock stays as it is.': 'இந்த ஃபோனில் இப்போது PIN ஐ மீட்டமைக்க முடியாது. அதற்கு இணையமும், இந்த ஃபோன் உங்கள் FieldOS கிளவுட் கணக்கில் உள்நுழைந்திருப்பதும் தேவை. அதுவரை PIN பூட்டு அப்படியே இருக்கும்.',
   '{amount}/hr': '{amount}/மணி',
   '{amount} an hour': 'மணிக்கு {amount}',
   'OT {h} h, {amount}': 'கூடுதல் நேரம் {h} மணி, {amount}',

@@ -94,12 +94,14 @@ void main() {
     );
     final r = sheet.lines.firstWhere((l) => l.name == 'Ramesh');
     expect(r.days, 2);
-    expect(r.earned, 1600);
+    // 2 days, plus 2 h overtime at twice 800 / 8 an hour.
+    expect(r.overtimePay, 400);
+    expect(r.earned, 1600 + 400);
     expect(r.overtimeHours, 2);
     expect(r.missingPunchOuts, 1);
     expect(r.paidInPeriod, 500);
-    // earned 800 before + 1600 now - 1000 advance before - 500 this week
-    expect(r.balanceDue, 900);
+    // earned 800 before + 2000 now - 1000 advance before - 500 this week
+    expect(r.balanceDue, 1300);
 
     final s = sheet.lines.firstWhere((l) => l.name == 'Suresh');
     expect(s.days, 1, reason: '7.5 h across two punches is a full day');
@@ -110,9 +112,9 @@ void main() {
     expect(helper.earned, 0);
 
     expect(sheet.lines.any((l) => l.name == 'Left site'), isFalse, reason: 'inactive with no punches is hidden');
-    expect(sheet.totalEarned, 1600 + 700);
+    expect(sheet.totalEarned, 2000 + 700);
     expect(sheet.totalPaid, 500);
-    expect(sheet.totalDue, 900 + 700);
+    expect(sheet.totalDue, 1300 + 700);
   });
 
   test('site stock: received minus used, merged by name, units kept apart, problems first', () {

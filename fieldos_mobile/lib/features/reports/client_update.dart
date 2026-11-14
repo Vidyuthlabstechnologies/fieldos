@@ -14,6 +14,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/page_format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/money/bill_pdf.dart' show pdfSafe;
@@ -117,7 +118,7 @@ Future<Uint8List> buildClientUpdatePdf({
   final pct = report.progressNow.clamp(0, 100);
   final doc = pw.Document(title: 'Progress update, ${project.name}, $range', creator: 'FieldOS');
   doc.addPage(pw.MultiPage(
-    pageFormat: PdfPageFormat.a4,
+    pageFormat: marketPageFormat(),
     margin: const pw.EdgeInsets.fromLTRB(32, 28, 32, 28),
     header: (ctx) => ctx.pageNumber == 1
         ? pw.Container(

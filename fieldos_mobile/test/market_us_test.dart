@@ -81,7 +81,7 @@ void main() {
     expect(text, isNot(contains('days')));
   });
 
-  test('India wage sheet share text is unchanged', () {
+  test('India wage sheet share text: days at the day wage, plus overtime pay', () {
     final mon = DateTime(2026, 11, 2);
     final sheet = buildWageSheet(
       workers: [_worker('r', 'Ramesh', 800)],
@@ -90,7 +90,8 @@ void main() {
       from: mon,
       to: addDays(mon, 7),
     );
-    expect(wageSheetShareText(sheet, projectName: 'Job', range: 'r'), contains('Ramesh: 1 days × ₹800 = ₹800, due ₹800'));
+    expect(wageSheetShareText(sheet, projectName: 'Job', range: 'r'),
+        contains('Ramesh: 1 days × ₹800 + 2 h overtime ₹400 = ₹1,200, due ₹1,200'));
   });
 
   test('US: a 10-digit phone opens WhatsApp with +1, not +91', () {

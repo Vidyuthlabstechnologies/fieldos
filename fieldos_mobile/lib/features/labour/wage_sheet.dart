@@ -10,7 +10,8 @@ import 'package:fieldos_mobile/data/app_database.dart';
 /// Hours on site that count as a full day / half day.
 const fullDayHours = 7.0;
 const halfDayHours = 3.5;
-/// Hours beyond this in one day are shown as overtime (not paid automatically).
+/// Hours beyond this in one day are overtime where the market sets no
+/// daily limit of its own (see [normalDayHours]).
 const overtimeAfterHours = 8.0;
 
 /// A punch closed more than this long after it opened was not a shift: it
@@ -58,17 +59,6 @@ class PayCalendar {
       return credit >= 1 || (hours != null && hours > half) ? 2 : 1;
     }
     return credit;
-  }
-
-  /// The overtime multiplier on [day]: past normal hours on a rest day is
-  /// twice the hourly rate and on a public holiday three times (Malaysia's
-  /// Employment Act s.60A(3)); otherwise the market's rule.
-  double overtimeMultiplierFor(DateTime day) {
-    if (market.premiumRestAndHolidayPay) {
-      if (isHoliday(day)) return 3;
-      if (isRestDay(day)) return 2;
-    }
-    return market.overtime.multiplier;
   }
 }
 
@@ -186,17 +176,23 @@ class WageLine {
   double? hourlyEarned;
   double hourlyEarnedBefore = 0;
 
+  /// Of [overtimeHours], those paid at double time (California, set by
+  /// [buildWageSheet]).
+  double doubleTimeHours = 0;
+
+  /// Overtime pay on top of the day wages, in the period and before it
+  /// (set by [buildWageSheet] where pay goes by days; 0 where it goes by
+  /// the hour, whose overtime is in [hourlyEarned]).
+  double overtimePay = 0;
+  double overtimePayBefore = 0;
+
   /// [dailyWage] is the rate per hour where the market pays by the hour.
   double get earned => hourlyEarned ?? days * (dailyWage ?? 0) + overtimePay;
-
-  /// The overtime premium on a day rate, where the market pays it
-  /// ([MarketConfig.payOvertimeOnDayRates]); 0 elsewhere.
-  double overtimePay = 0;
 
   /// Owed after this period: everything earned up to its end, minus
   /// everything paid up to its end. Negative means an advance not yet
   /// worked off.
-  double get balanceDue => earnedBefore + hourlyEarnedBefore + earned - paidBefore - paidInPeriod;
+  double get balanceDue => earnedBefore + hourlyEarnedBefore + overtimePayBefore + earned - paidBefore - paidInPeriod;
 }
 
 class WageSheet {
@@ -235,7 +231,9 @@ WageSheet buildWageSheet({
   required DateTime to,
   Iterable<AttendanceMark> marks = const [],
   PayCalendar calendar = const PayCalendar(),
+  OvertimePolicy? overtime,
 }) {
+  final otPolicy = overtime ?? OvertimePolicy.marketDefault;
   final byId = {for (final w in workers) w.id: w};
   final marked = marksByWorker(marks);
   final lines = <String, WageLine>{};
@@ -281,13 +279,11 @@ WageSheet buildWageSheet({
       // A hand mark is the supervisor's own call (2× and 3× included).
       final credit = mark ?? calendar.creditFor(day.key, dayCredit(hours, hasOpenPunch: open), hours: open ? null : hours);
       if (day.key.isBefore(from)) {
-        line.earnedBefore +=
-            credit * (line.dailyWage ?? 0) + _dayRateOvertime(line.dailyWage, hours, calendar.overtimeMultiplierFor(day.key), paidByMark: mark != null, open: open);
+        line.earnedBefore += credit * (line.dailyWage ?? 0);
       } else if (day.key.isBefore(to)) {
         line.days += credit;
         line.hours += hours;
-        if (hours > overtimeAfterHours) line.overtimeHours += hours - overtimeAfterHours;
-        line.overtimePay += _dayRateOvertime(line.dailyWage, hours, calendar.overtimeMultiplierFor(day.key), paidByMark: mark != null, open: open);
+        if (hours > normalDayHours) line.overtimeHours += hours - normalDayHours;
         if (open && mark == null) line.missingPunchOuts++;
         if (mark != null) line.markedDays++;
       }
@@ -330,7 +326,11 @@ WageSheet buildWageSheet({
     lineFor(w.id, w.name);
   }
 
-  if (market.payHourly) _payByTheHour(lines, days, marked, from, to);
+  if (market.payHourly) {
+    _payByTheHour(lines, days, marked, from, to, otPolicy);
+  } else {
+    _payDailyOvertime(lines, days, marked, from, to, otPolicy, calendar);
+  }
 
   final sorted = lines.values.toList()..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   return WageSheet(from, to, sorted);
@@ -340,9 +340,14 @@ WageSheet buildWageSheet({
 /// [markedDayHours] per day of pay), split by the overtime rule, paid at
 /// the worker's hourly rate. Overtime shown is the legal overtime, weekly
 /// in the US, not the "past 8 hours" hint the daily-wage markets show.
+///
+/// The US pays its legal rate (FLSA 1.5x past 40 a week, or California's
+/// daily rules when the company is there); the UK, with no legal rate,
+/// pays the company's ([OvertimePolicy.multiplier], 1x unless set).
 void _payByTheHour(Map<String, WageLine> lines, Map<String, Map<DateTime, List<LabourAttendanceData>>> punchDays,
-    Map<String, Map<DateTime, double>> marked, DateTime from, DateTime to) {
+    Map<String, Map<DateTime, double>> marked, DateTime from, DateTime to, OvertimePolicy policy) {
   final rule = market.overtime;
+  final multiplier = overtimeRateEditable ? policy.multiplier : rule.multiplier;
   for (final line in lines.values) {
     final hoursByDay = <DateTime, double>{};
     for (final MapEntry(key: day, value: ps) in (punchDays[line.key] ?? const {}).entries) {
@@ -358,15 +363,20 @@ void _payByTheHour(Map<String, WageLine> lines, Map<String, Map<DateTime, List<L
     marks?.forEach((day, units) => hoursByDay[day] = units * markedDayHours);
 
     final rate = line.dailyWage ?? 0;
-    var inPeriod = 0.0, before = 0.0, hours = 0.0, ot = 0.0;
-    splitOvertime(hoursByDay, rule).forEach((day, split) {
-      final pay = split.$1 * rate + split.$2 * rate * rule.multiplier;
+    final split = policy.californiaDaily
+        ? splitCaliforniaOvertime(hoursByDay)
+        : {for (final MapEntry(key: d, value: s) in splitOvertime(hoursByDay, rule).entries) d: (s.$1, s.$2, 0.0)};
+    final ot15 = policy.californiaDaily ? 1.5 : multiplier;
+    var inPeriod = 0.0, before = 0.0, hours = 0.0, ot = 0.0, dt = 0.0;
+    split.forEach((day, s) {
+      final pay = s.$1 * rate + s.$2 * rate * ot15 + s.$3 * rate * 2;
       if (day.isBefore(from)) {
         before += pay;
       } else if (day.isBefore(to)) {
         inPeriod += pay;
-        hours += split.$1 + split.$2;
-        ot += split.$2;
+        hours += s.$1 + s.$2 + s.$3;
+        ot += s.$2 + s.$3;
+        dt += s.$3;
       }
     });
     line
@@ -374,20 +384,151 @@ void _payByTheHour(Map<String, WageLine> lines, Map<String, Map<DateTime, List<L
       ..hourlyEarnedBefore = _round2(before)
       ..earnedBefore = 0
       ..hours = hours
-      ..overtimeHours = ot;
+      ..overtimeHours = ot
+      ..doubleTimeHours = dt;
   }
 }
 
-/// The overtime premium for one day on a day rate: hours past the legal
-/// day, at the daily rate over the legal day's hours, times the market's
-/// multiplier. None where the market doesn't pay it, for a day whose pay a
-/// hand mark decided, or with a punch-out missing (the hours are unknown).
-double _dayRateOvertime(double? dailyWage, double hours, double multiplier,
-    {required bool paidByMark, required bool open}) {
-  final legalDay = market.overtime.dailyHours;
-  if (!market.payOvertimeOnDayRates || legalDay == null || dailyWage == null || paidByMark || open) return 0;
-  if (hours <= legalDay) return 0;
-  return _round2((hours - legalDay) * dailyWage / legalDay * multiplier);
+double _round2(double v) => (v * 100).roundToDouble() / 100;
+
+// ---------------------------------------------------------------------------
+// Overtime pay: the company's rate on day wages, and California's daily rules.
+// ---------------------------------------------------------------------------
+
+/// Settings keys for a company's overtime pay. Kept on the phone in
+/// app_settings, like the pay calendar and the billing profile.
+String overtimeMultiplierKey(String companyId) => 'overtime_multiplier:$companyId';
+
+/// The company's US state, as a two-letter code ('CA'): state law can add
+/// overtime rules to the federal ones.
+String usStateKey(String companyId) => 'us_state:$companyId';
+
+/// How a company pays overtime.
+class OvertimePolicy {
+  const OvertimePolicy({required this.multiplier, this.usState});
+
+  /// An overtime hour, as a multiple of the hourly rate.
+  final double multiplier;
+
+  /// Two-letter code where the US app knows it, else null.
+  final String? usState;
+
+  /// California daily overtime (Labor Code s510), only in the US app.
+  bool get californiaDaily => currentMarket == Market.us && usState == 'CA';
+
+  /// The market's legal (or usual) rate: India 2x, UAE 1.25x, Malaysia
+  /// 1.5x, UK 1x, US 1.5x.
+  static OvertimePolicy get marketDefault => OvertimePolicy(multiplier: market.overtime.multiplier);
 }
 
-double _round2(double v) => (v * 100).roundToDouble() / 100;
+/// The company can set its own overtime rate everywhere but the US, where
+/// federal and state law fix it.
+bool get overtimeRateEditable => currentMarket != Market.us;
+
+/// The hours a day wage pays for: the market's normal working day (8 in
+/// India under the OSH Code, Malaysia and the UAE). Hours past it in a day
+/// are overtime, and the day wage over it is the hourly rate.
+double get normalDayHours => market.overtime.dailyHours ?? overtimeAfterHours;
+
+/// A rate the company may set: from straight time up to 5x.
+bool validOvertimeMultiplier(double m) => m >= 1 && m <= 5;
+
+/// Reads the company's overtime pay; the market's default where unset.
+Future<OvertimePolicy> loadOvertimePolicy(AppDatabase db, String companyId) async {
+  final m = double.tryParse((await db.settingsDao.get(overtimeMultiplierKey(companyId))) ?? '');
+  final state = (await db.settingsDao.get(usStateKey(companyId)))?.trim().toUpperCase();
+  return OvertimePolicy(
+    multiplier: overtimeRateEditable && m != null && validOvertimeMultiplier(m) ? m : market.overtime.multiplier,
+    usState: state == null || state.isEmpty ? null : state,
+  );
+}
+
+Future<void> saveOvertimeMultiplier(AppDatabase db, String companyId, double m) {
+  if (!validOvertimeMultiplier(m)) throw ArgumentError.value(m, 'm', 'from 1 to 5');
+  return db.settingsDao.set(overtimeMultiplierKey(companyId), '$m');
+}
+
+Future<void> saveUsState(AppDatabase db, String companyId, String? code) => code == null || code.isEmpty
+    ? db.settingsDao.remove(usStateKey(companyId))
+    : db.settingsDao.set(usStateKey(companyId), code.toUpperCase());
+
+/// The rate for an overtime hour on [day]: the company's, but in Malaysia
+/// at least 2x on the rest day and 3x on a public holiday (Employment Act
+/// 1955, s60(3)(a) and s60D(3)(a)).
+double _overtimeRateOn(DateTime day, double multiplier, PayCalendar calendar) {
+  if (!market.premiumRestAndHolidayPay) return multiplier;
+  if (calendar.isHoliday(day)) return multiplier > 3 ? multiplier : 3;
+  if (calendar.isRestDay(day)) return multiplier > 2 ? multiplier : 2;
+  return multiplier;
+}
+
+/// Day-wage markets: the hours past [normalDayHours] on a punched day are
+/// paid at the day wage / [normalDayHours] x the company's rate, on top of
+/// the day's pay. A day marked by hand keeps the mark (1½ and 2× are the
+/// supervisor's own overtime call), so its hours are not paid again.
+void _payDailyOvertime(Map<String, WageLine> lines, Map<String, Map<DateTime, List<LabourAttendanceData>>> punchDays,
+    Map<String, Map<DateTime, double>> marked, DateTime from, DateTime to, OvertimePolicy policy, PayCalendar calendar) {
+  final normal = normalDayHours;
+  for (final line in lines.values) {
+    final wage = line.dailyWage;
+    if (wage == null || wage <= 0) continue;
+    var pay = 0.0, before = 0.0;
+    for (final MapEntry(key: day, value: ps) in (punchDays[line.key] ?? const {}).entries) {
+      if (line.workerId != null && marked[line.workerId]?[day] != null) continue;
+      var h = 0.0;
+      for (final p in ps) {
+        final out = p.punchOut;
+        final d = out == null ? null : out.difference(p.punchIn).inMinutes / 60.0;
+        if (d != null && d >= 0 && d <= longestShiftHours) h += d;
+      }
+      if (h <= normal) continue;
+      final amount = (h - normal) * wage / normal * _overtimeRateOn(day, policy.multiplier, calendar);
+      if (day.isBefore(from)) {
+        before += amount;
+      } else if (day.isBefore(to)) {
+        pay += amount;
+      }
+    }
+    line
+      ..overtimePay = _round2(pay)
+      ..overtimePayBefore = _round2(before);
+  }
+}
+
+/// California (Labor Code s510, as the DLSE applies it), in a work week of
+/// Monday to Sunday: 1.5x past 8 hours in a day and 2x past 12; on the
+/// seventh day worked in a row in the week, 1.5x for the first 8 hours and
+/// 2x after. Past 40 straight-time hours in the week the rest are 1.5x.
+/// Daily overtime hours do not count towards the 40, so no hour is paid
+/// as overtime twice. Returns day -> (regular, 1.5x, 2x).
+Map<DateTime, (double regular, double overtime, double doubleTime)> splitCaliforniaOvertime(
+    Map<DateTime, double> hoursByDay) {
+  final out = <DateTime, (double, double, double)>{};
+  final weekRegular = <DateTime, double>{};
+  bool worked(DateTime d) => (hoursByDay[d] ?? 0) > 0;
+  for (final day in hoursByDay.keys.toList()..sort()) {
+    final h = hoursByDay[day]!;
+    final seventh =
+        h > 0 && day.weekday == DateTime.sunday && [for (var i = 1; i < 7; i++) addDays(day, -i)].every(worked);
+    double regular, ot, dt;
+    if (seventh) {
+      regular = 0;
+      ot = h < 8 ? h : 8;
+      dt = h - ot;
+    } else {
+      regular = h < 8 ? h : 8;
+      dt = h > 12 ? h - 12 : 0;
+      ot = h - regular - dt;
+    }
+    final week = weekStart(day);
+    final before = weekRegular[week] ?? 0;
+    final room = (40 - before).clamp(0, double.infinity).toDouble();
+    if (regular > room) {
+      ot += regular - room;
+      regular = room;
+    }
+    weekRegular[week] = before + regular;
+    out[day] = (regular, ot, dt);
+  }
+  return out;
+}

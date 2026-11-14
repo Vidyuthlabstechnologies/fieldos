@@ -12,6 +12,7 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/page_format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart';
@@ -64,7 +65,7 @@ Future<Uint8List> buildQuotePdf({
   final terms = (quote.terms ?? '').trim().isEmpty ? defaultQuoteTerms : quote.terms!.trim();
 
   doc.addPage(pw.MultiPage(
-    pageFormat: PdfPageFormat.a4,
+    pageFormat: marketPageFormat(),
     margin: const pw.EdgeInsets.all(32),
     footer: branding.hasFooter
         ? (ctx) => pw.Align(alignment: pw.Alignment.centerRight, child: t(branding.footerLine, size: 7, color: _muted))

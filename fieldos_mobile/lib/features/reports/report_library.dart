@@ -11,7 +11,7 @@ import 'package:fieldos_mobile/features/attendance/staff_attendance.dart' show c
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart' show isOpenStage, isFollowUpDue, leadValue;
-import 'package:fieldos_mobile/features/payroll/payroll_rules.dart' show advanceOwed, monthKey;
+import 'package:fieldos_mobile/features/payroll/payroll_rules.dart' show advanceOwed, malaysiaPayroll, monthKey;
 import 'package:fieldos_mobile/features/procurement/quote_compare.dart' show compareQuotes;
 import 'package:fieldos_mobile/features/procurement/site_stock.dart' show buildSiteStock, isOpeningStock;
 import 'package:fieldos_mobile/features/project/task_plan.dart' show isOverdue, daysOverdue;
@@ -1177,7 +1177,9 @@ final List<ReportDef> reportLibrary = [
               : a.month.compareTo(b.month),
         );
       return ReportTable(
-        ['Month', 'Name', 'Days paid', 'Gross', 'PF', 'ESI', 'PT', 'Advance', 'Other', 'Net', 'Status'],
+        // Malaysia keeps EPF in the PF columns and SOCSO with EIS in the ESI ones.
+        ['Month', 'Name', 'Days paid', 'Gross', malaysiaPayroll ? 'EPF' : 'PF', malaysiaPayroll ? 'SOCSO + EIS' : 'ESI',
+          'PT', 'Advance', 'Other', 'Net', 'Status'],
         [
           for (final l in xs)
             [

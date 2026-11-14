@@ -25,10 +25,12 @@ final _indiaOnlyBritish = RegExp(
 
 /// Shown only behind `isIndia` (see each note).
 const _hiddenOutsideIndia = {
-  // Staff salaries (PF, ESI, professional tax): home menu, isIndia.
+  // Staff salaries' PF, ESI and professional tax: the salaries screen is in
+  // the India and Malaysia apps (payrollShown), and Malaysia's branch
+  // (malaysiaPayroll) shows EPF, SOCSO and EIS instead of these.
   'Add the people on a monthly salary. Each month FieldOS works out their pay for the days worked, PF, ESI, professional tax and advance recovery, and makes the payslips.',
   'Cut when the salary is ₹21,000 or less', 'Not cut: salary is above ₹21,000', 'ESI', 'ESI to deposit', 'PF to deposit',
-  'Provident fund (PF)', 'Provident fund', 'Basic a month (₹)', 'HRA (₹)',
+  'Provident fund (PF)', 'Provident fund', 'HRA (₹)',
   // RERA: project menu and reminders, isIndia.
   'As on the RERA certificate', 'Progress is as recorded on site. The architect certifies the stage of completion for RERA.',
   'RERA quarterly report', 'RERA quarterly report is due', 'RERA quarterly report: 5 days left', 'RERA registration number',

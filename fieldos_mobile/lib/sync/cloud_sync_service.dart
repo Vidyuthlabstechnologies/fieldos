@@ -44,6 +44,25 @@ class CloudSyncResult {
   String? get error => cause?.toString();
 }
 
+/// How signing in again (Forgot PIN) went. `wrong`: the server checked the
+/// password or code and refused it. `offline`: no answer, so nothing was
+/// checked. `noSession`: this phone is not signed in to a cloud account.
+enum ReauthOutcome { ok, wrong, wrongAccount, cancelled, offline, failed, noSession }
+
+/// The email inside a Google or Apple ID token, unverified: only used to
+/// refuse a token for another account before sending it. Supabase checks
+/// the signature.
+String? idTokenEmail(String idToken) {
+  final parts = idToken.split('.');
+  if (parts.length != 3) return null;
+  try {
+    final payload = jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))));
+    return payload is Map ? payload['email'] as String? : null;
+  } catch (_) {
+    return null;
+  }
+}
+
 /// The server-side view of one company membership.
 class CloudCompany {
   const CloudCompany({required this.companyId, required this.role, this.name, this.joinCode});
@@ -306,6 +325,92 @@ class CloudSyncService {
     await client.auth.verifyOTP(email: email, token: code.trim(), type: OtpType.recovery);
     await client.auth.updateUser(UserAttributes(password: newPassword));
     await _persist();
+  }
+
+  /// How the signed-in account can sign in: 'email' (a password), 'google',
+  /// 'apple'. From Supabase's app metadata, so it lists every identity
+  /// linked to the account, not only the one used on this phone.
+  List<String> get signInProviders {
+    final meta = client.auth.currentUser?.appMetadata ?? const {};
+    final list = meta['providers'];
+    if (list is List) return [for (final p in list) '$p'];
+    final one = meta['provider'];
+    return one == null ? const [] : ['$one'];
+  }
+
+  /// Forgot PIN: proves the person holding the phone owns the signed-in
+  /// account by signing in to it again with its password. The session is
+  /// replaced by a fresh one for the same user; nothing else changes.
+  Future<ReauthOutcome> reauthWithPassword(String password) async {
+    final email = this.email;
+    if (email == null) return ReauthOutcome.noSession;
+    return _reauth(() => client.auth.signInWithPassword(email: email, password: password));
+  }
+
+  /// Emails the account a one-time code for [reauthWithCode]. It is the
+  /// password-reset code (supabase/templates/recovery.html), the one code
+  /// email the project sends; checking it does not change the password.
+  Future<ReauthOutcome> sendReauthCode() async {
+    final email = this.email;
+    if (email == null) return ReauthOutcome.noSession;
+    try {
+      await client.auth.resetPasswordForEmail(email);
+      return ReauthOutcome.ok;
+    } catch (e) {
+      return _reauthFailure(e);
+    }
+  }
+
+  Future<ReauthOutcome> reauthWithCode(String code) async {
+    final email = this.email;
+    if (email == null) return ReauthOutcome.noSession;
+    return _reauth(() => client.auth.verifyOTP(email: email, token: code.trim(), type: OtpType.recovery));
+  }
+
+  /// Google or Apple users: their provider's ID token, from running that
+  /// sign-in again. A token for some other email is refused before it
+  /// reaches Supabase, which would otherwise sign this phone in as them.
+  Future<ReauthOutcome> reauthWithIdToken({
+    required OAuthProvider provider,
+    required String idToken,
+    String? rawNonce,
+  }) async {
+    final email = this.email;
+    if (email == null) return ReauthOutcome.noSession;
+    if (idTokenEmail(idToken)?.toLowerCase() != email.toLowerCase()) return ReauthOutcome.wrongAccount;
+    return _reauth(() => client.auth.signInWithIdToken(provider: provider, idToken: idToken, nonce: rawNonce));
+  }
+
+  /// Runs [signIn] and checks it landed on the same user. If it did not,
+  /// the phone's own session is put back.
+  Future<ReauthOutcome> _reauth(Future<AuthResponse> Function() signIn) async {
+    final before = client.auth.currentSession;
+    if (before == null) return ReauthOutcome.noSession;
+    try {
+      await signIn();
+    } catch (e) {
+      return _reauthFailure(e);
+    }
+    if (client.auth.currentUser?.id != before.user.id) {
+      try {
+        await client.auth.recoverSession(jsonEncode(before.toJson()));
+      } catch (_) {}
+      await _persist();
+      return ReauthOutcome.wrongAccount;
+    }
+    await _persist();
+    return ReauthOutcome.ok;
+  }
+
+  static ReauthOutcome _reauthFailure(Object e) {
+    // Retryable means no answer, or a 5xx: the server never judged it.
+    if (e is AuthRetryableFetchException) return ReauthOutcome.offline;
+    if (e is AuthException) {
+      final status = int.tryParse(e.statusCode ?? '');
+      if (status == null) return ReauthOutcome.offline;
+      if (status >= 400 && status < 500 && status != 429) return ReauthOutcome.wrong;
+    }
+    return ReauthOutcome.failed;
   }
 
   /// Deletes this person's cloud account (Google Play requires an in-app

@@ -63,10 +63,10 @@ void main() {
     expect(before.balanceDue, 137.5);
   });
 
-  test('India shows the hours but pays only the day', () {
+  test('India pays overtime at twice the hourly rate (labour codes)', () {
     final l = line([punch(mon, 10)]);
     expect(l.overtimeHours, 2);
-    expect(l.overtimePay, 0);
-    expect(l.earned, 100);
+    expect(l.overtimePay, 50); // 2 h × 100/8 × 2
+    expect(l.earned, 150);
   });
 }

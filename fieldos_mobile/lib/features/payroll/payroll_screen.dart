@@ -17,6 +17,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/attendance/staff_attendance.dart' show StaffMonth, staffMonth;
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/money/bills_view.dart' show billingProfileProvider;
+import 'package:fieldos_mobile/features/payroll/malaysia_contributions.dart' show splitSocsoEis;
 import 'package:fieldos_mobile/features/payroll/payroll_rules.dart';
 import 'package:fieldos_mobile/features/payroll/payslip_pdf.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
@@ -43,6 +44,8 @@ final payrollDataProvider = FutureProvider.autoDispose.family<PayrollData, Strin
 });
 
 double? _num(String s) => double.tryParse(westernDigits(s.trim().replaceAll(',', '')));
+/// Malaysia's SOCSO and EIS have sen, so its figures show them.
+String _amt(double v) => rupees(v, paise: malaysiaPayroll);
 String _days(double d) => d == d.roundToDouble() ? d.toInt().toString() : fmtQty(d);
 
 /// "November 2026" in the app's language.
@@ -91,8 +94,11 @@ class _StaffSalariesScreenState extends ConsumerState<StaffSalariesScreen> {
                 ? EmptyState(
                     icon: Icons.badge_outlined,
                     title: tr('No staff yet'),
-                    message: tr('Add the people on a monthly salary. Each month FieldOS works out their pay for the days '
-                        'worked, PF, ESI, professional tax and advance recovery, and makes the payslips.'),
+                    message: malaysiaPayroll
+                        ? tr('Add the people on a monthly salary. Each month FieldOS works out their pay for the days '
+                            'worked, EPF, SOCSO, EIS and advance recovery, and makes the payslips.')
+                        : tr('Add the people on a monthly salary. Each month FieldOS works out their pay for the days '
+                            'worked, PF, ESI, professional tax and advance recovery, and makes the payslips.'),
                     actionLabel: tr('Add staff'),
                     onAction: () => _addStaff(d),
                   )
@@ -176,13 +182,21 @@ class _MonthTab extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Wrap(spacing: 24, runSpacing: 10, children: [
-            _Figure(label: tr('Net to pay'), value: rupees(t.net)),
+            _Figure(label: tr('Net to pay'), value: _amt(t.net)),
             _Figure(label: tr('Paid'), value: '${t.paid}/${t.people}'),
-            _Figure(label: tr('Gross'), value: rupees(t.gross)),
-            if (t.pf > 0) _Figure(label: tr('PF to deposit'), value: rupees(t.pf)),
-            if (t.esi > 0) _Figure(label: tr('ESI to deposit'), value: rupees(t.esi)),
-            if (t.pt > 0) _Figure(label: tr('Professional tax'), value: rupees(t.pt)),
-            _Figure(label: tr('Cost to company'), value: rupees(t.cost)),
+            _Figure(label: tr('Gross'), value: _amt(t.gross)),
+            if (malaysiaPayroll) ...[
+              if (malaysiaDeposits(lines) case final d) ...[
+                if (d.epf > 0) _Figure(label: tr('EPF to pay'), value: _amt(d.epf)),
+                if (d.socso > 0) _Figure(label: tr('SOCSO to pay'), value: _amt(d.socso)),
+                if (d.eis > 0) _Figure(label: tr('EIS to pay'), value: _amt(d.eis)),
+              ],
+            ] else ...[
+              if (t.pf > 0) _Figure(label: tr('PF to deposit'), value: _amt(t.pf)),
+              if (t.esi > 0) _Figure(label: tr('ESI to deposit'), value: _amt(t.esi)),
+            ],
+            if (t.pt > 0) _Figure(label: tr('Professional tax'), value: _amt(t.pt)),
+            _Figure(label: tr('Cost to company'), value: _amt(t.cost)),
           ]),
         ),
       ),
@@ -214,11 +228,11 @@ class _MonthTab extends ConsumerWidget {
           title: Text(staff[l.staffId]?.name ?? '?'),
           subtitle: Text([
             trf('{paid} of {days} days', {'paid': _days(l.paidDays), 'days': l.daysInMonth}),
-            trf('Gross {amount}', {'amount': rupees(l.gross)}),
-            if (l.advanceRecovery > 0) trf('Advance {amount}', {'amount': rupees(l.advanceRecovery)}),
+            trf('Gross {amount}', {'amount': _amt(l.gross)}),
+            if (l.advanceRecovery > 0) trf('Advance {amount}', {'amount': _amt(l.advanceRecovery)}),
           ].join(' · ')),
           trailing: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(rupees(l.net), style: const TextStyle(fontWeight: FontWeight.w700)),
+            Text(_amt(l.net), style: const TextStyle(fontWeight: FontWeight.w700)),
             StatusPill(l.status == 'paid' ? 'Paid' : 'Draft', tone: l.status == 'paid' ? PillTone.ok : PillTone.warn),
           ]),
           onTap: () async {
@@ -342,7 +356,7 @@ class _PayslipSheetState extends ConsumerState<PayslipSheet> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: Text(trf('Pay {amount}', {'amount': rupees(_line.net)})),
+          title: Text(trf('Pay {amount}', {'amount': _amt(_line.net)})),
           content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Wrap(spacing: 6, runSpacing: 4, children: [
               for (final MapEntry(:key, :value) in payModes.entries)
@@ -386,7 +400,7 @@ class _PayslipSheetState extends ConsumerState<PayslipSheet> {
           padding: const EdgeInsets.symmetric(vertical: 2),
           child: Row(children: [
             Expanded(child: Text(label, style: bold ? const TextStyle(fontWeight: FontWeight.w700) : null)),
-            Text(rupees(v), style: bold ? const TextStyle(fontWeight: FontWeight.w700) : null),
+            Text(_amt(v), style: bold ? const TextStyle(fontWeight: FontWeight.w700) : null),
           ]),
         );
     final gross = p?.gross ?? l.gross;
@@ -396,6 +410,8 @@ class _PayslipSheetState extends ConsumerState<PayslipSheet> {
     final adv = p?.advanceRecovery ?? l.advanceRecovery;
     final other = p?.otherDeduction ?? l.otherDeduction;
     final net = p?.net ?? l.net;
+    final pfEr = p?.pfEmployer ?? l.pfEmployer;
+    final esiEr = p?.esiEmployer ?? l.esiEmployer;
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.viewInsetsOf(context).bottom),
       child: SingleChildScrollView(
@@ -440,7 +456,7 @@ class _PayslipSheetState extends ConsumerState<PayslipSheet> {
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
                       labelText: tr('Advance to recover'),
-                      helperText: trf('Owed {amount}', {'amount': rupees(_owed)})),
+                      helperText: trf('Owed {amount}', {'amount': _amt(_owed)})),
                   onChanged: (_) => setState(() {}),
                 ),
               ),
@@ -455,13 +471,33 @@ class _PayslipSheetState extends ConsumerState<PayslipSheet> {
           ],
           const SizedBox(height: 12),
           row(tr('Gross'), gross),
-          if (pf > 0) row(tr('Provident fund'), -pf),
-          if (esi > 0) row(tr('ESI'), -esi),
+          if (malaysiaPayroll) ...[
+            if (pf > 0) row(tr('EPF'), -pf),
+            if (splitSocsoEis(gross, esi) case final e) ...[
+              if (e.socso > 0) row(tr('SOCSO'), -e.socso),
+              if (e.eis > 0) row(tr('EIS'), -e.eis),
+            ],
+          ] else ...[
+            if (pf > 0) row(tr('Provident fund'), -pf),
+            if (esi > 0) row(tr('ESI'), -esi),
+          ],
           if (pt > 0) row(tr('Professional tax'), -pt),
           if (adv > 0) row(tr('Advance recovered'), -adv),
           if (other > 0) row(tr('Other deduction'), -other),
           const Divider(),
           row(tr('Net pay'), net, bold: true),
+          // What the company pays on top, line by line: Malaysia's payslip
+          // shows it (India's states it in one line on the PDF only).
+          if (malaysiaPayroll && (pfEr > 0 || esiEr > 0)) ...[
+            const SizedBox(height: 8),
+            Text(tr('Employer pays on top'), style: theme.textTheme.labelLarge),
+            if (pfEr > 0) row(tr('EPF'), pfEr),
+            if (splitSocsoEis(gross, esiEr) case final e) ...[
+              if (e.socso > 0) row(tr('SOCSO'), e.socso),
+              if (e.eis > 0) row(tr('EIS'), e.eis),
+            ],
+            row(tr('Cost to company'), gross + pfEr + esiEr, bold: true),
+          ],
           if (_paid && l.paidOn != null)
             Padding(
               padding: const EdgeInsets.only(top: 6),
@@ -528,10 +564,10 @@ class _StaffTab extends ConsumerWidget {
               subtitle: Text([
                 if (s.designation != null) s.designation!,
                 if (s.projectId != null && sites[s.projectId] != null) sites[s.projectId]!,
-                if (owed > 0) trf('Advance owed {amount}', {'amount': rupees(owed)}),
+                if (owed > 0) trf('Advance owed {amount}', {'amount': _amt(owed)}),
               ].join(' · ')),
               trailing: s.active
-                  ? Text(trf('{amount} a month', {'amount': rupees(fullMonthGross(s))}))
+                  ? Text(trf('{amount} a month', {'amount': _amt(fullMonthGross(s))}))
                   : const StatusPill('Left'),
               onTap: () async {
                 final choice = await showModalBottomSheet<String>(
@@ -729,37 +765,48 @@ class _StaffFormState extends ConsumerState<_StaffForm> {
             ),
           money(const Key('staff-basic'), _basic, tr('Basic a month (₹)')),
           Row(children: [
-            Expanded(child: money(const Key('staff-hra'), _hra, tr('HRA (₹)'))),
+            Expanded(
+                child: money(const Key('staff-hra'), _hra, malaysiaPayroll ? tr('Housing allowance (₹)') : tr('HRA (₹)'))),
             const SizedBox(width: 8),
             Expanded(child: money(const Key('staff-other'), _other, tr('Other allowance (₹)'))),
           ]),
           Padding(
             padding: const EdgeInsets.only(top: 6),
-            child: Text(trf('{amount} a month in all', {'amount': rupees(gross)}),
+            child: Text(trf('{amount} a month in all', {'amount': _amt(gross)}),
                 style: Theme.of(context).textTheme.bodySmall),
           ),
           SwitchListTile(
               contentPadding: EdgeInsets.zero,
               value: _pf,
               onChanged: (v) => setState(() => _pf = v),
-              title: Text(tr('Provident fund (PF)'))),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            value: _esi,
-            onChanged: (v) => setState(() => _esi = v),
-            title: Text(tr('ESI')),
-            subtitle: Text(gross > esiWageLimit
-                ? tr('Not cut: salary is above ₹21,000')
-                : tr('Cut when the salary is ₹21,000 or less')),
-          ),
-          DropdownButtonFormField<String>(
-            initialValue: _pt,
-            isExpanded: true,
-            decoration: InputDecoration(labelText: tr('Professional tax')),
-            items: [for (final p in ptStates) DropdownMenuItem(value: p, child: Text(tr(ptStateLabels[p]!)))],
-            onChanged: (v) => setState(() => _pt = v ?? 'TS'),
-          ),
-          if (_pf) TextField(controller: _uan, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: tr('UAN'))),
+              title: Text(malaysiaPayroll ? tr('EPF (KWSP)') : tr('Provident fund (PF)'))),
+          if (malaysiaPayroll)
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _esi,
+              onChanged: (v) => setState(() => _esi = v),
+              title: Text(tr('SOCSO and EIS')),
+              subtitle: Text(tr('On pay up to ₹6,000 a month')),
+            )
+          else ...[
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _esi,
+              onChanged: (v) => setState(() => _esi = v),
+              title: Text(tr('ESI')),
+              subtitle: Text(gross > esiWageLimit
+                  ? tr('Not cut: salary is above ₹21,000')
+                  : tr('Cut when the salary is ₹21,000 or less')),
+            ),
+            DropdownButtonFormField<String>(
+              initialValue: _pt,
+              isExpanded: true,
+              decoration: InputDecoration(labelText: tr('Professional tax')),
+              items: [for (final p in ptStates) DropdownMenuItem(value: p, child: Text(tr(ptStateLabels[p]!)))],
+              onChanged: (v) => setState(() => _pt = v ?? 'TS'),
+            ),
+            if (_pf) TextField(controller: _uan, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: tr('UAN'))),
+          ],
           ListTile(
             contentPadding: EdgeInsets.zero,
             title: Text(tr('Joined on')),

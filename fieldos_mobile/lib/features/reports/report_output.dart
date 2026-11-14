@@ -12,6 +12,7 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/page_format.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
 import 'package:fieldos_mobile/features/export/xlsx_writer.dart';
 import 'package:fieldos_mobile/features/money/bill_pdf.dart' show BillingProfile, pdfSafe;
@@ -74,7 +75,7 @@ Future<Uint8List> buildReportPdf({
 
   final totals = table.totals;
   doc.addPage(pw.MultiPage(
-    pageFormat: wide ? PdfPageFormat.a4.landscape : PdfPageFormat.a4,
+    pageFormat: wide ? marketPageFormat().landscape : marketPageFormat(),
     margin: const pw.EdgeInsets.all(28),
     header: (ctx) => ctx.pageNumber == 1
         ? pw.SizedBox()
