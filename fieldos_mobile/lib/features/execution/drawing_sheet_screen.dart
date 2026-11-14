@@ -237,8 +237,9 @@ class _DrawingSheetScreenState extends ConsumerState<DrawingSheetScreen> {
                     ),
                   ),
                   for (final pin in pins)
-                    Positioned(
-                      left: pin.x * fit.width - 20,
+                    // Inside the left-to-right page, start is the left edge.
+                    PositionedDirectional(
+                      start: pin.x * fit.width - 20,
                       top: pin.y * fit.height - 20,
                       width: 40,
                       height: 40,

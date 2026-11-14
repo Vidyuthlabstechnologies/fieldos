@@ -362,6 +362,7 @@ const Map<String, String> scheduleEs = {
 };
 
 const Map<String, String> scheduleMs = {
+  'RFI': 'RFI',
   'Add earlier work it waits for': 'Tambah kerja terdahulu yang ditunggu',
   'Another task': 'Tugas lain',
   'Critical path': 'Laluan kritikal',
@@ -421,6 +422,7 @@ const Map<String, String> scheduleMs = {
 };
 
 const Map<String, String> scheduleZh = {
+  'RFI': 'RFI',
   'Add earlier work it waits for': '添加它所等待的前置工作',
   'Another task': '另一项任务',
   'Critical path': '关键路径',
@@ -660,6 +662,7 @@ const Map<String, String> scheduleMl = {
 };
 
 const Map<String, String> schedulePl = {
+  'RFI': 'RFI',
   'Add earlier work it waits for': 'Dodaj wcześniejszą pracę, na którą czeka',
   'Another task': 'Inne zadanie',
   'Critical path': 'Ścieżka krytyczna',
@@ -719,6 +722,7 @@ const Map<String, String> schedulePl = {
 };
 
 const Map<String, String> scheduleRo = {
+  'Defect': 'Defect de execuție',
   'Add earlier work it waits for': 'Adaugă lucrarea anterioară pe care o așteaptă',
   'Another task': 'Altă sarcină',
   'Critical path': 'Drum critic',
