@@ -22,6 +22,8 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/approvals/approvals_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
+import 'package:fieldos_mobile/features/legal/privacy_notice.dart';
+import 'package:fieldos_mobile/features/legal/privacy_rights_screen.dart';
 import 'package:fieldos_mobile/features/map/site_map_screen.dart';
 import 'package:fieldos_mobile/features/mascot/mitra.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
@@ -83,7 +85,27 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
       onSettled: _save,
     )..addListener(_changed);
     _continueLastChat();
-    if (widget.startListening) WidgetsBinding.instance.addPostFrameCallback((_) => _listen());
+    _loadConsent();
+  }
+
+  /// Whether the person agreed to their questions going to the AI
+  /// companies; null while it is read. Nothing is sent before they agree.
+  bool? _aiAllowed;
+
+  Future<void> _loadConsent() async {
+    final userId = ref.read(sessionProvider).user?.id ?? '';
+    final allowed = await aiConsentGiven(ref.read(appDatabaseProvider), userId);
+    if (!mounted) return;
+    setState(() => _aiAllowed = allowed);
+    if (allowed && widget.startListening) _listen();
+  }
+
+  Future<void> _agree() async {
+    final userId = ref.read(sessionProvider).user?.id ?? '';
+    await setAiConsent(ref.read(appDatabaseProvider), userId, true);
+    if (!mounted) return;
+    setState(() => _aiAllowed = true);
+    if (widget.startListening) _listen();
   }
 
   /// Opens the newest saved chat, so the conversation carries on.
@@ -180,14 +202,14 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
 
   Future<void> _send([String? text]) async {
     final words = (text ?? _input.text).trim();
-    if (words.isEmpty || _chat.busy) return;
+    if (words.isEmpty || _chat.busy || _aiAllowed != true) return;
     _input.clear();
     FocusScope.of(context).unfocus();
     await _chat.send(words);
   }
 
   Future<void> _listen() async {
-    if (_chat.busy) return;
+    if (_chat.busy || _aiAllowed != true) return;
     final heard = await showVoiceReportSheet(context, forAssistant: true);
     if (heard == null || !mounted) return;
     if (heard.typeInstead) {
@@ -303,6 +325,8 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
           Expanded(
             child: !signedIn
                 ? _SignInFirst(onDone: () => setState(() {}))
+                : _aiAllowed != true
+                    ? (_aiAllowed == null ? const SizedBox.shrink() : _AiConsent(onAgree: _agree))
                 : _chat.items.isEmpty
                     ? _Welcome(name: ref.read(sessionProvider).user?.name, onPick: _send)
                     : ListView.builder(
@@ -335,7 +359,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ),
-          if (signedIn)
+          if (signedIn && _aiAllowed == true)
             _Composer(
               controller: _input,
               enabled: !_chat.busy,
@@ -525,6 +549,44 @@ class _Welcome extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+/// Asked once before the first question: what goes where, and that it
+/// can be taken back. Nothing reaches the AI companies before "I agree".
+class _AiConsent extends StatelessWidget {
+  const _AiConsent({required this.onAgree});
+  final VoidCallback onAgree;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ListView(padding: const EdgeInsets.fromLTRB(24, 32, 24, 24), children: [
+      const Center(child: _Avatar(size: 72)),
+      const SizedBox(height: 16),
+      Text(tr('Ask FieldOS uses AI from other companies'), textAlign: TextAlign.center, style: theme.textTheme.titleLarge),
+      const SizedBox(height: 12),
+      Text(
+        tr('To answer, FieldOS sends what you type or say, and the site details needed for the answer (such as '
+            'project names, workers, tasks and amounts), to Anthropic in the USA. If Anthropic is not available, it '
+            'goes to Sarvam AI in India instead. They work out the reply and do not use it to train their models. '
+            'FieldOS keeps only how much you used the assistant.'),
+        style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        tr('You can stop this at any time in Settings, Your privacy.'),
+        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+      ),
+      const SizedBox(height: 20),
+      FilledButton(key: const Key('assistant-ai-agree'), onPressed: onAgree, child: Text(tr('I agree'))),
+      const SizedBox(height: 8),
+      OutlinedButton(onPressed: () => Navigator.of(context).maybePop(), child: Text(tr('Not now'))),
+      TextButton(
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PrivacyRightsScreen())),
+        child: Text(tr('Your privacy')),
+      ),
+    ]);
   }
 }
 

@@ -3,25 +3,40 @@
 /// here touches the network.
 library;
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 const _months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /// "6 Nov 2026" (the year is left out for dates in the current year when
-/// [short] is true: "6 Nov").
+/// [short] is true: "6 Nov"). In the US: "Nov 6, 2026" and "Nov 6".
 String fmtDate(DateTime d, {bool short = false, DateTime? now}) {
   final l = d.toLocal();
   final n = (now ?? DateTime.now()).toLocal();
+  final dropYear = short && l.year == n.year;
+  if (market.dateOrder == DateOrder.mdy) {
+    final base = '${_months[l.month - 1]} ${l.day}';
+    return dropYear ? base : '$base, ${l.year}';
+  }
   final base = '${l.day} ${_months[l.month - 1]}';
-  return short && l.year == n.year ? base : '$base ${l.year}';
+  return dropYear ? base : '$base ${l.year}';
 }
 
-/// "7:12 pm".
+/// "7:12 pm", or "19:12" where the 24-hour clock is the norm (UK).
 String fmtTime(DateTime d) {
   final l = d.toLocal();
-  final h = l.hour % 12 == 0 ? 12 : l.hour % 12;
   final m = l.minute.toString().padLeft(2, '0');
+  if (market.clock24h) return '${l.hour.toString().padLeft(2, '0')}:$m';
+  final h = l.hour % 12 == 0 ? 12 : l.hour % 12;
   return '$h:$m ${l.hour < 12 ? 'am' : 'pm'}';
+}
+
+/// A date the way forms write it in this market: "06/11/2026", or
+/// "11/06/2026" in the US.
+String fmtDateNumeric(DateTime d) {
+  final l = d.toLocal();
+  final dd = l.day.toString().padLeft(2, '0'), mm = l.month.toString().padLeft(2, '0');
+  return market.dateOrder == DateOrder.mdy ? '$mm/$dd/${l.year}' : '$dd/$mm/${l.year}';
 }
 
 /// "Today, 7:12 pm", "Yesterday, 9:05 am" or "3 Nov, 6:40 pm".
@@ -93,29 +108,48 @@ double? parseTypedNumber(String typed) {
   return v == null || !v.isFinite ? null : v;
 }
 
-/// Rupees with Indian grouping: "₹12,34,567". Whole rupees unless [paise]
-/// is true and the amount has some ("₹45.50").
-String rupees(num v, {bool paise = false}) {
+/// An amount in this market's currency: "₹12,34,567" in India,
+/// "$1,234,567" in the US, "RM1,234,567", "AED 1,234,567", "£1,234,567".
+/// Whole units unless [cents] is true and the amount has some ("₹45.50").
+String money(num v, {bool cents = false}) {
   final abs = v.abs();
-  final cents = (abs * 100).round();
-  final showPaise = paise && cents % 100 != 0;
-  final whole = (showPaise ? cents ~/ 100 : abs.round()).toString();
+  final hundredths = (abs * 100).round();
+  final showCents = cents && hundredths % 100 != 0;
+  final whole = (showCents ? hundredths ~/ 100 : abs.round()).toString();
   // "-₹0" for a balance that is only float dust below zero reads as owed.
-  final neg = v < 0 && (showPaise || whole != '0');
-  String grouped;
-  if (whole.length <= 3) {
-    grouped = whole;
-  } else {
-    final last3 = whole.substring(whole.length - 3);
-    var rest = whole.substring(0, whole.length - 3);
-    final parts = <String>[];
-    while (rest.length > 2) {
-      parts.insert(0, rest.substring(rest.length - 2));
-      rest = rest.substring(0, rest.length - 2);
-    }
-    if (rest.isNotEmpty) parts.insert(0, rest);
-    grouped = '${parts.join(',')},$last3';
+  final neg = v < 0 && (showCents || whole != '0');
+  final grouped = market.indianGrouping ? _groupIndian(whole) : _groupThousands(whole);
+  final tail = showCents ? '.${(hundredths % 100).toString().padLeft(2, '0')}' : '';
+  final sym = market.symbolSpace ? '${market.currencySymbol} ' : market.currencySymbol;
+  return '${neg ? '-' : ''}$sym$grouped$tail';
+}
+
+/// [money] under its older name: every screen was written for India first.
+/// It follows the build's market like [money] does.
+String rupees(num v, {bool paise = false}) => money(v, cents: paise);
+
+/// The currency symbol for a field's prefix or suffix: currencySymbol, r'$', 'RM'.
+String get currencySymbol => market.currencySymbol;
+
+String _groupThousands(String whole) {
+  final b = StringBuffer();
+  for (var i = 0; i < whole.length; i++) {
+    if (i > 0 && (whole.length - i) % 3 == 0) b.write(',');
+    b.write(whole[i]);
   }
-  final tail = showPaise ? '.${(cents % 100).toString().padLeft(2, '0')}' : '';
-  return '${neg ? '-' : ''}₹$grouped$tail';
+  return b.toString();
+}
+
+/// 12,34,567: the last three digits, then pairs.
+String _groupIndian(String whole) {
+  if (whole.length <= 3) return whole;
+  final last3 = whole.substring(whole.length - 3);
+  var rest = whole.substring(0, whole.length - 3);
+  final parts = <String>[];
+  while (rest.length > 2) {
+    parts.insert(0, rest.substring(rest.length - 2));
+    rest = rest.substring(0, rest.length - 2);
+  }
+  if (rest.isNotEmpty) parts.insert(0, rest);
+  return '${parts.join(',')},$last3';
 }

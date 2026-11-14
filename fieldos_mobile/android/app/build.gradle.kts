@@ -1,3 +1,4 @@
+import java.util.Base64
 import java.util.Properties
 
 plugins {
@@ -16,6 +17,21 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(keystorePropertiesFile.inputStream())
 }
 
+// One codebase, one app per country (lib/core/market.dart). The market
+// comes from the same --dart-define=FIELDOS_MARKET=us the Dart code reads
+// (Flutter hands Gradle its dart-defines base64-encoded), so a build can't
+// carry US code under the Indian app id or the other way round. No define:
+// India, the original id, so the app already on Play keeps updating.
+val dartDefines: Map<String, String> = (project.findProperty("dart-defines") as String?)
+    ?.split(",")
+    ?.mapNotNull { runCatching { String(Base64.getDecoder().decode(it)) }.getOrNull() }
+    ?.mapNotNull { kv -> kv.indexOf('=').takeIf { it > 0 }?.let { kv.substring(0, it) to kv.substring(it + 1) } }
+    ?.toMap()
+    ?: emptyMap()
+val fieldosMarket = dartDefines["FIELDOS_MARKET"] ?: "in"
+val appIdSuffix = mapOf("in" to "", "us" to ".us", "my" to ".my", "ae" to ".ae", "uk" to ".uk")[fieldosMarket]
+    ?: throw GradleException("Unknown FIELDOS_MARKET '$fieldosMarket'; use in, us, my, ae or uk")
+
 android {
     namespace = "com.predictera.fieldos_mobile"
     // flutter.compileSdkVersion currently resolves to 34, which is too low
@@ -33,8 +49,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.mldynamic.fieldos"
+        applicationId = "com.mldynamic.fieldos$appIdSuffix"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // Android 7.0+. (Was set for Chaquopy, removed in 1.7.4; kept so no

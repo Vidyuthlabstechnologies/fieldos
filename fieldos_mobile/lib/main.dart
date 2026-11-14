@@ -91,14 +91,14 @@ class AppWithMaterial extends ConsumerWidget {
       navigatorKey: appNavigatorKey,
       // Date pickers, dialogs' OK/Cancel and the like in the same language.
       locale: language.locale,
-      supportedLocales: [for (final l in AppLanguage.values) l.locale],
+      supportedLocales: [for (final l in AppLanguage.offered) l.locale],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       builder: (context, child) {
         final size = ref.watch(textSizeProvider);
         final media = MediaQuery.of(context);
         return MediaQuery(
           data: media.copyWith(textScaler: combinedTextScaler(media.textScaler, size)),
-          child: SystemNavBarSafeArea(child: AppLockGate(child: child ?? const SizedBox.shrink())),
+          child: TabletZoom(child: SystemNavBarSafeArea(child: AppLockGate(child: child ?? const SizedBox.shrink()))),
         );
       },
       debugShowCheckedModeBanner: false,

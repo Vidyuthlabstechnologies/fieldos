@@ -252,23 +252,30 @@ class SampleProjectBanner extends ConsumerWidget {
     if (id != project.id) return const SizedBox.shrink();
     final theme = Theme.of(context);
     // A thin, quiet strip: it explains the demo without taking over the
-    // top of every tab.
-    return Material(
-      color: theme.colorScheme.surfaceContainer,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 2, 4, 2),
-        child: Row(
-          children: [
-            Icon(Icons.science_outlined, size: 18, color: theme.colorScheme.onSurfaceVariant),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                tr('A sample site to try things on. It stays on this phone and your team never sees it.'),
-                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+    // top of every tab. Its text grows only a little with the phone's text
+    // size: at 200% on a small phone it took half the screen above every
+    // tab and pushed the tab's own content off the bottom.
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.3,
+      child: Material(
+        color: theme.colorScheme.surfaceContainer,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 2, 4, 2),
+          child: Row(
+            children: [
+              Icon(Icons.science_outlined, size: 18, color: theme.colorScheme.onSurfaceVariant),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  tr('A sample site to try things on. It stays on this phone and your team never sees it.'),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
               ),
-            ),
-            TextButton(onPressed: () => _remove(context, ref), child: Text(tr('Remove'))),
-          ],
+              TextButton(onPressed: () => _remove(context, ref), child: Text(tr('Remove'))),
+            ],
+          ),
         ),
       ),
     );

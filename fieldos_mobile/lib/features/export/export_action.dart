@@ -11,6 +11,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/export/accounts_export.dart';
@@ -102,13 +103,13 @@ Future<void> showAccountsExport(BuildContext context, WidgetRef ref) async {
                 ChoiceChip(label: Text(periods[i].$1), selected: pick == i, onSelected: (_) => setSheet(() => pick = i)),
             ]),
             const SizedBox(height: 16),
-            FilledButton.icon(
+            if (isIndia) FilledButton.icon(
               key: const Key('accounts-tally'),
               icon: const Icon(Icons.account_balance_outlined),
               label: Text(tr('Tally vouchers (XML)')),
               onPressed: () => Navigator.pop(ctx, AccountsFormat.tally),
             ),
-            const SizedBox(height: 8),
+            if (isIndia) const SizedBox(height: 8),
             OutlinedButton.icon(
               key: const Key('accounts-zoho'),
               icon: const Icon(Icons.table_rows_outlined),

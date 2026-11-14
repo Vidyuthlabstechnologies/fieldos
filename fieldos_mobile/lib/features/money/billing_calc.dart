@@ -10,7 +10,35 @@ library;
 
 import 'dart:convert';
 
-const billKinds = {'ra': 'Running bill (RA)', 'tax_invoice': 'Tax invoice'};
+import 'package:fieldos_mobile/core/market.dart';
+
+/// The two kinds of client bill, named the way this market names them.
+Map<String, String> get billKinds => {
+      'ra': market.progressBillName,
+      'tax_invoice': switch (currentMarket) {
+        Market.us => 'Invoice',
+        Market.uk => 'VAT invoice',
+        _ => 'Tax invoice',
+      },
+    };
+
+/// The tax lines on a bill: CGST + SGST or IGST in India, one line named
+/// after the market's tax ("Sales tax 8.25%", "VAT 20%") everywhere else.
+/// Outside India the single line is kept in the IGST column, so bills,
+/// sync and old exports need no new fields.
+List<(String, double)> taxLines(BillTotals t, {required double rate, required bool interState}) {
+  if (!market.tax.splitsInsideState) {
+    return rate > 0 || t.igst != 0 ? [('${market.tax.name} ${_pctLabel(rate)}%', t.igst)] : const [];
+  }
+  if (interState) return [('IGST ${_pctLabel(rate)}%', t.igst)];
+  if (rate <= 0) return const [];
+  return [('CGST ${_pctLabel(rate / 2)}%', t.cgst), ('SGST ${_pctLabel(rate / 2)}%', t.sgst)];
+}
+
+String _pctLabel(double v) {
+  if (v == v.roundToDouble()) return v.round().toString();
+  return v.toStringAsFixed(3).replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
+}
 
 /// Construction services SAC (works contract). Editable per bill.
 const defaultSac = '995411';
@@ -84,6 +112,8 @@ class BillTotals {
 /// [gstRate] is the full rate (18 means 18%). Inside the state it splits
 /// half CGST, half SGST; across states it is all IGST. Retention and TDS
 /// are taken on the value before GST, as contracts and section 194C do.
+/// Outside India there is no CGST/SGST split: the whole tax is one line
+/// (held in [BillTotals.igst]), whatever [interState] says.
 BillTotals billTotals(
   List<BillLine> lines, {
   double gstRate = 18,
@@ -91,6 +121,7 @@ BillTotals billTotals(
   double retentionPct = 0,
   double tdsPct = 0,
 }) {
+  if (!market.tax.splitsInsideState) interState = true;
   final gross = _round2(lines.fold<double>(0, (s, l) => s + l.amount));
   final tax = _round2(gross * gstRate / 100);
   final half = _round2(tax / 2);
@@ -159,13 +190,59 @@ String indianNumberWords(int n) {
   ].join(' ');
 }
 
-/// "Rupees Twelve Thousand Five Hundred and Fifty Paise Only".
-String rupeesInWords(double amount) {
-  final paiseTotal = (amount.abs() * 100).round();
-  final r = paiseTotal ~/ 100, p = paiseTotal % 100;
-  final words = 'Rupees ${indianNumberWords(r)}';
-  return p == 0 ? '$words Only' : '$words and ${_belowHundred(p)} Paise Only';
+/// Whole number in international words, for every market but India:
+/// 1,234,567 is "One Million Two Hundred Thirty Four Thousand Five Hundred
+/// Sixty Seven" (British style adds "and": "Five Hundred and Sixty Seven").
+String westernNumberWords(int n, {bool and = false}) {
+  if (n == 0) return 'Zero';
+  if (n < 0) return 'Minus ${westernNumberWords(-n, and: and)}';
+  String chunk(int v) {
+    final h = v ~/ 100, r = v % 100;
+    return [
+      if (h > 0) '${_ones[h]} Hundred',
+      if (r > 0) '${and && h > 0 ? 'and ' : ''}${_belowHundred(r)}',
+    ].join(' ');
+  }
+
+  const scales = ['', 'Thousand', 'Million', 'Billion', 'Trillion'];
+  final parts = <String>[];
+  var rest = n, i = 0;
+  while (rest > 0 && i < scales.length) {
+    final c = rest % 1000;
+    if (c > 0) parts.insert(0, [chunk(c), if (scales[i].isNotEmpty) scales[i]].join(' '));
+    rest ~/= 1000;
+    i++;
+  }
+  if (rest > 0) parts.insert(0, '${westernNumberWords(rest, and: and)} Quadrillion');
+  // "One Thousand and Five": British style joins a last chunk under 100.
+  if (and && parts.length > 1 && n % 1000 > 0 && n % 1000 < 100) {
+    parts[parts.length - 1] = 'and ${parts.last}';
+  }
+  return parts.join(' ');
 }
+
+/// A whole number in this market's words: lakh and crore in India,
+/// thousand and million elsewhere.
+String numberWords(int n) =>
+    market.indianGrouping ? indianNumberWords(n) : westernNumberWords(n, and: market.wordsAnd);
+
+/// An amount in words for bills and cheques: "Rupees Twelve Thousand Five
+/// Hundred and Fifty Paise Only" in India, "Twelve Thousand Five Hundred
+/// Dollars and Fifty Cents Only" in the US.
+String amountInWords(double amount) {
+  final minorTotal = (amount.abs() * 100).round();
+  final major = minorTotal ~/ 100, minor = minorTotal % 100;
+  final m = market;
+  if (m.currencyWordsFirst) {
+    final words = '${m.majorUnitWords} ${numberWords(major)}';
+    return minor == 0 ? '$words Only' : '$words and ${_belowHundred(minor)} ${m.minorUnitWords} Only';
+  }
+  final words = '${numberWords(major)} ${m.majorUnitWords}';
+  return minor == 0 ? '$words Only' : '$words and ${_belowHundred(minor)} ${m.minorUnitWords} Only';
+}
+
+/// [amountInWords] under its older name; follows the build's market.
+String rupeesInWords(double amount) => amountInWords(amount);
 
 /// GST state codes, as printed on invoices (first two digits of a GSTIN).
 const gstStates = {
@@ -181,6 +258,31 @@ const gstStates = {
 final _gstinPattern = RegExp(r'^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$');
 
 /// A GSTIN's shape: 15 characters, a known state code, PAN in the middle.
+/// A tax invoice number under rule 46(b) of the CGST Rules: at most 16
+/// characters, only letters, digits, hyphen and slash, unique in the
+/// financial year (the screen checks the bills already made).
+bool isValidInvoiceNumber(String number) => RegExp(r'^[A-Za-z0-9/-]{1,16}$').hasMatch(number.trim());
+
+/// The place of supply printed on a bill, as (state name, code), or null
+/// when it can't be told. Building work is supplied where the site is
+/// (section 12(3) of the IGST Act): inside the state that is our own GST
+/// state; across states the client's GSTIN is the best guess the bill has.
+(String, String)? placeOfSupply({required String ourGstin, String? clientGstin, required bool interState}) {
+  final from = interState ? (clientGstin ?? '') : ourGstin;
+  if (from.trim().length < 2) return null;
+  final code = from.trim().substring(0, 2);
+  final name = gstStates[code];
+  return name == null ? null : (name, code);
+}
+
+/// The heading of a bill that is not an RA bill. Only a GST-registered
+/// supplier issues a tax invoice; with no GST on the bill it is a bill of
+/// supply, and without a GSTIN a plain invoice.
+String invoiceTitle({required String ourGstin, required double gstRate}) {
+  if (ourGstin.trim().isEmpty) return 'INVOICE';
+  return gstRate > 0 ? 'TAX INVOICE' : 'BILL OF SUPPLY';
+}
+
 bool isValidGstin(String gstin) {
   final g = gstin.trim().toUpperCase();
   return _gstinPattern.hasMatch(g) && gstStates.containsKey(g.substring(0, 2));

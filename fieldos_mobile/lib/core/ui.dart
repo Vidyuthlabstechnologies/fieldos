@@ -356,3 +356,46 @@ class SystemNavBarSafeArea extends StatelessWidget {
     );
   }
 }
+
+/// Zooms the whole app in on tablets and opened foldables, the way
+/// Android's display size setting does. FieldOS is laid out for a phone held
+/// in one hand; on an 800 dp wide tablet every row stretched edge to edge
+/// with small type and a sea of empty space. Laying the app out about a
+/// third narrower and scaling it up keeps the phone layout, with bigger
+/// text and buttons that suit a tablet propped on a site table. Phones
+/// (shortest side under 600 dp) are untouched.
+class TabletZoom extends StatelessWidget {
+  const TabletZoom({super.key, required this.child});
+  final Widget child;
+
+  /// How much to zoom for a screen whose shortest side is [shortestSide].
+  static double zoomFor(double shortestSide) =>
+      shortestSide < 600 ? 1.0 : (shortestSide / 560).clamp(1.0, 1.35);
+
+  @override
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final z = zoomFor(media.size.shortestSide);
+    if (z == 1.0) return child;
+    return SizedBox.expand(
+      child: FittedBox(
+        fit: BoxFit.fill,
+        alignment: Alignment.topLeft,
+        child: SizedBox.fromSize(
+          size: media.size / z,
+          child: MediaQuery(
+            data: media.copyWith(
+              size: media.size / z,
+              devicePixelRatio: media.devicePixelRatio * z,
+              padding: media.padding / z,
+              viewPadding: media.viewPadding / z,
+              viewInsets: media.viewInsets / z,
+              systemGestureInsets: media.systemGestureInsets / z,
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}

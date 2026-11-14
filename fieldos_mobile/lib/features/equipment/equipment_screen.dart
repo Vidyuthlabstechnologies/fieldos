@@ -111,12 +111,12 @@ Future<void> editEquipment(BuildContext context, WidgetRef ref,
             TextField(
               key: const Key('equipment-hourly-rate'),
               controller: hourlyRate,
-              decoration: InputDecoration(labelText: tr('Rate per hour (optional)'), prefixText: '₹ '),
+              decoration: InputDecoration(labelText: tr('Rate per hour (optional)'), prefixText: '$currencySymbol '),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             TextField(
               controller: dailyRate,
-              decoration: InputDecoration(labelText: tr('Daily rate (optional)'), prefixText: '₹ '),
+              decoration: InputDecoration(labelText: tr('Daily rate (optional)'), prefixText: '$currencySymbol '),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             SwitchListTile(
@@ -395,7 +395,7 @@ class _EquipmentTile extends ConsumerWidget {
               TextField(
                 controller: cost,
                 onChanged: (_) => setDialogState(() {}),
-                decoration: InputDecoration(labelText: tr('Cost (optional)'), prefixText: '₹ '),
+                decoration: InputDecoration(labelText: tr('Cost (optional)'), prefixText: '$currencySymbol '),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
               ),
             ],
@@ -459,7 +459,7 @@ String? _orNull(String text) => text.trim().isEmpty ? null : text.trim();
 /// A typed amount, tolerating "1,500" and a stray "₹"; null when blank,
 /// unreadable or negative.
 double? _amount(String text) {
-  final v = double.tryParse(text.replaceAll(RegExp(r'[₹,\s]'), ''));
+  final v = double.tryParse(text.replaceAll(currencySymbol, '').replaceAll(RegExp(r'[₹,\s]'), ''));
   return v == null || v < 0 || v.isNaN || v.isInfinite ? null : v;
 }
 

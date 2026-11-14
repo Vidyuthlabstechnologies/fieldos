@@ -9,6 +9,10 @@
 #   REVENUECAT_ANDROID_KEY            RevenueCat's PUBLIC Google key (goog_...)
 # and the upload key: android/app/key.properties + the keystore it names.
 # Optional:
+#   FIELDOS_MARKET                    in (default), us, my, ae or uk: which
+#                                     country's app (its own Play listing and
+#                                     app id, lib/core/market.dart). The
+#                                     RevenueCat key must be that app's key.
 #   GOOGLE_WEB_CLIENT_ID              "Continue with Google"
 #   PRIVACY_POLICY_URL, TERMS_URL     default: the live FieldOS website
 #   REVENUECAT_IOS_KEY                passed through, unused on Android
@@ -53,11 +57,19 @@ esac
 store_file=$(sed -n 's/^storeFile=//p' android/app/key.properties)
 [ -n "$store_file" ] && [ -f "android/app/$store_file" ] || fail "the keystore named in key.properties ($store_file) is not in android/app/"
 
+FIELDOS_MARKET="${FIELDOS_MARKET:-in}"
+case "$FIELDOS_MARKET" in
+  in|us|my|ae|uk) ;;
+  *) fail "FIELDOS_MARKET should be in, us, my, ae or uk (got $FIELDOS_MARKET)" ;;
+esac
+echo "Building the $FIELDOS_MARKET app"
+
 PRIVACY_POLICY_URL="${PRIVACY_POLICY_URL:-https://fieldos-mldynamic.netlify.app/privacy-policy.html}"
 TERMS_URL="${TERMS_URL:-https://fieldos-mldynamic.netlify.app/terms-of-use.html}"
 
 defines=(
   "--dart-define=FIELDOS_STORE_RELEASE=true"
+  "--dart-define=FIELDOS_MARKET=$FIELDOS_MARKET"
   "--dart-define=SUPABASE_URL=$SUPABASE_URL"
   "--dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
   "--dart-define=REVENUECAT_ANDROID_KEY=$REVENUECAT_ANDROID_KEY"

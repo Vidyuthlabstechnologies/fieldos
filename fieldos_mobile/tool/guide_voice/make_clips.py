@@ -65,6 +65,9 @@ def main():
     for lang, entries in lines.items():
         if only and lang not in only:
             continue
+        # No Sarvam voice (Spanish, the US English lines): the phone reads them.
+        if not voices.get(lang):
+            continue
         for k, text in entries.items():
             path = os.path.join(ROOT, lang, f'{k}.mp3')
             if manifest.get(lang, {}).get(k) == text and os.path.exists(path):

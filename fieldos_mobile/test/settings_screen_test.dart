@@ -44,7 +44,7 @@ void main() {
     expect(find.text('Meena Rao'), findsOneWidget);
     expect(find.text('Site engineer · Sri Sai Constructions'), findsOneWidget);
     for (final label in ['Change password', 'App lock', 'Language', 'Export all sites to Excel', 'Report a bug', 'Email support']) {
-      await tester.scrollUntilVisible(find.text(label), 200);
+      await tester.scrollUntilVisible(find.text(label), 100);
       expect(find.text(label), findsOneWidget, reason: label);
     }
     expect(find.text('Sarvam fallback key'), findsNothing);

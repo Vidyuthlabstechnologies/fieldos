@@ -9,6 +9,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart' show isOpenStage;
@@ -213,7 +214,7 @@ List<PlannedReminder> planReminders({
     }
     // RERA's quarterly progress report, for owners of sites with a RERA
     // number: the day after a quarter ends and 5 days before it is due.
-    if (isOwner && reraSites.isNotEmpty) {
+    if (isIndia && isOwner && reraSites.isNotEmpty) {
       final ended = day.month % 3 == 1 && day.day == 1;
       final dueSoon = day.month % 3 == 1 && day.day == 10;
       final at = day.add(const Duration(hours: 10));

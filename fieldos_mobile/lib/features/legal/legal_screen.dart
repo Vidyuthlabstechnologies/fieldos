@@ -8,13 +8,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/features/legal/legal_texts.dart';
+import 'package:fieldos_mobile/features/legal/legal_texts_markets.dart';
 
 /// The published terms page, when there is one (--dart-define=TERMS_URL=...).
 const termsUrl = String.fromEnvironment('TERMS_URL');
 
-Future<void> openPrivacyPolicy(BuildContext context) => _open(context, Brand.privacyPolicyUrl, privacyPolicy);
+Future<void> openPrivacyPolicy(BuildContext context) => _open(context, Brand.privacyPolicyUrl, marketPrivacyPolicy);
 
-Future<void> openTerms(BuildContext context) => _open(context, termsUrl, termsOfUse);
+Future<void> openTerms(BuildContext context) => _open(context, termsUrl, marketTermsOfUse);
 
 Future<void> _open(BuildContext context, String url, LegalDocument doc) async {
   if (url.isNotEmpty) {

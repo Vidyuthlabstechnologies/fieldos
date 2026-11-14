@@ -275,8 +275,9 @@ void main() {
         'UPDATE labour_attendance SET punch_out = punch_in + 30600 WHERE punch_out IS NULL'));
     await shoot(tester, '11_wage_sheet',
         WageSheetScreen(projectId: mainSite.id, projectName: mainSite.name, userId: userId), before: () async {
-      // Last full week, so Saturday's sheet shows a whole week's days.
-      await tester.tap(find.byIcon(Icons.chevron_left));
+      // The seeded days are the 6 days up to the day before yesterday. Early in
+      // the week most of them sit in last week, so step back; later on, this week has them.
+      if (DateTime.now().weekday <= DateTime.wednesday) await tester.tap(find.byIcon(Icons.chevron_left));
       for (var i = 0; i < 3; i++) {
         await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 80)));
         await tester.pump(const Duration(milliseconds: 300));

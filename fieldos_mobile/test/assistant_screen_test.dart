@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/assistant/assistant_screen.dart';
 import 'package:fieldos_mobile/features/home/home_screen.dart';
+import 'package:fieldos_mobile/features/legal/privacy_notice.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/ai_backend.dart';
@@ -38,7 +39,8 @@ class _FakeAi implements AiBackend {
 void main() {
   tearDown(() => setCurrentLanguage(AppLanguage.en));
 
-  Future<(ProviderContainer, AppDatabase, String)> setUp(WidgetTester tester, AiBackend ai) async {
+  Future<(ProviderContainer, AppDatabase, String)> setUp(WidgetTester tester, AiBackend ai,
+      {bool aiConsent = true}) async {
     final db = AppDatabase.memory();
     final container = ProviderContainer(overrides: [
       appDatabaseProvider.overrideWithValue(db),
@@ -53,6 +55,7 @@ void main() {
       final session = container.read(sessionProvider.notifier);
       await session.register(username: 'ravi', name: 'Ravi Kumar', password: '123456');
       companyId = (await session.createCompany('Sri Sai Constructions')).id;
+      if (aiConsent) await setAiConsent(db, container.read(sessionProvider).user!.id, true);
       await db.projectDao.create(
           ProjectsCompanion.insert(id: 'p1', companyId: companyId, name: 'Narapally Villa', status: const Value('active')));
     });
@@ -69,6 +72,26 @@ void main() {
     ));
     await settle(tester);
   }
+
+  testWidgets('nothing goes to the AI companies until the person agrees, and they can take it back', (tester) async {
+    final ai = _FakeAi();
+    final (container, db, _) = await setUp(tester, ai, aiConsent: false);
+    await pump(tester, container, const AssistantScreen());
+    expect(find.text('Ask FieldOS uses AI from other companies'), findsOneWidget);
+    expect(find.textContaining('Anthropic in the USA'), findsOneWidget);
+    expect(find.text('Which tasks are late?'), findsNothing);
+    expect(find.byType(TextField), findsNothing);
+    expect(ai.calls, 0);
+
+    await tester.tap(find.byKey(const Key('assistant-ai-agree')));
+    await settle(tester);
+    expect(find.text('Which tasks are late?'), findsOneWidget);
+    final userId = container.read(sessionProvider).user!.id;
+    expect(await tester.runAsync(() => aiConsentGiven(db, userId)), isTrue);
+
+    await tester.runAsync(() => setAiConsent(db, userId, false));
+    expect(await tester.runAsync(() => aiConsentGiven(db, userId)), isFalse);
+  });
 
   testWidgets('Home has Ask FieldOS at the top, and it opens the assistant', (tester) async {
     final (container, _, _) = await setUp(tester, _FakeAi());

@@ -128,16 +128,22 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                                 if (l.markedDays > 0) trf('{n} marked by hand', {'n': l.markedDays}),
                                 if (l.paidInPeriod > 0) trf('paid {amount}', {'amount': rupees(l.paidInPeriod, paise: true)}),
                               ].join(' · ')),
-                              trailing: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(rupees(l.balanceDue, paise: true),
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          color: l.balanceDue < 0 ? toneColor(context, PillTone.warn) : null)),
-                                  Text(l.balanceDue < 0 ? tr('advance') : tr('due'), style: const TextStyle(fontSize: 11)),
-                                ],
+                              // ListTile caps the trailing height; with very
+                              // large text the two lines scale down to fit.
+                              trailing: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(rupees(l.balanceDue, paise: true),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            color: l.balanceDue < 0 ? toneColor(context, PillTone.warn) : null)),
+                                    Text(l.balanceDue < 0 ? tr('advance') : tr('due'), style: const TextStyle(fontSize: 11)),
+                                  ],
+                                ),
                               ),
                               onTap: l.workerId == null
                                   ? null
@@ -152,14 +158,18 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                                       if (saved && mounted) setState(() {});
                                     },
                             ),
+                          // The note scrolls with the list: fixed under it, on a
+                          // small phone with large text it left no room for
+                          // the workers themselves.
+                          Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Text(
+                              tr('A day counts as full at 7 hours on site and half at 3.5 hours, unless it was marked by hand on the day register. Tap a worker to pay wages or an advance.'),
+                              style: const TextStyle(fontSize: 12),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ]),
-            ),
-            Padding(
-              padding: EdgeInsets.all(12),
-              child: Text(tr('A day counts as full at 7 hours on site and half at 3.5 hours, unless it was marked by hand on the day register. Tap a worker to pay wages or an advance.'),
-                style: TextStyle(fontSize: 12),
-                textAlign: TextAlign.center,
-              ),
             ),
           ]),
         );

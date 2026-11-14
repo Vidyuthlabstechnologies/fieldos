@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 /// Rebuilds every widget so labels already on screen switch language in
@@ -52,7 +53,7 @@ Future<void> showLanguagePicker(BuildContext context, WidgetRef ref) async {
             child: Text(tr('Mitra talks with you in it, mixed with English, and voice input listens for it.'),
                 style: Theme.of(ctx).textTheme.bodySmall),
           ),
-          for (final l in AppLanguage.values)
+          for (final l in AppLanguage.offered)
             ListTile(
               title: Text(l.nativeName),
               subtitle: l == AppLanguage.en ? null : Text(l.englishName),
@@ -80,13 +81,16 @@ class LanguageChooserRow extends ConsumerWidget {
       alignment: WrapAlignment.center,
       spacing: 4,
       children: [
-        for (final l in AppLanguage.values)
+        for (final l in AppLanguage.offered)
           TextButton(
             onPressed: l == current ? null : () => chooseLanguage(ref, l),
             style: TextButton.styleFrom(
               foregroundColor: color,
               disabledForegroundColor: color,
-              textStyle: TextStyle(fontWeight: l == current ? FontWeight.w800 : FontWeight.w400),
+              textStyle: TextStyle(
+                  fontFamily: Brand.fontFamily,
+                  fontFamilyFallback: Brand.fontFallback,
+                  fontWeight: l == current ? FontWeight.w800 : FontWeight.w400),
             ),
             child: Text(l.nativeName),
           ),

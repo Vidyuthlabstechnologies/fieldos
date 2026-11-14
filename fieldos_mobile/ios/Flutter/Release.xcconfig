@@ -1,2 +1,3 @@
 #include "Generated.xcconfig"
 #include "Google.xcconfig"
+#include "Market.xcconfig"

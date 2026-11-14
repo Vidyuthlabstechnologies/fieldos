@@ -27,7 +27,7 @@ void main() {
 
   test('every language has a voice, a greeting and one line per tour step', () {
     final keys = {'greet', for (var i = 0; i < appTourSteps().length; i++) 'tour_$i'};
-    for (final l in AppLanguage.values) {
+    for (final l in AppLanguage.offered) {
       expect(guideVoices[l.code], isNotNull, reason: l.englishName);
       expect(guideLines[l.code]?.keys.toSet(), keys, reason: l.englishName);
       for (final line in guideLines[l.code]!.values) {
@@ -38,7 +38,7 @@ void main() {
   });
 
   test('Indian-language lines keep everyday English words, the way people talk', () {
-    for (final l in AppLanguage.values.where((l) => l != AppLanguage.en)) {
+    for (final l in AppLanguage.indianLanguages) {
       expect(guideLines[l.code]!['tour_1'], contains('sites'), reason: l.englishName);
       expect(guideLines[l.code]!['tour_1'], contains('list'), reason: l.englishName);
     }
@@ -65,7 +65,7 @@ void main() {
   test("the phone's language is offered first, but every language is there", () {
     expect(LanguageWelcomeScreen.order(const [Locale('kn', 'IN')]).first, AppLanguage.kn);
     expect(LanguageWelcomeScreen.order(const [Locale('en', 'US')]).first, AppLanguage.en);
-    expect(LanguageWelcomeScreen.order(const [Locale('ta', 'IN')]).toSet(), AppLanguage.values.toSet());
+    expect(LanguageWelcomeScreen.order(const [Locale('ta', 'IN')]).toSet(), AppLanguage.offered.toSet());
   });
 
   testWidgets('first launch: picking Telugu saves it, and the screens stay English', (tester) async {
@@ -86,7 +86,7 @@ void main() {
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Which language do you speak?'), findsOneWidget);
-    for (final l in AppLanguage.values) {
+    for (final l in AppLanguage.offered) {
       expect(find.text(l.nativeName), findsOneWidget);
     }
     await tester.tap(find.text('తెలుగు'));

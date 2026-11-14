@@ -20,7 +20,7 @@ class LanguageWelcomeScreen extends ConsumerWidget {
   /// The phone's language first, then the rest in the usual order.
   static List<AppLanguage> order([List<Locale>? locales]) {
     final phone = languageFromDevice(locales);
-    return [phone, for (final l in AppLanguage.values) if (l != phone) l];
+    return [phone, for (final l in AppLanguage.offered) if (l != phone) l];
   }
 
   Future<void> _pick(WidgetRef ref, AppLanguage l) async {
@@ -94,12 +94,17 @@ class _LanguageTile extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Center(
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(language.nativeName, style: theme.textTheme.headlineSmall),
-              if (language != AppLanguage.en)
-                Text(language.englishName,
-                    style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
-            ]),
+            // Scales down rather than overflowing the tile with very large
+            // text on a narrow phone (a Fold's cover screen at 200%).
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Text(language.nativeName, style: theme.textTheme.headlineSmall),
+                if (language != AppLanguage.en)
+                  Text(language.englishName,
+                      style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+              ]),
+            ),
           ),
         ),
       ),

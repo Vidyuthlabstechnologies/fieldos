@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/l10n/strings_crm_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_proof_hi.dart';
+import 'package:fieldos_mobile/l10n/strings_privacy_hi.dart';
 
 const Map<String, String> stringsHi = {
   'Try again': 'फिर से कोशिश करें',
@@ -2435,4 +2436,11 @@ const Map<String, String> stringsHi = {
   ...warehouseHi,
   ...dailyHi,
   ...proofHi,
+  ...privacyHi,
+  // Shown in the non-Indian apps (lib/core/market.dart); kept here for the coverage test.
+  "A Zoho Books file, with tax split out": "Zoho Books फ़ाइल, टैक्स अलग करके",
+  "Add your tax number and address": "अपना टैक्स नंबर और पता जोड़ें",
+  "Client's {label} (optional)": "क्लाइंट का {label} (वैकल्पिक)",
+  "Kept back by the client for the tax office": "क्लाइंट टैक्स विभाग के लिए रोकता है",
+  "{tax} rate": "{tax} दर",
 };

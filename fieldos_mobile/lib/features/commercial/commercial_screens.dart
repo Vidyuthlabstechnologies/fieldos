@@ -153,7 +153,7 @@ class _WorkOrdersTab extends ConsumerWidget {
                 const SizedBox(width: 8),
                 SizedBox(width: 80, child: TextField(controller: unit, decoration: InputDecoration(labelText: tr('Unit')))),
               ]),
-              NumField(controller: rate, label: tr('Rate per unit'), suffix: '₹'),
+              NumField(controller: rate, label: tr('Rate per unit'), suffix: currencySymbol),
               CostCodePicker(codes: data.costCodes, value: code, onChanged: (v) => set(() => code = v)),
             ]),
           ),
@@ -685,7 +685,7 @@ class _VariationsTabState extends ConsumerState<_VariationsTab> {
                     if (rate != null && q != null) cost.text = (q * rate).toStringAsFixed(0);
                   },
                 ),
-              NumField(controller: cost, label: tr('Estimated cost'), suffix: '₹'),
+              NumField(controller: cost, label: tr('Estimated cost'), suffix: currencySymbol),
               NumField(controller: days, label: tr('Effect on programme (days)')),
               if (order == null) CostCodePicker(codes: d.costCodes, value: code, onChanged: (v) => set(() => code = v)),
               TextField(controller: note, decoration: InputDecoration(labelText: tr('Note (optional)'))),
@@ -854,7 +854,7 @@ class VariationScreen extends ConsumerWidget {
         content: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             if (approve && v.qty != null) NumField(controller: qty, label: tr('Approved quantity'), suffix: v.unit),
-            if (approve) NumField(controller: cost, label: tr('Approved amount'), suffix: '₹'),
+            if (approve) NumField(controller: cost, label: tr('Approved amount'), suffix: currencySymbol),
             TextField(controller: note, decoration: InputDecoration(labelText: tr('Reason or note'))),
             const SizedBox(height: 8),
             Text(tr('A decision cannot be changed afterwards.'), style: Theme.of(ctx).textTheme.bodySmall),
@@ -933,7 +933,7 @@ class _CostTab extends ConsumerWidget {
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           TextField(controller: code, decoration: InputDecoration(labelText: tr('Code (e.g. 04-PL)'))),
           TextField(controller: name, decoration: InputDecoration(labelText: tr('Name (e.g. Internal plaster)'))),
-          NumField(controller: budget, label: tr('Original budget'), suffix: '₹'),
+          NumField(controller: budget, label: tr('Original budget'), suffix: currencySymbol),
         ]),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
@@ -1020,7 +1020,7 @@ class CostLineScreen extends ConsumerWidget {
                 subtitle: Text(trf('{money}: material or work not yet ordered on this line', {'money': rupees(code.uncommittedEstimate)})),
                 onTap: () async {
                   final v = await askText(context,
-                      title: tr('Still to commit'), label: '₹', initial: code.uncommittedEstimate.toStringAsFixed(0));
+                      title: tr('Still to commit'), label: currencySymbol, initial: code.uncommittedEstimate.toStringAsFixed(0));
                   final n = v == null ? null : parseNum(v);
                   if (n == null) return;
                   await ref.read(appDatabaseProvider).commercialDao.updateCostCode(code.id, uncommittedEstimate: n);
