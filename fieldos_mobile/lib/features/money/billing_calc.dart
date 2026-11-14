@@ -313,3 +313,24 @@ class ProjectPnl {
   /// Margin as a share of billed work, or null before the first bill.
   double? get marginPct => billed <= 0 ? null : margin / billed * 100;
 }
+
+/// The retention % this bill may keep so that all retention on the
+/// contract stays within the limit of retention fund: [pct] of [gross],
+/// cut down to what is left of [limitPctOfContract] of [contractSum] after
+/// [alreadyKept]. [pct] unchanged when there is no limit or no sum.
+double retentionPctWithinLimit({
+  required double pct,
+  required double gross,
+  required double alreadyKept,
+  double? contractSum,
+  double? limitPctOfContract,
+}) {
+  if (limitPctOfContract == null || contractSum == null || contractSum <= 0 || gross <= 0 || pct <= 0) return pct;
+  final room = contractSum * limitPctOfContract / 100 - alreadyKept;
+  if (room <= 0) return 0;
+  final wanted = gross * pct / 100;
+  if (wanted <= room + 0.005) return pct;
+  // Rounded down to 4 places so the money never goes over the limit.
+  return (room / gross * 100 * 10000).floorToDouble() / 10000;
+}
+

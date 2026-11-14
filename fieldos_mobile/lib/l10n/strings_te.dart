@@ -2479,4 +2479,6 @@ const Map<String, String> stringsTe = {
   'Emirates ID': 'ఎమిరేట్స్ ఐడీ',
   'CSCS card': 'CSCS కార్డ్',
   'Right to work (visa)': 'పని చేసే హక్కు (వీసా)',
+  'Contract sum': 'కాంట్రాక్ట్ మొత్తం',
+  'Retention stops at {pct}% of it': 'రిటెన్షన్ దీని {pct}% వద్ద ఆగుతుంది',
 };

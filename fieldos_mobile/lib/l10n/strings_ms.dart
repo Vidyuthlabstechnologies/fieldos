@@ -3017,4 +3017,6 @@ const stringsMs = <String, String>{
   'Emirates ID': 'Emirates ID',
   'CSCS card': 'Kad CSCS',
   'Right to work (visa)': 'Hak bekerja (visa)',
+  'Contract sum': 'Jumlah kontrak',
+  'Retention stops at {pct}% of it': 'Wang tahanan berhenti pada {pct}% daripadanya',
 };

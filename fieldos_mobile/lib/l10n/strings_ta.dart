@@ -3371,4 +3371,6 @@ const Map<String, String> stringsTa = {
   'Emirates ID': 'எமிரேட்ஸ் ஐடி',
   'CSCS card': 'CSCS அட்டை',
   'Right to work (visa)': 'வேலை செய்யும் உரிமை (விசா)',
+  'Contract sum': 'ஒப்பந்தத் தொகை',
+  'Retention stops at {pct}% of it': 'தக்கவைப்பு இதன் {pct}% இல் நிற்கும்',
 };
