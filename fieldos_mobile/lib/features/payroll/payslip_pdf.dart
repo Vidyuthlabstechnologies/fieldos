@@ -31,7 +31,7 @@ String monthTitle(String key) {
   return '${_months[d.month - 1]} ${d.year}';
 }
 
-String _money(double v) => pdfSafe(rupees(v));
+String _money(double v) => pdfSafe(rupees(v, paise: malaysiaPayroll));
 
 Future<Uint8List> buildPayslipPdf({
   required PayrollLine line,
@@ -65,6 +65,7 @@ Future<Uint8List> buildPayslipPdf({
         ]),
       );
 
+  final my = malaysiaPayroll ? malaysiaLineContributions(line) : null;
   final deductions = line.pfEmployee + line.esiEmployee + line.pt + line.advanceRecovery + line.otherDeduction;
   final days = line.paidDays == line.paidDays.roundToDouble() ? line.paidDays.toInt().toString() : fmtQty(line.paidDays);
 
@@ -93,7 +94,7 @@ Future<Uint8List> buildPayslipPdf({
         row('Name', staff.name),
         if (staff.designation != null) row('Designation', staff.designation!),
         if (siteName != null) row('Site', siteName),
-        if (staff.uan != null) row('UAN', staff.uan!),
+        if (my == null && staff.uan != null) row('UAN', staff.uan!),
         row('Days paid', '$days of ${line.daysInMonth}'),
       ]),
       pw.SizedBox(height: 12),
@@ -101,7 +102,7 @@ Future<Uint8List> buildPayslipPdf({
         pw.Expanded(
           child: box('Earnings', [
             row('Basic', _money(line.basic)),
-            if (line.hra > 0) row('HRA', _money(line.hra)),
+            if (line.hra > 0) row(my == null ? 'HRA' : 'Housing allowance', _money(line.hra)),
             if (line.otherAllowance > 0) row('Other allowance', _money(line.otherAllowance)),
             row('Gross', _money(line.gross), bold: true),
           ]),
@@ -109,8 +110,14 @@ Future<Uint8List> buildPayslipPdf({
         pw.SizedBox(width: 12),
         pw.Expanded(
           child: box('Deductions', [
-            if (line.pfEmployee > 0) row('Provident fund', _money(line.pfEmployee)),
-            if (line.esiEmployee > 0) row('ESI', _money(line.esiEmployee)),
+            if (my != null) ...[
+              if (my.epfEmployee > 0) row('EPF (KWSP)', _money(my.epfEmployee)),
+              if (my.socsoEmployee > 0) row('SOCSO (PERKESO)', _money(my.socsoEmployee)),
+              if (my.eisEmployee > 0) row('EIS (SIP)', _money(my.eisEmployee)),
+            ] else ...[
+              if (line.pfEmployee > 0) row('Provident fund', _money(line.pfEmployee)),
+              if (line.esiEmployee > 0) row('ESI', _money(line.esiEmployee)),
+            ],
             if (line.pt > 0) row('Professional tax', _money(line.pt)),
             if (line.advanceRecovery > 0) row('Advance recovered', _money(line.advanceRecovery)),
             if (line.otherDeduction > 0) row('Other', _money(line.otherDeduction)),
@@ -133,7 +140,16 @@ Future<Uint8List> buildPayslipPdf({
             ),
         ]),
       ),
-      if (line.pfEmployer > 0 || line.esiEmployer > 0) ...[
+      if (my != null && my.employerTotal > 0) ...[
+        pw.SizedBox(height: 12),
+        box('Employer contributions (not deducted from pay)', [
+          if (my.epfEmployer > 0) row('EPF (KWSP)', _money(my.epfEmployer)),
+          if (my.socsoEmployer > 0) row('SOCSO (PERKESO)', _money(my.socsoEmployer)),
+          if (my.eisEmployer > 0) row('EIS (SIP)', _money(my.eisEmployer)),
+          row('Total employer contributions', _money(my.employerTotal), bold: true),
+          row('Cost to company', _money(line.gross + my.employerTotal), bold: true),
+        ]),
+      ] else if (line.pfEmployer > 0 || line.esiEmployer > 0) ...[
         pw.SizedBox(height: 8),
         t('Company also pays: ${[
           if (line.pfEmployer > 0) 'PF ${_money(line.pfEmployer)}',

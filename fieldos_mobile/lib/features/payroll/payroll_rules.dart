@@ -16,12 +16,23 @@
 ///   earned: nil up to Rs 15,000, Rs 150 up to Rs 20,000, Rs 200 above.
 /// - An advance is recovered from the pay, never more than is left of it
 ///   or more than is still owed.
+///
+/// Malaysia ([malaysiaPayroll]) runs the same screens on its own rules
+/// (malaysia_contributions.dart): EPF in the PF columns, SOCSO and EIS
+/// together in the ESI columns, and no professional tax.
 library;
 
 import 'dart:math' as math;
 
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/payroll/malaysia_contributions.dart';
+
+/// Staff salaries with EPF, SOCSO and EIS: the Malaysia app.
+bool get malaysiaPayroll => currentMarket == Market.malaysia;
+
+/// The markets whose app has the staff salaries screen.
+bool get payrollShown => isIndia || malaysiaPayroll;
 
 const pfWageCeiling = 15000.0;
 const pfRate = 0.12;
@@ -95,7 +106,9 @@ class PayCalc {
 
   double get gross => basic + hra + otherAllowance;
   double get deductions => pfEmployee + esiEmployee + pt + advanceRecovery + otherDeduction;
-  double get net => math.max(0, gross - deductions);
+  // To the cent: Malaysia's SOCSO and EIS have sen; India's figures are
+  // whole rupees, which this leaves as they are.
+  double get net => (math.max(0, gross - deductions) * 100).roundToDouble() / 100;
 
   /// What the month costs the company: pay plus its PF and ESI share.
   double get costToCompany => gross + pfEmployer + esiEmployer;
@@ -120,17 +133,31 @@ PayCalc computePay(
   final other = (s.otherAllowance * ratio).roundToDouble();
   final gross = basic + hra + other;
 
-  final pfWage = pfWageFor(basic: basic, gross: gross);
-  final pfEmp = s.pf ? (pfWage * pfRate).roundToDouble() : 0.0;
-  final pfEr = s.pf ? (pfWage * pfRate).roundToDouble() : 0.0;
-  final esiOn = s.esi && fullMonthGross(s) <= esiWageLimit && gross > 0;
-  final esiEmp = esiOn ? (gross * esiEmployeeRate).ceilToDouble() : 0.0;
-  final esiEr = esiOn ? (gross * esiEmployerRate).ceilToDouble() : 0.0;
-  final pt = professionalTax(s.ptState, gross);
+  final double pfEmp, pfEr, esiEmp, esiEr, pt;
+  if (malaysiaPayroll) {
+    // Staff are taken as Malaysians: the salary record has no nationality.
+    final c = malaysiaContributions(gross);
+    pfEmp = s.pf ? c.epfEmployee : 0.0;
+    pfEr = s.pf ? c.epfEmployer : 0.0;
+    esiEmp = s.esi ? MalaysiaContributions(socsoEmployee: c.socsoEmployee, eisEmployee: c.eisEmployee).employeeTotal : 0.0;
+    esiEr = s.esi ? MalaysiaContributions(socsoEmployer: c.socsoEmployer, eisEmployer: c.eisEmployer).employerTotal : 0.0;
+    pt = 0.0;
+  } else {
+    final pfWage = pfWageFor(basic: basic, gross: gross);
+    pfEmp = s.pf ? (pfWage * pfRate).roundToDouble() : 0.0;
+    pfEr = s.pf ? (pfWage * pfRate).roundToDouble() : 0.0;
+    final esiOn = s.esi && fullMonthGross(s) <= esiWageLimit && gross > 0;
+    esiEmp = esiOn ? (gross * esiEmployeeRate).ceilToDouble() : 0.0;
+    esiEr = esiOn ? (gross * esiEmployerRate).ceilToDouble() : 0.0;
+    pt = professionalTax(s.ptState, gross);
+  }
   final otherDed = math.max(0.0, otherDeduction).roundToDouble();
 
-  final room = math.max(0.0, gross - pfEmp - esiEmp - pt - otherDed);
-  final adv = math.min(math.max(0.0, advanceWanted), math.min(math.max(0.0, advanceOwed), room)).roundToDouble();
+  final room = (math.max(0.0, gross - pfEmp - esiEmp - pt - otherDed) * 100).roundToDouble() / 100;
+  // Rounded before the cap: where room has sen (Malaysia) rounding up
+  // after it would take more than is left. With India's whole rupees the
+  // two orders give the same figure.
+  final adv = math.min(math.min(math.max(0.0, advanceWanted), math.max(0.0, advanceOwed)).roundToDouble(), room);
 
   return PayCalc(
     daysInMonth: days,
@@ -190,4 +217,31 @@ PayrollTotals payrollTotals(Iterable<PayrollLine> lines) {
     cost += l.gross + l.pfEmployer + l.esiEmployer;
   }
   return (people: people, paid: paid, gross: gross, net: net, pf: pf, esi: esi, pt: pt, cost: cost);
+}
+
+/// A Malaysian payslip's contributions, line by line: EPF from the PF
+/// columns, SOCSO and EIS split out of the ESI columns.
+MalaysiaContributions malaysiaLineContributions(PayrollLine l) {
+  final ee = splitSocsoEis(l.gross, l.esiEmployee);
+  final er = splitSocsoEis(l.gross, l.esiEmployer);
+  return MalaysiaContributions(
+    epfEmployee: l.pfEmployee,
+    epfEmployer: l.pfEmployer,
+    socsoEmployee: ee.socso,
+    socsoEmployer: er.socso,
+    eisEmployee: ee.eis,
+    eisEmployer: er.eis,
+  );
+}
+
+/// The month's EPF, SOCSO and EIS to pay over, both shares of each.
+({double epf, double socso, double eis}) malaysiaDeposits(Iterable<PayrollLine> lines) {
+  var epf = 0, socso = 0, eis = 0;
+  for (final l in lines) {
+    final c = malaysiaLineContributions(l);
+    epf += ((c.epfEmployee + c.epfEmployer) * 100).round();
+    socso += ((c.socsoEmployee + c.socsoEmployer) * 100).round();
+    eis += ((c.eisEmployee + c.eisEmployer) * 100).round();
+  }
+  return (epf: epf / 100, socso: socso / 100, eis: eis / 100);
 }

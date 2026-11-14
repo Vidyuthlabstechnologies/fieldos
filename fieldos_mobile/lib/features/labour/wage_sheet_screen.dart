@@ -7,6 +7,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/features/labour/pay_calendar_screen.dart';
+import 'package:fieldos_mobile/features/labour/wage_contributions.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -52,10 +53,20 @@ class WageSheetScreen extends ConsumerStatefulWidget {
 class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
   late DateTime _from = weekStart(DateTime.now());
   PayCalendar _cal = const PayCalendar();
+  Map<String, WageContribution> _contrib = const {};
   DateTime get _to => addDays(_from, 7);
 
   Future<WageSheet> _load() async {
     final db = ref.read(appDatabaseProvider);
+    final sheet = await _build(db);
+    _contrib = wageSheetContributionsShown
+        ? wageContributions(sheet,
+            foreign: foreignWorkerIds(await db.siteExecutionDao.permitsFor(widget.projectId)))
+        : const {};
+    return sheet;
+  }
+
+  Future<WageSheet> _build(AppDatabase db) async {
     return buildWageSheet(
       workers: await db.workerDao.forProject(widget.projectId),
       punches: await db.attendanceDao.forProject(widget.projectId),
@@ -138,6 +149,19 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
+            if (sheet != null && _contrib.isNotEmpty)
+              if (contributionTotals(_contrib) case final t)
+                Padding(
+                  key: const Key('contribution-totals'),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    trf('EPF, SOCSO and EIS: workers {ee} · employer {er}', {
+                      'ee': rupees(t.employee, paise: true),
+                      'er': rupees(t.employer, paise: true),
+                    }),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
             const Divider(),
             Expanded(
               child: sheet == null
@@ -148,7 +172,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                           for (final l in sheet.lines)
                             ListTile(
                               title: Text(l.name),
-                              subtitle: Text([
+                              subtitle: _withContributions(_contrib[l.key], Text([
                                 trf(l.days == 1 ? '{n} day ({h} h)' : '{n} days ({h} h)',
                                     {'n': _days(l.days), 'h': l.hours.toStringAsFixed(1)}),
                                 if (l.overtimeHours > 0) trf('OT {h} h', {'h': l.overtimeHours.toStringAsFixed(1)}),
@@ -164,7 +188,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                                       {'n': l.missingPunchOuts}),
                                 if (l.markedDays > 0) trf('{n} marked by hand', {'n': l.markedDays}),
                                 if (l.paidInPeriod > 0) trf('paid {amount}', {'amount': rupees(l.paidInPeriod, paise: true)}),
-                              ].join(' · ')),
+                              ].join(' · '))),
                               // ListTile caps the trailing height; with very
                               // large text the two lines scale down to fit.
                               trailing: FittedBox(
@@ -206,6 +230,16 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                               textAlign: TextAlign.center,
                             ),
                           ),
+                          if (_contrib.isNotEmpty)
+                            Padding(
+                              key: const Key('contribution-note'),
+                              padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+                              child: Text(
+                                tr('EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.'),
+                                style: const TextStyle(fontSize: 12),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                           if (market.minimumWage != null)
                             Padding(
                               key: const Key('minimum-wage-note'),
@@ -223,4 +257,24 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
       },
     );
   }
+}
+
+/// A wage line's subtitle, with the worker's EPF, SOCSO and EIS, the
+/// employer's, and the net pay on lines of their own (Malaysia).
+Widget _withContributions(WageContribution? c, Text summary) {
+  if (c == null) return summary;
+  final k = c.contributions;
+  String items(List<(String, double)> xs) => [
+        for (final (label, v) in xs)
+          if (v > 0) '${tr(label)} ${rupees(v, paise: true)}',
+      ].join(' · ');
+  final worker = items([('EPF', k.epfEmployee), ('SOCSO', k.socsoEmployee), ('EIS', k.eisEmployee)]);
+  final employer = items([('EPF', k.epfEmployer), ('SOCSO', k.socsoEmployer), ('EIS', k.eisEmployer)]);
+  return Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+    summary,
+    if (worker.isNotEmpty) Text(trf('Cut from pay: {items}', {'items': worker})),
+    if (employer.isNotEmpty) Text(trf('Employer pays: {items}', {'items': employer})),
+    Text(trf('Net pay {amount}', {'amount': rupees(c.netPay, paise: true)}),
+        style: const TextStyle(fontWeight: FontWeight.w600)),
+  ]);
 }
