@@ -4,6 +4,9 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/core/market.dart';
+import 'package:fieldos_mobile/features/labour/pay_calendar_screen.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -36,7 +39,13 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
       from: _from,
       to: _to,
       marks: await db.attendanceDao.marksForProject(widget.projectId),
+      calendar: await _calendar(db),
     );
+  }
+
+  Future<PayCalendar> _calendar(AppDatabase db) async {
+    final p = await db.projectDao.byId(widget.projectId);
+    return p == null ? const PayCalendar() : loadPayCalendar(db, p.companyId);
   }
 
   String _days(double d) => d == d.roundToDouble() ? d.toInt().toString() : d.toStringAsFixed(1);
@@ -66,6 +75,19 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
           appBar: AppBar(
             title: Text(tr('Wage sheet')),
             actions: [
+              if (market.premiumRestAndHolidayPay)
+                IconButton(
+                  key: const Key('pay-calendar'),
+                  tooltip: tr('Rest day and public holidays'),
+                  icon: const Icon(Icons.event_available_outlined),
+                  onPressed: () async {
+                    final p = await ref.read(appDatabaseProvider).projectDao.byId(widget.projectId);
+                    if (p == null || !context.mounted) return;
+                    await Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (_) => PayCalendarScreen(companyId: p.companyId)));
+                    if (mounted) setState(() {});
+                  },
+                ),
               if (sheet != null)
                 IconButton(
                   tooltip: tr('Share on WhatsApp'),
