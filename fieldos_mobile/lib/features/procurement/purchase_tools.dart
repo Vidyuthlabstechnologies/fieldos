@@ -4,6 +4,7 @@
 /// actually use.
 library;
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 
 String _norm(String s) => s.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
@@ -237,8 +238,15 @@ class UnitGroup {
   final List<SiteUnit> units;
 }
 
-/// Base units: metre, square metre, cubic metre, kilogram.
-const unitGroups = [
+/// Base units: metre, square metre, cubic metre, kilogram. The first unit
+/// of a group is what the converter converts to, the second what from.
+List<UnitGroup> get unitGroups => switch (currentMarket) {
+      Market.india => _indianUnits,
+      Market.us => _usUnits,
+      _ => _metricUnits,
+    };
+
+const _indianUnits = [
   UnitGroup('Length', [
     SiteUnit('m', 'Metre', 1),
     SiteUnit('rft', 'Running feet', 0.3048),
@@ -266,7 +274,78 @@ const unitGroups = [
   ]),
 ];
 
+/// Malaysia, UAE, UK: metric, with feet and inches still common on site.
+const _metricUnits = [
+  UnitGroup('Length', [
+    SiteUnit('m', 'Metre', 1),
+    SiteUnit('ft', 'Foot', 0.3048),
+    SiteUnit('in', 'Inch', 0.0254),
+    SiteUnit('mm', 'Millimetre', 0.001),
+  ]),
+  UnitGroup('Area', [
+    SiteUnit('sqm', 'Square metre', 1),
+    SiteUnit('sqft', 'Square feet', 0.09290304),
+    SiteUnit('acre', 'Acre', 4046.8564224),
+    SiteUnit('ha', 'Hectare', 10000),
+  ]),
+  UnitGroup('Volume', [
+    SiteUnit('cum', 'Cubic metre', 1),
+    SiteUnit('cft', 'Cubic feet', 0.028316846592),
+    SiteUnit('l', 'Litre', 0.001),
+  ]),
+  UnitGroup('Weight', [
+    SiteUnit('kg', 'Kilogram', 1),
+    SiteUnit('t', 'Tonne', 1000),
+    SiteUnit('bag', 'Cement bag (50 kg)', 50),
+  ]),
+];
+
+/// US customary units. A "ton" is the short ton (2,000 lb), a cement bag
+/// 94 lb, a square 100 sq ft (roofing).
+const _usUnits = [
+  UnitGroup('Length', [
+    SiteUnit('ft', 'Foot', 0.3048),
+    SiteUnit('in', 'Inch', 0.0254),
+    SiteUnit('yd', 'Yard', 0.9144),
+    SiteUnit('m', 'Meter', 1),
+  ]),
+  UnitGroup('Area', [
+    SiteUnit('sqft', 'Square feet', 0.09290304),
+    SiteUnit('sqyd', 'Square yard', 0.83612736),
+    SiteUnit('square', 'Square (100 sq ft, roofing)', 9.290304),
+    SiteUnit('acre', 'Acre', 4046.8564224),
+    SiteUnit('sqm', 'Square meter', 1),
+  ]),
+  UnitGroup('Volume', [
+    SiteUnit('cuyd', 'Cubic yard', 0.764554857984),
+    SiteUnit('cft', 'Cubic feet', 0.028316846592),
+    SiteUnit('gal', 'Gallon (US)', 0.003785411784),
+    SiteUnit('cum', 'Cubic meter', 1),
+  ]),
+  UnitGroup('Weight', [
+    SiteUnit('lb', 'Pound', 0.45359237),
+    SiteUnit('ton', 'Ton (2,000 lb)', 907.18474),
+    SiteUnit('bag', 'Cement bag (94 lb)', 42.63768278),
+    SiteUnit('kg', 'Kilogram', 1),
+  ]),
+];
+
 double convertUnits(double value, SiteUnit from, SiteUnit to) => value * from.toBase / to.toBase;
 
 /// Weight of a steel bar per metre, by the site rule d² / 162 (d in mm).
 double steelKgPerMetre(double diameterMm) => diameterMm * diameterMm / 162;
+
+/// US rebar: pounds per foot by bar size (#3 is 3/8 inch), from ASTM A615.
+const rebarLbPerFoot = {
+  3: 0.376,
+  4: 0.668,
+  5: 1.043,
+  6: 1.502,
+  7: 2.044,
+  8: 2.670,
+  9: 3.400,
+  10: 4.303,
+  11: 5.313,
+  14: 7.650,
+  18: 13.600,
+};

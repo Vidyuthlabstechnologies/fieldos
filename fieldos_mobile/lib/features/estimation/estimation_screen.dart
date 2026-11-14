@@ -9,6 +9,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -47,7 +48,7 @@ String? measurementProblem(String calculationType,
 
 /// Why a steel entry cannot be saved, or null. Blank used to save as 0.
 String? steelProblem({required String barDia, required String nos, required String lengthFt}) =>
-    [barDia, nos, lengthFt].any((t) => _size(t) == null) ? entrySizesMessage : null;
+    [barDia.replaceAll('#', ''), nos, lengthFt].any((t) => _size(t) == null) ? entrySizesMessage : null;
 
 /// A stored figure for the Decimal engine. Decimal.parse throws on the text
 /// of NaN or Infinity, which took the whole cost head's screen down.
@@ -475,7 +476,11 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(controller: description, decoration: InputDecoration(labelText: tr('Description'))),
-              TextField(controller: barDiaMm, decoration: InputDecoration(labelText: tr('Bar dia (mm)')), keyboardType: TextInputType.number),
+              TextField(
+                controller: barDiaMm,
+                decoration: InputDecoration(labelText: _imperial ? tr('Bar size (#3 to #18)') : tr('Bar dia (mm)')),
+                keyboardType: TextInputType.number,
+              ),
               TextField(controller: nos, decoration: InputDecoration(labelText: tr('Nos')), keyboardType: TextInputType.number),
               TextField(controller: lengthFt, decoration: InputDecoration(labelText: tr('Length (ft)')), keyboardType: TextInputType.number),
               if (error != null) FormMessage(error!),
@@ -498,13 +503,13 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
       ),
     );
     if (ok != true || description.text.trim().isEmpty || !context.mounted) return;
-    final dia = _size(barDiaMm.text), count = _size(nos.text), len = _size(lengthFt.text);
+    final dia = _size(barDiaMm.text.replaceAll('#', '')), count = _size(nos.text), len = _size(lengthFt.text);
     if (dia == null || count == null || len == null) return;
     await ref.read(appDatabaseProvider).estimationDao.addSteel(SteelEntriesCompanion.insert(
           id: const Uuid().v4(),
           costHeadId: widget.costHead.id,
           description: description.text.trim(),
-          barDiaMm: dia,
+          barDiaMm: _barDiaMm(barDiaMm.text),
           nos: count,
           lengthFt: len,
         ));
@@ -572,8 +577,13 @@ class _SteelEntryTile extends ConsumerWidget {
     return Card(
       child: ListTile(
         title: Text(entry.description),
-        subtitle: Text('Ø${entry.barDiaMm}mm · ${entry.nos} nos · ${entry.lengthFt} ft'),
-        trailing: Text('${weight.toStringAsFixed(2)} kg', style: const TextStyle(fontWeight: FontWeight.w600)),
+        subtitle: Text(_imperial
+            ? '#${barSizeFromMm(entry.barDiaMm)} · ${entry.nos} ${tr('count')} · ${entry.lengthFt} ft'
+            : 'Ø${entry.barDiaMm}mm · ${entry.nos} nos · ${entry.lengthFt} ft'),
+        trailing: Text(
+          _imperial ? '${(weight.toDouble() * lbPerKg).toStringAsFixed(1)} lb' : '${weight.toStringAsFixed(2)} kg',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }
@@ -655,3 +665,29 @@ class _TotalSection extends ConsumerWidget {
     );
   }
 }
+
+bool get _imperial => market.units == UnitSystem.imperial;
+
+const lbPerKg = 2.2046226218;
+
+/// The bar's diameter in mm from what was typed: in the US a bar size
+/// number (#3 to #8 are that many eighths of an inch, #4 is 12.7 mm; #9 and
+/// up follow the ASTM A615 table), elsewhere the diameter in mm. The
+/// table keeps mm, so weights work the same in every market.
+double _barDiaMm(String typed) {
+  final v = parseTypedNumber(typed.replaceAll('#', '')) ?? 0;
+  return _imperial ? barSizeToMm(v) : v;
+}
+
+double barSizeToMm(num size) => (_largeBarInches[size.round()] ?? size / 8) * 25.4;
+
+int barSizeFromMm(double mm) {
+  final inches = mm / 25.4;
+  for (final e in _largeBarInches.entries) {
+    if ((e.value - inches).abs() < 0.01) return e.key;
+  }
+  return (inches * 8).round();
+}
+
+/// Nominal diameters of the bars that are not whole eighths of an inch.
+const _largeBarInches = {9: 1.128, 10: 1.270, 11: 1.410, 14: 1.693, 18: 2.257};

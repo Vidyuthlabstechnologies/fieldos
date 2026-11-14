@@ -11,6 +11,7 @@ library;
 
 import 'dart:convert';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart' show normMaterial;
 
@@ -193,6 +194,10 @@ Future<void> saveMaterialNorms(AppDatabase db, String companyId, MaterialNormSet
     'sqm' || 'm2' || 'm²' || 'sqmt' || 'squaremetre' || 'squaremeter' => (qty: qty, unit: 'sqm'),
     'sft' || 'sqft' || 'ft2' || 'squarefeet' => (qty: qty / 10.7639, unit: 'sqm'),
     'kg' || 'kgs' || 'kilogram' || 'kilograms' => (qty: qty, unit: 'kg'),
+    'cuyd' || 'cy' || 'yd3' || 'cubicyard' || 'cubicyards' => (qty: qty * 0.764555, unit: 'cum'),
+    'lb' || 'lbs' || 'pound' || 'pounds' => (qty: qty * 0.453592, unit: 'kg'),
+    // A "ton" is 2,000 lb in the US; a tonne (1,000 kg) everywhere else.
+    'ton' || 'tons' when market.units == UnitSystem.imperial => (qty: qty * 907.185, unit: 'kg'),
     't' || 'mt' || 'tonne' || 'tonnes' || 'ton' || 'tons' => (qty: qty * 1000, unit: 'kg'),
     'quintal' || 'qtl' => (qty: qty * 100, unit: 'kg'),
     'bag' || 'bags' => (qty: qty, unit: 'bag'),

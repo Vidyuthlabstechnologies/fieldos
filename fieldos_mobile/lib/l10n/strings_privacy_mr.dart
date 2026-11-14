@@ -41,6 +41,4 @@ const Map<String, String> privacyMr = {
   'Your name, email address and the company you join, so that you can sign in and work with your team.': 'तुमचे नाव, ईमेल पत्ता आणि तुम्ही जोडता ती कंपनी, म्हणजे तुम्ही साइन इन करून तुमच्या टीमसोबत काम करू शकता.',
   'Your privacy': 'तुमची गोपनीयता',
   'Your rights': 'तुमचे अधिकार',
-  'Appeal a privacy decision': 'गोपनीयतेच्या निर्णयावर अपील करा',
-  'Write from the email address on your account. We reply within 45 days. If you are not satisfied, you can appeal, and then contact the authority for privacy where you live.': 'तुमच्या खात्यावरील ईमेल पत्त्यावरून लिहा. आम्ही 45 दिवसांत उत्तर देतो. तुमचे समाधान न झाल्यास, तुम्ही अपील करू शकता, आणि नंतर तुम्ही राहता तिथल्या गोपनीयता प्राधिकरणाशी संपर्क साधू शकता.',
 };

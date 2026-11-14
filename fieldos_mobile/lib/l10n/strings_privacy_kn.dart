@@ -41,6 +41,4 @@ const Map<String, String> privacyKn = {
   'Your name, email address and the company you join, so that you can sign in and work with your team.': 'ನಿಮ್ಮ ಹೆಸರು, ಇಮೇಲ್ ವಿಳಾಸ ಮತ್ತು ನೀವು ಸೇರುವ ಕಂಪನಿ, ನೀವು ಸೈನ್ ಇನ್ ಮಾಡಿ ನಿಮ್ಮ ತಂಡದೊಂದಿಗೆ ಕೆಲಸ ಮಾಡಲು.',
   'Your privacy': 'ನಿಮ್ಮ ಗೌಪ್ಯತೆ',
   'Your rights': 'ನಿಮ್ಮ ಹಕ್ಕುಗಳು',
-  'Appeal a privacy decision': 'ಗೌಪ್ಯತೆ ನಿರ್ಧಾರದ ವಿರುದ್ಧ ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಿ',
-  'Write from the email address on your account. We reply within 45 days. If you are not satisfied, you can appeal, and then contact the authority for privacy where you live.': 'ನಿಮ್ಮ ಖಾತೆಯಲ್ಲಿರುವ ಇಮೇಲ್ ವಿಳಾಸದಿಂದ ಬರೆಯಿರಿ. ನಾವು 45 ದಿನಗಳಲ್ಲಿ ಉತ್ತರಿಸುತ್ತೇವೆ. ನಿಮಗೆ ತೃಪ್ತಿ ಇಲ್ಲದಿದ್ದರೆ, ಮೇಲ್ಮನವಿ ಸಲ್ಲಿಸಬಹುದು, ನಂತರ ನೀವು ವಾಸಿಸುವ ಸ್ಥಳದ ಗೌಪ್ಯತಾ ಪ್ರಾಧಿಕಾರವನ್ನು ಸಂಪರ್ಕಿಸಬಹುದು.',
 };

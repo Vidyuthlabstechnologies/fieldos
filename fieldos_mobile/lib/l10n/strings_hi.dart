@@ -2443,4 +2443,13 @@ const Map<String, String> stringsHi = {
   "Client's {label} (optional)": "क्लाइंट का {label} (वैकल्पिक)",
   "Kept back by the client for the tax office": "क्लाइंट टैक्स विभाग के लिए रोकता है",
   "{tax} rate": "{tax} दर",
+  'Appeal a privacy decision': 'निजता के फ़ैसले पर अपील करें',
+  'Write from the email address on your account. We reply within 45 days. If you are not satisfied, you can appeal, and then contact the authority for privacy where you live.': 'अपने खाते वाले ईमेल पते से लिखें। हम 45 दिनों में जवाब देते हैं। अगर आप संतुष्ट नहीं हैं, तो आप अपील कर सकते हैं, और फिर अपने यहाँ के निजता प्राधिकरण से संपर्क कर सकते हैं।',
+  'Bar size (#3 to #18)': 'सरिया साइज़ (#3 से #18)',
+  '{lb} lb per foot': '{lb} lb प्रति फ़ुट',
+  '{lb} lb for {ft} ft': '{ft} ft के लिए {lb} lb',
+  'Standard rebar weights (ASTM A615). Bar #4 is 4/8 inch across.': 'सरिया का मानक वज़न (ASTM A615)। #4 सरिया 4/8 इंच मोटा होता है।',
+  'count': 'गिनती',
+  'Foot': 'फ़ुट',
+  'Hectare': 'हेक्टेयर',
 };

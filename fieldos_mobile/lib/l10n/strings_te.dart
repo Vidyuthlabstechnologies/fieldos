@@ -2445,4 +2445,13 @@ const Map<String, String> stringsTe = {
   "Client's {label} (optional)": "క్లయింట్ {label} (ఐచ్ఛికం)",
   "Kept back by the client for the tax office": "టాక్స్ ఆఫీస్ కోసం క్లయింట్ ఉంచుకునేది",
   "{tax} rate": "{tax} రేటు",
+  'Appeal a privacy decision': 'గోప్యత నిర్ణయంపై అప్పీల్ చేయండి',
+  'Write from the email address on your account. We reply within 45 days. If you are not satisfied, you can appeal, and then contact the authority for privacy where you live.': 'మీ ఖాతాలోని ఈమెయిల్ చిరునామా నుండి రాయండి. మేము 45 రోజుల్లో జవాబిస్తాము. మీకు సంతృప్తి లేకపోతే, అప్పీల్ చేయవచ్చు, తర్వాత మీ ప్రాంత గోప్యత అధికార సంస్థను సంప్రదించవచ్చు.',
+  'Bar size (#3 to #18)': 'కడ్డీ సైజు (#3 నుండి #18)',
+  '{lb} lb per foot': 'అడుగుకు {lb} lb',
+  '{lb} lb for {ft} ft': '{ft} ft కి {lb} lb',
+  'Standard rebar weights (ASTM A615). Bar #4 is 4/8 inch across.': 'కడ్డీల ప్రామాణిక బరువులు (ASTM A615). #4 కడ్డీ 4/8 అంగుళం మందం.',
+  'count': 'లెక్క',
+  'Foot': 'అడుగు',
+  'Hectare': 'హెక్టారు',
 };
