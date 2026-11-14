@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/l10n/strings_crm_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_proof_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_privacy_mr.dart';
 
 const Map<String, String> stringsMr = {
   'Try again':
@@ -3325,6 +3326,7 @@ const Map<String, String> stringsMr = {
   ...warehouseMr,
   ...dailyMr,
   ...proofMr,
+  ...privacyMr,
   // Shown in the non-Indian apps (lib/core/market.dart); kept here for the coverage test.
   "A Zoho Books file, with tax split out": "Zoho Books फाइल, कर वेगळा करून",
   "Add your tax number and address": "तुमचा कर क्रमांक आणि पत्ता जोडा",

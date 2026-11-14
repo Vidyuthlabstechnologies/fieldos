@@ -255,6 +255,31 @@ const gstStates = {
 final _gstinPattern = RegExp(r'^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$');
 
 /// A GSTIN's shape: 15 characters, a known state code, PAN in the middle.
+/// A tax invoice number under rule 46(b) of the CGST Rules: at most 16
+/// characters, only letters, digits, hyphen and slash, unique in the
+/// financial year (the screen checks the bills already made).
+bool isValidInvoiceNumber(String number) => RegExp(r'^[A-Za-z0-9/-]{1,16}$').hasMatch(number.trim());
+
+/// The place of supply printed on a bill, as (state name, code), or null
+/// when it can't be told. Building work is supplied where the site is
+/// (section 12(3) of the IGST Act): inside the state that is our own GST
+/// state; across states the client's GSTIN is the best guess the bill has.
+(String, String)? placeOfSupply({required String ourGstin, String? clientGstin, required bool interState}) {
+  final from = interState ? (clientGstin ?? '') : ourGstin;
+  if (from.trim().length < 2) return null;
+  final code = from.trim().substring(0, 2);
+  final name = gstStates[code];
+  return name == null ? null : (name, code);
+}
+
+/// The heading of a bill that is not an RA bill. Only a GST-registered
+/// supplier issues a tax invoice; with no GST on the bill it is a bill of
+/// supply, and without a GSTIN a plain invoice.
+String invoiceTitle({required String ourGstin, required double gstRate}) {
+  if (ourGstin.trim().isEmpty) return 'INVOICE';
+  return gstRate > 0 ? 'TAX INVOICE' : 'BILL OF SUPPLY';
+}
+
 bool isValidGstin(String gstin) {
   final g = gstin.trim().toUpperCase();
   return _gstinPattern.hasMatch(g) && gstStates.containsKey(g.substring(0, 2));

@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/l10n/strings_crm_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_proof_kn.dart';
+import 'package:fieldos_mobile/l10n/strings_privacy_kn.dart';
 
 const Map<String, String> stringsKn = {
   'Try again':
@@ -3325,6 +3326,7 @@ const Map<String, String> stringsKn = {
   ...warehouseKn,
   ...dailyKn,
   ...proofKn,
+  ...privacyKn,
   // Shown in the non-Indian apps (lib/core/market.dart); kept here for the coverage test.
   "A Zoho Books file, with tax split out": "Zoho Books ಫೈಲ್, ತೆರಿಗೆ ಬೇರೆಯಾಗಿ",
   "Add your tax number and address": "ನಿಮ್ಮ ತೆರಿಗೆ ಸಂಖ್ಯೆ, ವಿಳಾಸ ಸೇರಿಸಿ",

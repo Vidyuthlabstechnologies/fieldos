@@ -20,7 +20,7 @@ class LegalDocument {
 
 const privacyPolicy = LegalDocument(
   title: 'Privacy policy',
-  updated: '11 November 2026',
+  updated: '14 November 2026',
   intro:
       'FieldOS is made by ML Dynamic Solutions Private Limited. FieldOS stores the projects, reports, '
       'photos, attendance and other site records you create on your phone. If you sign in to Team & sync, '
@@ -89,7 +89,7 @@ const privacyPolicy = LegalDocument(
           'not let it use this to train its models. If Anthropic is unavailable, the same goes instead to '
           'Sarvam AI (sarvam.ai), which runs a DeepSeek model for the reply. FieldOS keeps only a count of how '
           'much each account uses the assistant each day and month, not the conversation. Nothing is saved to '
-          'your records until you tap Save on the card the assistant shows.',
+          'your records until you tap Save on the card the assistant shows. The app asks for your permission before the first question, and you can take it back at any time in Settings, Your privacy.',
     ),
     LegalSection(
       'Maps',
@@ -120,6 +120,18 @@ const privacyPolicy = LegalDocument(
           'phone. We do not sell data or show ads.',
     ),
     LegalSection(
+      'Where your data is processed',
+      'Your cloud records are stored by Supabase in Mumbai, India. A few services we use are run from outside India: Anthropic (USA) for the AI assistant, RevenueCat (USA) for checking subscriptions, GitHub (USA) for our private copy of bug and message reports, and Google and Apple for sign-in, speech and the stores. Each gets only what this policy describes for it, under a contract that limits it to providing its service. We follow any restriction the Government of India places on sending personal data to a country.',
+    ),
+    LegalSection(
+      'Keeping data safe',
+      'We protect data with encryption in transit, access limited by role, and checks that keep each company\'s records apart. If a breach of personal data affects you, we will tell you what happened, what it means for you and what we are doing about it, and we will report it to the Data Protection Board of India, as the law requires.',
+    ),
+    LegalSection(
+      'Children',
+      'FieldOS is for people aged 18 and over, and we do not knowingly collect personal data of children. Do not record anyone under 18 as a worker: the law does not allow children or adolescents to be employed in building and construction work.',
+    ),
+    LegalSection(
       'How long we keep data',
       '• Company records stay as long as the company uses FieldOS, and are deleted with the account as '
           'described below.\n\n• Bug, crash and message reports are kept only as long as needed to fix or '
@@ -142,7 +154,7 @@ const privacyPolicy = LegalDocument(
           'personal data we hold about you, ask us to correct or complete it, ask us to erase it, and nominate '
           'someone to act for you. Email info@mldynamic.com from the address on your account. If your data is '
           'in a company\'s records (for example as a worker or a lead), we pass your request to that company, '
-          'which decides about its own records, and we tell you that we have done so.',
+          'which decides about its own records, and we tell you that we have done so. You can also withdraw your consent at any time, as easily as you gave it: turn off the AI assistant or crash details, or delete your cloud account. Withdrawing does not affect what was done before. In the app, Settings, Your privacy has all of this in one place, with this notice in Hindi, Telugu, Tamil, Kannada and Marathi.',
     ),
     LegalSection(
       'Grievance officer',
@@ -160,7 +172,7 @@ const privacyPolicy = LegalDocument(
 
 const termsOfUse = LegalDocument(
   title: 'Terms of use',
-  updated: '8 November 2026',
+  updated: '14 November 2026',
   intro:
       'These terms of use ("terms") are an agreement between you and ML Dynamic Solutions Private Limited, '
       'a company incorporated in India ("we", "us"), which makes the FieldOS app and its cloud service '
@@ -196,7 +208,7 @@ const termsOfUse = LegalDocument(
           'you before the new price applies, and you can cancel before then. If a payment fails or a '
           'subscription ends, FieldOS cannot be used until you subscribe again. Your records are not deleted: '
           'they stay on your phone, and in the cloud for your company if Team & sync is on, and are there '
-          'again when you resubscribe.',
+          'again when you resubscribe.\n\nCompany plans for builder firms are agreed and invoiced directly by us, with GST, outside the stores, on the terms of the order or invoice. They are not bought in the app.',
     ),
     LegalSection(
       '4. Your content',
@@ -217,8 +229,7 @@ const termsOfUse = LegalDocument(
           'obscene, violent or hateful, or involves a child in any harmful way;\n• is spam, a scam or fraud, '
           'or asks for money under false pretences;\n• is false or misleading in a way meant to harm someone, '
           'or impersonates another person;\n• shares someone\'s private information without their '
-          'permission;\n• infringes anyone\'s copyright, trademark or other rights; or\n• breaks any law in '
-          'force in India, including the content the Information Technology Act, 2000 and its rules prohibit.',
+          'permission;\n• infringes anyone\'s copyright, trademark or other rights;\n• threatens the unity, integrity, defence, security or sovereignty of India, friendly relations with other countries or public order, or incites an offence;\n• is harmful to children, or is knowingly false and meant to mislead; or\n• breaks any law in force in India, including the content the Information Technology Act, 2000 and its rules prohibit.',
     ),
     LegalSection(
       '6. Reporting content and how we act',
@@ -252,7 +263,7 @@ const termsOfUse = LegalDocument(
       'Some parts of FieldOS use services from other companies, including Google Play and the Apple App '
           'Store (payments), RevenueCat (checking subscriptions), Supabase (our cloud database), Google '
           '(sign-in, speech and translation), Apple (speech), OpenStreetMap (maps), Anthropic (the AI '
-          'assistant) and Sarvam AI (speech, only for languages your phone can\'t recognise). Their own terms apply to their services, and we are '
+          'assistant) and Sarvam AI (speech, only for languages your phone can\'t recognise, and the assistant when Anthropic is unavailable). Their own terms apply to their services, and we are '
           'not responsible for them.',
     ),
     LegalSection(

@@ -550,6 +550,13 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     if (client.isEmpty) error = tr('Who is the bill for? Add the client name.');
     if (gstin.isNotEmpty && !isValidGstin(gstin)) error = tr('That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.');
     if (lines.isEmpty) error = tr('Add at least one item with a quantity.');
+    if (_kind == 'tax_invoice' && !isValidInvoiceNumber(number)) {
+      error = tr('A tax invoice number has up to 16 letters, digits, - or /, like INV-0001.');
+    }
+    final ourGstin = ref.read(billingProfileProvider(widget.project.companyId)).value?.gstin ?? '';
+    if (_gstRate > 0 && ourGstin.trim().isEmpty) {
+      error = tr('Add your GSTIN in "Your details on bills" first. Without it a bill cannot charge GST; pick None.');
+    }
     if (bills.any((b) => b.billNumber.toLowerCase() == number.toLowerCase())) error = trf('Bill {number} already exists.', {'number': number});
     if (error != null) {
       setState(() => _error = error);
@@ -719,7 +726,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
           if (isIndia) SwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: Text(tr('Client is in another state (IGST)')),
-            subtitle: Text(tr('Inside the state, GST splits into CGST and SGST')),
+            subtitle: Text(tr('For building work, GST follows the state where the site is. Inside your state it splits '
+                'into CGST and SGST')),
             value: _interState,
             onChanged: (v) => setState(() {
               _interState = v;

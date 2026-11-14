@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/l10n/strings_crm_te.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_te.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_te.dart';
 import 'package:fieldos_mobile/l10n/strings_proof_te.dart';
+import 'package:fieldos_mobile/l10n/strings_privacy_te.dart';
 
 const Map<String, String> stringsTe = {
   'Try again': 'మళ్ళీ ప్రయత్నించండి',
@@ -2433,6 +2434,7 @@ const Map<String, String> stringsTe = {
   ...warehouseTe,
   ...dailyTe,
   ...proofTe,
+  ...privacyTe,
   // Shown in the non-Indian apps (lib/core/market.dart); kept here for the coverage test.
   "A Zoho Books file, with tax split out": "Zoho Books ఫైల్, టాక్స్ వేరుగా",
   "Add your tax number and address": "మీ టాక్స్ నంబర్, అడ్రస్ జోడించండి",

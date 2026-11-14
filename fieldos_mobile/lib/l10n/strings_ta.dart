@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/l10n/strings_crm_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_wh_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_daily_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_proof_ta.dart';
+import 'package:fieldos_mobile/l10n/strings_privacy_ta.dart';
 
 const Map<String, String> stringsTa = {
   'Try again':
@@ -3325,6 +3326,7 @@ const Map<String, String> stringsTa = {
   ...warehouseTa,
   ...dailyTa,
   ...proofTa,
+  ...privacyTa,
   // Shown in the non-Indian apps (lib/core/market.dart); kept here for the coverage test.
   "A Zoho Books file, with tax split out": "Zoho Books கோப்பு, வரி தனியாக",
   "Add your tax number and address": "உங்கள் வரி எண், முகவரி சேர்க்கவும்",
