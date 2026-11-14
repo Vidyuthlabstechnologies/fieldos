@@ -67,6 +67,19 @@ void main() {
     expect(QuoteLine(today, 1).expired(now), isFalse);
   });
 
+  // Audit 2026-11-14: with every open quote past its validity, the
+  // expired one still came back as best, so the screen said "Best quote is
+  // ₹X under the estimate" for a price the supplier no longer holds.
+  test('only expired quotes leave no best and no saving against the estimate', () async {
+    final r = await request(estimate: 40000);
+    await db.supplierQuoteDao.addQuote(
+        requestId: r.id, supplierId: 'A', rate: 300, validUntil: DateTime(2026, 11, 9), by: 'u');
+    final c = compareQuotes(r, await db.supplierQuoteDao.forRequest(r.id), now);
+    expect(c.lines, hasLength(1));
+    expect(c.best, isNull);
+    expect(c.savingVsEstimate(), isNull);
+  });
+
   test('only turned-down quotes leave no best', () async {
     final r = await request();
     final q = await db.supplierQuoteDao.addQuote(requestId: r.id, supplierId: 'A', rate: 300, by: 'u');

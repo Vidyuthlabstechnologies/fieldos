@@ -56,4 +56,32 @@ void main() {
     expect(completed.overallResult, 'partial');
     expect(completed.completedDate, isNotNull);
   });
+
+  // Audit 2026-11-14: a sortOrder given by the caller was overwritten with
+  // 0, so a checklist built in a set order (a template) came out jumbled.
+  test('a given sortOrder is kept', () async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    final inspection = await db.inspectionDao.create(InspectionsCompanion.insert(
+      id: _uuid.v4(),
+      projectId: 'p1',
+      title: 'Pre-pour check',
+      inspectionType: 'quality',
+    ));
+    final last = await db.inspectionDao.addItem(InspectionItemsCompanion.insert(
+      id: _uuid.v4(),
+      inspectionId: inspection.id,
+      itemDescription: 'Curing arranged',
+      sortOrder: const Value(5),
+    ));
+    final first = await db.inspectionDao.addItem(InspectionItemsCompanion.insert(
+      id: _uuid.v4(),
+      inspectionId: inspection.id,
+      itemDescription: 'Shuttering level',
+      sortOrder: const Value(1),
+    ));
+    expect(last.sortOrder, 5);
+    expect(first.sortOrder, 1);
+    expect([for (final i in await db.inspectionDao.itemsFor(inspection.id)) i.id], [first.id, last.id]);
+  });
 }

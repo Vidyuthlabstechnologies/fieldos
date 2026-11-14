@@ -2181,7 +2181,7 @@ class InspectionDao extends DatabaseAccessor<AppDatabase> with _$InspectionDaoMi
         : companion.copyWith(sortOrder: const Value(0)); // We'll update after insert
     return transaction(() async {
       // First, get the current count of items for this inspection to set sortOrder
-      int sortOrder = 0;
+      int sortOrder = companion.sortOrder.present ? companion.sortOrder.value : 0;
       if (!companion.sortOrder.present) {
         final count = await (select(inspectionItems)
               ..where((item) => item.inspectionId.equals(companion.inspectionId.value))).get();

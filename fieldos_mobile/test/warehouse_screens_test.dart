@@ -115,6 +115,25 @@ void main() {
     expect(find.textContaining('Came in 38'), findsOneWidget);
   });
 
+  // Audit 2026-11-14: usage typed as "1,500" (bricks are counted in
+  // thousands) was read as no number and the entry silently not saved, so
+  // the stock still showed bricks the site had used.
+  testWidgets('material used typed with a thousands comma is saved', (tester) async {
+    final (container, db, _, me) = await setUpCompany(tester);
+    await tester.runAsync(() => db.materialDao.createReceipt(MaterialReceiptsCompanion.insert(
+        id: 'g1', projectId: 'p-1', materialName: 'Bricks', quantity: 2000, unit: const Value('nos'), amount: 16000,
+        receivedBy: me, receivedOn: DateTime(2026, 11, 1))));
+    await pumpApp(tester, container, Scaffold(body: StockView(projectId: 'p-1', userId: me)));
+    await tester.tap(find.text('Bricks'));
+    await settle(tester);
+    await tester.enterText(find.widgetWithText(TextField, 'Quantity used'), '1,500');
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await settle(tester);
+    final used = (await tester.runAsync(() => db.materialDao.usageForProject('p-1')))!;
+    expect(used.single.quantity, 1500);
+    expect(find.text('500 nos'), findsOneWidget);
+  });
+
   testWidgets('a tool is added and handed over', (tester) async {
     final (container, _, companyId, me) = await setUpCompany(tester);
     await pumpApp(tester, container, WarehouseScreen(companyId: companyId, userId: me));

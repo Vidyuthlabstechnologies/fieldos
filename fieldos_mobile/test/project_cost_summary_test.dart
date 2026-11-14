@@ -139,5 +139,38 @@ void main() {
     expect(summary.actual, 1e6);
     expect(summary.status, 'over');
   });
+
+  // Audit 2026-11-14: a site with two estimates (civil at 10% profit, an
+  // electrical one at none) had the civil 10% put on the electrical work
+  // too, and with two different percentages whichever row came last won.
+  test('each estimation profit applies to its own work only', () async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    final project = await db.projectDao.create(ProjectsCompanion.insert(id: _uuid.v4(), companyId: 'c1', name: 'Two BOQs'));
+    Future<void> estimate(String name, double? profitPct, double nos) async {
+      final est = await db.estimationDao.create(EstimationsCompanion.insert(
+          id: _uuid.v4(), projectId: project.id, name: name, createdBy: 'u1', contractorProfitPercent: Value(profitPct)));
+      final head = await db.estimationDao.addCostHead(CostHeadsCompanion.insert(
+          id: _uuid.v4(),
+          estimationId: est.id,
+          name: '$name items',
+          calculationType: 'count',
+          rawUnit: 'nos',
+          billingUnit: 'nos',
+          ratePerUnit: const Value(1000.0)));
+      await db.estimationDao.addMeasurement(MeasurementEntriesCompanion.insert(
+          id: _uuid.v4(), costHeadId: head.id, description: name, nos: Value(nos)));
+    }
+
+    await estimate('Civil', 10, 100); // 1,00,000 + 10,000 profit
+    await estimate('Electrical', null, 50); // 50,000, no profit
+    await estimate('Plumbing', 20, 10); // 10,000 + 2,000 profit
+
+    final boq = await buildProjectBoq(db.estimationDao, project.id);
+    expect(boq.subtotal, Decimal.fromInt(160000));
+    expect(boq.contractorProfitAmount, Decimal.fromInt(12000));
+    expect(boq.grandTotal, Decimal.fromInt(172000));
+    expect(boq.lines, hasLength(3));
+  });
 }
 
