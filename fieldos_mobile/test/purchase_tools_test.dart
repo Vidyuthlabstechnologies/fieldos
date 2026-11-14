@@ -188,6 +188,64 @@ void main() {
     expect(find.textContaining('60 of 100 received, 40 to come'), findsOneWidget);
   });
 
+  // Audit 2026-11-14: "1,200" bags typed with a thousands comma (as every
+  // Indian bill prints it) was read as no number, so the GRN saved 1 bag at
+  // ₹0, ticked "everything has come" and closed a PO with 300 bags still due.
+  testWidgets('a GRN typed with Indian commas keeps its quantity and amount', (tester) async {
+    tester.view.physicalSize = const Size(412, 915);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final db = AppDatabase.memory();
+    final container = ProviderContainer(overrides: [
+      appDatabaseProvider.overrideWithValue(db),
+      cloudSyncClientProvider.overrideWith((ref) {
+        final c = SupabaseClient('http://localhost:1', 'anon',
+            authOptions: const AuthClientOptions(autoRefreshToken: false, authFlowType: AuthFlowType.implicit));
+        ref.onDispose(c.dispose);
+        return c;
+      }),
+    ]);
+    addTearDown(() async {
+      container.dispose();
+      await db.close();
+    });
+    await tester.runAsync(() async {
+      await db.projectDao.create(ProjectsCompanion.insert(id: 'p', companyId: 'c', name: 'Site'));
+      await db.supplierDao.create(SuppliersCompanion.insert(id: 's1', companyId: 'c', name: 'Sri Balaji Traders'));
+      await db.purchaseDao.createRequest(PurchaseRequestsCompanion.insert(
+          id: 'r1', projectId: 'p', raisedBy: 'u', materialName: 'Cement', quantity: const Value(1500), unit: const Value('bags')));
+      await db.purchaseDao.createOrder(PurchaseOrdersCompanion.insert(
+          id: 'o1', projectId: 'p', supplierId: 's1', raisedBy: 'u', requestId: const Value('r1'), totalAmount: const Value(600000)));
+    });
+    await tester.pumpWidget(UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        theme: buildFieldOsTheme(Brightness.light),
+        home: const Scaffold(body: ProcurementView(projectId: 'p', companyId: 'c', userId: 'u')),
+      ),
+    ));
+    await tester.tap(find.text('PO'));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Receive'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, '1500'), '1,200');
+    await tester.enterText(find.widgetWithText(TextField, '600000'), '4,80,000');
+    await tester.pumpAndSettle();
+    expect(tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).value, isFalse,
+        reason: '300 bags are still to come');
+    await tester.tap(find.widgetWithText(FilledButton, 'Receive').last);
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 150)));
+    await tester.pumpAndSettle();
+
+    final got = await tester.runAsync(() => db.materialDao.forProject('p'));
+    expect(got!.single.quantity, 1200);
+    expect(got.single.amount, 480000);
+    final orders = await tester.runAsync(() => db.purchaseDao.ordersFor('p'));
+    expect(orders!.single.status, 'issued');
+  });
+
   testWidgets('unit converter', (tester) async {
     tester.view.physicalSize = const Size(412, 1400);
     tester.view.devicePixelRatio = 1;

@@ -224,7 +224,7 @@ class SupplierHomeScreen extends ConsumerWidget {
       ),
     );
     if (ok != true || !context.mounted) return;
-    final rateV = double.tryParse(rate.text.trim());
+    final rateV = parseTypedNumber(rate.text);
     if (rateV == null || rateV <= 0) {
       showSnack(context, tr('Enter the rate a unit.'), error: true);
       return;
@@ -232,8 +232,8 @@ class SupplierHomeScreen extends ConsumerWidget {
     try {
       await ref.read(portalServiceProvider).sendQuote(r,
           rate: rateV,
-          gstPct: double.tryParse(gst.text.trim()) ?? 18,
-          transport: double.tryParse(transport.text.trim()) ?? 0,
+          gstPct: parseTypedNumber(gst.text) ?? 18,
+          transport: parseTypedNumber(transport.text) ?? 0,
           deliveryDays: int.tryParse(days.text.trim()),
           paymentTerms: terms.text);
       ref.invalidate(supplierPortalProvider);

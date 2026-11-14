@@ -164,10 +164,19 @@ WageSheet buildWageSheet({
         key, () => WageLine(key: key, name: w?.name ?? name.trim(), workerId: w?.id, dailyWage: w?.dailyWage));
   }
 
+  // A punch by typed name (a walk-in later added to the list, or "type
+  // name manually") is that worker's, as the calendar and day register
+  // count it -- unless two workers share the name.
+  final byName = <String, String?>{};
+  for (final w in workers) {
+    final n = w.name.trim().toLowerCase();
+    byName[n] = byName.containsKey(n) ? null : w.id;
+  }
+
   // Group punches per worker per day.
   final days = <String, Map<DateTime, List<LabourAttendanceData>>>{};
   for (final p in punches) {
-    final line = lineFor(p.workerId, p.workerName);
+    final line = lineFor(p.workerId ?? byName[p.workerName.trim().toLowerCase()], p.workerName);
     days.putIfAbsent(line.key, () => {}).putIfAbsent(_day(p.punchIn), () => []).add(p);
   }
   for (final entry in days.entries) {

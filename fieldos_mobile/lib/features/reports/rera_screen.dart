@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -149,8 +150,7 @@ class _ReraScreenState extends ConsumerState<ReraScreen> {
               leading: const Icon(Icons.event_outlined),
               title: Text(trf('As on {date}', {'date': fmtDate(day)})),
               onTap: () async {
-                final d = await showDatePicker(
-                    context: ctx, initialDate: day, firstDate: DateTime(2020), lastDate: DateTime.now());
+                final d = await pickDate(ctx, initial: day, first: DateTime(2020), last: DateTime.now());
                 if (d != null) set(() => day = d);
               },
             ),

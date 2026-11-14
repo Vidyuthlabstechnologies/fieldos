@@ -131,7 +131,7 @@ class _MeasurementBookScreenState extends ConsumerState<MeasurementBookScreen> {
       ),
     );
     if (ok != true) return;
-    final q = double.tryParse(qty.text.trim());
+    final q = parseTypedNumber(qty.text);
     if (q == null || q == 0 || desc.text.trim().isEmpty || unit.text.trim().isEmpty) {
       if (mounted) showSnack(context, tr('Give the item, its unit and a quantity.'), error: true);
       return;
@@ -142,7 +142,7 @@ class _MeasurementBookScreenState extends ConsumerState<MeasurementBookScreen> {
             costHeadId: head?.id,
             description: desc.text,
             unit: unit.text,
-            rate: double.tryParse(rate.text.trim()),
+            rate: parseTypedNumber(rate.text),
             qty: q,
             on: DateTime.now(),
             by: _me,
@@ -178,7 +178,7 @@ class _MeasurementBookScreenState extends ConsumerState<MeasurementBookScreen> {
     await _run(
       () => ref.read(appDatabaseProvider).billingRecordsDao.decide(m.id,
           approve: choice == 'approve',
-          approvedQty: double.tryParse(qty.text.trim()),
+          approvedQty: parseTypedNumber(qty.text),
           by: _me,
           note: note.text.trim().isEmpty ? null : note.text.trim()),
       done: choice == 'approve' ? tr('Approved.') : tr('Rejected.'),

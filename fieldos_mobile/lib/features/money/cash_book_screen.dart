@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/auth/site_roles.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -388,7 +389,7 @@ Future<bool> recordCashMove(BuildContext context, WidgetRef ref,
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, set) {
-        final typed = double.tryParse(amount.text.trim());
+        final typed = parseTypedNumber(amount.text);
         final gap = kind == 'counted' && typed != null ? typed - inHand : null;
         return AlertDialog(
           title: Text(title),
@@ -419,11 +420,11 @@ Future<bool> recordCashMove(BuildContext context, WidgetRef ref,
                 icon: const Icon(Icons.event_outlined),
                 label: Text(fmtDate(day)),
                 onPressed: () async {
-                  final d = await showDatePicker(
-                    context: ctx,
-                    initialDate: day,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime.now(),
+                  final d = await pickDate(
+                    ctx,
+                    initial: day,
+                    first: DateTime(2020),
+                    last: DateTime.now(),
                   );
                   if (d != null) set(() => day = d);
                 },
@@ -443,7 +444,7 @@ Future<bool> recordCashMove(BuildContext context, WidgetRef ref,
       },
     ),
   );
-  final value = double.tryParse(amount.text.trim());
+  final value = parseTypedNumber(amount.text);
   final noteText = note.text;
   amount.dispose();
   note.dispose();

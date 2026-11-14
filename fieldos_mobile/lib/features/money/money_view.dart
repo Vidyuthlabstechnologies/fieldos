@@ -19,6 +19,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'dart:io';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
@@ -1015,17 +1016,22 @@ class _ReceivedTabState extends ConsumerState<_ReceivedTab> {
         note: Value(n.isEmpty ? null : _cut(n, 300)),
       ));
     } else {
-      await db.paymentDao.edit(
-        existing.id,
-        PaymentsReceivedCompanion(
-          amount: Value(value),
-          receivedOn: Value(on),
-          fromParty: Value(_cut(party.text.trim(), 120)),
-          mode: Value(mode),
-          note: Value(n.isEmpty ? null : _cut(n, 300)),
-        ),
-        by: widget.userId,
-      );
+      try {
+        await db.paymentDao.edit(
+          existing.id,
+          PaymentsReceivedCompanion(
+            amount: Value(value),
+            receivedOn: Value(on),
+            fromParty: Value(_cut(party.text.trim(), 120)),
+            mode: Value(mode),
+            note: Value(n.isEmpty ? null : _cut(n, 300)),
+          ),
+          by: widget.userId,
+        );
+      } on AllocationTooBig catch (e) {
+        if (context.mounted) showSnack(context, e.message, error: true);
+        return;
+      }
     }
     _refreshMoney(ref, widget.projectId);
   }
@@ -1319,8 +1325,7 @@ class _DateRow extends StatelessWidget {
         Expanded(child: Text(trf('Date: {date}', {'date': shortDay(value)}))),
         TextButton(
           onPressed: () async {
-            final d = await showDatePicker(
-                context: context, initialDate: value, firstDate: DateTime(2020), lastDate: DateTime.now());
+            final d = await pickDate(context, initial: value, first: DateTime(2020), last: DateTime.now());
             if (d != null) onChanged(d);
           },
           child: Text(tr('Change')),

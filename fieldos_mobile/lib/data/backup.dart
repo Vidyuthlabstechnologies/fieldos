@@ -45,6 +45,7 @@ const _fileColumns = [
   ('commercial_attachments', 'file_path'),
   ('drawing_revisions', 'file_path'),
   ('execution_photos', 'file_path'),
+  ('attendance_photos', 'file_path'),
 ];
 
 class BackupProblem implements Exception {
@@ -288,6 +289,26 @@ class AppDatabaseCheck {
       }
       stmt.close();
     }
+    // A file not yet uploaded is read from the path in its outbox entry,
+    // not from the record: point those at the restored files too, or every
+    // unsynced photo fails as "no longer on the phone" and is parked.
+    if (!have.contains('sync_outbox')) return;
+    final queued = _db.select("SELECT id, payload FROM sync_outbox WHERE payload LIKE '%_local_file_path%'");
+    final stmt = _db.prepare('UPDATE sync_outbox SET payload = ? WHERE id = ?');
+    for (final r in queued) {
+      final Object? payload;
+      try {
+        payload = jsonDecode(r['payload'] as String);
+      } catch (_) {
+        continue;
+      }
+      if (payload is! Map<String, dynamic>) continue;
+      final moved = moves[payload['_local_file_path']];
+      if (moved == null) continue;
+      payload['_local_file_path'] = moved;
+      stmt.execute([jsonEncode(payload), r['id']]);
+    }
+    stmt.close();
   }
 
   Future<void> close() async {

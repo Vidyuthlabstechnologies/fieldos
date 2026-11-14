@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -57,11 +58,11 @@ Future<bool> _act(BuildContext context, WidgetRef ref, String projectId, Future<
 
 Future<String?> _pickDay(BuildContext context, {String? initial}) async {
   final now = DateTime.now();
-  final d = await showDatePicker(
-    context: context,
-    initialDate: parseDay(initial) ?? now,
-    firstDate: now.subtract(const Duration(days: 365)),
-    lastDate: now.add(const Duration(days: 730)),
+  final d = await pickDate(
+    context,
+    initial: parseDay(initial) ?? now,
+    first: now.subtract(const Duration(days: 365)),
+    last: now.add(const Duration(days: 730)),
   );
   return d == null ? null : ymd(d);
 }

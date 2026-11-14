@@ -11,13 +11,15 @@ import 'package:fieldos_mobile/estimation/estimation_calc.dart';
 
 Future<BOQResult> buildProjectBoq(EstimationDao dao, String projectId) async {
   final estimations = await dao.forProject(projectId);
-  final records = <(CalcCostHead, List<CalcMeasurement>, List<CalcSteel>)>[];
-  Decimal? profitPercent;
+  // Each estimation carries its own contractor profit, so each is priced on
+  // its own and the results added up (audit 2026-11-14: one estimation's
+  // percentage used to be put on every estimation's work).
+  final parts = <BOQResult>[];
 
   for (final est in estimations) {
-    if (est.contractorProfitPercent != null) {
-      profitPercent = Decimal.parse(est.contractorProfitPercent.toString());
-    }
+    final records = <(CalcCostHead, List<CalcMeasurement>, List<CalcSteel>)>[];
+    final profitPercent =
+        est.contractorProfitPercent == null ? null : Decimal.parse(est.contractorProfitPercent.toString());
     final heads = await dao.costHeadsFor(est.id);
     for (final h in heads) {
       final meas = await dao.measurements(h.id);
@@ -49,7 +51,23 @@ Future<BOQResult> buildProjectBoq(EstimationDao dao, String projectId) async {
             .toList(),
       ));
     }
+    parts.add(buildBoq(records, contractorProfitPercent: profitPercent));
   }
 
-  return buildBoq(records, contractorProfitPercent: profitPercent);
+  if (parts.length == 1) return parts.single;
+  final percents = {for (final p in parts) p.contractorProfitPercent};
+  var subtotal = Decimal.zero;
+  var profit = Decimal.zero;
+  for (final p in parts) {
+    subtotal += p.subtotal;
+    profit += p.contractorProfitAmount;
+  }
+  return BOQResult(
+    lines: [for (final p in parts) ...p.lines],
+    subtotal: subtotal,
+    // One percentage only when every estimation has the same one.
+    contractorProfitPercent: percents.length == 1 ? percents.single : null,
+    contractorProfitAmount: profit,
+    grandTotal: subtotal + profit,
+  );
 }

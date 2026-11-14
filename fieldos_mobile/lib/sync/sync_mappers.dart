@@ -51,7 +51,10 @@ import 'package:drift/drift.dart' show Value;
 import 'package:fieldos_mobile/data/app_database.dart';
 
 String? _dateOnly(DateTime? d) => d?.toIso8601String().split('T').first;
-String? _timestamp(DateTime? d) => d?.toIso8601String();
+// Always UTC with its 'Z': Drift reads DateTimes back as local time, and
+// an ISO string with no offset is taken as UTC by Postgres (timestamptz),
+// which put an IST phone's resolved/decided/approved times 5:30 off.
+String? _timestamp(DateTime? d) => d?.toUtc().toIso8601String();
 
 Map<String, dynamic> projectToSupabaseJson(Project p) => {
       'id': p.id,

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' show Value;
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -765,11 +766,10 @@ class _StaffFormState extends ConsumerState<_StaffForm> {
             subtitle: Text(_joined == null ? tr('No date') : fmtDate(_joined!)),
             trailing: const Icon(Icons.event),
             onTap: () async {
-              final d = await showDatePicker(
-                  context: context,
-                  initialDate: _joined ?? DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime.now().add(const Duration(days: 60)));
+              final d = await pickDate(context,
+                  initial: _joined ?? DateTime.now(),
+                  first: DateTime(2000),
+                  last: DateTime.now().add(const Duration(days: 60)));
               if (d != null) setState(() => _joined = d);
             },
           ),

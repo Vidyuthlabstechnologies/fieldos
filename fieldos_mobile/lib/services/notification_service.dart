@@ -17,11 +17,14 @@ import 'package:fieldos_mobile/features/reminders/reminders.dart';
 
 /// What to show for one newly-arrived row, or null to stay quiet. Kept a
 /// pure function so the rules (skip my own rows, which tables alert) are
-/// unit-testable without the Android plugin.
+/// unit-testable without the Android plugin. [blockedSenders] are the
+/// people blocked in chat on this phone: their messages stay hidden in the
+/// chat, so they must not pop up as alerts either.
 ({String title, String body})? describeRemoteRow(
   String table,
   Map<String, dynamic> row, {
   required String? myUserId,
+  Set<String> blockedSenders = const {},
 }) {
   String text(Object? v, [int max = 120]) {
     final s = (v as String? ?? '').trim();
@@ -30,7 +33,7 @@ import 'package:fieldos_mobile/features/reminders/reminders.dart';
 
   switch (table) {
     case 'project_messages':
-      if (row['sender_id'] == myUserId) return null;
+      if (row['sender_id'] == myUserId || blockedSenders.contains(row['sender_id'])) return null;
       return (title: text(row['sender_name'], 60), body: text(row['body']));
     case 'issues':
       // Issues carry no author column; a row this phone wrote itself is
@@ -64,6 +67,12 @@ import 'package:fieldos_mobile/features/reminders/reminders.dart';
   }
 }
 
+/// The id for the next colleague alert. Alerts take 1 to reminderIdBase - 1
+/// and then start again at 1 (replacing an alert long since read): counting
+/// on past that ran into the reminder ids, so an alert replaced a reminder
+/// and the next re-plan cancelled the alert.
+int alertIdAfter(int id) => id < 1 || id >= reminderIdBase - 1 ? 1 : id + 1;
+
 /// The app's navigator, so a tapped reminder can open its screen.
 final appNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -73,7 +82,7 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _plugin;
   bool _ready = false;
-  int _nextId = 1;
+  int _lastId = 0;
 
   static const _channel = AndroidNotificationDetails(
     'site_updates',
@@ -112,7 +121,7 @@ class NotificationService {
   Future<void> show(String title, String body) async {
     if (!_ready) return;
     await _plugin.show(
-      id: _nextId++,
+      id: _lastId = alertIdAfter(_lastId),
       title: title,
       body: body,
       notificationDetails: const NotificationDetails(android: _channel, iOS: DarwinNotificationDetails()),

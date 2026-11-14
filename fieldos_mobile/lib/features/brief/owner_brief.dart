@@ -188,8 +188,11 @@ Future<SiteBrief> buildSiteBrief(AppDatabase db, Project project, {required Date
 }
 
 /// Every running site's brief for [day], the ones needing the owner first.
-Future<List<SiteBrief>> buildOwnerBrief(AppDatabase db, String companyId, {required DateTime day, DateTime? now}) async {
-  final projects = (await db.projectDao.forCompany(companyId)).where((p) => p.status == 'active');
+/// With [siteIds], only those sites (the ones this person may see).
+Future<List<SiteBrief>> buildOwnerBrief(AppDatabase db, String companyId,
+    {required DateTime day, DateTime? now, Set<String>? siteIds}) async {
+  final projects = (await db.projectDao.forCompany(companyId))
+      .where((p) => p.status == 'active' && (siteIds == null || siteIds.contains(p.id)));
   final out = [for (final p in projects) await buildSiteBrief(db, p, day: day, now: now)];
   return rankBriefs(out);
 }

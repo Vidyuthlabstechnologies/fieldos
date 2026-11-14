@@ -139,10 +139,10 @@ class _UnitConverterScreenState extends State<UnitConverterScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final v = double.tryParse(_value.text.trim());
+    final v = parseTypedNumber(_value.text);
     final result = v == null ? null : convertUnits(v, _from, _to);
-    final d = double.tryParse(_bar.text.trim());
-    final len = double.tryParse(_barLength.text.trim());
+    final d = parseTypedNumber(_bar.text);
+    final len = parseTypedNumber(_barLength.text);
     final imperial = market.units == UnitSystem.imperial;
     // US: bar size number (#4) and feet; elsewhere diameter in mm and metres.
     final perLength = imperial

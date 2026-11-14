@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -90,8 +91,8 @@ class _DayRegisterScreenState extends ConsumerState<DayRegisterScreen> {
                     child: TextButton(
                       key: const Key('register-day'),
                       onPressed: () async {
-                        final d = await showDatePicker(
-                            context: context, initialDate: _day, firstDate: DateTime(2020), lastDate: _today);
+                        final d = await pickDate(context,
+                            initial: _day, first: DateTime(2020), last: _today, keepRange: true);
                         if (d != null) setState(() => _day = d);
                       },
                       child: Text(_day == _today ? tr('Today') : fmtDate(_day), style: theme.textTheme.titleMedium),

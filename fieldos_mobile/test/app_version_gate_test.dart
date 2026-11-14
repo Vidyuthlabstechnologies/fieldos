@@ -110,4 +110,15 @@ void main() {
     await g.check(force: true);
     expect(s.hits.where((h) => h.endsWith('/rpc/min_app_build')).length, 2);
   });
+
+  test('an answer saved while the phone clock ran ahead does not stay fresh once the clock is put right', () async {
+    final s = server(minimum: {'android': 0});
+    final now = DateTime.now();
+    // The clock was a year ahead when the answer was saved.
+    await gate(s.client, clock: () => now.add(const Duration(days: 365))).check();
+    expect(s.hits.where((h) => h.endsWith('/rpc/min_app_build')).length, 1);
+    // Clock corrected: the saved answer is "from the future", so ask again.
+    await gate(s.client, clock: () => now).check();
+    expect(s.hits.where((h) => h.endsWith('/rpc/min_app_build')).length, 2);
+  });
 }

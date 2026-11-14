@@ -100,15 +100,24 @@ String fmtQty(num q) {
   return t.replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
 }
 
+/// A number as typed on a phone: "1,200", " 1250.5 ", "₹45,000". Null when
+/// blank or unreadable, and for "NaN" or "Infinity", which double.tryParse
+/// accepts but no amount or quantity can be.
+double? parseTypedNumber(String typed) {
+  final v = double.tryParse(typed.replaceAll(RegExp(r'[,₹\s]'), ''));
+  return v == null || !v.isFinite ? null : v;
+}
+
 /// An amount in this market's currency: "₹12,34,567" in India,
 /// "$1,234,567" in the US, "RM1,234,567", "AED 1,234,567", "£1,234,567".
 /// Whole units unless [cents] is true and the amount has some ("₹45.50").
 String money(num v, {bool cents = false}) {
-  final neg = v < 0;
   final abs = v.abs();
   final hundredths = (abs * 100).round();
   final showCents = cents && hundredths % 100 != 0;
   final whole = (showCents ? hundredths ~/ 100 : abs.round()).toString();
+  // "-₹0" for a balance that is only float dust below zero reads as owed.
+  final neg = v < 0 && (showCents || whole != '0');
   final grouped = market.indianGrouping ? _groupIndian(whole) : _groupThousands(whole);
   final tail = showCents ? '.${(hundredths % 100).toString().padLeft(2, '0')}' : '';
   final sym = market.symbolSpace ? '${market.currencySymbol} ' : market.currencySymbol;

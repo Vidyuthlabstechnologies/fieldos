@@ -75,6 +75,15 @@ void main() {
       expect(rupees(100000.05, paise: true), '₹1,00,000.05');
     });
 
+    test('rupees: a negative that rounds to nothing has no minus sign', () {
+      // A balance such as 2400.10 - 2400.1000000001 from adding up paise.
+      expect(rupees(-1e-9), '₹0');
+      expect(rupees(-0.4), '₹0');
+      expect(rupees(-0.004, paise: true), '₹0');
+      expect(rupees(-0.5), '-₹1');
+      expect(rupees(-0.05, paise: true), '-₹0.05');
+    });
+
     test('quantities lose their trailing .0', () {
       expect(fmtQty(50.0), '50');
       expect(fmtQty(12.5), '12.5');

@@ -249,7 +249,7 @@ class StockView extends ConsumerWidget {
         ],
       ),
     );
-    final q = double.tryParse(qty.text.trim());
+    final q = double.tryParse(qty.text.trim().replaceAll(',', ''));
     if (ok != true || q == null || q <= 0 || name.text.trim().isEmpty) return;
     await ref.read(appDatabaseProvider).materialDao.recordUsage(MaterialUsageCompanion.insert(
           id: const Uuid().v4(),

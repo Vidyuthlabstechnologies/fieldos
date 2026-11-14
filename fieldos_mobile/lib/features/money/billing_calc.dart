@@ -77,7 +77,10 @@ List<BillLine> decodeLines(String json) {
   return [for (final j in raw) if (j is Map<String, dynamic>) BillLine.fromJson(j)];
 }
 
-double _round2(double v) => (v * 100).roundToDouble() / 100;
+/// Rounds to paise, half up, as money_book.dart does. The nudge keeps an
+/// exact half such as 46.25 x 18% = 8.325 (stored as 8.32499...) from
+/// rounding down a paisa on the invoice.
+double _round2(double v) => ((v * 100) + (v < 0 ? -1e-6 : 1e-6)).roundToDouble() / 100;
 
 class BillTotals {
   const BillTotals({

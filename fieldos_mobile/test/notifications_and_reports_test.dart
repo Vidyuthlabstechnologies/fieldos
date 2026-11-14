@@ -22,6 +22,13 @@ void main() {
           isNull);
     });
 
+    test('a person blocked in chat does not alert either', () {
+      final row = {'sender_id': 'spammer', 'sender_name': 'Spam', 'body': 'Buy now'};
+      expect(describeRemoteRow('project_messages', row, myUserId: 'me', blockedSenders: {'spammer'}), isNull);
+      expect(describeRemoteRow('project_messages', {...row, 'sender_id': 'ravi'}, myUserId: 'me', blockedSenders: {'spammer'}),
+          isNotNull);
+    });
+
     test('new issue shows severity and description', () {
       final a = describeRemoteRow('issues', {'severity': 'high', 'description': 'Crack in column C4'}, myUserId: 'me');
       expect(a?.title, 'New issue (high)');

@@ -68,8 +68,50 @@ void main() {
     expect(roster.labelFor(null), isNull);
   });
 
+  testWidgets('a task that started over two years ago can still have its dates changed', (tester) async {
+    // A long job (a tower) started in 2024: the picker's range began two
+    // years back, so opening it on the start date failed.
+    tester.view.physicalSize = const Size(412, 915);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final today = DateTime.now();
+    final old = Task(
+      id: 'tw',
+      projectId: 'p1',
+      title: 'Tower B structure',
+      status: 'in_progress',
+      createdAt: today,
+      updatedAt: today,
+      progress: 40,
+      priority: 'normal',
+      startDate: DateTime(today.year - 3, today.month, 1),
+      dueDate: DateTime(today.year + 4, today.month, 1),
+    );
+    await tester.pumpWidget(MaterialApp(
+      theme: buildFieldOsTheme(Brightness.light),
+      home: Builder(
+        builder: (context) => Scaffold(
+          body: TextButton(onPressed: () => showTaskSheet(context, existing: old), child: const Text('open')),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('Start '));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text('When does work start?'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('Due '));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text('When must it be finished?'), findsOneWidget);
+  });
+
   group('screens', () {
-    Future<(ProviderContainer, AppDatabase, Project, Project)> pump(WidgetTester tester, {bool team = false}) async {
+    Future<(ProviderContainer, AppDatabase, Project, Project)> pump(WidgetTester tester,
+        {bool team = false, bool hideLakeView = false}) async {
       tester.view.physicalSize = const Size(412, 915);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -87,6 +129,7 @@ void main() {
         await db.taskDao.create(TasksCompanion.insert(id: 't1', projectId: a.id, title: 'Plinth beam', dueDate: Value(due), assigneeId: const Value('u1')));
         await db.taskDao.create(TasksCompanion.insert(id: 't2', projectId: b.id, title: 'Shuttering', assigneeId: const Value('u2')));
         await db.taskDao.create(TasksCompanion.insert(id: 't3', projectId: b.id, title: 'Old job', status: const Value('done')));
+        if (hideLakeView) await db.siteTeamDao.setMembersOnly(b.id, true);
         if (team) {
           await saveRoster(db, 'c1', const [
             CloudMember(userId: 'u1', email: 'meena@site.in', role: 'owner'),
@@ -113,6 +156,15 @@ void main() {
       expect(find.text('Given to me'), findsNothing);
       expect(find.textContaining('Turn on Team & sync'), findsOneWidget);
       expect(find.text('Due in the next 7 days (1)'), findsOneWidget);
+    });
+
+    testWidgets('a members-only site this person is not on keeps its tasks out of the list', (tester) async {
+      // The site is hidden from the project list; its tasks pulled before it
+      // was made members-only must not show here, with no site name either.
+      await pump(tester, hideLakeView: true);
+      expect(find.text('Plinth beam'), findsOneWidget);
+      expect(find.text('Shuttering'), findsNothing);
+      expect(find.text('Lake View'), findsNothing);
     });
 
     testWidgets('with a team, it starts on mine and Everyone shows who has the rest', (tester) async {

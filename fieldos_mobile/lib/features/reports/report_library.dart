@@ -694,7 +694,7 @@ final List<ReportDef> reportLibrary = [
             if (q.requestId == r.id) q,
         ];
         if (qs.isEmpty) continue;
-        final c = compareQuotes(r, qs, d.now);
+        final c = compareQuotes(r, qs, d.now, supplierNames: d.supplierName);
         final won = c.lines.where((l) => l.quote.status == 'accepted').firstOrNull;
         final others = [
           for (final l in c.lines)

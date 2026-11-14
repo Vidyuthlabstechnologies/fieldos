@@ -73,7 +73,10 @@ class AppVersionGate {
   /// Fresh when the cached answer is older than [maxAge] (or [force]).
   Future<AppUpdateRequired?> check({bool force = false}) async {
     final c = await _readCache();
-    if (c != null && !force && _clock().difference(c.$3) < maxAge) return _judge(c.$1, c.$2);
+    // An answer dated in the future (saved while the phone clock ran ahead)
+    // is stale, or it would never be asked again until that date.
+    final age = c == null ? null : _clock().difference(c.$3);
+    if (c != null && !force && !age!.isNegative && age < maxAge) return _judge(c.$1, c.$2);
     try {
       final res = await client().rpc('min_app_build').timeout(const Duration(seconds: 8));
       final m = res is Map ? Map<String, dynamic>.from(res) : const <String, dynamic>{};

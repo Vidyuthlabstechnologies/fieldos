@@ -62,6 +62,16 @@ void main() {
       expect(t.cgst + t.sgst, closeTo(0.01, 1e-9));
     });
 
+    test('rounds an exact half paisa up, like the money book (no float drift down)', () {
+      // 46.25 x 18% is exactly 8.325; stored as 8.32499.. it used to round to 8.32.
+      final t = billTotals(const [BillLine(description: 'x', unit: 'no', rate: 46.25, qty: 1)],
+          gstRate: 18, interState: true, retentionPct: 5);
+      expect(t.igst, 8.33);
+      expect(t.invoiceTotal, 54.58);
+      // 5% of 10.10 is exactly 0.505.
+      expect(billTotals(const [BillLine(description: 'x', unit: 'no', rate: 10.1, qty: 1)], retentionPct: 5).retention, 0.51);
+    });
+
     test('an empty bill is all zero', () {
       expect(billTotals(const []).netPayable, 0);
     });

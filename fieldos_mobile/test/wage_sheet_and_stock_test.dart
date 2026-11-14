@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet.dart';
 import 'package:fieldos_mobile/features/procurement/site_stock.dart';
+import 'package:fieldos_mobile/features/workers/worker_calendar.dart' show buildWorkerMonth;
 
 Worker _worker(String id, String name, double? wage, {String status = 'active'}) => Worker(
     id: id, projectId: 'p', name: name, dailyWage: wage, status: status, createdAt: DateTime(2026, 1, 1));
@@ -44,6 +45,29 @@ void main() {
     expect(r.days, 0.5);
     expect(r.overtimeHours, 0);
     expect(r.missingPunchOuts, 1);
+  });
+
+  test('days punched by typed name count on that worker\'s line, as the calendar shows them', () {
+    // A walk-in punched by name on Monday and Tuesday, added to the worker
+    // list on Wednesday and punched from the list after that.
+    final from = DateTime(2026, 11, 2), to = DateTime(2026, 11, 9);
+    final ramesh = _worker('r', 'Ramesh', 800);
+    final punches = [
+      _punch(null, 'ramesh ', DateTime(2026, 11, 2, 9), 8),
+      _punch(null, 'Ramesh', DateTime(2026, 11, 3, 9), 8),
+      _punch('r', 'Ramesh', DateTime(2026, 11, 4, 9), 8),
+    ];
+    final sheet = buildWageSheet(workers: [ramesh], punches: punches, expenses: const [], from: from, to: to);
+    final r = sheet.lines.single;
+    expect(r.workerId, 'r');
+    expect(r.days, 3);
+    expect(r.earned, 2400);
+    expect(r.days, buildWorkerMonth(punches, ramesh, from).daysWorked);
+
+    // Two workers with one name: a typed name can't tell them apart, so it stays on its own line.
+    final twins = buildWageSheet(
+        workers: [ramesh, _worker('r2', 'Ramesh', 700)], punches: punches.take(1).toList(), expenses: const [], from: from, to: to);
+    expect(twins.lines.where((l) => l.workerId == null).single.days, 1);
   });
 
   test('weekStart is the Monday', () {

@@ -449,13 +449,22 @@ export function wavSeconds(wav: Uint8Array): number | null {
   return null;
 }
 
-/** Whether a RevenueCat v1 subscriber response has the entitlement active. */
+/** Whether a RevenueCat v1 subscriber response has the entitlement active. A
+ * renewal whose payment failed stays active until grace_period_expires_date,
+ * as the app's SDK treats it (the app keeps the person in during the grace
+ * period), so the assistant must too. */
 export function entitlementActive(subscriber: unknown, now = new Date()): boolean {
-  const ent = (subscriber as { subscriber?: { entitlements?: Record<string, { expires_date?: string | null }> } })
-    ?.subscriber?.entitlements?.[ENTITLEMENT];
+  const ent = (subscriber as {
+    subscriber?: {
+      entitlements?: Record<string, { expires_date?: string | null; grace_period_expires_date?: string | null }>;
+    };
+  })?.subscriber?.entitlements?.[ENTITLEMENT];
   if (!ent) return false;
   if (ent.expires_date == null) return true; // lifetime / no end date
-  const ends = Date.parse(ent.expires_date);
+  const ends = Math.max(
+    ...[ent.expires_date, ent.grace_period_expires_date].map((d) => (d == null ? NaN : Date.parse(d)))
+      .filter(Number.isFinite),
+  );
   return Number.isFinite(ends) && ends > now.getTime();
 }
 

@@ -20,6 +20,7 @@ import 'package:fieldos_mobile/features/commercial/commercial_rules.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart';
 import 'package:fieldos_mobile/features/payroll/payroll_rules.dart';
 import 'package:fieldos_mobile/features/procurement/quote_compare.dart' show awardNote, compareQuotes;
+import 'package:fieldos_mobile/features/procurement/site_stock.dart' show buildSiteStock;
 import 'package:fieldos_mobile/features/warehouse/tools_rules.dart';
 import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart' show BillLine, encodeLines;
@@ -1424,6 +1425,16 @@ class PaymentDao extends DatabaseAccessor<AppDatabase> with _$PaymentDaoMixin {
 
   Future<PaymentsReceivedData> edit(String id, PaymentsReceivedCompanion changes, {required String by, DateTime? now}) {
     return transaction(() async {
+      if (changes.amount.present) {
+        // Cutting a payment below what is already put against bills would
+        // leave those bills paid by money that was never received.
+        final put = (await (select(db.billAllocations)..where((a) => a.paymentId.equals(id))).get())
+            .fold(0.0, (s, a) => s + a.amount);
+        if (changes.amount.value < put - 0.005) {
+          throw AllocationTooBig(
+              '${put.toStringAsFixed(2)} of this payment is already put against bills. Take those back first.');
+        }
+      }
       await (update(paymentsReceived)..where((p) => p.id.equals(id))).write(changes.copyWith(
         id: const Value.absent(),
         projectId: const Value.absent(),
@@ -1445,7 +1456,9 @@ class PaymentDao extends DatabaseAccessor<AppDatabase> with _$PaymentDaoMixin {
         editedAt: Value(now ?? DateTime.now()),
         editedBy: Value(by),
       ));
-      return _queueUpdate(id);
+      final row = await _queueUpdate(id);
+      await db.billingRecordsDao.resettleBillsOf(id);
+      return row;
     });
   }
 
@@ -1704,7 +1717,7 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
   Future<void> billWorkOrder(String id, double additional) {
     return transaction(() async {
       await (update(workOrders)..where((w) => w.id.equals(id)))
-          .write(WorkOrdersCompanion(billedAmount: Value(additional)));
+          .write(WorkOrdersCompanion.custom(billedAmount: workOrders.billedAmount + Variable(additional)));
       final row = await (select(workOrders)..where((w) => w.id.equals(id))).getSingle();
       await db.syncOutboxDao.enqueue(
         targetTable: 'work_orders',
@@ -1981,9 +1994,15 @@ class ApprovalDao extends DatabaseAccessor<AppDatabase> with _$ApprovalDaoMixin 
   /// "Spending is ₹25,000 over the BOQ budget.") stays, and a reason, if
   /// one is given, goes after it; it used to replace the request text, so
   /// a decided approval no longer said what it had been about.
-  Future<void> decide(String id, bool approved, String approverId, String? note) {
+  ///
+  /// Only a pending approval is decided: once someone has said yes or no
+  /// (on this phone, or on another one and pulled since the list was
+  /// opened), a second tap must not flip it or put another name on it.
+  /// Returns whether this call made the decision.
+  Future<bool> decide(String id, bool approved, String approverId, String? note) {
     return transaction(() async {
       final before = await (select(approvals)..where((a) => a.id.equals(id))).getSingle();
+      if (before.status != 'pending') return false;
       final reason = note?.trim() ?? '';
       final asked = before.decisionNote?.trim() ?? '';
       final joined = reason.isEmpty
@@ -2006,6 +2025,7 @@ class ApprovalDao extends DatabaseAccessor<AppDatabase> with _$ApprovalDaoMixin 
         operation: 'update',
         payloadJson: jsonEncode(approvalToSupabaseJson(row)),
       );
+      return true;
     });
   }
 
@@ -2169,7 +2189,7 @@ class InspectionDao extends DatabaseAccessor<AppDatabase> with _$InspectionDaoMi
         : companion.copyWith(sortOrder: const Value(0)); // We'll update after insert
     return transaction(() async {
       // First, get the current count of items for this inspection to set sortOrder
-      int sortOrder = 0;
+      int sortOrder = companion.sortOrder.present ? companion.sortOrder.value : 0;
       if (!companion.sortOrder.present) {
         final count = await (select(inspectionItems)
               ..where((item) => item.inspectionId.equals(companion.inspectionId.value))).get();
@@ -2410,7 +2430,11 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
   Future<List<SyncOutboxData>> pending() {
     return (select(syncOutbox)
           ..where((o) => o.retryCount.isSmallerThanValue(syncOutboxMaxRetries))
-          ..orderBy([(o) => OrderingTerm.asc(o.createdAt)]))
+          // By id, not created_at: the phone's clock can be set back (or
+          // corrected by the network) between two writes, and created_at
+          // has whole-second precision, so an edit could sort before the
+          // insert it follows and be refused by the server.
+          ..orderBy([(o) => OrderingTerm.asc(o.id)]))
         .get();
   }
 
@@ -3218,8 +3242,40 @@ class BillingRecordsDao extends DatabaseAccessor<AppDatabase> with _$BillingReco
 
   // Payments against bills
 
-  Future<List<BillAllocation>> allocationsFor(String projectId) =>
-      (select(billAllocations)..where((a) => a.projectId.equals(projectId))).get();
+  /// The allocations that count. A cancelled payment (a bounced cheque)
+  /// pays no bill, so its allocations are left out until it is restored;
+  /// otherwise the bill stays paid and the corrected payment can't go
+  /// against it.
+  Future<List<BillAllocation>> allocationsFor(String projectId) async {
+    final cancelled = {
+      for (final p in await (select(paymentsReceived)
+            ..where((p) => p.projectId.equals(projectId) & p.voided.equals(true)))
+          .get())
+        p.id,
+    };
+    final rows = await (select(billAllocations)..where((a) => a.projectId.equals(projectId))).get();
+    return [for (final a in rows) if (!cancelled.contains(a.paymentId)) a];
+  }
+
+  /// After [paymentId] is cancelled or restored: a bill it covered is due
+  /// again, or paid again.
+  Future<void> resettleBillsOf(String paymentId) async {
+    final mine =
+        await (select(billAllocations)..where((a) => a.paymentId.equals(paymentId) & a.kind.equals('bill'))).get();
+    if (mine.isEmpty) return;
+    final live = await allocationsFor(mine.first.projectId);
+    for (final billId in {for (final a in mine) a.billId}) {
+      final b = await (select(clientBills)..where((x) => x.id.equals(billId))).getSingleOrNull();
+      if (b == null) continue;
+      final paid = live.where((a) => a.billId == billId && a.kind == 'bill').fold(0.0, (s, a) => s + a.amount);
+      final covered = b.netPayable - paid <= 0.005;
+      if (covered && b.status != 'paid') {
+        await db.billDao.setStatus(billId, 'paid');
+      } else if (!covered && b.status == 'paid') {
+        await db.billDao.setStatus(billId, 'issued');
+      }
+    }
+  }
 
   /// Puts [amount] of [paymentId] against [billId] (its net amount, or its
   /// retention). Marks the bill paid when its net amount is covered.
@@ -3311,7 +3367,8 @@ class BillingRecordsDao extends DatabaseAccessor<AppDatabase> with _$BillingReco
       into(supplierInvoices).insertOnConflictUpdate(c);
 }
 
-double _round2(double v) => (v * 100).roundToDouble() / 100;
+// Half up, like billTotals, so the retention allocate() allows is the bill's.
+double _round2(double v) => ((v * 100) + (v < 0 ? -1e-6 : 1e-6)).roundToDouble() / 100;
 
 /// Multi-level approvals by amount (v30): the owner's rules, and the
 /// signatures on each item. What a chain needs is worked out in
@@ -3860,6 +3917,20 @@ class WarehouseDao extends DatabaseAccessor<AppDatabase> with _$WarehouseDaoMixi
           throw ArgumentError(trf('The store has only {qty} of this.', {'qty': fmtQty(have < 0 ? 0 : have)}));
         }
         r ??= storeRate(all, fromStoreId, materialName, unit);
+      }
+      if (fromProjectId != null) {
+        // A site is held to what it has on record, as a store is: received
+        // and transferred in, less used and already sent away.
+        final k = materialKey(materialName, unit);
+        final stock = buildSiteStock(await db.materialDao.forProject(fromProjectId),
+            await db.materialDao.usageForProject(fromProjectId),
+            moves: await movesForSite(fromProjectId), projectId: fromProjectId);
+        final have = stock.where((l) => materialKey(l.name, l.unit) == k).fold(0.0, (s, l) => s + l.balance);
+        if (quantity > have + 1e-9) {
+          final u = _blankW(unit, 20);
+          final q = fmtQty(have < 0 ? 0 : have);
+          throw ArgumentError(trf('This site has only {qty} on record.', {'qty': u == null ? q : '$q $u'}));
+        }
       }
       final now = on ?? DateTime.now();
       final row = await into(stockMoves).insertReturning(StockMovesCompanion.insert(

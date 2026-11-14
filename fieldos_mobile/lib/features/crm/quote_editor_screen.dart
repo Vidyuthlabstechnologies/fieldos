@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -312,11 +313,10 @@ class _QuoteEditorState extends ConsumerState<QuoteEditorScreen> {
               ? null
               : () async {
                   final now = DateTime.now();
-                  final d = await showDatePicker(
-                      context: context,
-                      initialDate: _validUntil ?? now.add(const Duration(days: 30)),
-                      firstDate: DateTime(now.year - 1),
-                      lastDate: DateTime(now.year + 2));
+                  final d = await pickDate(context,
+                      initial: _validUntil ?? now.add(const Duration(days: 30)),
+                      first: DateTime(now.year - 1),
+                      last: DateTime(now.year + 2));
                   if (d != null) setState(() => _validUntil = d);
                 },
         ),

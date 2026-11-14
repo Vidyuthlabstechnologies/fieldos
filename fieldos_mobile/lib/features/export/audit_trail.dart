@@ -210,7 +210,14 @@ Future<List<AuditEvent>> buildAuditTrail(AppDatabase db, String companyId,
   return out;
 }
 
-String _csv(String s) => s.contains(RegExp(r'[",\n]')) ? '"${s.replaceAll('"', '""')}"' : s;
+// Text typed on site (a note, a payee, a site name) opens in Excel, where a
+// cell starting with = + - @ (or a tab or return before one) runs as a
+// formula: "=HYPERLINK(...)" in a cancellation reason would be live in the
+// auditor's sheet. A leading apostrophe keeps it text (OWASP's advice).
+String _csv(String s) {
+  final t = s.startsWith(RegExp(r'[=+\-@\t\r]')) ? "'$s" : s;
+  return t.contains(RegExp(r'[",\n\r]')) ? '"${t.replaceAll('"', '""')}"' : t;
+}
 
 String _time(DateTime d) {
   final l = d.toLocal();

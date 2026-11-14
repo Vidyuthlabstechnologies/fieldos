@@ -136,6 +136,51 @@ void main() {
       expect(b.retentionHeld, 0);
       expect(b.outstanding, 113000, reason: 'retention money does not pay the bill');
     });
+
+    test('a cancelled payment no longer pays its bills, and the corrected one can go against them', () async {
+      final ra1 = await _bill('RA-01', [const BillLine(description: 'Work', unit: 'cum', rate: 1000, qty: 100)]);
+      final dao = db.billingRecordsDao;
+      final wrong = await _payment('pay-wrong', 113000);
+      await dao.allocate(paymentId: wrong.id, billId: ra1.id, amount: 113000, by: 'pm');
+      expect((await db.billDao.forProject(site.id)).single.status, 'paid');
+
+      // The cheque bounced: the payment is cancelled in the money book.
+      await db.paymentDao.setVoided(wrong.id, voided: true, reason: 'Cheque bounced', by: 'pm');
+      final bills = await db.billDao.forProject(site.id);
+      expect(bills.single.status, 'issued');
+      final bal = billBalances(bills, await dao.allocationsFor(site.id)).single;
+      expect(bal.paid, 0);
+      expect(bal.outstanding, 113000);
+
+      final redo = await _payment('pay-redo', 113000);
+      await dao.allocate(paymentId: redo.id, billId: ra1.id, amount: 113000, by: 'pm');
+      expect((await db.billDao.forProject(site.id)).single.status, 'paid');
+      expect(billBalances(await db.billDao.forProject(site.id), await dao.allocationsFor(site.id)).single.paid, 113000);
+    });
+
+    test('restoring a cancelled payment puts it back against its bill', () async {
+      final ra1 = await _bill('RA-01', [const BillLine(description: 'Work', unit: 'cum', rate: 1000, qty: 100)]);
+      final dao = db.billingRecordsDao;
+      final p = await _payment('pay-1', 113000);
+      await dao.allocate(paymentId: p.id, billId: ra1.id, amount: 113000, by: 'pm');
+      await db.paymentDao.setVoided(p.id, voided: true, reason: 'By mistake', by: 'pm');
+      await db.paymentDao.setVoided(p.id, voided: false, by: 'pm');
+      final bills = await db.billDao.forProject(site.id);
+      expect(bills.single.status, 'paid');
+      expect(billBalances(bills, await dao.allocationsFor(site.id)).single.settled, isTrue);
+    });
+
+    test('a payment already put against bills cannot be cut below what it covers', () async {
+      final ra1 = await _bill('RA-01', [const BillLine(description: 'Work', unit: 'cum', rate: 1000, qty: 100)]);
+      final p = await _payment('pay-1', 113000);
+      await db.billingRecordsDao.allocate(paymentId: p.id, billId: ra1.id, amount: 113000, by: 'pm');
+      await expectLater(
+          db.paymentDao.edit(p.id, const PaymentsReceivedCompanion(amount: Value(13000)), by: 'pm'), throwsA(isA<AllocationTooBig>()));
+      expect((await db.paymentDao.forProject(site.id)).single.amount, 113000);
+      // Other fixes, and raising the amount, still go through.
+      await db.paymentDao.edit(p.id, const PaymentsReceivedCompanion(amount: Value(120000), note: Value('UTR fixed')), by: 'pm');
+      expect((await db.paymentDao.forProject(site.id)).single.amount, 120000);
+    });
   });
 
   group('supplier invoice against PO and GRN', () {

@@ -2975,6 +2975,7 @@ const Map<String, String> stringsEs = {
   'If we turn down a request, write to info@mldynamic.com with the word "Appeal" and we will look at it again. If you are still not satisfied, you can contact your state attorney general.': 'Si rechazamos una solicitud, escribe a info@mldynamic.com con la palabra "Appeal" y la revisaremos de nuevo. Si aún no quedas satisfecho, puedes contactar al fiscal general de tu estado.',
   'Appeal a privacy decision': 'Apelar una decisión de privacidad',
   'Write from the email address on your account. We reply within 45 days. If you are not satisfied, you can appeal, and then contact the authority for privacy where you live.': 'Escribe desde el correo de tu cuenta. Respondemos en 45 días. Si no quedas satisfecho, puedes apelar y luego contactar a la autoridad de privacidad de donde vives.',
+  'This site has only {qty} on record.': 'Esta obra solo tiene {qty} registrado.',
   'Bar size (#3 to #18)': 'Calibre de varilla (#3 a #18)',
   '{lb} lb per foot': '{lb} lb por pie',
   '{lb} lb for {ft} ft': '{lb} lb para {ft} ft',

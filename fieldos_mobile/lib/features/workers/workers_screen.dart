@@ -248,7 +248,7 @@ class _WorkersViewState extends ConsumerState<WorkersView> {
           name: name.text.trim(),
           role: Value(role.text.trim()),
           phone: Value(phone.text.trim()),
-          dailyWage: Value(double.tryParse(dailyWage.text)),
+          dailyWage: Value(parseTypedNumber(dailyWage.text)),
           status: const Value('active'),
         ));
     ref.invalidate(workersProvider(widget.projectId));

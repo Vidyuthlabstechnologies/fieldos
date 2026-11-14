@@ -3320,6 +3320,10 @@ const Map<String, String> stringsTa = {
       'ஒவ்வொரு ஒப்புதல், ரத்து, கட்டணம், யார் எப்போது செய்தார்கள் என்பது ஒரே கோப்பில்',
   'Nothing has been recorded yet.':
       'இன்னும் எதுவும் பதிவாகவில்லை.',
+  // Audit round 2.
+  'This site has only {qty} on record.': 'இந்த தளத்தில் பதிவின்படி {qty} மட்டுமே உள்ளது.',
+  'Enter each size as a number more than zero.': 'ஒவ்வொரு அளவையும் பூஜ்ஜியத்தை விட அதிகமான எண்ணாக உள்ளிடவும்.',
+  'Enter a description.': 'விவரத்தை உள்ளிடவும்.',
   ...commercialTa,
   ...executionTa,
   ...crmTa,

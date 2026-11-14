@@ -27,13 +27,25 @@ class QuoteLine {
 }
 
 class QuoteComparison {
-  QuoteComparison(this.lines, this.estimate);
+  QuoteComparison(this.lines, this.estimate, [this.now]);
 
   /// Valid quotes cheapest first, then expired and turned-down ones.
   final List<QuoteLine> lines;
   final double? estimate;
 
-  QuoteLine? get best => lines.isEmpty || lines.first.quote.status == 'rejected' ? null : lines.first;
+  /// When the comparison was made, to tell expired quotes; null treats none
+  /// as expired.
+  final DateTime? now;
+
+  /// The accepted quote, else the cheapest one still valid. An expired
+  /// quote is not one the supplier still holds to, so it is never best.
+  QuoteLine? get best {
+    if (lines.isEmpty) return null;
+    final first = lines.first;
+    if (first.quote.status == 'rejected') return null;
+    if (first.quote.status != 'accepted' && now != null && first.expired(now!)) return null;
+    return first;
+  }
 
   /// The cheapest valid quote less the next one.
   double? savingVsNext(DateTime now) {
@@ -54,14 +66,28 @@ class QuoteComparison {
   }
 }
 
-QuoteComparison compareQuotes(PurchaseRequest r, Iterable<SupplierQuote> quotes, DateTime now) {
+/// Quotes that land at the same cost (to the paisa) go by quicker delivery
+/// (a quote without a delivery time after one with), then the one received
+/// first, then the supplier's name from [supplierNames] (else its id), so
+/// "best" does not change with the order the rows were read in.
+QuoteComparison compareQuotes(PurchaseRequest r, Iterable<SupplierQuote> quotes, DateTime now,
+    {Map<String, String> supplierNames = const {}}) {
   final lines = [for (final q in quotes) QuoteLine(q, r.quantity)];
   int rank(QuoteLine l) => l.quote.status == 'accepted' ? 0 : (l.quote.status == 'rejected' ? 3 : (l.expired(now) ? 2 : 1));
+  String name(QuoteLine l) => (supplierNames[l.quote.supplierId] ?? l.quote.supplierId).toLowerCase();
   lines.sort((a, b) {
-    final x = rank(a).compareTo(rank(b));
-    return x != 0 ? x : a.landed.compareTo(b.landed);
+    var x = rank(a).compareTo(rank(b));
+    if (x != 0) return x;
+    x = (a.landed * 100).round().compareTo((b.landed * 100).round());
+    if (x != 0) return x;
+    x = (a.quote.deliveryDays ?? 1 << 30).compareTo(b.quote.deliveryDays ?? 1 << 30);
+    if (x != 0) return x;
+    x = a.quote.createdAt.compareTo(b.quote.createdAt);
+    if (x != 0) return x;
+    x = name(a).compareTo(name(b));
+    return x != 0 ? x : a.quote.id.compareTo(b.quote.id);
   });
-  return QuoteComparison(lines, r.estimatedAmount);
+  return QuoteComparison(lines, r.estimatedAmount, now);
 }
 
 /// The message asking a supplier for their price, for WhatsApp.

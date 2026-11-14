@@ -430,9 +430,9 @@ class _RfqTab extends ConsumerWidget {
           projectId: projectId,
           raisedBy: userId,
           materialName: name.text.trim(),
-          quantity: Value(double.tryParse(qty.text) ?? 1),
+          quantity: Value(_num(qty.text) ?? 1),
           unit: Value(unit.text.trim()),
-          estimatedAmount: Value(double.tryParse(est.text)),
+          estimatedAmount: Value(_num(est.text)),
         ));
     ref.invalidate(requestsProvider(projectId));
   }
@@ -475,7 +475,7 @@ class _RfqTab extends ConsumerWidget {
           projectId: projectId,
           supplierId: supplierId,
           raisedBy: userId,
-          totalAmount: Value(double.tryParse(amount.text)),
+          totalAmount: Value(_num(amount.text)),
         ));
     ref.invalidate(requestsProvider(projectId));
     ref.invalidate(ordersProvider(projectId));
@@ -613,7 +613,7 @@ class _PoTab extends ConsumerWidget {
     final photoPath = ValueNotifier<String?>(null);
     var closeOrder = true;
     void updateClose() {
-      final q = double.tryParse(qty.text.trim());
+      final q = _num(qty.text);
       closeOrder = pending == null || q == null || q >= pending - 0.0001;
     }
     final ok = await showDialog<bool>(
@@ -680,9 +680,9 @@ class _PoTab extends ConsumerWidget {
           supplierId: Value(o.supplierId),
           costHeadId: const Value(null),
           materialName: material.text.trim().isEmpty ? tr('Goods from PO') : material.text.trim(),
-          quantity: double.tryParse(qty.text.trim()) ?? 1,
+          quantity: _num(qty.text) ?? 1,
           unit: Value(unit.text.trim()),
-          amount: double.tryParse(amount.text.trim()) ?? 0,
+          amount: _num(amount.text) ?? 0,
           receivedBy: userId,
           receivedOn: DateTime.now(),
         ));
@@ -693,6 +693,10 @@ class _PoTab extends ConsumerWidget {
     ref.invalidate(costSummaryProvider(projectId));
   }
 }
+
+/// A typed number, with Indian thousands commas ("1,20,000") allowed, as
+/// the rate hint under the same fields already reads them.
+double? _num(String s) => double.tryParse(s.trim().replaceAll(',', ''));
 
 String _supName(AsyncValue<List<Supplier>> suppliers, String id) {
   for (final s in suppliers.value ?? const <Supplier>[]) {

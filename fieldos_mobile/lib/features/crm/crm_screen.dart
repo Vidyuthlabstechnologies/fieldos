@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -267,11 +268,11 @@ class LeadDetailScreen extends ConsumerWidget {
 
   Future<void> _pickFollowUp(BuildContext context, WidgetRef ref, CrmLead lead) async {
     final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: lead.nextFollowUp ?? now.add(const Duration(days: 1)),
-      firstDate: DateTime(now.year - 1),
-      lastDate: DateTime(now.year + 2),
+    final picked = await pickDate(
+      context,
+      initial: lead.nextFollowUp ?? now.add(const Duration(days: 1)),
+      first: DateTime(now.year - 1),
+      last: DateTime(now.year + 2),
       helpText: tr('Next follow-up'),
     );
     if (picked == null || !context.mounted) return;
@@ -737,11 +738,8 @@ class _LeadFormState extends ConsumerState<_LeadForm> {
               subtitle: Text(_followUp == null ? tr('Not set') : fmtDate(_followUp!)),
               onTap: () async {
                 final now = DateTime.now();
-                final d = await showDatePicker(
-                    context: context,
-                    initialDate: _followUp ?? now,
-                    firstDate: DateTime(now.year - 1),
-                    lastDate: DateTime(now.year + 2));
+                final d = await pickDate(context,
+                    initial: _followUp ?? now, first: DateTime(now.year - 1), last: DateTime(now.year + 2));
                 if (d != null) setState(() => _followUp = d);
               },
             ),

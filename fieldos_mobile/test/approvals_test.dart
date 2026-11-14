@@ -23,6 +23,25 @@ void main() {
     expect(decided, isEmpty);
   });
 
+  test('a decided approval is not decided again', () async {
+    // A manager approves; a second manager whose list was opened before the
+    // pull taps Reject on the same request. The first decision stands.
+    final db = AppDatabase.memory();
+    await raiseBudgetOverrunApproval(db, 'p1', -650.0, requestedBy: 'u1');
+    final id = (await db.approvalDao.pendingFor(null)).single.id;
+
+    expect(await db.approvalDao.decide(id, true, 'pm1', null), isTrue);
+    final queued = (await db.syncOutboxDao.pending()).length;
+    expect(await db.approvalDao.decide(id, false, 'pm2', 'Too costly'), isFalse);
+
+    final row = await (db.select(db.approvals)..where((a) => a.id.equals(id))).getSingle();
+    expect(row.status, 'approved');
+    expect(row.approverId, 'pm1');
+    expect(row.decisionNote, isNot(contains('Too costly')));
+    expect((await db.syncOutboxDao.pending()).length, queued);
+    await db.close();
+  });
+
   test('DPR-detected issue links back to its DPR entry', () async {
     final db = AppDatabase.memory();
     final project = await db.projectDao.create(ProjectsCompanion.insert(

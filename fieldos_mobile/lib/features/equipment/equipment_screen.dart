@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -73,8 +74,8 @@ Future<void> editEquipment(BuildContext context, WidgetRef ref,
   DateTime? returnDue = e?.returnDueOn;
   String? nameError;
 
-  Future<DateTime?> pick(BuildContext ctx, DateTime initial, {DateTime? first}) => showDatePicker(
-      context: ctx, initialDate: initial, firstDate: first ?? DateTime(2020), lastDate: DateTime(today.year + 3));
+  Future<DateTime?> pick(BuildContext ctx, DateTime initial, {DateTime? first}) =>
+      pickDate(ctx, initial: initial, first: first ?? DateTime(2020), last: DateTime(today.year + 3));
 
   final ok = await showDialog<bool>(
     context: context,

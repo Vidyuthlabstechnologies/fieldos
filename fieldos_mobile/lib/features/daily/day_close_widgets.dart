@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -291,15 +292,25 @@ class _SetupSheetState extends ConsumerState<_SetupSheet> {
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.event),
             title: Text(tr('Covers until')),
-            trailing: Text(_until == null ? tr('Until I change it') : fmtDate(_until!, short: true)),
+            trailing: _until == null
+                ? Text(tr('Until I change it'))
+                : Row(mainAxisSize: MainAxisSize.min, children: [
+                    Text(fmtDate(_until!, short: true)),
+                    // Cancelling the picker keeps the date, so clearing it
+                    // back to "until I change it" is its own tap.
+                    IconButton(
+                      tooltip: tr('Until I change it'),
+                      icon: const Icon(Icons.close),
+                      onPressed: () => setState(() => _until = null),
+                    ),
+                  ]),
             onTap: () async {
               final now = DateTime.now();
-              final d = await showDatePicker(
-                  context: context,
-                  initialDate: _until ?? now,
-                  firstDate: dayOf(now),
-                  lastDate: now.add(const Duration(days: 90)));
-              setState(() => _until = d == null ? null : dayOf(d));
+              // An expired date opens on today (the cover cannot end in
+              // the past); cancelling keeps what was set.
+              final d = await pickDate(context,
+                  initial: _until ?? now, first: dayOf(now), last: now.add(const Duration(days: 90)), keepRange: true);
+              if (d != null) setState(() => _until = dayOf(d));
             },
           ),
         if (roster == null || roster.members.isEmpty)
