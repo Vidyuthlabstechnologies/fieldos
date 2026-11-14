@@ -2992,4 +2992,5 @@ const stringsMs = <String, String>{
   'Ton (2,000 lb)': 'Tan (2,000 lb)',
   'Cement bag (94 lb)': 'Beg simen (94 lb)',
   'Add your {label} in "Your details on bills" first. Without it a bill cannot charge {tax}; pick None.': 'Tambah {label} anda dalam "Butiran anda pada bil" dahulu. Tanpanya bil tidak boleh mengenakan {tax}; pilih Tiada.',
+  'This site has only {qty} on record.': 'Tapak ini hanya ada {qty} dalam rekod.',
 };

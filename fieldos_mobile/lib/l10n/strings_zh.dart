@@ -2992,4 +2992,5 @@ const stringsZh = <String, String>{
   'Ton (2,000 lb)': '吨（2,000 lb）',
   'Cement bag (94 lb)': '水泥包（94 lb）',
   'Add your {label} in "Your details on bills" first. Without it a bill cannot charge {tax}; pick None.': '请先在“账单上的你的资料”中添加你的{label}。没有它，账单不能收取{tax}；请选择“无”。',
+  'This site has only {qty} on record.': '这个工地记录中只有 {qty}。',
 };
