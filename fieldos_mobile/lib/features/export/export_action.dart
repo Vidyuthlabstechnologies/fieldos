@@ -110,6 +110,23 @@ Future<void> showAccountsExport(BuildContext context, WidgetRef ref) async {
               onPressed: () => Navigator.pop(ctx, AccountsFormat.tally),
             ),
             if (isIndia) const SizedBox(height: 8),
+            // Product names, the same in every language.
+            if (!isIndia) ...[
+              FilledButton.icon(
+                key: const Key('accounts-quickbooks'),
+                icon: const Icon(Icons.account_balance_outlined),
+                label: const Text('QuickBooks Online (CSV)'),
+                onPressed: () => Navigator.pop(ctx, AccountsFormat.quickbooks),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                key: const Key('accounts-xero'),
+                icon: const Icon(Icons.account_balance_wallet_outlined),
+                label: const Text('Xero (CSV)'),
+                onPressed: () => Navigator.pop(ctx, AccountsFormat.xero),
+              ),
+              const SizedBox(height: 8),
+            ],
             OutlinedButton.icon(
               key: const Key('accounts-zoho'),
               icon: const Icon(Icons.table_rows_outlined),
@@ -131,15 +148,25 @@ Future<void> showAccountsExport(BuildContext context, WidgetRef ref) async {
       if (context.mounted) showSnack(context, 'No money entries in this period.');
       return;
     }
-    final note = format == AccountsFormat.tally
-        ? '${company.name}: ${export.vouchers} vouchers for Tally, checked before sending.\n'
-            'First import the ledgers file (Gateway > Import > Masters), then the vouchers (Import > Vouchers). '
-            'Ledgers: ${export.ledgers.join(', ')}.'
-        : '${company.name}: ${export.vouchers} expenses for Zoho Books (Purchases > Expenses > Import), checked before sending.';
+    final note = switch (format) {
+      AccountsFormat.tally => '${company.name}: ${export.vouchers} vouchers for Tally, checked before sending.\n'
+          'First import the ledgers file (Gateway > Import > Masters), then the vouchers (Import > Vouchers). '
+          'Ledgers: ${export.ledgers.join(', ')}.',
+      AccountsFormat.zoho =>
+        '${company.name}: ${export.vouchers} expenses for Zoho Books (Purchases > Expenses > Import), checked before sending.',
+      AccountsFormat.quickbooks => '${company.name}: ${export.vouchers} transactions for QuickBooks Online, checked before sending.\n'
+          'One file per account (cash, bank). In QuickBooks: Transactions > Bank transactions > Upload transactions, '
+          'pick the matching account, choose the three-column layout and the date format of the file. '
+          'Each line starts with its category: ${export.ledgers.join(', ')}.',
+      AccountsFormat.xero => '${company.name}: ${export.vouchers} transactions for Xero, checked before sending.\n'
+          'One file per account (cash, bank). In Xero: Accounting > Bank accounts > Import a statement, '
+          'one file into each matching account. Each line starts with its category: ${export.ledgers.join(', ')}.',
+    };
     await SharePlus.instance.share(ShareParams(
       files: [
         if (out.ledgersFile != null) XFile(out.ledgersFile!.path, mimeType: 'application/xml'),
         XFile(out.file.path, mimeType: format == AccountsFormat.tally ? 'application/xml' : 'text/csv'),
+        for (final f in out.moreFiles) XFile(f.path, mimeType: 'text/csv'),
       ],
       text: note,
       subject: note.split('\n').first,

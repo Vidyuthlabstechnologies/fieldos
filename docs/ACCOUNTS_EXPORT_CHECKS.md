@@ -86,3 +86,28 @@ It is built from the records themselves, most of which are insert-only, in
 `fieldos_mobile/lib/features/export/audit_trail.dart`. Money in (bills,
 payments, allocations) is left out for anyone who does not see it in the
 app. Test: `test/audit_trail_test.dart`.
+
+## QuickBooks Online and Xero (US, Malaysia, UAE, UK apps)
+
+Outside India the sheet offers QuickBooks Online and Xero instead of Tally.
+Both import a bank statement CSV into one bank or cash account without any
+chart of accounts set up first, so the export is one statement file per
+account the money moved through (`..._cash.csv`, `..._bank_account.csv`):
+spending negative, client payments positive, oldest first, dates in the
+market's order (US month first, the others day first). Each line's
+description starts with the expense category, then the site, payee, note
+and the tax rate when the bill had one, so bank rules in either product can
+categorise it.
+
+- QuickBooks: `Date,Description,Amount` (the three-column layout). Upload
+  from Transactions > Bank transactions > Upload transactions.
+- Xero: `Date,Amount,Payee,Description,Reference`. Import from the bank
+  account's Import a statement.
+
+Their bill and invoice imports were not used: both need the firm's own
+account codes, which the phone does not know. Each file is checked for the
+columns, a real date in the market's order on every row, and a number other
+than zero for the amount.
+
+"This financial year" is April to March in India and the UK and the
+calendar year in the US, Malaysia and the UAE.
