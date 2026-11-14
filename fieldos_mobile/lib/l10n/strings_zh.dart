@@ -3017,4 +3017,6 @@ const stringsZh = <String, String>{
   'Emirates ID': '阿联酋身份证',
   'CSCS card': 'CSCS 卡',
   'Right to work (visa)': '工作权（签证）',
+  'Contract sum': '合同总额',
+  'Retention stops at {pct}% of it': '保留金最多为其 {pct}%',
 };

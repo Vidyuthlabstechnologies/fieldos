@@ -3019,4 +3019,6 @@ const Map<String, String> stringsEs = {
   'Emirates ID': 'Emirates ID',
   'CSCS card': 'Tarjeta CSCS',
   'Right to work (visa)': 'Derecho a trabajar (visa)',
+  'Contract sum': 'Monto del contrato',
+  'Retention stops at {pct}% of it': 'La retención se detiene en el {pct}% de este',
 };

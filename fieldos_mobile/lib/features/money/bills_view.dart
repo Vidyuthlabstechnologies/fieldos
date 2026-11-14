@@ -394,7 +394,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
   late final _client = TextEditingController(text: widget.project.clientName ?? '');
   final _clientGstin = TextEditingController();
   final _number = TextEditingController();
-  final _retention = TextEditingController(text: '5');
+  final _retention = TextEditingController(text: fmtQty(market.retentionDefaultPct));
   final _tds = TextEditingController(text: '0');
   final _notes = TextEditingController();
   double _gstRate = market.tax.defaultRate;
@@ -570,6 +570,17 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
       return;
     }
     setState(() => _saving = true);
+    // Malaysia: all retention on the contract stays within the limit of
+    // retention fund (5% of the contract sum).
+    final limit = market.retentionLimitOfContractPct;
+    if (limit != null && _pct(_retention) > 0) {
+      final sum = double.tryParse((await ref.read(appDatabaseProvider).settingsDao.get(contractSumKey(widget.project.id))) ?? '');
+      final gross = billTotals(lines, gstRate: _gstRate, interState: _interState).gross;
+      final kept = bills.where((b) => b.kind != 'tax_invoice').fold<double>(0, (a, b) => a + b.gross * b.retentionPct / 100);
+      final allowed = retentionPctWithinLimit(
+          pct: _pct(_retention), gross: gross, alreadyKept: kept, contractSum: sum, limitPctOfContract: limit);
+      if (allowed != _pct(_retention)) _retention.text = fmtQty(allowed);
+    }
     final totals = billTotals(lines,
         gstRate: _gstRate, interState: _interState, retentionPct: _pct(_retention), tdsPct: _pct(_tds));
     await ref.read(appDatabaseProvider).billDao.create(ClientBillsCompanion.insert(
@@ -750,6 +761,10 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
                 decoration: InputDecoration(labelText: tr('Retention %'), helperText: tr('Held back by the client')),
               ),
             ),
+            if (market.retentionLimitOfContractPct != null) ...[
+              const SizedBox(width: 12),
+              Expanded(child: _ContractSumField(projectId: widget.project.id)),
+            ],
             if (market.tax.withholdingLabel != null) ...[
               const SizedBox(width: 12),
               Expanded(
@@ -828,3 +843,51 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
         ]),
       );
 }
+
+/// Where a site's contract sum is kept, for the limit of retention fund.
+String contractSumKey(String projectId) => 'contract_sum:$projectId';
+
+/// The contract sum, saved as it is typed; retention on later claims stops
+/// at the market's limit of it.
+class _ContractSumField extends ConsumerStatefulWidget {
+  const _ContractSumField({required this.projectId});
+  final String projectId;
+
+  @override
+  ConsumerState<_ContractSumField> createState() => _ContractSumFieldState();
+}
+
+class _ContractSumFieldState extends ConsumerState<_ContractSumField> {
+  final _c = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(appDatabaseProvider).settingsDao.get(contractSumKey(widget.projectId)).then((v) {
+      if (mounted && v != null && _c.text.isEmpty) _c.text = v;
+    });
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => TextField(
+        key: const Key('contract-sum'),
+        controller: _c,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        onChanged: (v) {
+          final n = double.tryParse(v.replaceAll(',', '').trim());
+          ref.read(appDatabaseProvider).settingsDao.set(contractSumKey(widget.projectId), n == null ? '' : '$n');
+        },
+        decoration: InputDecoration(
+          labelText: tr('Contract sum'),
+          prefixText: currencySymbol,
+          helperText: trf('Retention stops at {pct}% of it', {'pct': fmtQty(market.retentionLimitOfContractPct!)}),
+        ),
+      );
+}
+

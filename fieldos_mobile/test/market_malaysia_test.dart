@@ -47,4 +47,22 @@ void main() {
     expect(tr('Make the next RA bill'), 'Make the next progress claim');
     expect(tr('GST'), 'SST');
   });
+
+  test('retention: 10% a claim, stopping at 5% of the contract sum', () {
+    debugSetMarket(Market.malaysia);
+    expect(market.retentionDefaultPct, 10);
+    // Contract RM1,000,000: limit RM50,000. RM40,000 already kept.
+    expect(
+        retentionPctWithinLimit(pct: 10, gross: 50000, alreadyKept: 40000, contractSum: 1000000, limitPctOfContract: 5),
+        10); // 5,000 fits in the 10,000 left
+    expect(
+        retentionPctWithinLimit(pct: 10, gross: 200000, alreadyKept: 40000, contractSum: 1000000, limitPctOfContract: 5),
+        5); // room 10,000 of 200,000 = 5%
+    expect(retentionPctWithinLimit(pct: 10, gross: 100000, alreadyKept: 50000, contractSum: 1000000, limitPctOfContract: 5), 0);
+    expect(retentionPctWithinLimit(pct: 10, gross: 100000, alreadyKept: 0, limitPctOfContract: 5), 10); // no sum: unchanged
+    debugSetMarket(Market.india);
+    expect(market.retentionDefaultPct, 5);
+    expect(market.retentionLimitOfContractPct, isNull);
+  });
 }
+

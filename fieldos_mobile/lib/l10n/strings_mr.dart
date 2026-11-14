@@ -3371,4 +3371,6 @@ const Map<String, String> stringsMr = {
   'Emirates ID': 'एमिरेट्स आयडी',
   'CSCS card': 'CSCS कार्ड',
   'Right to work (visa)': 'काम करण्याचा अधिकार (व्हिसा)',
+  'Contract sum': 'करार रक्कम',
+  'Retention stops at {pct}% of it': 'रिटेन्शन याच्या {pct}% वर थांबते',
 };

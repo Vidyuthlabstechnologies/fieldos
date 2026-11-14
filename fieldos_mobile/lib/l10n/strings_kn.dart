@@ -3371,4 +3371,6 @@ const Map<String, String> stringsKn = {
   'Emirates ID': 'ಎಮಿರೇಟ್ಸ್ ಐಡಿ',
   'CSCS card': 'CSCS ಕಾರ್ಡ್',
   'Right to work (visa)': 'ಕೆಲಸ ಮಾಡುವ ಹಕ್ಕು (ವೀಸಾ)',
+  'Contract sum': 'ಒಪ್ಪಂದದ ಮೊತ್ತ',
+  'Retention stops at {pct}% of it': 'ರಿಟೆನ್ಷನ್ ಇದರ {pct}% ಗೆ ನಿಲ್ಲುತ್ತದೆ',
 };

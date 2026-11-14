@@ -148,7 +148,17 @@ class MarketConfig {
     this.payHourly = false,
     required this.instantPaymentName,
     this.billFooterNote,
+    this.retentionDefaultPct = 5,
+    this.retentionLimitOfContractPct,
   });
+
+  /// The retention (retainage) a progress bill keeps back by default.
+  final double retentionDefaultPct;
+
+  /// The most retention a contract may hold in all, as a percent of the
+  /// contract sum: the "limit of retention fund" in Malaysian PAM and JKR
+  /// contracts (usually 5%). Null where contracts set no such cap.
+  final double? retentionLimitOfContractPct;
 
   /// ISO 4217: 'INR', 'USD', 'MYR', 'AED', 'GBP'.
   final String currencyCode;
@@ -296,6 +306,10 @@ const _malaysia = MarketConfig(
   minorWordsFirst: true,
   instantPaymentName: 'DuitNow',
   billFooterNote: 'This document is not an e-Invoice validated by LHDN (MyInvois).',
+  // PAM 2018 / JKR 203A: 10% of each certificate, up to a limit of 5% of
+  // the contract sum.
+  retentionDefaultPct: 10,
+  retentionLimitOfContractPct: 5,
   pdfCurrency: 'RM',
   indianGrouping: false,
   dateOrder: DateOrder.dmy,
