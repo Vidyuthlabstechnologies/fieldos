@@ -4,8 +4,11 @@
 /// The usual private-sector rules, kept to what a small builder runs:
 /// - Pay is the monthly salary for the days paid: each part (basic, HRA,
 ///   other) times paid days over the days in the month, to the rupee.
-/// - PF: 12% from the employee and 12% from the company, on the basic
-///   earned up to Rs 15,000 (the statutory wage ceiling).
+/// - PF: 12% from the employee and 12% from the company, on the PF wage
+///   earned up to Rs 15,000 (the statutory wage ceiling). Since the labour
+///   codes came into force (21 November 2025), allowances above half of
+///   the pay count as wages, so the PF wage is the basic or half of the
+///   pay, whichever is more ([pfWageFor]).
 /// - ESI: when the full monthly salary is Rs 21,000 or less, 0.75% from
 ///   the employee and 3.25% from the company on what was earned, each
 ///   rounded up to the rupee.
@@ -52,6 +55,14 @@ double professionalTax(String state, double grossEarned) {
 }
 
 double fullMonthGross(StaffMember s) => s.basic + s.hra + s.otherAllowance;
+
+/// The wage PF is worked out on. Under the Code on Wages, 2019 (section
+/// 2(y)) and the Code on Social Security, 2020, what is left out of wages
+/// (HRA and other allowances here) can be at most half of the pay; the
+/// rest is added back. So the wage is the basic, or half of the pay when
+/// that is more, up to the Rs 15,000 ceiling.
+double pfWageFor({required double basic, required double gross}) =>
+    math.min(math.max(basic, (gross / 2).roundToDouble()), pfWageCeiling);
 
 class PayCalc {
   const PayCalc({
@@ -108,7 +119,7 @@ PayCalc computePay(
   final other = (s.otherAllowance * ratio).roundToDouble();
   final gross = basic + hra + other;
 
-  final pfWage = math.min(basic, pfWageCeiling);
+  final pfWage = pfWageFor(basic: basic, gross: gross);
   final pfEmp = s.pf ? (pfWage * pfRate).roundToDouble() : 0.0;
   final pfEr = s.pf ? (pfWage * pfRate).roundToDouble() : 0.0;
   final esiOn = s.esi && fullMonthGross(s) <= esiWageLimit && gross > 0;

@@ -110,13 +110,15 @@ before launch.
 
 | Question | Answer |
 |---|---|
-| Does the app collect or share user data? | Collects: yes. Shares: no (Supabase, RevenueCat and Sarvam are service providers processing on our behalf; Google ML Kit's data stays with Google and is not passed to third parties). |
+| Does the app collect or share user data? | Collects: yes. Shares: no (Supabase, RevenueCat, Anthropic and Sarvam are service providers processing on our behalf, which Play does not count as sharing; Google ML Kit's data stays with Google and is not passed to third parties). The app asks before Ask FieldOS sends anything to Anthropic or Sarvam (Settings › Your privacy takes it back). |
 | Encrypted in transit? | Yes (HTTPS). |
 | Can users request deletion? | Yes: in the app (Team & sync → Delete my cloud account) and by email (see policy). For "Delete account URL", use the published privacy policy page; its "Deleting data" section explains both routes. |
 | Personal info → Email address, Name | Collected, required for Team & sync, purpose: App functionality, Account management. |
+| Personal info → Phone number | Collected, optional: phone numbers a company records for its leads, workers and suppliers. Purpose: App functionality. |
+| Personal info → Other info | Collected, optional: messages and site details sent to the AI assistant (processed ephemerally by Anthropic or Sarvam; only a usage count is kept). Purpose: App functionality. |
 | Location → Precise location | Collected, optional, purpose: App functionality (attendance geofence, photo location stamp). |
 | Audio → Voice or sound recordings | Collected, optional, processed ephemerally, purpose: App functionality. Only the Sarvam fallback sends a recording, and only on phones that can't recognise the chosen language. The phone's own speech recognition is a system service of Google or Apple, not part of the app. |
-| Photos | Collected, optional, purpose: App functionality (site evidence). |
+| Photos | Collected, optional, purpose: App functionality (site evidence, and attendance selfies, which are never used for face recognition). |
 | Files and docs | Collected, optional, purpose: App functionality (project documents). |
 | Messages → Other in-app messages | Collected (team chat), purpose: App functionality. |
 | Financial info → Purchase history | Collected (subscription, via Google Play and RevenueCat), required, not ephemeral, purposes: App functionality, Analytics (RevenueCat's own guidance). |
@@ -129,9 +131,13 @@ Sources for the SDK rows: [ML Kit data disclosure](https://developers.google.com
 and [RevenueCat: Google Play's Data Safety](https://www.revenuecat.com/docs/platform-resources/google-platform-resources/google-plays-data-safety).
 Check both again before submitting, since SDK updates can change them.
 
-**Content rating:** questionnaire answers are all "No" (utility app, no
-user-generated content shared publicly; team chat is private to the
-company). Expected rating: Everyone / 3+.
+**Content rating:** answer "Yes" to "Can users interact or exchange
+content?" (project chat and shared photos inside a company), and say that
+users can report messages and block people in the app. Everything else is
+"No" (business utility, no gambling, no violence). Expected rating:
+Everyone / 3+ with the "Users Interact" notice. Answering "No" to the
+interaction question while the app has a chat is a listing mismatch Play
+can act on.
 
 **Target audience:** 18+. **Ads:** No. **Government app:** No.
 
