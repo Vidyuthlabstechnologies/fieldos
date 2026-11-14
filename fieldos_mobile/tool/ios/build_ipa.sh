@@ -8,6 +8,10 @@
 #   SUPABASE_URL, SUPABASE_ANON_KEY   Team & sync (the production project)
 #   REVENUECAT_IOS_KEY                RevenueCat's PUBLIC Apple key (appl_...)
 # Optional:
+#   FIELDOS_MARKET                    in (default), us, my, ae or uk: which
+#                                     country's app; sets the bundle id
+#                                     (com.mldynamic.fieldos.us ...) through
+#                                     ios/Flutter/Market.xcconfig
 #   GOOGLE_WEB_CLIENT_ID + GOOGLE_IOS_CLIENT_ID   "Continue with Google"
 #   PRIVACY_POLICY_URL, TERMS_URL     default: the live FieldOS website
 #   BUILD_NUMBER                      default: the +N in pubspec.yaml
@@ -30,6 +34,16 @@ case "$REVENUECAT_IOS_KEY" in
   appl_*) ;;
   *) echo "error: REVENUECAT_IOS_KEY should be the Apple public SDK key (starts with appl_)" >&2; exit 1 ;;
 esac
+
+FIELDOS_MARKET="${FIELDOS_MARKET:-in}"
+case "$FIELDOS_MARKET" in
+  in) suffix="" ;;
+  us|my|ae|uk) suffix=".$FIELDOS_MARKET" ;;
+  *) echo "error: FIELDOS_MARKET should be in, us, my, ae or uk (got $FIELDOS_MARKET)" >&2; exit 1 ;;
+esac
+sed -i.bak "s|^FIELDOS_BUNDLE_SUFFIX =.*|FIELDOS_BUNDLE_SUFFIX = $suffix|" ios/Flutter/Market.xcconfig
+rm -f ios/Flutter/Market.xcconfig.bak
+echo "Building the $FIELDOS_MARKET app: com.mldynamic.fieldos$suffix"
 
 PRIVACY_POLICY_URL="${PRIVACY_POLICY_URL:-https://fieldos-mldynamic.netlify.app/privacy-policy.html}"
 TERMS_URL="${TERMS_URL:-https://fieldos-mldynamic.netlify.app/terms-of-use.html}"
@@ -56,6 +70,7 @@ fi
 
 args=(build ipa --release
   "--dart-define=FIELDOS_STORE_RELEASE=true"
+  "--dart-define=FIELDOS_MARKET=$FIELDOS_MARKET"
   "--dart-define=SUPABASE_URL=$SUPABASE_URL"
   "--dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
   "--dart-define=REVENUECAT_IOS_KEY=$REVENUECAT_IOS_KEY"

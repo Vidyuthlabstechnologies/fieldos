@@ -91,7 +91,7 @@ class AppWithMaterial extends ConsumerWidget {
       navigatorKey: appNavigatorKey,
       // Date pickers, dialogs' OK/Cancel and the like in the same language.
       locale: language.locale,
-      supportedLocales: [for (final l in AppLanguage.values) l.locale],
+      supportedLocales: [for (final l in AppLanguage.offered) l.locale],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       builder: (context, child) {
         final size = ref.watch(textSizeProvider);

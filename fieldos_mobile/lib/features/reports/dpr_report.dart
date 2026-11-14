@@ -20,6 +20,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/core/brand.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
@@ -44,7 +45,7 @@ String _latin(String s) => s
     .replaceAll(RegExp('[“”„″]'), '"')
     .replaceAll('•', '-')
     .replaceAll('…', '...')
-    .replaceAll('₹', 'Rs. ')
+    .replaceAll('₹', market.pdfCurrency)
     .replaceAll(' ', ' ');
 
 /// True when [text] has characters the PDF's built-in font cannot draw
