@@ -23,16 +23,16 @@ class Brand {
   /// Light page background, a touch cooler than white so cards stand out.
   static const paper = Color(0xFFF4F6F9);
   static const ink = Color(0xFF13233A);
-  static const inkMuted = Color(0xFF5B6B80);
+  static const inkMuted = Color(0xFF56667A);
   static const line = Color(0xFFDDE3EB);
 
   /// Status colours. Earthy and muted so they sit with the navy and
   /// amber instead of shouting over them: a moss green, a burnt ochre and
   /// a brick red, still dark enough to read in bright sunlight. They mark
   /// a status with a small dot or a word, never a big filled block.
-  static const ok = Color(0xFF3F7A5C);
+  static const ok = Color(0xFF3B7556);
   static const okSoft = Color(0xFFEAF2EC);
-  static const warn = Color(0xFFA8650B);
+  static const warn = Color(0xFF9C5D09);
   static const warnSoft = Color(0xFFFBF1DF);
   static const danger = Color(0xFFB0412E);
   static const dangerSoft = Color(0xFFF8ECE8);

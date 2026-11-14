@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 /// Rebuilds every widget so labels already on screen switch language in
@@ -86,7 +87,10 @@ class LanguageChooserRow extends ConsumerWidget {
             style: TextButton.styleFrom(
               foregroundColor: color,
               disabledForegroundColor: color,
-              textStyle: TextStyle(fontWeight: l == current ? FontWeight.w800 : FontWeight.w400),
+              textStyle: TextStyle(
+                  fontFamily: Brand.fontFamily,
+                  fontFamilyFallback: Brand.fontFallback,
+                  fontWeight: l == current ? FontWeight.w800 : FontWeight.w400),
             ),
             child: Text(l.nativeName),
           ),

@@ -56,6 +56,7 @@ class SubcontractorsScreen extends ConsumerWidget {
         error: (e, st) => ErrorState(error: e, stack: st),
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: tr('Add subcontractor'),
         child: const Icon(Icons.add),
         onPressed: () => _add(context, ref),
       ),
