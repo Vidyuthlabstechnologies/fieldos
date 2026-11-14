@@ -88,11 +88,12 @@ String fmtQty(num q) {
 /// Rupees with Indian grouping: "₹12,34,567". Whole rupees unless [paise]
 /// is true and the amount has some ("₹45.50").
 String rupees(num v, {bool paise = false}) {
-  final neg = v < 0;
   final abs = v.abs();
   final cents = (abs * 100).round();
   final showPaise = paise && cents % 100 != 0;
   final whole = (showPaise ? cents ~/ 100 : abs.round()).toString();
+  // "-₹0" for a balance that is only float dust below zero reads as owed.
+  final neg = v < 0 && (showPaise || whole != '0');
   String grouped;
   if (whole.length <= 3) {
     grouped = whole;

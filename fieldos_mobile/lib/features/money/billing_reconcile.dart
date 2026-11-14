@@ -11,7 +11,8 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
-double _r2(double v) => (v * 100).roundToDouble() / 100;
+// Same half-up rounding as billTotals, so retention kept matches the bill.
+double _r2(double v) => ((v * 100) + (v < 0 ? -1e-6 : 1e-6)).roundToDouble() / 100;
 double _r3(double v) => (v * 1000).roundToDouble() / 1000;
 
 // --- RA bill from approved measurements ------------------------------------

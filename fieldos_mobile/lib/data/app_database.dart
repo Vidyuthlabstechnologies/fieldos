@@ -1445,7 +1445,9 @@ class PaymentDao extends DatabaseAccessor<AppDatabase> with _$PaymentDaoMixin {
         editedAt: Value(now ?? DateTime.now()),
         editedBy: Value(by),
       ));
-      return _queueUpdate(id);
+      final row = await _queueUpdate(id);
+      await db.billingRecordsDao.resettleBillsOf(id);
+      return row;
     });
   }
 
@@ -3218,8 +3220,40 @@ class BillingRecordsDao extends DatabaseAccessor<AppDatabase> with _$BillingReco
 
   // Payments against bills
 
-  Future<List<BillAllocation>> allocationsFor(String projectId) =>
-      (select(billAllocations)..where((a) => a.projectId.equals(projectId))).get();
+  /// The allocations that count. A cancelled payment (a bounced cheque)
+  /// pays no bill, so its allocations are left out until it is restored;
+  /// otherwise the bill stays paid and the corrected payment can't go
+  /// against it.
+  Future<List<BillAllocation>> allocationsFor(String projectId) async {
+    final cancelled = {
+      for (final p in await (select(paymentsReceived)
+            ..where((p) => p.projectId.equals(projectId) & p.voided.equals(true)))
+          .get())
+        p.id,
+    };
+    final rows = await (select(billAllocations)..where((a) => a.projectId.equals(projectId))).get();
+    return [for (final a in rows) if (!cancelled.contains(a.paymentId)) a];
+  }
+
+  /// After [paymentId] is cancelled or restored: a bill it covered is due
+  /// again, or paid again.
+  Future<void> resettleBillsOf(String paymentId) async {
+    final mine =
+        await (select(billAllocations)..where((a) => a.paymentId.equals(paymentId) & a.kind.equals('bill'))).get();
+    if (mine.isEmpty) return;
+    final live = await allocationsFor(mine.first.projectId);
+    for (final billId in {for (final a in mine) a.billId}) {
+      final b = await (select(clientBills)..where((x) => x.id.equals(billId))).getSingleOrNull();
+      if (b == null) continue;
+      final paid = live.where((a) => a.billId == billId && a.kind == 'bill').fold(0.0, (s, a) => s + a.amount);
+      final covered = b.netPayable - paid <= 0.005;
+      if (covered && b.status != 'paid') {
+        await db.billDao.setStatus(billId, 'paid');
+      } else if (!covered && b.status == 'paid') {
+        await db.billDao.setStatus(billId, 'issued');
+      }
+    }
+  }
 
   /// Puts [amount] of [paymentId] against [billId] (its net amount, or its
   /// retention). Marks the bill paid when its net amount is covered.
@@ -3311,7 +3345,8 @@ class BillingRecordsDao extends DatabaseAccessor<AppDatabase> with _$BillingReco
       into(supplierInvoices).insertOnConflictUpdate(c);
 }
 
-double _round2(double v) => (v * 100).roundToDouble() / 100;
+// Half up, like billTotals, so the retention allocate() allows is the bill's.
+double _round2(double v) => ((v * 100) + (v < 0 ? -1e-6 : 1e-6)).roundToDouble() / 100;
 
 /// Multi-level approvals by amount (v30): the owner's rules, and the
 /// signatures on each item. What a chain needs is worked out in
