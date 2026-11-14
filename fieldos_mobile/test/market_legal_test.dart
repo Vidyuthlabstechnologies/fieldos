@@ -76,7 +76,10 @@ void main() {
         'one month', 'Information Commissioner', 'face recognition', 'Mumbai, India', '72 hours']) {
       expect(policy, contains(want));
     }
-    for (final want in ['England and Wales', 'Article 28', 'HMRC', 'reverse charge', 'death or personal injury']) {
+    expect(policy, contains('decides its own lawful basis'));
+    expect(policy, contains('acknowledge a complaint within 30 days'));
+    for (final want in ['England and Wales', 'Article 28', 'HMRC', 'reverse charge', 'death or personal injury',
+        'Consumer Rights Act 2015', 'if you or your business are in']) {
       expect(terms, contains(want));
     }
     final numbers = [for (final s in marketTermsOfUse.sections) int.parse(s.heading.split('.').first)];

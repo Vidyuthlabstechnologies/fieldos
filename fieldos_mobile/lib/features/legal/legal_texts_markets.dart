@@ -680,8 +680,9 @@ final ukPrivacyPolicy = adaptLegal(
       'Where your data is processed',
       'Why we use your data (the lawful basis): to provide FieldOS to you and your company under our contract; for our '
           'legitimate interests in keeping FieldOS secure, fixing faults and answering reports; and with your consent '
-          'for the AI assistant, crash details and the photo and location for your attendance, which you can withdraw '
-          'at any time.\n\nYour cloud records are stored by Supabase in Mumbai, India, outside the UK. A few other '
+          'for the AI assistant and crash details, which you can withdraw at any time. The photo and location for '
+          'attendance are processed for your company, which decides its own lawful basis; the app tells you first and '
+          'lets you use supervisor sign-in instead.\n\nYour cloud records are stored by Supabase in Mumbai, India, outside the UK. A few other '
           'services we use are run from other countries: Anthropic (USA) for the AI assistant, with Sarvam AI (India) '
           'as its backup, RevenueCat (USA) for checking subscriptions, GitHub (USA) for our private copy of bug and '
           'message reports, and Google and Apple for sign-in, speech and the stores. India has no UK adequacy decision, '
@@ -723,15 +724,16 @@ final ukPrivacyPolicy = adaptLegal(
           'privacy. We reply within one month; if a request is complex we may take up to two more months, and will tell '
           'you why within the first month. If your data is in a company\'s records (for example as an operative or a '
           'lead), that company is the controller: we pass your request to it and tell you we have done so. You can '
-          'withdraw your consent at any time: turn off the AI assistant, crash details, or the photo and location for '
-          'your attendance in Settings, Your privacy, or delete your cloud account. Withdrawing does not affect what was '
-          'done before.',
+          'withdraw your consent at any time: turn off the AI assistant or crash details in Settings, Your privacy, or '
+          'delete your cloud account. Withdrawing does not affect what was done before. In the same place you can also '
+          'choose supervisor sign-in instead of the attendance photo and location.',
     ),
     'Grievance officer': const LegalSection(
       'Privacy contact and complaints',
       'For any question or complaint about your personal data, write to our privacy contact at info@mldynamic.com with '
-          '"Privacy" in the subject. If you are not satisfied with our answer, you can complain to the Information '
-          'Commissioner\'s Office (ico.org.uk, 0303 123 1113).',
+          '"Privacy" in the subject. We acknowledge a complaint within 30 days and tell you what we are doing about it. '
+          'If you are not satisfied with our answer, you can complain to the Information Commissioner\'s Office '
+          '(ico.org.uk, 0303 123 1113).',
     ),
     'Contact': const LegalSection(
       'Contact',
@@ -752,7 +754,7 @@ final ukTermsOfUse = adaptLegal(
     '1. Who can use FieldOS': const LegalSection(
       '1. Who can use FieldOS',
       'You must be at least 18 years old. FieldOS is made for contractors, builders and their site teams, for use in '
-          'their trade or business, not as consumers.',
+          'their trade or business.',
     ),
     '3. Subscription, free trial and payment': const LegalSection(
       '3. Subscription, free trial and payment',
@@ -795,7 +797,8 @@ final ukTermsOfUse = adaptLegal(
           'is limited to the amount you paid for FieldOS in the 12 months before the event that led to the claim.'
           '\n\nNothing in these terms limits or excludes liability for death or personal injury caused by negligence, '
           'for fraud or fraudulent misrepresentation, or any other liability that cannot be limited or excluded under '
-          'the law of England and Wales.',
+          'the law of England and Wales.\n\nIf you are a consumer, nothing in these terms affects your statutory '
+          'rights, including those under the Consumer Rights Act 2015.',
     ),
     '16. Changes to these terms': const LegalSection(
       '16. Changes to these terms',
@@ -807,8 +810,8 @@ final ukTermsOfUse = adaptLegal(
       '17. Law and disputes',
       'These terms are governed by the law of England and Wales. If you have a complaint, please write to us first at '
           'info@mldynamic.com so we can try to settle it; most problems can be solved this way within 30 days. If it is '
-          'not settled, the courts of England and Wales have jurisdiction, except that if your business is in Scotland '
-          'or Northern Ireland you may also bring a claim in the courts there.',
+          'not settled, the courts of England and Wales have jurisdiction, except that if you or your business are in '
+          'Scotland or Northern Ireland you may also bring a claim in the courts there.',
     ),
     '18. Grievance officer': const LegalSection(
       '18. Your operatives\' personal data',
