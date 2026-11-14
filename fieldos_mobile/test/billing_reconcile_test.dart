@@ -169,6 +169,18 @@ void main() {
       expect(bills.single.status, 'paid');
       expect(billBalances(bills, await dao.allocationsFor(site.id)).single.settled, isTrue);
     });
+
+    test('a payment already put against bills cannot be cut below what it covers', () async {
+      final ra1 = await _bill('RA-01', [const BillLine(description: 'Work', unit: 'cum', rate: 1000, qty: 100)]);
+      final p = await _payment('pay-1', 113000);
+      await db.billingRecordsDao.allocate(paymentId: p.id, billId: ra1.id, amount: 113000, by: 'pm');
+      await expectLater(
+          db.paymentDao.edit(p.id, const PaymentsReceivedCompanion(amount: Value(13000)), by: 'pm'), throwsA(isA<AllocationTooBig>()));
+      expect((await db.paymentDao.forProject(site.id)).single.amount, 113000);
+      // Other fixes, and raising the amount, still go through.
+      await db.paymentDao.edit(p.id, const PaymentsReceivedCompanion(amount: Value(120000), note: Value('UTR fixed')), by: 'pm');
+      expect((await db.paymentDao.forProject(site.id)).single.amount, 120000);
+    });
   });
 
   group('supplier invoice against PO and GRN', () {

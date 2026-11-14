@@ -1014,17 +1014,22 @@ class _ReceivedTabState extends ConsumerState<_ReceivedTab> {
         note: Value(n.isEmpty ? null : _cut(n, 300)),
       ));
     } else {
-      await db.paymentDao.edit(
-        existing.id,
-        PaymentsReceivedCompanion(
-          amount: Value(value),
-          receivedOn: Value(on),
-          fromParty: Value(_cut(party.text.trim(), 120)),
-          mode: Value(mode),
-          note: Value(n.isEmpty ? null : _cut(n, 300)),
-        ),
-        by: widget.userId,
-      );
+      try {
+        await db.paymentDao.edit(
+          existing.id,
+          PaymentsReceivedCompanion(
+            amount: Value(value),
+            receivedOn: Value(on),
+            fromParty: Value(_cut(party.text.trim(), 120)),
+            mode: Value(mode),
+            note: Value(n.isEmpty ? null : _cut(n, 300)),
+          ),
+          by: widget.userId,
+        );
+      } on AllocationTooBig catch (e) {
+        if (context.mounted) showSnack(context, e.message, error: true);
+        return;
+      }
     }
     _refreshMoney(ref, widget.projectId);
   }

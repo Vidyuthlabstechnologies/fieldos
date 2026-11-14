@@ -257,6 +257,8 @@ class BillsView extends ConsumerWidget {
           .read(appDatabaseProvider)
           .billingRecordsDao
           .allocate(paymentId: picked.id, billId: bill.id, kind: kind, amount: a, by: userId);
+    } on AllocationTooBig catch (e) {
+      if (context.mounted) showSnack(context, e.message, error: true);
     } catch (e, st) {
       if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
     }

@@ -1424,6 +1424,16 @@ class PaymentDao extends DatabaseAccessor<AppDatabase> with _$PaymentDaoMixin {
 
   Future<PaymentsReceivedData> edit(String id, PaymentsReceivedCompanion changes, {required String by, DateTime? now}) {
     return transaction(() async {
+      if (changes.amount.present) {
+        // Cutting a payment below what is already put against bills would
+        // leave those bills paid by money that was never received.
+        final put = (await (select(db.billAllocations)..where((a) => a.paymentId.equals(id))).get())
+            .fold(0.0, (s, a) => s + a.amount);
+        if (changes.amount.value < put - 0.005) {
+          throw AllocationTooBig(
+              '${put.toStringAsFixed(2)} of this payment is already put against bills. Take those back first.');
+        }
+      }
       await (update(paymentsReceived)..where((p) => p.id.equals(id))).write(changes.copyWith(
         id: const Value.absent(),
         projectId: const Value.absent(),
@@ -1706,7 +1716,7 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
   Future<void> billWorkOrder(String id, double additional) {
     return transaction(() async {
       await (update(workOrders)..where((w) => w.id.equals(id)))
-          .write(WorkOrdersCompanion(billedAmount: Value(additional)));
+          .write(WorkOrdersCompanion.custom(billedAmount: workOrders.billedAmount + Variable(additional)));
       final row = await (select(workOrders)..where((w) => w.id.equals(id))).getSingle();
       await db.syncOutboxDao.enqueue(
         targetTable: 'work_orders',
