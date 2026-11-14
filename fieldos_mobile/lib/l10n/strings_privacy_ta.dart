@@ -41,4 +41,6 @@ const Map<String, String> privacyTa = {
   'Your name, email address and the company you join, so that you can sign in and work with your team.': 'உங்கள் பெயர், மின்னஞ்சல் முகவரி, நீங்கள் சேரும் நிறுவனம், நீங்கள் உள்நுழைந்து உங்கள் குழுவுடன் வேலை செய்ய.',
   'Your privacy': 'உங்கள் தனியுரிமை',
   'Your rights': 'உங்கள் உரிமைகள்',
+  'Appeal a privacy decision': 'தனியுரிமை முடிவை மேல்முறையீடு செய்யுங்கள்',
+  'Write from the email address on your account. We reply within 45 days. If you are not satisfied, you can appeal, and then contact the authority for privacy where you live.': 'உங்கள் கணக்கில் உள்ள மின்னஞ்சல் முகவரியிலிருந்து எழுதுங்கள். 45 நாட்களுக்குள் பதில் தருகிறோம். உங்களுக்குத் திருப்தி இல்லையென்றால், மேல்முறையீடு செய்யலாம், பிறகு நீங்கள் வசிக்கும் இடத்தின் தனியுரிமை அமைப்பைத் தொடர்பு கொள்ளலாம்.',
 };

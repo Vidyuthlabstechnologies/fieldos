@@ -41,4 +41,6 @@ const Map<String, String> privacyTe = {
   'Your name, email address and the company you join, so that you can sign in and work with your team.': 'మీ పేరు, ఈమెయిల్ చిరునామా, మీరు చేరే కంపెనీ, మీరు సైన్ ఇన్ చేసి మీ బృందంతో పనిచేయడానికి.',
   'Your privacy': 'మీ గోప్యత',
   'Your rights': 'మీ హక్కులు',
+  'Appeal a privacy decision': 'గోప్యత నిర్ణయంపై అప్పీల్ చేయండి',
+  'Write from the email address on your account. We reply within 45 days. If you are not satisfied, you can appeal, and then contact the authority for privacy where you live.': 'మీ ఖాతాలోని ఈమెయిల్ చిరునామా నుండి రాయండి. మేము 45 రోజుల్లో జవాబిస్తాము. మీకు సంతృప్తి లేకపోతే, మీరు అప్పీల్ చేయవచ్చు, ఆ తర్వాత మీరు ఉండే చోటి గోప్యత అధికార సంస్థను సంప్రదించవచ్చు.',
 };
