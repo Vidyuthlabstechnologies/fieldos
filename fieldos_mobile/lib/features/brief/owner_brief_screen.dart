@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:fieldos_mobile/l10n/stored_notes.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/brief/owner_brief.dart';
@@ -230,7 +231,7 @@ class _SiteBriefCard extends ConsumerWidget {
             for (final i in b.newIssues.take(2)) _Line(icon: Icons.error_outline, text: i),
             if (b.dueTomorrow.isNotEmpty)
               _Line(icon: Icons.event_outlined, text: '${tr('Tomorrow')}: ${b.dueTomorrow.take(3).join(', ')}'),
-            if (showMoney && b.costAlert != null) _Line(icon: Icons.warning_amber_rounded, text: b.costAlert!, warn: true),
+            if (showMoney && b.costAlert != null) _Line(icon: Icons.warning_amber_rounded, text: trStoredNote(b.costAlert!), warn: true),
             if (showMoney && b.received > 0)
               Padding(
                 padding: const EdgeInsets.only(top: 6),

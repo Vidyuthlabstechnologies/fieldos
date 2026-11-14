@@ -7,6 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/l10n/stored_notes.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -148,7 +149,7 @@ class _ProjectHealthCard extends ConsumerWidget {
                         children: [
                           Icon(Icons.warning_amber_rounded, size: 16, color: theme.colorScheme.error),
                           const SizedBox(width: 6),
-                          Expanded(child: Text(a, style: theme.textTheme.bodySmall)),
+                          Expanded(child: Text(trStoredNote(a), style: theme.textTheme.bodySmall)),
                         ],
                       ),
                     ),

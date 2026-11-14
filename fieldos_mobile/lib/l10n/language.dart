@@ -171,6 +171,9 @@ String trIn(AppLanguage l, String english) {
   out ??= applyWordSwaps(currentMarket, english);
   // Labels written for India say "(₹)"; elsewhere that is the market's sign.
   if (!out.contains('₹')) return out;
+  // India's example figure (₹5,000 of cement) is about 500 in the other
+  // currencies, in every language's way of writing it.
+  out = out.replaceAll(RegExp(r'₹\s?5[,.\s]?000(?![\d,.])'), '₹500');
   // "AED 5,000" takes a space before the figure; "(₹)" stays "(AED)".
   if (market.symbolSpace) out = out.replaceAll(RegExp(r'₹(?=\d)'), '${market.currencySymbol} ');
   return out.replaceAll('₹', market.currencySymbol);
