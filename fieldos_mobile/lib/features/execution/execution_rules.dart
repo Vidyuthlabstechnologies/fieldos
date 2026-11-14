@@ -53,6 +53,7 @@ class ExecutionData {
   final List<HandoverUnit> units;
   final List<HandoverCheck> checks;
 
+  late final Map<String, Task> _taskById = {for (final t in tasks) t.id: t};
   late final Map<String, Rfi> _rfiById = {for (final r in rfis) r.id: r};
   late final Map<String, HoldPoint> _holdById = {for (final h in holdPoints) h.id: h};
   late final Map<String, Drawing> drawingById = {for (final d in drawings) d.id: d};
@@ -69,6 +70,9 @@ class ExecutionData {
     final hold = _holdById[link];
     if (hold != null) return hold.status != 'released';
     if (drawingById.containsKey(link)) return currentRevision(link) == null;
+    // "Earlier work" linked from the schedule: open until that task is done.
+    final task = _taskById[link];
+    if (task != null) return task.status != 'done';
     return true;
   }
 

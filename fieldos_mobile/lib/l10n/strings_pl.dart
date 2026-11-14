@@ -3,7 +3,10 @@
 /// Keyed by the Indian English text, like every table (see language.dart).
 library;
 
+import 'package:fieldos_mobile/l10n/strings_schedule.dart';
+
 const stringsPl = <String, String>{
+  ...schedulePl,
   'Try again': 'Spróbuj ponownie',
   'Approvals': 'Zatwierdzenia',
   'Nothing waiting': 'Nic nie czeka',
