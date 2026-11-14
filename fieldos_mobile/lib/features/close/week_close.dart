@@ -187,7 +187,7 @@ class WeekClose {
 
   /// Monday 00:00 of the week.
   final DateTime from;
-  DateTime get to => from.add(const Duration(days: 7));
+  DateTime get to => addDays(from, 7);
   String get weekKey => markDay(from);
   final List<CloseItem> items;
 
@@ -275,7 +275,7 @@ WeekClose buildWeekClose({
   PayCalendar calendar = const PayCalendar(),
 }) {
   final from = weekStart(weekOf);
-  final to = from.add(const Duration(days: 7));
+  final to = addDays(from, 7);
   final at = now ?? DateTime.now();
   bool inWeek(DateTime d) => !d.isBefore(from) && d.isBefore(to);
 

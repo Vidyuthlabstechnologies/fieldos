@@ -196,8 +196,14 @@ DateTime _day(DateTime t) {
 /// Monday 00:00 of the week containing [t], local time.
 DateTime weekStart(DateTime t) {
   final d = _day(t);
-  return d.subtract(Duration(days: d.weekday - DateTime.monday));
+  return addDays(d, -(d.weekday - DateTime.monday));
 }
+
+/// The local midnight [n] calendar days from [day]'s. Adding
+/// `Duration(days: 7)` adds 168 hours, which lands an hour off midnight
+/// across a daylight-saving change (US, UK): the next Monday's punches
+/// then fell into the week before.
+DateTime addDays(DateTime day, int n) => DateTime(day.year, day.month, day.day + n);
 
 WageSheet buildWageSheet({
   required List<Worker> workers,

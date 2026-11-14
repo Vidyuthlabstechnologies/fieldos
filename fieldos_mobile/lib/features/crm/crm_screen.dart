@@ -251,8 +251,7 @@ class LeadDetailScreen extends ConsumerWidget {
 
   Future<void> _call(BuildContext context, String phone, {bool whatsapp = false}) async {
     final digits = phone.replaceAll(RegExp(r'[^0-9+]'), '');
-    final wa = digits.startsWith('+') ? digits.substring(1) : (digits.length == 10 ? '91$digits' : digits);
-    final uri = whatsapp ? Uri.parse('https://wa.me/$wa') : Uri(scheme: 'tel', path: digits);
+    final uri = whatsapp ? Uri.parse('https://wa.me/${whatsAppNumber(phone)}') : Uri(scheme: 'tel', path: digits);
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication).catchError((_) => false);
     if (!ok && context.mounted) showSnack(context, tr('Could not open the phone app.'), error: true);
   }

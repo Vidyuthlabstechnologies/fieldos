@@ -135,6 +135,14 @@ double? parseTypedNumber(String typed) {
   return v == null || !v.isFinite ? null : v;
 }
 
+/// A phone number as wa.me wants it: country code and number, digits
+/// only. A 10-digit number is taken as a local one and gets this market's
+/// code (+1 in the US, +91 in India); "+1 512 555 0134" keeps its own.
+String whatsAppNumber(String phone) {
+  final digits = westernDigits(phone).replaceAll(RegExp(r'\D'), '');
+  return digits.length == 10 ? '${market.phonePrefix.substring(1)}$digits' : digits;
+}
+
 /// An amount in this market's currency: "₹12,34,567" in India,
 /// "$1,234,567" in the US, "RM1,234,567", "AED 1,234,567", "£1,234,567".
 /// Whole units unless [cents] is true and the amount has some ("₹45.50").

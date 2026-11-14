@@ -13,6 +13,29 @@ import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
+String _days(double d) => d == d.roundToDouble() ? d.toInt().toString() : d.toStringAsFixed(1);
+
+/// The sheet as a WhatsApp message. Where crews are paid by the hour (US,
+/// UK) a line is the hours at the hourly rate: "45 h (5 h overtime) ×
+/// $30/hr", not "5 days × $30", which did not add up.
+String wageSheetShareText(WageSheet s, {required String projectName, required String range}) {
+  final b = StringBuffer('Wage sheet · $projectName\n$range\n\n');
+  for (final l in s.lines.where((l) => l.days > 0 || l.paidInPeriod > 0 || l.balanceDue != 0)) {
+    if (market.payHourly) {
+      b.write('${l.name}: ${fmtQty(l.hours)} h');
+      if (l.overtimeHours > 0) b.write(' (${fmtQty(l.overtimeHours)} h overtime)');
+      if (l.dailyWage != null) b.write(' × ${rupees(l.dailyWage!, paise: true)}/hr = ${rupees(l.earned, paise: true)}');
+    } else {
+      b.write('${l.name}: ${_days(l.days)} days');
+      if (l.dailyWage != null) b.write(' × ${rupees(l.dailyWage!, paise: true)} = ${rupees(l.earned, paise: true)}');
+    }
+    if (l.paidInPeriod > 0) b.write(', paid ${rupees(l.paidInPeriod, paise: true)}');
+    b.write(', due ${rupees(l.balanceDue, paise: true)}\n');
+  }
+  b.write('\nTotal earned ${rupees(s.totalEarned, paise: true)} · paid ${rupees(s.totalPaid, paise: true)} · due ${rupees(s.totalDue, paise: true)}');
+  return b.toString();
+}
+
 /// Weekly wage sheet (Monday to Sunday) from GPS punches, with a Pay button
 /// per worker and a WhatsApp-ready summary to share with the contractor or
 /// the office.
@@ -29,7 +52,7 @@ class WageSheetScreen extends ConsumerStatefulWidget {
 class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
   late DateTime _from = weekStart(DateTime.now());
   PayCalendar _cal = const PayCalendar();
-  DateTime get _to => _from.add(const Duration(days: 7));
+  DateTime get _to => addDays(_from, 7);
 
   Future<WageSheet> _load() async {
     final db = ref.read(appDatabaseProvider);
@@ -49,22 +72,9 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
     return p == null ? const PayCalendar() : loadPayCalendar(db, p.companyId);
   }
 
-  String _days(double d) => d == d.roundToDouble() ? d.toInt().toString() : d.toStringAsFixed(1);
 
   String _range() => trf('{from} to {to}',
-      {'from': shortDay(_from), 'to': shortDay(_to.subtract(const Duration(days: 1)))});
-
-  String _shareText(WageSheet s) {
-    final b = StringBuffer('Wage sheet · ${widget.projectName}\n${_range()}\n\n');
-    for (final l in s.lines.where((l) => l.days > 0 || l.paidInPeriod > 0 || l.balanceDue != 0)) {
-      b.write('${l.name}: ${_days(l.days)} days');
-      if (l.dailyWage != null) b.write(' × ${rupees(l.dailyWage!, paise: true)} = ${rupees(l.earned, paise: true)}');
-      if (l.paidInPeriod > 0) b.write(', paid ${rupees(l.paidInPeriod, paise: true)}');
-      b.write(', due ${rupees(l.balanceDue, paise: true)}\n');
-    }
-    b.write('\nTotal earned ${rupees(s.totalEarned, paise: true)} · paid ${rupees(s.totalPaid, paise: true)} · due ${rupees(s.totalDue, paise: true)}');
-    return b.toString();
-  }
+      {'from': shortDay(_from), 'to': shortDay(addDays(_to, -1))});
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +103,8 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                 IconButton(
                   tooltip: tr('Share on WhatsApp'),
                   icon: const Icon(Icons.share),
-                  onPressed: () => SharePlus.instance.share(ShareParams(text: _shareText(sheet))),
+                  onPressed: () => SharePlus.instance.share(
+                      ShareParams(text: wageSheetShareText(sheet, projectName: widget.projectName, range: _range()))),
                 ),
             ],
           ),
@@ -102,7 +113,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
               IconButton(
                   icon: const Icon(Icons.chevron_left),
                   tooltip: tr('Previous week'),
-                  onPressed: () => setState(() => _from = _from.subtract(const Duration(days: 7)))),
+                  onPressed: () => setState(() => _from = addDays(_from, -7))),
               // The week can be long in Tamil or with large text: it wraps
               // between the arrows instead of pushing "next week" off screen.
               Expanded(
@@ -113,7 +124,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                   tooltip: tr('Next week'),
                   onPressed: _to.isAfter(DateTime.now())
                       ? null
-                      : () => setState(() => _from = _from.add(const Duration(days: 7)))),
+                      : () => setState(() => _from = addDays(_from, 7))),
             ]),
             if (sheet != null)
               Padding(

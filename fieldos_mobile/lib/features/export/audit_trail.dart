@@ -11,6 +11,7 @@ library;
 import 'package:drift/drift.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/l10n/language.dart';
 
 class AuditEvent {
   const AuditEvent({
@@ -228,7 +229,7 @@ String _time(DateTime d) {
 /// The trail as CSV. [nameOf] turns a user id into a name or email;
 /// [siteName] a project id into the site's name.
 String auditCsv(List<AuditEvent> events, {required String Function(String id) nameOf, required Map<String, String> siteName}) {
-  final rows = ['When,Site,Who,What,Item,Amount (₹),Note,Record'];
+  final rows = ['When,Site,Who,What,Item,${marketText('Amount (₹)')},Note,Record'];
   for (final e in events) {
     rows.add([
       _time(e.at),

@@ -16,7 +16,7 @@ import 'package:fieldos_mobile/core/market.dart';
 
 /// Per market, per language code ('en', 'es'...), English key -> label.
 const Map<Market, Map<String, Map<String, String>>> marketTerms = {
-  Market.us: {'en': _usEnglish},
+  Market.us: {'en': _usEnglish, 'es': _usSpanish},
   Market.malaysia: {'en': _malaysiaEnglish},
   Market.uae: {'en': _uaeEnglish},
 };
@@ -123,6 +123,9 @@ const _usEnglish = <String, String>{
   'Daily wage': 'Hourly rate',
   'Daily wage (₹)': r'Hourly rate ($)',
   '{amount}/day': '{amount}/hr',
+  // A forgotten clock-out pays nothing until it is fixed (wage_sheet.dart).
+  '1 missing punch-out (half day)': '1 missing clock-out (not paid until fixed)',
+  '{n} missing punch-outs (half days)': '{n} missing clock-outs (not paid until fixed)',
   'A day counts as full at 7 hours on site and half at 3.5 hours, unless it was marked by hand on the day register. Tap a worker to pay wages or an advance.':
       'Pay is the hours on the clock at the hourly rate, with time and a half past 40 hours in a work week (Monday to Sunday). A day marked by hand counts as 8 hours. Tap a worker to pay wages or an advance.',
   'DPR': 'Daily log',
@@ -177,6 +180,22 @@ const _usEnglish = <String, String>{
   'Nos: {n}': 'Count: {n}',
   'This is a one-time download of about 30 MB. After that, {language} reports translate to English on this phone, with no internet and no cost.':
       'This is a one-time download of about 30 MB. After that, {language} logs translate to English on this phone, with no internet and no cost.',
+};
+
+/// The US app in Spanish, where the Spanish table (written for daily
+/// wages and UPI) says the wrong thing for the US: pay is by the hour.
+const _usSpanish = <String, String>{
+  'Daily wage': 'Pago por hora',
+  'Daily wage (₹)': r'Pago por hora ($)',
+  '{amount}/day': '{amount}/hora',
+  '1 missing punch-out (half day)': '1 salida sin registrar (sin pago hasta corregirla)',
+  '{n} missing punch-outs (half days)': '{n} salidas sin registrar (sin pago hasta corregirlas)',
+  'A day counts as full at 7 hours on site and half at 3.5 hours, unless it was marked by hand on the day register. Tap a worker to pay wages or an advance.':
+      'El pago son las horas registradas por la tarifa por hora, con tiempo y medio después de 40 horas en la semana de trabajo (de lunes a domingo). Un día marcado a mano cuenta como 8 horas. Toca a un trabajador para pagarle o darle un adelanto.',
+  'Approve it in your UPI or bank app. FieldOS opens by itself once {store} confirms the payment, usually within a few minutes.':
+      'Apruébalo en la app de tu banco. FieldOS se abre solo cuando {store} confirme el pago, casi siempre en pocos minutos.',
+  'Your payment is waiting for approval, for example in your UPI app. FieldOS opens by itself once {store} confirms it.':
+      'Tu pago está esperando aprobación, por ejemplo en la app de tu banco. FieldOS se abre solo cuando {store} lo confirme.',
 };
 
 /// [text] with this market's whole-word swaps applied, keeping the first
