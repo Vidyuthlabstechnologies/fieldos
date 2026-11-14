@@ -16,6 +16,7 @@ library;
 
 import 'package:xml/xml.dart';
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/market.dart';
 
 class ExportCheck {
   const ExportCheck(this.problems, {required this.entries});
@@ -196,4 +197,48 @@ ExportCheck checkZohoCsv(String csv) {
     }
   }
   return ExportCheck(problems, entries: rows);
+}
+
+/// A QuickBooks Online (Date, Description, Amount) or Xero (Date, Amount,
+/// Payee, Description, Reference) bank statement as each would read it:
+/// every row a real date in the market's order and a non-zero amount.
+ExportCheck checkBankStatementCsv(String csv, {required bool xero}) {
+  final problems = <String>[];
+  final records = _csvRecords(csv.endsWith('\n') ? csv.substring(0, csv.length - 1) : csv);
+  if (records.isEmpty || records.first.trim().isEmpty) return const ExportCheck(['The file is empty'], entries: 0);
+  final header = _csvFields(records.first) ?? const [];
+  final need = xero ? const ['Date', 'Amount'] : const ['Date', 'Description', 'Amount'];
+  for (final c in need) {
+    if (!header.contains(c)) problems.add('Column "$c" is missing');
+  }
+  if (problems.isNotEmpty) return ExportCheck(problems, entries: 0);
+  final dateCol = header.indexOf('Date'), amountCol = header.indexOf('Amount');
+  var rows = 0;
+  for (var i = 1; i < records.length; i++) {
+    final row = 'Row ${i + 1}';
+    final f = _csvFields(records[i]);
+    rows++;
+    if (f == null) {
+      problems.add('$row: a quote is not closed');
+      continue;
+    }
+    if (f.length != header.length) {
+      problems.add('$row: ${f.length} fields, the header has ${header.length}');
+      continue;
+    }
+    if (_statementDate(f[dateCol]) == null) problems.add('$row: date "${f[dateCol]}" is not a real date');
+    final amount = double.tryParse(f[amountCol]);
+    if (amount == null || amount == 0) problems.add('$row: amount "${f[amountCol]}" is not a number other than zero');
+  }
+  return ExportCheck(problems, entries: rows);
+}
+
+/// "11/02/2026" read in the market's order (US month first), or null.
+DateTime? _statementDate(String s) {
+  final m = RegExp(r'^(\d{2})/(\d{2})/(\d{4})$').firstMatch(s);
+  if (m == null) return null;
+  final a = int.parse(m[1]!), b = int.parse(m[2]!), y = int.parse(m[3]!);
+  final (month, day) = market.dateOrder == DateOrder.mdy ? (a, b) : (b, a);
+  final d = DateTime(y, month, day);
+  return d.year == y && d.month == month && d.day == day ? d : null;
 }
