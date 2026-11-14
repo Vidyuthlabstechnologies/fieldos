@@ -3019,4 +3019,10 @@ const stringsMs = <String, String>{
   'Right to work (visa)': 'Hak bekerja (visa)',
   'Contract sum': 'Jumlah kontrak',
   'Retention stops at {pct}% of it': 'Wang tahanan berhenti pada {pct}% daripadanya',
+  'Rest day and public holidays': 'Hari rehat dan cuti umum',
+  'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'Kerja pada hari rehat dibayar 1 hari untuk sehingga separuh waktu biasa dan 2 hari jika lebih. Kerja pada cuti umum dibayar 2 hari di atas gaji cuti. Hari yang anda tanda sendiri kekal dengan tanda anda.',
+  'Rest day': 'Hari rehat',
+  'Friday (Kelantan, Terengganu, Kedah)': 'Jumaat (Kelantan, Terengganu, Kedah)',
+  'Public holidays': 'Cuti umum',
+  'Add the federal and state holidays your company gives, from the gazette for your state.': 'Tambah cuti persekutuan dan negeri yang diberi syarikat anda, mengikut warta negeri anda.',
 };

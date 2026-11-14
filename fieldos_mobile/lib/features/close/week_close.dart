@@ -272,6 +272,7 @@ WeekClose buildWeekClose({
   Map<String, int> receiptSlips = const {},
   Set<String> unconfirmedVouchers = const {},
   DateTime? now,
+  PayCalendar calendar = const PayCalendar(),
 }) {
   final from = weekStart(weekOf);
   final to = from.add(const Duration(days: 7));
@@ -284,7 +285,8 @@ WeekClose buildWeekClose({
       expenses: [for (final e in expenses) if (!e.voided) e],
       from: from,
       to: to,
-      marks: marks);
+      marks: marks,
+      calendar: calendar);
   final items = <CloseItem>[];
 
   // Wages: one item per worker who worked or was paid this week.

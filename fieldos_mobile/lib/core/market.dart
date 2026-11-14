@@ -149,8 +149,13 @@ class MarketConfig {
     required this.instantPaymentName,
     this.billFooterNote,
     this.retentionDefaultPct = 5,
+    this.premiumRestAndHolidayPay = false,
     this.retentionLimitOfContractPct,
   });
+
+  /// Work on the rest day and on public holidays earns more by law, and
+  /// the wage sheet pays it from the company's pay calendar (Malaysia).
+  final bool premiumRestAndHolidayPay;
 
   /// The retention (retainage) a progress bill keeps back by default.
   final double retentionDefaultPct;
@@ -310,6 +315,7 @@ const _malaysia = MarketConfig(
   // the contract sum.
   retentionDefaultPct: 10,
   retentionLimitOfContractPct: 5,
+  premiumRestAndHolidayPay: true,
   pdfCurrency: 'RM',
   indianGrouping: false,
   dateOrder: DateOrder.dmy,

@@ -2479,4 +2479,10 @@ const Map<String, String> stringsHi = {
   'Right to work (visa)': 'काम करने का अधिकार (वीज़ा)',
   'Contract sum': 'अनुबंध राशि',
   'Retention stops at {pct}% of it': 'रिटेंशन इसके {pct}% पर रुक जाता है',
+  'Rest day and public holidays': 'साप्ताहिक छुट्टी और सरकारी छुट्टियाँ',
+  'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'छुट्टी के दिन सामान्य घंटों के आधे तक काम पर 1 दिन और उससे ज़्यादा पर 2 दिन की मज़दूरी। सरकारी छुट्टी पर काम पर छुट्टी की मज़दूरी के ऊपर 2 दिन। हाथ से लगाया गया निशान वैसा ही रहता है।',
+  'Rest day': 'साप्ताहिक छुट्टी',
+  'Friday (Kelantan, Terengganu, Kedah)': 'शुक्रवार (केलंतन, तेरेंगानु, केदाह)',
+  'Public holidays': 'सरकारी छुट्टियाँ',
+  'Add the federal and state holidays your company gives, from the gazette for your state.': 'आपकी कंपनी जो संघीय और राज्य छुट्टियाँ देती है, अपने राज्य के गज़ट से जोड़ें।',
 };

@@ -3373,4 +3373,10 @@ const Map<String, String> stringsTa = {
   'Right to work (visa)': 'வேலை செய்யும் உரிமை (விசா)',
   'Contract sum': 'ஒப்பந்தத் தொகை',
   'Retention stops at {pct}% of it': 'தக்கவைப்பு இதன் {pct}% இல் நிற்கும்',
+  'Rest day and public holidays': 'ஓய்வு நாள் மற்றும் பொது விடுமுறைகள்',
+  'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'ஓய்வு நாளில் சாதாரண நேரத்தின் பாதி வரை வேலைக்கு 1 நாள், அதற்கு மேல் 2 நாள் கூலி. பொது விடுமுறையில் வேலைக்கு விடுமுறைக் கூலிக்கு மேல் 2 நாள். நீங்கள் கையால் குறித்தது அப்படியே இருக்கும்.',
+  'Rest day': 'ஓய்வு நாள்',
+  'Friday (Kelantan, Terengganu, Kedah)': 'வெள்ளி (கிளந்தான், திரெங்கானு, கெடா)',
+  'Public holidays': 'பொது விடுமுறைகள்',
+  'Add the federal and state holidays your company gives, from the gazette for your state.': 'உங்கள் நிறுவனம் தரும் கூட்டரசு மற்றும் மாநில விடுமுறைகளை உங்கள் மாநில அரசிதழிலிருந்து சேர்க்கவும்.',
 };

@@ -3019,4 +3019,10 @@ const stringsZh = <String, String>{
   'Right to work (visa)': '工作权（签证）',
   'Contract sum': '合同总额',
   'Retention stops at {pct}% of it': '保留金最多为其 {pct}%',
+  'Rest day and public holidays': '休息日和公共假期',
+  'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': '休息日工作不超过正常工时一半付 1 天工资，超过付 2 天。公共假期工作在假期工资之外再付 2 天。你手动标记的日子保持你的标记。',
+  'Rest day': '休息日',
+  'Friday (Kelantan, Terengganu, Kedah)': '星期五（吉兰丹、登嘉楼、吉打）',
+  'Public holidays': '公共假期',
+  'Add the federal and state holidays your company gives, from the gazette for your state.': '根据你所在州的宪报，添加公司给的联邦和州假期。',
 };

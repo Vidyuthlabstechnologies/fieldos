@@ -3021,4 +3021,10 @@ const Map<String, String> stringsEs = {
   'Right to work (visa)': 'Derecho a trabajar (visa)',
   'Contract sum': 'Monto del contrato',
   'Retention stops at {pct}% of it': 'La retención se detiene en el {pct}% de este',
+  'Rest day and public holidays': 'Día de descanso y feriados',
+  'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'El trabajo en el día de descanso paga 1 día hasta la mitad de las horas normales y 2 días si es más. El trabajo en un feriado paga 2 días además del pago del feriado. Un día que marques a mano conserva tu marca.',
+  'Rest day': 'Día de descanso',
+  'Friday (Kelantan, Terengganu, Kedah)': 'Viernes (Kelantan, Terengganu, Kedah)',
+  'Public holidays': 'Feriados',
+  'Add the federal and state holidays your company gives, from the gazette for your state.': 'Agrega los feriados federales y estatales que da tu empresa, según el boletín oficial de tu estado.',
 };
