@@ -3028,4 +3028,10 @@ const Map<String, String> stringsEs = {
       'Sin conexión hace más de 7 días. Conéctese a internet para seguir haciendo cambios. Puede ver todo.',
   'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
       'El plan de su empresa terminó. Conéctese a internet para comprobarlo. Puede ver todo.',
+  'Rest day and public holidays': 'Día de descanso y feriados',
+  'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'El trabajo en el día de descanso paga 1 día hasta la mitad de las horas normales y 2 días si es más. El trabajo en un feriado paga 2 días además del pago del feriado. Un día que marques a mano conserva tu marca.',
+  'Rest day': 'Día de descanso',
+  'Friday (Kelantan, Terengganu, Kedah)': 'Viernes (Kelantan, Terengganu, Kedah)',
+  'Public holidays': 'Feriados',
+  'Add the federal and state holidays your company gives, from the gazette for your state.': 'Agrega los feriados federales y estatales que da tu empresa, según el boletín oficial de tu estado.',
 };

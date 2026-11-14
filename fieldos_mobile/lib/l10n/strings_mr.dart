@@ -3380,4 +3380,10 @@ const Map<String, String> stringsMr = {
       '7 दिवसांपेक्षा जास्त ऑफलाइन. बदल करत राहण्यासाठी इंटरनेटला जोडा. तुम्ही सगळे पाहू शकता.',
   'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
       'तुमच्या कंपनीचा प्लान संपला आहे. तपासण्यासाठी इंटरनेटला जोडा. तुम्ही सगळे पाहू शकता.',
+  'Rest day and public holidays': 'साप्ताहिक सुट्टी आणि सार्वजनिक सुट्ट्या',
+  'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'सुट्टीच्या दिवशी नेहमीच्या तासांच्या निम्म्यापर्यंत कामाला 1 दिवस आणि त्याहून जास्त कामाला 2 दिवसांची मजुरी. सार्वजनिक सुट्टीत कामाला सुट्टीच्या मजुरीवर 2 दिवस. हाताने केलेली खूण तशीच राहते.',
+  'Rest day': 'साप्ताहिक सुट्टी',
+  'Friday (Kelantan, Terengganu, Kedah)': 'शुक्रवार (केलांतन, तेरेंगानू, केदाह)',
+  'Public holidays': 'सार्वजनिक सुट्ट्या',
+  'Add the federal and state holidays your company gives, from the gazette for your state.': 'तुमची कंपनी देत असलेल्या संघीय आणि राज्य सुट्ट्या तुमच्या राज्याच्या राजपत्रातून जोडा.',
 };

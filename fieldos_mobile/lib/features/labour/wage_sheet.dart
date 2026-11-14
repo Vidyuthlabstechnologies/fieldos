@@ -29,6 +29,49 @@ double dayCredit(double closedHours, {required bool hasOpenPunch}) {
   return hasOpenPunch && credit < 0.5 ? 0.5 : credit;
 }
 
+/// The company's rest day and public holidays, where the market pays more
+/// for work on them (Malaysia's Employment Act 1955, s60 and s60D):
+/// a rest day worked is 1 day's pay for up to half the normal hours and 2
+/// days' for more; a public holiday worked is 2 days' pay on top of the
+/// holiday's own pay, so 3 in all. Overtime hours stay on show, as on
+/// other days. Elsewhere the calendar is empty and nothing changes.
+class PayCalendar {
+  const PayCalendar({this.restDays = const {}, this.holidays = const {}});
+
+  /// Weekdays (DateTime.monday..sunday) that are the rest day.
+  final Set<int> restDays;
+
+  /// Public holidays the company observes, as local days.
+  final Set<DateTime> holidays;
+
+  bool isHoliday(DateTime day) => holidays.contains(DateTime(day.year, day.month, day.day));
+  bool isRestDay(DateTime day) => restDays.contains(day.weekday);
+
+  /// A punched day's [credit] (0, ½ or 1 day) as days of pay.
+  double creditFor(DateTime day, double credit) {
+    if (credit <= 0 || !market.premiumRestAndHolidayPay) return credit;
+    if (isHoliday(day)) return 3;
+    if (isRestDay(day)) return credit >= 1 ? 2 : 1;
+    return credit;
+  }
+}
+
+/// Settings keys for a company's pay calendar.
+String restDayKey(String companyId) => 'rest_day:$companyId';
+String publicHolidaysKey(String companyId) => 'public_holidays:$companyId';
+
+/// Reads the company's pay calendar; Sunday is the rest day unless set.
+Future<PayCalendar> loadPayCalendar(AppDatabase db, String companyId) async {
+  if (!market.premiumRestAndHolidayPay) return const PayCalendar();
+  final rest = int.tryParse((await db.settingsDao.get(restDayKey(companyId))) ?? '') ?? DateTime.sunday;
+  final raw = (await db.settingsDao.get(publicHolidaysKey(companyId))) ?? '';
+  final days = <DateTime>{
+    for (final d in raw.split(',').map((e) => DateTime.tryParse(e.trim())).whereType<DateTime>())
+      DateTime(d.year, d.month, d.day),
+  };
+  return PayCalendar(restDays: {rest}, holidays: days);
+}
+
 /// Hours a hand-marked day stands for where crews are paid by the hour.
 const markedDayHours = 8.0;
 
@@ -152,6 +195,7 @@ WageSheet buildWageSheet({
   required DateTime from,
   required DateTime to,
   Iterable<AttendanceMark> marks = const [],
+  PayCalendar calendar = const PayCalendar(),
 }) {
   final byId = {for (final w in workers) w.id: w};
   final marked = marksByWorker(marks);
@@ -195,7 +239,8 @@ WageSheet buildWageSheet({
       }
       // A hand mark for the day decides its pay; the hours stay on show.
       final mark = line.workerId == null ? null : marked[line.workerId]?[day.key];
-      final credit = mark ?? dayCredit(hours, hasOpenPunch: open);
+      // A hand mark is the supervisor's own call (2× and 3× included).
+      final credit = mark ?? calendar.creditFor(day.key, dayCredit(hours, hasOpenPunch: open));
       if (day.key.isBefore(from)) {
         line.earnedBefore += credit * (line.dailyWage ?? 0);
       } else if (day.key.isBefore(to)) {

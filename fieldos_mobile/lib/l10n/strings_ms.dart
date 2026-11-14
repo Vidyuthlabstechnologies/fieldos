@@ -3026,4 +3026,10 @@ const stringsMs = <String, String>{
       'Luar talian lebih 7 hari. Sambung ke internet untuk terus membuat perubahan. Anda masih boleh melihat semuanya.',
   'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
       'Pelan syarikat anda telah tamat. Sambung ke internet untuk menyemaknya. Anda masih boleh melihat semuanya.',
+  'Rest day and public holidays': 'Hari rehat dan cuti umum',
+  'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'Kerja pada hari rehat dibayar 1 hari untuk sehingga separuh waktu biasa dan 2 hari jika lebih. Kerja pada cuti umum dibayar 2 hari di atas gaji cuti. Hari yang anda tanda sendiri kekal dengan tanda anda.',
+  'Rest day': 'Hari rehat',
+  'Friday (Kelantan, Terengganu, Kedah)': 'Jumaat (Kelantan, Terengganu, Kedah)',
+  'Public holidays': 'Cuti umum',
+  'Add the federal and state holidays your company gives, from the gazette for your state.': 'Tambah cuti persekutuan dan negeri yang diberi syarikat anda, mengikut warta negeri anda.',
 };

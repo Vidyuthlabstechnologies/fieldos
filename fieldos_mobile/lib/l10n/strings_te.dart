@@ -2488,4 +2488,10 @@ const Map<String, String> stringsTe = {
       '7 రోజులకు పైగా ఆఫ్‌లైన్. మార్పులు చేయడానికి ఇంటర్నెట్‌కు కనెక్ట్ అవ్వండి. మీరు అన్నీ చూడగలరు.',
   'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
       'మీ కంపెనీ ప్లాన్ ముగిసింది. చూసుకోవడానికి ఇంటర్నెట్‌కు కనెక్ట్ అవ్వండి. మీరు అన్నీ చూడగలరు.',
+  'Rest day and public holidays': 'వారపు సెలవు, ప్రభుత్వ సెలవులు',
+  'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'విశ్రాంతి దినాన సాధారణ గంటల్లో సగం వరకు పనికి 1 రోజు, అంతకు మించితే 2 రోజుల కూలీ. ప్రభుత్వ సెలవున పనికి సెలవు కూలీ పైన 2 రోజులు. మీరు చేతితో వేసిన గుర్తు అలాగే ఉంటుంది.',
+  'Rest day': 'విశ్రాంతి దినం',
+  'Friday (Kelantan, Terengganu, Kedah)': 'శుక్రవారం (కెలంతాన్, తెరెంగాను, కెదా)',
+  'Public holidays': 'ప్రభుత్వ సెలవులు',
+  'Add the federal and state holidays your company gives, from the gazette for your state.': 'మీ కంపెనీ ఇచ్చే ఫెడరల్, రాష్ట్ర సెలవులను మీ రాష్ట్ర గెజిట్ నుండి జోడించండి.',
 };
