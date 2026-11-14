@@ -408,10 +408,10 @@ class _ProjectList extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(firstName.isEmpty ? greeting : '$greeting, $firstName', style: theme.textTheme.headlineSmall),
+            Text(firstName.isEmpty ? greeting : '$greeting$listComma$firstName', style: theme.textTheme.headlineSmall),
             const SizedBox(height: 2),
             Text(
-              '${tr(_weekdays[now.weekday - 1])}, ${fmtDate(now, short: true)} · '
+              '${tr(_weekdays[now.weekday - 1])}$listComma${fmtDate(now, short: true)} · '
               '${active == 0 ? tr('no active sites') : active == 1 ? tr('1 active site') : trf('{n} active sites', {'n': active})}',
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),

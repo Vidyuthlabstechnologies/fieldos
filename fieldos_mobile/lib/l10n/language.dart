@@ -132,6 +132,11 @@ bool _screensOn = false;
 /// The language the screens are in now, the one [tr] uses.
 AppLanguage get currentLanguage => _current;
 
+/// The comma that joins two parts of a line on screen ("Good evening,
+/// Ramesh"). Arabic and Urdu write it reversed (،); a Latin comma reads as
+/// a stray mark in right-to-left text.
+String get listComma => _current == AppLanguage.ar || _current == AppLanguage.ur ? '، ' : ', ';
+
 /// Sets the language for [tr]. The app calls this through
 /// [languageProvider]; tests call it directly.
 void setCurrentLanguage(AppLanguage l) => _current = l;
