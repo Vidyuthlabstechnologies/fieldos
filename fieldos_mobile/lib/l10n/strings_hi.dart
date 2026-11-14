@@ -2522,4 +2522,7 @@ const Map<String, String> stringsHi = {
   'Gross payment status (0%)': 'ग्रॉस पेमेंट स्टेटस (0%)',
   'Registered (20%)': 'रजिस्टर्ड (20%)',
   'Not registered (30%)': 'रजिस्टर्ड नहीं (30%)',
+  '{amount}/hr': '{amount}/घंटा',
+  '{amount} an hour': '{amount} प्रति घंटा',
+  'OT {h} h, {amount}': 'ओवरटाइम {h} घंटे, {amount}',
 };

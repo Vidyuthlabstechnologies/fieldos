@@ -27,7 +27,14 @@ String wageSheetShareText(WageSheet s, {required String projectName, required St
       if (l.dailyWage != null) b.write(' × ${rupees(l.dailyWage!, paise: true)}/hr = ${rupees(l.earned, paise: true)}');
     } else {
       b.write('${l.name}: ${_days(l.days)} days');
-      if (l.dailyWage != null) b.write(' × ${rupees(l.dailyWage!, paise: true)} = ${rupees(l.earned, paise: true)}');
+      if (l.dailyWage != null) {
+        b.write(' × ${rupees(l.dailyWage!, paise: true)}');
+        // Malaysia and the UAE pay the overtime premium on a day rate.
+        if (l.overtimePay > 0) {
+          b.write(' + ${fmtQty(l.overtimeHours)} h overtime ${rupees(l.overtimePay, paise: true)}');
+        }
+        b.write(' = ${rupees(l.earned, paise: true)}');
+      }
     }
     if (l.paidInPeriod > 0) b.write(', paid ${rupees(l.paidInPeriod, paise: true)}');
     b.write(', due ${rupees(l.balanceDue, paise: true)}\n');
@@ -151,11 +158,16 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                               subtitle: Text([
                                 trf(l.days == 1 ? '{n} day ({h} h)' : '{n} days ({h} h)',
                                     {'n': _days(l.days), 'h': l.hours.toStringAsFixed(1)}),
-                                if (l.overtimeHours > 0) trf('OT {h} h', {'h': l.overtimeHours.toStringAsFixed(1)}),
+                                if (l.overtimePay > 0)
+                                  trf('OT {h} h, {amount}',
+                                      {'h': l.overtimeHours.toStringAsFixed(1), 'amount': rupees(l.overtimePay, paise: true)})
+                                else if (l.overtimeHours > 0)
+                                  trf('OT {h} h', {'h': l.overtimeHours.toStringAsFixed(1)}),
                                 if (l.dailyWage == null)
                                   tr('no daily wage set')
                                 else
-                                  trf('{amount}/day', {'amount': rupees(l.dailyWage!, paise: true)}),
+                                  trf(market.payHourly ? '{amount}/hr' : '{amount}/day',
+                                      {'amount': rupees(l.dailyWage!, paise: true)}),
                                 if (belowMinimumWage(l.dailyWage, _cal) case final min?)
                                   trf(market.payHourly ? 'below the minimum wage of {amount}/hr' : 'below the minimum wage of {amount}/day',
                                       {'amount': rupees(min, paise: true)}),

@@ -59,6 +59,17 @@ class PayCalendar {
     }
     return credit;
   }
+
+  /// The overtime multiplier on [day]: past normal hours on a rest day is
+  /// twice the hourly rate and on a public holiday three times (Malaysia's
+  /// Employment Act s.60A(3)); otherwise the market's rule.
+  double overtimeMultiplierFor(DateTime day) {
+    if (market.premiumRestAndHolidayPay) {
+      if (isHoliday(day)) return 3;
+      if (isRestDay(day)) return 2;
+    }
+    return market.overtime.multiplier;
+  }
 }
 
 /// The market's minimum daily rate when [dailyWage] is under it, for a
@@ -176,7 +187,11 @@ class WageLine {
   double hourlyEarnedBefore = 0;
 
   /// [dailyWage] is the rate per hour where the market pays by the hour.
-  double get earned => hourlyEarned ?? days * (dailyWage ?? 0);
+  double get earned => hourlyEarned ?? days * (dailyWage ?? 0) + overtimePay;
+
+  /// The overtime premium on a day rate, where the market pays it
+  /// ([MarketConfig.payOvertimeOnDayRates]); 0 elsewhere.
+  double overtimePay = 0;
 
   /// Owed after this period: everything earned up to its end, minus
   /// everything paid up to its end. Negative means an advance not yet
@@ -266,11 +281,13 @@ WageSheet buildWageSheet({
       // A hand mark is the supervisor's own call (2× and 3× included).
       final credit = mark ?? calendar.creditFor(day.key, dayCredit(hours, hasOpenPunch: open), hours: open ? null : hours);
       if (day.key.isBefore(from)) {
-        line.earnedBefore += credit * (line.dailyWage ?? 0);
+        line.earnedBefore +=
+            credit * (line.dailyWage ?? 0) + _dayRateOvertime(line.dailyWage, hours, calendar.overtimeMultiplierFor(day.key), paidByMark: mark != null, open: open);
       } else if (day.key.isBefore(to)) {
         line.days += credit;
         line.hours += hours;
         if (hours > overtimeAfterHours) line.overtimeHours += hours - overtimeAfterHours;
+        line.overtimePay += _dayRateOvertime(line.dailyWage, hours, calendar.overtimeMultiplierFor(day.key), paidByMark: mark != null, open: open);
         if (open && mark == null) line.missingPunchOuts++;
         if (mark != null) line.markedDays++;
       }
@@ -359,6 +376,18 @@ void _payByTheHour(Map<String, WageLine> lines, Map<String, Map<DateTime, List<L
       ..hours = hours
       ..overtimeHours = ot;
   }
+}
+
+/// The overtime premium for one day on a day rate: hours past the legal
+/// day, at the daily rate over the legal day's hours, times the market's
+/// multiplier. None where the market doesn't pay it, for a day whose pay a
+/// hand mark decided, or with a punch-out missing (the hours are unknown).
+double _dayRateOvertime(double? dailyWage, double hours, double multiplier,
+    {required bool paidByMark, required bool open}) {
+  final legalDay = market.overtime.dailyHours;
+  if (!market.payOvertimeOnDayRates || legalDay == null || dailyWage == null || paidByMark || open) return 0;
+  if (hours <= legalDay) return 0;
+  return _round2((hours - legalDay) * dailyWage / legalDay * multiplier);
 }
 
 double _round2(double v) => (v * 100).roundToDouble() / 100;

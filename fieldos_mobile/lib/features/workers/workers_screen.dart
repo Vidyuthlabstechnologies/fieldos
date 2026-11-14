@@ -10,6 +10,7 @@ import 'package:fieldos_mobile/features/workers/worker_calendar.dart';
 import 'package:fieldos_mobile/features/workers/worker_permits.dart';
 import 'package:fieldos_mobile/features/workers/worker_permits_screen.dart';
 import 'package:fieldos_mobile/features/workers/worker_tools.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -281,7 +282,7 @@ class _WorkerTile extends ConsumerWidget {
         subtitle: Text([
           worker.role == null ? '' : tr(worker.role!),
           worker.phone ?? '',
-          worker.dailyWage != null ? trf('{amount} a day', {'amount': rupees(worker.dailyWage!)}) : '',
+          worker.dailyWage != null ? trf(market.payHourly ? '{amount} an hour' : '{amount} a day', {'amount': rupees(worker.dailyWage!)}) : '',
         ].where((e) => e.isNotEmpty).join(' · ')),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

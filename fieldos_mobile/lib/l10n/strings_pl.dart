@@ -3076,4 +3076,7 @@ const stringsPl = <String, String>{
   'Gross payment status (0%)': 'Status płatności brutto (0%)',
   'Registered (20%)': 'Zarejestrowany (20%)',
   'Not registered (30%)': 'Niezarejestrowany (30%)',
+  '{amount}/hr': '{amount}/godz.',
+  '{amount} an hour': '{amount} za godzinę',
+  'OT {h} h, {amount}': 'Nadgodziny {h} godz., {amount}',
 };
