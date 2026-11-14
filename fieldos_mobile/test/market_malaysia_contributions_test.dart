@@ -269,4 +269,18 @@ void main() {
       }
     });
   });
+
+  test('EPF leaves overtime pay out; SOCSO and EIS charge it', () {
+    debugSetMarket(Market.malaysia);
+    // RM1,700 of wages plus RM300 overtime pay.
+    final c = malaysiaContributions(2000, epfWages: 1700);
+    final plain = malaysiaContributions(1700);
+    final all = malaysiaContributions(2000);
+    expect(c.epfEmployee, plain.epfEmployee);
+    expect(c.epfEmployer, plain.epfEmployer);
+    expect(c.socsoEmployee, all.socsoEmployee);
+    expect(c.socsoEmployer, all.socsoEmployer);
+    expect(c.eisEmployee, all.eisEmployee);
+    expect(c.epfEmployee, lessThan(all.epfEmployee));
+  });
 }

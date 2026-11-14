@@ -44,7 +44,7 @@ Map<String, WageContribution> wageContributions(WageSheet sheet, {Set<String> fo
     final isForeign = l.workerId != null && foreign.contains(l.workerId);
     out[l.key] = WageContribution(
       earned: l.earned,
-      contributions: malaysiaContributions(l.earned, foreign: isForeign),
+      contributions: malaysiaContributions(l.earned, foreign: isForeign, epfWages: l.earned - l.overtimePay),
       foreign: isForeign,
     );
   }

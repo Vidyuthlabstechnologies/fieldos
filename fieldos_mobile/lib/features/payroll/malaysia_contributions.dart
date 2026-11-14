@@ -74,21 +74,26 @@ const epfHigherEmployerRateUpTo = 5000.0;
 
 /// The contributions on [monthlyWage] (for daily-rated workers, the sum of
 /// the period's wages). [foreign] is a worker on a foreign worker's permit.
-MalaysiaContributions malaysiaContributions(double monthlyWage, {bool foreign = false}) {
+///
+/// [epfWages] is the part of the wage EPF is charged on, when it differs:
+/// overtime pay is not "wages" for EPF (EPF Act 1991, s2), but SOCSO and
+/// EIS are charged on it. Left out, EPF uses the whole wage.
+MalaysiaContributions malaysiaContributions(double monthlyWage, {bool foreign = false, double? epfWages}) {
   final w = _sen(monthlyWage);
   if (w <= 0) return MalaysiaContributions.none;
+  final e = epfWages == null ? w : _sen(epfWages.clamp(0, monthlyWage).toDouble());
   if (foreign) {
     return MalaysiaContributions(
-      epfEmployee: _rm(epfShare(w, 2)),
-      epfEmployer: _rm(epfShare(w, 2)),
+      epfEmployee: _rm(epfShare(e, 2)),
+      epfEmployer: _rm(epfShare(e, 2)),
       socsoEmployer: _rm(_employmentInjuryOnly(w)),
     );
   }
   final (socsoEr, socsoEe) = _socsoFirstCategory(w);
   final eis = _eis(w);
   return MalaysiaContributions(
-    epfEmployee: _rm(epfShare(w, 11)),
-    epfEmployer: _rm(epfShare(w, w <= _sen(epfHigherEmployerRateUpTo) ? 13 : 12)),
+    epfEmployee: _rm(epfShare(e, 11)),
+    epfEmployer: _rm(epfShare(e, e <= _sen(epfHigherEmployerRateUpTo) ? 13 : 12)),
     socsoEmployee: _rm(socsoEe),
     socsoEmployer: _rm(socsoEr),
     eisEmployee: _rm(eis),
