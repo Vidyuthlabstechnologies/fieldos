@@ -129,6 +129,7 @@ String? _clip(String? s, int max) {
   HandoverChecks,
   CompanyStandards,
   WorkerPermits,
+  DrawingPins,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -166,7 +167,7 @@ class AppDatabase extends _$AppDatabase {
             );
 
   @override
-  int get schemaVersion => 41;
+  int get schemaVersion => 42;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -416,6 +417,10 @@ class AppDatabase extends _$AppDatabase {
             // Workers' permits and site cards with expiry dates (Malaysia,
             // UAE, UK apps).
             await _createTableIfMissing(m, workerPermits);
+          }
+          if (from < 42) {
+            // Pins and markup on drawings.
+            await _createTableIfMissing(m, drawingPins);
           }
         },
       );

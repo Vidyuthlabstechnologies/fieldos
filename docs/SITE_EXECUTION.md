@@ -118,3 +118,26 @@ records in `lib/data/site_execution_dao.dart`; sync mapping in
 `fieldos_mobile/test/site_execution_cycle_test.dart` runs the two-phone
 version of this against a local Supabase stack, and checks that the server
 refuses each step the phone would refuse.
+
+## Pins and markup on drawings
+
+The drawing register's pin icon opens the site's current (approved)
+revision on screen: pinch to zoom, **Pin** to tap a spot and raise a
+defect or an RFI there, or leave a note, and **Draw** to mark it up with a
+finger (red or blue) and save the markup with a line of text. PDFs show a
+page at a time, rendered once by the phone's own PDF engine (`printing`
+package) and kept as a PNG beside the app's files.
+
+- A pin's place is a fraction of the page (0..1), so it lands in the same
+  spot on every screen and zoom. Pins of earlier revisions still show on
+  the current one.
+- A defect pin is coloured by its defect (open red, fixed amber, closed
+  green); an RFI pin by its RFI (open amber, answered/closed green).
+- Pins are never deleted, only removed: by whoever placed them, the owner
+  or a project manager. The server checks the same and refuses any other
+  change to a pin.
+
+Code: `fieldos_mobile/lib/features/execution/drawing_sheet_screen.dart`,
+DAO `addPin` / `removePin`; phone table `drawing_pins` (schema v42);
+server `supabase/migrations/20261114220000_drawing_pins.sql`
+(`site_drawing_pins`, synced by the site-execution mapper).

@@ -39,6 +39,7 @@ class ExecutionData {
     required this.photos,
     required this.units,
     required this.checks,
+    this.pins = const [],
   });
 
   final String projectId;
@@ -52,6 +53,13 @@ class ExecutionData {
   final List<ExecutionPhoto> photos;
   final List<HandoverUnit> units;
   final List<HandoverCheck> checks;
+
+  /// Pins and markup on drawings, removed ones included.
+  final List<DrawingPin> pins;
+
+  /// The pins still showing on [drawingId], page [page].
+  List<DrawingPin> pinsOn(String drawingId, {int page = 0}) =>
+      [for (final p in pins) if (p.drawingId == drawingId && p.page == page && p.removedAt == null) p];
 
   late final Map<String, Task> _taskById = {for (final t in tasks) t.id: t};
   late final Map<String, Rfi> _rfiById = {for (final r in rfis) r.id: r};

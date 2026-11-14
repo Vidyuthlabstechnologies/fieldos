@@ -54946,6 +54946,965 @@ class WorkerPermitsCompanion extends UpdateCompanion<WorkerPermit> {
   }
 }
 
+class $DrawingPinsTable extends DrawingPins
+    with TableInfo<$DrawingPinsTable, DrawingPin> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DrawingPinsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _drawingIdMeta = const VerificationMeta(
+    'drawingId',
+  );
+  @override
+  late final GeneratedColumn<String> drawingId = GeneratedColumn<String>(
+    'drawing_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _revisionIdMeta = const VerificationMeta(
+    'revisionId',
+  );
+  @override
+  late final GeneratedColumn<String> revisionId = GeneratedColumn<String>(
+    'revision_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pageMeta = const VerificationMeta('page');
+  @override
+  late final GeneratedColumn<int> page = GeneratedColumn<int>(
+    'page',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _xMeta = const VerificationMeta('x');
+  @override
+  late final GeneratedColumn<double> x = GeneratedColumn<double>(
+    'x',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _yMeta = const VerificationMeta('y');
+  @override
+  late final GeneratedColumn<double> y = GeneratedColumn<double>(
+    'y',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _linkIdMeta = const VerificationMeta('linkId');
+  @override
+  late final GeneratedColumn<String> linkId = GeneratedColumn<String>(
+    'link_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 36),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 300,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _strokesMeta = const VerificationMeta(
+    'strokes',
+  );
+  @override
+  late final GeneratedColumn<String> strokes = GeneratedColumn<String>(
+    'strokes',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 40000),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+    'color',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('red'),
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _removedAtMeta = const VerificationMeta(
+    'removedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> removedAt = GeneratedColumn<DateTime>(
+    'removed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _removedByMeta = const VerificationMeta(
+    'removedBy',
+  );
+  @override
+  late final GeneratedColumn<String> removedBy = GeneratedColumn<String>(
+    'removed_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    drawingId,
+    revisionId,
+    page,
+    x,
+    y,
+    kind,
+    linkId,
+    label,
+    strokes,
+    color,
+    createdBy,
+    removedAt,
+    removedBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'drawing_pins';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DrawingPin> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('drawing_id')) {
+      context.handle(
+        _drawingIdMeta,
+        drawingId.isAcceptableOrUnknown(data['drawing_id']!, _drawingIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_drawingIdMeta);
+    }
+    if (data.containsKey('revision_id')) {
+      context.handle(
+        _revisionIdMeta,
+        revisionId.isAcceptableOrUnknown(data['revision_id']!, _revisionIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_revisionIdMeta);
+    }
+    if (data.containsKey('page')) {
+      context.handle(
+        _pageMeta,
+        page.isAcceptableOrUnknown(data['page']!, _pageMeta),
+      );
+    }
+    if (data.containsKey('x')) {
+      context.handle(_xMeta, x.isAcceptableOrUnknown(data['x']!, _xMeta));
+    } else if (isInserting) {
+      context.missing(_xMeta);
+    }
+    if (data.containsKey('y')) {
+      context.handle(_yMeta, y.isAcceptableOrUnknown(data['y']!, _yMeta));
+    } else if (isInserting) {
+      context.missing(_yMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('link_id')) {
+      context.handle(
+        _linkIdMeta,
+        linkId.isAcceptableOrUnknown(data['link_id']!, _linkIdMeta),
+      );
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (data.containsKey('strokes')) {
+      context.handle(
+        _strokesMeta,
+        strokes.isAcceptableOrUnknown(data['strokes']!, _strokesMeta),
+      );
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('removed_at')) {
+      context.handle(
+        _removedAtMeta,
+        removedAt.isAcceptableOrUnknown(data['removed_at']!, _removedAtMeta),
+      );
+    }
+    if (data.containsKey('removed_by')) {
+      context.handle(
+        _removedByMeta,
+        removedBy.isAcceptableOrUnknown(data['removed_by']!, _removedByMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DrawingPin map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DrawingPin(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      drawingId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}drawing_id'],
+      )!,
+      revisionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}revision_id'],
+      )!,
+      page: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}page'],
+      )!,
+      x: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}x'],
+      )!,
+      y: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}y'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      linkId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}link_id'],
+      ),
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      strokes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}strokes'],
+      ),
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      removedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}removed_at'],
+      ),
+      removedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}removed_by'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $DrawingPinsTable createAlias(String alias) {
+    return $DrawingPinsTable(attachedDatabase, alias);
+  }
+}
+
+class DrawingPin extends DataClass implements Insertable<DrawingPin> {
+  final String id;
+  final String projectId;
+  final String drawingId;
+  final String revisionId;
+  final int page;
+  final double x;
+  final double y;
+
+  /// note | defect | rfi | task | markup
+  final String kind;
+  final String? linkId;
+  final String label;
+
+  /// Markup only: JSON `[[x, y, x, y, ...], ...]` in page fractions.
+  final String? strokes;
+
+  /// red | blue | green | black
+  final String color;
+  final String createdBy;
+  final DateTime? removedAt;
+  final String? removedBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const DrawingPin({
+    required this.id,
+    required this.projectId,
+    required this.drawingId,
+    required this.revisionId,
+    required this.page,
+    required this.x,
+    required this.y,
+    required this.kind,
+    this.linkId,
+    required this.label,
+    this.strokes,
+    required this.color,
+    required this.createdBy,
+    this.removedAt,
+    this.removedBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['drawing_id'] = Variable<String>(drawingId);
+    map['revision_id'] = Variable<String>(revisionId);
+    map['page'] = Variable<int>(page);
+    map['x'] = Variable<double>(x);
+    map['y'] = Variable<double>(y);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || linkId != null) {
+      map['link_id'] = Variable<String>(linkId);
+    }
+    map['label'] = Variable<String>(label);
+    if (!nullToAbsent || strokes != null) {
+      map['strokes'] = Variable<String>(strokes);
+    }
+    map['color'] = Variable<String>(color);
+    map['created_by'] = Variable<String>(createdBy);
+    if (!nullToAbsent || removedAt != null) {
+      map['removed_at'] = Variable<DateTime>(removedAt);
+    }
+    if (!nullToAbsent || removedBy != null) {
+      map['removed_by'] = Variable<String>(removedBy);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  DrawingPinsCompanion toCompanion(bool nullToAbsent) {
+    return DrawingPinsCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      drawingId: Value(drawingId),
+      revisionId: Value(revisionId),
+      page: Value(page),
+      x: Value(x),
+      y: Value(y),
+      kind: Value(kind),
+      linkId: linkId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(linkId),
+      label: Value(label),
+      strokes: strokes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(strokes),
+      color: Value(color),
+      createdBy: Value(createdBy),
+      removedAt: removedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(removedAt),
+      removedBy: removedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(removedBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory DrawingPin.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DrawingPin(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      drawingId: serializer.fromJson<String>(json['drawingId']),
+      revisionId: serializer.fromJson<String>(json['revisionId']),
+      page: serializer.fromJson<int>(json['page']),
+      x: serializer.fromJson<double>(json['x']),
+      y: serializer.fromJson<double>(json['y']),
+      kind: serializer.fromJson<String>(json['kind']),
+      linkId: serializer.fromJson<String?>(json['linkId']),
+      label: serializer.fromJson<String>(json['label']),
+      strokes: serializer.fromJson<String?>(json['strokes']),
+      color: serializer.fromJson<String>(json['color']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      removedAt: serializer.fromJson<DateTime?>(json['removedAt']),
+      removedBy: serializer.fromJson<String?>(json['removedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'drawingId': serializer.toJson<String>(drawingId),
+      'revisionId': serializer.toJson<String>(revisionId),
+      'page': serializer.toJson<int>(page),
+      'x': serializer.toJson<double>(x),
+      'y': serializer.toJson<double>(y),
+      'kind': serializer.toJson<String>(kind),
+      'linkId': serializer.toJson<String?>(linkId),
+      'label': serializer.toJson<String>(label),
+      'strokes': serializer.toJson<String?>(strokes),
+      'color': serializer.toJson<String>(color),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'removedAt': serializer.toJson<DateTime?>(removedAt),
+      'removedBy': serializer.toJson<String?>(removedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  DrawingPin copyWith({
+    String? id,
+    String? projectId,
+    String? drawingId,
+    String? revisionId,
+    int? page,
+    double? x,
+    double? y,
+    String? kind,
+    Value<String?> linkId = const Value.absent(),
+    String? label,
+    Value<String?> strokes = const Value.absent(),
+    String? color,
+    String? createdBy,
+    Value<DateTime?> removedAt = const Value.absent(),
+    Value<String?> removedBy = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => DrawingPin(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    drawingId: drawingId ?? this.drawingId,
+    revisionId: revisionId ?? this.revisionId,
+    page: page ?? this.page,
+    x: x ?? this.x,
+    y: y ?? this.y,
+    kind: kind ?? this.kind,
+    linkId: linkId.present ? linkId.value : this.linkId,
+    label: label ?? this.label,
+    strokes: strokes.present ? strokes.value : this.strokes,
+    color: color ?? this.color,
+    createdBy: createdBy ?? this.createdBy,
+    removedAt: removedAt.present ? removedAt.value : this.removedAt,
+    removedBy: removedBy.present ? removedBy.value : this.removedBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  DrawingPin copyWithCompanion(DrawingPinsCompanion data) {
+    return DrawingPin(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      drawingId: data.drawingId.present ? data.drawingId.value : this.drawingId,
+      revisionId: data.revisionId.present
+          ? data.revisionId.value
+          : this.revisionId,
+      page: data.page.present ? data.page.value : this.page,
+      x: data.x.present ? data.x.value : this.x,
+      y: data.y.present ? data.y.value : this.y,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      linkId: data.linkId.present ? data.linkId.value : this.linkId,
+      label: data.label.present ? data.label.value : this.label,
+      strokes: data.strokes.present ? data.strokes.value : this.strokes,
+      color: data.color.present ? data.color.value : this.color,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      removedAt: data.removedAt.present ? data.removedAt.value : this.removedAt,
+      removedBy: data.removedBy.present ? data.removedBy.value : this.removedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DrawingPin(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('drawingId: $drawingId, ')
+          ..write('revisionId: $revisionId, ')
+          ..write('page: $page, ')
+          ..write('x: $x, ')
+          ..write('y: $y, ')
+          ..write('kind: $kind, ')
+          ..write('linkId: $linkId, ')
+          ..write('label: $label, ')
+          ..write('strokes: $strokes, ')
+          ..write('color: $color, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('removedAt: $removedAt, ')
+          ..write('removedBy: $removedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    drawingId,
+    revisionId,
+    page,
+    x,
+    y,
+    kind,
+    linkId,
+    label,
+    strokes,
+    color,
+    createdBy,
+    removedAt,
+    removedBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DrawingPin &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.drawingId == this.drawingId &&
+          other.revisionId == this.revisionId &&
+          other.page == this.page &&
+          other.x == this.x &&
+          other.y == this.y &&
+          other.kind == this.kind &&
+          other.linkId == this.linkId &&
+          other.label == this.label &&
+          other.strokes == this.strokes &&
+          other.color == this.color &&
+          other.createdBy == this.createdBy &&
+          other.removedAt == this.removedAt &&
+          other.removedBy == this.removedBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class DrawingPinsCompanion extends UpdateCompanion<DrawingPin> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> drawingId;
+  final Value<String> revisionId;
+  final Value<int> page;
+  final Value<double> x;
+  final Value<double> y;
+  final Value<String> kind;
+  final Value<String?> linkId;
+  final Value<String> label;
+  final Value<String?> strokes;
+  final Value<String> color;
+  final Value<String> createdBy;
+  final Value<DateTime?> removedAt;
+  final Value<String?> removedBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const DrawingPinsCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.drawingId = const Value.absent(),
+    this.revisionId = const Value.absent(),
+    this.page = const Value.absent(),
+    this.x = const Value.absent(),
+    this.y = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.linkId = const Value.absent(),
+    this.label = const Value.absent(),
+    this.strokes = const Value.absent(),
+    this.color = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.removedAt = const Value.absent(),
+    this.removedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DrawingPinsCompanion.insert({
+    required String id,
+    required String projectId,
+    required String drawingId,
+    required String revisionId,
+    this.page = const Value.absent(),
+    required double x,
+    required double y,
+    required String kind,
+    this.linkId = const Value.absent(),
+    required String label,
+    this.strokes = const Value.absent(),
+    this.color = const Value.absent(),
+    required String createdBy,
+    this.removedAt = const Value.absent(),
+    this.removedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       drawingId = Value(drawingId),
+       revisionId = Value(revisionId),
+       x = Value(x),
+       y = Value(y),
+       kind = Value(kind),
+       label = Value(label),
+       createdBy = Value(createdBy);
+  static Insertable<DrawingPin> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? drawingId,
+    Expression<String>? revisionId,
+    Expression<int>? page,
+    Expression<double>? x,
+    Expression<double>? y,
+    Expression<String>? kind,
+    Expression<String>? linkId,
+    Expression<String>? label,
+    Expression<String>? strokes,
+    Expression<String>? color,
+    Expression<String>? createdBy,
+    Expression<DateTime>? removedAt,
+    Expression<String>? removedBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (drawingId != null) 'drawing_id': drawingId,
+      if (revisionId != null) 'revision_id': revisionId,
+      if (page != null) 'page': page,
+      if (x != null) 'x': x,
+      if (y != null) 'y': y,
+      if (kind != null) 'kind': kind,
+      if (linkId != null) 'link_id': linkId,
+      if (label != null) 'label': label,
+      if (strokes != null) 'strokes': strokes,
+      if (color != null) 'color': color,
+      if (createdBy != null) 'created_by': createdBy,
+      if (removedAt != null) 'removed_at': removedAt,
+      if (removedBy != null) 'removed_by': removedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DrawingPinsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? drawingId,
+    Value<String>? revisionId,
+    Value<int>? page,
+    Value<double>? x,
+    Value<double>? y,
+    Value<String>? kind,
+    Value<String?>? linkId,
+    Value<String>? label,
+    Value<String?>? strokes,
+    Value<String>? color,
+    Value<String>? createdBy,
+    Value<DateTime?>? removedAt,
+    Value<String?>? removedBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return DrawingPinsCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      drawingId: drawingId ?? this.drawingId,
+      revisionId: revisionId ?? this.revisionId,
+      page: page ?? this.page,
+      x: x ?? this.x,
+      y: y ?? this.y,
+      kind: kind ?? this.kind,
+      linkId: linkId ?? this.linkId,
+      label: label ?? this.label,
+      strokes: strokes ?? this.strokes,
+      color: color ?? this.color,
+      createdBy: createdBy ?? this.createdBy,
+      removedAt: removedAt ?? this.removedAt,
+      removedBy: removedBy ?? this.removedBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (drawingId.present) {
+      map['drawing_id'] = Variable<String>(drawingId.value);
+    }
+    if (revisionId.present) {
+      map['revision_id'] = Variable<String>(revisionId.value);
+    }
+    if (page.present) {
+      map['page'] = Variable<int>(page.value);
+    }
+    if (x.present) {
+      map['x'] = Variable<double>(x.value);
+    }
+    if (y.present) {
+      map['y'] = Variable<double>(y.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (linkId.present) {
+      map['link_id'] = Variable<String>(linkId.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (strokes.present) {
+      map['strokes'] = Variable<String>(strokes.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<String>(color.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (removedAt.present) {
+      map['removed_at'] = Variable<DateTime>(removedAt.value);
+    }
+    if (removedBy.present) {
+      map['removed_by'] = Variable<String>(removedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DrawingPinsCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('drawingId: $drawingId, ')
+          ..write('revisionId: $revisionId, ')
+          ..write('page: $page, ')
+          ..write('x: $x, ')
+          ..write('y: $y, ')
+          ..write('kind: $kind, ')
+          ..write('linkId: $linkId, ')
+          ..write('label: $label, ')
+          ..write('strokes: $strokes, ')
+          ..write('color: $color, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('removedAt: $removedAt, ')
+          ..write('removedBy: $removedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -55597,6 +56556,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $WorkerPermitsTable workerPermits = $WorkerPermitsTable(this);
+  late final $DrawingPinsTable drawingPins = $DrawingPinsTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -55687,6 +56647,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     handoverChecks,
     companyStandards,
     workerPermits,
+    drawingPins,
     syncOutbox,
   ];
 }
@@ -82565,6 +83526,445 @@ typedef $$WorkerPermitsTableProcessedTableManager =
       WorkerPermit,
       PrefetchHooks Function()
     >;
+typedef $$DrawingPinsTableCreateCompanionBuilder =
+    DrawingPinsCompanion Function({
+      required String id,
+      required String projectId,
+      required String drawingId,
+      required String revisionId,
+      Value<int> page,
+      required double x,
+      required double y,
+      required String kind,
+      Value<String?> linkId,
+      required String label,
+      Value<String?> strokes,
+      Value<String> color,
+      required String createdBy,
+      Value<DateTime?> removedAt,
+      Value<String?> removedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$DrawingPinsTableUpdateCompanionBuilder =
+    DrawingPinsCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> drawingId,
+      Value<String> revisionId,
+      Value<int> page,
+      Value<double> x,
+      Value<double> y,
+      Value<String> kind,
+      Value<String?> linkId,
+      Value<String> label,
+      Value<String?> strokes,
+      Value<String> color,
+      Value<String> createdBy,
+      Value<DateTime?> removedAt,
+      Value<String?> removedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$DrawingPinsTableFilterComposer
+    extends Composer<_$AppDatabase, $DrawingPinsTable> {
+  $$DrawingPinsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get drawingId => $composableBuilder(
+    column: $table.drawingId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get revisionId => $composableBuilder(
+    column: $table.revisionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get page => $composableBuilder(
+    column: $table.page,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get x => $composableBuilder(
+    column: $table.x,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get y => $composableBuilder(
+    column: $table.y,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linkId => $composableBuilder(
+    column: $table.linkId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get strokes => $composableBuilder(
+    column: $table.strokes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get removedAt => $composableBuilder(
+    column: $table.removedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get removedBy => $composableBuilder(
+    column: $table.removedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DrawingPinsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DrawingPinsTable> {
+  $$DrawingPinsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get drawingId => $composableBuilder(
+    column: $table.drawingId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get revisionId => $composableBuilder(
+    column: $table.revisionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get page => $composableBuilder(
+    column: $table.page,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get x => $composableBuilder(
+    column: $table.x,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get y => $composableBuilder(
+    column: $table.y,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get linkId => $composableBuilder(
+    column: $table.linkId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get strokes => $composableBuilder(
+    column: $table.strokes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get removedAt => $composableBuilder(
+    column: $table.removedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get removedBy => $composableBuilder(
+    column: $table.removedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DrawingPinsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DrawingPinsTable> {
+  $$DrawingPinsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get drawingId =>
+      $composableBuilder(column: $table.drawingId, builder: (column) => column);
+
+  GeneratedColumn<String> get revisionId => $composableBuilder(
+    column: $table.revisionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get page =>
+      $composableBuilder(column: $table.page, builder: (column) => column);
+
+  GeneratedColumn<double> get x =>
+      $composableBuilder(column: $table.x, builder: (column) => column);
+
+  GeneratedColumn<double> get y =>
+      $composableBuilder(column: $table.y, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get linkId =>
+      $composableBuilder(column: $table.linkId, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<String> get strokes =>
+      $composableBuilder(column: $table.strokes, builder: (column) => column);
+
+  GeneratedColumn<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get removedAt =>
+      $composableBuilder(column: $table.removedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get removedBy =>
+      $composableBuilder(column: $table.removedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$DrawingPinsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DrawingPinsTable,
+          DrawingPin,
+          $$DrawingPinsTableFilterComposer,
+          $$DrawingPinsTableOrderingComposer,
+          $$DrawingPinsTableAnnotationComposer,
+          $$DrawingPinsTableCreateCompanionBuilder,
+          $$DrawingPinsTableUpdateCompanionBuilder,
+          (
+            DrawingPin,
+            BaseReferences<_$AppDatabase, $DrawingPinsTable, DrawingPin>,
+          ),
+          DrawingPin,
+          PrefetchHooks Function()
+        > {
+  $$DrawingPinsTableTableManager(_$AppDatabase db, $DrawingPinsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DrawingPinsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DrawingPinsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DrawingPinsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> drawingId = const Value.absent(),
+                Value<String> revisionId = const Value.absent(),
+                Value<int> page = const Value.absent(),
+                Value<double> x = const Value.absent(),
+                Value<double> y = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String?> linkId = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<String?> strokes = const Value.absent(),
+                Value<String> color = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime?> removedAt = const Value.absent(),
+                Value<String?> removedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DrawingPinsCompanion(
+                id: id,
+                projectId: projectId,
+                drawingId: drawingId,
+                revisionId: revisionId,
+                page: page,
+                x: x,
+                y: y,
+                kind: kind,
+                linkId: linkId,
+                label: label,
+                strokes: strokes,
+                color: color,
+                createdBy: createdBy,
+                removedAt: removedAt,
+                removedBy: removedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String drawingId,
+                required String revisionId,
+                Value<int> page = const Value.absent(),
+                required double x,
+                required double y,
+                required String kind,
+                Value<String?> linkId = const Value.absent(),
+                required String label,
+                Value<String?> strokes = const Value.absent(),
+                Value<String> color = const Value.absent(),
+                required String createdBy,
+                Value<DateTime?> removedAt = const Value.absent(),
+                Value<String?> removedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DrawingPinsCompanion.insert(
+                id: id,
+                projectId: projectId,
+                drawingId: drawingId,
+                revisionId: revisionId,
+                page: page,
+                x: x,
+                y: y,
+                kind: kind,
+                linkId: linkId,
+                label: label,
+                strokes: strokes,
+                color: color,
+                createdBy: createdBy,
+                removedAt: removedAt,
+                removedBy: removedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$DrawingPinsTable, DrawingPin>(table),
+                  BaseReferences<_$AppDatabase, $DrawingPinsTable, DrawingPin>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DrawingPinsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DrawingPinsTable,
+      DrawingPin,
+      $$DrawingPinsTableFilterComposer,
+      $$DrawingPinsTableOrderingComposer,
+      $$DrawingPinsTableAnnotationComposer,
+      $$DrawingPinsTableCreateCompanionBuilder,
+      $$DrawingPinsTableUpdateCompanionBuilder,
+      (
+        DrawingPin,
+        BaseReferences<_$AppDatabase, $DrawingPinsTable, DrawingPin>,
+      ),
+      DrawingPin,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -83003,6 +84403,8 @@ class $AppDatabaseManager {
       $$CompanyStandardsTableTableManager(_db, _db.companyStandards);
   $$WorkerPermitsTableTableManager get workerPermits =>
       $$WorkerPermitsTableTableManager(_db, _db.workerPermits);
+  $$DrawingPinsTableTableManager get drawingPins =>
+      $$DrawingPinsTableTableManager(_db, _db.drawingPins);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }

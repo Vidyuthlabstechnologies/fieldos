@@ -21,6 +21,7 @@ const siteExecutionTables = {
   'site_handover_checks': 'handover_checks',
   'company_standards': 'company_standards',
   'worker_permits': 'worker_permits',
+  'site_drawing_pins': 'drawing_pins',
 };
 
 /// Tables whose rows are a file on the phone, uploaded to Storage under
@@ -34,6 +35,7 @@ const siteExecutionFileFolders = {
 const siteExecutionProjectScoped = {
   'site_task_constraints', 'site_drawings', 'site_drawing_revisions', 'site_rfis', 'site_hold_points',
   'site_defects', 'site_execution_photos', 'site_handover_units', 'site_handover_checks', 'worker_permits',
+  'site_drawing_pins',
 };
 
 /// Person columns on these tables, swapped between the phone's and the
@@ -41,7 +43,7 @@ const siteExecutionProjectScoped = {
 /// (owner_id, raised_by, created_by, decided_by, uploaded_by and
 /// assignee_id are already in SyncEngine.userIdColumns.)
 const siteExecutionUserColumns = {
-  'cleared_by', 'answered_by', 'fixed_by', 'closed_by', 'handed_over_by', 'done_by',
+  'cleared_by', 'answered_by', 'fixed_by', 'closed_by', 'handed_over_by', 'done_by', 'removed_by',
 };
 
 /// Timestamps go to the server in UTC and come back as local time.
@@ -109,6 +111,7 @@ Insertable<DataClass> executionFromRemote(String serverTable, Map<String, dynami
     'site_handover_checks' => HandoverCheck.fromJson(camel, serializer: _iso),
     'company_standards' => CompanyStandard.fromJson(camel, serializer: _iso),
     'worker_permits' => WorkerPermit.fromJson(camel, serializer: _iso),
+    'site_drawing_pins' => DrawingPin.fromJson(camel, serializer: _iso),
     _ => throw ArgumentError('Not a site execution table: $serverTable'),
   };
   return d as Insertable<DataClass>;
@@ -127,5 +130,6 @@ TableInfo<Table, DataClass> executionTable(AppDatabase db, String serverTable) =
       'site_handover_checks' => db.handoverChecks,
       'company_standards' => db.companyStandards,
       'worker_permits' => db.workerPermits,
+      'site_drawing_pins' => db.drawingPins,
       _ => throw ArgumentError('Not a site execution table: $serverTable'),
     } as TableInfo<Table, DataClass>;

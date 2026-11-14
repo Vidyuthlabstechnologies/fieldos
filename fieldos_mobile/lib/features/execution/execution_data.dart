@@ -21,6 +21,7 @@ Future<ExecutionData> loadExecutionData(AppDatabase db, String projectId) async 
     photos: await x.photosFor(projectId),
     units: await x.unitsFor(projectId),
     checks: await x.checksFor(projectId),
+    pins: await x.pinsFor(projectId),
   );
 }
 
