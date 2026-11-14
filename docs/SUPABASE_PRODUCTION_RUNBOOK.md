@@ -73,10 +73,15 @@ The app's Forgot PIN ("Email me a code") sends a sign-in code with
 `signInWithOtp` (no new accounts) and checks it as an `email` OTP, so
 Supabase sends its **Magic Link** email, not the password reset one. No
 other flow in the app or website sends that email. Nothing in the repo
-pushes email templates to the hosted project: `supabase-deploy` only runs
-`supabase db push`, and `supabase config push` is not used. Until this is
-done the hosted project sends Supabase's default Magic Link email, a link
-with no code, and Forgot PIN by email cannot work. Once, in the dashboard:
+in `supabase-deploy` pushes email templates (it only runs `supabase db
+push`). Until the template is set, the hosted project sends Supabase's
+default Magic Link email, a link with no code, and Forgot PIN by email
+cannot work.
+
+Easiest: run the **supabase-email-templates** workflow from the Actions
+tab. It sets the subject and body below through the Management API and
+fails if the saved template doesn't show the code. Or by hand, in the
+dashboard:
 
 1. Authentication -> Email Templates -> **Magic Link**.
 2. Subject: `FieldOS verification code`.
