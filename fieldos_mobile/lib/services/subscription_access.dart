@@ -62,7 +62,14 @@ class SubscriptionState {
 /// after its paid-up date, since the store can't be asked offline.
 const offlineGrace = Duration(days: 3);
 
-enum Access { allowed, blocked }
+enum Access {
+  allowed,
+  blocked,
+
+  /// Everything can be viewed, nothing changed (a company plan offline for
+  /// too long, lib/services/company_plan.dart). Only company plans give it.
+  readOnly,
+}
 
 /// [billingSetUp] is false in builds without store keys (development):
 /// nothing is locked then, except in a store build.

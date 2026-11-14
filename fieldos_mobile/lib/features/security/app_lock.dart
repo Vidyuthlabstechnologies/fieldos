@@ -3,7 +3,15 @@
 /// table doesn't show the company's money and wages. The PIN is stored
 /// only as a salted hash (the same hashing as passwords). Someone who
 /// forgets it logs in again with their password, which clears it.
+///
+/// Wrong PINs: four digits are only 10,000 guesses, so after
+/// [PinLockout.freeTries] wrong ones in a row the pad waits 30 seconds,
+/// doubling with each further wrong one; at [PinLockout.signOutAt] the
+/// lock is removed and the person is signed out (locally and of the cloud
+/// account) and must log in with their password. Data on the phone stays.
 library;
+
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,32 +21,170 @@ import 'package:fieldos_mobile/core/crypto.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
 const appLockPinKey = 'app_lock_pin';
+
+/// Wrong PINs in a row, and when the current wait started (ms since
+/// epoch), kept next to the PIN so killing the app doesn't reset them.
+const appLockFailsKey = 'app_lock_fails';
+const appLockLockedAtKey = 'app_lock_locked_at';
 
 /// Away this long, and the PIN is asked again.
 const appLockAfter = Duration(minutes: 1);
 
 bool isValidPin(String pin) => RegExp(r'^\d{4}$').hasMatch(pin);
 
+/// The wrong-PIN rules, with no storage or clock of their own.
+class PinLockout {
+  const PinLockout({this.fails = 0, this.lockedAt});
+
+  /// Wrong PINs in a row.
+  final int fails;
+
+  /// When the current wait started; null when there is none.
+  final DateTime? lockedAt;
+
+  static const none = PinLockout();
+
+  /// Wrong PINs allowed before the first wait.
+  static const freeTries = 5;
+
+  /// Wrong PINs in a row that remove the lock and sign the person out.
+  static const signOutAt = 10;
+
+  static const firstWait = Duration(seconds: 30);
+
+  /// The wait after [fails] wrong PINs: none below [freeTries], then 30 s,
+  /// 60 s, 120 s...
+  static Duration waitAfter(int fails) =>
+      fails < freeTries ? Duration.zero : firstWait * (1 << (fails - freeTries).clamp(0, 20));
+
+  bool get mustSignIn => fails >= signOutAt;
+
+  /// Wrong PINs left before the forced sign-out.
+  int get triesLeft => (signOutAt - fails).clamp(0, signOutAt);
+
+  /// A start in the future means the clock was set back: the wait counts
+  /// from [now] instead, so turning the clock back never shortens it.
+  PinLockout settle(DateTime now) {
+    final at = lockedAt;
+    return at != null && at.isAfter(now) ? PinLockout(fails: fails, lockedAt: now) : this;
+  }
+
+  /// How long PIN entry stays refused.
+  Duration remaining(DateTime now) {
+    final at = settle(now).lockedAt;
+    if (at == null) return Duration.zero;
+    final left = at.add(waitAfter(fails)).difference(now);
+    return left.isNegative ? Duration.zero : left;
+  }
+
+  bool isLocked(DateTime now) => remaining(now) > Duration.zero;
+
+  /// After one more wrong PIN at [now].
+  PinLockout wrong(DateTime now) {
+    final n = fails + 1;
+    return PinLockout(fails: n, lockedAt: waitAfter(n) > Duration.zero ? now : null);
+  }
+
+  @override
+  bool operator ==(Object other) => other is PinLockout && other.fails == fails && other.lockedAt == lockedAt;
+
+  @override
+  int get hashCode => Object.hash(fails, lockedAt);
+
+  @override
+  String toString() => 'PinLockout($fails, $lockedAt)';
+}
+
+enum PinResult {
+  right,
+  wrong,
+
+  /// Refused unchecked: a wait is running.
+  locked,
+
+  /// Too many wrong PINs: the caller signs the person out.
+  signOut,
+}
+
+class PinAttempt {
+  const PinAttempt(this.result, {this.wait = Duration.zero, this.triesLeft = PinLockout.signOutAt});
+  final PinResult result;
+
+  /// How long entry is refused from now.
+  final Duration wait;
+  final int triesLeft;
+}
+
 class AppLock {
-  AppLock(this._db);
+  AppLock(this._db, {DateTime Function()? clock}) : _now = clock ?? DateTime.now;
   final AppDatabase _db;
+  final DateTime Function() _now;
+
+  /// The clock the waits are measured with.
+  DateTime now() => _now();
 
   Future<bool> isOn() async => ((await _db.settingsDao.get(appLockPinKey)) ?? '').isNotEmpty;
 
   Future<void> setPin(String pin) async {
     if (!isValidPin(pin)) throw ArgumentError.value(pin, 'pin', 'four digits');
     await _db.settingsDao.set(appLockPinKey, await hashPassword(pin));
+    await _save(PinLockout.none);
   }
 
-  Future<void> turnOff() => _db.settingsDao.set(appLockPinKey, '');
+  Future<void> turnOff() async {
+    await _db.settingsDao.set(appLockPinKey, '');
+    await _save(PinLockout.none);
+  }
 
+  /// Whether [pin] is the PIN. Counts nothing; the PIN pad uses [attempt].
   Future<bool> check(String pin) async {
     final stored = await _db.settingsDao.get(appLockPinKey);
     if (stored == null || stored.isEmpty) return true;
     return verifyPassword(pin, stored);
   }
+
+  /// The stored wrong-PIN state. A wait that started "in the future"
+  /// (clock set back) is restarted from now and saved that way.
+  Future<PinLockout> lockout() async {
+    final fails = int.tryParse(await _db.settingsDao.get(appLockFailsKey) ?? '') ?? 0;
+    final ms = int.tryParse(await _db.settingsDao.get(appLockLockedAtKey) ?? '');
+    final stored = PinLockout(fails: fails, lockedAt: ms == null ? null : DateTime.fromMillisecondsSinceEpoch(ms));
+    final settled = stored.settle(_now());
+    if (settled != stored) await _save(settled);
+    return settled;
+  }
+
+  Future<void> _save(PinLockout s) async {
+    await _db.settingsDao.set(appLockFailsKey, '${s.fails}');
+    await _db.settingsDao.set(appLockLockedAtKey, s.lockedAt == null ? '' : '${s.lockedAt!.millisecondsSinceEpoch}');
+  }
+
+  /// One PIN typed on the pad: checks it unless a wait is running, and
+  /// counts it.
+  Future<PinAttempt> attempt(String pin) async {
+    final s = await lockout();
+    if (s.mustSignIn) return const PinAttempt(PinResult.signOut, triesLeft: 0);
+    final now = _now();
+    if (s.isLocked(now)) return PinAttempt(PinResult.locked, wait: s.remaining(now), triesLeft: s.triesLeft);
+    if (await check(pin)) {
+      await _save(PinLockout.none);
+      return const PinAttempt(PinResult.right);
+    }
+    final next = s.wrong(now);
+    await _save(next);
+    if (next.mustSignIn) return const PinAttempt(PinResult.signOut, triesLeft: 0);
+    return PinAttempt(PinResult.wrong, wait: next.remaining(now), triesLeft: next.triesLeft);
+  }
+}
+
+/// "0:30", "2:00" for a wait on the PIN pad.
+String formatPinWait(Duration d) {
+  final s = (d.inMilliseconds / 1000).ceil();
+  return '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
 }
 
 final appLockProvider = Provider<AppLock>((ref) => AppLock(ref.watch(appDatabaseProvider)));
@@ -65,6 +211,19 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
   bool _checkedAtLaunch = false;
   DateTime? _pausedAt;
 
+  /// What the pad shows; the overlay entry below is built once, so it
+  /// listens to this instead of the gate's setState.
+  final _view = ValueNotifier<int>(0);
+  Duration _wait = Duration.zero;
+  int? _triesLeft;
+
+  /// Bumped when a wait starts, so the pad starts a fresh countdown.
+  int _waitSerial = 0;
+
+  /// Signed out after too many wrong PINs: says so before showing the
+  /// log-in screen.
+  bool _forcedOut = false;
+
   @override
   void initState() {
     super.initState();
@@ -75,12 +234,36 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _view.dispose();
     super.dispose();
   }
 
+  void _show({required Duration wait, int? triesLeft}) {
+    _wait = wait;
+    _triesLeft = triesLeft;
+    if (wait > Duration.zero) _waitSerial++;
+    _view.value++;
+  }
+
+  /// The tries-left line shows once the waits have started.
+  static int? _warnTries(int triesLeft) =>
+      triesLeft <= PinLockout.signOutAt - PinLockout.freeTries ? triesLeft : null;
+
   Future<void> _lockIfOn() async {
-    final on = await ref.read(appLockProvider).isOn();
+    final lock = ref.read(appLockProvider);
+    final on = await lock.isOn();
+    final state = on ? await lock.lockout() : PinLockout.none;
     if (!mounted) return;
+    if (state.mustSignIn) {
+      // Killed part-way through the sign-out: finish it.
+      setState(() {
+        _locked = true;
+        _checkedAtLaunch = true;
+      });
+      await _forceSignOut();
+      return;
+    }
+    _show(wait: state.remaining(lock.now()), triesLeft: _warnTries(state.triesLeft));
     setState(() {
       _locked = on;
       _checkedAtLaunch = true;
@@ -98,6 +281,63 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
     }
   }
 
+  Future<bool> _submit(String pin) async {
+    final r = await ref.read(appLockProvider).attempt(pin);
+    if (!mounted) return false;
+    switch (r.result) {
+      case PinResult.right:
+        _show(wait: Duration.zero);
+        setState(() => _locked = false);
+        return true;
+      case PinResult.wrong:
+      case PinResult.locked:
+        _show(wait: r.wait, triesLeft: _warnTries(r.triesLeft));
+        return false;
+      case PinResult.signOut:
+        await _forceSignOut();
+        return false;
+    }
+  }
+
+  /// Ten wrong PINs: the lock comes off and the person is signed out, of
+  /// the cloud account too (as Team sync's Sign out does), so only the
+  /// password gets back in. The data on the phone is not touched.
+  Future<void> _forceSignOut() async {
+    try {
+      ref.read(cloudSyncBootstrapProvider).stop();
+      if (ref.read(cloudSyncAvailableProvider)) await ref.read(cloudSyncServiceProvider).disableSync();
+    } catch (_) {
+      // Best effort: the local sign-out below is what stops the guessing.
+    }
+    await ref.read(sessionProvider.notifier).logout();
+    // Last, so a phone killed before here finishes the sign-out on launch.
+    await ref.read(appLockProvider).turnOff();
+    ref.invalidate(appLockOnProvider);
+    if (!mounted) return;
+    _forcedOut = true;
+    _show(wait: Duration.zero);
+  }
+
+  Widget _pad() {
+    if (_forcedOut) {
+      return _SignedOutNotice(
+        onOk: () {
+          _forcedOut = false;
+          setState(() => _locked = false);
+        },
+      );
+    }
+    return PinPad(
+      // A new wait starts a fresh countdown.
+      key: ValueKey(_waitSerial),
+      title: tr('Enter your PIN'),
+      lockedFor: _wait,
+      note: _triesLeft == null ? null : trf('Tries left before sign-out: {n}', {'n': _triesLeft!}),
+      onSubmit: _submit,
+      onForgot: _forgot,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Until the first check is done, show nothing of the app.
@@ -113,14 +353,9 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
                 ? Overlay(
                     initialEntries: [
                       OverlayEntry(
-                        builder: (_) => PinPad(
-                          title: tr('Enter your PIN'),
-                          onSubmit: (pin) async {
-                            final ok = await ref.read(appLockProvider).check(pin);
-                            if (ok && mounted) setState(() => _locked = false);
-                            return ok;
-                          },
-                          onForgot: _forgot,
+                        builder: (_) => ValueListenableBuilder<int>(
+                          valueListenable: _view,
+                          builder: (_, _, _) => _pad(),
                         ),
                       ),
                     ],
@@ -139,11 +374,56 @@ class _AppLockGateState extends ConsumerState<AppLockGate> with WidgetsBindingOb
   }
 }
 
+class _SignedOutNotice extends StatelessWidget {
+  const _SignedOutNotice({required this.onOk});
+  final VoidCallback onOk;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: const Color(0xFF14213D),
+    child: SafeArea(
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.lock_open, color: Colors.white, size: 40),
+              const SizedBox(height: 16),
+              Text(
+                tr('Too many wrong PINs. The app lock is off. Log in again with your password.'),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white),
+              ),
+              const SizedBox(height: 24),
+              FilledButton(onPressed: onOk, child: Text(tr('Log in'))),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 /// A full-screen four-digit PIN pad. [onSubmit] returns whether the PIN
 /// was right; a wrong one shakes the dots clear.
 class PinPad extends StatefulWidget {
-  const PinPad({super.key, required this.title, required this.onSubmit, this.onForgot, this.onCancel});
+  const PinPad({
+    super.key,
+    required this.title,
+    required this.onSubmit,
+    this.onForgot,
+    this.onCancel,
+    this.lockedFor = Duration.zero,
+    this.note,
+  });
   final String title;
+
+  /// Too many wrong PINs: entry is refused for this long, counting down.
+  final Duration lockedFor;
+
+  /// A line under the title, e.g. how many tries are left.
+  final String? note;
   final Future<bool> Function(String pin) onSubmit;
   final VoidCallback? onForgot;
   final VoidCallback? onCancel;
@@ -156,9 +436,37 @@ class _PinPadState extends State<PinPad> {
   String _pin = '';
   bool _wrong = false;
   bool _busy = false;
+  Duration _left = Duration.zero;
+  Timer? _timer;
+
+  bool get _waiting => _left > Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _left = widget.lockedFor;
+    if (_waiting) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+        if (!mounted) return;
+        setState(() {
+          _left -= const Duration(seconds: 1);
+          if (!_waiting) {
+            _left = Duration.zero;
+            t.cancel();
+          }
+        });
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   Future<void> _tap(String d) async {
-    if (_busy || _pin.length >= 4) return;
+    if (_busy || _waiting || _pin.length >= 4) return;
     HapticFeedback.selectionClick();
     setState(() {
       _pin += d;
@@ -178,7 +486,7 @@ class _PinPadState extends State<PinPad> {
   }
 
   void _back() {
-    if (_pin.isEmpty) return;
+    if (_pin.isEmpty || _waiting) return;
     setState(() => _pin = _pin.substring(0, _pin.length - 1));
   }
 
@@ -189,8 +497,12 @@ class _PinPadState extends State<PinPad> {
       width: 76,
       height: 76,
       child: TextButton(
-        onPressed: () => _tap(d),
-        style: TextButton.styleFrom(shape: const CircleBorder(), foregroundColor: Colors.white),
+        onPressed: _waiting ? null : () => _tap(d),
+        style: TextButton.styleFrom(
+          shape: const CircleBorder(),
+          foregroundColor: Colors.white,
+          disabledForegroundColor: Colors.white24,
+        ),
         child: Text(d, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w500)),
       ),
     );
@@ -206,12 +518,30 @@ class _PinPadState extends State<PinPad> {
                 const SizedBox(height: 12),
                 Text(widget.title, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white)),
                 const SizedBox(height: 8),
-                SizedBox(
-                  height: 20,
-                  child: _wrong
-                      ? Text(tr('Wrong PIN. Try again.'), style: const TextStyle(color: Color(0xFFFFB4AB)))
-                      : null,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 20),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: _waiting
+                        ? Text(
+                            trf('Too many wrong PINs. Wait {time}.', {'time': formatPinWait(_left)}),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Color(0xFFFFB4AB)),
+                          )
+                        : _wrong
+                        ? Text(
+                            tr('Wrong PIN. Try again.'),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Color(0xFFFFB4AB)),
+                          )
+                        : null,
+                  ),
                 ),
+                if (widget.note != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
+                    child: Text(widget.note!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
+                  ),
                 const SizedBox(height: 12),
                 Semantics(
                   label: trf('{n} of {total}', {'n': _pin.length, 'total': 4}),
@@ -259,7 +589,7 @@ class _PinPadState extends State<PinPad> {
                       height: 76,
                       child: IconButton(
                         tooltip: tr('Delete'),
-                        onPressed: _back,
+                        onPressed: _waiting ? null : _back,
                         icon: const Icon(Icons.backspace_outlined, color: Colors.white70),
                       ),
                     ),

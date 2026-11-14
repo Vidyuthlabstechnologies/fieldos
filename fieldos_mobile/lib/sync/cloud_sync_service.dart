@@ -344,7 +344,14 @@ class CloudSyncService {
         await engine.pushPending().timeout(const Duration(seconds: 20));
       } catch (_) {}
     }
-    await client.auth.signOut();
+    try {
+      await client.auth.signOut();
+    } catch (_) {
+      // Offline: the client drops its session before telling the server,
+      // so this phone is signed out already; the server's token expires on
+      // its own. The saved session must still go, or the next launch would
+      // sign back in.
+    }
     await sessionStore?.write(null);
   }
 

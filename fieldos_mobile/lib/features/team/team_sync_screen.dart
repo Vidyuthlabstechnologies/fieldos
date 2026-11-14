@@ -22,6 +22,7 @@ import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_service.dart';
+import 'package:fieldos_mobile/sync/sync_engine.dart' show siteLimitReasonOf;
 import 'package:fieldos_mobile/l10n/language.dart';
 
 class TeamSyncScreen extends ConsumerStatefulWidget {
@@ -51,6 +52,9 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
   List<CloudMember>? _roster;
   int _pending = 0;
   int _parked = 0;
+
+  /// Why a parked site was refused: the company plan's site limit.
+  String? _siteLimitReason;
   String? _lastSyncedAt;
 
   @override
@@ -84,7 +88,9 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
     if (!service.isSignedIn) await service.restoreSession();
     final linked = company != null && await ref.read(cloudLinksProvider).isLinked(company.id);
     final pending = await db.syncOutboxDao.pendingCount();
-    final parked = await db.syncOutboxDao.parkedCount();
+    final parkedRows = await db.syncOutboxDao.parked();
+    final parked = parkedRows.length;
+    final siteLimit = parkedRows.map((r) => siteLimitReasonOf(r.lastError)).nonNulls.firstOrNull;
     final last = await db.settingsDao.get('last_sync_at');
     CloudCompany? cloud;
     List<CloudMember>? roster;
@@ -106,6 +112,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       _roster = roster;
       _pending = pending;
       _parked = parked;
+      _siteLimitReason = siteLimit;
       _lastSyncedAt = (last == null || last.isEmpty) ? null : last;
     });
   }
@@ -556,6 +563,8 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
       if (_parked > 0)
         Text(trf('{n} changes could not be sent after several tries.', {'n': _parked}),
             style: TextStyle(color: Theme.of(context).colorScheme.error)),
+      if (_siteLimitReason != null)
+        Text(_siteLimitReason!, key: const ValueKey('site-limit-refused'), style: Theme.of(context).textTheme.bodySmall),
       const SizedBox(height: 8),
       Row(children: [
         FilledButton.icon(onPressed: _busy ? null : _syncNow, icon: const Icon(Icons.sync), label: _busyOr(tr('Sync now'))),

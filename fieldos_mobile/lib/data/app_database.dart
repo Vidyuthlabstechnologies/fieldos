@@ -27,6 +27,8 @@ import 'package:fieldos_mobile/features/money/billing_calc.dart' show BillLine, 
 import 'package:fieldos_mobile/l10n/language.dart' show trf;
 import 'package:fieldos_mobile/data/backup.dart';
 import 'package:fieldos_mobile/data/site_execution_dao.dart';
+import 'package:fieldos_mobile/data/write_guard.dart';
+export 'package:fieldos_mobile/data/write_guard.dart' show WriteGuard, ReadOnlyModeException, ReadOnlyReason, readOnlyMessage;
 export 'package:fieldos_mobile/data/site_execution_dao.dart' show SiteExecutionDao, ExecutionRefused;
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
 
@@ -130,9 +132,18 @@ String? _clip(String? s, int max) {
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? executor])
-      : super(executor ??
-            driftDatabase(
+  AppDatabase([QueryExecutor? executor]) : this._guarded(executor ?? _openDefault(), WriteGuard());
+
+  /// In-memory database for tests (no filesystem / path_provider needed).
+  AppDatabase.memory() : this._guarded(NativeDatabase.memory(), WriteGuard());
+
+  AppDatabase._guarded(QueryExecutor executor, this.writeGuard) : super(executor.interceptWith(writeGuard));
+
+  /// Read-only mode (lib/data/write_guard.dart): while on, every change to
+  /// the person's data is refused; settings and server sync still write.
+  final WriteGuard writeGuard;
+
+  static QueryExecutor _openDefault() => driftDatabase(
               name: 'fieldos',
               // Web options are required by the constructor but ignored on
               // native (Android/iOS/desktop) builds, which is where this app
@@ -152,10 +163,7 @@ class AppDatabase extends _$AppDatabase {
                   return path;
                 },
               ),
-            ));
-
-  /// In-memory database for tests (no filesystem / path_provider needed).
-  AppDatabase.memory() : super(NativeDatabase.memory());
+            );
 
   @override
   int get schemaVersion => 41;
@@ -2458,6 +2466,15 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
       lastError: Value(error),
     ));
   }
+
+  /// The server refused the write for a reason retrying can't fix (the
+  /// company plan's site limit): parked at once, with [error] for Team &
+  /// sync. "Retry failed" ([retryParked]) sends it again.
+  Future<void> park(int id, String error) =>
+      (update(syncOutbox)..where((o) => o.id.equals(id))).write(SyncOutboxCompanion(
+        retryCount: const Value(syncOutboxMaxRetries),
+        lastError: Value(error),
+      ));
 
   /// The server could not be reached: keep the reason for the status
   /// screen but do not count a try, so a phone that is offline for hours

@@ -3373,6 +3373,13 @@ const Map<String, String> stringsKn = {
   'Right to work (visa)': 'ಕೆಲಸ ಮಾಡುವ ಹಕ್ಕು (ವೀಸಾ)',
   'Contract sum': 'ಒಪ್ಪಂದದ ಮೊತ್ತ',
   'Retention stops at {pct}% of it': 'ರಿಟೆನ್ಷನ್ ಇದರ {pct}% ಗೆ ನಿಲ್ಲುತ್ತದೆ',
+  'Too many wrong PINs. Wait {time}.': 'ಹಲವು ತಪ್ಪು PIN. {time} ಕಾಯಿರಿ.',
+  'Tries left before sign-out: {n}': 'ಸೈನ್ ಔಟ್‌ಗೆ ಮುನ್ನ ಉಳಿದ ಪ್ರಯತ್ನಗಳು: {n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'ಹಲವು ತಪ್ಪು PIN. ಆ್ಯಪ್ ಲಾಕ್ ತೆಗೆಯಲಾಗಿದೆ. ಪಾಸ್‌ವರ್ಡ್‌ನಿಂದ ಮತ್ತೆ ಲಾಗಿನ್ ಆಗಿ.',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      '7 ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಆಫ್‌ಲೈನ್. ಬದಲಾವಣೆ ಮಾಡಲು ಇಂಟರ್ನೆಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ. ನೀವು ಎಲ್ಲವನ್ನೂ ನೋಡಬಹುದು.',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      'ನಿಮ್ಮ ಕಂಪನಿ ಪ್ಲಾನ್ ಮುಗಿದಿದೆ. ಪರಿಶೀಲಿಸಲು ಇಂಟರ್ನೆಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ. ನೀವು ಎಲ್ಲವನ್ನೂ ನೋಡಬಹುದು.',
   'Rest day and public holidays': 'ವಿಶ್ರಾಂತಿ ದಿನ ಮತ್ತು ಸಾರ್ವಜನಿಕ ರಜೆಗಳು',
   'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'ವಿಶ್ರಾಂತಿ ದಿನ ಸಾಮಾನ್ಯ ಗಂಟೆಗಳ ಅರ್ಧದವರೆಗೆ ಕೆಲಸಕ್ಕೆ 1 ದಿನ, ಅದಕ್ಕಿಂತ ಹೆಚ್ಚು ಆದರೆ 2 ದಿನದ ಕೂಲಿ. ಸಾರ್ವಜನಿಕ ರಜೆಯಲ್ಲಿ ಕೆಲಸಕ್ಕೆ ರಜೆ ಕೂಲಿಯ ಮೇಲೆ 2 ದಿನ. ನೀವು ಕೈಯಿಂದ ಹಾಕಿದ ಗುರುತು ಹಾಗೆಯೇ ಇರುತ್ತದೆ.',
   'Rest day': 'ವಿಶ್ರಾಂತಿ ದಿನ',

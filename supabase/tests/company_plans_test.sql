@@ -159,6 +159,117 @@ begin
 end $$;
 reset role;
 
+-- The server holds the site limit across all the company's sites
+-- (20261114130000_site_limit_enforced.sql): Site Pro covers 3, and Tower A
+-- and Tower B are open.
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c1', true);
+insert into projects (id, company_id, name, status) values
+  ('00000000-0000-0000-0000-00000000c0b4', '00000000-0000-0000-0000-00000000c0a1', 'Tower C', 'planning');
+do $$
+declare
+  v_state text;
+  v_message text;
+begin
+  -- A fourth active site is refused, with the distinctive error.
+  begin
+    insert into projects (id, company_id, name, status) values
+      ('00000000-0000-0000-0000-00000000c0b5', '00000000-0000-0000-0000-00000000c0a1', 'Tower D', 'active');
+    raise exception 'a fourth active site was accepted on Site Pro';
+  exception when raise_exception then
+    get stacked diagnostics v_state = returned_sqlstate, v_message = message_text;
+    if v_state <> 'P0001' or v_message not like 'site_limit_reached%' then raise; end if;
+    if v_message <> 'site_limit_reached: limit 3, active 3' then raise exception 'unexpected message: %', v_message; end if;
+  end;
+  -- So is one with no status (the default, planning, counts).
+  begin
+    insert into projects (id, company_id, name) values
+      ('00000000-0000-0000-0000-00000000c0b5', '00000000-0000-0000-0000-00000000c0a1', 'Tower D');
+    raise exception 'a default-status site went past the limit';
+  exception when raise_exception then null;
+  end;
+  -- Reopening the finished Villa is refused.
+  begin
+    update projects set status = 'active' where id = '00000000-0000-0000-0000-00000000c0b2';
+    raise exception 'a completed site was reopened past the limit';
+  exception when raise_exception then null;
+  end;
+  -- An upsert of a new active site is refused too.
+  begin
+    insert into projects (id, company_id, name, status) values
+      ('00000000-0000-0000-0000-00000000c0b5', '00000000-0000-0000-0000-00000000c0a1', 'Tower D', 'active')
+    on conflict (id) do update set status = excluded.status;
+    raise exception 'an upsert went past the limit';
+  exception when raise_exception then null;
+  end;
+  -- A finished site can still be added, and open sites edited and paused.
+  insert into projects (id, company_id, name, status) values
+    ('00000000-0000-0000-0000-00000000c0b6', '00000000-0000-0000-0000-00000000c0a1', 'Old shed', 'completed');
+  update projects set name = 'Tower A (east)', status = 'on_hold' where id = '00000000-0000-0000-0000-00000000c0b1';
+  update projects set status = 'active' where id = '00000000-0000-0000-0000-00000000c0b1';
+  -- A replayed insert (or upsert) of a site already on the server is not a new site.
+  insert into projects (id, company_id, name, status) values
+    ('00000000-0000-0000-0000-00000000c0b4', '00000000-0000-0000-0000-00000000c0a1', 'Tower C', 'active')
+  on conflict (id) do update set status = excluded.status;
+  begin
+    insert into projects (id, company_id, name, status) values
+      ('00000000-0000-0000-0000-00000000c0b4', '00000000-0000-0000-0000-00000000c0a1', 'Tower C', 'active');
+    raise exception 'a duplicate id was accepted';
+  exception when unique_violation then null;
+  end;
+  -- Two new sites in one statement can't both take the last place.
+  update projects set status = 'completed' where id = '00000000-0000-0000-0000-00000000c0b4';
+  begin
+    insert into projects (id, company_id, name, status) values
+      ('00000000-0000-0000-0000-00000000c0b7', '00000000-0000-0000-0000-00000000c0a1', 'Tower E', 'active'),
+      ('00000000-0000-0000-0000-00000000c0b8', '00000000-0000-0000-0000-00000000c0a1', 'Tower F', 'active');
+    raise exception 'two sites in one insert went past the limit';
+  exception when raise_exception then null;
+  end;
+  -- Finishing a site frees a place: reopening Villa now works.
+  update projects set status = 'active' where id = '00000000-0000-0000-0000-00000000c0b2';
+end $$;
+reset role;
+
+-- A company over its limit (the team moved it to a 1-site pilot) keeps
+-- working on the sites it has; only new or reopened ones are refused.
+set local role service_role;
+select public.end_company_plan(:'plan_id');
+select public.grant_company_plan('pilot', public.ist_today() + 60, p_company_id => '00000000-0000-0000-0000-00000000c0a1',
+                                 p_invoice_ref => 'INV-TEST-PILOT') as pilot_id \gset
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c1', true);
+update projects set name = 'Tower B (west)', status = 'planning' where id = '00000000-0000-0000-0000-00000000c0b3';
+update projects set status = 'completed' where id = '00000000-0000-0000-0000-00000000c0b2';
+do $$
+begin
+  begin
+    update projects set status = 'on_hold' where id = '00000000-0000-0000-0000-00000000c0b2';
+    raise exception 'a site was reopened by a company over its limit';
+  exception when raise_exception then null;
+  end;
+end $$;
+reset role;
+-- Enterprise with no limit: nothing refused.
+set local role service_role;
+select public.end_company_plan(:'pilot_id');
+select public.grant_company_plan('enterprise', public.ist_today() + 30, p_company_id => '00000000-0000-0000-0000-00000000c0a1')
+  as ent_id \gset
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c1', true);
+insert into projects (id, company_id, name, status) values
+  ('00000000-0000-0000-0000-00000000c0b9', '00000000-0000-0000-0000-00000000c0a1', 'Mall', 'active');
+reset role;
+set local role service_role;
+select public.end_company_plan(:'ent_id');
+reset role;
+-- With no plan at all there is no site limit (store subscription).
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c1', true);
+update projects set status = 'active' where id = '00000000-0000-0000-0000-00000000c0b2';
+reset role;
+
 -- The team ends the plan: nobody is covered from today.
 set local role service_role;
 select public.end_company_plan(:'plan_id');

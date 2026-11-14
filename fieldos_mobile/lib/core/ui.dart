@@ -10,6 +10,7 @@ import 'package:supabase/supabase.dart' as sb;
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
+import 'package:fieldos_mobile/data/write_guard.dart';
 import 'package:fieldos_mobile/services/bug_report_service.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/sync/app_version_gate.dart';
@@ -19,6 +20,7 @@ import 'package:fieldos_mobile/sync/app_version_gate.dart';
 String friendlyError(Object error, [StackTrace? stack]) {
   if (error is AuthException) return error.message;
   if (error is AppUpdateRequired) return error.message;
+  if (error is ReadOnlyModeException) return error.message;
   if (error is SocketException || error is HttpException || error is HandshakeException) return offlineMessage;
   if (error is TimeoutException) return tr('That took too long. Check your connection and try again.');
   final known = switch (error) {

@@ -2479,6 +2479,13 @@ const Map<String, String> stringsHi = {
   'Right to work (visa)': 'काम करने का अधिकार (वीज़ा)',
   'Contract sum': 'अनुबंध राशि',
   'Retention stops at {pct}% of it': 'रिटेंशन इसके {pct}% पर रुक जाता है',
+  'Too many wrong PINs. Wait {time}.': 'बहुत गलत PIN। {time} रुकें।',
+  'Tries left before sign-out: {n}': 'साइन आउट से पहले बची कोशिशें: {n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'बहुत गलत PIN। ऐप लॉक हट गया। पासवर्ड से फिर लॉग इन करें।',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      '7 दिन से ज़्यादा ऑफ़लाइन। बदलाव करते रहने के लिए इंटरनेट से जुड़ें। आप सब कुछ देख सकते हैं।',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      'आपकी कंपनी का प्लान ख़त्म हो गया है। जाँचने के लिए इंटरनेट से जुड़ें। आप सब कुछ देख सकते हैं।',
   'Rest day and public holidays': 'साप्ताहिक छुट्टी और सरकारी छुट्टियाँ',
   'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'छुट्टी के दिन सामान्य घंटों के आधे तक काम पर 1 दिन और उससे ज़्यादा पर 2 दिन की मज़दूरी। सरकारी छुट्टी पर काम पर छुट्टी की मज़दूरी के ऊपर 2 दिन। हाथ से लगाया गया निशान वैसा ही रहता है।',
   'Rest day': 'साप्ताहिक छुट्टी',

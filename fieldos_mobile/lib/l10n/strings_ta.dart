@@ -3373,6 +3373,13 @@ const Map<String, String> stringsTa = {
   'Right to work (visa)': 'வேலை செய்யும் உரிமை (விசா)',
   'Contract sum': 'ஒப்பந்தத் தொகை',
   'Retention stops at {pct}% of it': 'தக்கவைப்பு இதன் {pct}% இல் நிற்கும்',
+  'Too many wrong PINs. Wait {time}.': 'பல தவறான PIN. {time} காத்திருங்கள்.',
+  'Tries left before sign-out: {n}': 'வெளியேறும் முன் மீதி முயற்சிகள்: {n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'பல தவறான PIN. ஆப் பூட்டு நீக்கப்பட்டது. கடவுச்சொல்லுடன் மீண்டும் உள்நுழையவும்.',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      '7 நாட்களுக்கு மேல் ஆஃப்லைன். மாற்றங்கள் செய்ய இணையத்துடன் இணைக்கவும். எல்லாவற்றையும் பார்க்கலாம்.',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      'உங்கள் நிறுவனத் திட்டம் முடிந்தது. சரிபார்க்க இணையத்துடன் இணைக்கவும். எல்லாவற்றையும் பார்க்கலாம்.',
   'Rest day and public holidays': 'ஓய்வு நாள் மற்றும் பொது விடுமுறைகள்',
   'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'ஓய்வு நாளில் சாதாரண நேரத்தின் பாதி வரை வேலைக்கு 1 நாள், அதற்கு மேல் 2 நாள் கூலி. பொது விடுமுறையில் வேலைக்கு விடுமுறைக் கூலிக்கு மேல் 2 நாள். நீங்கள் கையால் குறித்தது அப்படியே இருக்கும்.',
   'Rest day': 'ஓய்வு நாள்',

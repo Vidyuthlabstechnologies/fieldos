@@ -2481,6 +2481,13 @@ const Map<String, String> stringsTe = {
   'Right to work (visa)': 'పని చేసే హక్కు (వీసా)',
   'Contract sum': 'కాంట్రాక్ట్ మొత్తం',
   'Retention stops at {pct}% of it': 'రిటెన్షన్ దీని {pct}% వద్ద ఆగుతుంది',
+  'Too many wrong PINs. Wait {time}.': 'చాలా తప్పు PINలు. {time} ఆగండి.',
+  'Tries left before sign-out: {n}': 'సైన్ అవుట్‌కు ముందు మిగిలిన ప్రయత్నాలు: {n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'చాలా తప్పు PINలు. యాప్ లాక్ తీసేశాం. పాస్‌వర్డ్‌తో మళ్ళీ లాగిన్ అవ్వండి.',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      '7 రోజులకు పైగా ఆఫ్‌లైన్. మార్పులు చేయడానికి ఇంటర్నెట్‌కు కనెక్ట్ అవ్వండి. మీరు అన్నీ చూడగలరు.',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      'మీ కంపెనీ ప్లాన్ ముగిసింది. చూసుకోవడానికి ఇంటర్నెట్‌కు కనెక్ట్ అవ్వండి. మీరు అన్నీ చూడగలరు.',
   'Rest day and public holidays': 'వారపు సెలవు, ప్రభుత్వ సెలవులు',
   'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'విశ్రాంతి దినాన సాధారణ గంటల్లో సగం వరకు పనికి 1 రోజు, అంతకు మించితే 2 రోజుల కూలీ. ప్రభుత్వ సెలవున పనికి సెలవు కూలీ పైన 2 రోజులు. మీరు చేతితో వేసిన గుర్తు అలాగే ఉంటుంది.',
   'Rest day': 'విశ్రాంతి దినం',

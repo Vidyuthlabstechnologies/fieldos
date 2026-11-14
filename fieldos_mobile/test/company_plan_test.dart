@@ -68,20 +68,84 @@ void main() {
     expect(planForCompany([own], 'c2'), isNull);
   });
 
-  test('lets people in while covered, and for 3 days offline after the last day', () async {
+  test('lets people in while covered; the server saying "none" ends it at once', () async {
     final now = DateTime(2027, 3, 31, 18);
     expect(await service.access(live: const [], now: now), Access.blocked);
     expect(await service.access(live: [sitePro()], now: now), Access.allowed);
-
-    await service.remember([sitePro()]);
-    // Offline: the last answer counts through the last day, plus the grace.
-    expect(await service.access(live: null, now: now), Access.allowed);
-    expect(await service.access(live: null, now: DateTime(2027, 4, 3, 12)), Access.allowed);
-    expect(await service.access(live: null, now: DateTime(2027, 4, 5)), Access.blocked);
-
-    // The server saying "none" ends it at once.
-    await service.remember(const []);
+    // Never heard of a plan: blocked offline, not read-only.
     expect(await service.access(live: null, now: now), Access.blocked);
+
+    await service.remember([sitePro()], checkedAt: now);
+    expect(await service.access(live: null, now: now), Access.allowed);
+    await service.remember(const [], checkedAt: now);
+    expect(await service.access(live: null, now: now), Access.blocked);
+  });
+
+  group('offline: 7 days after the last server answer, then read-only', () {
+    final checked = DateTime(2027, 1, 10, 9);
+
+    test('the 7-day boundary', () async {
+      await service.remember([sitePro()], checkedAt: checked);
+      expect(await service.access(live: null, now: checked.add(const Duration(days: 6, hours: 23))), Access.allowed);
+      expect(await service.access(live: null, now: checked.add(const Duration(days: 7))), Access.readOnly);
+      expect(await service.readOnlyReason(checked.add(const Duration(days: 7))), ReadOnlyReason.offlineTooLong);
+      expect(await service.access(live: null, now: checked.add(const Duration(days: 200))), Access.readOnly);
+    });
+
+    test("never past the plan's last day", () async {
+      // The plan covers through 12 January: 2 days, not 7.
+      await service.remember([sitePro(endsOn: DateTime(2027, 1, 12))], checkedAt: checked);
+      expect(await service.access(live: null, now: DateTime(2027, 1, 12, 23, 59)), Access.allowed);
+      expect(await service.access(live: null, now: DateTime(2027, 1, 13)), Access.readOnly);
+      expect(await service.readOnlyReason(DateTime(2027, 1, 13)), ReadOnlyReason.planEnded);
+    });
+
+    test('a clock set back past the last answer is read-only; a small correction is not', () async {
+      await service.remember([sitePro()], checkedAt: checked);
+      expect(await service.access(live: null, now: checked.subtract(const Duration(minutes: 2))), Access.allowed);
+      expect(await service.access(live: null, now: checked.subtract(const Duration(days: 1))), Access.readOnly);
+    });
+
+    test('a clock moved back later, within the 7 days, is noticed', () async {
+      await service.remember([sitePro()], checkedAt: checked);
+      expect(await service.access(live: null, now: checked.add(const Duration(days: 6))), Access.allowed);
+      // Back to day 1 to stretch the 7 days: read-only.
+      expect(await service.access(live: null, now: checked.add(const Duration(days: 1))), Access.readOnly);
+    });
+
+    test('a clock set forward just ends the 7 days early', () async {
+      await service.remember([sitePro()], checkedAt: checked);
+      expect(await service.access(live: null, now: checked.add(const Duration(days: 30))), Access.readOnly);
+    });
+
+    test('a good server answer brings it back', () async {
+      await service.remember([sitePro()], checkedAt: checked);
+      final later = checked.add(const Duration(days: 20));
+      expect(await service.access(live: null, now: later), Access.readOnly);
+      expect(await service.access(live: [sitePro()], now: later), Access.allowed);
+      await service.remember([sitePro()], checkedAt: later);
+      expect(await service.access(live: null, now: later.add(const Duration(days: 3))), Access.allowed);
+    });
+
+    test('a plan remembered before this rule gets 7 days from the first check', () async {
+      await service.remember([sitePro()], checkedAt: checked);
+      await db.settingsDao.set('company_plan_checked_at', '');
+      await db.settingsDao.set('company_plan_seen_at', '');
+      final first = DateTime(2027, 2, 1);
+      expect(await service.access(live: null, now: first), Access.allowed);
+      expect(await service.access(live: null, now: first.add(const Duration(days: 7))), Access.readOnly);
+    });
+
+    test('the pure rule', () {
+      final until = DateTime(2027, 3, 1);
+      expect(offlineCompanyAccess(coveredUntil: null, lastChecked: checked, now: checked), Access.blocked);
+      expect(offlineCompanyAccess(coveredUntil: until, lastChecked: null, now: checked), Access.readOnly);
+      expect(offlineCompanyAccess(coveredUntil: until, lastChecked: checked, now: checked), Access.allowed);
+      expect(
+          offlineCompanyAccess(
+              coveredUntil: until, lastChecked: checked, latestSeen: checked.add(const Duration(days: 3)), now: checked),
+          Access.readOnly);
+    });
   });
 
   test('completed sites do not count; on hold and planning do', () async {

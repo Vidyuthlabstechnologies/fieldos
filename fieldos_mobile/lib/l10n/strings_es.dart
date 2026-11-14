@@ -3021,6 +3021,13 @@ const Map<String, String> stringsEs = {
   'Right to work (visa)': 'Derecho a trabajar (visa)',
   'Contract sum': 'Monto del contrato',
   'Retention stops at {pct}% of it': 'La retención se detiene en el {pct}% de este',
+  'Too many wrong PINs. Wait {time}.': 'Demasiados PIN incorrectos. Espera {time}.',
+  'Tries left before sign-out: {n}': 'Intentos antes de cerrar sesión: {n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'Demasiados PIN incorrectos. Se quitó el bloqueo. Inicia sesión de nuevo con tu contraseña.',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      'Sin conexión hace más de 7 días. Conéctese a internet para seguir haciendo cambios. Puede ver todo.',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      'El plan de su empresa terminó. Conéctese a internet para comprobarlo. Puede ver todo.',
   'Rest day and public holidays': 'Día de descanso y feriados',
   'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': 'El trabajo en el día de descanso paga 1 día hasta la mitad de las horas normales y 2 días si es más. El trabajo en un feriado paga 2 días además del pago del feriado. Un día que marques a mano conserva tu marca.',
   'Rest day': 'Día de descanso',

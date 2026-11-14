@@ -3019,6 +3019,13 @@ const stringsZh = <String, String>{
   'Right to work (visa)': '工作权（签证）',
   'Contract sum': '合同总额',
   'Retention stops at {pct}% of it': '保留金最多为其 {pct}%',
+  'Too many wrong PINs. Wait {time}.': 'PIN 错误次数过多。请等 {time}。',
+  'Tries left before sign-out: {n}': '退出登录前剩余次数：{n}',
+  'Too many wrong PINs. The app lock is off. Log in again with your password.': 'PIN 错误次数过多。应用锁已关闭。请用密码重新登录。',
+  'Offline for over 7 days. Connect to the internet to keep making changes. You can still view everything.':
+      '已离线超过 7 天。请连接互联网以继续修改。您仍可查看所有内容。',
+  'Your company plan has ended. Connect to the internet to check it. You can still view everything.':
+      '贵公司的套餐已结束。请连接互联网查看。您仍可查看所有内容。',
   'Rest day and public holidays': '休息日和公共假期',
   'Work on the rest day pays 1 day for up to half the normal hours and 2 days for more. Work on a public holiday pays 2 days on top of the holiday pay. A day you mark by hand keeps your mark.': '休息日工作不超过正常工时一半付 1 天工资，超过付 2 天。公共假期工作在假期工资之外再付 2 天。你手动标记的日子保持你的标记。',
   'Rest day': '休息日',
