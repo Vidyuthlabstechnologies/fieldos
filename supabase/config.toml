@@ -254,6 +254,12 @@ content_path = "./supabase/templates/confirmation.html"
 subject = "Your FieldOS password reset code"
 content_path = "./supabase/templates/recovery.html"
 
+# The sign-in code (signInWithOtp, no new accounts) that Forgot PIN asks
+# for. No other flow sends it; the app has no magic-link sign-in.
+[auth.email.template.magic_link]
+subject = "FieldOS verification code"
+content_path = "./supabase/templates/magic_link.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"

@@ -284,7 +284,7 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                               key: const Key('contribution-note'),
                               padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
                               child: Text(
-                                tr('EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.'),
+                                tr('EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO as for a local worker, no EIS.'),
                                 style: const TextStyle(fontSize: 12),
                                 textAlign: TextAlign.center,
                               ),

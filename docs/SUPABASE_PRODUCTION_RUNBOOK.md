@@ -64,8 +64,36 @@ instead, which is not the app. So:
    website (it is only used by links, which these templates no longer
    have).
 
-The local stack (`supabase start`) already uses both templates
+The local stack (`supabase start`) already uses these templates
 (`supabase/config.toml`).
+
+### Forgot PIN code email (Magic Link template)
+
+The app's Forgot PIN ("Email me a code") sends a sign-in code with
+`signInWithOtp` (no new accounts) and checks it as an `email` OTP, so
+Supabase sends its **Magic Link** email, not the password reset one. No
+other flow in the app or website sends that email. Nothing in the repo
+in `supabase-deploy` pushes email templates (it only runs `supabase db
+push`). Until the template is set, the hosted project sends Supabase's
+default Magic Link email, a link with no code, and Forgot PIN by email
+cannot work.
+
+Easiest: run the **supabase-email-templates** workflow from the Actions
+tab. It sets the subject and body below through the Management API and
+fails if the saved template doesn't show the code. Or by hand, in the
+dashboard:
+
+1. Authentication -> Email Templates -> **Magic Link**.
+2. Subject: `FieldOS verification code`.
+3. Body: the whole of `supabase/templates/magic_link.html` (it shows
+   `{{ .Token }}` as the sign-in code; keep that line).
+4. Save. Then Authentication -> Providers -> Email: leave the Email
+   provider on (the code needs it; "Confirm email" can stay off).
+5. Check: on a test phone with the app locked, Forgot PIN -> "Email me a
+   code". The email's subject is "FieldOS verification code" and the
+   6-digit code in it unlocks the PIN reset.
+
+The email can only reach people once SMTP is set up (step 3 above).
 
 The owner taps "Put company on the cloud", which calls the
 `ensure_company` RPC: it creates the company row, makes the caller its
