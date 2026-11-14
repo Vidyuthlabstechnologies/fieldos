@@ -3463,4 +3463,6 @@ const Map<String, String> stringsKn = {
   'Over budget on {item}: spent {spent} of {budget}.': 'ಬಜೆಟ್ ಮೀರಿದೆ, {item}: {budget} ರಲ್ಲಿ {spent} ಖರ್ಚು.',
   'Close to budget on {item}: {spent} of {budget} ({pct}%).': 'ಬಜೆಟ್ ಹತ್ತಿರ, {item}: {budget} ರಲ್ಲಿ {spent} ({pct}%).',
   '{amount} spent without a BOQ item.': 'BOQ ಐಟಂ ಇಲ್ಲದೆ {amount} ಖರ್ಚು.',
+  'Purchase request': 'ಖರೀದಿ ವಿನಂತಿ',
+  'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'ಪ್ರತಿ ಕೆಲಸ ಎಷ್ಟು ಮುಂದುವರಿದಿದೆ, ಯಾವುದು ಹಿಂದೆ ಬೀಳುತ್ತಿದೆ ಎಂದು ಕೆಲಸಗಳು ತೋರಿಸುತ್ತವೆ. ಗ್ರೌಂಡ್ ಬೀಮ್ ತಡವಾಗಿದೆ, ಹಾಗಾಗಿ ಯಾರೂ ಕೇಳುವ ಮೊದಲೇ ಕೆಂಪಿನಲ್ಲಿ ಗುರುತಿಸಲಾಗಿದೆ.',
 };

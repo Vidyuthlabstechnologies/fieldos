@@ -3463,4 +3463,6 @@ const Map<String, String> stringsMr = {
   'Over budget on {item}: spent {spent} of {budget}.': 'बजेटच्या पुढे, {item}: {budget} पैकी {spent} खर्च.',
   'Close to budget on {item}: {spent} of {budget} ({pct}%).': 'बजेटच्या जवळ, {item}: {budget} पैकी {spent} ({pct}%).',
   '{amount} spent without a BOQ item.': 'BOQ आयटमशिवाय {amount} खर्च.',
+  'Purchase request': 'खरेदी मागणी',
+  'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'प्रत्येक काम किती पुढे गेले आणि काय मागे पडत आहे ते कामे दाखवतात. ग्राउंड बीम उशिरा आहे, म्हणून कोणी विचारण्याआधीच ते लाल रंगात खुणावले जाते.',
 };

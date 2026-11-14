@@ -214,7 +214,8 @@ class _WageSheetScreenState extends ConsumerState<WageSheetScreen> {
                                 if (l.dailyWage == null)
                                   tr('no daily wage set')
                                 else
-                                  trf('{amount}/day', {'amount': rupees(l.dailyWage!, paise: true)}),
+                                  trf(market.payHourly ? '{amount}/hr' : '{amount}/day',
+                                      {'amount': rupees(l.dailyWage!, paise: true)}),
                                 if (belowMinimumWage(l.dailyWage, _cal) case final min?)
                                   trf(market.payHourly ? 'below the minimum wage of {amount}/hr' : 'below the minimum wage of {amount}/day',
                                       {'amount': rupees(min, paise: true)}),

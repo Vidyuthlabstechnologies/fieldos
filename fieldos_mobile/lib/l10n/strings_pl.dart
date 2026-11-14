@@ -3143,4 +3143,6 @@ const stringsPl = <String, String>{
   'Over budget on {item}: spent {spent} of {budget}.': 'Ponad budżet w pozycji {item}: wydano {spent} z {budget}.',
   'Close to budget on {item}: {spent} of {budget} ({pct}%).': 'Blisko budżetu w pozycji {item}: {spent} z {budget} ({pct}%).',
   '{amount} spent without a BOQ item.': 'Wydano {amount} bez pozycji przedmiaru.',
+  'Purchase request': 'Zapotrzebowanie',
+  'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'Zadania pokazują, jak daleko jest każda praca i co się opóźnia. Belka fundamentowa jest opóźniona, więc jest zaznaczona na czerwono, zanim ktoś zapyta.',
 };

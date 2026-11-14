@@ -3123,4 +3123,6 @@ const stringsMl = <String, String>{
   'Over budget on {item}: spent {spent} of {budget}.': 'ബജറ്റ് കവിഞ്ഞു, {item}: {budget}-ൽ {spent} ചെലവായി.',
   'Close to budget on {item}: {spent} of {budget} ({pct}%).': 'ബജറ്റിനോട് അടുത്തു, {item}: {budget}-ൽ {spent} ({pct}%).',
   '{amount} spent without a BOQ item.': 'BOQ ഇനമില്ലാതെ {amount} ചെലവായി.',
+  'Purchase request': 'വാങ്ങൽ അഭ്യർത്ഥന',
+  'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'ഓരോ ജോലിയും എത്രത്തോളം ആയി, എന്താണ് പിന്നോട്ട് പോകുന്നത് എന്ന് ടാസ്കുകൾ കാണിക്കുന്നു. ഗ്രൗണ്ട് ബീം വൈകിയതിനാൽ, ആരെങ്കിലും ചോദിക്കുന്നതിന് മുമ്പേ അത് ചുവപ്പിൽ അടയാളപ്പെടുത്തുന്നു.',
 };

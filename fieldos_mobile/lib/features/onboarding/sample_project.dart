@@ -27,6 +27,13 @@ String get sampleClient => switch (currentMarket) {
       Market.uk => 'Mr. Smith',
     };
 
+/// The late beam in the sample story, by the local trade name.
+String get sampleBeam => switch (currentMarket) {
+      Market.india => 'Plinth beam',
+      Market.us => 'Grade beam',
+      _ => 'Ground beam',
+    };
+
 String sampleProjectKey(String companyId) => 'sample_project:$companyId';
 
 /// The company's sample project id, if it has one.
@@ -73,7 +80,7 @@ Future<Project> createSampleProject(
     for (final (title, status, progress, priority, start, due) in [
       ('Excavation and PCC', 'done', 100, 'normal', -30, -24),
       ('Footings', 'done', 100, 'normal', -23, -14),
-      ('Plinth beam', 'in_progress', 80, 'high', -12, -3),
+      (sampleBeam, 'in_progress', 80, 'high', -12, -3),
       ('Ground floor columns', 'in_progress', 30, 'high', -5, 6),
       ('First slab shuttering', 'todo', 0, 'normal', 5, 15),
       ('Ground floor brick work', 'todo', 0, 'low', 14, 40),
@@ -146,7 +153,7 @@ Future<Project> createSampleProject(
         createdBy: userId,
         entryDate: d(-1),
         workSummary:
-            'Plinth beam shuttering finished on the east side, reinforcement tied for 6 of 8 beams. '
+            '$sampleBeam shuttering finished on the east side, reinforcement tied for 6 of 8 beams. '
             'Column starters checked. Cement ran short in the evening, 20 bags needed tomorrow.',
         manpowerCount: const Value(5),
         weather: const Value('Sunny'),

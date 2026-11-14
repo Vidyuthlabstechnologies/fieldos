@@ -157,7 +157,7 @@ const Map<String, String> overtimeAr = {
 
 const Map<String, String> overtimeUr = {
   'Overtime pay': 'اوور ٹائم کی ادائیگی',
-  'OT pay {amount}': 'OT ادائیگی {amount}',
+  'OT pay {amount}': 'اوور ٹائم کی ادائیگی {amount}',
   '{h} h double time': '{h} گھنٹے دگنی شرح پر',
   'Overtime rate (×)': 'اوور ٹائم کی شرح (×)',
   'Hours past {h} in a day are overtime. The hourly rate is the day wage divided by {h}.':
@@ -174,7 +174,7 @@ const Map<String, String> overtimeUr = {
 
 const Map<String, String> overtimeMl = {
   'Overtime pay': 'ഓവർടൈം വേതനം',
-  'OT pay {amount}': 'OT വേതനം {amount}',
+  'OT pay {amount}': 'ഓവർടൈം വേതനം {amount}',
   '{h} h double time': '{h} മണിക്കൂർ ഇരട്ടി നിരക്കിൽ',
   'Overtime rate (×)': 'ഓവർടൈം നിരക്ക് (×)',
   'Hours past {h} in a day are overtime. The hourly rate is the day wage divided by {h}.':
