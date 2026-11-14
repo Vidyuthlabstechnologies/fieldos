@@ -16,6 +16,7 @@ import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/close/week_close_screen.dart' show closeNamesProvider;
 import 'package:fieldos_mobile/features/commercial/commercial_widgets.dart' show askText, KeyValue;
+import 'package:fieldos_mobile/features/execution/drawing_sheet_screen.dart';
 import 'package:fieldos_mobile/features/execution/execution_data.dart';
 import 'package:fieldos_mobile/features/execution/execution_rules.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
@@ -406,9 +407,12 @@ class _DrawingsTab extends ConsumerWidget {
         trailing: current == null
             ? StatusPill(tr('Not for construction'), tone: PillTone.warn)
             : IconButton(
+                key: Key('drawing-sheet-${dr.id}'),
                 tooltip: tr('Open the current revision'),
-                icon: const Icon(Icons.open_in_new),
-                onPressed: () => _openFile(context, current.filePath, title: '${dr.number} ${current.rev}'),
+                icon: const Icon(Icons.add_location_alt_outlined),
+                // The drawing on screen with its pins and markup.
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => DrawingSheetScreen(project: project, drawingId: dr.id))),
               ),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(

@@ -1860,3 +1860,35 @@ class WorkerPermits extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+/// A pin or markup on a drawing revision: a note, the defect, RFI or task
+/// raised at that spot ([linkId]), or freehand [strokes]. [x] and [y] are
+/// fractions of the page (0..1). Never deleted, only removed.
+class DrawingPins extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get drawingId => text().withLength(min: 1, max: 36)();
+  TextColumn get revisionId => text().withLength(min: 1, max: 36)();
+  IntColumn get page => integer().withDefault(const Constant(0))();
+  RealColumn get x => real()();
+  RealColumn get y => real()();
+
+  /// note | defect | rfi | task | markup
+  TextColumn get kind => text().withLength(min: 1, max: 10)();
+  TextColumn get linkId => text().withLength(max: 36).nullable()();
+  TextColumn get label => text().withLength(min: 1, max: 300)();
+
+  /// Markup only: JSON `[[x, y, x, y, ...], ...]` in page fractions.
+  TextColumn get strokes => text().withLength(max: 40000).nullable()();
+
+  /// red | blue | green | black
+  TextColumn get color => text().withLength(min: 1, max: 10).withDefault(const Constant('red'))();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get removedAt => dateTime().nullable()();
+  TextColumn get removedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

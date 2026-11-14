@@ -615,4 +615,71 @@ class SiteExecutionDao {
         await _queue('worker_permits', 'update', row);
         return row;
       });
+
+  // --- Pins and markup on drawings --------------------------------------------
+
+  Future<List<DrawingPin>> pinsFor(String projectId) => (db.select(db.drawingPins)
+        ..where((p) => p.projectId.equals(projectId))
+        ..orderBy([(p) => OrderingTerm.asc(p.createdAt)]))
+      .get();
+
+  /// Places a pin (or, with [strokes], a markup) on [revisionId] at the page
+  /// fractions [x], [y].
+  Future<DrawingPin> addPin({
+    required String projectId,
+    required String revisionId,
+    required String kind,
+    required String label,
+    required double x,
+    required double y,
+    required String by,
+    int page = 0,
+    String? linkId,
+    String? strokes,
+    String color = 'red',
+    DateTime? now,
+  }) =>
+      db.transaction(() async {
+        final text = _clip(label, 300);
+        if (text == null) throw ExecutionRefused(tr('Write what this pin is about.'));
+        final rev = await (db.select(db.drawingRevisions)..where((r) => r.id.equals(revisionId))).getSingleOrNull();
+        if (rev == null || rev.projectId != projectId) throw ExecutionRefused(tr('This drawing is no longer on the phone.'));
+        final t = now ?? DateTime.now();
+        final row = await db.into(db.drawingPins).insertReturning(DrawingPinsCompanion.insert(
+              id: _uuid.v4(),
+              projectId: projectId,
+              drawingId: rev.drawingId,
+              revisionId: revisionId,
+              page: Value(page),
+              x: x.clamp(0.0, 1.0).toDouble(),
+              y: y.clamp(0.0, 1.0).toDouble(),
+              kind: kind,
+              linkId: Value(linkId),
+              label: text,
+              strokes: Value(strokes),
+              color: Value(color),
+              createdBy: by,
+              createdAt: Value(t),
+              updatedAt: Value(t),
+            ));
+        await _queue('site_drawing_pins', 'insert', row);
+        return row;
+      });
+
+  /// Removes a pin. Whoever placed it, or the owner or a project manager
+  /// ([manager]); the server checks the same.
+  Future<DrawingPin> removePin(String id, {required String by, required bool manager, DateTime? now}) =>
+      db.transaction(() async {
+        final pin = await (db.select(db.drawingPins)..where((p) => p.id.equals(id))).getSingle();
+        if (pin.removedAt != null) return pin;
+        if (pin.createdBy != by && !manager) {
+          throw ExecutionRefused(tr('Only whoever placed the pin, the owner or a project manager removes it.'));
+        }
+        final t = now ?? DateTime.now();
+        await (db.update(db.drawingPins)..where((p) => p.id.equals(id)))
+            .write(DrawingPinsCompanion(removedAt: Value(t), removedBy: Value(by), updatedAt: Value(t)));
+        final row = await (db.select(db.drawingPins)..where((p) => p.id.equals(id))).getSingle();
+        await _queue('site_drawing_pins', 'update', row);
+        return row;
+      });
 }

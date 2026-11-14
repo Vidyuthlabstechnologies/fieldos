@@ -117,6 +117,10 @@ dependencies:
   # Already present through `supabase`; declared because the sync engine
   # tells a network failure (http's ClientException) from a server refusal.
   http: ^1.2.0
+  # Drawing PDFs shown as a page image so pins and markup sit on them. Uses
+  # the phone's own PDF renderer (Android PdfRenderer, iOS CoreGraphics);
+  # same author as `pdf`.
+  printing: ^5.15.1
 
 dev_dependencies:
   flutter_test:
