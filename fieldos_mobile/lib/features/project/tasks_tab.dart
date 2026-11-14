@@ -232,6 +232,7 @@ class TaskCard extends StatelessWidget {
                   child: Icon(Icons.flag_rounded, size: 16, color: toneColor(context, PillTone.warn)),
                 ),
               Expanded(
+                flex: 2,
                 child: Text(
                   t.title,
                   style: theme.textTheme.titleSmall?.copyWith(
@@ -241,12 +242,20 @@ class TaskCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              StatusPill(taskStatusLabels[t.status] ?? 'To do',
-                  tone: done
-                      ? PillTone.ok
-                      : (t.status == 'blocked'
-                          ? PillTone.danger
-                          : (t.status == 'in_progress' ? PillTone.warn : PillTone.neutral))),
+              // The pill shrinks to fit rather than pushing the row off
+              // screen when its word is long (Malayalam at 200% text).
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.topEnd,
+                  child: StatusPill(taskStatusLabels[t.status] ?? 'To do',
+                      tone: done
+                          ? PillTone.ok
+                          : (t.status == 'blocked'
+                              ? PillTone.danger
+                              : (t.status == 'in_progress' ? PillTone.warn : PillTone.neutral))),
+                ),
+              ),
             ]),
             const SizedBox(height: 8),
             Row(children: [
