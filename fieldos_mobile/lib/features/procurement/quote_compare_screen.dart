@@ -68,8 +68,8 @@ class QuoteCompareScreen extends ConsumerWidget {
         error: (e, st) => ErrorState(error: e, stack: st),
         data: (d) {
           final now = DateTime.now();
-          final c = compareQuotes(d.request, d.quotes, now);
           final names = {for (final s in d.suppliers) s.id: s.name};
+          final c = compareQuotes(d.request, d.quotes, now, supplierNames: names);
           final theme = Theme.of(context);
           final vsNext = c.savingVsNext(now);
           final vsEst = c.savingVsEstimate();

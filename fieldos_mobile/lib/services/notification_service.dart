@@ -67,6 +67,12 @@ import 'package:fieldos_mobile/features/reminders/reminders.dart';
   }
 }
 
+/// The id for the next colleague alert. Alerts take 1 to reminderIdBase - 1
+/// and then start again at 1 (replacing an alert long since read): counting
+/// on past that ran into the reminder ids, so an alert replaced a reminder
+/// and the next re-plan cancelled the alert.
+int alertIdAfter(int id) => id < 1 || id >= reminderIdBase - 1 ? 1 : id + 1;
+
 /// The app's navigator, so a tapped reminder can open its screen.
 final appNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -76,7 +82,7 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _plugin;
   bool _ready = false;
-  int _nextId = 1;
+  int _lastId = 0;
 
   static const _channel = AndroidNotificationDetails(
     'site_updates',
@@ -115,7 +121,7 @@ class NotificationService {
   Future<void> show(String title, String body) async {
     if (!_ready) return;
     await _plugin.show(
-      id: _nextId++,
+      id: _lastId = alertIdAfter(_lastId),
       title: title,
       body: body,
       notificationDetails: const NotificationDetails(android: _channel, iOS: DarwinNotificationDetails()),

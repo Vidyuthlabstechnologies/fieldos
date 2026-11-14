@@ -2425,6 +2425,10 @@ const Map<String, String> stringsHi = {
       'हर मंज़ूरी, रद्द और भुगतान, किसने और कब किया, एक फ़ाइल में',
   'Nothing has been recorded yet.':
       'अभी तक कुछ दर्ज नहीं हुआ।',
+  // Audit round 2.
+  'This site has only {qty} on record.': 'इस साइट पर रिकॉर्ड में सिर्फ़ {qty} है।',
+  'Enter each size as a number more than zero.': 'हर नाप शून्य से ज़्यादा की संख्या में भरें।',
+  'Enter a description.': 'विवरण भरें।',
   ...commercialHi,
   ...executionHi,
   ...crmHi,

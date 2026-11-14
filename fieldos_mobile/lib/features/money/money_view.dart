@@ -19,6 +19,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'dart:io';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -1323,8 +1324,7 @@ class _DateRow extends StatelessWidget {
         Expanded(child: Text(trf('Date: {date}', {'date': shortDay(value)}))),
         TextButton(
           onPressed: () async {
-            final d = await showDatePicker(
-                context: context, initialDate: value, firstDate: DateTime(2020), lastDate: DateTime.now());
+            final d = await pickDate(context, initial: value, first: DateTime(2020), last: DateTime.now());
             if (d != null) onChanged(d);
           },
           child: Text(tr('Change')),

@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -77,11 +78,12 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
             icon: const Icon(Icons.calendar_month_outlined),
             onPressed: () async {
               final now = DateTime.now();
-              final d = await showDatePicker(
-                context: context,
-                initialDate: _day,
-                firstDate: now.subtract(const Duration(days: 60)),
-                lastDate: now,
+              final d = await pickDate(
+                context,
+                initial: _day,
+                first: now.subtract(const Duration(days: 60)),
+                last: now,
+                keepRange: true,
               );
               if (d != null) {
                 setState(() {

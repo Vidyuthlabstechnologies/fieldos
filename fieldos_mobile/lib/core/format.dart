@@ -85,6 +85,14 @@ String fmtQty(num q) {
   return t.replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
 }
 
+/// A number as typed on a phone: "1,200", " 1250.5 ", "₹45,000". Null when
+/// blank or unreadable, and for "NaN" or "Infinity", which double.tryParse
+/// accepts but no amount or quantity can be.
+double? parseTypedNumber(String typed) {
+  final v = double.tryParse(typed.replaceAll(RegExp(r'[,₹\s]'), ''));
+  return v == null || !v.isFinite ? null : v;
+}
+
 /// Rupees with Indian grouping: "₹12,34,567". Whole rupees unless [paise]
 /// is true and the amount has some ("₹45.50").
 String rupees(num v, {bool paise = false}) {

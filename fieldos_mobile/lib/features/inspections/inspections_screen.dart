@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -79,11 +80,13 @@ class _InspectionsViewState extends ConsumerState<InspectionsView> {
               decoration: InputDecoration(labelText: tr('Scheduled date (optional)')),
               readOnly: true,
               onTap: () async {
-                final picked = await showDatePicker(
-                  context: ctx,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2030),
+                // A fixed end year stops the picker opening at all once
+                // that year has passed.
+                final picked = await pickDate(
+                  ctx,
+                  initial: scheduledOn ?? DateTime.now(),
+                  first: DateTime(2020),
+                  last: DateTime(DateTime.now().year + 4),
                 );
                 if (picked != null) {
                   scheduledOn = picked;
@@ -271,7 +274,9 @@ class _InspectionTile extends ConsumerWidget {
   }
 
   Future<void> _completeInspection(BuildContext context, WidgetRef ref) async {
-    var result = 'pass';
+    final items = await ref.read(appDatabaseProvider).inspectionDao.itemsFor(inspection.id);
+    if (!context.mounted) return;
+    var result = defaultInspectionResult(items.map((i) => i.status));
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -280,7 +285,7 @@ class _InspectionTile extends ConsumerWidget {
           initialValue: result,
           decoration: InputDecoration(labelText: tr('Overall result')),
           items: [for (final e in _results.entries) DropdownMenuItem(value: e.key, child: Text(tr(e.value)))],
-          onChanged: (v) => result = v ?? 'pass',
+          onChanged: (v) => result = v ?? result,
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
@@ -302,6 +307,11 @@ String _typeLabel(String type) => switch (type) {
   '' => tr('Inspection'),
   _ => tr('${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}'),
 };
+
+/// The result the Complete dialog starts on: failed when any checklist item
+/// failed (it used to start on passed, one tap from signing off a failed
+/// check), else passed. The person can still change it.
+String defaultInspectionResult(Iterable<String> itemStatuses) => itemStatuses.contains('fail') ? 'fail' : 'pass';
 
 /// An inspection's overall result, in words.
 const _results = {'pass': 'Passed', 'fail': 'Failed', 'partial': 'Partly passed'};

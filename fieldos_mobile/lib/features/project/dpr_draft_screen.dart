@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/agents/dpr_intake.dart';
 import 'package:fieldos_mobile/agents/site_report_parser.dart';
 import 'package:fieldos_mobile/agents/voice_dpr_agent.dart';
@@ -202,11 +203,11 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _date,
-      firstDate: now.subtract(const Duration(days: 60)),
-      lastDate: now,
+    final picked = await pickDate(
+      context,
+      initial: _date,
+      first: now.subtract(const Duration(days: 60)),
+      last: now,
       helpText: tr('Which day is this report for?'),
     );
     if (picked != null) setState(() => _date = DateTime(picked.year, picked.month, picked.day, now.hour, now.minute));

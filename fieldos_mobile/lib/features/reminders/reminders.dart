@@ -261,7 +261,13 @@ class ReminderScheduler {
       final s = await settings();
       final t = now ?? DateTime.now();
       final today = _day(t);
-      final running = (await _db.projectDao.forCompany(company.id)).where((p) => p.status == 'active').toList();
+      // Only sites this person may see: a members-only site they are not
+      // on is not theirs to report, and its tasks and name stay off the
+      // lock screen.
+      final sites = await mySiteIds(_db, _ref.read(sessionProvider), company.id);
+      final running = (await _db.projectDao.forCompany(company.id))
+          .where((p) => p.status == 'active' && sites.contains(p.id))
+          .toList();
       var reported = running.isNotEmpty;
       for (final p in running) {
         final dprs = await _db.dprDao.forProject(p.id);
@@ -305,7 +311,9 @@ class ReminderScheduler {
           for (final p in running)
             if ((await _db.settingsDao.get(reraNumberKey(p.id)))?.trim().isNotEmpty == true) p.name,
         ],
-        openTasks: s.tasksOn ? await _db.taskDao.openForCompany(company.id) : const [],
+        openTasks: s.tasksOn
+            ? [for (final t in await _db.taskDao.openForCompany(company.id)) if (sites.contains(t.projectId)) t]
+            : const [],
         isOwner: canSeeMoneyIn(_ref.read(sessionProvider).role),
         followUps: Roles.canApprove(_ref.read(sessionProvider).role)
             ? [

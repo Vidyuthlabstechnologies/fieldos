@@ -18,7 +18,10 @@ import 'package:fieldos_mobile/providers.dart';
 /// Today's brief for a company. Refreshed whenever Home is.
 final todayBriefProvider = FutureProvider.autoDispose.family<List<SiteBrief>, String>((ref, companyId) async {
   ref.watch(projectsProvider(companyId));
-  return buildOwnerBrief(ref.watch(appDatabaseProvider), companyId, day: DateTime.now());
+  final db = ref.watch(appDatabaseProvider);
+  // A members-only site this person is not on stays out of the brief.
+  final sites = await mySiteIds(db, ref.watch(sessionProvider), companyId);
+  return buildOwnerBrief(db, companyId, day: DateTime.now(), siteIds: sites);
 });
 
 String flagLabel(BriefFlag f) => switch (f.kind) {
@@ -70,8 +73,11 @@ class _OwnerBriefScreenState extends ConsumerState<OwnerBriefScreen> {
     return _yesterday ? t.subtract(const Duration(days: 1)) : t;
   }
 
-  Future<List<SiteBrief>> _load() =>
-      buildOwnerBrief(ref.read(appDatabaseProvider), widget.companyId, day: _day, now: _now);
+  Future<List<SiteBrief>> _load() async {
+    final db = ref.read(appDatabaseProvider);
+    final sites = await mySiteIds(db, ref.read(sessionProvider), widget.companyId);
+    return buildOwnerBrief(db, widget.companyId, day: _day, now: _now, siteIds: sites);
+  }
 
   void _pick(bool yesterday) => setState(() {
         _yesterday = yesterday;

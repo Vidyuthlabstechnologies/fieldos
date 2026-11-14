@@ -3319,6 +3319,10 @@ const Map<String, String> stringsMr = {
       'प्रत्येक मंजुरी, रद्द आणि पेमेंट, कोणी आणि केव्हा केले, एका फाइलमध्ये',
   'Nothing has been recorded yet.':
       'अजून काहीही नोंदवले नाही.',
+  // Audit round 2.
+  'This site has only {qty} on record.': 'या साइटवर नोंदीनुसार फक्त {qty} आहे.',
+  'Enter each size as a number more than zero.': 'प्रत्येक माप शून्यापेक्षा जास्त संख्येत भरा.',
+  'Enter a description.': 'वर्णन भरा.',
   ...commercialMr,
   ...executionMr,
   ...crmMr,

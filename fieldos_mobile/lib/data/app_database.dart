@@ -20,6 +20,7 @@ import 'package:fieldos_mobile/features/commercial/commercial_rules.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart';
 import 'package:fieldos_mobile/features/payroll/payroll_rules.dart';
 import 'package:fieldos_mobile/features/procurement/quote_compare.dart' show awardNote, compareQuotes;
+import 'package:fieldos_mobile/features/procurement/site_stock.dart' show buildSiteStock;
 import 'package:fieldos_mobile/features/warehouse/tools_rules.dart';
 import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart' show BillLine, encodeLines;
@@ -3916,6 +3917,20 @@ class WarehouseDao extends DatabaseAccessor<AppDatabase> with _$WarehouseDaoMixi
           throw ArgumentError(trf('The store has only {qty} of this.', {'qty': fmtQty(have < 0 ? 0 : have)}));
         }
         r ??= storeRate(all, fromStoreId, materialName, unit);
+      }
+      if (fromProjectId != null) {
+        // A site is held to what it has on record, as a store is: received
+        // and transferred in, less used and already sent away.
+        final k = materialKey(materialName, unit);
+        final stock = buildSiteStock(await db.materialDao.forProject(fromProjectId),
+            await db.materialDao.usageForProject(fromProjectId),
+            moves: await movesForSite(fromProjectId), projectId: fromProjectId);
+        final have = stock.where((l) => materialKey(l.name, l.unit) == k).fold(0.0, (s, l) => s + l.balance);
+        if (quantity > have + 1e-9) {
+          final u = _blankW(unit, 20);
+          final q = fmtQty(have < 0 ? 0 : have);
+          throw ArgumentError(trf('This site has only {qty} on record.', {'qty': u == null ? q : '$q $u'}));
+        }
       }
       final now = on ?? DateTime.now();
       final row = await into(stockMoves).insertReturning(StockMovesCompanion.insert(

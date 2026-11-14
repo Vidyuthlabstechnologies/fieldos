@@ -65,12 +65,26 @@ class QuoteComparison {
   }
 }
 
-QuoteComparison compareQuotes(PurchaseRequest r, Iterable<SupplierQuote> quotes, DateTime now) {
+/// Quotes that land at the same cost (to the paisa) go by quicker delivery
+/// (a quote without a delivery time after one with), then the one received
+/// first, then the supplier's name from [supplierNames] (else its id), so
+/// "best" does not change with the order the rows were read in.
+QuoteComparison compareQuotes(PurchaseRequest r, Iterable<SupplierQuote> quotes, DateTime now,
+    {Map<String, String> supplierNames = const {}}) {
   final lines = [for (final q in quotes) QuoteLine(q, r.quantity)];
   int rank(QuoteLine l) => l.quote.status == 'accepted' ? 0 : (l.quote.status == 'rejected' ? 3 : (l.expired(now) ? 2 : 1));
+  String name(QuoteLine l) => (supplierNames[l.quote.supplierId] ?? l.quote.supplierId).toLowerCase();
   lines.sort((a, b) {
-    final x = rank(a).compareTo(rank(b));
-    return x != 0 ? x : a.landed.compareTo(b.landed);
+    var x = rank(a).compareTo(rank(b));
+    if (x != 0) return x;
+    x = (a.landed * 100).round().compareTo((b.landed * 100).round());
+    if (x != 0) return x;
+    x = (a.quote.deliveryDays ?? 1 << 30).compareTo(b.quote.deliveryDays ?? 1 << 30);
+    if (x != 0) return x;
+    x = a.quote.createdAt.compareTo(b.quote.createdAt);
+    if (x != 0) return x;
+    x = name(a).compareTo(name(b));
+    return x != 0 ? x : a.quote.id.compareTo(b.quote.id);
   });
   return QuoteComparison(lines, r.estimatedAmount, now);
 }

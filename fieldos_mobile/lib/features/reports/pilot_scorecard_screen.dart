@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -49,12 +50,12 @@ class PilotScorecardScreen extends ConsumerWidget {
   final Project project;
 
   Future<void> _pickStart(BuildContext context, WidgetRef ref, DateTime? current) async {
-    final d = await showDatePicker(
-      context: context,
+    final d = await pickDate(
+      context,
       helpText: tr('When did the pilot start?'),
-      initialDate: current ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
+      initial: current ?? DateTime.now(),
+      first: DateTime(2020),
+      last: DateTime.now(),
     );
     if (d == null) return;
     await savePilotStart(ref.read(appDatabaseProvider), project.id, d);

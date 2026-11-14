@@ -2427,6 +2427,10 @@ const Map<String, String> stringsTe = {
       'ప్రతి ఆమోదం, రద్దు, చెల్లింపు, ఎవరు ఎప్పుడు చేశారో, ఒకే ఫైల్‌లో',
   'Nothing has been recorded yet.':
       'ఇంకా ఏదీ నమోదు కాలేదు.',
+  // Audit round 2.
+  'This site has only {qty} on record.': 'ఈ సైట్‌లో రికార్డు ప్రకారం {qty} మాత్రమే ఉంది.',
+  'Enter each size as a number more than zero.': 'ప్రతి కొలతను సున్నా కంటే ఎక్కువ సంఖ్యగా నమోదు చేయండి.',
+  'Enter a description.': 'వివరణ నమోదు చేయండి.',
   ...commercialTe,
   ...executionTe,
   ...crmTe,

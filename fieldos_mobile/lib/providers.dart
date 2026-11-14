@@ -69,20 +69,25 @@ final sessionProvider = NotifierProvider<SessionNotifier, SessionState>(SessionN
 final projectsProvider =
     FutureProvider.autoDispose.family<List<Project>, String>((ref, companyId) async {
   final db = ref.watch(appDatabaseProvider);
-  final s = ref.watch(sessionProvider);
   final all = await db.projectDao.forCompany(companyId);
-  final visible = await visibleSiteIds(db, companyId,
-      userId: s.user?.id, companyRole: s.role, cloudUserId: await db.settingsDao.get('cloud_user_id'));
+  final visible = await mySiteIds(db, ref.watch(sessionProvider), companyId);
   return [for (final p in all) if (visible.contains(p.id)) p];
 });
+
+/// The company's sites this phone's person may see (see visibleSiteIds).
+Future<Set<String>> mySiteIds(AppDatabase db, SessionState s, String companyId) async => visibleSiteIds(db, companyId,
+    userId: s.user?.id, companyRole: s.role, cloudUserId: await db.settingsDao.get('cloud_user_id'));
 
 final tasksProvider = FutureProvider.autoDispose.family<List<Task>, String>((ref, projectId) {
   return ref.watch(appDatabaseProvider).taskDao.forProject(projectId);
 });
 
-/// Open tasks across the company's projects, for the late counts on home.
-final openTasksProvider = FutureProvider.autoDispose.family<List<Task>, String>((ref, companyId) {
-  return ref.watch(appDatabaseProvider).taskDao.openForCompany(companyId);
+/// Open tasks across the company's sites this person may see, for the
+/// late counts on home and My tasks.
+final openTasksProvider = FutureProvider.autoDispose.family<List<Task>, String>((ref, companyId) async {
+  final db = ref.watch(appDatabaseProvider);
+  final visible = await mySiteIds(db, ref.watch(sessionProvider), companyId);
+  return [for (final t in await db.taskDao.openForCompany(companyId)) if (visible.contains(t.projectId)) t];
 });
 
 final dprProvider = FutureProvider.autoDispose.family<List<DprEntry>, String>((ref, projectId) {

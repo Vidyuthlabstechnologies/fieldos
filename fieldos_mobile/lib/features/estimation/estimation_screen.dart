@@ -16,6 +16,43 @@ import 'package:fieldos_mobile/estimation/estimation_calc.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
+/// The one message for a measurement or steel entry that cannot be saved.
+const entrySizesMessage = 'Enter each size as a number more than zero.';
+
+/// A size or count as typed: a number more than zero, or null (blank,
+/// unreadable, zero, negative, NaN or Infinity).
+double? _size(String typed) {
+  final v = parseTypedNumber(typed);
+  return v == null || v <= 0 ? null : v;
+}
+
+/// Why a measurement of [calculationType] cannot be saved, or null. A blank
+/// size used to save as no size, which counts as 0: a slab with no depth
+/// added 0 cft without a word. A size the type does not need may be left
+/// blank, but not mistyped.
+String? measurementProblem(String calculationType,
+    {required String length, required String width, required String depth, required String nos}) {
+  final needs = switch (calculationType) {
+    calcVolume => const {'l', 'w', 'd'},
+    calcArea => const {'l', 'w'},
+    _ => const <String>{},
+  };
+  for (final (key, typed) in [('l', length), ('w', width), ('d', depth)]) {
+    if (needs.contains(key) || typed.trim().isNotEmpty) {
+      if (_size(typed) == null) return entrySizesMessage;
+    }
+  }
+  return _size(nos) == null ? entrySizesMessage : null;
+}
+
+/// Why a steel entry cannot be saved, or null. Blank used to save as 0.
+String? steelProblem({required String barDia, required String nos, required String lengthFt}) =>
+    [barDia, nos, lengthFt].any((t) => _size(t) == null) ? entrySizesMessage : null;
+
+/// A stored figure for the Decimal engine. Decimal.parse throws on the text
+/// of NaN or Infinity, which took the whole cost head's screen down.
+Decimal _dec(double v) => v.isFinite ? Decimal.parse(v.toString()) : Decimal.zero;
+
 class EstimationView extends ConsumerStatefulWidget {
   const EstimationView({
     super.key,
@@ -87,7 +124,7 @@ class _EstimationViewState extends ConsumerState<EstimationView> {
           id: const Uuid().v4(),
           projectId: widget.projectId,
           name: name.text.trim(),
-          contractorProfitPercent: Value(double.tryParse(profitPercent.text)),
+          contractorProfitPercent: Value(parseTypedNumber(profitPercent.text)),
           createdBy: widget.userId,
           status: const Value('draft'),
         ));
@@ -240,8 +277,8 @@ class _CostHeadsScreenState extends ConsumerState<CostHeadsScreen> {
           calculationType: calculationType.text,
           rawUnit: rawUnit.text.trim(),
           billingUnit: billingUnit.text.trim(),
-          conversionFactor: Value(double.tryParse(conversionFactor.text) ?? 1),
-          ratePerUnit: Value(double.tryParse(ratePerUnit.text)),
+          conversionFactor: Value(parseTypedNumber(conversionFactor.text) ?? 1),
+          ratePerUnit: Value(parseTypedNumber(ratePerUnit.text)),
         ));
     ref.invalidate(costHeadsProvider(widget.estimation.id));
   }
@@ -370,12 +407,13 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
     final depth = TextEditingController();
     final nos = TextEditingController(text: '1');
     final isDeduction = ValueNotifier<bool>(false);
+    String? error;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr('Add measurement')),
-        content: StatefulBuilder(
-          builder: (ctx, setDialogState) => Column(
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: Text(tr('Add measurement')),
+          content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(controller: description, decoration: InputDecoration(labelText: tr('Description'))),
@@ -388,13 +426,24 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
                 title: Text(tr('Deduction')),
                 onChanged: (v) => setDialogState(() => isDeduction.value = v ?? false),
               ),
+              if (error != null) FormMessage(error!),
             ],
           ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+            FilledButton(
+              onPressed: () {
+                final problem = description.text.trim().isEmpty
+                    ? 'Enter a description.'
+                    : measurementProblem(widget.costHead.calculationType,
+                        length: length.text, width: width.text, depth: depth.text, nos: nos.text);
+                if (problem != null) return setDialogState(() => error = tr(problem));
+                Navigator.of(ctx).pop(true);
+              },
+              child: Text(tr('Save')),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
-        ],
       ),
     );
     if (ok != true || description.text.trim().isEmpty || !context.mounted) return;
@@ -402,10 +451,10 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
           id: const Uuid().v4(),
           costHeadId: widget.costHead.id,
           description: description.text.trim(),
-          length: Value(double.tryParse(length.text)),
-          width: Value(double.tryParse(width.text)),
-          depth: Value(double.tryParse(depth.text)),
-          nos: Value(double.tryParse(nos.text) ?? 1),
+          length: Value(_size(length.text)),
+          width: Value(_size(width.text)),
+          depth: Value(_size(depth.text)),
+          nos: Value(_size(nos.text) ?? 1),
           isDeduction: Value(isDeduction.value),
         ));
     ref.invalidate(measurementEntriesProvider(widget.costHead.id));
@@ -416,33 +465,48 @@ class _EntriesScreenState extends ConsumerState<EntriesScreen> {
     final barDiaMm = TextEditingController();
     final nos = TextEditingController();
     final lengthFt = TextEditingController();
+    String? error;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr('Add steel entry')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: description, decoration: InputDecoration(labelText: tr('Description'))),
-            TextField(controller: barDiaMm, decoration: InputDecoration(labelText: tr('Bar dia (mm)')), keyboardType: TextInputType.number),
-            TextField(controller: nos, decoration: InputDecoration(labelText: tr('Nos')), keyboardType: TextInputType.number),
-            TextField(controller: lengthFt, decoration: InputDecoration(labelText: tr('Length (ft)')), keyboardType: TextInputType.number),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: Text(tr('Add steel entry')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: description, decoration: InputDecoration(labelText: tr('Description'))),
+              TextField(controller: barDiaMm, decoration: InputDecoration(labelText: tr('Bar dia (mm)')), keyboardType: TextInputType.number),
+              TextField(controller: nos, decoration: InputDecoration(labelText: tr('Nos')), keyboardType: TextInputType.number),
+              TextField(controller: lengthFt, decoration: InputDecoration(labelText: tr('Length (ft)')), keyboardType: TextInputType.number),
+              if (error != null) FormMessage(error!),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+            FilledButton(
+              onPressed: () {
+                final problem = description.text.trim().isEmpty
+                    ? 'Enter a description.'
+                    : steelProblem(barDia: barDiaMm.text, nos: nos.text, lengthFt: lengthFt.text);
+                if (problem != null) return setDialogState(() => error = tr(problem));
+                Navigator.of(ctx).pop(true);
+              },
+              child: Text(tr('Save')),
+            ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
-        ],
       ),
     );
     if (ok != true || description.text.trim().isEmpty || !context.mounted) return;
+    final dia = _size(barDiaMm.text), count = _size(nos.text), len = _size(lengthFt.text);
+    if (dia == null || count == null || len == null) return;
     await ref.read(appDatabaseProvider).estimationDao.addSteel(SteelEntriesCompanion.insert(
           id: const Uuid().v4(),
           costHeadId: widget.costHead.id,
           description: description.text.trim(),
-          barDiaMm: double.tryParse(barDiaMm.text) ?? 0,
-          nos: double.tryParse(nos.text) ?? 0,
-          lengthFt: double.tryParse(lengthFt.text) ?? 0,
+          barDiaMm: dia,
+          nos: count,
+          lengthFt: len,
         ));
     ref.invalidate(steelEntriesProvider(widget.costHead.id));
   }
@@ -462,10 +526,10 @@ class _MeasurementEntryTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final qty = measurementEntryQuantity(
       costHead.calculationType,
-      length: entry.length == null ? null : Decimal.parse(entry.length.toString()),
-      width: entry.width == null ? null : Decimal.parse(entry.width.toString()),
-      depth: entry.depth == null ? null : Decimal.parse(entry.depth.toString()),
-      nos: Decimal.parse(entry.nos.toString()),
+      length: entry.length == null ? null : _dec(entry.length!),
+      width: entry.width == null ? null : _dec(entry.width!),
+      depth: entry.depth == null ? null : _dec(entry.depth!),
+      nos: _dec(entry.nos),
       isDeduction: entry.isDeduction,
     );
     return Card(
@@ -501,9 +565,9 @@ class _SteelEntryTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final weight = steelEntryWeightKg(
-      Decimal.parse(entry.barDiaMm.toString()),
-      Decimal.parse(entry.nos.toString()),
-      Decimal.parse(entry.lengthFt.toString()),
+      _dec(entry.barDiaMm),
+      _dec(entry.nos),
+      _dec(entry.lengthFt),
     );
     return Card(
       child: ListTile(
@@ -539,23 +603,23 @@ class _TotalSection extends ConsumerWidget {
             name: costHead.name,
             calculationType: costHead.calculationType,
             billingUnit: costHead.billingUnit,
-            conversionFactor: Decimal.parse(costHead.conversionFactor.toString()),
-            ratePerUnit: costHead.ratePerUnit == null ? null : Decimal.parse(costHead.ratePerUnit.toString()),
+            conversionFactor: _dec(costHead.conversionFactor),
+            ratePerUnit: costHead.ratePerUnit == null ? null : _dec(costHead.ratePerUnit!),
           );
           final calcMeas = meas
               .map((m) => CalcMeasurement(
-                    length: m.length == null ? null : Decimal.parse(m.length.toString()),
-                    width: m.width == null ? null : Decimal.parse(m.width.toString()),
-                    depth: m.depth == null ? null : Decimal.parse(m.depth.toString()),
-                    nos: Decimal.parse(m.nos.toString()),
+                    length: m.length == null ? null : _dec(m.length!),
+                    width: m.width == null ? null : _dec(m.width!),
+                    depth: m.depth == null ? null : _dec(m.depth!),
+                    nos: _dec(m.nos),
                     isDeduction: m.isDeduction,
                   ))
               .toList();
           final calcSteel = stl
               .map((s) => CalcSteel(
-                    barDiaMm: Decimal.parse(s.barDiaMm.toString()),
-                    nos: Decimal.parse(s.nos.toString()),
-                    lengthFt: Decimal.parse(s.lengthFt.toString()),
+                    barDiaMm: _dec(s.barDiaMm),
+                    nos: _dec(s.nos),
+                    lengthFt: _dec(s.lengthFt),
                   ))
               .toList();
 

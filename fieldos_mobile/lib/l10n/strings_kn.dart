@@ -3319,6 +3319,10 @@ const Map<String, String> stringsKn = {
       'ಪ್ರತಿ ಅನುಮೋದನೆ, ರದ್ದು, ಪಾವತಿ, ಯಾರು ಯಾವಾಗ ಮಾಡಿದರು ಎಂಬುದು ಒಂದೇ ಫೈಲ್‌ನಲ್ಲಿ',
   'Nothing has been recorded yet.':
       'ಇನ್ನೂ ಏನೂ ದಾಖಲಾಗಿಲ್ಲ.',
+  // Audit round 2.
+  'This site has only {qty} on record.': 'ಈ ಸೈಟ್‌ನಲ್ಲಿ ದಾಖಲೆಯ ಪ್ರಕಾರ {qty} ಮಾತ್ರ ಇದೆ.',
+  'Enter each size as a number more than zero.': 'ಪ್ರತಿ ಅಳತೆಯನ್ನು ಸೊನ್ನೆಗಿಂತ ಹೆಚ್ಚಿನ ಸಂಖ್ಯೆಯಾಗಿ ನಮೂದಿಸಿ.',
+  'Enter a description.': 'ವಿವರಣೆ ನಮೂದಿಸಿ.',
   ...commercialKn,
   ...executionKn,
   ...crmKn,

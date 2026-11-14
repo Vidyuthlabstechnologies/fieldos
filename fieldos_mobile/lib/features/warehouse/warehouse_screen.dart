@@ -10,6 +10,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -396,7 +397,7 @@ Future<Store?> showStoreForm(BuildContext context, WidgetRef ref,
       .addStore(companyId: companyId, name: name.text, location: location.text, by: userId);
 }
 
-double? _num(String s) => double.tryParse(s.trim().replaceAll(',', ''));
+double? _num(String s) => parseTypedNumber(s);
 
 /// The form for every kind of move. Fixed ends ([fromStoreId] and so on)
 /// are not asked; the open end is picked from the company's stores and
@@ -640,33 +641,52 @@ class _MoveFormState extends ConsumerState<_MoveForm> {
 Future<StockMove?> showReceiveDialog(BuildContext context, WidgetRef ref, StockMove m, String userId) async {
   final qty = TextEditingController(text: _qty(m.quantity));
   final note = TextEditingController();
+  // The count starts at what was sent. A cleared or unreadable count is
+  // refused here: the store's receive() reads no count as "all of it", so
+  // a slip of the thumb closed a short delivery as complete.
+  double? arrived;
+  String? error;
   final ok = await showDialog<bool>(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(tr('Receive')),
-      content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(trf('{qty} {unit} of {name} were sent. Count what arrived.',
-            {'qty': _qty(m.quantity), 'unit': m.unit ?? '', 'name': m.materialName})),
-        TextField(
-          key: const Key('receive-qty'),
-          controller: qty,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(labelText: tr('Quantity that arrived')),
-        ),
-        TextField(controller: note, decoration: InputDecoration(labelText: tr('Note'))),
-      ]),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
-        FilledButton(key: const Key('receive-save'), onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Receive'))),
-      ],
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setState) => AlertDialog(
+        title: Text(tr('Receive')),
+        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(trf('{qty} {unit} of {name} were sent. Count what arrived.',
+              {'qty': _qty(m.quantity), 'unit': m.unit ?? '', 'name': m.materialName})),
+          TextField(
+            key: const Key('receive-qty'),
+            controller: qty,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(labelText: tr('Quantity that arrived'), errorText: error),
+          ),
+          TextField(controller: note, decoration: InputDecoration(labelText: tr('Note'))),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+          FilledButton(
+            key: const Key('receive-save'),
+            onPressed: () {
+              final v = _num(qty.text);
+              if (v == null || v < 0 || v > m.quantity + 1e-9) {
+                setState(() => error = tr('Enter what arrived, up to what was sent.'));
+                return;
+              }
+              arrived = v;
+              Navigator.pop(ctx, true);
+            },
+            child: Text(tr('Receive')),
+          ),
+        ],
+      ),
     ),
   );
-  if (ok != true) return null;
+  if (ok != true || arrived == null) return null;
   try {
     return await ref
         .read(appDatabaseProvider)
         .warehouseDao
-        .receive(m.id, by: userId, arrived: _num(qty.text), note: note.text);
+        .receive(m.id, by: userId, arrived: arrived, note: note.text);
   } on ArgumentError catch (e) {
     if (context.mounted) showSnack(context, tr('${e.message}'), error: true);
     return null;
@@ -995,13 +1015,15 @@ Future<ToolIssue?> showIssueTool(BuildContext context, WidgetRef ref,
               subtitle: Text(due == null ? tr('No date') : fmtDate(due!)),
               trailing: const Icon(Icons.event),
               onTap: () async {
-                final d = await showDatePicker(
-                  context: ctx,
-                  initialDate: due ?? DateTime.now(),
-                  firstDate: DateTime.now().subtract(const Duration(days: 1)),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                // An overdue date opens on today; cancelling keeps it.
+                final d = await pickDate(
+                  ctx,
+                  initial: due ?? DateTime.now(),
+                  first: DateTime.now().subtract(const Duration(days: 1)),
+                  last: DateTime.now().add(const Duration(days: 365)),
+                  keepRange: true,
                 );
-                setState(() => due = d);
+                if (d != null) setState(() => due = d);
               },
             ),
           ]),

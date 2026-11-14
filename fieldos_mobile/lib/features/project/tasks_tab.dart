@@ -16,7 +16,9 @@ import 'package:fieldos_mobile/features/tasks/team_roster.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
-const taskStatusLabels = {'todo': 'To do', 'in_progress': 'In progress', 'done': 'Done'};
+/// The server also has "blocked" (waiting on something outside the team:
+/// a drawing, a payment, the client); it was shown as "To do".
+const taskStatusLabels = {'todo': 'To do', 'in_progress': 'In progress', 'blocked': 'Blocked', 'done': 'Done'};
 
 enum TaskView { all, late, next14 }
 
@@ -240,7 +242,11 @@ class TaskCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               StatusPill(taskStatusLabels[t.status] ?? 'To do',
-                  tone: done ? PillTone.ok : (t.status == 'in_progress' ? PillTone.warn : PillTone.neutral)),
+                  tone: done
+                      ? PillTone.ok
+                      : (t.status == 'blocked'
+                          ? PillTone.danger
+                          : (t.status == 'in_progress' ? PillTone.warn : PillTone.neutral))),
             ]),
             const SizedBox(height: 8),
             Row(children: [
@@ -461,7 +467,7 @@ class _TaskSheetState extends State<_TaskSheet> {
               Text(tr('Status'), style: theme.textTheme.labelLarge),
               const SizedBox(height: 6),
               SegmentedButton<String>(
-                segments: [for (final e in taskStatusLabels.entries) ButtonSegment(value: e.key, label: Text(e.value))],
+                segments: [for (final e in taskStatusLabels.entries) ButtonSegment(value: e.key, label: Text(tr(e.value)))],
                 selected: {_status},
                 showSelectedIcon: false,
                 onSelectionChanged: (s) => setState(() {

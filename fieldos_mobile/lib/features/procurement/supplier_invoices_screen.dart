@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -122,8 +123,7 @@ class _SupplierInvoicesScreenState extends ConsumerState<SupplierInvoicesScreen>
                 icon: const Icon(Icons.event_outlined),
                 label: Text(fmtDate(date)),
                 onPressed: () async {
-                  final d = await showDatePicker(
-                      context: ctx, initialDate: date, firstDate: DateTime(2020), lastDate: DateTime.now());
+                  final d = await pickDate(ctx, initial: date, first: DateTime(2020), last: DateTime.now());
                   if (d != null) setLocal(() => date = d);
                 },
               ),
@@ -137,7 +137,7 @@ class _SupplierInvoicesScreenState extends ConsumerState<SupplierInvoicesScreen>
       }),
     );
     if (ok != true || !mounted) return;
-    final a = double.tryParse(amount.text.trim());
+    final a = parseTypedNumber(amount.text);
     final n = number.text.trim();
     if (a == null || n.isEmpty) {
       showSnack(context, tr('Give the invoice number and its total.'), error: true);
@@ -153,8 +153,8 @@ class _SupplierInvoicesScreenState extends ConsumerState<SupplierInvoicesScreen>
             invoiceNumber: n.length > 40 ? n.substring(0, 40) : n,
             invoiceDate: DateTime(date.year, date.month, date.day),
             amount: a,
-            gstAmount: Value(double.tryParse(gst.text.trim()) ?? 0),
-            qty: Value(double.tryParse(qty.text.trim())),
+            gstAmount: Value(parseTypedNumber(gst.text) ?? 0),
+            qty: Value(parseTypedNumber(qty.text)),
             recordedBy: ref.read(sessionProvider).user?.id ?? '',
           ));
       ref.invalidate(supplierInvoicesProvider(widget.project));

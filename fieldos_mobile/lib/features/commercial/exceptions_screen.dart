@@ -9,6 +9,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -150,11 +151,12 @@ class _ExceptionCard extends ConsumerWidget {
             if (canAct && !e.isResolved)
               TextButton(
                 onPressed: () async {
-                  final d = await showDatePicker(
-                    context: context,
-                    initialDate: e.dueDate.isBefore(now) ? now : e.dueDate,
-                    firstDate: now.subtract(const Duration(days: 1)),
-                    lastDate: now.add(const Duration(days: 365)),
+                  final d = await pickDate(
+                    context,
+                    initial: e.dueDate,
+                    first: now.subtract(const Duration(days: 1)),
+                    last: now.add(const Duration(days: 365)),
+                    keepRange: true,
                   );
                   if (d != null) await _assign(ref, dueOn: _ymd(d));
                 },

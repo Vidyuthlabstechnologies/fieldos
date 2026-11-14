@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -476,8 +477,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
           FilledButton(
             onPressed: () {
               final d = desc.text.trim();
-              final r = double.tryParse(rate.text.trim());
-              final q = double.tryParse(qty.text.trim());
+              final r = parseTypedNumber(rate.text);
+              final q = parseTypedNumber(qty.text);
               if (d.isEmpty || r == null || q == null || r < 0 || q < 0) return;
               Navigator.pop(ctx, BillLine(description: d, unit: unit.text.trim(), rate: r, qty: q));
             },
@@ -637,11 +638,11 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
                 icon: const Icon(Icons.event_outlined),
                 label: Text(fmtDate(_date)),
                 onPressed: () async {
-                  final d = await showDatePicker(
-                    context: context,
-                    initialDate: _date,
-                    firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
-                    lastDate: DateTime.now().add(const Duration(days: 30)),
+                  final d = await pickDate(
+                    context,
+                    initial: _date,
+                    first: DateTime.now().subtract(const Duration(days: 365 * 2)),
+                    last: DateTime.now().add(const Duration(days: 30)),
                   );
                   if (d != null) setState(() => _date = d);
                 },
