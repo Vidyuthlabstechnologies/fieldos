@@ -36,6 +36,7 @@ import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
 import 'package:fieldos_mobile/features/tasks/my_tasks_screen.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
+import 'package:fieldos_mobile/l10n/stored_notes.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/read_aloud.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
@@ -643,6 +644,7 @@ class _Bubble extends StatelessWidget {
         ),
       ),
       child: SelectableText(text,
+          textDirection: contentDirection(text),
           style: TextStyle(color: mine ? Colors.white : scheme.onSurface, fontSize: 16, height: 1.35)),
     );
     return Padding(
@@ -713,7 +715,7 @@ class _ConfirmCard extends StatelessWidget {
               Text(label, style: theme.textTheme.labelLarge?.copyWith(color: color)),
             ]),
             const SizedBox(height: 6),
-            Text(action.summary, style: theme.textTheme.bodyLarge),
+            Text(action.summary, textDirection: contentDirection(action.summary), style: theme.textTheme.bodyLarge),
             if (action.state == ConfirmState.waiting)
               Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                 TextButton(onPressed: () => onDecide(false), child: Text(tr('Cancel'))),

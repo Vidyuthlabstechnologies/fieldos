@@ -287,7 +287,7 @@ class _Line extends StatelessWidget {
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Icon(icon, size: 16, color: color ?? theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 8),
-        Expanded(child: Text(text, style: theme.textTheme.bodyMedium?.copyWith(color: color))),
+        Expanded(child: Text(text, textDirection: contentDirection(text), style: theme.textTheme.bodyMedium?.copyWith(color: color))),
       ]),
     );
   }

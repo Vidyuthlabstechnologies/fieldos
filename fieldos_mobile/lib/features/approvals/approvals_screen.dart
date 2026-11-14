@@ -78,7 +78,7 @@ class ApprovalsScreen extends ConsumerWidget {
                                 context,
                               ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                             ),
-                            if (note.isNotEmpty) ...[const SizedBox(height: 8), Text(trStoredNote(note))],
+                            if (note.isNotEmpty) ...[const SizedBox(height: 8), Text(trStoredNote(note), textDirection: contentDirection(trStoredNote(note)))],
                             if (canDecide)
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,

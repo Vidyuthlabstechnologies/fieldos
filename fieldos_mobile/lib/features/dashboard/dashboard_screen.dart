@@ -149,7 +149,7 @@ class _ProjectHealthCard extends ConsumerWidget {
                         children: [
                           Icon(Icons.warning_amber_rounded, size: 16, color: theme.colorScheme.error),
                           const SizedBox(width: 6),
-                          Expanded(child: Text(trStoredNote(a), style: theme.textTheme.bodySmall)),
+                          Expanded(child: Text(trStoredNote(a), textDirection: contentDirection(trStoredNote(a)), style: theme.textTheme.bodySmall)),
                         ],
                       ),
                     ),

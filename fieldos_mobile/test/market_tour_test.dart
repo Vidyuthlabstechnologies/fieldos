@@ -3,6 +3,7 @@
 /// notes stored in English show in the person's language.
 library;
 
+import 'package:flutter/widgets.dart' show TextDirection;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:fieldos_mobile/core/market.dart';
@@ -103,5 +104,21 @@ void main() {
     expect(trf('{amount}/day', {'amount': 'AED 100'}), contains('\u2068AED 100\u2069'));
     setCurrentLanguage(AppLanguage.hi);
     expect(trf('{amount}/day', {'amount': '₹100'}), isNot(contains('\u2068')));
+  });
+
+  test('an English note on an Arabic or Urdu screen is laid out left to right', () {
+    const note = '40 bags cement (OPC) for column casting, AED 780';
+    expect(contentDirection(note), isNull);
+    setCurrentLanguage(AppLanguage.ar);
+    expect(contentDirection(note), TextDirection.ltr);
+    expect(contentDirection('٤٠ كيس إسمنت'), isNull);
+    setCurrentLanguage(AppLanguage.ur);
+    expect(contentDirection('Plot 14, JVC Villa: 20 bags cement'), TextDirection.ltr);
+  });
+
+  test('US home card and Malayalam overtime use their own words', () {
+    debugSetMarket(Market.us);
+    expect(trIn(AppLanguage.en, 'Daily reports'), 'Daily logs');
+    expect(trIn(AppLanguage.ml, 'OT {h} h'), isNot(contains('OT')));
   });
 }
