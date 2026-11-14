@@ -335,6 +335,15 @@ class CloudSyncService {
   }
 
   Future<void> disableSync() async {
+    // Send what is still queued while this account is signed in. The queue
+    // is not tied to an account, so anything left would go up under the
+    // next person who signs in on this phone. Best effort: offline, the
+    // queue stays and goes with the next sign-in, as before.
+    if (isSignedIn) {
+      try {
+        await engine.pushPending().timeout(const Duration(seconds: 20));
+      } catch (_) {}
+    }
     await client.auth.signOut();
     await sessionStore?.write(null);
   }
