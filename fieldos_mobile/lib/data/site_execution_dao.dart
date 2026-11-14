@@ -682,4 +682,125 @@ class SiteExecutionDao {
         await _queue('site_drawing_pins', 'update', row);
         return row;
       });
+
+  // --- Submittals --------------------------------------------------------------
+
+  Future<List<Submittal>> submittalsFor(String projectId) => (db.select(db.submittals)
+        ..where((x) => x.projectId.equals(projectId))
+        ..orderBy([(x) => OrderingTerm.asc(x.createdAt)]))
+      .get();
+
+  Future<Submittal?> submittalById(String id) => (db.select(db.submittals)..where((x) => x.id.equals(id))).getSingleOrNull();
+
+  /// Sends a submittal for review. With [taskId], the task waits for its
+  /// approval (a material constraint that clears itself once approved).
+  Future<Submittal> raiseSubmittal({
+    required String projectId,
+    required String title,
+    required String by,
+    String kind = 'product_data',
+    String? specSection,
+    String? fromParty,
+    String? reviewer,
+    String? requiredBy,
+    String? drawingId,
+    String? taskId,
+    List<String> photos = const [],
+    DateTime? now,
+  }) =>
+      db.transaction(() async {
+        final name = _clip(title, 200);
+        if (name == null) throw ExecutionRefused(tr('Say what is being submitted.'));
+        final t = now ?? DateTime.now();
+        final row = await db.into(db.submittals).insertReturning(SubmittalsCompanion.insert(
+              id: _uuid.v4(),
+              projectId: projectId,
+              title: name,
+              kind: Value(kind),
+              specSection: Value(_clip(specSection, 40)),
+              fromParty: Value(_clip(fromParty, 120)),
+              reviewer: Value(_clip(reviewer, 120)),
+              requiredBy: Value(requiredBy),
+              drawingId: Value(drawingId),
+              taskId: Value(taskId),
+              raisedBy: by,
+              createdAt: Value(t),
+              updatedAt: Value(t),
+            ));
+        await _queue('site_submittals', 'insert', row);
+        for (final p in photos) {
+          await addPhoto(projectId: projectId, parentKind: 'submittal', parentId: row.id, filePath: p, now: t);
+        }
+        if (taskId != null) {
+          await addConstraint(
+              projectId: projectId,
+              taskId: taskId,
+              kind: 'material',
+              description: trf('Approval of {title}', {'title': name}),
+              by: by,
+              needBy: requiredBy,
+              linkId: row.id,
+              now: t);
+        }
+        return row;
+      });
+
+  /// The reviewer's answer, recorded by the owner or a project manager (the
+  /// server refuses anyone else).
+  Future<Submittal> decideSubmittal(String id, {required String status, required String by, String? note, DateTime? now}) =>
+      db.transaction(() async {
+        const outcomes = ['approved', 'approved_as_noted', 'revise_resubmit', 'rejected'];
+        if (!outcomes.contains(status)) throw ArgumentError.value(status, 'status');
+        final x = await submittalById(id);
+        if (x == null) throw ExecutionRefused(tr('This submittal is no longer on the phone.'));
+        if (x.status != 'submitted') throw ExecutionRefused(tr('This submittal has already been reviewed.'));
+        final clipped = _clip(note, 1000);
+        if (status != 'approved' && clipped == null) {
+          throw ExecutionRefused(tr('Write what the reviewer said.'));
+        }
+        final t = now ?? DateTime.now();
+        await (db.update(db.submittals)..where((r) => r.id.equals(id))).write(SubmittalsCompanion(
+            status: Value(status), decisionNote: Value(clipped), decidedBy: Value(by), decidedAt: Value(t), updatedAt: Value(t)));
+        final row = (await submittalById(id))!;
+        await _queue('site_submittals', 'update', row);
+        return row;
+      });
+
+  /// Sends it again after "revise and resubmit" or a rejection: the next
+  /// round, waiting for a new review, the last review kept in history.
+  Future<Submittal> resubmitSubmittal(String id, {required String by, List<String> photos = const [], DateTime? now}) =>
+      db.transaction(() async {
+        final x = await submittalById(id);
+        if (x == null) throw ExecutionRefused(tr('This submittal is no longer on the phone.'));
+        if (x.status != 'revise_resubmit' && x.status != 'rejected') {
+          throw ExecutionRefused(tr('Only a submittal sent back can be resubmitted.'));
+        }
+        final t = now ?? DateTime.now();
+        final line = submittalHistoryLine(x);
+        var history = x.history.isEmpty ? line : '${x.history}\n$line';
+        if (history.length > 8000) history = history.substring(0, 8000);
+        await (db.update(db.submittals)..where((r) => r.id.equals(id))).write(SubmittalsCompanion(
+            status: const Value('submitted'),
+            round: Value(x.round + 1),
+            decisionNote: const Value(null),
+            decidedBy: const Value(null),
+            decidedAt: const Value(null),
+            history: Value(history),
+            updatedAt: Value(t)));
+        for (final p in photos) {
+          await addPhoto(projectId: x.projectId, parentKind: 'submittal', parentId: id, filePath: p, now: t);
+        }
+        final row = (await submittalById(id))!;
+        await _queue('site_submittals', 'update', row);
+        return row;
+      });
+}
+
+/// One review kept in a submittal's history:
+/// `round|status|decided by|yyyy-mm-dd|note`, the note last so it may hold `|`.
+String submittalHistoryLine(Submittal x) {
+  final d = x.decidedAt ?? x.updatedAt;
+  final day = '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  final note = (x.decisionNote ?? '').replaceAll('\n', ' ');
+  return '${x.round}|${x.status}|${x.decidedBy ?? ''}|$day|$note';
 }

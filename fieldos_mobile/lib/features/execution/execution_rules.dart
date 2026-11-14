@@ -40,6 +40,7 @@ class ExecutionData {
     required this.units,
     required this.checks,
     this.pins = const [],
+    this.submittals = const [],
   });
 
   final String projectId;
@@ -54,6 +55,8 @@ class ExecutionData {
   final List<HandoverUnit> units;
   final List<HandoverCheck> checks;
 
+  final List<Submittal> submittals;
+
   /// Pins and markup on drawings, removed ones included.
   final List<DrawingPin> pins;
 
@@ -61,6 +64,7 @@ class ExecutionData {
   List<DrawingPin> pinsOn(String drawingId, {int page = 0}) =>
       [for (final p in pins) if (p.drawingId == drawingId && p.page == page && p.removedAt == null) p];
 
+  late final Map<String, Submittal> _submittalById = {for (final x in submittals) x.id: x};
   late final Map<String, Task> _taskById = {for (final t in tasks) t.id: t};
   late final Map<String, Rfi> _rfiById = {for (final r in rfis) r.id: r};
   late final Map<String, HoldPoint> _holdById = {for (final h in holdPoints) h.id: h};
@@ -78,6 +82,8 @@ class ExecutionData {
     final hold = _holdById[link];
     if (hold != null) return hold.status != 'released';
     if (drawingById.containsKey(link)) return currentRevision(link) == null;
+    final sub = _submittalById[link];
+    if (sub != null) return !submittalCleared(sub.status);
     // "Earlier work" linked from the schedule: open until that task is done.
     final task = _taskById[link];
     if (task != null) return task.status != 'done';
@@ -132,6 +138,13 @@ class ExecutionData {
       r.status == 'approved' && currentRevision(r.drawingId)?.id != r.id;
 
   List<DrawingRevision> get pendingRevisions => [for (final r in revisions) if (r.status == 'pending') r];
+
+  /// "SUB-3": by the order raised.
+  String submittalNo(Submittal x) => 'SUB-${submittals.indexWhere((y) => y.id == x.id) + 1}';
+
+  /// Waiting for review past the day it was needed.
+  bool submittalOverdue(Submittal x, DateTime now) =>
+      x.status == 'submitted' && parseDay(x.requiredBy) != null && parseDay(x.requiredBy)!.isBefore(_day(now));
 
   /// "RFI-3": by the order raised.
   String rfiNo(Rfi r) => 'RFI-${rfis.indexWhere((x) => x.id == r.id) + 1}';
@@ -295,3 +308,34 @@ String severityLabel(String s) => switch (s) {
       'major' => tr('Major'),
       _ => tr('Minor'),
     };
+
+const submittalKinds = ['shop_drawing', 'product_data', 'sample', 'mock_up', 'method_statement', 'other'];
+
+/// Approved (with or without notes): the work or the order can go ahead.
+bool submittalCleared(String status) => status == 'approved' || status == 'approved_as_noted';
+
+String submittalKindLabel(String k) => switch (k) {
+      'shop_drawing' => tr('Shop drawing'),
+      'product_data' => tr('Product data sheet'),
+      'sample' => tr('Sample'),
+      'mock_up' => tr('Mock-up'),
+      'method_statement' => tr('Method statement'),
+      _ => tr('Other'),
+    };
+
+String submittalStatusLabel(String s) => switch (s) {
+      'approved' => tr('Approved'),
+      'approved_as_noted' => tr('Approved as noted'),
+      'revise_resubmit' => tr('Revise and resubmit'),
+      'rejected' => tr('Rejected'),
+      _ => tr('Waiting for review'),
+    };
+
+/// A review from a submittal's history line, or null if it is not one.
+({int round, String status, String decidedBy, String day, String note})? parseSubmittalHistory(String line) {
+  final parts = line.split('|');
+  if (parts.length < 5) return null;
+  final round = int.tryParse(parts[0]);
+  if (round == null) return null;
+  return (round: round, status: parts[1], decidedBy: parts[2], day: parts[3], note: parts.sublist(4).join('|'));
+}
