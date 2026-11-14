@@ -37,7 +37,7 @@ import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart' show cloudLinksProvider;
 import 'package:fieldos_mobile/l10n/language.dart';
 
-const paymentModes = {'cash': 'Cash', 'upi': 'UPI', 'bank': 'Bank transfer', 'cheque': 'Cheque'};
+Map<String, String> get paymentModes => {'cash': 'Cash', 'upi': market.instantPaymentName, 'bank': 'Bank transfer', 'cheque': 'Cheque'};
 
 /// Expenses that count (cancelled ones left out), for totals elsewhere.
 final expensesProvider = FutureProvider.autoDispose.family<List<SiteExpense>, String>((ref, projectId) async {

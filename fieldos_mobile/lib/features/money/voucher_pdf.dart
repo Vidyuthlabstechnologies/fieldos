@@ -30,7 +30,7 @@ const _muted = PdfColor.fromInt(0xFF5B6B80);
 const _line = PdfColor.fromInt(0xFFDDE3EB);
 const _paper = PdfColor.fromInt(0xFFF4F6F9);
 
-const _modes = {'cash': 'Cash', 'upi': 'UPI', 'bank': 'Bank transfer', 'cheque': 'Cheque'};
+Map<String, String> get _modes => {'cash': 'Cash', 'upi': market.instantPaymentName, 'bank': 'Bank transfer', 'cheque': 'Cheque'};
 
 /// Who the voucher says was paid: the worker, else the typed name.
 String voucherPayee(SiteExpense e, {String? workerName}) {

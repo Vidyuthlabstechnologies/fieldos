@@ -18,6 +18,11 @@ final _indiaOnly = RegExp(
     r'\b(GST|GSTIN|CGST|SGST|IGST|TDS|SAC|HSN|PAN|UPI|lakhs?|crores?|DPR|RA|paise|rupees?|Rs|RERA|BOCW|PF|ESIC?|Aadhaar|challan|Tally|labour)\b|₹',
     caseSensitive: false);
 
+/// The same for British-English markets, where "labour" is right.
+final _indiaOnlyBritish = RegExp(
+    r'\b(GST|GSTIN|CGST|SGST|IGST|TDS|SAC|HSN|PAN|UPI|lakhs?|crores?|DPR|RA|paise|rupees?|Rs|RERA|BOCW|PF|ESIC?|Aadhaar|challan|Tally)\b|₹',
+    caseSensitive: false);
+
 /// Shown only behind `isIndia` (see each note).
 const _hiddenOutsideIndia = {
   // Staff salaries (PF, ESI, professional tax): home menu, isIndia.
@@ -44,17 +49,19 @@ void main() {
     setCurrentLanguage(AppLanguage.en);
   });
 
-  test('the US app shows no India-only words', () {
-    debugSetMarket(Market.us);
-    final leaks = <String>[];
-    for (final label in labelsInSource()) {
-      if (_hiddenOutsideIndia.contains(label)) continue;
-      final shown = tr(label);
-      if (_indiaOnly.hasMatch(shown.replaceAll(RegExp(r'\{\w+\}'), ''))) leaks.add('$label  ->  $shown');
-    }
-    leaks.sort();
-    expect(leaks, isEmpty, reason: '${leaks.length} labels still read as Indian:\n${leaks.join('\n')}');
-  });
+  for (final (m, words) in [(Market.us, _indiaOnly), (Market.malaysia, _indiaOnlyBritish)]) {
+    test('the ${m.name} app shows no India-only words', () {
+      debugSetMarket(m);
+      final leaks = <String>[];
+      for (final label in labelsInSource()) {
+        if (_hiddenOutsideIndia.contains(label)) continue;
+        final shown = tr(label);
+        if (words.hasMatch(shown.replaceAll(RegExp(r'\{\w+\}'), ''))) leaks.add('$label  ->  $shown');
+      }
+      leaks.sort();
+      expect(leaks, isEmpty, reason: '${leaks.length} labels still read as Indian:\n${leaks.join('\n')}');
+    });
+  }
 
   test('every hidden label is still in the app (or drop it from the list)', () {
     final labels = labelsInSource();

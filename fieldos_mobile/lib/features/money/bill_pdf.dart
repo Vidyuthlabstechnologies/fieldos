@@ -116,11 +116,12 @@ Future<Uint8List> buildBillPdf({
   doc.addPage(pw.MultiPage(
     pageFormat: PdfPageFormat.a4,
     margin: const pw.EdgeInsets.all(32),
-    footer: branding.hasFooter
-        ? (ctx) => pw.Align(
-              alignment: pw.Alignment.centerRight,
-              child: t(branding.footerLine, size: 7, color: _muted),
-            )
+    footer: branding.hasFooter || market.billFooterNote != null
+        ? (ctx) => pw.Row(children: [
+              if (market.billFooterNote != null) t(market.billFooterNote!, size: 7, color: _muted),
+              pw.Spacer(),
+              if (branding.hasFooter) t(branding.footerLine, size: 7, color: _muted),
+            ])
         : null,
     build: (_) => [
       pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [

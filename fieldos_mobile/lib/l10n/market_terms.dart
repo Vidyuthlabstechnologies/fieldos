@@ -17,12 +17,14 @@ import 'package:fieldos_mobile/core/market.dart';
 /// Per market, per language code ('en', 'es'...), English key -> label.
 const Map<Market, Map<String, Map<String, String>>> marketTerms = {
   Market.us: {'en': _usEnglish},
+  Market.malaysia: {'en': _malaysiaEnglish},
 };
 
 /// Whole-word swaps on English text, after the exact table: spelling and
 /// trade words that appear in hundreds of labels. Case is kept for the
 /// first letter ("Labour" -> "Labor").
 const Map<Market, Map<String, String>> marketWordSwaps = {
+  Market.malaysia: _malaysiaSwaps,
   Market.us: {
     'labour': 'labor',
     'labourer': 'laborer',
@@ -50,6 +52,39 @@ const Map<Market, Map<String, String>> marketWordSwaps = {
     'tender': 'bid',
     'tenders': 'bids',
   },
+};
+
+/// Malaysian English keeps British spelling; the trade words follow PAM
+/// and JKR contracts (BQ, progress claim, delivery order).
+const _malaysiaSwaps = {
+  'gst': 'SST',
+  'dpr': 'daily report',
+  'dprs': 'daily reports',
+  'boq': 'BQ',
+  'challan': 'delivery order',
+  'challans': 'delivery orders',
+  'rupee': 'ringgit',
+  'rupees': 'ringgit',
+};
+
+/// The Malaysia app in Malaysian English, on top of [_malaysiaSwaps].
+const _malaysiaEnglish = <String, String>{
+  'Make the next RA bill': 'Make the next progress claim',
+  'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
+      'Measure work done against the BQ. Approved quantities go on the next progress claim.',
+  'Note (e.g. RA bill 3)': 'Note (e.g. Progress claim 3)',
+  'Running bill (RA)': 'Progress claim',
+  'Running bill': 'Progress claim',
+  'Retention %': 'Retention sum %',
+  'Less retention': 'Less retention sum',
+  'One supplier per line: name, phone, GSTIN, what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.':
+      'One supplier per line: name, phone, SST no., what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.',
+  'Approve it in your UPI or bank app. FieldOS opens by itself once {store} confirms the payment, usually within a few minutes.':
+      'Approve it in your DuitNow or bank app. FieldOS opens by itself once {store} confirms the payment, usually within a few minutes.',
+  'Your payment is waiting for approval, for example in your UPI app. FieldOS opens by itself once {store} confirms it.':
+      'Your payment is waiting for approval, for example in your bank app. FieldOS opens by itself once {store} confirms it.',
+  'Every rupee on site': 'Every ringgit on site',
+  'Add ₹5,000 spent on cement': 'Add RM500 spent on cement',
 };
 
 /// The US app in American English. Labels hidden in the US build (RERA,

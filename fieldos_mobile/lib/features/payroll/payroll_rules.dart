@@ -20,6 +20,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 
 const pfWageCeiling = 15000.0;
@@ -31,7 +32,7 @@ const esiEmployerRate = 0.0325;
 const ptStates = ['TS', 'AP', 'none'];
 const ptStateLabels = {'TS': 'Telangana', 'AP': 'Andhra Pradesh', 'none': 'No professional tax'};
 
-const payModes = {'bank': 'Bank transfer', 'upi': 'UPI', 'cash': 'Cash', 'cheque': 'Cheque'};
+Map<String, String> get payModes => {'bank': 'Bank transfer', 'upi': market.instantPaymentName, 'cash': 'Cash', 'cheque': 'Cheque'};
 
 String monthKey(DateTime d) => '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}';
 

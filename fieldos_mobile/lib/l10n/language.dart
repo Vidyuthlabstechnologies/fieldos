@@ -22,8 +22,10 @@ import 'package:fieldos_mobile/l10n/strings_es.dart';
 import 'package:fieldos_mobile/l10n/strings_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_mr.dart';
+import 'package:fieldos_mobile/l10n/strings_ms.dart';
 import 'package:fieldos_mobile/l10n/strings_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_te.dart';
+import 'package:fieldos_mobile/l10n/strings_zh.dart';
 import 'package:fieldos_mobile/providers.dart';
 
 enum AppLanguage {
@@ -33,7 +35,9 @@ enum AppLanguage {
   ta('ta', 'தமிழ்', 'Tamil'),
   kn('kn', 'ಕನ್ನಡ', 'Kannada'),
   mr('mr', 'मराठी', 'Marathi'),
-  es('es', 'Español', 'Spanish');
+  es('es', 'Español', 'Spanish'),
+  ms('ms', 'Bahasa Melayu', 'Malay'),
+  zh('zh', '中文', 'Chinese');
 
   const AppLanguage(this.code, this.nativeName, this.englishName);
   final String code;
@@ -45,7 +49,11 @@ enum AppLanguage {
   /// The Indian languages are spoken as in India wherever the app is
   /// (a Telugu mason in Dubai still speaks te-IN); English follows the
   /// market (en-US, en-GB).
-  Locale get locale => Locale(code, _indian.contains(this) ? 'IN' : currentMarket.countryCode);
+  /// Chinese is Simplified, as Malaysian schools teach it.
+  Locale get locale {
+    if (this == zh) return Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: currentMarket.countryCode);
+    return Locale(code, _indian.contains(this) ? 'IN' : currentMarket.countryCode);
+  }
 
   static const _indian = indianLanguages;
 
@@ -53,7 +61,7 @@ enum AppLanguage {
   static const indianLanguages = {hi, te, ta, kn, mr};
 
   /// Written in the Latin alphabet, so the phone voice reads it as is.
-  bool get latinScript => this == en || this == es;
+  bool get latinScript => this == en || this == es || this == ms;
 
   /// The languages this build's market offers, English first.
   static List<AppLanguage> get offered => [
@@ -81,11 +89,15 @@ const Map<AppLanguage, Map<String, String>> _tables = {
   AppLanguage.kn: stringsKn,
   AppLanguage.mr: stringsMr,
   AppLanguage.es: stringsEs,
+  AppLanguage.ms: stringsMs,
+  AppLanguage.zh: stringsZh,
 };
 
 /// The speech code (BCP-47) for [l], for the phone's voice and its
 /// speech recognition: 'ta-IN'.
-String speechCodeFor(AppLanguage l) => '${l.locale.languageCode}-${l.locale.countryCode}';
+String speechCodeFor(AppLanguage l) =>
+    // Phones voice Mandarin as zh-CN; there is no zh-MY voice.
+    l == AppLanguage.zh ? 'zh-CN' : '${l.locale.languageCode}-${l.locale.countryCode}';
 
 AppLanguage _current = AppLanguage.en;
 AppLanguage _spoken = AppLanguage.en;

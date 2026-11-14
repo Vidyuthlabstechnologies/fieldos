@@ -7,7 +7,7 @@ FieldOS ships as a separate store app per country, all built from
 |---|---|---|---|---|---|---|
 | India | `in` (default) | `com.mldynamic.fieldos` | ₹ INR, lakh grouping | GST (CGST+SGST / IGST), TDS | metric | en, hi, te, ta, kn, mr |
 | United States | `us` | `com.mldynamic.fieldos.us` | $ USD | Sales tax (default 0%), hourly pay, OT past 40 h/week | US customary (ft, cu yd, lb, rebar #) | en, es |
-| Malaysia | `my` | `com.mldynamic.fieldos.my` | RM MYR | SST 8% | metric | en, ms, zh, ta |
+| Malaysia | `my` | `com.mldynamic.fieldos.my` | RM MYR, "Ringgit Malaysia ... and Cents ... Only" | SST 6% (only when registered), e-Invoice note on bills, DuitNow | metric | en, ms, zh, ta |
 | UAE | `ae` | `com.mldynamic.fieldos.ae` | AED | VAT 5% | metric | en, ar, hi, ur, ml |
 | United Kingdom | `uk` | `com.mldynamic.fieldos.uk` | £ GBP | VAT 20%, CIS, reverse charge | metric | en, pl, ro |
 

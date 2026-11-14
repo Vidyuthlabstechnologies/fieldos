@@ -67,7 +67,13 @@ class TaxRegime {
     required this.rateChoices,
     this.withholdingLabel,
     this.reverseChargeNote,
+    this.onlyWhenRegistered = true,
   });
+
+  /// Only a registered business may charge the tax (GST, SST, VAT): a bill
+  /// with tax needs our registration number. False for US sales tax, which
+  /// follows state permits the app does not track.
+  final bool onlyWhenRegistered;
 
   /// The rates offered as one-tap choices on a bill, 0 (none) first.
   final List<double> rateChoices;
@@ -138,7 +144,10 @@ class MarketConfig {
     required this.invoiceTitle,
     this.wordsAnd = false,
     this.currencyWordsFirst = true,
+    this.minorWordsFirst = false,
     this.payHourly = false,
+    required this.instantPaymentName,
+    this.billFooterNote,
   });
 
   /// ISO 4217: 'INR', 'USD', 'MYR', 'AED', 'GBP'.
@@ -200,12 +209,25 @@ class MarketConfig {
   /// the rate is per day and a day counts as full or half.
   final bool payHourly;
 
+  /// "and Cents Fifty Six Only" (Malaysia, as local accounting software
+  /// prints it) rather than "and Fifty Six Paise Only".
+  final bool minorWordsFirst;
+
+  /// The name of the payment mode stored as 'upi': the country's instant
+  /// bank transfer (UPI, DuitNow, Faster Payment...).
+  final String instantPaymentName;
+
+  /// A line printed under every bill and claim, when the market needs one
+  /// (Malaysia: not an LHDN e-Invoice).
+  final String? billFooterNote;
+
   /// "Rupees One Hundred Only" (India, Malaysia, UAE cheques) rather than
   /// "One Hundred Dollars" (US, UK).
   final bool currencyWordsFirst;
 }
 
 const _india = MarketConfig(
+  instantPaymentName: 'UPI',
   currencyCode: 'INR',
   currencySymbol: '₹',
   symbolSpace: false,
@@ -237,6 +259,7 @@ const _india = MarketConfig(
 );
 
 const _us = MarketConfig(
+  instantPaymentName: 'Payment app (Zelle, Venmo)',
   currencyCode: 'USD',
   currencySymbol: r'$',
   symbolSpace: false,
@@ -249,7 +272,7 @@ const _us = MarketConfig(
   units: UnitSystem.imperial,
   // No federal VAT; state and local sales tax, often 0 on lump-sum
   // construction contracts, so the default is 0 and each bill can set it.
-  tax: TaxRegime(name: 'Sales tax', defaultRate: 0, registrationLabel: 'Tax ID (EIN)', rateChoices: [0, 6, 7, 8.25]),
+  tax: TaxRegime(name: 'Sales tax', defaultRate: 0, registrationLabel: 'Tax ID (EIN)', rateChoices: [0, 6, 7, 8.25], onlyWhenRegistered: false),
   // FLSA: time and a half past 40 hours in a work week. California adds
   // daily overtime past 8 hours; the wage sheet notes it.
   overtime: OvertimeRule(weeklyHours: 40, multiplier: 1.5, note: 'Time and a half past 40 hours a week (FLSA). Some states, like California, also pay daily overtime.'),
@@ -269,7 +292,10 @@ const _malaysia = MarketConfig(
   currencySymbol: 'RM',
   symbolSpace: false,
   majorUnitWords: 'Ringgit Malaysia',
-  minorUnitWords: 'Sen',
+  minorUnitWords: 'Cents',
+  minorWordsFirst: true,
+  instantPaymentName: 'DuitNow',
+  billFooterNote: 'This document is not an e-Invoice validated by LHDN (MyInvois).',
   pdfCurrency: 'RM',
   indianGrouping: false,
   dateOrder: DateOrder.dmy,
@@ -293,6 +319,7 @@ const _malaysia = MarketConfig(
 );
 
 const _uae = MarketConfig(
+  instantPaymentName: 'Instant transfer (Aani)',
   currencyCode: 'AED',
   currencySymbol: 'AED',
   symbolSpace: true,
@@ -317,6 +344,7 @@ const _uae = MarketConfig(
 );
 
 const _uk = MarketConfig(
+  instantPaymentName: 'Faster Payment',
   currencyCode: 'GBP',
   currencySymbol: '£',
   symbolSpace: false,
