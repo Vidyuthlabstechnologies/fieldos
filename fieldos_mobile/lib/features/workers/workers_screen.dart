@@ -7,6 +7,8 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/features/workers/worker_calendar.dart';
+import 'package:fieldos_mobile/features/workers/worker_permits.dart';
+import 'package:fieldos_mobile/features/workers/worker_permits_screen.dart';
 import 'package:fieldos_mobile/features/workers/worker_tools.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -56,6 +58,14 @@ class _WorkersViewState extends ConsumerState<WorkersView> {
                     style: Theme.of(context).textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
               Row(mainAxisSize: MainAxisSize.min, children: [
+                if (permitKinds.isNotEmpty)
+                  IconButton(
+                    key: const Key('site-permits'),
+                    icon: const Icon(Icons.badge_outlined),
+                    tooltip: tr('Permits and cards'),
+                    onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => SitePermitsScreen(projectId: widget.projectId))),
+                  ),
                 TextButton.icon(
                   icon: const Icon(Icons.playlist_add),
                   label: ConstrainedBox(
@@ -262,6 +272,8 @@ class _WorkerTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final permits = permitKinds.isEmpty ? null : ref.watch(workerPermitsProvider(projectId)).value;
+    final permitState = permits == null ? null : workerPermitStatus(permits, worker.id, DateTime.now());
     return Card(
       child: ListTile(
         onTap: () => openWorkerCalendar(context, worker),
@@ -274,17 +286,28 @@ class _WorkerTile extends ConsumerWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (permitState == PermitStatus.expired)
+              Tooltip(message: tr('A permit or card has expired'),
+                  child: Icon(Icons.error_outline, color: toneColor(context, PillTone.danger)))
+            else if (permitState == PermitStatus.dueSoon)
+              Tooltip(message: tr('A permit or card expires soon'),
+                  child: Icon(Icons.schedule, color: toneColor(context, PillTone.warn))),
             _statusBadge(worker.status),
             const SizedBox(width: 8),
             PopupMenuButton<String>(
               initialValue: worker.status,
               onSelected: (s) async {
+                if (s == 'permits') {
+                  await Navigator.of(context).push(MaterialPageRoute(builder: (_) => WorkerPermitsScreen(worker: worker)));
+                  return;
+                }
                 await ref.read(appDatabaseProvider).workerDao.setStatus(worker.id, s);
                 ref.invalidate(workersProvider(projectId));
               },
               itemBuilder: (ctx) => [
                 PopupMenuItem(value: 'active', child: Text(tr('Active'))),
                 PopupMenuItem(value: 'inactive', child: Text(tr('Inactive'))),
+                if (permitKinds.isNotEmpty) PopupMenuItem(value: 'permits', child: Text(tr('Permits and cards'))),
               ],
             ),
           ],

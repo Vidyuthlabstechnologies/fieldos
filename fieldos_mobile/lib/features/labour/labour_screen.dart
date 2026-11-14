@@ -21,6 +21,7 @@ import 'package:fieldos_mobile/features/labour/day_register_screen.dart';
 import 'package:fieldos_mobile/features/labour/wage_sheet_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
+import 'package:fieldos_mobile/features/workers/worker_permits.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 export 'package:fieldos_mobile/core/geo.dart' show haversineMeters;
@@ -168,6 +169,8 @@ class _LabourViewState extends ConsumerState<LabourView> {
       ),
     );
     if (ok != true || name.text.trim().isEmpty || !context.mounted) return;
+    if (selectedWorkerId != null && permitKinds.isNotEmpty && !await _permitsAllowSite(context, selectedWorkerId!)) return;
+    if (!context.mounted) return;
 
     final latV = double.tryParse(lat.text);
     final lngV = double.tryParse(lng.text);
@@ -188,6 +191,29 @@ class _LabourViewState extends ConsumerState<LabourView> {
           photoId: Value(photoId),
         ));
     ref.invalidate(attendanceProvider(widget.projectId));
+  }
+
+  /// An expired work permit or site card (PLKS, Green Card, CSCS...) is
+  /// a warning before the punch, never a block on the worker's pay: true
+  /// when there is none, or the person goes ahead anyway.
+  Future<bool> _permitsAllowSite(BuildContext context, String workerId) async {
+    final permits = await ref.read(appDatabaseProvider).siteExecutionDao.permitsFor(widget.projectId);
+    final expired = blockingExpired(permits, workerId, DateTime.now());
+    if (expired.isEmpty || !context.mounted) return true;
+    final what = [for (final p in expired) '${tr(permitKind(p.kind)!.label)} (${fmtDate(p.expiresOn)})'].join(', ');
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('Expired permit')),
+        content: Text(trf('{what} has expired. Working on site without it can break the law. Renew it first if you can.',
+            {'what': what})),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Punch in anyway'))),
+        ],
+      ),
+    );
+    return go == true;
   }
 
   /// Keeps the punch photo, if one was taken; its id goes on the punches.

@@ -1834,3 +1834,29 @@ class CompanyStandards extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+/// A worker's permit, ID or site card with an expiry date: in Malaysia the
+/// passport, PLKS work permit, FOMEMA medical and CIDB Green Card; in the
+/// UAE the Emirates ID and work permit; in the UK the CSCS card. The kinds
+/// a market uses are in lib/features/workers/worker_permits.dart.
+///
+/// The number is optional and shown in full only to the owner and project
+/// managers. Health results are never stored: a FOMEMA row holds only its
+/// date and, in [note], fit or unfit if the company chooses.
+class WorkerPermits extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get workerId => text().withLength(min: 1, max: 36)();
+
+  /// passport | plks | fomema | green_card | emirates_id | work_permit | cscs | other
+  TextColumn get kind => text().withLength(min: 1, max: 20)();
+  TextColumn get number => text().withLength(max: 40).nullable()();
+  DateTimeColumn get expiresOn => dateTime()();
+  TextColumn get note => text().withLength(max: 200).nullable()();
+  TextColumn get createdBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

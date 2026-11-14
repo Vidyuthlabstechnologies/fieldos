@@ -54328,6 +54328,624 @@ class CompanyStandardsCompanion extends UpdateCompanion<CompanyStandard> {
   }
 }
 
+class $WorkerPermitsTable extends WorkerPermits
+    with TableInfo<$WorkerPermitsTable, WorkerPermit> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WorkerPermitsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _workerIdMeta = const VerificationMeta(
+    'workerId',
+  );
+  @override
+  late final GeneratedColumn<String> workerId = GeneratedColumn<String>(
+    'worker_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _numberMeta = const VerificationMeta('number');
+  @override
+  late final GeneratedColumn<String> number = GeneratedColumn<String>(
+    'number',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 40),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _expiresOnMeta = const VerificationMeta(
+    'expiresOn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> expiresOn = GeneratedColumn<DateTime>(
+    'expires_on',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    workerId,
+    kind,
+    number,
+    expiresOn,
+    note,
+    createdBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'worker_permits';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<WorkerPermit> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('worker_id')) {
+      context.handle(
+        _workerIdMeta,
+        workerId.isAcceptableOrUnknown(data['worker_id']!, _workerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_workerIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('number')) {
+      context.handle(
+        _numberMeta,
+        number.isAcceptableOrUnknown(data['number']!, _numberMeta),
+      );
+    }
+    if (data.containsKey('expires_on')) {
+      context.handle(
+        _expiresOnMeta,
+        expiresOn.isAcceptableOrUnknown(data['expires_on']!, _expiresOnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_expiresOnMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  WorkerPermit map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return WorkerPermit(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      workerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}worker_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      number: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}number'],
+      ),
+      expiresOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}expires_on'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $WorkerPermitsTable createAlias(String alias) {
+    return $WorkerPermitsTable(attachedDatabase, alias);
+  }
+}
+
+class WorkerPermit extends DataClass implements Insertable<WorkerPermit> {
+  final String id;
+  final String projectId;
+  final String workerId;
+
+  /// passport | plks | fomema | green_card | emirates_id | work_permit | cscs | other
+  final String kind;
+  final String? number;
+  final DateTime expiresOn;
+  final String? note;
+  final String createdBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const WorkerPermit({
+    required this.id,
+    required this.projectId,
+    required this.workerId,
+    required this.kind,
+    this.number,
+    required this.expiresOn,
+    this.note,
+    required this.createdBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['worker_id'] = Variable<String>(workerId);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || number != null) {
+      map['number'] = Variable<String>(number);
+    }
+    map['expires_on'] = Variable<DateTime>(expiresOn);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['created_by'] = Variable<String>(createdBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  WorkerPermitsCompanion toCompanion(bool nullToAbsent) {
+    return WorkerPermitsCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      workerId: Value(workerId),
+      kind: Value(kind),
+      number: number == null && nullToAbsent
+          ? const Value.absent()
+          : Value(number),
+      expiresOn: Value(expiresOn),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      createdBy: Value(createdBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory WorkerPermit.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return WorkerPermit(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      workerId: serializer.fromJson<String>(json['workerId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      number: serializer.fromJson<String?>(json['number']),
+      expiresOn: serializer.fromJson<DateTime>(json['expiresOn']),
+      note: serializer.fromJson<String?>(json['note']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'workerId': serializer.toJson<String>(workerId),
+      'kind': serializer.toJson<String>(kind),
+      'number': serializer.toJson<String?>(number),
+      'expiresOn': serializer.toJson<DateTime>(expiresOn),
+      'note': serializer.toJson<String?>(note),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  WorkerPermit copyWith({
+    String? id,
+    String? projectId,
+    String? workerId,
+    String? kind,
+    Value<String?> number = const Value.absent(),
+    DateTime? expiresOn,
+    Value<String?> note = const Value.absent(),
+    String? createdBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => WorkerPermit(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    workerId: workerId ?? this.workerId,
+    kind: kind ?? this.kind,
+    number: number.present ? number.value : this.number,
+    expiresOn: expiresOn ?? this.expiresOn,
+    note: note.present ? note.value : this.note,
+    createdBy: createdBy ?? this.createdBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  WorkerPermit copyWithCompanion(WorkerPermitsCompanion data) {
+    return WorkerPermit(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      workerId: data.workerId.present ? data.workerId.value : this.workerId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      number: data.number.present ? data.number.value : this.number,
+      expiresOn: data.expiresOn.present ? data.expiresOn.value : this.expiresOn,
+      note: data.note.present ? data.note.value : this.note,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WorkerPermit(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('workerId: $workerId, ')
+          ..write('kind: $kind, ')
+          ..write('number: $number, ')
+          ..write('expiresOn: $expiresOn, ')
+          ..write('note: $note, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    workerId,
+    kind,
+    number,
+    expiresOn,
+    note,
+    createdBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is WorkerPermit &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.workerId == this.workerId &&
+          other.kind == this.kind &&
+          other.number == this.number &&
+          other.expiresOn == this.expiresOn &&
+          other.note == this.note &&
+          other.createdBy == this.createdBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class WorkerPermitsCompanion extends UpdateCompanion<WorkerPermit> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> workerId;
+  final Value<String> kind;
+  final Value<String?> number;
+  final Value<DateTime> expiresOn;
+  final Value<String?> note;
+  final Value<String> createdBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const WorkerPermitsCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.workerId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.number = const Value.absent(),
+    this.expiresOn = const Value.absent(),
+    this.note = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  WorkerPermitsCompanion.insert({
+    required String id,
+    required String projectId,
+    required String workerId,
+    required String kind,
+    this.number = const Value.absent(),
+    required DateTime expiresOn,
+    this.note = const Value.absent(),
+    required String createdBy,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       workerId = Value(workerId),
+       kind = Value(kind),
+       expiresOn = Value(expiresOn),
+       createdBy = Value(createdBy);
+  static Insertable<WorkerPermit> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? workerId,
+    Expression<String>? kind,
+    Expression<String>? number,
+    Expression<DateTime>? expiresOn,
+    Expression<String>? note,
+    Expression<String>? createdBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (workerId != null) 'worker_id': workerId,
+      if (kind != null) 'kind': kind,
+      if (number != null) 'number': number,
+      if (expiresOn != null) 'expires_on': expiresOn,
+      if (note != null) 'note': note,
+      if (createdBy != null) 'created_by': createdBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  WorkerPermitsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? workerId,
+    Value<String>? kind,
+    Value<String?>? number,
+    Value<DateTime>? expiresOn,
+    Value<String?>? note,
+    Value<String>? createdBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return WorkerPermitsCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      workerId: workerId ?? this.workerId,
+      kind: kind ?? this.kind,
+      number: number ?? this.number,
+      expiresOn: expiresOn ?? this.expiresOn,
+      note: note ?? this.note,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (workerId.present) {
+      map['worker_id'] = Variable<String>(workerId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (number.present) {
+      map['number'] = Variable<String>(number.value);
+    }
+    if (expiresOn.present) {
+      map['expires_on'] = Variable<DateTime>(expiresOn.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WorkerPermitsCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('workerId: $workerId, ')
+          ..write('kind: $kind, ')
+          ..write('number: $number, ')
+          ..write('expiresOn: $expiresOn, ')
+          ..write('note: $note, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -54978,6 +55596,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CompanyStandardsTable companyStandards = $CompanyStandardsTable(
     this,
   );
+  late final $WorkerPermitsTable workerPermits = $WorkerPermitsTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -55067,6 +55686,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     handoverUnits,
     handoverChecks,
     companyStandards,
+    workerPermits,
     syncOutbox,
   ];
 }
@@ -81641,6 +82261,310 @@ typedef $$CompanyStandardsTableProcessedTableManager =
       CompanyStandard,
       PrefetchHooks Function()
     >;
+typedef $$WorkerPermitsTableCreateCompanionBuilder =
+    WorkerPermitsCompanion Function({
+      required String id,
+      required String projectId,
+      required String workerId,
+      required String kind,
+      Value<String?> number,
+      required DateTime expiresOn,
+      Value<String?> note,
+      required String createdBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$WorkerPermitsTableUpdateCompanionBuilder =
+    WorkerPermitsCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> workerId,
+      Value<String> kind,
+      Value<String?> number,
+      Value<DateTime> expiresOn,
+      Value<String?> note,
+      Value<String> createdBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$WorkerPermitsTableFilterComposer
+    extends Composer<_$AppDatabase, $WorkerPermitsTable> {
+  $$WorkerPermitsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get workerId => $composableBuilder(
+    column: $table.workerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get number => $composableBuilder(
+    column: $table.number,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get expiresOn => $composableBuilder(
+    column: $table.expiresOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$WorkerPermitsTableOrderingComposer
+    extends Composer<_$AppDatabase, $WorkerPermitsTable> {
+  $$WorkerPermitsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get workerId => $composableBuilder(
+    column: $table.workerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get number => $composableBuilder(
+    column: $table.number,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get expiresOn => $composableBuilder(
+    column: $table.expiresOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$WorkerPermitsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WorkerPermitsTable> {
+  $$WorkerPermitsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get workerId =>
+      $composableBuilder(column: $table.workerId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get number =>
+      $composableBuilder(column: $table.number, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get expiresOn =>
+      $composableBuilder(column: $table.expiresOn, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$WorkerPermitsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $WorkerPermitsTable,
+          WorkerPermit,
+          $$WorkerPermitsTableFilterComposer,
+          $$WorkerPermitsTableOrderingComposer,
+          $$WorkerPermitsTableAnnotationComposer,
+          $$WorkerPermitsTableCreateCompanionBuilder,
+          $$WorkerPermitsTableUpdateCompanionBuilder,
+          (
+            WorkerPermit,
+            BaseReferences<_$AppDatabase, $WorkerPermitsTable, WorkerPermit>,
+          ),
+          WorkerPermit,
+          PrefetchHooks Function()
+        > {
+  $$WorkerPermitsTableTableManager(_$AppDatabase db, $WorkerPermitsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$WorkerPermitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WorkerPermitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WorkerPermitsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> workerId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String?> number = const Value.absent(),
+                Value<DateTime> expiresOn = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => WorkerPermitsCompanion(
+                id: id,
+                projectId: projectId,
+                workerId: workerId,
+                kind: kind,
+                number: number,
+                expiresOn: expiresOn,
+                note: note,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String workerId,
+                required String kind,
+                Value<String?> number = const Value.absent(),
+                required DateTime expiresOn,
+                Value<String?> note = const Value.absent(),
+                required String createdBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => WorkerPermitsCompanion.insert(
+                id: id,
+                projectId: projectId,
+                workerId: workerId,
+                kind: kind,
+                number: number,
+                expiresOn: expiresOn,
+                note: note,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$WorkerPermitsTable, WorkerPermit>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $WorkerPermitsTable,
+                    WorkerPermit
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$WorkerPermitsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $WorkerPermitsTable,
+      WorkerPermit,
+      $$WorkerPermitsTableFilterComposer,
+      $$WorkerPermitsTableOrderingComposer,
+      $$WorkerPermitsTableAnnotationComposer,
+      $$WorkerPermitsTableCreateCompanionBuilder,
+      $$WorkerPermitsTableUpdateCompanionBuilder,
+      (
+        WorkerPermit,
+        BaseReferences<_$AppDatabase, $WorkerPermitsTable, WorkerPermit>,
+      ),
+      WorkerPermit,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -82077,6 +83001,8 @@ class $AppDatabaseManager {
       $$HandoverChecksTableTableManager(_db, _db.handoverChecks);
   $$CompanyStandardsTableTableManager get companyStandards =>
       $$CompanyStandardsTableTableManager(_db, _db.companyStandards);
+  $$WorkerPermitsTableTableManager get workerPermits =>
+      $$WorkerPermitsTableTableManager(_db, _db.workerPermits);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }

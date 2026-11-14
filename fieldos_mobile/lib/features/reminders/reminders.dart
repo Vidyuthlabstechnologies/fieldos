@@ -11,12 +11,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/crm/crm_rules.dart' show isOpenStage;
 import 'package:fieldos_mobile/features/daily/day_close.dart';
 import 'package:fieldos_mobile/features/daily/day_close_data.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart' show canSeeMoneyIn;
 import 'package:fieldos_mobile/features/reports/rera_pack.dart' show reraNumberKey;
+import 'package:fieldos_mobile/features/workers/worker_permits.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
@@ -128,6 +130,7 @@ List<PlannedReminder> planReminders({
   List<SiteCloseReminder> closeReminders = const [],
   bool dailyCloseInUse = false,
   List<String> reraSites = const [],
+  List<({String worker, String permit, DateTime expiresOn})> permits = const [],
 }) {
   final out = <PlannedReminder>[];
   final today = _day(now);
@@ -230,6 +233,24 @@ List<PlannedReminder> planReminders({
         ));
       }
     }
+    // Workers' permits and site cards (Malaysia, UAE, UK), for the owner
+    // and managers: 90, 60, 30 and 7 days before each date, all of a day's
+    // in one reminder.
+    if (isOwner && permits.isNotEmpty) {
+      final due = permits.where((p) => permitReminderDays.contains(_day(p.expiresOn).difference(day).inDays)).toList()
+        ..sort((a, b) => a.expiresOn.compareTo(b.expiresOn));
+      final at = day.add(const Duration(hours: 9));
+      if (due.isNotEmpty && at.isAfter(now)) {
+        final lines = [for (final p in due.take(3)) '${p.worker}: ${p.permit} ${fmtDate(p.expiresOn)}'].join(', ');
+        out.add(PlannedReminder(
+          id: reminderIdBase + 214 + i,
+          at: at,
+          title: due.length == 1 ? tr('A permit or card expires soon') : trf('{n} permits or cards expire soon', {'n': due.length}),
+          body: due.length > 3 ? trf('{names} and {n} more', {'names': lines, 'n': due.length - 3}) : lines,
+          payload: 'permits',
+        ));
+      }
+    }
   }
   return out..sort((a, b) => a.at.compareTo(b.at));
 }
@@ -308,6 +329,15 @@ class ReminderScheduler {
         reportedToday: reported,
         closeReminders: close,
         dailyCloseInUse: closeInUse,
+        permits: permitKinds.isEmpty
+            ? const []
+            : [
+                for (final p in running)
+                  for (final w in await _db.workerDao.forProject(p.id))
+                    for (final x in await _db.siteExecutionDao.permitsFor(p.id))
+                      if (x.workerId == w.id && w.status == 'active')
+                        (worker: w.name, permit: tr(permitKind(x.kind)?.label ?? x.kind), expiresOn: x.expiresOn),
+              ],
         reraSites: [
           for (final p in running)
             if ((await _db.settingsDao.get(reraNumberKey(p.id)))?.trim().isNotEmpty == true) p.name,
