@@ -13,6 +13,9 @@ dependencies:
   # Flutter's own widgets (date pickers, OK/Cancel) in Hindi and Telugu.
   flutter_localizations:
     sdk: flutter
+  # Month names in the screens' language (core/format.dart). The version
+  # is the one flutter_localizations pins.
+  intl: any
   cupertino_icons: ^1.0.8
 
   # State management

@@ -203,7 +203,7 @@ Future<Uint8List> buildDprPdf({
   TextPicturePainter paintText = paintWithPhoneFonts,
   PdfBranding branding = const PdfBranding(),
 }) async {
-  final date = fmtDate(dpr.entryDate);
+  final date = fmtDate(dpr.entryDate, english: true);
   // No company name (should not happen): the project heads the report.
   if (companyName.trim().isEmpty) companyName = project.name;
   final doc = pw.Document(
@@ -432,7 +432,7 @@ String dprShareText(Project project, DprEntry dpr) {
   final head = [
     'Daily progress report',
     project.name,
-    fmtDate(dpr.entryDate),
+    fmtDate(dpr.entryDate, english: true),
   ].join(' · ');
   final facts = [
     if (dpr.manpowerCount > 0) dpr.manpowerCount == 1 ? '1 worker on site' : '${dpr.manpowerCount} workers on site',

@@ -202,7 +202,7 @@ Future<Uint8List> buildClientUpdatePdf({
             child: pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
               pw.SizedBox(
                 width: 80,
-                child: pw.Text('${fmtDay(d.day)} ${fmtDate(d.day, short: true)}',
+                child: pw.Text('${fmtDay(d.day, english: true)} ${fmtDate(d.day, short: true, english: true)}',
                     style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: _muted)),
               ),
               pw.Expanded(child: kit.one(d.text, size: 10, width: 420)),

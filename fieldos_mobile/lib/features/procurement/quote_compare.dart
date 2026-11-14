@@ -104,7 +104,7 @@ String rfqMessage({
     ..writeln('Please send your best rate for:')
     ..writeln('${request.materialName}: ${fmtQty(request.quantity)} ${request.unit}'.trim())
     ..writeln('Delivery to: $siteName${siteLocation == null || siteLocation.trim().isEmpty ? '' : ', ${siteLocation.trim()}'}');
-  if (needBy != null) b.writeln('Needed by: ${fmtDate(needBy)}');
+  if (needBy != null) b.writeln('Needed by: ${fmtDate(needBy, english: true)}');
   b
     ..writeln('Please mention the rate a unit, ${market.tax.name}, transport, delivery days and payment terms.')
     ..write('Thank you.');

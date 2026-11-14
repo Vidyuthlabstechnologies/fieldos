@@ -85,7 +85,7 @@ DateTime expenseDate(SiteExpense e) {
 String statementText(Supplier s, List<StatementLine> lines, {required String companyName}) {
   final b = StringBuffer('Statement: ${s.name}\nFrom $companyName\n\n');
   for (final l in lines) {
-    final when = l.on == null ? '' : '${fmtDate(l.on!, short: true)} ';
+    final when = l.on == null ? '' : '${fmtDate(l.on!, short: true, english: true)} ';
     final sign = l.amount >= 0 ? '+' : '-';
     final ref = l.reference == null ? '' : ' (${l.reference})';
     b.write('$when${l.label}$ref: $sign${rupees(l.amount.abs(), paise: true)} = ${rupees(l.balance, paise: true)}\n');

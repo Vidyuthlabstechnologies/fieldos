@@ -136,7 +136,7 @@ Future<Uint8List> buildPayslipPdf({
           if (line.status == 'paid' && line.paidOn != null)
             pw.Padding(
               padding: const pw.EdgeInsets.fromLTRB(6, 4, 6, 0),
-              child: t('Paid on ${fmtDate(line.paidOn!)}${line.paidMode == null ? '' : ' by ${payModes[line.paidMode] ?? line.paidMode}'}',
+              child: t('Paid on ${fmtDate(line.paidOn!, english: true)}${line.paidMode == null ? '' : ' by ${payModes[line.paidMode] ?? line.paidMode}'}',
                   color: _muted),
             ),
         ]),

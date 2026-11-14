@@ -86,8 +86,8 @@ Future<Uint8List> buildQuotePdf({
         pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
           t('QUOTATION', size: 13, bold: true),
           t('No. ${quote.quoteNumber}'),
-          t('Date ${fmtDate(quote.quoteDate)}'),
-          if (quote.validUntil != null) t('Valid until ${fmtDate(quote.validUntil!)}'),
+          t('Date ${fmtDate(quote.quoteDate, english: true)}'),
+          if (quote.validUntil != null) t('Valid until ${fmtDate(quote.validUntil!, english: true)}'),
         ]),
       ]),
       pw.SizedBox(height: 14),
@@ -165,7 +165,7 @@ Future<Uint8List> buildQuotePdf({
 
 /// The text sent with the PDF on WhatsApp or email.
 String quoteShareText(CrmQuote q, CrmLead lead, String companyName) {
-  final valid = q.validUntil == null ? '' : ' Valid until ${fmtDate(q.validUntil!)}.';
+  final valid = q.validUntil == null ? '' : ' Valid until ${fmtDate(q.validUntil!, english: true)}.';
   return '${isIndia ? 'Namaste' : 'Hello'} ${lead.name}, please find our quotation ${q.quoteNumber} for '
       '${(lead.workType ?? '').isEmpty ? 'the work' : lead.workType}: ${rupees(q.total, paise: true)} with ${market.tax.name}.$valid '
       '- $companyName';

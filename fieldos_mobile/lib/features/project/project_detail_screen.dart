@@ -594,7 +594,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
             SelectableText(d.workSummary, style: Theme.of(ctx).textTheme.bodyLarge?.copyWith(height: 1.45)),
             DprPhotosBlock(
               dpr: d,
-              shareText: '${widget.project.name} · ${fmtDate(d.entryDate)}',
+              shareText: '${widget.project.name} · ${fmtDate(d.entryDate, english: true)}',
               canDelete: _canChangeReport(d),
             ),
             const SizedBox(height: 24),

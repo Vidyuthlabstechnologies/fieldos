@@ -80,7 +80,7 @@ class CompanyPlan {
   /// What My subscription and Team & sync say about it.
   String describe() {
     final who = companyName == null ? 'your company' : companyName!;
-    return 'Paid by $who until ${fmtDate(endsOn)}. Everyone in the company is included. $sitesLine.';
+    return 'Paid by $who until ${fmtDate(endsOn, english: true)}. Everyone in the company is included. $sitesLine.';
   }
 }
 

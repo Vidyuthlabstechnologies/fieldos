@@ -35,14 +35,14 @@ const moneyHeaders = {
 
 String cellText(Object? v, {bool money = false}) => switch (v) {
       null => '',
-      DateTime d => fmtDate(d),
+      DateTime d => fmtDate(d, english: true),
       num n when money => rupees(n),
       num n => fmtQty(n),
       _ => '$v',
     };
 
 /// "1 Nov 2026 to 30 Nov 2026".
-String periodText(DateTime from, DateTime to) => '${fmtDate(from)} to ${fmtDate(to.subtract(const Duration(days: 1)))}';
+String periodText(DateTime from, DateTime to) => '${fmtDate(from, english: true)} to ${fmtDate(to.subtract(const Duration(days: 1)), english: true)}';
 
 Future<Uint8List> buildReportPdf({
   required ReportDef report,
@@ -101,7 +101,7 @@ Future<Uint8List> buildReportPdf({
           t(report.title.toUpperCase(), size: 12, bold: true, color: accent),
           t(sitesText, color: _muted),
           if (periodLine != null) t(periodLine, color: _muted),
-          t('Made on ${fmtDate(now ?? DateTime.now())}', size: 7, color: _muted),
+          t('Made on ${fmtDate(now ?? DateTime.now(), english: true)}', size: 7, color: _muted),
         ]),
       ]),
       pw.Container(height: 2, color: accent, margin: const pw.EdgeInsets.symmetric(vertical: 8)),

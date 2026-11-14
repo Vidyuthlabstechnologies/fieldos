@@ -148,7 +148,7 @@ void main() {
     setCurrentLanguage(AppLanguage.hi);
     expect(raisedWhen(now, now: now), tr('raised today'));
     expect(raisedWhen(now.subtract(const Duration(days: 1)), now: now), tr('raised yesterday'));
-    expect(raisedWhen(DateTime(2026, 11, 3), now: now), trf('raised on {date}', {'date': '3 Nov'}));
+    expect(raisedWhen(DateTime(2026, 11, 3), now: now), trf('raised on {date}', {'date': '3 नव॰'}));
     expect(raisedWhen(now, now: now), isNot(contains('raised')));
     setCurrentLanguage(AppLanguage.en);
     expect(raisedWhen(DateTime(2026, 11, 3), now: now), 'raised on 3 Nov');
