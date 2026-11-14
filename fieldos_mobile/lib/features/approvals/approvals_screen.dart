@@ -134,9 +134,10 @@ class ApprovalsScreen extends ConsumerWidget {
     final user = session.user;
     if (user == null || !Roles.canApprove(session.role)) return;
     try {
-      await ref.read(appDatabaseProvider).approvalDao.decide(a.id, approve, user.id, note);
+      final decided = await ref.read(appDatabaseProvider).approvalDao.decide(a.id, approve, user.id, note);
       ref.invalidate(pendingApprovalsProvider(companyId));
-      if (context.mounted) showSnack(context, approve ? tr('Approved') : tr('Rejected'));
+      // Already decided by someone else: the refreshed list drops it.
+      if (decided && context.mounted) showSnack(context, approve ? tr('Approved') : tr('Rejected'));
     } catch (e, st) {
       if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
     }

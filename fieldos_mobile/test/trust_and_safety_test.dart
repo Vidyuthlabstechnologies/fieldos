@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase/supabase.dart';
 
+import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/auth/site_roles.dart';
 import 'package:fieldos_mobile/core/text_size.dart';
 import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -192,6 +194,28 @@ void main() {
     test('finds workers by role, suppliers by name, ignoring case', () async {
       expect((await searchCompany(db, 'c', 'MASON')).single.title, 'Ramesh');
       expect((await searchCompany(db, 'c', 'balaji')).single.kind, SearchKind.supplier);
+    });
+
+    test('a members-only site this person is not on stays out of search', () async {
+      // Its rows were pulled before it was made members-only; the project
+      // list hides it, so search must too.
+      await db.projectDao.create(ProjectsCompanion.insert(id: 'p2', companyId: 'c', name: 'Head office'));
+      await db.taskDao.create(TasksCompanion.insert(id: 't2', projectId: 'p2', title: 'Beam for the director cabin'));
+      await db.workerDao.create(WorkersCompanion.insert(id: 'w2', projectId: 'p2', name: 'Rameshwar', role: const Value('Mason')));
+      await db.siteTeamDao.setMembersOnly('p2', true);
+      final sees = await visibleSiteIds(db, 'c', userId: 'eng', companyRole: Roles.member);
+      expect(sees, {'p1'});
+
+      final hits = await searchCompany(db, 'c', 'beam', sites: sees);
+      expect(hits.map((h) => h.projectId).toSet(), {'p1'});
+      expect((await searchCompany(db, 'c', 'head office', sites: sees)), isEmpty);
+      expect((await searchCompany(db, 'c', 'mason', sites: sees)).map((h) => h.title), ['Ramesh']);
+      // Suppliers belong to no site and are still found.
+      expect((await searchCompany(db, 'c', 'balaji', sites: sees)).single.kind, SearchKind.supplier);
+      expect((await searchCompany(db, 'c', 'beam', sites: const {})).where((h) => h.projectId != null), isEmpty);
+      // The owner sees both.
+      final owner = await visibleSiteIds(db, 'c', userId: 'o', companyRole: Roles.owner);
+      expect((await searchCompany(db, 'c', 'beam', sites: owner)).map((h) => h.projectId).toSet(), {'p1', 'p2'});
     });
 
     test('one letter finds nothing, and % or _ are taken literally', () async {

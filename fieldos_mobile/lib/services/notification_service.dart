@@ -17,11 +17,14 @@ import 'package:fieldos_mobile/features/reminders/reminders.dart';
 
 /// What to show for one newly-arrived row, or null to stay quiet. Kept a
 /// pure function so the rules (skip my own rows, which tables alert) are
-/// unit-testable without the Android plugin.
+/// unit-testable without the Android plugin. [blockedSenders] are the
+/// people blocked in chat on this phone: their messages stay hidden in the
+/// chat, so they must not pop up as alerts either.
 ({String title, String body})? describeRemoteRow(
   String table,
   Map<String, dynamic> row, {
   required String? myUserId,
+  Set<String> blockedSenders = const {},
 }) {
   String text(Object? v, [int max = 120]) {
     final s = (v as String? ?? '').trim();
@@ -30,7 +33,7 @@ import 'package:fieldos_mobile/features/reminders/reminders.dart';
 
   switch (table) {
     case 'project_messages':
-      if (row['sender_id'] == myUserId) return null;
+      if (row['sender_id'] == myUserId || blockedSenders.contains(row['sender_id'])) return null;
       return (title: text(row['sender_name'], 60), body: text(row['body']));
     case 'issues':
       // Issues carry no author column; a row this phone wrote itself is

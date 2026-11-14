@@ -13,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/notification_service.dart';
+import 'package:fieldos_mobile/services/chat_block_service.dart';
 import 'package:fieldos_mobile/features/tasks/team_roster.dart';
 import 'cloud_sync_providers.dart';
 import 'cloud_sync_service.dart';
@@ -83,9 +84,12 @@ class CloudSyncBootstrap {
     // The first full pull on a newly-linked phone brings down the whole
     // company's history; none of that is news. Alerts start once this
     // device has completed one sync (last_sync_at is set after it).
-    _ref.read(appDatabaseProvider).settingsDao.get('last_sync_at').then((lastSync) {
+    final db = _ref.read(appDatabaseProvider);
+    db.settingsDao.get('last_sync_at').then((lastSync) async {
       if (lastSync == null || lastSync.isEmpty) return;
-      final alert = describeRemoteRow(table, row, myUserId: _ref.read(cloudSyncClientProvider).auth.currentUser?.id);
+      final blocked = table == 'project_messages' ? (await ChatBlockService(db).blocked()).keys.toSet() : const <String>{};
+      final alert = describeRemoteRow(table, row,
+          myUserId: _ref.read(cloudSyncClientProvider).auth.currentUser?.id, blockedSenders: blocked);
       if (alert == null) return;
       _queued.add(alert);
       _flush ??= Timer(const Duration(seconds: 2), _flushAlerts);

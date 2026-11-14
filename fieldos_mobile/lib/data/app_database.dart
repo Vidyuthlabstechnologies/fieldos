@@ -1993,9 +1993,15 @@ class ApprovalDao extends DatabaseAccessor<AppDatabase> with _$ApprovalDaoMixin 
   /// "Spending is ₹25,000 over the BOQ budget.") stays, and a reason, if
   /// one is given, goes after it; it used to replace the request text, so
   /// a decided approval no longer said what it had been about.
-  Future<void> decide(String id, bool approved, String approverId, String? note) {
+  ///
+  /// Only a pending approval is decided: once someone has said yes or no
+  /// (on this phone, or on another one and pulled since the list was
+  /// opened), a second tap must not flip it or put another name on it.
+  /// Returns whether this call made the decision.
+  Future<bool> decide(String id, bool approved, String approverId, String? note) {
     return transaction(() async {
       final before = await (select(approvals)..where((a) => a.id.equals(id))).getSingle();
+      if (before.status != 'pending') return false;
       final reason = note?.trim() ?? '';
       final asked = before.decisionNote?.trim() ?? '';
       final joined = reason.isEmpty
@@ -2018,6 +2024,7 @@ class ApprovalDao extends DatabaseAccessor<AppDatabase> with _$ApprovalDaoMixin 
         operation: 'update',
         payloadJson: jsonEncode(approvalToSupabaseJson(row)),
       );
+      return true;
     });
   }
 

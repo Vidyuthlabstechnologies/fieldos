@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/auth/site_roles.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
 import 'package:fieldos_mobile/features/search/search.dart';
@@ -59,7 +60,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void _changed(String q) {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 250), () async {
-      final hits = await searchCompany(ref.read(appDatabaseProvider), widget.companyId, q);
+      final db = ref.read(appDatabaseProvider);
+      final session = ref.read(sessionProvider);
+      final sites = await visibleSiteIds(db, widget.companyId,
+          userId: session.user?.id, companyRole: session.role, cloudUserId: await db.settingsDao.get('cloud_user_id'));
+      final hits = await searchCompany(db, widget.companyId, q, sites: sites);
       if (mounted && _query.text == q) setState(() => _hits = q.trim().length < 2 ? null : hits);
     });
   }

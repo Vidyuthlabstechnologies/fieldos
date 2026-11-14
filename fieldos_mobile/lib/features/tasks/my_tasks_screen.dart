@@ -94,7 +94,10 @@ class _MyTasksScreenState extends ConsumerState<MyTasksScreen> {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => EmptyState(icon: Icons.error_outline, title: tr('Could not load tasks'), message: '$e'),
           data: (tasks) {
-            final groups = groupTasks(tasks, now, myUserId: roster.myUserId, mine: mine);
+            // Only sites this person may see (a members-only site they are
+            // not on is left out of the project list, so its tasks are too).
+            final shown = tasks.where((t) => byId.containsKey(t.projectId));
+            final groups = groupTasks(shown, now, myUserId: roster.myUserId, mine: mine);
             return ListView(
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 32),
               children: [
