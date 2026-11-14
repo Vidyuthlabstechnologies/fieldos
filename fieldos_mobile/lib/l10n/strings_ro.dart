@@ -3076,4 +3076,7 @@ const stringsRo = <String, String>{
   'Gross payment status (0%)': 'Statut de plată brută (0%)',
   'Registered (20%)': 'Înregistrat (20%)',
   'Not registered (30%)': 'Neînregistrat (30%)',
+  '{amount}/hr': '{amount}/oră',
+  '{amount} an hour': '{amount} pe oră',
+  'OT {h} h, {amount}': 'Ore suplimentare {h} h, {amount}',
 };

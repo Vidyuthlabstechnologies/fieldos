@@ -3066,4 +3066,7 @@ const stringsMl = <String, String>{
   'Gross payment status (0%)': 'ഗ്രോസ് പേയ്‌മെന്റ് സ്റ്റാറ്റസ് (0%)',
   'Registered (20%)': 'രജിസ്റ്റർ ചെയ്തവർ (20%)',
   'Not registered (30%)': 'രജിസ്റ്റർ ചെയ്യാത്തവർ (30%)',
+  '{amount}/hr': '{amount}/മണിക്കൂർ',
+  '{amount} an hour': 'മണിക്കൂറിന് {amount}',
+  'OT {h} h, {amount}': 'ഓവർടൈം {h} മണിക്കൂർ, {amount}',
 };

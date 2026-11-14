@@ -3407,4 +3407,7 @@ const Map<String, String> stringsMr = {
   'Gross payment status (0%)': 'ग्रॉस पेमेंट स्थिती (0%)',
   'Registered (20%)': 'नोंदणीकृत (20%)',
   'Not registered (30%)': 'नोंदणी नसलेले (30%)',
+  '{amount}/hr': '{amount}/तास',
+  '{amount} an hour': 'तासाला {amount}',
+  'OT {h} h, {amount}': 'ओव्हरटाइम {h} तास, {amount}',
 };

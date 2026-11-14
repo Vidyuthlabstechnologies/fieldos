@@ -3066,4 +3066,7 @@ const stringsUr = <String, String>{
   'Gross payment status (0%)': 'گراس پیمنٹ اسٹیٹس (0%)',
   'Registered (20%)': 'رجسٹرڈ (20%)',
   'Not registered (30%)': 'غیر رجسٹرڈ (30%)',
+  '{amount}/hr': '{amount}/گھنٹہ',
+  '{amount} an hour': '{amount} فی گھنٹہ',
+  'OT {h} h, {amount}': 'اوور ٹائم {h} گھنٹے، {amount}',
 };

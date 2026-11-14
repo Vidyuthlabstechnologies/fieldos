@@ -3407,4 +3407,7 @@ const Map<String, String> stringsKn = {
   'Gross payment status (0%)': 'ಗ್ರಾಸ್ ಪೇಮೆಂಟ್ ಸ್ಥಿತಿ (0%)',
   'Registered (20%)': 'ನೋಂದಾಯಿತ (20%)',
   'Not registered (30%)': 'ನೋಂದಾಯಿತವಲ್ಲ (30%)',
+  '{amount}/hr': '{amount}/ಗಂಟೆ',
+  '{amount} an hour': 'ಗಂಟೆಗೆ {amount}',
+  'OT {h} h, {amount}': 'ಓವರ್‌ಟೈಮ್ {h} ಗಂ, {amount}',
 };

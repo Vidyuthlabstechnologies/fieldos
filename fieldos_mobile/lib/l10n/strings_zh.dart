@@ -3063,4 +3063,7 @@ const stringsZh = <String, String>{
   'Gross payment status (0%)': '总额付款身份 (0%)',
   'Registered (20%)': '已注册 (20%)',
   'Not registered (30%)': '未注册 (30%)',
+  '{amount}/hr': '{amount}/小时',
+  '{amount} an hour': '每小时 {amount}',
+  'OT {h} h, {amount}': '加班 {h} 小时，{amount}',
 };

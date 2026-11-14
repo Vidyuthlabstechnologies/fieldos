@@ -3063,4 +3063,7 @@ const stringsMs = <String, String>{
   'Gross payment status (0%)': 'Status bayaran kasar (0%)',
   'Registered (20%)': 'Berdaftar (20%)',
   'Not registered (30%)': 'Tidak berdaftar (30%)',
+  '{amount}/hr': '{amount}/jam',
+  '{amount} an hour': '{amount} sejam',
+  'OT {h} h, {amount}': 'Lebih masa {h} jam, {amount}',
 };

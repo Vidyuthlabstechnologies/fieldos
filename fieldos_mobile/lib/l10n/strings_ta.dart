@@ -3417,4 +3417,7 @@ const Map<String, String> stringsTa = {
   'Gross payment status (0%)': 'மொத்தப் பணம் பெறும் நிலை (0%)',
   'Registered (20%)': 'பதிவு பெற்றவர் (20%)',
   'Not registered (30%)': 'பதிவு பெறாதவர் (30%)',
+  '{amount}/hr': '{amount}/மணி',
+  '{amount} an hour': 'மணிக்கு {amount}',
+  'OT {h} h, {amount}': 'கூடுதல் நேரம் {h} மணி, {amount}',
 };

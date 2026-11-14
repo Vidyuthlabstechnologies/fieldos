@@ -3066,4 +3066,7 @@ const stringsAr = <String, String>{
   'Gross payment status (0%)': 'حالة الدفع الإجمالي (0%)',
   'Registered (20%)': 'مسجل (20%)',
   'Not registered (30%)': 'غير مسجل (30%)',
+  '{amount}/hr': '{amount}/ساعة',
+  '{amount} an hour': '{amount} في الساعة',
+  'OT {h} h, {amount}': 'عمل إضافي {h} ساعة، {amount}',
 };

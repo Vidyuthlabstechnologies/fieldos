@@ -2515,4 +2515,7 @@ const Map<String, String> stringsTe = {
   'Gross payment status (0%)': 'గ్రాస్ పేమెంట్ స్టేటస్ (0%)',
   'Registered (20%)': 'నమోదైనవారు (20%)',
   'Not registered (30%)': 'నమోదు కానివారు (30%)',
+  '{amount}/hr': '{amount}/గంట',
+  '{amount} an hour': 'గంటకు {amount}',
+  'OT {h} h, {amount}': 'ఓవర్‌టైమ్ {h} గం, {amount}',
 };

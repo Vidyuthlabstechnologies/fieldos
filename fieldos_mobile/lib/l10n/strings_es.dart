@@ -3056,4 +3056,7 @@ const Map<String, String> stringsEs = {
   'Gross payment status (0%)': 'Pago bruto (0%)',
   'Registered (20%)': 'Registrado (20%)',
   'Not registered (30%)': 'No registrado (30%)',
+  '{amount}/hr': '{amount}/h',
+  '{amount} an hour': '{amount} la hora',
+  'OT {h} h, {amount}': 'Horas extra {h} h, {amount}',
 };
