@@ -3080,7 +3080,7 @@ const stringsUr = <String, String>{
   'SOCSO and EIS': 'SOCSO اور EIS',
   'On pay up to ₹6,000 a month': '₹6,000 ماہانہ تک کی تنخواہ پر',
   'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF، SOCSO اور EIS: مزدور {ee} · کمپنی {er}',
-  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF، SOCSO اور EIS اس شیٹ کی اجرت پر نکالے گئے ہیں۔ یہ مہینے کی اجرت پر واجب ہوتے ہیں، اس لیے جمع کرنے سے پہلے مہینے کے کل سے ملا لیں۔ جس مزدور کا PLKS پرمٹ درج ہے اسے غیر ملکی مانا جاتا ہے: EPF دونوں طرف 2%، SOCSO صرف کام کی چوٹ کا، EIS نہیں۔',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO as for a local worker, no EIS.': 'EPF، SOCSO اور EIS اس شیٹ کی اجرت پر نکالے گئے ہیں۔ یہ مہینے کی اجرت پر واجب ہوتے ہیں، اس لیے جمع کرنے سے پہلے مہینے کے کل سے ملا لیں۔ جس مزدور کا PLKS پرمٹ درج ہے اسے غیر ملکی مانا جاتا ہے: EPF دونوں طرف 2%، SOCSO مقامی مزدور کی طرح، EIS نہیں۔',
   'Cut from pay: {items}': 'تنخواہ سے کٹا: {items}',
   'Employer pays: {items}': 'کمپنی دیتی ہے: {items}',
   'Net pay {amount}': 'ہاتھ میں تنخواہ {amount}',

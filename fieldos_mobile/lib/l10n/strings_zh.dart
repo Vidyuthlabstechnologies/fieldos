@@ -3077,7 +3077,7 @@ const stringsZh = <String, String>{
   'SOCSO and EIS': 'SOCSO 和 EIS',
   'On pay up to ₹6,000 a month': '按每月最高 ₹6,000 的工资计',
   'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF、SOCSO 和 EIS：工人 {ee} · 雇主 {er}',
-  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF、SOCSO 和 EIS 按本表中的工资计算。它们按月工资缴付，缴付前请与当月总额核对。已登记 PLKS 准证的工人按外籍工人计算：EPF 双方各 2%，SOCSO 仅工伤，无 EIS。',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO as for a local worker, no EIS.': 'EPF、SOCSO 和 EIS 按本表中的工资计算。它们按月工资缴付，缴付前请与当月总额核对。已登记 PLKS 准证的工人按外籍工人计算：EPF 双方各 2%，SOCSO 与本地工人相同，无 EIS。',
   'Cut from pay: {items}': '从工资中扣除：{items}',
   'Employer pays: {items}': '雇主缴付：{items}',
   'Net pay {amount}': '实发工资 {amount}',

@@ -3420,7 +3420,7 @@ const Map<String, String> stringsMr = {
   'SOCSO and EIS': 'SOCSO आणि EIS',
   'On pay up to ₹6,000 a month': 'महिना ₹6,000 पर्यंतच्या पगारावर',
   'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO आणि EIS: कामगार {ee} · कंपनी {er}',
-  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO आणि EIS या शीटमधील मजुरीवर काढले आहेत. ते महिन्याच्या मजुरीवर देय असतात, म्हणून भरण्यापूर्वी महिन्याच्या एकूण रकमेशी जुळवून पाहा. ज्या कामगाराचा PLKS परवाना नोंदलेला आहे तो परदेशी धरला जातो: EPF दोन्ही बाजूंनी 2%, SOCSO फक्त कामावरील दुखापत, EIS नाही.',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO as for a local worker, no EIS.': 'EPF, SOCSO आणि EIS या शीटमधील मजुरीवर काढले आहेत. ते महिन्याच्या मजुरीवर देय असतात, म्हणून भरण्यापूर्वी महिन्याच्या एकूण रकमेशी जुळवून पाहा. ज्या कामगाराचा PLKS परवाना नोंदलेला आहे तो परदेशी धरला जातो: EPF दोन्ही बाजूंनी 2%, SOCSO स्थानिक कामगाराप्रमाणेच, EIS नाही.',
   'Cut from pay: {items}': 'पगारातून कपात: {items}',
   'Employer pays: {items}': 'कंपनी भरते: {items}',
   'Net pay {amount}': 'हातात पगार {amount}',

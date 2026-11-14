@@ -3088,7 +3088,7 @@ const stringsRo = <String, String>{
   'EPF': 'EPF',
   'EPF (KWSP)': 'EPF (KWSP)',
   'EPF to pay': 'EPF de plătit',
-  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO și EIS se calculează pe salariile din această fișă. Se datorează pe salariul lunar, așa că verifică-le cu totalul lunii înainte de a le plăti. Un muncitor cu permis PLKS la dosar este considerat străin: EPF 2% fiecare, SOCSO doar pentru accidente de muncă, fără EIS.',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO as for a local worker, no EIS.': 'EPF, SOCSO și EIS se calculează pe salariile din această fișă. Se datorează pe salariul lunar, așa că verifică-le cu totalul lunii înainte de a le plăti. Un muncitor cu permis PLKS la dosar este considerat străin: EPF 2% fiecare, SOCSO ca pentru un muncitor local, fără EIS.',
   'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO și EIS: muncitori {ee} · angajator {er}',
   'Email me a code': 'Trimite-mi un cod pe e-mail',
   'Employer pays on top': 'Angajatorul plătește în plus',

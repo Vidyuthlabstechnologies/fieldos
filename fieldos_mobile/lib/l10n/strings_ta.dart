@@ -3430,7 +3430,7 @@ const Map<String, String> stringsTa = {
   'SOCSO and EIS': 'SOCSO மற்றும் EIS',
   'On pay up to ₹6,000 a month': 'மாதம் ₹6,000 வரையிலான சம்பளத்தில்',
   'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO, EIS: தொழிலாளர்கள் {ee} · நிறுவனம் {er}',
-  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO, EIS இந்தத் தாளில் உள்ள கூலியில் கணக்கிடப்பட்டவை. இவை மாதக் கூலியில் செலுத்த வேண்டியவை, எனவே செலுத்தும் முன் மாத மொத்தத்துடன் சரிபார்க்கவும். PLKS அனுமதி பதிவில் உள்ள தொழிலாளர் வெளிநாட்டவராகக் கணக்கிடப்படுவார்: EPF இருபுறமும் 2%, SOCSO வேலைக் காயம் மட்டும், EIS இல்லை.',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO as for a local worker, no EIS.': 'EPF, SOCSO, EIS இந்தத் தாளில் உள்ள கூலியில் கணக்கிடப்பட்டவை. இவை மாதக் கூலியில் செலுத்த வேண்டியவை, எனவே செலுத்தும் முன் மாத மொத்தத்துடன் சரிபார்க்கவும். PLKS அனுமதி பதிவில் உள்ள தொழிலாளர் வெளிநாட்டவராகக் கணக்கிடப்படுவார்: EPF இருபுறமும் 2%, SOCSO உள்ளூர் தொழிலாளரைப் போலவே, EIS இல்லை.',
   'Cut from pay: {items}': 'சம்பளத்திலிருந்து பிடித்தம்: {items}',
   'Employer pays: {items}': 'நிறுவனம் செலுத்துவது: {items}',
   'Net pay {amount}': 'கைக்கு வரும் சம்பளம் {amount}',

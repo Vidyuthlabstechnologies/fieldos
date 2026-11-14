@@ -3088,7 +3088,7 @@ const stringsPl = <String, String>{
   'EPF': 'EPF',
   'EPF (KWSP)': 'EPF (KWSP)',
   'EPF to pay': 'EPF do zapłaty',
-  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO i EIS są liczone od wynagrodzeń z tego zestawienia. Należą się od wynagrodzenia miesięcznego, więc przed wpłatą sprawdź je z sumą za miesiąc. Pracownik z zezwoleniem PLKS w aktach jest liczony jako cudzoziemiec: EPF po 2%, SOCSO tylko od wypadków przy pracy, bez EIS.',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO as for a local worker, no EIS.': 'EPF, SOCSO i EIS są liczone od wynagrodzeń z tego zestawienia. Należą się od wynagrodzenia miesięcznego, więc przed wpłatą sprawdź je z sumą za miesiąc. Pracownik z zezwoleniem PLKS w aktach jest liczony jako cudzoziemiec: EPF po 2%, SOCSO jak u pracownika miejscowego, bez EIS.',
   'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO i EIS: pracownicy {ee} · pracodawca {er}',
   'Email me a code': 'Wyślij mi kod e-mailem',
   'Employer pays on top': 'Pracodawca płaci dodatkowo',

@@ -3077,7 +3077,7 @@ const stringsMs = <String, String>{
   'SOCSO and EIS': 'PERKESO dan SIP',
   'On pay up to ₹6,000 a month': 'Atas gaji sehingga ₹6,000 sebulan',
   'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'KWSP, PERKESO dan SIP: pekerja {ee} · majikan {er}',
-  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'KWSP, PERKESO dan SIP dikira atas upah dalam helaian ini. Caruman ini dikenakan atas upah sebulan, jadi semak dengan jumlah sebulan sebelum membayarnya. Pekerja yang mempunyai permit PLKS dalam rekod dikira sebagai pekerja asing: KWSP 2% setiap pihak, PERKESO bencana pekerjaan sahaja, tiada SIP.',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO as for a local worker, no EIS.': 'KWSP, PERKESO dan SIP dikira atas upah dalam helaian ini. Caruman ini dikenakan atas upah sebulan, jadi semak dengan jumlah sebulan sebelum membayarnya. Pekerja yang mempunyai permit PLKS dalam rekod dikira sebagai pekerja asing: KWSP 2% setiap pihak, PERKESO sama seperti pekerja tempatan, tiada SIP.',
   'Cut from pay: {items}': 'Dipotong daripada gaji: {items}',
   'Employer pays: {items}': 'Majikan bayar: {items}',
   'Net pay {amount}': 'Gaji bersih {amount}',

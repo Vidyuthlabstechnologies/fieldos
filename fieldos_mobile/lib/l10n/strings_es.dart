@@ -3070,7 +3070,7 @@ const Map<String, String> stringsEs = {
   'SOCSO and EIS': 'SOCSO y EIS',
   'On pay up to ₹6,000 a month': 'Sobre el sueldo hasta ₹6,000 al mes',
   'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO y EIS: trabajadores {ee} · empleador {er}',
-  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO y EIS se calculan sobre los salarios de esta hoja. Se deben sobre el salario del mes, así que compárelos con el total del mes antes de pagarlos. Un trabajador con permiso PLKS registrado se cuenta como extranjero: EPF 2% cada parte, SOCSO solo por accidente de trabajo, sin EIS.',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO as for a local worker, no EIS.': 'EPF, SOCSO y EIS se calculan sobre los salarios de esta hoja. Se deben sobre el salario del mes, así que compárelos con el total del mes antes de pagarlos. Un trabajador con permiso PLKS registrado se cuenta como extranjero: EPF 2% cada parte, SOCSO igual que un trabajador local, sin EIS.',
   'Cut from pay: {items}': 'Descontado del pago: {items}',
   'Employer pays: {items}': 'El empleador paga: {items}',
   'Net pay {amount}': 'Pago neto {amount}',

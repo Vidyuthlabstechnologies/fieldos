@@ -3080,7 +3080,7 @@ const stringsMl = <String, String>{
   'SOCSO and EIS': 'SOCSO, EIS',
   'On pay up to ₹6,000 a month': 'മാസം ₹6,000 വരെയുള്ള ശമ്പളത്തിൽ',
   'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO, EIS: തൊഴിലാളികൾ {ee} · കമ്പനി {er}',
-  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO, EIS ഈ ഷീറ്റിലെ കൂലിയിൽ കണക്കാക്കിയതാണ്. ഇവ മാസക്കൂലിയിലാണ് അടയ്ക്കേണ്ടത്, അതിനാൽ അടയ്ക്കുന്നതിന് മുമ്പ് മാസത്തെ ആകെ തുകയുമായി ഒത്തുനോക്കുക. PLKS പെർമിറ്റ് രേഖപ്പെടുത്തിയ തൊഴിലാളിയെ വിദേശിയായി കണക്കാക്കുന്നു: EPF ഇരുഭാഗത്തും 2%, SOCSO ജോലിസ്ഥല പരിക്ക് മാത്രം, EIS ഇല്ല.',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO as for a local worker, no EIS.': 'EPF, SOCSO, EIS ഈ ഷീറ്റിലെ കൂലിയിൽ കണക്കാക്കിയതാണ്. ഇവ മാസക്കൂലിയിലാണ് അടയ്ക്കേണ്ടത്, അതിനാൽ അടയ്ക്കുന്നതിന് മുമ്പ് മാസത്തെ ആകെ തുകയുമായി ഒത്തുനോക്കുക. PLKS പെർമിറ്റ് രേഖപ്പെടുത്തിയ തൊഴിലാളിയെ വിദേശിയായി കണക്കാക്കുന്നു: EPF ഇരുഭാഗത്തും 2%, SOCSO നാട്ടുകാരനായ തൊഴിലാളിയുടേത് പോലെ, EIS ഇല്ല.',
   'Cut from pay: {items}': 'ശമ്പളത്തിൽ നിന്ന് പിടിച്ചത്: {items}',
   'Employer pays: {items}': 'കമ്പനി അടയ്ക്കുന്നത്: {items}',
   'Net pay {amount}': 'കൈയിൽ കിട്ടുന്ന ശമ്പളം {amount}',

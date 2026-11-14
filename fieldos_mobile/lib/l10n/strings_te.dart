@@ -2529,7 +2529,7 @@ const Map<String, String> stringsTe = {
   'SOCSO and EIS': 'SOCSO మరియు EIS',
   'On pay up to ₹6,000 a month': 'నెలకు ₹6,000 వరకు జీతంపై',
   'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO, EIS: కార్మికులు {ee} · కంపెనీ {er}',
-  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO, EIS ఈ షీట్‌లోని కూలీపై లెక్కించారు. ఇవి నెల కూలీపై చెల్లించాలి, కాబట్టి కట్టే ముందు నెల మొత్తంతో సరిచూడండి. PLKS పర్మిట్ నమోదైన కార్మికుడిని విదేశీయుడిగా లెక్కిస్తారు: EPF ఇరువైపులా 2%, SOCSO పని గాయం మాత్రమే, EIS లేదు.',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO as for a local worker, no EIS.': 'EPF, SOCSO, EIS ఈ షీట్‌లోని కూలీపై లెక్కించారు. ఇవి నెల కూలీపై చెల్లించాలి, కాబట్టి కట్టే ముందు నెల మొత్తంతో సరిచూడండి. PLKS పర్మిట్ నమోదైన కార్మికుడిని విదేశీయుడిగా లెక్కిస్తారు: EPF ఇరువైపులా 2%, SOCSO స్థానిక కార్మికుడి మాదిరిగానే, EIS లేదు.',
   'Cut from pay: {items}': 'జీతం నుండి కోత: {items}',
   'Employer pays: {items}': 'కంపెనీ కడుతుంది: {items}',
   'Net pay {amount}': 'చేతికి జీతం {amount}',

@@ -3420,7 +3420,7 @@ const Map<String, String> stringsKn = {
   'SOCSO and EIS': 'SOCSO ಮತ್ತು EIS',
   'On pay up to ₹6,000 a month': 'ತಿಂಗಳಿಗೆ ₹6,000 ವರೆಗಿನ ಸಂಬಳದ ಮೇಲೆ',
   'EPF, SOCSO and EIS: workers {ee} · employer {er}': 'EPF, SOCSO, EIS: ಕಾರ್ಮಿಕರು {ee} · ಕಂಪನಿ {er}',
-  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO employment injury only, no EIS.': 'EPF, SOCSO, EIS ಈ ಶೀಟ್‌ನ ಕೂಲಿಯ ಮೇಲೆ ಲೆಕ್ಕ ಹಾಕಲಾಗಿದೆ. ಇವು ತಿಂಗಳ ಕೂಲಿಯ ಮೇಲೆ ಕಟ್ಟಬೇಕಾದವು, ಆದ್ದರಿಂದ ಕಟ್ಟುವ ಮೊದಲು ತಿಂಗಳ ಒಟ್ಟು ಮೊತ್ತದೊಂದಿಗೆ ಹೋಲಿಸಿ. PLKS ಪರ್ಮಿಟ್ ದಾಖಲಾದ ಕಾರ್ಮಿಕರನ್ನು ವಿದೇಶಿ ಎಂದು ಪರಿಗಣಿಸಲಾಗುತ್ತದೆ: EPF ಎರಡೂ ಕಡೆ 2%, SOCSO ಕೆಲಸದ ಗಾಯ ಮಾತ್ರ, EIS ಇಲ್ಲ.',
+  'EPF, SOCSO and EIS are worked out on the wages in this sheet. They are due on a month\'s wages, so check them against the month\'s total before paying them over. A worker with a PLKS permit on file is counted as foreign: EPF 2% each, SOCSO as for a local worker, no EIS.': 'EPF, SOCSO, EIS ಈ ಶೀಟ್‌ನ ಕೂಲಿಯ ಮೇಲೆ ಲೆಕ್ಕ ಹಾಕಲಾಗಿದೆ. ಇವು ತಿಂಗಳ ಕೂಲಿಯ ಮೇಲೆ ಕಟ್ಟಬೇಕಾದವು, ಆದ್ದರಿಂದ ಕಟ್ಟುವ ಮೊದಲು ತಿಂಗಳ ಒಟ್ಟು ಮೊತ್ತದೊಂದಿಗೆ ಹೋಲಿಸಿ. PLKS ಪರ್ಮಿಟ್ ದಾಖಲಾದ ಕಾರ್ಮಿಕರನ್ನು ವಿದೇಶಿ ಎಂದು ಪರಿಗಣಿಸಲಾಗುತ್ತದೆ: EPF ಎರಡೂ ಕಡೆ 2%, SOCSO ಸ್ಥಳೀಯ ಕಾರ್ಮಿಕರಂತೆಯೇ, EIS ಇಲ್ಲ.',
   'Cut from pay: {items}': 'ಸಂಬಳದಿಂದ ಕಡಿತ: {items}',
   'Employer pays: {items}': 'ಕಂಪನಿ ಕಟ್ಟುತ್ತದೆ: {items}',
   'Net pay {amount}': 'ಕೈಗೆ ಸಂಬಳ {amount}',
