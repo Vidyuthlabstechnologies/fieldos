@@ -44,8 +44,17 @@ class ReadAloud {
   /// The guide line [key] in the person's language ([guideLines]), or
   /// [fallback] when there is none.
   /// A market's own lines ('en_us') come before the language's.
-  static String? guideText(String key, {String? fallback}) =>
-      guideLines['${spokenLanguage.code}_${currentMarket.id}']?[key] ?? guideLines[spokenLanguage.code]?[key] ?? fallback;
+  /// Outside India the plain English and Indian-language tour lines are
+  /// India's story (Namaste, Mr. Reddy's house, rupees), so the tour reads
+  /// the market's own lines or the step on screen instead.
+  static String? guideText(String key, {String? fallback}) {
+    final lang = spokenLanguage.code;
+    final own = guideLines['${lang}_${currentMarket.id}']?[key];
+    if (own != null) return own;
+    final indiaStory = !isIndia && key.startsWith('tour_') &&
+        (spokenLanguage == AppLanguage.en || AppLanguage.indianLanguages.contains(spokenLanguage));
+    return (indiaStory ? null : guideLines[lang]?[key]) ?? fallback;
+  }
 
   /// Says Mitra's guide line [key], or stops it if it is playing now.
   static Future<void> toggleGuide(String key, {String? fallback}) async {

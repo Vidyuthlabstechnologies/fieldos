@@ -11,6 +11,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
 import 'package:fieldos_mobile/features/home/home_screen.dart';
@@ -62,9 +63,14 @@ List<TourStep> appTourSteps() => [
       TourStep(
         stage: TourStage.home,
         mood: MitraMood.wave,
-        title: tr('Namaste! I am Mitra, your site buddy'),
-        body: tr('Let me show you one day on a real site: Mr. Reddy\'s G+1 house. It takes two minutes '
-            'and does not touch your own data.'),
+        // Outside India the sample site is not Mr. Reddy's, and Mitra
+        // does not greet with Namaste.
+        title: isIndia ? tr('Namaste! I am Mitra, your site buddy') : tr('Hi! I am Mitra, your site buddy'),
+        body: isIndia
+            ? tr('Let me show you one day on a real site: Mr. Reddy\'s G+1 house. It takes two minutes '
+                'and does not touch your own data.')
+            : tr('Let me show you one day on a sample site, a two-storey house. It takes two minutes and '
+                'does not touch your own data.'),
       ),
       TourStep(
         stage: TourStage.home,
@@ -77,8 +83,11 @@ List<TourStep> appTourSteps() => [
         stage: TourStage.home,
         mood: MitraMood.talk,
         title: tr('Just ask FieldOS'),
-        body: tr('Not sure where something is? Tap Ask FieldOS at the top and type or speak, like '
-            '"add 5000 for cement". It does the work and asks you to tap Save first.'),
+        body: isIndia
+            ? tr('Not sure where something is? Tap Ask FieldOS at the top and type or speak, like '
+                '"add 5000 for cement". It does the work and asks you to tap Save first.')
+            : tr('Not sure where something is? Tap Ask FieldOS at the top and type or speak, like '
+                '"add 500 for cement". It does the work and asks you to tap Save first.'),
       ),
       TourStep(
         tab: 0,
@@ -93,8 +102,11 @@ List<TourStep> appTourSteps() => [
         time: tr('9:00 AM'),
         mood: MitraMood.thumbsUp,
         title: tr('Attendance in two taps'),
-        body: tr('Punch workers in as they arrive, or mark the whole gang at once. Hours, half days '
-            'and overtime are worked out for you.'),
+        body: isIndia
+            ? tr('Punch workers in as they arrive, or mark the whole gang at once. Hours, half days '
+                'and overtime are worked out for you.')
+            : tr('Check workers in as they arrive, or mark the whole crew at once. Hours and overtime '
+                'are worked out for you.'),
       ),
       TourStep(
         tab: 4,
@@ -108,9 +120,12 @@ List<TourStep> appTourSteps() => [
         tab: 6,
         time: tr('1:00 PM'),
         mood: MitraMood.money,
-        title: tr('Every rupee on site'),
-        body: tr('Money received, money spent and the balance, by category. Client bills and GST '
-            'invoices are made here too.'),
+        title: isIndia ? tr('Every rupee on site') : tr('Every cost on site'),
+        body: isIndia
+            ? tr('Money received, money spent and the balance, by category. Client bills and GST '
+                'invoices are made here too.')
+            : tr('Money received, money spent and the balance, by category. Client bills and tax '
+                'invoices are made here too.'),
       ),
       TourStep(
         tab: 2,
@@ -125,16 +140,22 @@ List<TourStep> appTourSteps() => [
         time: tr('6:00 PM'),
         mood: MitraMood.listen,
         title: tr('Speak the daily report'),
-        body: tr('Tap Speak report and just talk, in Telugu, Hindi or English. FieldOS writes the '
-            'report, adds the day\'s numbers and shares a PDF on WhatsApp.'),
+        body: isIndia
+            ? tr('Tap Speak report and just talk, in Telugu, Hindi or English. FieldOS writes the '
+                'report, adds the day\'s numbers and shares a PDF on WhatsApp.')
+            : tr('Tap Speak report and just talk, in your language or in English. FieldOS writes the '
+                'report, adds the day\'s numbers and shares it as a PDF.'),
       ),
       TourStep(
         stage: TourStage.wageSheet,
         time: tr('Saturday'),
         mood: MitraMood.chai,
         title: tr('Wages without a calculator'),
-        body: tr('The wage sheet adds up each worker\'s days, advances and what is still due, ready to '
-            'pay or send to the contractor.'),
+        body: isIndia
+            ? tr('The wage sheet adds up each worker\'s days, advances and what is still due, ready to '
+                'pay or send to the contractor.')
+            : tr('The wage sheet adds up each worker\'s pay, advances and what is still due, ready to '
+                'pay or send to the office.'),
       ),
       TourStep(
         stage: TourStage.dashboard,

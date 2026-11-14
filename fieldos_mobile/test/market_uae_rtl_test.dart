@@ -36,7 +36,7 @@ void main() {
   test('amounts and money icons follow the dirham', () {
     debugSetMarket(Market.uae);
     expect(trIn(AppLanguage.en, 'Amount (₹)'), 'Amount (AED)');
-    expect(trIn(AppLanguage.ar, 'Add ₹5,000 spent on cement'), contains('AED 5,000'));
+    expect(trIn(AppLanguage.ar, 'Add ₹5,000 spent on cement'), contains('AED 500'));
     expect(trIn(AppLanguage.ar, 'Cancel'), isNot('Cancel'));
     expect(trIn(AppLanguage.ur, 'Cancel'), isNot('Cancel'));
     expect(trIn(AppLanguage.ml, 'Cancel'), isNot('Cancel'));

@@ -10,12 +10,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 
 const sampleProjectName = 'Sample site (demo)';
+
+/// The sample site's client, as a builder in that country would know him.
+String get sampleClient => switch (currentMarket) {
+      Market.india => 'Mr. Reddy',
+      Market.us => 'Mr. Johnson',
+      Market.malaysia => 'Encik Ahmad',
+      Market.uae => 'Mr. Al Mansoori',
+      Market.uk => 'Mr. Smith',
+    };
 
 String sampleProjectKey(String companyId) => 'sample_project:$companyId';
 
@@ -53,7 +63,7 @@ Future<Project> createSampleProject(
         id: projectId,
         companyId: companyId,
         name: sampleProjectName,
-        clientName: const Value('Mr. Reddy (G+1 house)'),
+        clientName: Value(isIndia ? 'Mr. Reddy (G+1 house)' : '$sampleClient (two-storey house)'),
         status: const Value('active'),
         startDate: Value(d(-30)),
         endDate: Value(d(120)),
@@ -183,7 +193,7 @@ Future<Project> createSampleProject(
         projectId: projectId,
         amount: 300000,
         receivedOn: d(-28),
-        fromParty: 'Mr. Reddy',
+        fromParty: sampleClient,
         mode: 'bank',
         recordedBy: userId,
         note: const Value('Advance'),

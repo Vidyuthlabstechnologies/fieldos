@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/l10n/stored_notes.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -77,7 +78,7 @@ class ApprovalsScreen extends ConsumerWidget {
                                 context,
                               ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                             ),
-                            if (note.isNotEmpty) ...[const SizedBox(height: 8), Text(note)],
+                            if (note.isNotEmpty) ...[const SizedBox(height: 8), Text(trStoredNote(note))],
                             if (canDecide)
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,

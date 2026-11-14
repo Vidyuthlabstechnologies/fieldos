@@ -19,7 +19,7 @@ const Map<Market, Map<String, Map<String, String>>> marketTerms = {
   Market.us: {'en': _usEnglish, 'es': _usSpanish},
   Market.malaysia: {'en': _malaysiaEnglish},
   Market.uae: {'en': _uaeEnglish},
-  Market.uk: {'en': _ukEnglish},
+  Market.uk: {'en': _ukEnglish, 'pl': _ukPolish, 'ro': _ukRomanian},
 };
 
 /// Whole-word swaps on English text, after the exact table: spelling and
@@ -105,6 +105,7 @@ const _ukSwaps = {
 /// The UK app in British English, on top of [_ukSwaps]. Operatives are
 /// paid by the hour (MarketConfig.payHourly): the rate field holds it.
 const _ukEnglish = <String, String>{
+  'GRN': 'Goods received',
   'Daily wage': 'Hourly rate',
   'Daily wage (₹)': 'Hourly rate (£)',
   '{amount}/day': '{amount}/hr',
@@ -138,8 +139,34 @@ const _ukEnglish = <String, String>{
       'One supplier per line: name, phone, VAT number, what you owe them today. Only the name is needed. Write "advance" after an amount they hold of yours.',
 };
 
+/// The UK app in Polish and Romanian: the labels whose English the UK
+/// changes ([_ukEnglish]) for hourly pay, so the translation of India's
+/// day-rate wording does not show through.
+const _ukPolish = <String, String>{
+  'Daily wage': 'Stawka godzinowa',
+  'Daily wage (₹)': 'Stawka godzinowa (£)',
+  'no daily wage set': 'brak stawki godzinowej',
+  "No daily wage set, so wages can't be worked out": 'Brak stawki godzinowej, więc nie można obliczyć wynagrodzenia',
+  'A day counts as full at 7 hours on site and half at 3.5 hours, unless it was marked by hand on the day register. Tap a worker to pay wages or an advance.':
+      'Wynagrodzenie to godziny od zameldowania do wymeldowania razy stawka godzinowa. Dzień oznaczony ręcznie liczy się jako 8 godzin. Prawo w Wielkiej Brytanii nie ustala stawki za nadgodziny; godziny ponad 48 w tygodniu są pokazane jako nadgodziny. Dotknij pracownika, aby wypłacić wynagrodzenie lub zaliczkę.',
+  'A day counts as full at 7 hours on site and half at 3.5 hours. Tap a worker to pay wages or an advance.':
+      'Wynagrodzenie to godziny od zameldowania do wymeldowania razy stawka godzinowa. Dotknij pracownika, aby wypłacić wynagrodzenie lub zaliczkę.',
+};
+
+const _ukRomanian = <String, String>{
+  'Daily wage': 'Tarif orar',
+  'Daily wage (₹)': 'Tarif orar (£)',
+  'no daily wage set': 'fără tarif orar',
+  "No daily wage set, so wages can't be worked out": 'Nu este setat un tarif orar, așa că plata nu poate fi calculată',
+  'A day counts as full at 7 hours on site and half at 3.5 hours, unless it was marked by hand on the day register. Tap a worker to pay wages or an advance.':
+      'Plata înseamnă orele de la intrare la ieșire înmulțite cu tariful orar. O zi marcată manual se socotește 8 ore. Legea din Regatul Unit nu stabilește un tarif pentru orele suplimentare; orele de peste 48 pe săptămână apar ca ore suplimentare. Atinge un muncitor pentru a plăti salariul sau un avans.',
+  'A day counts as full at 7 hours on site and half at 3.5 hours. Tap a worker to pay wages or an advance.':
+      'Plata înseamnă orele de la intrare la ieșire înmulțite cu tariful orar. Atinge un muncitor pentru a plăti salariul sau un avans.',
+};
+
 /// The UAE app in English, on top of [_uaeSwaps].
 const _uaeEnglish = <String, String>{
+  'GRN': 'Goods received',
   'Make the next RA bill': 'Make the next interim payment application',
   'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
       'Measure work done against the BOQ. Approved quantities go on the next interim payment application.',
@@ -152,6 +179,7 @@ const _uaeEnglish = <String, String>{
 
 /// The Malaysia app in Malaysian English, on top of [_malaysiaSwaps].
 const _malaysiaEnglish = <String, String>{
+  'GRN': 'Goods received',
   'Make the next RA bill': 'Make the next progress claim',
   'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
       'Measure work done against the BQ. Approved quantities go on the next progress claim.',
@@ -173,6 +201,7 @@ const _malaysiaEnglish = <String, String>{
 /// The US app in American English. Labels hidden in the US build (RERA,
 /// PF/ESI salaries, UPI, Tally) need no entry; the test knows which.
 const _usEnglish = <String, String>{
+  'GRN': 'Receiving',
   // Crews are paid by the hour in the US (MarketConfig.payHourly): the
   // worker's rate field holds the hourly rate.
   'Daily wage': 'Hourly rate',
