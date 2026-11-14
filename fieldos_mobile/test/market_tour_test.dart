@@ -20,6 +20,7 @@ void main() {
   });
 
   test('India keeps its tour', () {
+    debugSetMarket(Market.india);
     final text = appTourSteps().map((s) => '${s.title} ${s.body}').join('\n');
     expect(text, contains('Namaste'));
     expect(text, contains('Mr. Reddy'));
@@ -46,6 +47,7 @@ void main() {
   });
 
   test('stored budget notes show in the person\'s language', () {
+    debugSetMarket(Market.india);
     for (final l in AppLanguage.values.where((l) => l != AppLanguage.en)) {
       for (final label in storedNoteLabels) {
         expect(hasTranslation(l, label), isTrue, reason: '${l.code}: $label');
@@ -71,5 +73,35 @@ void main() {
     }
     debugSetMarket(Market.india);
     expect(trIn(AppLanguage.hi, 'Add ₹5,000 spent on cement'), contains('5,000'));
+  });
+
+  test('the late beam has the local trade name, and the tour never says plinth outside India', () {
+    debugSetMarket(Market.india);
+    expect(sampleBeam, 'Plinth beam');
+    debugSetMarket(Market.us);
+    expect(sampleBeam, 'Grade beam');
+    expect(appTourSteps().map((s) => s.body).join('\n'), contains('grade beam'));
+    for (final m in [Market.malaysia, Market.uae, Market.uk]) {
+      debugSetMarket(m);
+      expect(sampleBeam, 'Ground beam');
+      for (final l in AppLanguage.offered) {
+        setCurrentLanguage(l);
+        final text = appTourSteps().map((s) => s.body).join('\n').toLowerCase();
+        expect(text, isNot(contains('plinth')), reason: '${m.name} ${l.code}');
+      }
+    }
+  });
+
+  test('Purchase request is translated in every language', () {
+    for (final l in AppLanguage.values.where((l) => l != AppLanguage.en)) {
+      expect(hasTranslation(l, 'Purchase request'), isTrue, reason: l.code);
+    }
+  });
+
+  test('in Arabic and Urdu a filled-in amount is kept in its own direction', () {
+    setCurrentLanguage(AppLanguage.ar);
+    expect(trf('{amount}/day', {'amount': 'AED 100'}), contains('\u2068AED 100\u2069'));
+    setCurrentLanguage(AppLanguage.hi);
+    expect(trf('{amount}/day', {'amount': '₹100'}), isNot(contains('\u2068')));
   });
 }

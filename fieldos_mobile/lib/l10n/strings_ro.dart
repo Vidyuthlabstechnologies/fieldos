@@ -3143,4 +3143,6 @@ const stringsRo = <String, String>{
   'Over budget on {item}: spent {spent} of {budget}.': 'Peste buget la {item}: cheltuit {spent} din {budget}.',
   'Close to budget on {item}: {spent} of {budget} ({pct}%).': 'Aproape de buget la {item}: {spent} din {budget} ({pct}%).',
   '{amount} spent without a BOQ item.': '{amount} cheltuiți fără articol din deviz.',
+  'Purchase request': 'Cerere de materiale',
+  'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'Sarcinile arată cât a avansat fiecare lucrare și ce rămâne în urmă. Grinda de fundație e întârziată, așa că e marcată cu roșu înainte să întrebe cineva.',
 };

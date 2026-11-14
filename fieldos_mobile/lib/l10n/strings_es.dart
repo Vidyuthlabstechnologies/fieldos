@@ -3113,4 +3113,6 @@ const Map<String, String> stringsEs = {
   'Over budget on {item}: spent {spent} of {budget}.': 'Sobre presupuesto en {item}: gastado {spent} de {budget}.',
   'Close to budget on {item}: {spent} of {budget} ({pct}%).': 'Cerca del presupuesto en {item}: {spent} de {budget} ({pct}%).',
   '{amount} spent without a BOQ item.': '{amount} gastados sin partida del presupuesto.',
+  'Purchase request': 'Solicitud de compra',
+  'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'Las tareas muestran cuánto avanzó cada trabajo y qué se está atrasando. La viga de cimentación va tarde, así que se marca en rojo antes de que alguien pregunte.',
 };

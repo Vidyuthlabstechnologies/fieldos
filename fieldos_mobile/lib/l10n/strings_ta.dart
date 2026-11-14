@@ -3473,4 +3473,6 @@ const Map<String, String> stringsTa = {
   'Over budget on {item}: spent {spent} of {budget}.': 'பட்ஜெட்டை தாண்டியது, {item}: {budget}-இல் {spent} செலவு.',
   'Close to budget on {item}: {spent} of {budget} ({pct}%).': 'பட்ஜெட்டை நெருங்குகிறது, {item}: {budget}-இல் {spent} ({pct}%).',
   '{amount} spent without a BOQ item.': 'BOQ உருப்படி இல்லாமல் {amount} செலவு.',
+  'Purchase request': 'கொள்முதல் கோரிக்கை',
+  'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'ஒவ்வொரு வேலையும் எவ்வளவு முன்னேறியது, எது பின்தங்குகிறது என்று பணிகள் காட்டும். கிரவுண்ட் பீம் தாமதம், அதனால் யாரும் கேட்கும் முன்பே சிவப்பில் குறிக்கப்படுகிறது.',
 };

@@ -195,7 +195,11 @@ String tr(String english) => trIn(_current, english);
 /// `trf('{n} tasks late', {'n': '3'})`.
 String trf(String english, Map<String, Object> args) {
   var s = tr(english);
-  args.forEach((k, v) => s = s.replaceAll('{$k}', '$v'));
+  // In Arabic and Urdu an amount ("AED 780.40") or a Latin name dropped
+  // into the sentence is isolated, so the bidi algorithm doesn't scatter
+  // its parts ("AED 780 40").
+  final isolate = currentLanguage.rightToLeft;
+  args.forEach((k, v) => s = s.replaceAll('{$k}', isolate ? '\u2068$v\u2069' : '$v'));
   return s;
 }
 

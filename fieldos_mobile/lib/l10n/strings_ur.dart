@@ -3123,4 +3123,6 @@ const stringsUr = <String, String>{
   'Over budget on {item}: spent {spent} of {budget}.': '{item} پر بجٹ سے زیادہ: {budget} میں سے {spent} خرچ۔',
   'Close to budget on {item}: {spent} of {budget} ({pct}%).': '{item} پر بجٹ کے قریب: {budget} میں سے {spent} ({pct}%)۔',
   '{amount} spent without a BOQ item.': 'BOQ آئٹم کے بغیر {amount} خرچ۔',
+  'Purchase request': 'خریداری کی درخواست',
+  'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'کام دکھاتے ہیں کہ ہر کام کتنا ہوا اور کیا پیچھے رہ رہا ہے۔ گراؤنڈ بیم لیٹ ہے، اس لیے کسی کے پوچھنے سے پہلے ہی سرخ نشان لگ جاتا ہے۔',
 };

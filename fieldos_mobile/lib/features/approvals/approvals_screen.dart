@@ -212,6 +212,8 @@ String approvalLabel(String type) => switch (type) {
   'budget_overrun' => tr('Site over budget'),
   'purchase_order' => tr('Purchase order'),
   'material_receipt' => tr('Material received'),
+  'purchase_request' => tr('Purchase request'),
+  'expense' => tr('Expense'),
   _ => tr('${type[0].toUpperCase()}${type.substring(1).replaceAll('_', ' ')}'),
 };
 

@@ -94,8 +94,11 @@ List<TourStep> appTourSteps() => [
         time: tr('8:00 AM'),
         mood: MitraMood.checklist,
         title: tr('Plan the day'),
-        body: tr('Tasks show how far each job has got and what is slipping. The plinth beam is late, '
-            'so it is marked in red before anyone has to ask.'),
+        body: isIndia
+            ? tr('Tasks show how far each job has got and what is slipping. The plinth beam is late, '
+                'so it is marked in red before anyone has to ask.')
+            : tr('Tasks show how far each job has got and what is slipping. The ground beam is late, '
+                'so it is marked in red before anyone has to ask.'),
       ),
       TourStep(
         tab: 5,

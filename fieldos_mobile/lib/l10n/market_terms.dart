@@ -17,8 +17,15 @@ import 'package:fieldos_mobile/core/market.dart';
 /// Per market, per language code ('en', 'es'...), English key -> label.
 const Map<Market, Map<String, Map<String, String>>> marketTerms = {
   Market.us: {'en': _usEnglish, 'es': _usSpanish},
-  Market.malaysia: {'en': _malaysiaEnglish},
-  Market.uae: {'en': _uaeEnglish},
+  Market.malaysia: {'en': _malaysiaEnglish, 'ta': {'GRN': 'பொருள் பெறுதல்'}},
+  Market.uae: {
+    'en': _uaeEnglish,
+    // India's tables keep "GRN", which Indian sites say; the UAE says
+    // goods received.
+    'hi': {'GRN': 'माल प्राप्ति'},
+    'ur': {'GRN': 'وصولیِ مال'},
+    'ml': {'GRN': 'സാധനങ്ങൾ ലഭിച്ചു'},
+  },
   Market.uk: {'en': _ukEnglish, 'pl': _ukPolish, 'ro': _ukRomanian},
 };
 
@@ -201,6 +208,11 @@ const _malaysiaEnglish = <String, String>{
 /// The US app in American English. Labels hidden in the US build (RERA,
 /// PF/ESI salaries, UPI, Tally) need no entry; the test knows which.
 const _usEnglish = <String, String>{
+  'Daily report': 'Daily log',
+  'Spending is {amount} over the BOQ budget.': 'Spending is {amount} over the estimate.',
+  '{amount} spent without a BOQ item.': '{amount} spent without an estimate line.',
+  'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.':
+      'Tasks show how far each job has gotten and what is slipping. The grade beam is late, so it is marked in red before anyone has to ask.',
   'GRN': 'Receiving',
   // Crews are paid by the hour in the US (MarketConfig.payHourly): the
   // worker's rate field holds the hourly rate.
@@ -269,6 +281,8 @@ const _usEnglish = <String, String>{
 /// The US app in Spanish, where the Spanish table (written for daily
 /// wages and UPI) says the wrong thing for the US: pay is by the hour.
 const _usSpanish = <String, String>{
+  'Add ₹5,000 spent on cement': r'Agrega $500 gastados en concreto',
+  'Just say it: "Add ₹5,000 for cement", "Who came today?"': r'Solo dilo: "Agrega $500 de concreto", "¿Quién vino hoy?"',
   'Daily wage': 'Pago por hora',
   'Daily wage (₹)': r'Pago por hora ($)',
   '{amount}/day': '{amount}/hora',

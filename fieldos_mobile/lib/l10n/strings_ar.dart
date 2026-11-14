@@ -3123,4 +3123,6 @@ const stringsAr = <String, String>{
   'Over budget on {item}: spent {spent} of {budget}.': 'تجاوز الميزانية في {item}: صُرف {spent} من {budget}.',
   'Close to budget on {item}: {spent} of {budget} ({pct}%).': 'قريب من الميزانية في {item}: {spent} من {budget} ({pct}%).',
   '{amount} spent without a BOQ item.': '{amount} صُرف دون بند في جدول الكميات.',
+  'Purchase request': 'طلب شراء',
+  'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'تُظهر المهام مدى تقدم كل عمل وما الذي يتأخر. الجسر الأرضي متأخر، لذلك يظهر باللون الأحمر قبل أن يسأل أحد.',
 };
