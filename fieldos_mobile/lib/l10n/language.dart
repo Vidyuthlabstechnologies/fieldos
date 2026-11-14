@@ -175,7 +175,7 @@ String trIn(AppLanguage l, String english) {
   // currencies, in every language's way of writing it.
   out = out.replaceAll(RegExp(r'₹\s?5[,.\s]?000(?![\d,.])'), '₹500');
   // "AED 5,000" takes a space before the figure; "(₹)" stays "(AED)".
-  if (market.symbolSpace) out = out.replaceAll(RegExp(r'₹(?=\d)'), '${market.currencySymbol} ');
+  if (market.symbolSpace) out = out.replaceAll(RegExp(r'₹(?=\d)'), '${market.currencySymbol}\u00A0');
   return out.replaceAll('₹', market.currencySymbol);
 }
 

@@ -178,7 +178,9 @@ String money(num v, {bool cents = false}) {
   final neg = v < 0 && (showCents || whole != '0');
   final grouped = market.indianGrouping ? _groupIndian(whole) : _groupThousands(whole);
   final tail = showCents ? '.${(hundredths % 100).toString().padLeft(2, '0')}' : '';
-  final sym = market.symbolSpace ? '${market.currencySymbol} ' : market.currencySymbol;
+  // A no-break space keeps "AED" and its figure on one line, and in one
+  // left-to-right run inside Arabic and Urdu sentences.
+  final sym = market.symbolSpace ? '${market.currencySymbol}\u00A0' : market.currencySymbol;
   return '${neg ? '-' : ''}$sym$grouped$tail';
 }
 

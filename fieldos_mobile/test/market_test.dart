@@ -49,7 +49,7 @@ void main() {
       final cases = {
         Market.us: r'$1,234,567.89',
         Market.malaysia: 'RM1,234,567.89',
-        Market.uae: 'AED 1,234,567.89',
+        Market.uae: 'AED\u00A01,234,567.89',
         Market.uk: '£1,234,567.89',
       };
       cases.forEach((m, want) {

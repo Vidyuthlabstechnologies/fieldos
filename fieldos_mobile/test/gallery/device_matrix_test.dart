@@ -164,7 +164,7 @@ final Map<String, _Shot> _screens = {
   '48_bug_report': (c, p) => const BugReportScreen(),
   '50_site_brief': (c, p) => OwnerBriefScreen(companyId: p.companyId, companyName: 'Sri Sai Constructions'),
   '51_who_you_owe': (c, p) => PayablesScreen(companyId: p.companyId),
-  for (final i in List.generate(11, (i) => i))
+  for (var i = 0; i < appTourSteps().length; i++)
     '6${i.toString().padLeft(2, '0')}_tour': (c, p) =>
         AppTourScreen(companyId: p.companyId, project: p, initialStep: i),
 };
