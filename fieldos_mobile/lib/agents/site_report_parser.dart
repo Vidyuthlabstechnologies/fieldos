@@ -322,6 +322,7 @@ final _unitWords = {
   'truck', 'trucks', 'load', 'loads', 'trip', 'trips', 'litre', 'litres', 'liter', 'liters', 'brick', 'bricks',
   'block', 'blocks', 'room', 'rooms', 'column', 'columns', 'beam', 'beams', 'slab', 'slabs', 'unit', 'units',
   'flat', 'flats', 'house', 'houses', 'per', 'o', 'clock', 'times', 'nos', 'number', 'numbers',
+  'yd', 'yds', 'yard', 'yards', 'cy', 'lb', 'lbs', 'pound', 'pounds', 'lf', 'sf', 'gal', 'gallon', 'gallons', 'dollars',
   'बजे', 'घंटे', 'घंटा', 'दिन', 'मंजिल', 'बोरी', 'बोरियां', 'किलो', 'टन', 'फीट', 'मीटर', 'रुपये', 'रुपए', 'प्रतिशत', 'ट्रक',
   'प्रति', 'गुना',
   'గంటలు', 'గంటల', 'గంట', 'గంటలకు', 'రోజులు', 'రోజు', 'అంతస్తు', 'అంతస్తులు', 'బస్తాలు', 'బస్తా', 'కిలోలు', 'టన్నులు',

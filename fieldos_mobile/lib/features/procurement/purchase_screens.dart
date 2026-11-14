@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_tools.dart';
@@ -109,8 +110,8 @@ class _UnitConverterScreenState extends State<UnitConverterScreen> {
   late var _from = _group.units[1];
   late var _to = _group.units[0];
   final _value = TextEditingController(text: '1');
-  final _bar = TextEditingController(text: '12');
-  final _barLength = TextEditingController(text: '12');
+  final _bar = TextEditingController(text: market.units == UnitSystem.imperial ? '4' : '12');
+  final _barLength = TextEditingController(text: market.units == UnitSystem.imperial ? '20' : '12');
 
   @override
   void dispose() {
@@ -142,7 +143,13 @@ class _UnitConverterScreenState extends State<UnitConverterScreen> {
     final result = v == null ? null : convertUnits(v, _from, _to);
     final d = double.tryParse(_bar.text.trim());
     final len = double.tryParse(_barLength.text.trim());
-    final kgPerM = d == null || d <= 0 ? null : steelKgPerMetre(d);
+    final imperial = market.units == UnitSystem.imperial;
+    // US: bar size number (#4) and feet; elsewhere diameter in mm and metres.
+    final perLength = imperial
+        ? (d == null ? null : rebarLbPerFoot[d.round()])
+        : d == null || d <= 0
+            ? null
+            : steelKgPerMetre(d);
     DropdownButtonFormField<SiteUnit> unitPicker(String label, SiteUnit value, ValueChanged<SiteUnit> onPick) =>
         DropdownButtonFormField<SiteUnit>(
           key: ValueKey('${_group.label}-$label'),
@@ -193,7 +200,7 @@ class _UnitConverterScreenState extends State<UnitConverterScreen> {
               child: TextField(
                 controller: _bar,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(labelText: tr('Bar size (mm)')),
+                decoration: InputDecoration(labelText: imperial ? tr('Bar size (#3 to #18)') : tr('Bar size (mm)')),
                 onChanged: (_) => setState(() {}),
               ),
             ),
@@ -202,16 +209,22 @@ class _UnitConverterScreenState extends State<UnitConverterScreen> {
               child: TextField(
                 controller: _barLength,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(labelText: tr('Length (m)')),
+                decoration: InputDecoration(labelText: imperial ? tr('Length (ft)') : tr('Length (m)')),
                 onChanged: (_) => setState(() {}),
               ),
             ),
           ]),
           const SizedBox(height: 12),
-          if (kgPerM != null) ...[
-            Text(trf('{kg} kg per metre', {'kg': _fmt(kgPerM)}), style: theme.textTheme.titleMedium),
+          if (perLength != null && imperial) ...[
+            Text(trf('{lb} lb per foot', {'lb': _fmt(perLength)}), style: theme.textTheme.titleMedium),
             if (len != null && len > 0)
-              Text(trf('{kg} kg for {m} m', {'kg': _fmt(kgPerM * len), 'm': _fmt(len)}), style: theme.textTheme.bodyLarge),
+              Text(trf('{lb} lb for {ft} ft', {'lb': _fmt(perLength * len), 'ft': _fmt(len)}), style: theme.textTheme.bodyLarge),
+            const SizedBox(height: 4),
+            Text(tr('Standard rebar weights (ASTM A615). Bar #4 is 4/8 inch across.'), style: theme.textTheme.bodySmall),
+          ] else if (perLength != null) ...[
+            Text(trf('{kg} kg per metre', {'kg': _fmt(perLength)}), style: theme.textTheme.titleMedium),
+            if (len != null && len > 0)
+              Text(trf('{kg} kg for {m} m', {'kg': _fmt(perLength * len), 'm': _fmt(len)}), style: theme.textTheme.bodyLarge),
             const SizedBox(height: 4),
             Text(tr('By the site rule: weight per metre = d × d ÷ 162.'), style: theme.textTheme.bodySmall),
           ],

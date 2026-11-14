@@ -238,7 +238,10 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                     title: Text(tr('Change history')),
                   ),
                 ),
-              if (Roles.canApprove(ref.watch(sessionProvider).role))
+              // The norms are site mixes counted in cement bags (PCC 1:4:8,
+              // M20): metric markets only. US jobs order ready-mix by the
+              // cubic yard.
+              if (Roles.canApprove(ref.watch(sessionProvider).role) && market.units == UnitSystem.metric)
                 PopupMenuItem(
                   value: 'materialcheck',
                   child: ListTile(
