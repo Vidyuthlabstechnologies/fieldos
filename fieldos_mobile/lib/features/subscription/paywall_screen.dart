@@ -51,8 +51,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
   BillingService get _billing => ref.read(billingServiceProvider);
 
+  // Full 48 dp height: these are the only way to restore a purchase or read
+  // the terms, and a compact link is hard to hit with a thumb.
   static final _linkStyle = TextButton.styleFrom(
-    visualDensity: VisualDensity.compact,
+    minimumSize: const Size(48, 48),
     padding: const EdgeInsets.symmetric(horizontal: 10),
   );
 

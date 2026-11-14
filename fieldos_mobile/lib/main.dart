@@ -98,7 +98,7 @@ class AppWithMaterial extends ConsumerWidget {
         final media = MediaQuery.of(context);
         return MediaQuery(
           data: media.copyWith(textScaler: combinedTextScaler(media.textScaler, size)),
-          child: SystemNavBarSafeArea(child: AppLockGate(child: child ?? const SizedBox.shrink())),
+          child: TabletZoom(child: SystemNavBarSafeArea(child: AppLockGate(child: child ?? const SizedBox.shrink()))),
         );
       },
       debugShowCheckedModeBanner: false,

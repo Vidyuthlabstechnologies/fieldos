@@ -373,9 +373,13 @@ class _GuideCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Tapping Mitra reads the step aloud too.
-                  GestureDetector(
-                    onTap: onMitra,
-                    child: Mitra(mood: step.mood, size: compact ? 72 : 104),
+                  Semantics(
+                    button: onMitra != null,
+                    label: tr('Read aloud'),
+                    child: GestureDetector(
+                      onTap: onMitra,
+                      child: Mitra(mood: step.mood, size: compact ? 72 : 104),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(

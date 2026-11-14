@@ -160,7 +160,7 @@ Widget _sectionHeader(BuildContext context, String title, VoidCallback onAdd) =>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title, style: Theme.of(context).textTheme.titleSmall),
-          FloatingActionButton.small(onPressed: onAdd, child: const Icon(Icons.upload_file)),
+          FloatingActionButton.small(tooltip: tr('Add'), onPressed: onAdd, child: const Icon(Icons.upload_file)),
         ],
       ),
     );

@@ -94,12 +94,17 @@ class _LanguageTile extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Center(
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(language.nativeName, style: theme.textTheme.headlineSmall),
-              if (language != AppLanguage.en)
-                Text(language.englishName,
-                    style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
-            ]),
+            // Scales down rather than overflowing the tile with very large
+            // text on a narrow phone (a Fold's cover screen at 200%).
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Text(language.nativeName, style: theme.textTheme.headlineSmall),
+                if (language != AppLanguage.en)
+                  Text(language.englishName,
+                      style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+              ]),
+            ),
           ),
         ),
       ),

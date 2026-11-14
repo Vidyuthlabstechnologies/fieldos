@@ -28,6 +28,11 @@ class BrandedSheetPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    // Keeps the sheet's content at most 420 wide by padding the sides,
+    // not with a ConstrainedBox: SliverFillRemaining measures the sheet's
+    // height at the full width, and a narrower box then wraps its text onto
+    // more lines than measured and overflows (an open Galaxy Fold showed it).
+    final side = ((MediaQuery.sizeOf(context).width - 420) / 2).clamp(24.0, double.infinity);
     // White status-bar icons on the navy top. Without this the phone keeps
     // whatever the last screen (or the launch theme) set, which can be dark
     // icons that disappear into the navy.
@@ -69,11 +74,8 @@ class BrandedSheetPage extends StatelessWidget {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(24, 28, 24, 24 + bottomInset),
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: sheet),
-                  ),
+                  padding: EdgeInsets.fromLTRB(side, 28, side, 24 + bottomInset),
+                  child: Align(alignment: Alignment.topCenter, child: sheet),
                 ),
               ),
             ),
