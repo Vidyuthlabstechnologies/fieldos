@@ -45,7 +45,16 @@ String _pctLabel(double v) {
 const defaultSac = '995411';
 
 class BillLine {
-  const BillLine({required this.description, required this.unit, required this.rate, required this.qty});
+  const BillLine({
+    required this.description,
+    required this.unit,
+    required this.rate,
+    required this.qty,
+    this.materials = false,
+  });
+
+  /// The line is materials (or plant hired in): UK CIS is not deducted on it.
+  final bool materials;
 
   final String description;
   final String unit;
@@ -56,13 +65,14 @@ class BillLine {
 
   double get amount => _round2(qty * rate);
 
-  Map<String, dynamic> toJson() => {'d': description, 'u': unit, 'r': rate, 'q': qty};
+  Map<String, dynamic> toJson() => {'d': description, 'u': unit, 'r': rate, 'q': qty, if (materials) 'm': true};
 
   static BillLine fromJson(Map<String, dynamic> j) => BillLine(
         description: (j['d'] as String? ?? '').trim(),
         unit: (j['u'] as String? ?? '').trim(),
         rate: (j['r'] as num? ?? 0).toDouble(),
         qty: (j['q'] as num? ?? 0).toDouble(),
+        materials: j['m'] == true,
       );
 
   /// Lines with the same description and unit are the same BOQ item.
@@ -91,7 +101,12 @@ class BillTotals {
     required this.igst,
     required this.retention,
     required this.tds,
+    this.reverseCharge = false,
   });
+
+  /// UK domestic reverse charge: the VAT is shown but the customer pays it
+  /// to HMRC, so it is not added to the total.
+  final bool reverseCharge;
 
   /// Value of work on this bill, before tax.
   final double gross;
@@ -104,7 +119,7 @@ class BillTotals {
   double get gst => _round2(cgst + sgst + igst);
 
   /// The bill's value with GST: the invoice total.
-  double get invoiceTotal => _round2(gross + gst);
+  double get invoiceTotal => reverseCharge ? gross : _round2(gross + gst);
 
   /// What the client pays now: invoice total less retention and TDS.
   double get netPayable => _round2(invoiceTotal - retention - tds);
@@ -121,9 +136,12 @@ BillTotals billTotals(
   bool interState = false,
   double retentionPct = 0,
   double tdsPct = 0,
+  bool reverseCharge = false,
 }) {
   if (!market.tax.splitsInsideState) interState = true;
   final gross = _round2(lines.fold<double>(0, (s, l) => s + l.amount));
+  final materials = _round2(lines.where((l) => l.materials).fold<double>(0, (s, l) => s + l.amount));
+  final withholdingBase = market.tax.withholdingOnLabourOnly ? gross - materials : gross;
   final tax = _round2(gross * gstRate / 100);
   final half = _round2(tax / 2);
   return BillTotals(
@@ -132,8 +150,44 @@ BillTotals billTotals(
     sgst: interState ? 0 : _round2(tax - half),
     igst: interState ? tax : 0,
     retention: _round2(gross * retentionPct / 100),
-    tds: _round2(gross * tdsPct / 100),
+    tds: _round2(withholdingBase * tdsPct / 100),
+    reverseCharge: reverseCharge && market.tax.reverseChargeNote != null && gstRate > 0,
   );
+}
+
+/// A bill raised under the UK domestic reverse charge. Bills keep the flag
+/// in their SAC column, which only India uses, so it syncs with no new
+/// server column.
+const reverseChargeMark = 'DRC';
+bool isReverseCharge(String? sac) => !isIndia && sac == reverseChargeMark;
+
+/// The statutory reverse-charge line for an invoice, with the VAT amount
+/// and rate filled in; null where the market has none.
+String? reverseChargeLine(double vat, double rate) => market.tax.reverseChargeNote
+    ?.replaceAll('{amount}', _withPence(vat))
+    .replaceAll('{rate}', _pctLabel(rate));
+
+// HMRC wants the VAT figure in pounds and pence, so "£800.00", never "£800".
+String _withPence(double v) {
+  final m = money(v, cents: true);
+  return RegExp(r'\.\d\d$').hasMatch(m) ? m : '$m.00';
+}
+
+/// A UK VAT number: GB and 9 digits (or 12 for a branch), with the HMRC
+/// mod-97 check on the first 9 (both the old and the 2010 series), or a
+/// government department (GBGD) or health authority (GBHA) number.
+bool isValidUkVat(String vat) {
+  final v = vat.toUpperCase().replaceAll(RegExp(r'[\s-]'), '');
+  if (RegExp(r'^GB(GD[0-4]|HA[5-9])\d{2}$').hasMatch(v)) return true;
+  final m = RegExp(r'^(?:GB)?(\d{9})(\d{3})?$').firstMatch(v);
+  if (m == null) return false;
+  final d = m[1]!;
+  var sum = 0;
+  for (var i = 0; i < 7; i++) {
+    sum += int.parse(d[i]) * (8 - i);
+  }
+  final check = int.parse(d.substring(7));
+  return (sum + check) % 97 == 0 || (sum + check + 55) % 97 == 0;
 }
 
 /// Quantity of each item billed on earlier bills, by [BillLine.itemKey].
@@ -299,14 +353,19 @@ bool isValidTrn(String trn) => RegExp(r'^\d{15}$').hasMatch(trn.replaceAll(RegEx
 String normaliseTaxId(String id) => switch (currentMarket) {
       Market.india => id.trim().toUpperCase(),
       Market.uae => westernDigits(id).replaceAll(RegExp(r'[\s-]'), ''),
+      Market.uk => () {
+          final v = id.toUpperCase().replaceAll(RegExp(r'[\s-]'), '');
+          return RegExp(r'^\d{9}(\d{3})?$').hasMatch(v) ? 'GB$v' : v;
+        }(),
       _ => id.trim(),
     };
 
 /// Whether [id] can be this market's registration number. Markets with
-/// no fixed format (SST, US, UK VAT kept free) accept anything.
+/// no fixed format (SST, US) accept anything.
 bool validTaxId(String id) => switch (currentMarket) {
       Market.india => isValidGstin(id),
       Market.uae => isValidTrn(id),
+      Market.uk => isValidUkVat(id),
       _ => true,
     };
 

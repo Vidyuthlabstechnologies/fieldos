@@ -67,6 +67,8 @@ class PayCalendar {
 double? belowMinimumWage(double? dailyWage, PayCalendar calendar) {
   final min = market.minimumWage;
   if (min == null || dailyWage == null || dailyWage <= 0) return null;
+  // Hourly markets keep the hourly rate in the wage field.
+  if (market.payHourly) return dailyWage + 0.005 < min.hourly ? min.hourly : null;
   final workDays = 7 - (calendar.restDays.isEmpty ? 1 : calendar.restDays.length);
   final floor = min.dailyFor(workDays);
   return dailyWage + 0.005 < floor ? floor : null;

@@ -3052,4 +3052,10 @@ const stringsMs = <String, String>{
   'Indoor or exempt work': 'Kerja dalam bangunan atau dikecualikan',
   'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': 'TRN itu nampaknya tidak betul. Ia ada 15 digit, contohnya 100123456700003.',
   'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': 'Tulis daripada alamat e-mel akaun anda. Kami balas dalam 30 hari. Jika anda tidak berpuas hati, anda boleh membuat aduan kepada pihak berkuasa perlindungan data UAE.',
+  'CIS work for a VAT-registered contractor who is not the end user. The VAT is shown, and the customer pays it to HMRC.': 'Kerja CIS untuk kontraktor berdaftar VAT yang bukan pengguna akhir. VAT ditunjukkan, dan pelanggan membayarnya kepada HMRC.',
+  'Domestic reverse charge': 'Caj songsang domestik',
+  'Materials or plant hire': 'Bahan atau sewa jentera',
+  'No CIS is taken off this line': 'Tiada CIS dipotong daripada baris ini',
+  '{tax} (reverse charge, not added)': '{tax} (caj songsang, tidak ditambah)',
+  'below the minimum wage of {amount}/hr': 'di bawah gaji minimum {amount}/jam',
 };

@@ -3046,4 +3046,10 @@ const Map<String, String> stringsEs = {
   'Indoor or exempt work': 'Trabajo bajo techo o exento',
   'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': 'Ese TRN no parece correcto. Tiene 15 dígitos, como 100123456700003.',
   'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': 'Escriba desde el correo electrónico de su cuenta. Respondemos en un plazo de 30 días. Si no está satisfecho, puede presentar una queja ante la autoridad de protección de datos de UAE (Emiratos Árabes Unidos).',
+  'CIS work for a VAT-registered contractor who is not the end user. The VAT is shown, and the customer pays it to HMRC.': 'Trabajo CIS para un contratista registrado en el IVA que no es el usuario final. El IVA se muestra y el cliente lo paga a HMRC.',
+  'Domestic reverse charge': 'Inversión del sujeto pasivo nacional',
+  'Materials or plant hire': 'Materiales o alquiler de maquinaria',
+  'No CIS is taken off this line': 'No se retiene CIS en esta línea',
+  '{tax} (reverse charge, not added)': '{tax} (inversión del sujeto pasivo, no sumado)',
+  'below the minimum wage of {amount}/hr': 'por debajo del salario mínimo de {amount}/h',
 };

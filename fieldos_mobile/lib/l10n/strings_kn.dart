@@ -3397,4 +3397,10 @@ const Map<String, String> stringsKn = {
   'Indoor or exempt work': 'ಒಳಗಿನ ಕೆಲಸ ಅಥವಾ ವಿನಾಯಿತಿ ಇರುವ ಕೆಲಸ',
   'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': 'ಈ TRN ಸರಿ ಇಲ್ಲ ಅನಿಸುತ್ತಿದೆ. ಇದರಲ್ಲಿ 15 ಅಂಕೆಗಳು ಇರುತ್ತವೆ, ಉದಾಹರಣೆಗೆ 100123456700003.',
   'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': 'ನಿಮ್ಮ ಖಾತೆಯಲ್ಲಿರುವ ಇಮೇಲ್ ವಿಳಾಸದಿಂದ ಬರೆಯಿರಿ. ನಾವು 30 ದಿನಗಳಲ್ಲಿ ಉತ್ತರಿಸುತ್ತೇವೆ. ನಿಮಗೆ ತೃಪ್ತಿ ಆಗದಿದ್ದರೆ, UAE ಡೇಟಾ ಸಂರಕ್ಷಣಾ ಪ್ರಾಧಿಕಾರಕ್ಕೆ ದೂರು ನೀಡಬಹುದು.',
+  'CIS work for a VAT-registered contractor who is not the end user. The VAT is shown, and the customer pays it to HMRC.': 'ಅಂತಿಮ ಬಳಕೆದಾರರಲ್ಲದ VAT ನೋಂದಾಯಿತ ಗುತ್ತಿಗೆದಾರರಿಗಾಗಿ CIS ಕೆಲಸ. VAT ತೋರಿಸಲಾಗುತ್ತದೆ, ಗ್ರಾಹಕರು ಅದನ್ನು HMRCಗೆ ಪಾವತಿಸುತ್ತಾರೆ.',
+  'Domestic reverse charge': 'ದೇಶೀಯ ರಿವರ್ಸ್ ಚಾರ್ಜ್',
+  'Materials or plant hire': 'ಸಾಮಗ್ರಿ ಅಥವಾ ಯಂತ್ರ ಬಾಡಿಗೆ',
+  'No CIS is taken off this line': 'ಈ ಸಾಲಿನಿಂದ CIS ಕಡಿತವಾಗುವುದಿಲ್ಲ',
+  '{tax} (reverse charge, not added)': '{tax} (ರಿವರ್ಸ್ ಚಾರ್ಜ್, ಸೇರಿಸಿಲ್ಲ)',
+  'below the minimum wage of {amount}/hr': 'ಕನಿಷ್ಠ ವೇತನ {amount}/ಗಂಟೆಗಿಂತ ಕಡಿಮೆ',
 };

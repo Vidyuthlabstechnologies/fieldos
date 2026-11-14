@@ -3055,4 +3055,10 @@ const stringsMl = <String, String>{
   'Your rights under the PDPL': 'PDPL പ്രകാരം നിങ്ങളുടെ അവകാശങ്ങൾ',
   'Ask us for a copy of your data, to correct or erase it, to stop using it, or to send it to another organisation. Write to info@mldynamic.com. We reply within 30 days.': 'നിങ്ങളുടെ ഡാറ്റയുടെ ഒരു കോപ്പി ചോദിക്കാനോ, അത് തിരുത്താനോ മായ്ക്കാനോ, അത് ഉപയോഗിക്കുന്നത് നിർത്താനോ, മറ്റൊരു സ്ഥാപനത്തിലേക്ക് അയയ്ക്കാനോ ഞങ്ങളോട് ആവശ്യപ്പെടുക. info@mldynamic.com എന്ന വിലാസത്തിലേക്ക് എഴുതുക. 30 ദിവസത്തിനുള്ളിൽ ഞങ്ങൾ മറുപടി നൽകും.',
   'Write to info@mldynamic.com with "Privacy" in the subject. If you are not satisfied, you can complain to the UAE data protection authority.': 'വിഷയത്തിൽ "Privacy" എന്ന് ചേർത്ത് info@mldynamic.com എന്ന വിലാസത്തിലേക്ക് എഴുതുക. നിങ്ങൾക്ക് തൃപ്തിയില്ലെങ്കിൽ, UAE ഡാറ്റ സംരക്ഷണ അതോറിറ്റിയിൽ പരാതി നൽകാം.',
+  'CIS work for a VAT-registered contractor who is not the end user. The VAT is shown, and the customer pays it to HMRC.': 'അന്തിമ ഉപയോക്താവല്ലാത്ത VAT രജിസ്റ്റർ ചെയ്ത കരാറുകാരനുള്ള CIS ജോലി. VAT കാണിക്കും, ഉപഭോക്താവ് അത് HMRC-ക്ക് അടയ്ക്കും.',
+  'Domestic reverse charge': 'ആഭ്യന്തര റിവേഴ്സ് ചാർജ്',
+  'Materials or plant hire': 'സാമഗ്രികൾ അല്ലെങ്കിൽ യന്ത്ര വാടക',
+  'No CIS is taken off this line': 'ഈ വരിയിൽ നിന്ന് CIS പിടിക്കില്ല',
+  '{tax} (reverse charge, not added)': '{tax} (റിവേഴ്സ് ചാർജ്, ചേർത്തിട്ടില്ല)',
+  'below the minimum wage of {amount}/hr': 'മിനിമം വേതനം {amount}/മണിക്കൂറിൽ താഴെ',
 };

@@ -3397,4 +3397,10 @@ const Map<String, String> stringsMr = {
   'Indoor or exempt work': 'आतले किंवा सूट असलेले काम',
   'That TRN doesn\'t look right. It has 15 digits, like 100123456700003.': 'हा TRN बरोबर वाटत नाही. यात 15 अंक असतात, उदा. 100123456700003.',
   'Write from the email address on your account. We reply within 30 days. If you are not satisfied, you can complain to the UAE data protection authority.': 'तुमच्या अकाउंटवरच्या ईमेल पत्त्यावरून लिहा. आम्ही 30 दिवसांत उत्तर देतो. तुमचे समाधान झाले नाही, तर तुम्ही UAE च्या डेटा संरक्षण प्राधिकरणाकडे तक्रार करू शकता.',
+  'CIS work for a VAT-registered contractor who is not the end user. The VAT is shown, and the customer pays it to HMRC.': 'अंतिम वापरकर्ता नसलेल्या VAT-नोंदणीकृत कंत्राटदारासाठी CIS काम. VAT दाखवला जातो, आणि ग्राहक तो HMRC ला भरतो.',
+  'Domestic reverse charge': 'देशांतर्गत रिव्हर्स चार्ज',
+  'Materials or plant hire': 'साहित्य किंवा मशीन भाडे',
+  'No CIS is taken off this line': 'या ओळीतून CIS कापला जात नाही',
+  '{tax} (reverse charge, not added)': '{tax} (रिव्हर्स चार्ज, जोडलेला नाही)',
+  'below the minimum wage of {amount}/hr': 'किमान वेतन {amount}/तास पेक्षा कमी',
 };
