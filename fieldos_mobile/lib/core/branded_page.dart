@@ -55,9 +55,9 @@ class BrandedSheetPage extends StatelessWidget {
                     ),
                   ),
                   if (trailing != null)
-                    Positioned(
+                    PositionedDirectional(
                       top: 4,
-                      right: 4,
+                      end: 4,
                       child: IconTheme.merge(data: const IconThemeData(color: Colors.white), child: trailing!),
                     ),
                 ],

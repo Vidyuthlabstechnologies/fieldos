@@ -271,7 +271,7 @@ Future<Uint8List> buildDprPdf({
     header: (ctx) => ctx.pageNumber == 1
         ? pw.Container(
             margin: const pw.EdgeInsets.only(bottom: 14),
-            padding: const pw.EdgeInsets.fromLTRB(14, 12, 16, 12),
+            padding: const pw.EdgeInsetsDirectional.fromSTEB(14, 12, 16, 12),
             decoration: pw.BoxDecoration(color: brandInk(branding, _navy), borderRadius: pw.BorderRadius.circular(8)),
             child: pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.center, children: [
               if (branding.logo != null)

@@ -803,8 +803,8 @@ class _ToolsTabState extends ConsumerState<_ToolsTab> {
               ),
           ],
         ]),
-      Positioned(
-        right: 16,
+      PositionedDirectional(
+        end: 16,
         bottom: 16,
         child: FloatingActionButton.extended(
           heroTag: 'add-tool',

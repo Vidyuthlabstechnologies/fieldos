@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/digits_input.dart';
 import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/auth/site_roles.dart';
 import 'package:fieldos_mobile/core/format.dart';
@@ -401,7 +402,7 @@ Future<bool> recordCashMove(BuildContext context, WidgetRef ref,
                 controller: amount,
                 autofocus: true,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                inputFormatters: [const WesternDigitsFormatter(), FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
                 decoration: InputDecoration(
                   labelText: kind == 'counted' ? tr('Cash found in hand (₹)') : tr('Amount (₹)'),
                 ),

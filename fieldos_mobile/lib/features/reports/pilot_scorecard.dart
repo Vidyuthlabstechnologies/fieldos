@@ -235,7 +235,7 @@ Future<Uint8List> buildPilotScorecardPdf(PilotScorecard card,
       );
   pw.Widget cell(String s, {bool bold = false, PdfColor color = _ink, bool right = false}) => pw.Padding(
         padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-        child: t(s, bold: bold, color: color, align: right ? pw.TextAlign.right : null),
+        child: t(s, bold: bold, color: color, align: right ? pw.TextAlign.end : null),
       );
   final last = card.periods.last;
   doc.addPage(pw.Page(

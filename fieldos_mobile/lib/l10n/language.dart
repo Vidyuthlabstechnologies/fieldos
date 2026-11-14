@@ -18,13 +18,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fieldos_mobile/core/market.dart';
 
 import 'package:fieldos_mobile/l10n/market_terms.dart';
+import 'package:fieldos_mobile/l10n/strings_ar.dart';
 import 'package:fieldos_mobile/l10n/strings_es.dart';
 import 'package:fieldos_mobile/l10n/strings_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_kn.dart';
+import 'package:fieldos_mobile/l10n/strings_ml.dart';
 import 'package:fieldos_mobile/l10n/strings_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_ms.dart';
 import 'package:fieldos_mobile/l10n/strings_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_te.dart';
+import 'package:fieldos_mobile/l10n/strings_ur.dart';
 import 'package:fieldos_mobile/l10n/strings_zh.dart';
 import 'package:fieldos_mobile/providers.dart';
 
@@ -37,7 +40,10 @@ enum AppLanguage {
   mr('mr', 'मराठी', 'Marathi'),
   es('es', 'Español', 'Spanish'),
   ms('ms', 'Bahasa Melayu', 'Malay'),
-  zh('zh', '中文', 'Chinese');
+  zh('zh', '中文', 'Chinese'),
+  ar('ar', 'العربية', 'Arabic'),
+  ur('ur', 'اردو', 'Urdu'),
+  ml('ml', 'മലയാളം', 'Malayalam');
 
   const AppLanguage(this.code, this.nativeName, this.englishName);
   final String code;
@@ -52,6 +58,10 @@ enum AppLanguage {
   /// Chinese is Simplified, as Malaysian schools teach it.
   Locale get locale {
     if (this == zh) return Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: currentMarket.countryCode);
+    // Malayalam is spoken as in Kerala, Urdu as in Pakistan, wherever the
+    // app is: those are the voice packs phones have.
+    if (this == ml) return const Locale('ml', 'IN');
+    if (this == ur) return const Locale('ur', 'PK');
     return Locale(code, _indian.contains(this) ? 'IN' : currentMarket.countryCode);
   }
 
@@ -62,6 +72,9 @@ enum AppLanguage {
 
   /// Written in the Latin alphabet, so the phone voice reads it as is.
   bool get latinScript => this == en || this == es || this == ms;
+
+  /// Written right to left: the screens mirror (Arabic, Urdu).
+  bool get rightToLeft => this == ar || this == ur;
 
   /// The languages this build's market offers, English first.
   static List<AppLanguage> get offered => [
@@ -91,6 +104,9 @@ const Map<AppLanguage, Map<String, String>> _tables = {
   AppLanguage.es: stringsEs,
   AppLanguage.ms: stringsMs,
   AppLanguage.zh: stringsZh,
+  AppLanguage.ar: stringsAr,
+  AppLanguage.ur: stringsUr,
+  AppLanguage.ml: stringsMl,
 };
 
 /// The speech code (BCP-47) for [l], for the phone's voice and its
@@ -139,7 +155,10 @@ String trIn(AppLanguage l, String english) {
   var out = terms?[l.code]?[english] ?? _tables[l]?[english] ?? terms?['en']?[english];
   out ??= applyWordSwaps(currentMarket, english);
   // Labels written for India say "(₹)"; elsewhere that is the market's sign.
-  return out.contains('₹') ? out.replaceAll('₹', market.currencySymbol) : out;
+  if (!out.contains('₹')) return out;
+  // "AED 5,000" takes a space before the figure; "(₹)" stays "(AED)".
+  if (market.symbolSpace) out = out.replaceAll(RegExp(r'₹(?=\d)'), '${market.currencySymbol} ');
+  return out.replaceAll('₹', market.currencySymbol);
 }
 
 /// [english] as this market writes it in English, for exports, PDFs and

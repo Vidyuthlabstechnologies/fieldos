@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/digits_input.dart';
 import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/market.dart';
@@ -153,8 +154,8 @@ class BillsView extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(billsProvider(project.id))),
       ),
-      Positioned(
-        right: 16,
+      PositionedDirectional(
+        end: 16,
         bottom: 16,
         child: FloatingActionButton.extended(
           heroTag: 'new_bill',
@@ -252,7 +253,7 @@ class BillsView extends ConsumerWidget {
       ),
     );
     if (ok != true) return;
-    final a = double.tryParse(amount.text.trim().replaceAll(',', ''));
+    final a = double.tryParse(westernDigits(amount.text.trim().replaceAll(',', '')));
     if (a == null || a <= 0) return;
     try {
       await ref
@@ -427,7 +428,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     if (inter != _interState) setState(() => _interState = inter);
   }
 
-  double _pct(TextEditingController c) => (double.tryParse(c.text.trim()) ?? 0).clamp(0, 100).toDouble();
+  double _pct(TextEditingController c) => (double.tryParse(westernDigits(c.text.trim())) ?? 0).clamp(0, 100).toDouble();
 
   Map<String, double> _previous(List<ClientBill> bills) => previousQuantities(
       bills.where((b) => b.kind == 'ra' && !b.billDate.isAfter(_date)).map((b) => decodeLines(b.linesJson)));
@@ -454,13 +455,13 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
             TextField(
               controller: rate,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+              inputFormatters: [const WesternDigitsFormatter(), FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
               decoration: InputDecoration(labelText: tr('Rate (₹ per unit)')),
             ),
             TextField(
               controller: qty,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+              inputFormatters: [const WesternDigitsFormatter(), FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
               decoration: InputDecoration(labelText: _kind == 'ra' ? tr('Quantity this bill') : tr('Quantity')),
             ),
           ]),
@@ -515,7 +516,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Cancel'))),
           FilledButton(
             onPressed: () {
-              final r = double.tryParse(c.text.trim());
+              final r = double.tryParse(westernDigits(c.text.trim()));
               Navigator.pop(ctx, r == null || r < 0 || r > 100 ? null : r);
             },
             child: Text(tr('Save')),
@@ -880,7 +881,7 @@ class _ContractSumFieldState extends ConsumerState<_ContractSumField> {
         controller: _c,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         onChanged: (v) {
-          final n = double.tryParse(v.replaceAll(',', '').trim());
+          final n = double.tryParse(westernDigits(v.replaceAll(',', '').trim()));
           ref.read(appDatabaseProvider).settingsDao.set(contractSumKey(widget.projectId), n == null ? '' : '$n');
         },
         decoration: InputDecoration(

@@ -42,7 +42,7 @@ final payrollDataProvider = FutureProvider.autoDispose.family<PayrollData, Strin
   );
 });
 
-double? _num(String s) => double.tryParse(s.trim().replaceAll(',', ''));
+double? _num(String s) => double.tryParse(westernDigits(s.trim().replaceAll(',', '')));
 String _days(double d) => d == d.roundToDouble() ? d.toInt().toString() : fmtQty(d);
 
 /// "November 2026" in the app's language.
@@ -562,8 +562,8 @@ class _StaffTab extends ConsumerWidget {
             );
           }),
       ]),
-      Positioned(
-        right: 16,
+      PositionedDirectional(
+        end: 16,
         bottom: 16,
         child: FloatingActionButton.extended(
           heroTag: 'add-staff',

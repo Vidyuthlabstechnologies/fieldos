@@ -482,7 +482,7 @@ class LeadDetailScreen extends ConsumerWidget {
                 if ((lead.location ?? '').isNotEmpty) row(Icons.place_outlined, tr('Location'), lead.location!),
                 row(Icons.campaign_outlined, tr('Came from'), tr(leadSourceLabels[lead.source] ?? 'Other')),
                 if (lead.estimatedValue != null)
-                  row(Icons.currency_rupee, tr('Their budget'), rupees(lead.estimatedValue!)),
+                  row(currencyIcon, tr('Their budget'), rupees(lead.estimatedValue!)),
                 if (lead.ownerId != null)
                   row(Icons.person_outline, tr('Followed up by'), names[lead.ownerId] ?? tr('Someone on the team')),
                 if (lead.stage == 'lost') row(Icons.block, tr('Lost because'), lead.lostReason ?? ''),
@@ -640,7 +640,7 @@ class _LeadFormState extends ConsumerState<_LeadForm> {
       setState(() => _error = tr('Enter who the enquiry is from.'));
       return;
     }
-    final value = _value.text.trim().isEmpty ? null : double.tryParse(_value.text.replaceAll(',', '').trim());
+    final value = _value.text.trim().isEmpty ? null : double.tryParse(westernDigits(_value.text.replaceAll(',', '').trim()));
     if (_value.text.trim().isNotEmpty && (value == null || value < 0)) {
       setState(() => _error = tr('Enter the budget as a number, such as 2500000.'));
       return;

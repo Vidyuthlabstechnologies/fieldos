@@ -88,7 +88,7 @@ class _PrivacyRightsScreenState extends ConsumerState<PrivacyRightsScreen> {
               ),
             const SizedBox(height: 4),
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: TextButton(
                 onPressed: () => openPrivacyPolicy(context),
                 child: Text(tr('Read the full privacy policy')),

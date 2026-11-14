@@ -53,7 +53,7 @@ Future<Uint8List> buildPayslipPdf({
         padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3),
         child: pw.Row(children: [
           pw.Expanded(child: t(label, bold: bold)),
-          t(value, bold: bold, align: pw.TextAlign.right),
+          t(value, bold: bold, align: pw.TextAlign.end),
         ]),
       );
 
@@ -142,7 +142,7 @@ Future<Uint8List> buildPayslipPdf({
       ],
       pw.Spacer(),
       t('This is a computer-made payslip.', color: _muted, size: 8),
-      if (branding.hasFooter) t(branding.footerLine, size: 7, color: _muted, align: pw.TextAlign.right),
+      if (branding.hasFooter) t(branding.footerLine, size: 7, color: _muted, align: pw.TextAlign.end),
     ]),
   ));
   return doc.save();

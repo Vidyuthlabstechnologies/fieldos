@@ -121,7 +121,7 @@ class ExpenseBills extends ConsumerWidget {
         ),
       if (canChange)
         Align(
-          alignment: Alignment.centerLeft,
+          alignment: AlignmentDirectional.centerStart,
           child: TextButton.icon(
             key: const Key('expense-attach-bill'),
             onPressed: () => _attach(context, ref),

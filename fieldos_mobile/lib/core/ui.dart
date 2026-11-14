@@ -10,6 +10,7 @@ import 'package:supabase/supabase.dart' as sb;
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/write_guard.dart';
 import 'package:fieldos_mobile/services/bug_report_service.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
@@ -260,7 +261,7 @@ class StatusPill extends StatelessWidget {
     final dot = tone == PillTone.neutral ? null : toneColor(context, tone);
     final fg = tone == PillTone.danger ? toneColor(context, tone) : scheme.onSurfaceVariant;
     return Container(
-      padding: EdgeInsets.fromLTRB(dot == null ? 9 : 7, 3, 9, 3),
+      padding: EdgeInsetsDirectional.fromSTEB(dot == null ? 9 : 7, 3, 9, 3),
       decoration: BoxDecoration(
         color: scheme.surfaceContainer,
         borderRadius: BorderRadius.circular(20),
@@ -382,7 +383,7 @@ class TabletZoom extends StatelessWidget {
     return SizedBox.expand(
       child: FittedBox(
         fit: BoxFit.fill,
-        alignment: Alignment.topLeft,
+        alignment: AlignmentDirectional.topStart,
         child: SizedBox.fromSize(
           size: media.size / z,
           child: MediaQuery(
@@ -401,3 +402,12 @@ class TabletZoom extends StatelessWidget {
     );
   }
 }
+
+/// The money icon for this market's currency: the rupee sign only in
+/// India, the dollar in the US, a plain banknote elsewhere.
+IconData get currencyIcon => switch (currentMarket) {
+      Market.india => Icons.currency_rupee_rounded,
+      Market.us => Icons.attach_money_rounded,
+      Market.uk => Icons.currency_pound_rounded,
+      _ => Icons.payments_outlined,
+    };

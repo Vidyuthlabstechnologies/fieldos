@@ -474,7 +474,7 @@ class TourInviteCard extends ConsumerWidget {
       child: InkWell(
         onTap: onStart,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
+          padding: const EdgeInsetsDirectional.fromSTEB(4, 8, 8, 8),
           child: Row(
             children: [
               const Mitra(mood: MitraMood.wave, size: 88),

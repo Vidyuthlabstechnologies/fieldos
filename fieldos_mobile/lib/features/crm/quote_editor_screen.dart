@@ -30,7 +30,7 @@ class _LineCtl {
   final TextEditingController qty;
   final TextEditingController rate;
 
-  static double _n(TextEditingController c) => double.tryParse(c.text.replaceAll(',', '').trim()) ?? 0;
+  static double _n(TextEditingController c) => double.tryParse(westernDigits(c.text.replaceAll(',', '').trim())) ?? 0;
 
   BillLine get line => BillLine(description: description.text.trim(), unit: unit.text.trim(), rate: _n(rate), qty: _n(qty));
 
@@ -91,7 +91,7 @@ class _QuoteEditorState extends ConsumerState<QuoteEditorScreen> {
   }
 
   QuoteTotals get _totals => quoteTotals([for (final l in _lines) l.line],
-      discount: double.tryParse(_discount.text.replaceAll(',', '').trim()) ?? 0, gstRate: _gst, interState: _interState);
+      discount: double.tryParse(westernDigits(_discount.text.replaceAll(',', '').trim())) ?? 0, gstRate: _gst, interState: _interState);
 
   Future<CrmQuote?> _save() async {
     setState(() {
@@ -106,7 +106,7 @@ class _QuoteEditorState extends ConsumerState<QuoteEditorScreen> {
             by: ref.read(sessionProvider).user!.id,
             gstRate: _gst,
             interState: _interState,
-            discount: double.tryParse(_discount.text.replaceAll(',', '').trim()) ?? 0,
+            discount: double.tryParse(westernDigits(_discount.text.replaceAll(',', '').trim())) ?? 0,
             quoteDate: _quote?.quoteDate,
             validUntil: _validUntil,
             terms: _terms.text,
@@ -200,7 +200,7 @@ class _QuoteEditorState extends ConsumerState<QuoteEditorScreen> {
         if (_quote != null) ...[
           const SizedBox(height: 4),
           Align(
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: StatusPill(quoteStatusLabels[_quote!.status]!,
                 tone: _quote!.status == 'accepted' ? PillTone.ok : PillTone.neutral),
           ),
@@ -214,7 +214,7 @@ class _QuoteEditorState extends ConsumerState<QuoteEditorScreen> {
         for (final (i, l) in _lines.indexed)
           Card(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 4, 4, 8),
+              padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 4, 8),
               child: Column(children: [
                 Row(children: [
                   Expanded(
@@ -260,9 +260,9 @@ class _QuoteEditorState extends ConsumerState<QuoteEditorScreen> {
                   ),
                 ]),
                 Align(
-                  alignment: Alignment.centerRight,
+                  alignment: AlignmentDirectional.centerEnd,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 6, right: 8),
+                    padding: const EdgeInsetsDirectional.only(top: 6, end: 8),
                     child: Text(rupees(l.line.amount, paise: true), style: theme.textTheme.bodySmall),
                   ),
                 ),

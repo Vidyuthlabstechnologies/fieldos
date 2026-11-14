@@ -12,6 +12,7 @@ library;
 import 'package:drift/drift.dart' show Value;
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 
 class NewSupplier {
@@ -62,7 +63,7 @@ double? _amount(String p) {
       .replaceAll(RegExp(r'\bcr\b\.?', caseSensitive: false), '')
       .replaceAll(RegExp(r'[₹,\s]|rs\.?|/-', caseSensitive: false), '')
       .replaceFirst(RegExp(r'^-'), '');
-  final v = double.tryParse(clean);
+  final v = double.tryParse(westernDigits(clean));
   if (v == null) return null;
   return advance ? -v : v;
 }

@@ -15,6 +15,7 @@
 library;
 
 import 'package:xml/xml.dart';
+import 'package:fieldos_mobile/core/format.dart';
 
 class ExportCheck {
   const ExportCheck(this.problems, {required this.entries});
@@ -190,7 +191,7 @@ ExportCheck checkZohoCsv(String csv) {
     if (f[col('Paid Through')].trim().isEmpty) problems.add('$row: no paid-through account');
     final t = col('Tax Percentage');
     if (t >= 0 && f[t].isNotEmpty) {
-      final rate = double.tryParse(f[t]);
+      final rate = double.tryParse(westernDigits(f[t]));
       if (rate == null || rate < 0 || rate > 100) problems.add('$row: tax rate "${f[t]}" is not a percentage');
     }
   }

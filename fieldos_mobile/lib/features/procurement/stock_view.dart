@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' hide Column;
 
+import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/procurement/purchase_screens.dart';
@@ -125,8 +126,8 @@ class StockView extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => ErrorState(error: e, stack: st),
       ),
-      Positioned(
-        right: 16,
+      PositionedDirectional(
+        end: 16,
         bottom: 16,
         child: FloatingActionButton.extended(
           heroTag: 'record-usage',
@@ -201,7 +202,7 @@ class StockView extends ConsumerWidget {
         ],
       ),
     );
-    final q = double.tryParse(qty.text.trim().replaceAll(',', ''));
+    final q = double.tryParse(westernDigits(qty.text.trim().replaceAll(',', '')));
     if (ok != true || q == null || q <= 0 || name.text.trim().isEmpty) return;
     await ref.read(appDatabaseProvider).materialDao.createReceipt(MaterialReceiptsCompanion.insert(
           id: const Uuid().v4(),
@@ -249,7 +250,7 @@ class StockView extends ConsumerWidget {
         ],
       ),
     );
-    final q = double.tryParse(qty.text.trim().replaceAll(',', ''));
+    final q = double.tryParse(westernDigits(qty.text.trim().replaceAll(',', '')));
     if (ok != true || q == null || q <= 0 || name.text.trim().isEmpty) return;
     await ref.read(appDatabaseProvider).materialDao.recordUsage(MaterialUsageCompanion.insert(
           id: const Uuid().v4(),

@@ -172,8 +172,8 @@ class _LabourViewState extends ConsumerState<LabourView> {
     if (selectedWorkerId != null && permitKinds.isNotEmpty && !await _permitsAllowSite(context, selectedWorkerId!)) return;
     if (!context.mounted) return;
 
-    final latV = double.tryParse(lat.text);
-    final lngV = double.tryParse(lng.text);
+    final latV = double.tryParse(westernDigits(lat.text));
+    final lngV = double.tryParse(westernDigits(lng.text));
     final geo = geoCheck(latV, lngV, geofence.value);
     final photoId = await _keepPhoto(photoPath, latV, lngV);
 
@@ -283,8 +283,8 @@ class _LabourViewState extends ConsumerState<LabourView> {
       ),
     );
     if (ok != true || picked.isEmpty || !context.mounted) return;
-    final latV = double.tryParse(lat.text);
-    final lngV = double.tryParse(lng.text);
+    final latV = double.tryParse(westernDigits(lat.text));
+    final lngV = double.tryParse(westernDigits(lng.text));
     final geo = geoCheck(latV, lngV, geofence.value);
     // One roll-call photo stands for everyone punched in together.
     final photoId = await _keepPhoto(photoPath, latV, lngV);
@@ -353,8 +353,8 @@ class _LabourViewState extends ConsumerState<LabourView> {
       ),
     );
     if (ok != true || !context.mounted) return;
-    final latV = double.tryParse(lat.text);
-    final lngV = double.tryParse(lng.text);
+    final latV = double.tryParse(westernDigits(lat.text));
+    final lngV = double.tryParse(westernDigits(lng.text));
     final g = ref.read(geofenceProvider(widget.projectId)).value;
     final within = (g != null && latV != null && lngV != null)
         ? haversineMeters(latV, lngV, g.centerLat, g.centerLng) <= g.radiusMeters
@@ -377,7 +377,7 @@ class _GeofenceCard extends ConsumerWidget {
       margin: EdgeInsets.zero,
       color: scheme.surfaceContainerHighest,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+        padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 4, 8),
         child: Row(
           children: [
             Icon(set ? Icons.gps_fixed : Icons.gps_not_fixed, color: scheme.onSurfaceVariant),
@@ -432,13 +432,13 @@ class _GeofenceCard extends ConsumerWidget {
       ),
     );
     if (ok != true || !context.mounted) return;
-    final latV = double.tryParse(lat.text);
-    final lngV = double.tryParse(lng.text);
+    final latV = double.tryParse(westernDigits(lat.text));
+    final lngV = double.tryParse(westernDigits(lng.text));
     if (latV == null || lngV == null || latV.abs() > 90 || lngV.abs() > 180) {
       showSnack(context, 'No location yet. Wait for the GPS fix, then save again.', error: true);
       return;
     }
-    final r = double.tryParse(radius.text.trim()) ?? 100;
+    final r = double.tryParse(westernDigits(radius.text.trim())) ?? 100;
     if (r < 10 || r > 5000) {
       showSnack(context, 'Use a radius between 10 and 5000 metres.', error: true);
       return;
@@ -570,7 +570,7 @@ class _PunchPhotoButtonState extends ConsumerState<PunchPhotoButton> {
   Widget build(BuildContext context) {
     final taken = _path != null;
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: TextButton.icon(
         key: const Key('punch-photo'),
         icon: Icon(taken ? Icons.check_circle : Icons.photo_camera_outlined),

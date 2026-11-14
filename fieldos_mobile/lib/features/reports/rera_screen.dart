@@ -102,7 +102,7 @@ class _ReraScreenState extends ConsumerState<ReraScreen> {
         ],
       ),
     );
-    final n = int.tryParse(count.text.trim());
+    final n = int.tryParse(westernDigits(count.text.trim()));
     if (ok != true || block.text.trim().isEmpty || n == null || n < 0 || n > 80) {
       if (ok == true && mounted) showSnack(context, tr('Give a block name and 0 to 80 floors'), error: true);
       return;

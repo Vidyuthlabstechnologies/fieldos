@@ -100,11 +100,38 @@ String fmtQty(num q) {
   return t.replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
 }
 
+/// [typed] with Arabic-Indic (٠-٩) and Persian/Urdu (۰-۹) digits as 0-9,
+/// the Arabic decimal sign (٫) as "." and its thousands sign (٬) and the
+/// bidi marks removed: an Arabic or Urdu keyboard types those, and
+/// double.tryParse reads only 0-9.
+String westernDigits(String typed) {
+  if (!_easternDigit.hasMatch(typed)) return typed;
+  final b = StringBuffer();
+  for (final c in typed.runes) {
+    if (c >= 0x0660 && c <= 0x0669) {
+      b.writeCharCode(0x30 + c - 0x0660);
+    } else if (c >= 0x06F0 && c <= 0x06F9) {
+      b.writeCharCode(0x30 + c - 0x06F0);
+    } else if (c == 0x066B) {
+      b.write('.');
+    } else if (c == 0x066C || c == 0x200E || c == 0x200F || (c >= 0x2066 && c <= 0x2069)) {
+      // thousands sign and direction marks: dropped
+    } else {
+      b.writeCharCode(c);
+    }
+  }
+  return b.toString();
+}
+
+final _easternDigit = RegExp('[\u0660-\u066C\u06F0-\u06F9\u200E\u200F\u2066-\u2069]');
+
 /// A number as typed on a phone: "1,200", " 1250.5 ", "₹45,000". Null when
 /// blank or unreadable, and for "NaN" or "Infinity", which double.tryParse
 /// accepts but no amount or quantity can be.
 double? parseTypedNumber(String typed) {
-  final v = double.tryParse(typed.replaceAll(RegExp(r'[,₹\s]'), ''));
+  final v = double.tryParse(
+    westernDigits(typed).replaceAll(RegExp(r'[,₹\s]'), '').replaceAll(market.currencySymbol, '').replaceAll('د.إ', ''),
+  );
   return v == null || !v.isFinite ? null : v;
 }
 

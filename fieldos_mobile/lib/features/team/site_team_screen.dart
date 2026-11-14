@@ -268,7 +268,7 @@ class _MemberSheetState extends State<_MemberSheet> {
   void _save() {
     double? limit;
     if (_role == SiteRole.projectManager && _limit.text.trim().isNotEmpty) {
-      limit = double.tryParse(_limit.text.trim().replaceAll(',', ''));
+      limit = double.tryParse(westernDigits(_limit.text.trim().replaceAll(',', '')));
       if (limit == null || limit < 0) {
         setState(() => _error = tr('Enter the limit in rupees, or leave it empty for no limit.'));
         return;

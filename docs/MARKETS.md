@@ -73,6 +73,18 @@ each date; an expired permit that blocks site work is a warning at
 punch-in, never a block on pay. Numbers show in full only to the owner and
 project managers. No health results are stored.
 
+## Right-to-left languages (UAE)
+
+The UAE app offers English, Arabic, Hindi, Urdu and Malayalam
+(`strings_ar.dart`, `strings_ur.dart`, `strings_ml.dart`, machine-assisted,
+each needing a native speaker's review). Arabic and Urdu screens mirror:
+layouts use `EdgeInsetsDirectional`, `AlignmentDirectional`,
+`PositionedDirectional` and `TextAlign.start/end`, never left and right
+(test/market_uae_rtl_test.dart fails on a new left/right). Number fields
+read Arabic-Indic (٠-٩) and Urdu (۰-۹) digits: `westernDigits` in
+`core/format.dart`, and `WesternDigitsFormatter` first in any field that
+filters its characters. PDFs stay in English.
+
 ## Minimum wage
 
 Malaysia's wage sheet flags any daily rate under the Minimum Wages Order

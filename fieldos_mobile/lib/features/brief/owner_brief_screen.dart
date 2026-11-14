@@ -256,7 +256,7 @@ class _Fact extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         FittedBox(
           fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
+          alignment: AlignmentDirectional.centerStart,
           child: Text(value, style: theme.textTheme.titleMedium),
         ),
         Text(label, maxLines: 1, overflow: TextOverflow.ellipsis,
@@ -324,12 +324,12 @@ class TodayBriefCard extends ConsumerWidget {
             ref.invalidate(todayBriefProvider(companyId));
           },
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 12, 14),
             child: Row(children: [
               Container(
                 width: 10,
                 height: 10,
-                margin: const EdgeInsets.only(left: 2, right: 14),
+                margin: const EdgeInsetsDirectional.only(start: 2, end: 14),
                 decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
               ),
               Expanded(

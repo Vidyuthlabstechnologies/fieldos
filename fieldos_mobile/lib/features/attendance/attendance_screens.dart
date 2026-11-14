@@ -416,7 +416,7 @@ class _DayTile extends StatelessWidget {
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             if (file != null && file.existsSync())
               Padding(
-                padding: const EdgeInsets.only(right: 10),
+                padding: const EdgeInsetsDirectional.only(end: 10),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
                   child: Image.file(file, width: 56, height: 56, fit: BoxFit.cover, cacheWidth: 112),

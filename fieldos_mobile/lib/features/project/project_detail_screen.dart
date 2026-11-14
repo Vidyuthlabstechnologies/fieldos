@@ -380,7 +380,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 Tab(text: tr('Chat'), icon: Icon(Icons.forum)),
                 Tab(text: tr('Procure'), icon: Icon(Icons.shopping_cart)),
                 Tab(text: tr('Labour'), icon: Icon(Icons.people)),
-                Tab(text: tr('Money'), icon: Icon(Icons.currency_rupee)),
+                Tab(text: tr('Money'), icon: Icon(currencyIcon)),
                 Tab(text: tr('Equipment'), icon: Icon(Icons.construction)),
                 Tab(text: tr('Inspections'), icon: Icon(Icons.fact_check)),
                 Tab(text: tr('Documents'), icon: Icon(Icons.folder)),
@@ -640,7 +640,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
                 itemBuilder: (_, index) {
                   if (index == 0) {
                     return Align(
-                      alignment: Alignment.centerLeft,
+                      alignment: AlignmentDirectional.centerStart,
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 4),
                         child: OutlinedButton.icon(
@@ -659,7 +659,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
                     child: InkWell(
                       onTap: () => _showDetails(d, issueCount),
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 4, 12),
+                        padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 4, 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -688,7 +688,7 @@ class _DprTabState extends ConsumerState<_DprTab> {
                               ],
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(right: 12),
+                              padding: const EdgeInsetsDirectional.only(end: 12),
                               child: Text(d.workSummary, maxLines: 3, overflow: TextOverflow.ellipsis),
                             ),
                             const SizedBox(height: 10),
@@ -706,9 +706,9 @@ class _DprTabState extends ConsumerState<_DprTab> {
                 ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(dprProvider(widget.project.id))),
           ),
         ),
-        Positioned(
+        PositionedDirectional(
           bottom: 16,
-          right: 16,
+          end: 16,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -896,9 +896,9 @@ class _IssuesTab extends ConsumerWidget {
                 ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(issuesProvider(project.id))),
           ),
         ),
-        Positioned(
+        PositionedDirectional(
           bottom: 16,
-          right: 16,
+          end: 16,
           child: FloatingActionButton.extended(
             heroTag: 'issue_add',
             icon: const Icon(Icons.add),

@@ -137,9 +137,9 @@ class _TasksTabState extends ConsumerState<TasksTab> {
             error: (e, st) => ErrorState(error: e, stack: st, onRetry: _refresh),
           ),
         ),
-        Positioned(
+        PositionedDirectional(
           bottom: 16,
-          right: 16,
+          end: 16,
           child: FloatingActionButton.extended(
             heroTag: 'task_add',
             icon: const Icon(Icons.add),
@@ -228,7 +228,7 @@ class TaskCard extends StatelessWidget {
             Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               if (t.priority == 'high')
                 Padding(
-                  padding: const EdgeInsets.only(right: 6, top: 2),
+                  padding: const EdgeInsetsDirectional.only(end: 6, top: 2),
                   child: Icon(Icons.flag_rounded, size: 16, color: toneColor(context, PillTone.warn)),
                 ),
               Expanded(

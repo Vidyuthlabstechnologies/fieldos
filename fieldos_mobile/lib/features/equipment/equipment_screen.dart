@@ -459,7 +459,7 @@ String? _orNull(String text) => text.trim().isEmpty ? null : text.trim();
 /// A typed amount, tolerating "1,500" and a stray "₹"; null when blank,
 /// unreadable or negative.
 double? _amount(String text) {
-  final v = double.tryParse(text.replaceAll(currencySymbol, '').replaceAll(RegExp(r'[₹,\s]'), ''));
+  final v = double.tryParse(westernDigits(text).replaceAll(currencySymbol, '').replaceAll(RegExp(r'[₹,\s]'), ''));
   return v == null || v < 0 || v.isNaN || v.isInfinite ? null : v;
 }
 

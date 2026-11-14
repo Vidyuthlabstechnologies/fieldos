@@ -18,6 +18,7 @@ import 'package:fieldos_mobile/core/market.dart';
 const Map<Market, Map<String, Map<String, String>>> marketTerms = {
   Market.us: {'en': _usEnglish},
   Market.malaysia: {'en': _malaysiaEnglish},
+  Market.uae: {'en': _uaeEnglish},
 };
 
 /// Whole-word swaps on English text, after the exact table: spelling and
@@ -25,6 +26,7 @@ const Map<Market, Map<String, Map<String, String>>> marketTerms = {
 /// first letter ("Labour" -> "Labor").
 const Map<Market, Map<String, String>> marketWordSwaps = {
   Market.malaysia: _malaysiaSwaps,
+  Market.uae: _uaeSwaps,
   Market.us: {
     'labour': 'labor',
     'labourer': 'laborer',
@@ -65,6 +67,32 @@ const _malaysiaSwaps = {
   'challans': 'delivery orders',
   'rupee': 'ringgit',
   'rupees': 'ringgit',
+};
+
+/// UAE English: British spelling, FIDIC and Dubai Municipality trade
+/// words (interim payment application, delivery note, daily site report).
+const _uaeSwaps = {
+  'gst': 'VAT',
+  'gstin': 'TRN',
+  'dpr': 'daily site report',
+  'dprs': 'daily site reports',
+  'challan': 'delivery note',
+  'challans': 'delivery notes',
+  'rupee': 'dirham',
+  'rupees': 'dirhams',
+  'upi': 'instant transfer',
+};
+
+/// The UAE app in English, on top of [_uaeSwaps].
+const _uaeEnglish = <String, String>{
+  'Make the next RA bill': 'Make the next interim payment application',
+  'Measure work done against the BOQ. Approved quantities go on the next RA bill.':
+      'Measure work done against the BOQ. Approved quantities go on the next interim payment application.',
+  'Note (e.g. RA bill 3)': 'Note (e.g. Interim payment 3)',
+  'Running bill (RA)': 'Interim payment application',
+  'Running bill': 'Interim payment application',
+  'Every rupee on site': 'Every dirham on site',
+  'Add ₹5,000 spent on cement': 'Add AED 500 spent on cement',
 };
 
 /// The Malaysia app in Malaysian English, on top of [_malaysiaSwaps].

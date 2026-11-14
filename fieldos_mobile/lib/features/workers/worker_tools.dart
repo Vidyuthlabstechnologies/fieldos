@@ -2,6 +2,7 @@
 /// twice, and adding a whole gang at once from a pasted list.
 library;
 
+import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 
 /// The last 10 digits, so "+91 98480 12345", "098480-12345" and
@@ -82,7 +83,7 @@ List<NewWorker> parseWorkerLines(String text) {
       final cleanWage = p.replaceAll(RegExp(r'[₹,\s]|rs\.?|/-|a day|per day', caseSensitive: false), '');
       if (RegExp(r'^\d{6,}$').hasMatch(digits)) {
         phone ??= p;
-      } else if (double.tryParse(cleanWage) != null) {
+      } else if (double.tryParse(westernDigits(cleanWage)) != null) {
         wage ??= double.parse(cleanWage);
       } else {
         role ??= p;

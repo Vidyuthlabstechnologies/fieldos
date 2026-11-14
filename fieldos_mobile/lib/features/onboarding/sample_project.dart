@@ -260,7 +260,7 @@ class SampleProjectBanner extends ConsumerWidget {
       child: Material(
         color: theme.colorScheme.surfaceContainer,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 2, 4, 2),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 2, 4, 2),
           child: Row(
             children: [
               Icon(Icons.science_outlined, size: 18, color: theme.colorScheme.onSurfaceVariant),

@@ -563,7 +563,7 @@ class AssistantTools {
   static num? _num(Map<String, dynamic> i, String key) {
     final v = i[key];
     if (v is num) return v;
-    if (v is String) return num.tryParse(v.replaceAll(',', '').trim());
+    if (v is String) return num.tryParse(westernDigits(v.replaceAll(',', '').trim()));
     return null;
   }
 

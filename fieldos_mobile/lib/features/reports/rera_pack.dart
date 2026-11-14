@@ -248,7 +248,7 @@ Future<Uint8List> buildReraPackPdf(ReraPack pack,
       );
   pw.Widget cell(String s, {bool bold = false, PdfColor color = _ink, bool right = false}) => pw.Padding(
         padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-        child: t(s, size: 8, bold: bold, color: color, align: right ? pw.TextAlign.right : null),
+        child: t(s, size: 8, bold: bold, color: color, align: right ? pw.TextAlign.end : null),
       );
 
   final images = <({pw.MemoryImage image, DateTime on, String? caption})>[];

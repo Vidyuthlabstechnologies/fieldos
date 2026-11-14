@@ -114,7 +114,7 @@ class MitraSays extends StatelessWidget {
           child: CustomPaint(
             painter: _BubbleTail(color: scheme.surfaceContainerHigh),
             child: Container(
-              margin: const EdgeInsets.only(left: 8, bottom: 14),
+              margin: const EdgeInsetsDirectional.only(start: 8, bottom: 14),
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
               decoration: BoxDecoration(
                 color: scheme.surfaceContainerHigh,

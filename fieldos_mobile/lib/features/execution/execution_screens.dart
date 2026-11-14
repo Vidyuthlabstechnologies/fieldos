@@ -185,7 +185,7 @@ class _LookaheadCard extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 12, 8, 8),
+        padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 8, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -215,7 +215,7 @@ class _LookaheadCard extends ConsumerWidget {
               ),
             if (me.canWrite)
               Align(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 child: TextButton.icon(
                   icon: const Icon(Icons.add, size: 18),
                   label: Text(tr('Add what it waits for')),
@@ -529,7 +529,7 @@ class _DrawingScreen extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 10, 8, 6),
+        padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 8, 6),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -680,7 +680,7 @@ class _RfisTab extends ConsumerWidget {
                   Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(14, 10, 8, 6),
+                      padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 8, 6),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -951,7 +951,7 @@ class _QualityTab extends ConsumerWidget {
                   Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(14, 10, 8, 6),
+                      padding: const EdgeInsetsDirectional.fromSTEB(14, 10, 8, 6),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1560,7 +1560,7 @@ class _UnitScreen extends ConsumerWidget {
                 ),
               if (!handed && me.canWrite)
                 Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart,
                   child: TextButton.icon(
                     icon: const Icon(Icons.add, size: 18),
                     label: Text(tr('Add checklist line')),
@@ -1595,7 +1595,7 @@ class _UnitScreen extends ConsumerWidget {
                 ),
               if (!handed && me.canWrite)
                 Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart,
                   child: TextButton.icon(
                     icon: const Icon(Icons.report_problem_outlined, size: 18),
                     label: Text(tr('Raise a defect')),

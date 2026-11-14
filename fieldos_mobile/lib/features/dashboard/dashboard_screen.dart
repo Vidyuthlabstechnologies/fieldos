@@ -154,7 +154,7 @@ class _ProjectHealthCard extends ConsumerWidget {
                     ),
                   if (s.alerts.length > 3)
                     Padding(
-                      padding: const EdgeInsets.only(top: 4, left: 22),
+                      padding: const EdgeInsetsDirectional.only(top: 4, start: 22),
                       child: Text(trf('and {n} more', {'n': s.alerts.length - 3}),
                           style: theme.textTheme.bodySmall?.copyWith(color: muted)),
                     ),
@@ -162,7 +162,7 @@ class _ProjectHealthCard extends ConsumerWidget {
                 if (s.status == 'over' && Roles.canWrite(ref.watch(sessionProvider).role ?? Roles.viewer)) ...[
                   const SizedBox(height: 8),
                   Align(
-                    alignment: Alignment.centerRight,
+                    alignment: AlignmentDirectional.centerEnd,
                     child: FilledButton.tonalIcon(
                       icon: const Icon(Icons.approval_outlined, size: 18),
                       label: Text(tr('Ask for approval')),
@@ -225,7 +225,7 @@ class _Metric extends StatelessWidget {
           const SizedBox(height: 2),
           FittedBox(
             fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: Text(value,
                 style: theme.textTheme.titleSmall?.copyWith(color: warn ? theme.colorScheme.error : null)),
           ),

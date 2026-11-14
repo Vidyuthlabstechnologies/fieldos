@@ -179,7 +179,7 @@ class CompanyStandardsScreen extends ConsumerWidget {
                 ),
               if (canEdit)
                 Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart,
                   child: TextButton.icon(
                     icon: const Icon(Icons.add, size: 18),
                     label: Text(tr('Add a line')),

@@ -177,7 +177,7 @@ class PhotoStrip extends StatelessWidget {
       ),
       if (paths.length > 1)
         Align(
-          alignment: Alignment.centerLeft,
+          alignment: AlignmentDirectional.centerStart,
           child: TextButton.icon(
             icon: const Icon(Icons.share, size: 18),
             label: Text(tr('Share all photos')),
