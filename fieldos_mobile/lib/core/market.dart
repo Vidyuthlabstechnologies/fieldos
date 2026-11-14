@@ -370,3 +370,30 @@ String get igstLabel => isIndia ? 'IGST' : market.tax.name;
 
 /// Tests switch market with this; the app never does (one build, one market).
 void debugSetMarket(Market m) => _market = m;
+
+/// The app plan's price in a market's currency, for the paywall's fallback
+/// text and the store setup docs. The store (Play / App Store, through
+/// RevenueCat) shows the real price; this is never charged by the app.
+class MarketPrice {
+  const MarketPrice({required this.monthly, required this.yearly, required this.approved});
+
+  final num monthly;
+  final num yearly;
+
+  /// False while the owner has not agreed the price: PROPOSED, NOT
+  /// APPROVED. No store product may be made from an unapproved price.
+  final bool approved;
+}
+
+/// India's prices were set by the owner (2026-11-08). The others come from
+/// the research packs (project files `international/<market>/03-pricing-and-store-setup.md`)
+/// and are proposed, not approved. UK prices include VAT, as UK prices must.
+const marketPrices = <Market, MarketPrice>{
+  Market.india: MarketPrice(monthly: 999, yearly: 10999, approved: true),
+  Market.us: MarketPrice(monthly: 24.99, yearly: 249.99, approved: false), // proposed, not approved
+  Market.malaysia: MarketPrice(monthly: 59.90, yearly: 599, approved: false), // proposed, not approved
+  Market.uae: MarketPrice(monthly: 99, yearly: 999, approved: false), // proposed, not approved
+  Market.uk: MarketPrice(monthly: 19.99, yearly: 199.99, approved: false), // proposed, not approved
+};
+
+MarketPrice get marketPrice => marketPrices[currentMarket]!;

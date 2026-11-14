@@ -10,6 +10,7 @@
 /// same) and the person can take it back in Your privacy.
 library;
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
@@ -20,7 +21,12 @@ class NoticeItem {
   final String body;
 }
 
-const privacyNoticeItems = [
+/// The notice this build shows: the US app has its own (state privacy
+/// laws, no Indian authority); other markets use India's until theirs is
+/// written (see legal_texts_markets.dart).
+List<NoticeItem> get privacyNoticeItems => currentMarket == Market.us ? usPrivacyNoticeItems : indiaPrivacyNoticeItems;
+
+const indiaPrivacyNoticeItems = [
   NoticeItem(
     'Your account',
     'Your name, email address and the company you join, so that you can sign in and work with your team.',
@@ -63,6 +69,54 @@ const privacyNoticeItems = [
     'Complaints',
     'Write to our Grievance Officer at info@mldynamic.com. We reply within 30 days. You can also complain to the '
         'Data Protection Board of India.',
+  ),
+];
+
+const usPrivacyNoticeItems = [
+  NoticeItem(
+    'Your account',
+    'Your name, email address and the company you join, so that you can sign in and work with your team.',
+  ),
+  NoticeItem(
+    'Job records',
+    'Projects, logs, photos, time cards, pay and other records your company keeps. They stay on this phone, and in '
+        'our cloud when Team & sync is on, so that your team can see them. Our cloud is in India today.',
+  ),
+  NoticeItem(
+    'Location and photo check-in',
+    'Your location, and a photo, only when you clock in or out, clock a worker in, set a job location or take a '
+        'job photo, to show the work was done on the job. Never in the background. FieldOS does not use face '
+        'recognition and keeps no face scan.',
+  ),
+  NoticeItem(
+    'The AI assistant',
+    'Only when you use it: what you ask, and the job details needed to answer, go to Anthropic in the USA (or Sarvam '
+        'AI in India as a backup) to work out the reply. Photos and locations are never sent. They do not use it to '
+        'train their models.',
+  ),
+  NoticeItem(
+    'Paying for FieldOS',
+    'Google Play or the App Store take the payment. RevenueCat in the USA gets the purchase record so the app can '
+        'check your plan. We never see card details.',
+  ),
+  NoticeItem(
+    'Bug and crash reports',
+    'Only what you send us, and crash details if that setting is on, so that we can fix problems.',
+  ),
+  NoticeItem(
+    'Your choices',
+    'You can stop the AI assistant, turn off crash details, export your records or delete your cloud account at any '
+        'time. We do not sell or share your personal information, and we do not use it for targeted ads.',
+  ),
+  NoticeItem(
+    'Your privacy rights',
+    'Ask us what we hold about you, to correct it, delete it or get a copy, or let someone act for you. Write to '
+        'info@mldynamic.com. We reply within 45 days.',
+  ),
+  NoticeItem(
+    'Appeals',
+    'If we turn down a request, write to info@mldynamic.com with the word "Appeal" and we will look at it again. If '
+        'you are still not satisfied, you can contact your state attorney general.',
   ),
 ];
 

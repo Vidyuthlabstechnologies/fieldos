@@ -49,6 +49,31 @@ scripts) need `--flavor`, and the Indian app must keep building unchanged.
   "Daily log"): `lib/l10n/market_terms.dart`, looked up by `tr()` before the
   language tables. Labels stay keyed by their Indian English text.
 
+## Legal texts and prices
+
+- **Privacy policy, terms, privacy notice**: `lib/features/legal/legal_texts_markets.dart`
+  adapts India's texts section by section (`adaptLegal`); the short notice
+  in Settings > Your privacy is `privacyNoticeItems` in
+  `lib/features/legal/privacy_notice.dart`. The US has its own (state privacy
+  laws, arbitration, Delaware law). Malaysia, UAE and the UK still show
+  India's until theirs are written, and `marketLegalReady` is false for them:
+  do not publish those apps before it is true. All of these are drafts that
+  need a lawyer in that country; never call them lawyer-reviewed.
+  The published pages (`PRIVACY_POLICY_URL`, `TERMS_URL`) are build defines,
+  so each market's store build points at its own pages.
+- **Prices**: `marketPrices` in `lib/core/market.dart`. India's are the
+  owner's. The others are **proposed, not approved** (`approved: false`):
+  make no store products from them until the owner agrees.
+
+## Backend per market
+
+All markets use the one Supabase project (Mumbai) for now. The backend is
+chosen at build time by `SUPABASE_URL` and `SUPABASE_ANON_KEY`, so a market
+moves to its own regional project (US, Singapore, London...) by building
+its app with that project's values. No code change is needed. Before a
+market moves, deploy the same migrations and functions to the new project
+and update that market's privacy policy ("Where your data is processed").
+
 ## Per-market setup that is not code
 
 Each market's app needs its own store listing, RevenueCat app (and key),
