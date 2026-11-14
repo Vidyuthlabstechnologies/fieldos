@@ -208,7 +208,7 @@ class _MeasurementBookScreenState extends ConsumerState<MeasurementBookScreen> {
               NumField(
                 controller: rates[v.variation.id]!,
                 label: '${v.description} · ${fmtQty(v.qty)} ${v.unit}',
-                suffix: '₹/${v.unit}',
+                suffix: '$currencySymbol/${v.unit}',
               ),
           ]),
         ),

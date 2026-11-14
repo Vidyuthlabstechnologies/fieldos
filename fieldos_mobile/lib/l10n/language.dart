@@ -15,6 +15,9 @@ import 'dart:ui' show PlatformDispatcher;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
+
+import 'package:fieldos_mobile/l10n/market_terms.dart';
 import 'package:fieldos_mobile/l10n/strings_hi.dart';
 import 'package:fieldos_mobile/l10n/strings_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_mr.dart';
@@ -37,7 +40,18 @@ enum AppLanguage {
   final String nativeName;
   final String englishName;
 
-  Locale get locale => Locale(code, 'IN');
+  /// The Indian languages are spoken as in India wherever the app is
+  /// (a Telugu mason in Dubai still speaks te-IN); English follows the
+  /// market (en-US, en-GB).
+  Locale get locale => Locale(code, _indian.contains(this) ? 'IN' : currentMarket.countryCode);
+
+  static const _indian = {hi, te, ta, kn, mr};
+
+  /// The languages this build's market offers, English first.
+  static List<AppLanguage> get offered => [
+        for (final c in market.languageCodes)
+          ?fromCode(c),
+      ];
 
   static AppLanguage? fromCode(String? code) {
     for (final l in values) {
@@ -62,7 +76,7 @@ const Map<AppLanguage, Map<String, String>> _tables = {
 
 /// The speech code (BCP-47) for [l], for the phone's voice and its
 /// speech recognition: 'ta-IN'.
-String speechCodeFor(AppLanguage l) => '${l.code}-IN';
+String speechCodeFor(AppLanguage l) => '${l.locale.languageCode}-${l.locale.countryCode}';
 
 AppLanguage _current = AppLanguage.en;
 AppLanguage _spoken = AppLanguage.en;
@@ -93,14 +107,25 @@ void _apply(AppLanguage spoken, bool screens) {
 }
 
 /// [english] in language [l], or [english] when there is no translation.
-String trIn(AppLanguage l, String english) => _tables[l]?[english] ?? english;
+/// The market's own wording comes first (lib/l10n/market_terms.dart), so
+/// "GST" reads "Sales tax" in the US app in English and in Spanish.
+String trIn(AppLanguage l, String english) {
+  final terms = marketTerms[currentMarket];
+  if (terms != null) {
+    final own = terms[l.code]?[english];
+    if (own != null) return own;
+    if (_tables[l]?[english] case final t?) return t;
+    return terms['en']?[english] ?? english;
+  }
+  return _tables[l]?[english] ?? english;
+}
 
 /// [english] in the person's spoken language, for words read aloud.
 String trSpoken(String english) => trIn(_spoken, english);
 
 /// [english] in the current language, or [english] itself when there is
 /// no translation.
-String tr(String english) => _tables[_current]?[english] ?? english;
+String tr(String english) => trIn(_current, english);
 
 /// [tr] with `{name}` placeholders filled in after the lookup:
 /// `trf('{n} tasks late', {'n': '3'})`.
@@ -115,7 +140,7 @@ String trf(String english, Map<String, Object> args) {
 AppLanguage languageFromDevice([List<Locale>? locales]) {
   for (final l in locales ?? PlatformDispatcher.instance.locales) {
     final found = AppLanguage.fromCode(l.languageCode);
-    if (found != null) return found;
+    if (found != null && AppLanguage.offered.contains(found)) return found;
   }
   return AppLanguage.en;
 }

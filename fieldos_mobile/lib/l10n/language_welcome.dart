@@ -20,7 +20,7 @@ class LanguageWelcomeScreen extends ConsumerWidget {
   /// The phone's language first, then the rest in the usual order.
   static List<AppLanguage> order([List<Locale>? locales]) {
     final phone = languageFromDevice(locales);
-    return [phone, for (final l in AppLanguage.values) if (l != phone) l];
+    return [phone, for (final l in AppLanguage.offered) if (l != phone) l];
   }
 
   Future<void> _pick(WidgetRef ref, AppLanguage l) async {

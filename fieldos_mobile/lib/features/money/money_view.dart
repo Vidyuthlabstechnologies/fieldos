@@ -1034,7 +1034,7 @@ String _cut(String s, int max) => s.length > max ? s.substring(0, max) : s;
 
 /// "1,250.50" or "1250.5" typed in a money field; null when it isn't a number.
 double? parseAmount(String typed) {
-  final v = double.tryParse(typed.trim().replaceAll(',', '').replaceAll('₹', '').trim());
+  final v = double.tryParse(typed.trim().replaceAll(',', '').replaceAll('₹', '').replaceAll(currencySymbol, '').trim());
   if (v == null || v.isNaN || v.isInfinite) return null;
   return (v * 100).roundToDouble() / 100;
 }

@@ -12,6 +12,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
@@ -29,7 +30,7 @@ String pdfSafe(String s) {
       .replaceAll(RegExp('[–—−]'), '-')
       .replaceAll(RegExp('[‘’‚′]'), "'")
       .replaceAll(RegExp('[“”„″]'), '"')
-      .replaceAll('₹', 'Rs. ')
+      .replaceAll('₹', market.pdfCurrency)
       .replaceAll('…', '...');
   return String.fromCharCodes(t.runes.map((r) => r > 0xFF ? 0x3F : r));
 }

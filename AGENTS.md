@@ -31,6 +31,13 @@ before assuming otherwise) with:
   company, up to a number of active sites. The apps must never show its
   price or a way to buy it. See `docs/COMPANY_PLANS.md`.
 
+- **Markets (countries)**: one codebase, one store app per country (India,
+  US, Malaysia, UAE, UK), picked by `--dart-define=FIELDOS_MARKET=in|us|my|ae|uk`
+  (default India, the original app id). Never hard-code ₹, GST, lakh or a
+  date order in new code: use `money()`, `amountInWords()`, `fmtDate()` and
+  `market` (`lib/core/market.dart`), and put country wording in
+  `lib/l10n/market_terms.dart`. See `docs/MARKETS.md`.
+
 ## Code Style Rules
 
 ### Python (Backend)

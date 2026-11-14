@@ -10,6 +10,8 @@ library;
 
 import 'dart:convert';
 
+import 'package:fieldos_mobile/core/market.dart';
+
 const billKinds = {'ra': 'Running bill (RA)', 'tax_invoice': 'Tax invoice'};
 
 /// Construction services SAC (works contract). Editable per bill.
@@ -156,13 +158,59 @@ String indianNumberWords(int n) {
   ].join(' ');
 }
 
-/// "Rupees Twelve Thousand Five Hundred and Fifty Paise Only".
-String rupeesInWords(double amount) {
-  final paiseTotal = (amount.abs() * 100).round();
-  final r = paiseTotal ~/ 100, p = paiseTotal % 100;
-  final words = 'Rupees ${indianNumberWords(r)}';
-  return p == 0 ? '$words Only' : '$words and ${_belowHundred(p)} Paise Only';
+/// Whole number in international words, for every market but India:
+/// 1,234,567 is "One Million Two Hundred Thirty Four Thousand Five Hundred
+/// Sixty Seven" (British style adds "and": "Five Hundred and Sixty Seven").
+String westernNumberWords(int n, {bool and = false}) {
+  if (n == 0) return 'Zero';
+  if (n < 0) return 'Minus ${westernNumberWords(-n, and: and)}';
+  String chunk(int v) {
+    final h = v ~/ 100, r = v % 100;
+    return [
+      if (h > 0) '${_ones[h]} Hundred',
+      if (r > 0) '${and && h > 0 ? 'and ' : ''}${_belowHundred(r)}',
+    ].join(' ');
+  }
+
+  const scales = ['', 'Thousand', 'Million', 'Billion', 'Trillion'];
+  final parts = <String>[];
+  var rest = n, i = 0;
+  while (rest > 0 && i < scales.length) {
+    final c = rest % 1000;
+    if (c > 0) parts.insert(0, [chunk(c), if (scales[i].isNotEmpty) scales[i]].join(' '));
+    rest ~/= 1000;
+    i++;
+  }
+  if (rest > 0) parts.insert(0, '${westernNumberWords(rest, and: and)} Quadrillion');
+  // "One Thousand and Five": British style joins a last chunk under 100.
+  if (and && parts.length > 1 && n % 1000 > 0 && n % 1000 < 100) {
+    parts[parts.length - 1] = 'and ${parts.last}';
+  }
+  return parts.join(' ');
 }
+
+/// A whole number in this market's words: lakh and crore in India,
+/// thousand and million elsewhere.
+String numberWords(int n) =>
+    market.indianGrouping ? indianNumberWords(n) : westernNumberWords(n, and: market.wordsAnd);
+
+/// An amount in words for bills and cheques: "Rupees Twelve Thousand Five
+/// Hundred and Fifty Paise Only" in India, "Twelve Thousand Five Hundred
+/// Dollars and Fifty Cents Only" in the US.
+String amountInWords(double amount) {
+  final minorTotal = (amount.abs() * 100).round();
+  final major = minorTotal ~/ 100, minor = minorTotal % 100;
+  final m = market;
+  if (m.currencyWordsFirst) {
+    final words = '${m.majorUnitWords} ${numberWords(major)}';
+    return minor == 0 ? '$words Only' : '$words and ${_belowHundred(minor)} ${m.minorUnitWords} Only';
+  }
+  final words = '${numberWords(major)} ${m.majorUnitWords}';
+  return minor == 0 ? '$words Only' : '$words and ${_belowHundred(minor)} ${m.minorUnitWords} Only';
+}
+
+/// [amountInWords] under its older name; follows the build's market.
+String rupeesInWords(double amount) => amountInWords(amount);
 
 /// GST state codes, as printed on invoices (first two digits of a GSTIN).
 const gstStates = {

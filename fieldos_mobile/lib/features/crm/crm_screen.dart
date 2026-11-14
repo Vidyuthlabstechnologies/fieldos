@@ -711,7 +711,7 @@ class _LeadFormState extends ConsumerState<_LeadForm> {
           TextField(
             controller: _value,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(labelText: tr('Their budget (optional)'), prefixText: '₹ '),
+            decoration: InputDecoration(labelText: tr('Their budget (optional)'), prefixText: '$currencySymbol '),
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(

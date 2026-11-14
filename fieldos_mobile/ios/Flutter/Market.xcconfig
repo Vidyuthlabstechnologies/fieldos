@@ -1,0 +1,4 @@
+// Which country's app this is (lib/core/market.dart). tool/ios/build_ipa.sh
+// sets the suffix from FIELDOS_MARKET: empty for India (com.mldynamic.fieldos,
+// the app already on the App Store), ".us", ".my", ".ae" or ".uk" otherwise.
+FIELDOS_BUNDLE_SUFFIX =
