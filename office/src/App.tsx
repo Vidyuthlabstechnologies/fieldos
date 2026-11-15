@@ -4,8 +4,11 @@ import { configured, supabase } from './supabase';
 import { t } from './strings';
 import { SignIn } from './SignIn';
 import { Sites } from './Sites';
+import { SitePage } from './SitePage';
+import { useRoute } from './route';
 
 export function App() {
+  const route = useRoute();
   const [session, setSession] = useState<Session | null | undefined>(undefined);
 
   useEffect(() => {
@@ -31,5 +34,6 @@ export function App() {
     );
   }
   if (!session) return <SignIn db={supabase} />;
+  if (route.page === 'site') return <SitePage db={supabase} session={session} id={route.id} tab={route.tab} />;
   return <Sites db={supabase} session={session} />;
 }
