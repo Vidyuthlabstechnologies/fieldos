@@ -8,7 +8,10 @@ site and a task the way the app does, then, signed in as B:
   * reads every table the migrations create and fails if any row mentions
     A's company, site or task;
   * tries to add a task to A's site, rename A's task and read A's team list,
-    and fails if any of that works.
+    and fails if any of that works;
+  * if the public-api function is deployed: no key and a revoked key get
+    401, B cannot make a key for A, and A's key reads A's records but never
+    B's (list, by id, by site, change feed).
 
 Both accounts are deleted at the end with delete_my_account, whether the
 checks pass or not. Uses only SUPABASE_URL and SUPABASE_ANON_KEY (the public
@@ -125,10 +128,69 @@ def run(api: Api) -> list[str]:
         code, rows = a.rest("GET", f"/rest/v1/projects?id=eq.{a.project}&select=id")
         if not (code == 200 and rows):
             problems.append("projects: A can't read its own site, so the check proves nothing")
+
+        # 5. The open API: a company key reads its own company only, and
+        # nothing without a key or after it is revoked.
+        problems += open_api_checks(api, a, b)
     finally:
         a.delete()
         b.delete()
     return problems
+
+
+def open_api_checks(api: Api, a: Account, b: Account) -> list[str]:
+    base = os.environ.get("PUBLIC_API_URL", f"{api.base}/functions/v1/public-api").rstrip("/") + "/v1"
+
+    def get(path: str, key: str | None):
+        headers = {"Authorization": f"Bearer {key}"} if key else {}
+        req = urllib.request.Request(base + path, headers=headers, method="GET")
+        try:
+            with urllib.request.urlopen(req, timeout=20) as res:
+                raw, code = res.read(), res.status
+        except urllib.error.HTTPError as e:
+            raw, code = e.read(), e.code
+        try:
+            return code, json.loads(raw) if raw else None
+        except ValueError:
+            return code, None
+
+    code, _ = get("/tasks", None)
+    if code == 404:
+        print("open API: public-api is not deployed; skipped")
+        return []
+    out: list[str] = []
+    if code != 401:
+        out.append(f"open API: no key answered {code}, not 401")
+    code, _ = b.rest("POST", "/rest/v1/rpc/create_company_api_key", {"p_company_id": a.company, "p_name": "B's key"})
+    if code == 200:
+        out.append("open API: B made an API key for A's company")
+    code, made = a.rest("POST", "/rest/v1/rpc/create_company_api_key", {"p_company_id": a.company, "p_name": "isolation check"})
+    if code != 200 or not isinstance(made, dict) or not made.get("key"):
+        return out + [f"open API: A could not make a key (HTTP {code})"]
+    key = made["key"]
+    code, rows = a.rest("GET", f"/rest/v1/company_api_keys?id=eq.{made['id']}&select=key_hash")
+    if code == 200 and rows:
+        out.append("open API: the key's hash is readable")
+    code, body = get("/tasks", key)
+    ids = [r.get("id") for r in (body or {}).get("data", [])] if code == 200 and isinstance(body, dict) else []
+    if a.task not in ids:
+        out.append(f"open API: A's key cannot read A's task (HTTP {code}), so the checks prove nothing")
+    if b.task in ids or b.project in json.dumps(body):
+        out.append("open API: A's key reads B's task")
+    for path in (f"/tasks/{b.task}", f"/projects/{b.project}", f"/tasks?project_id={b.project}"):
+        code, body = get(path, key)
+        if code != 404:
+            out.append(f"open API: {path} with A's key answered {code}, not 404")
+    code, body = get("/changes?limit=500", key)
+    if code != 200 or any(c.get("id") in (b.company, b.project, b.task) for c in (body or {}).get("data", [])):
+        out.append(f"open API: A's change feed failed or shows B's records (HTTP {code})")
+    code, _ = a.rest("POST", "/rest/v1/rpc/revoke_company_api_key", {"p_key_id": made["id"]})
+    if code not in (200, 204):
+        out.append(f"open API: A could not revoke the key (HTTP {code})")
+    code, _ = get("/tasks", key)
+    if code != 401:
+        out.append(f"open API: a revoked key answered {code}, not 401")
+    return out
 
 
 def main() -> int:
