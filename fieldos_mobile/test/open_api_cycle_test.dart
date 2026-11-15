@@ -53,7 +53,7 @@ void main() {
     await other.service.registerCompany(companyId: theirs.id, name: theirs.name);
     final theirSite = await other.db.projectDao.create(ProjectsCompanion.insert(
         id: uuid.v4(), companyId: theirs.id, name: 'Rival Towers', status: const Value('active')));
-    await other.db.taskDao.create(TasksCompanion.insert(id: uuid.v4(), projectId: theirSite.id, title: 'Their secret task'));
+    final theirTask = await other.db.taskDao.create(TasksCompanion.insert(id: uuid.v4(), projectId: theirSite.id, title: 'Their secret task'));
     await pushAll(other);
 
     // A member who is not the owner cannot make a key or see one.
@@ -77,8 +77,12 @@ void main() {
     expect([for (final p in projects['data'] as List) p['name']], ['Kompally Villas']);
     final tasks = await read(key, 'tasks');
     expect([for (final t in tasks['data'] as List) t['title']], unorderedEquals(['Footing', 'Columns', 'Slab']));
-    await expectLater(read(key, 'tasks', project: theirSite.id), throwsA(isA<PostgrestException>()));
-    await expectLater(read(key, 'company_api_keys'), throwsA(isA<PostgrestException>()));
+    expect(await read(key, 'tasks', project: theirSite.id), {'error': 'not_found'});
+    expect(await read(key, 'tasks', id: theirTask.id), {'error': 'not_found'});
+    expect(await read(key, 'company_api_keys'), {'error': 'unknown_resource'});
+    expect(await read(key, 'changes', after: 'x'), {'error': 'bad_cursor'});
+    final theirFeed = [for (final c in (await read(key, 'changes', limit: 500))['data'] as List) c['id']];
+    expect(theirFeed, isNot(contains(theirSite.id)), reason: 'no other company in the change feed');
 
     // Pages by id.
     final page1 = await read(key, 'tasks', limit: 2);
@@ -99,6 +103,17 @@ void main() {
     await pushAll(owner);
     final more = await read(key, 'changes', after: last);
     expect([for (final c in more['data'] as List) (c['resource'], c['op'])], [('tasks', 'changed')]);
+
+    // 120 calls a minute, even when they arrive at once.
+    final burst = await Future.wait([
+      for (var i = 0; i < 130; i++) read(key, 'projects', limit: 1).then((_) => true, onError: (Object e) {
+        expect(e, isA<PostgrestException>().having((x) => x.message, 'm', 'rate_limited'));
+        return false;
+      }),
+    ]);
+    expect(burst.where((ok) => ok).length, lessThanOrEqualTo(120));
+    expect(burst.where((ok) => !ok), isNotEmpty);
+    await admin.from('company_api_keys').update({'window_start': '2000-01-01T00:00:00Z'}).eq('id', listed.id);
 
     // A wrong or revoked key gets nothing.
     await expectLater(read('fos_${'0' * 48}', 'tasks'), throwsA(isA<PostgrestException>().having((e) => e.message, 'm', 'invalid_key')));
