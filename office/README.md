@@ -5,8 +5,14 @@ managers and accounts. It signs in with the same FieldOS account as the phone
 app and reads the same cloud, through the same row-level security, so it can
 never see or do more than that person could on their phone. Online only.
 
-Plan and build order: the "FieldOS office web app" plan doc (step 1 of 7 is
-this scaffold: sign-in, company picker, list of sites).
+Built so far (the plan has 7 steps):
+
+1. Sign-in, company picker, list of sites.
+2. Site dashboard (what needs attention) and the RFI, submittal, defect and
+   drawing registers, read only. Pages live in the address's `#` part
+   (`#/site/<id>/<tab>`), so links can be shared and the host needs no
+   rewrite rules. The register rules in `src/rules.ts` mirror the phone's
+   `execution_rules.dart`; change both together.
 
 ## Address
 

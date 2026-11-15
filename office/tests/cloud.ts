@@ -38,3 +38,19 @@ export async function site(a: Account, companyId: string, name: string, status =
   if (error) throw error;
   return id;
 }
+
+// One row written as the account itself, so the server's guards apply.
+export async function row(a: Account, table: string, values: Record<string, unknown>): Promise<string> {
+  const id = (values.id as string | undefined) ?? crypto.randomUUID();
+  const { error } = await a.db.from(table).insert({ id, ...values });
+  if (error) throw new Error(`${table}: ${error.message}`);
+  return id;
+}
+
+// Moves a row's raised time back, as the service role (the phones stamp it).
+export async function backdate(table: string, id: string, createdAt: string) {
+  const admin = createClient(url, service, opts);
+  const { error } = await admin.from(table).update({ created_at: createdAt }).eq('id', id);
+  if (error) throw new Error(`${table}: ${error.message}`);
+}
+

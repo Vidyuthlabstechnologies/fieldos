@@ -9,6 +9,8 @@ import {
   type Company,
   type Site,
 } from './data';
+import { day } from './format';
+import { siteHref } from './route';
 import { roleLabel, statusLabel, t } from './strings';
 
 type Load<T> = { state: 'loading' } | { state: 'error' } | { state: 'ready'; value: T };
@@ -120,7 +122,9 @@ export function Sites({ db, session }: { db: SupabaseClient; session: Session })
                 <tbody>
                   {shown.map((s) => (
                     <tr key={s.id} data-testid={`site-${s.id}`}>
-                      <td>{s.name}</td>
+                      <td>
+                        <a href={siteHref(s.id)}>{s.name}</a>
+                      </td>
                       <td>{s.client_name ?? ''}</td>
                       <td>{dates(s)}</td>
                       <td>
@@ -149,10 +153,6 @@ function Retry({ onRetry }: { onRetry: () => void }) {
   );
 }
 
-const fmt = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-function day(d: string | null): string {
-  return d ? fmt.format(new Date(d + 'T00:00:00')) : '';
-}
 function dates(s: Site): string {
   if (!s.start_date && !s.end_date) return '';
   return `${day(s.start_date)} – ${day(s.end_date)}`;
