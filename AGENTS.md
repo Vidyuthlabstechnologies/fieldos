@@ -221,7 +221,7 @@ class NewModelOut(BaseModel):
 ```
 
 ### Mobile (Drift) schema changes
-- Every `schemaVersion` bump needs an `if (from < N)` step that leaves an upgraded phone with exactly a fresh install's schema. `test/shipped_schema_upgrade_test.dart` checks this from every shipped schema (v9, v14, v32).
+- Every `schemaVersion` bump needs an `if (from < N)` step that leaves an upgraded phone with exactly a fresh install's schema. `test/shipped_schema_upgrade_test.dart` checks this from every shipped schema (v9, v14, v32, v39).
 - When a release ships with a new `schemaVersion`, add its fixture as `tool/upgrade_fixtures/README.md` describes.
 - When a server change would break older app builds, raise the minimum build instead of letting them sync wrongly: `update public.app_config set min_build_android = <build>, min_build_ios = <build>, message = '<short reason>';` (service role, SQL editor). Phones below it stop syncing and show an Update banner on Home; their work stays on the phone (`lib/sync/app_version_gate.dart`). Set it back to 0 to switch it off.
 
@@ -229,6 +229,7 @@ class NewModelOut(BaseModel):
 - **No GitHub Actions runs without the owner's OK.** Every workflow is `workflow_dispatch` only (issue #149). Run the checks locally instead: `flutter analyze` and `flutter test` in `fieldos_mobile/`, `deno test` in each `supabase/functions/*`, `pytest`, and the SQL tests in `supabase/tests/` against a local Postgres.
 - **Play uploads go through the `play-upload` workflow** (owner's OK for each run): closed testing (`alpha`) as a draft by default, never production. It checks package, versionCode and upload-key SHA-1 first (`fieldos_mobile/tool/android/verify_bundle.sh`). Setup and failure table: docs/PLAY_STORE_LAUNCH.md section 10.
 - **Production migrations get one line in issue #132**, never a new issue. Apply them with the `supabase-deploy` workflow (owner's OK), then `isolation-check`.
+- **Before onboarding a customer or pilot**, run `tools/pilot_check.py` locally against production (`SUPABASE_URL`/`SUPABASE_ANON_KEY`, the public pair): one throwaway company walks sign-up, join code, roles, two sites, daily records, chat, a bill with GST, the assistant's plan check, a bug report and account deletion, then every test account is deleted. No Actions needed.
 - **Supabase and RevenueCat setup work is assigned to `bahumanyarg11`** on GitHub.
 - **Legal texts have one source:** `website/privacy-policy.html` and `website/terms-of-use.html`. The app's copy (`fieldos_mobile/lib/features/legal/legal_texts.dart`) must say the same; `docs/store/` only points there. Never describe them as lawyer-reviewed.
 

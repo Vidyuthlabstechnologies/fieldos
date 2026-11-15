@@ -65,7 +65,7 @@ void main() {
     return s;
   }
 
-  for (final version in [9, 14, 32]) {
+  for (final version in [9, 14, 32, 39]) {
     test('a phone on schema v$version upgrades with every row kept and a fresh install\'s schema', () async {
       final file = File(p.join(dir.path, 'v$version.sqlite'))
         ..writeAsBytesSync(gzip.decode(File('test/fixtures/upgrade/fieldos_v$version.sqlite.gz').readAsBytesSync()));
