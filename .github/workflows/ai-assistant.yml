@@ -30,9 +30,9 @@ jobs:
       - run: deno lint
       - run: deno check index.ts live_test.ts
       - run: deno test core_test.ts
-      - name: account-cleanup and report-to-github
+      - name: account-cleanup, report-to-github and public-api
         run: |
-          for f in account-cleanup report-to-github; do
+          for f in account-cleanup report-to-github public-api; do
             (cd ../$f && deno fmt --check && deno lint && deno check index.ts && deno test core_test.ts)
           done
 
