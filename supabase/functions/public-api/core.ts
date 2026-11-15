@@ -129,14 +129,16 @@ export async function handle(req: Request, read: ApiRead): Promise<Response> {
     p_limit: limit,
   });
   if (error) return fromError(error.message);
-  const body = data as { data: unknown[]; next: string | null };
+  const body = data as { data: unknown[]; next: string | null; error?: string };
+  if (body.error) return fromError(body.error);
   if (r.id) return Response.json({ data: body.data[0] ?? null });
   return Response.json(body);
 }
 
 function fromError(message: string): Response {
-  const code = Object.keys(STATUS).find((c) => message.includes(c));
-  if (code) return problem(STATUS[code], code);
+  // Only the exact codes api_read() uses; any other database message is
+  // logged here and never sent back.
+  if (Object.hasOwn(STATUS, message)) return problem(STATUS[message], message);
   console.error("public-api read failed", message);
   return Response.json({ error: "server_error", message: "Something went wrong on our side. Try again." }, {
     status: 500,

@@ -60,6 +60,11 @@ Deno.test("errors map to statuses and never leak the database message", async ()
   assertEquals(await status(get("/tasks?project_id=1;drop")), 400);
   assertEquals(await status(get("/secrets")), 404);
   assertEquals(await status(new Request("http://x/public-api/v1/tasks", { method: "POST" })), 405);
+  // A counted call that found nothing comes back as data.
+  assertEquals((await handle(get(`/rfis/${ID}`), reader({ data: { error: "not_found" } }))).status, 404);
+  assertEquals((await handle(get("/tasks?after=x"), reader({ data: { error: "bad_cursor" } }))).status, 400);
+  // Only exact codes map; anything else is a 500 with no detail.
+  assertEquals(await status(get("/tasks"), "invalid_key: or something"), 500);
   const res = await handle(get("/tasks"), reader({ error: 'relation "x" does not exist' }));
   assertEquals(res.status, 500);
   assertEquals((await res.json()).message.includes("relation"), false);
