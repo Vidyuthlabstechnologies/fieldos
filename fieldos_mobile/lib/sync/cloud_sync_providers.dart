@@ -49,6 +49,9 @@ final cloudSyncClientProvider = Provider<SupabaseClient>((ref) {
   return client;
 });
 
+/// Where integrations call the open API (supabase/functions/public-api).
+final openApiBaseUrlProvider = Provider<String>((ref) => '${_resolveConfig().url}/functions/v1/public-api/v1');
+
 /// FieldOS's server-side AI (the assistant and the Sarvam fallback), signed
 /// in with the same FieldOS account as Team & sync.
 final aiBackendProvider = Provider<AiBackend>((ref) => SupabaseAiBackend(
