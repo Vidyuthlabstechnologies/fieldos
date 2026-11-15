@@ -43,6 +43,9 @@ export type Route =
 
 /** Everything after ".../public-api/v1". */
 export function route(pathname: string): Route {
+  // The bare function URL is the index too, so a probe of it (and the
+  // deploy workflow's liveness check) gets 401, not 404.
+  if (/\/public-api\/?$/.test(pathname)) return { kind: "index" };
   const m = /\/public-api\/v1(\/.*)?$/.exec(pathname);
   if (!m) return { kind: "error", status: 404, code: "not_found" };
   const parts = (m[1] ?? "").split("/").filter(Boolean);

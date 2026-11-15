@@ -7,6 +7,8 @@ const ID = "0b9f6a52-3c1d-4e8a-9f00-1234567890ab";
 
 Deno.test("routes", () => {
   assertEquals(route("/public-api/v1"), { kind: "index" });
+  assertEquals(route("/public-api"), { kind: "index" });
+  assertEquals(route("/public-api/"), { kind: "index" });
   assertEquals(route("/functions/v1/public-api/v1/rfis"), { kind: "list", resource: "rfis", id: null });
   assertEquals(route(`/public-api/v1/rfis/${ID.toUpperCase()}`), { kind: "list", resource: "rfis", id: ID });
   assertEquals(route("/public-api/v1/changes"), { kind: "list", resource: "changes", id: null });
