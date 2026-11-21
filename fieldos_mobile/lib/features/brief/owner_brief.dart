@@ -133,18 +133,20 @@ Future<SiteBrief> buildSiteBrief(AppDatabase db, Project project, {required Date
   final at = now ?? DateTime.now();
   final d = _dayOf(day);
   final isToday = _dayOf(at) == d;
-  final dprs = (await db.dprDao.forProject(project.id)).where((r) => _sameDay(r.entryDate, d)).toList()
-    ..sort((a, b) => a.entryDate.compareTo(b.entryDate));
-  final attendance = await db.attendanceDao.forProject(project.id);
+  final allDprs = await db.dprDao.forProject(project.id);
+  final dprs = allDprs.where((r) => _sameDay(r.entryDate, d)).toList()..sort((a, b) => a.entryDate.compareTo(b.entryDate));
+  final attendance = await db.attendanceDao.aroundDay(project.id, d);
   final tasks = await db.taskDao.forProject(project.id);
   final issues = await db.issueDao.forProject(project.id);
   final receipts = await db.materialDao.forProject(project.id);
-  final expenses = (await db.expenseDao.forProject(project.id)).where((e) {
+  final allExpenses = await db.expenseDao.forProject(project.id);
+  final expenses = allExpenses.where((e) {
     final t = DateTime.tryParse(e.incurredOn);
     return t != null && _sameDay(t, d);
   });
   final payments = (await db.paymentDao.forProject(project.id)).where((p) => _sameDay(p.receivedOn, d));
-  final cost = await ProjectCostSummary.forProject(db, project);
+  final cost = await ProjectCostSummary.forProject(db, project,
+      expenses: allExpenses, receipts: receipts, issues: issues, dprs: allDprs, tasks: tasks);
 
   // From the end of the day being briefed, so a past day reads as it stood.
   final asOf = isToday ? at : d.add(const Duration(hours: 23, minutes: 59));
