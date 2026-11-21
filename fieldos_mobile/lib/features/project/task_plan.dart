@@ -13,13 +13,22 @@ int priorityRank(String p) => switch (p) { 'high' => 0, 'low' => 2, _ => 1 };
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
 
+/// Calendar days from [a] to [b], on UTC dates: a local day is 23 or 25
+/// hours where the clocks change (US, UK), and inDays would lose one.
+int _between(DateTime a, DateTime b) =>
+    DateTime.utc(b.year, b.month, b.day).difference(DateTime.utc(a.year, a.month, a.day)).inDays;
+
+/// The local midnight [n] calendar days after [d]'s (adding a Duration
+/// lands an hour off midnight across a clock change).
+DateTime _plus(DateTime d, int n) => DateTime(d.year, d.month, d.day + n);
+
 bool isOpen(Task t) => t.status != 'done';
 
 /// Past its due date and not done.
 bool isOverdue(Task t, DateTime now) => isOpen(t) && t.dueDate != null && _day(t.dueDate!).isBefore(_day(now));
 
 /// Days past the due date (0 when not overdue).
-int daysOverdue(Task t, DateTime now) => isOverdue(t, now) ? _day(now).difference(_day(t.dueDate!)).inDays : 0;
+int daysOverdue(Task t, DateTime now) => isOverdue(t, now) ? _between(t.dueDate!, now) : 0;
 
 /// When the task will finish at the pace logged so far: the days since
 /// [Task.startDate] stretched to 100%. Null without a start date or any
@@ -30,9 +39,9 @@ DateTime? forecastFinish(Task t, DateTime now) {
   final today = _day(now);
   if (today.isBefore(start)) return null;
   // Count today as a working day, so 50% on day one forecasts two days.
-  final elapsed = today.difference(start).inDays + 1;
+  final elapsed = _between(start, today) + 1;
   final total = (elapsed * 100 / t.progress).ceil();
-  return start.add(Duration(days: total - 1));
+  return _plus(start, total - 1);
 }
 
 /// How many days after its due date the task is heading to finish, from
@@ -43,7 +52,7 @@ int daysLate(Task t, DateTime now) {
   final due = _day(t.dueDate!);
   final overdue = daysOverdue(t, now);
   final forecast = forecastFinish(t, now);
-  final slip = forecast == null ? 0 : forecast.difference(due).inDays;
+  final slip = forecast == null ? 0 : _between(due, forecast);
   return overdue > slip ? overdue : (slip > 0 ? slip : 0);
 }
 
@@ -63,7 +72,7 @@ String? lateLabel(Task t, DateTime now) {
 /// labour and material from.
 List<Task> lookAhead(Iterable<Task> tasks, DateTime now, int days) {
   final today = _day(now);
-  final end = today.add(Duration(days: days));
+  final end = _plus(today, days);
   DateTime? key(Task t) {
     final dates = [t.startDate, t.dueDate].whereType<DateTime>().map(_day).where((d) => !d.isBefore(today) && d.isBefore(end));
     return dates.isEmpty ? null : dates.reduce((a, b) => a.isBefore(b) ? a : b);

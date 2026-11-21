@@ -965,11 +965,15 @@ class _QualityTab extends ConsumerWidget {
                           Row(
                             children: [
                               Expanded(child: Text(d.description, style: theme.textTheme.titleSmall)),
-                              Builder(
-                                builder: (_) {
-                                  final (l, t) = _defectPill(d);
-                                  return StatusPill(l, tone: t);
-                                },
+                              // Flexible: "Open, critical" in Telugu is wider
+                              // than a 320dp card leaves it.
+                              Flexible(
+                                child: Builder(
+                                  builder: (_) {
+                                    final (l, t) = _defectPill(d);
+                                    return StatusPill(l, tone: t);
+                                  },
+                                ),
                               ),
                             ],
                           ),

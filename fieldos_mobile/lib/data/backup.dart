@@ -63,16 +63,6 @@ class BackupInfo {
   final int files;
 }
 
-Future<Map<String, int>> _countRows(AppDatabase db) async {
-  final have = {
-    for (final r in await db.customSelect("SELECT name FROM sqlite_master WHERE type = 'table'").get()) r.read<String>('name'),
-  };
-  return {
-    for (final t in _countedTables)
-      if (have.contains(t)) t: (await db.customSelect('SELECT COUNT(*) AS n FROM "$t"').getSingle()).read<int>('n'),
-  };
-}
-
 Future<List<String>> _filePaths(AppDatabase db) async {
   final have = {
     for (final r in await db.customSelect("SELECT name FROM sqlite_master WHERE type = 'table'").get()) r.read<String>('name'),
@@ -98,7 +88,16 @@ Future<BackupInfo> writeBackup(AppDatabase db, File outFile, {required Directory
   await db.customStatement('VACUUM INTO ?', [copy.path]);
   try {
     _stripCredentials(copy);
-    final counts = await _countRows(db);
+    // Counted in the copy: the app keeps writing while the backup is made
+    // (a sync, an entry being saved), and a count of the live database
+    // could then never match on restore.
+    final copyCheck = AppDatabaseCheck(copy);
+    final Map<String, int> counts;
+    try {
+      counts = await copyCheck.counts(_countedTables);
+    } finally {
+      await copyCheck.close();
+    }
     final files = await _filePaths(db);
     final info = BackupInfo(schemaVersion: db.schemaVersion, madeAt: now ?? DateTime.now(), counts: counts, files: files.length);
     final archive = Archive()

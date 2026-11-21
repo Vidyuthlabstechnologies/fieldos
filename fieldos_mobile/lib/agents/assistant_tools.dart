@@ -16,6 +16,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart' show Roles;
+import 'package:fieldos_mobile/auth/site_roles.dart' show siteAccessFor;
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/dashboard/project_cost_summary.dart';
@@ -153,6 +154,7 @@ class AssistantTools {
   /// would save. Throws [ToolInputError] for an input that can't be saved,
   /// so a broken action never reaches the card.
   Future<String> describe(String name, Map<String, dynamic> i) async {
+    if (writeTools.contains(name)) await _mayChange(i);
     switch (name) {
       case 'create_project':
         return trf('New project: {name}', {'name': _text(i, 'name', 200)});
@@ -219,7 +221,20 @@ class AssistantTools {
   // ---------------------------------------------------------------------------
   // Writes
 
+  /// A viewer "can see the site, changes nothing" (site_roles.dart): the
+  /// company's viewers anywhere, and anyone on a site's team as viewer there.
+  Future<void> _mayChange(Map<String, dynamic> i) async {
+    if (role == Roles.viewer) throw ToolInputError(_viewerOnly);
+    final pid = _str(i, 'project_id');
+    if (pid == null) return;
+    final access = await siteAccessFor(db, pid, userId: userId, companyRole: role);
+    if (!access.canWrite) throw ToolInputError(_viewerOnly);
+  }
+
+  static const _viewerOnly = 'A viewer can see the site but not change anything. Ask the owner or a manager.';
+
   Future<ToolOutcome> _write(String name, Map<String, dynamic> i) async {
+    await _mayChange(i);
     switch (name) {
       case 'create_project':
         final blocked = await newActiveSiteBlocked(db, companyId);

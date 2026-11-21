@@ -97,7 +97,9 @@ class ExecutionData {
   /// [now], late ones included, earliest first.
   List<LookaheadItem> lookahead(DateTime now) {
     final today = _day(now);
-    final end = today.add(const Duration(days: lookaheadDays));
+    // Calendar days: adding 14 x 24 hours lands an hour short of midnight
+    // when the clocks go back (US, UK) and dropped the 14th day.
+    final end = DateTime(today.year, today.month, today.day + lookaheadDays);
     final out = <LookaheadItem>[];
     for (final t in tasks) {
       if (t.status == 'done') continue;
@@ -158,7 +160,12 @@ class ExecutionData {
       [for (final p in photos) if (p.parentId == parentId && (kind == null || p.parentKind == kind)) p];
 
   bool defectAgeing(Defect d, DateTime now) =>
-      d.status != 'closed' && now.difference(d.createdAt).inDays >= defectAgeingDays;
+      d.status != 'closed' && _wall(now).difference(_wall(d.createdAt)).inDays >= defectAgeingDays;
+
+  /// The clock reading as UTC, so a week across a clock change (US, UK) is
+  /// still seven days at the same hour, not 167 or 169 hours.
+  static DateTime _wall(DateTime d) =>
+      DateTime.utc(d.year, d.month, d.day, d.hour, d.minute, d.second, d.millisecond, d.microsecond);
 
   bool defectOverdue(Defect d, DateTime now) =>
       d.status != 'closed' && parseDay(d.dueOn) != null && parseDay(d.dueOn)!.isBefore(_day(now));
