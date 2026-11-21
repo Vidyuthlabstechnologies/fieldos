@@ -344,7 +344,11 @@ export function fromOpenAi(res: Record<string, unknown>): { content: unknown[]; 
 }
 
 const USER_BLOCKS = new Set(["text", "tool_result"]);
-const BLOCKED_ASSISTANT_BLOCKS = new Set(["image", "document", "search_result", "container_upload"]);
+// What the assistant's replies can hold: text and tool calls (and thinking,
+// should AI_MODEL ever name a model that can't switch it off). Anything
+// else in an "assistant" message (server tool calls, MCP or code execution
+// blocks, files) was not written by the model here, so it is refused.
+const ASSISTANT_BLOCKS = new Set(["text", "tool_use", "thinking", "redacted_thinking"]);
 
 /** Accepts only what the app's chat can produce: text from the person, tool
  * results from the phone, and assistant messages as the API returned them. */
@@ -379,8 +383,10 @@ export function validateMessages(value: unknown): unknown[] {
     } else {
       if (!Array.isArray(content) || content.length === 0) throw bad("reply");
       for (const b of content) {
-        const t = (b as Record<string, unknown>)?.type;
-        if (typeof t !== "string" || BLOCKED_ASSISTANT_BLOCKS.has(t)) throw bad("reply block");
+        const block = b as Record<string, unknown>;
+        const t = block?.type;
+        if (typeof t !== "string" || !ASSISTANT_BLOCKS.has(t)) throw bad("reply block");
+        if (t === "text" && typeof block.text !== "string") throw bad("reply");
       }
     }
   });

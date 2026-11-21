@@ -78,7 +78,9 @@ begin
 end $$;
 reset role;
 
--- What the edge function does through the Storage API.
+-- What the edge function does through the Storage API (newer Storage
+-- versions refuse a plain SQL delete unless this is set, as their API does).
+select set_config('storage.allow_delete_query', 'true', true);
 delete from storage.objects where name like '00000000-0000-0000-0000-00000000d0b1/%' or name like '00000000-0000-0000-0000-00000000d0b2/%';
 
 set local role service_role;
