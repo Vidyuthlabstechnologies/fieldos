@@ -32,6 +32,7 @@ import 'package:fieldos_mobile/core/text_size.dart';
 import 'package:fieldos_mobile/features/reminders/reminders.dart';
 import 'package:fieldos_mobile/features/security/app_lock.dart';
 import 'package:fieldos_mobile/features/settings/api_keys_screen.dart';
+import 'package:fieldos_mobile/features/settings/webhooks_screen.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/l10n/language_picker.dart';
@@ -381,6 +382,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: Text(tr('Let your accounts software, Zapier or Make read your sites')),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ApiKeysScreen(companyId: company.id))),
+            ),
+          if (company != null && session.role == Roles.owner && ref.watch(cloudSyncAvailableProvider))
+            ListTile(
+              key: const Key('settings-webhooks'),
+              leading: const Icon(Icons.webhook),
+              title: Text(tr('Webhooks')),
+              subtitle: Text(tr('Tell Zapier, Make or your ERP the moment something changes')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => WebhooksScreen(companyId: company.id))),
             ),
           if (company != null && session.canManageSettings) ...[
             const SectionHeader('Bills and reports', padding: EdgeInsets.fromLTRB(20, 16, 20, 4)),
