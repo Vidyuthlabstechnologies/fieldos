@@ -98,6 +98,12 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     // Suppliers and site clients too (owner's ask, 10 Nov 2026).
     if (session.role == Roles.supplier && session.activeCompany != null) return const SupplierHomeScreen();
     if (session.role == Roles.client && session.activeCompany != null) return const ClientHomeScreen();
-    return SubscriptionGate(child: session.needsCompany ? const CompanySetupScreen() : const HomeScreen());
+    // Company setup comes before the paywall: someone invited by their
+    // employer joins with the code first, and their company's plan (if it
+    // has one) then lets them straight in, instead of the trial offer
+    // being the first thing a new site engineer sees. Naming a company
+    // unlocks nothing, so it needs no subscription.
+    if (session.needsCompany) return const CompanySetupScreen();
+    return const SubscriptionGate(child: HomeScreen());
   }
 }

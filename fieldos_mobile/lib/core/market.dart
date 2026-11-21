@@ -558,3 +558,6 @@ const marketPrices = <Market, MarketPrice>{
 };
 
 MarketPrice get marketPrice => marketPrices[currentMarket]!;
+
+/// This country's app on Google Play (each market is its own listing).
+String get playStoreLink => 'https://play.google.com/store/apps/details?id=${currentMarket.appId}';
