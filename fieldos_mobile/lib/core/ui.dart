@@ -68,7 +68,7 @@ String? _cloudAuthMessage(sb.AuthException e) {
     case 'over_email_send_rate_limit' || 'over_request_rate_limit' || 'over_sms_send_rate_limit':
       return tr('Too many tries in a short time. Wait a few minutes, then try again.');
     case 'signup_disabled':
-      return tr('New cloud accounts are switched off for now. Write to us at the support address and we will help.');
+      return tr('That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.');
     case 'email_address_invalid' || 'email_address_not_authorized':
       return tr('That email address cannot be used. Check it, or try another.');
     case 'session_expired' || 'session_not_found' || 'refresh_token_not_found' || 'refresh_token_already_used':
