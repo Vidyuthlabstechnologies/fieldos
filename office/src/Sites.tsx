@@ -4,6 +4,7 @@ import {
   lastCompany,
   loadCompanies,
   loadSites,
+  managesCompany,
   matchesSearch,
   rememberCompany,
   type Company,
@@ -12,6 +13,7 @@ import {
 import { day } from './format';
 import { siteHref } from './route';
 import { roleLabel, statusLabel, t } from './strings';
+import { CompanyMoney } from './CompanyMoney';
 
 type Load<T> = { state: 'loading' } | { state: 'error' } | { state: 'ready'; value: T };
 
@@ -134,6 +136,9 @@ export function Sites({ db, session }: { db: SupabaseClient; session: Session })
                   ))}
                 </tbody>
               </table>
+            )}
+            {sites.state === 'ready' && managesCompany(company.role) && (
+              <CompanyMoney key={company.id} db={db} companyName={company.name} sites={sites.value} />
             )}
           </>
         )}

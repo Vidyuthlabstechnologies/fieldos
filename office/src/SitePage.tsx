@@ -15,10 +15,11 @@ import {
 } from './rules';
 import { day } from './format';
 import { label, statusLabel, t } from './strings';
+import { MoneyTab } from './Money';
 
 type Load = { state: 'loading' } | { state: 'error' } | { state: 'ready'; site: Site | null; reg: Registers };
 
-const TABS = ['rfis', 'submittals', 'defects', 'drawings'] as const;
+const TABS = ['rfis', 'submittals', 'defects', 'drawings', 'money'] as const;
 type Tab = (typeof TABS)[number];
 
 export function SitePage({ db, session, id, tab }: { db: SupabaseClient; session: Session; id: string; tab: string }) {
@@ -60,7 +61,7 @@ export function SitePage({ db, session, id, tab }: { db: SupabaseClient; session
         )}
         {load.state === 'ready' && !load.site && <p data-testid="site-not-found">{t.siteNotFound}</p>}
         {load.state === 'ready' && load.site && (
-          <SiteBody site={load.site} reg={load.reg} tab={current} now={now} showClosed={showClosed} setShowClosed={setShowClosed} />
+          <SiteBody db={db} site={load.site} reg={load.reg} tab={current} now={now} showClosed={showClosed} setShowClosed={setShowClosed} />
         )}
       </main>
     </>
@@ -68,6 +69,7 @@ export function SitePage({ db, session, id, tab }: { db: SupabaseClient; session
 }
 
 function SiteBody(props: {
+  db: SupabaseClient;
   site: Site;
   reg: Registers;
   tab: Tab;
@@ -75,7 +77,7 @@ function SiteBody(props: {
   showClosed: boolean;
   setShowClosed: (v: boolean) => void;
 }) {
-  const { site, reg, tab, now, showClosed, setShowClosed } = props;
+  const { db, site, reg, tab, now, showClosed, setShowClosed } = props;
   const s = summary(reg, now);
   const tiles: { tab: Tab; title: string; big: number; lines: [number, string, boolean?][] }[] = [
     { tab: 'rfis', title: t.rfis, big: s.rfisOpen, lines: [[s.rfisOpen, t.open], [s.rfisOverdue, t.overdue, true]] },
@@ -127,7 +129,7 @@ function SiteBody(props: {
           </a>
         ))}
         <span className="spacer" />
-        {tab !== 'drawings' && (
+        {tab !== 'drawings' && tab !== 'money' && (
           <label className="check">
             <input type="checkbox" checked={showClosed} onChange={(e) => setShowClosed(e.target.checked)} data-testid="show-closed" />
             {t.showClosed}
@@ -138,6 +140,7 @@ function SiteBody(props: {
       {tab === 'submittals' && <SubmittalTable reg={reg} now={now} showClosed={showClosed} />}
       {tab === 'defects' && <DefectTable reg={reg} now={now} showClosed={showClosed} />}
       {tab === 'drawings' && <DrawingTable reg={reg} />}
+      {tab === 'money' && <MoneyTab db={db} site={site} />}
     </>
   );
 }
