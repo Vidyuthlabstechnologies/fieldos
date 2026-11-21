@@ -891,11 +891,16 @@ class SyncEngine {
   /// server does not have: a site or task saved meanwhile is not there yet.
   ///
   /// The sites those records are in count too, so a site no longer shared
-  /// is not removed (with everything in it) while it has unsent work.
+  /// is not removed (with everything in it) while it has unsent work not
+  /// yet tried on the server.
   Future<Set<String>> _queuedIds() async {
     final out = <String>{};
     for (final e in await db.select(db.syncOutbox).get()) {
       out.add(e.recordId);
+      // Work the server has already refused (removed from the company, the
+      // row gone) can never be sent, so it does not hold the site on the
+      // phone; the incremental_pull cloud test covers that case.
+      if (e.retryCount > 0) continue;
       final payload = jsonDecode(e.payload);
       if (payload is! Map<String, dynamic>) continue;
       final site = await _siteOf(e.targetTable, payload);
