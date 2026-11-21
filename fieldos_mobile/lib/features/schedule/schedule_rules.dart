@@ -19,10 +19,14 @@ int _days(DateTime a, DateTime b) => b.difference(a).inDays;
 
 /// "Earlier work" link: [to] starts only after [from] is done.
 class ScheduleLink {
-  const ScheduleLink({required this.id, required this.from, required this.to});
+  ScheduleLink({required this.id, required this.from, required this.to, List<String>? ids}) : ids = ids ?? [id];
 
   /// The constraint row the link is stored as.
   final String id;
+
+  /// Every row in force for this pair: two phones can each add the same
+  /// link offline, and removing it has to clear them all.
+  final List<String> ids;
   final String from;
   final String to;
 }
@@ -32,18 +36,23 @@ class ScheduleLink {
 /// bar still sits before the task.
 List<ScheduleLink> scheduleLinks(Iterable<Task> tasks, Iterable<TaskConstraint> constraints) {
   final ids = {for (final t in tasks) t.id};
-  final seen = <(String, String)>{};
-  return [
-    for (final c in constraints)
-      if (c.kind == 'predecessor' &&
-          c.clearedAt == null &&
-          c.linkId != null &&
-          c.linkId != c.taskId &&
-          ids.contains(c.linkId) &&
-          ids.contains(c.taskId) &&
-          seen.add((c.linkId!, c.taskId)))
-        ScheduleLink(id: c.id, from: c.linkId!, to: c.taskId),
-  ];
+  final byPair = <(String, String), ScheduleLink>{};
+  for (final c in constraints) {
+    if (c.kind == 'predecessor' &&
+        c.clearedAt == null &&
+        c.linkId != null &&
+        c.linkId != c.taskId &&
+        ids.contains(c.linkId) &&
+        ids.contains(c.taskId)) {
+      final same = byPair[(c.linkId!, c.taskId)];
+      if (same == null) {
+        byPair[(c.linkId!, c.taskId)] = ScheduleLink(id: c.id, from: c.linkId!, to: c.taskId);
+      } else {
+        same.ids.add(c.id);
+      }
+    }
+  }
+  return byPair.values.toList();
 }
 
 /// Would a link making [to] wait for [from] close a loop (directly or
@@ -160,21 +169,40 @@ Schedule buildSchedule(List<Task> tasks, List<TaskConstraint> constraints, DateT
     succs.putIfAbsent(l.from, () => []).add(l.to);
   }
 
-  // Kahn's order; whatever is left in a loop goes last, its loop links
-  // ignored (the phone refuses new ones, but rows can arrive from sync).
+  // Kahn's order. A loop (the phone refuses new ones, but rows can arrive
+  // from sync) is broken at its first task: the link into it is ignored,
+  // and everything after the loop still waits for what it is linked to.
+  // (Appending the loop's leftovers in list order dropped the links of
+  // tasks merely downstream of it.)
   final indegree = {for (final t in dated) t.id: (preds[t.id] ?? const []).length};
   final queue = [for (final t in dated) if (indegree[t.id] == 0) t.id];
   final order = <String>[];
-  while (queue.isNotEmpty) {
+  final placed = <String>{};
+  bool onLoop(String id) {
+    final stack = [...?succs[id]];
+    final seen = <String>{};
+    while (stack.isNotEmpty) {
+      final x = stack.removeLast();
+      if (x == id) return true;
+      if (placed.contains(x) || !seen.add(x)) continue;
+      stack.addAll(succs[x] ?? const []);
+    }
+    return false;
+  }
+
+  while (order.length < dated.length) {
+    if (queue.isEmpty) {
+      final rest = [for (final t in dated) if (!placed.contains(t.id)) t.id];
+      queue.add(rest.firstWhere(onLoop, orElse: () => rest.first));
+    }
     final id = queue.removeAt(0);
+    if (!placed.add(id)) continue;
     order.add(id);
     for (final s in succs[id] ?? const <String>[]) {
       indegree[s] = indegree[s]! - 1;
-      if (indegree[s] == 0) queue.add(s);
+      if (indegree[s] == 0 && !placed.contains(s)) queue.add(s);
     }
   }
-  final placed = order.toSet();
-  order.addAll([for (final t in dated) if (!placed.contains(t.id)) t.id]);
 
   final taskById = {for (final t in dated) t.id: t};
   final out = <String, ScheduledTask>{};

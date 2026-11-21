@@ -69,7 +69,9 @@ void main() {
   });
 
   test('lets people in while covered; the server saying "none" ends it at once', () async {
-    final now = DateTime(2027, 3, 31, 18);
+    // 17:30 in India on the plan's last day (plans end on India days),
+    // whatever zone the test machine is in.
+    final now = DateTime.utc(2027, 3, 31, 12);
     expect(await service.access(live: const [], now: now), Access.blocked);
     expect(await service.access(live: [sitePro()], now: now), Access.allowed);
     // Never heard of a plan: blocked offline, not read-only.
@@ -95,9 +97,10 @@ void main() {
     test("never past the plan's last day", () async {
       // The plan covers through 12 January: 2 days, not 7.
       await service.remember([sitePro(endsOn: DateTime(2027, 1, 12))], checkedAt: checked);
-      expect(await service.access(live: null, now: DateTime(2027, 1, 12, 23, 59)), Access.allowed);
-      expect(await service.access(live: null, now: DateTime(2027, 1, 13)), Access.readOnly);
-      expect(await service.readOnlyReason(DateTime(2027, 1, 13)), ReadOnlyReason.planEnded);
+      // Through the 12th in India time: midnight there is 18:30 UTC.
+      expect(await service.access(live: null, now: DateTime.utc(2027, 1, 12, 18, 29)), Access.allowed);
+      expect(await service.access(live: null, now: DateTime.utc(2027, 1, 12, 18, 30)), Access.readOnly);
+      expect(await service.readOnlyReason(DateTime.utc(2027, 1, 12, 18, 30)), ReadOnlyReason.planEnded);
     });
 
     test('a clock set back past the last answer is read-only; a small correction is not', () async {

@@ -288,14 +288,21 @@ String amountInWords(double amount) {
   final minorTotal = (amount.abs() * 100).round();
   final major = minorTotal ~/ 100, minor = minorTotal % 100;
   final m = market;
+  // Below zero says so, as money() writes "-₹"; float dust is zero.
+  final sign = amount < 0 && minorTotal > 0 ? 'Minus ' : '';
   if (m.currencyWordsFirst) {
-    final words = '${m.majorUnitWords} ${numberWords(major)}';
+    final words = '$sign${m.majorUnitWords} ${numberWords(major)}';
     if (m.minorWordsFirst && minor != 0) return '$words and ${m.minorUnitWords} ${_belowHundred(minor)} Only';
     return minor == 0 ? '$words Only' : '$words and ${_belowHundred(minor)} ${m.minorUnitWords} Only';
   }
-  final words = '${numberWords(major)} ${m.majorUnitWords}';
-  return minor == 0 ? '$words Only' : '$words and ${_belowHundred(minor)} ${m.minorUnitWords} Only';
+  final words = '$sign${numberWords(major)} ${_unitAfter(major, m.majorUnitWords)}';
+  return minor == 0 ? '$words Only' : '$words and ${_belowHundred(minor)} ${_unitAfter(minor, m.minorUnitWords)} Only';
 }
+
+/// "One Dollar", "One Cent", "One Pound", "One Penny": where the unit comes
+/// after the figure (US, UK), a figure of one takes the singular.
+const _singularUnits = {'Dollars': 'Dollar', 'Cents': 'Cent', 'Pounds': 'Pound', 'Pence': 'Penny'};
+String _unitAfter(int n, String plural) => n == 1 ? (_singularUnits[plural] ?? plural) : plural;
 
 /// [amountInWords] under its older name; follows the build's market.
 String rupeesInWords(double amount) => amountInWords(amount);

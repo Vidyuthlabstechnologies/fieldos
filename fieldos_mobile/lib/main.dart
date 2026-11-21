@@ -35,7 +35,7 @@ void main() {
     yield LicenseEntryWithLineBreaks(const ['Inter (font)'], await rootBundle.loadString('assets/fonts/OFL.txt'));
   });
   final problems =
-      storeRelease ? storeReleaseProblems(cloud: SyncConfig.production, billingKey: BillingConfig.keyForThisDevice) : const <String>[];
+      storeRelease ? storeReleaseProblems(cloud: SyncConfig.production, billingKey: BillingConfig.keyForThisDevice, ios: defaultTargetPlatform == TargetPlatform.iOS) : const <String>[];
   if (problems.isNotEmpty) {
     runApp(BrokenBuildApp(problems: problems));
     return;

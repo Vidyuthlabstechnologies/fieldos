@@ -18,7 +18,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:drift/drift.dart' show Value, Variable;
+import 'package:drift/drift.dart' show DriftSqlType, Value, Variable;
 import 'package:http/http.dart' show ClientException;
 import 'package:supabase/supabase.dart';
 
@@ -448,7 +448,7 @@ class SyncEngine {
 
   Future<void> _pullAll() => _synchronized(() async {
         final dirty = await db.syncOutboxDao.dirtyKeys();
-        final keep = {...dirty.map((k) => k.substring(k.indexOf(':') + 1)), ...await db.syncOutboxDao.localOnlyIds()};
+        final keep = {...await _queuedIds(), ...await db.syncOutboxDao.localOnlyIds()};
         final cursorKey = 'sync_cursor:${client.auth.currentUser?.id}';
         final cursor = int.tryParse(await db.settingsDao.get(cursorKey) ?? '');
         // Where the next read of the log starts (see _pullChanges): at or
@@ -720,11 +720,25 @@ class SyncEngine {
         .customSelect('SELECT * FROM $local WHERE id = ?', variables: [Variable<String>(row['id'] as String)])
         .getSingleOrNull();
     if (mine == null) return null;
+    // The raw SQLite value is not the server's JSON shape: a date is stored
+    // as seconds and a yes/no as 0/1. Put them back the way a server row
+    // carries them, or the mapper cannot read them and the kept value is
+    // dropped.
+    final types = {
+      for (final t in db.allTables)
+        if (t.actualTableName == local)
+          for (final c in t.$columns) c.name: c.type,
+    };
     Map<String, dynamic>? out;
     for (final c in lacks) {
       final v = mine.data[c];
       if (v == null || row.containsKey(c)) continue;
-      (out ??= Map.of(row))[c] = v;
+      final type = types[c];
+      (out ??= Map.of(row))[c] = switch (type) {
+        DriftSqlType.dateTime => (db.typeMapping.read(DriftSqlType.dateTime, v) as DateTime).toUtc().toIso8601String(),
+        DriftSqlType.bool => db.typeMapping.read(DriftSqlType.bool, v),
+        _ => v,
+      };
     }
     return out;
   }
@@ -749,6 +763,7 @@ class SyncEngine {
     }
     final sites = seen['projects'] ?? const <String>{};
     if (sites.isEmpty) return;
+    keep = {...keep, ...await _queuedIds()};
     final marks = List.filled(sites.length, '?').join(',');
     for (final MapEntry(key: remote, value: local) in localTableNames.entries) {
       if (!_projectScoped.contains(remote) || !seen.containsKey(remote)) continue;
@@ -859,6 +874,7 @@ class SyncEngine {
     final linked = (jsonDecode(raw) as List).cast<String>();
     if (linked.isEmpty) return;
     final visible = {for (final r in await _fetchIds('projects')) r};
+    keep = {...keep, ...await _queuedIds()};
     final marks = List.filled(linked.length, '?').join(',');
     final local = await db
         .customSelect('SELECT id FROM projects WHERE company_id IN ($marks)',
@@ -868,6 +884,48 @@ class SyncEngine {
       final id = r.read<String>('id');
       if (!visible.contains(id) && !keep.contains(id)) await _deleteLocal('projects', id);
     }
+  }
+
+  /// Records queued now. The person keeps working while a pull runs, so
+  /// what was queued when it started is not enough before removing rows the
+  /// server does not have: a site or task saved meanwhile is not there yet.
+  ///
+  /// The sites those records are in count too, so a site no longer shared
+  /// is not removed (with everything in it) while it has unsent work not
+  /// yet tried on the server.
+  Future<Set<String>> _queuedIds() async {
+    final out = <String>{};
+    for (final e in await db.select(db.syncOutbox).get()) {
+      out.add(e.recordId);
+      // Work the server has already refused (removed from the company, the
+      // row gone) can never be sent, so it does not hold the site on the
+      // phone; the incremental_pull cloud test covers that case.
+      if (e.retryCount > 0) continue;
+      final payload = jsonDecode(e.payload);
+      if (payload is! Map<String, dynamic>) continue;
+      final site = await _siteOf(e.targetTable, payload);
+      if (site != null) out.add(site);
+    }
+    return out;
+  }
+
+  /// The site a record is in: its project_id, or its parent's
+  /// ([_children]) for a photo, bill or line under another record.
+  Future<String?> _siteOf(String table, Map<String, dynamic> row) async {
+    if (table == 'projects') return row['id'] as String?;
+    for (var depth = 0; depth < 4; depth++) {
+      final site = row['project_id'];
+      if (site is String) return site;
+      final link = _children.where((c) => c.$1 == table).firstOrNull;
+      final parentId = link == null ? null : row[link.$3];
+      if (link == null || parentId is! String) return null;
+      final parent = await db
+          .customSelect('SELECT * FROM ${localTableNames[link.$2]} WHERE id = ?', variables: [Variable<String>(parentId)])
+          .getSingleOrNull();
+      if (parent == null) return null;
+      (table, row) = (link.$2, parent.data);
+    }
+    return null;
   }
 
   Future<List<String>> _fetchIds(String table) async =>

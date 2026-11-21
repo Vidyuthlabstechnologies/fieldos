@@ -21,6 +21,7 @@ const storeRelease = bool.fromEnvironment('FIELDOS_STORE_RELEASE');
 List<String> storeReleaseProblems({
   required SyncConfig cloud,
   required String? billingKey,
+  bool? ios,
 }) {
   final problems = <String>[];
   if (!cloud.isConfigured) {
@@ -35,6 +36,12 @@ List<String> storeReleaseProblems({
     problems.add('RevenueCat key for this platform missing (REVENUECAT_ANDROID_KEY / REVENUECAT_IOS_KEY)');
   } else if (!billingKey.startsWith('goog_') && !billingKey.startsWith('appl_')) {
     problems.add('RevenueCat key is not a public store SDK key (goog_... or appl_...)');
+  } else if (ios != null && !billingKey.startsWith(ios ? 'appl_' : 'goog_')) {
+    // [ios]: the platform this build runs on. The other store's key
+    // configures, then no plan ever loads.
+    problems.add(ios
+        ? 'RevenueCat key is not the App Store one (REVENUECAT_IOS_KEY, appl_...)'
+        : 'RevenueCat key is not the Google Play one (REVENUECAT_ANDROID_KEY, goog_...)');
   }
   return problems;
 }
