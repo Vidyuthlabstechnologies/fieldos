@@ -36,7 +36,9 @@ import 'package:fieldos_mobile/features/support/bug_report_screen.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
+import 'package:fieldos_mobile/features/onboarding/get_started.dart';
 import 'package:fieldos_mobile/features/onboarding/sample_project.dart';
+import 'package:fieldos_mobile/features/subscription/trial_notice.dart';
 import 'package:fieldos_mobile/features/money/money_view.dart' show canSeeMoneyIn;
 import 'package:fieldos_mobile/features/procurement/payables_screen.dart';
 import 'package:fieldos_mobile/features/search/search_screen.dart';
@@ -301,6 +303,7 @@ class HomeScreen extends ConsumerWidget {
                         projects: projects,
                         userName: session.user?.name,
                         onTour: () => _tour(context, ref, company.id),
+                        onNewSite: () => _newProject(context, ref, company.id),
                       ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, st) => ErrorState(error: e, stack: st, onRetry: () => ref.invalidate(projectsProvider(company.id))),
@@ -375,12 +378,19 @@ class _CompanyTitle extends ConsumerWidget {
 }
 
 class _ProjectList extends StatelessWidget {
-  const _ProjectList({required this.company, required this.projects, required this.userName, required this.onTour});
+  const _ProjectList({
+    required this.company,
+    required this.projects,
+    required this.userName,
+    required this.onTour,
+    required this.onNewSite,
+  });
 
   final Company company;
   final List<Project> projects;
   final String? userName;
   final VoidCallback onTour;
+  final Future<void> Function() onNewSite;
 
   static const _weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -419,6 +429,9 @@ class _ProjectList extends StatelessWidget {
           ]),
         ),
         const AppUpdateBanner(),
+        const TrialNoticeCard(),
+        // A new company's first few steps, until they are done or closed.
+        GetStartedCard(companyId: company.id, onNewSite: onNewSite),
         // The day's four jobs as big picture buttons, one tap each.
         QuickActions(projects: projects),
         // The day's report: what is still to send (or, for a manager, which

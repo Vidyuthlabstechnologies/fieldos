@@ -81,8 +81,9 @@ void main() {
         ));
       }
     });
-    // Tall enough that the picture buttons leave every project on screen.
-    await pumpApp(tester, container, const HomeScreen(), size: const Size(412, 1400));
+    // Tall enough that the picture buttons and the getting-started
+    // checklist leave every project on screen.
+    await pumpApp(tester, container, const HomeScreen(), size: const Size(412, 2000));
     expect(find.textContaining('Ravi'), findsOneWidget);
     expect(find.textContaining('1 active site'), findsOneWidget);
     final towerY = tester.getTopLeft(find.text('Tower B')).dy;

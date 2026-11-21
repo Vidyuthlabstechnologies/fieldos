@@ -148,9 +148,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       await widget.onCompanyLinked?.call();
       if (!mounted) return;
       setState(() => _error = ref.read(cloudSyncServiceProvider).isSignedIn
-          ? 'No company plan was found for this account. Join your company with the code from its owner, or '
-              'sign in with the email the plan is under.'
-          : 'Sign in to your company first, then FieldOS opens by itself.');
+          ? tr('No company plan was found for this account. Join your company with the code from its owner, or '
+              'sign in with the email the plan is under.')
+          : tr('Sign in to your company first, then FieldOS opens by itself.'));
     });
   }
 

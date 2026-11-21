@@ -28,6 +28,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/app_database.dart' hide Store;
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/services/subscription_access.dart';
@@ -37,8 +38,9 @@ export 'package:fieldos_mobile/services/subscription_access.dart';
 /// The RevenueCat entitlement every product unlocks.
 const entitlementId = 'fieldos_pro';
 
-/// The Android application id, for the Play subscriptions page.
-const androidPackageName = 'com.mldynamic.fieldos';
+/// This country's Android application id, for the Play subscriptions
+/// page (each market is its own app: com.mldynamic.fieldos.us and so on).
+String get androidPackageName => currentMarket.appId;
 
 /// What an access code becomes in RevenueCat. The prefix keeps typed codes
 /// apart from real customers, so a code can only ever open a customer the
