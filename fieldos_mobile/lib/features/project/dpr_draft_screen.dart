@@ -416,6 +416,9 @@ class _DprDraftScreenState extends ConsumerState<DprDraftScreen> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.file(File(p), width: 92, height: 92, fit: BoxFit.cover,
+                              // Decoded at thumbnail size: a full photo per
+                              // thumbnail ran a cheap phone out of memory.
+                              cacheWidth: (92 * MediaQuery.devicePixelRatioOf(context)).ceil(),
                               errorBuilder: (_, _, _) => Container(width: 92, height: 92, color: theme.colorScheme.surfaceContainer)),
                         ),
                         PositionedDirectional(

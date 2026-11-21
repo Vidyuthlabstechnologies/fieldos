@@ -12,6 +12,7 @@ import 'package:drift/native.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:sqlite3/common.dart' as sqlite3 show CommonDatabase;
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/core/format.dart' show fmtQty;
@@ -145,6 +146,48 @@ class AppDatabase extends _$AppDatabase {
   /// the person's data is refused; settings and server sync still write.
   final WriteGuard writeGuard;
 
+  /// A database in [file], set up as on the phone (tests and benchmarks).
+  static QueryExecutor openFile(File file) => NativeDatabase(file, setup: tuneConnection);
+
+  /// Write-ahead log: a save no longer rewrites a rollback journal and
+  /// waits on several storage flushes (slow on a cheap phone's eMMC), and
+  /// screens keep reading while sync writes. synchronous=NORMAL is the
+  /// usual partner of WAL (Android's own default for it): a power cut can
+  /// lose the last moments' commits, never corrupt the file. Backups use
+  /// VACUUM INTO and restore/erase already clear -wal/-shm, so both work
+  /// unchanged.
+  static void tuneConnection(sqlite3.CommonDatabase raw) {
+    raw.execute('PRAGMA journal_mode=WAL');
+    raw.execute('PRAGMA synchronous=NORMAL');
+  }
+
+  /// Columns screens and sync look rows up by. The tables had no indexes
+  /// at all besides their ids, so every "this site's expenses" read the
+  /// whole table, which grows with every site and month on the phone.
+  static const lookupColumns = {
+    'project_id', 'company_id', 'dpr_entry_id', 'equipment_id', 'inspection_id', 'cost_head_id',
+    'estimation_id', 'expense_id', 'receipt_id', 'lead_id', 'tool_id', 'staff_id', 'task_id',
+  };
+
+  /// Creates any lookup index that is missing (one quick read of the
+  /// schema when none is). Not tied to a schema version: it also covers
+  /// tables added later, and never clashes with another change's version.
+  Future<void> ensureLookupIndexes() async {
+    final have = {
+      for (final r in await customSelect("SELECT name FROM sqlite_master WHERE type = 'index'").get()) r.read<String>('name')
+    };
+    for (final table in allTables) {
+      for (final column in table.$columns) {
+        if (!lookupColumns.contains(column.name)) continue;
+        // Already the leading column of the primary key.
+        if (table.$primaryKey.isNotEmpty && table.$primaryKey.first.name == column.name) continue;
+        final name = 'idx_${table.actualTableName}_${column.name}';
+        if (have.contains(name)) continue;
+        await customStatement('CREATE INDEX IF NOT EXISTS "$name" ON "${table.actualTableName}" ("${column.name}")');
+      }
+    }
+  }
+
   static QueryExecutor _openDefault() => driftDatabase(
               name: 'fieldos',
               // Web options are required by the constructor but ignored on
@@ -155,6 +198,7 @@ class AppDatabase extends _$AppDatabase {
                 driftWorker: Uri.parse('drift_worker.js'),
               ),
               native: DriftNativeOptions(
+                setup: tuneConnection,
                 // Centralised under the app's documents dir, mirroring the
                 // desktop app's app-data layout (fieldos/paths.py).
                 databasePath: () async {
@@ -428,6 +472,7 @@ class AppDatabase extends _$AppDatabase {
             await _createTableIfMissing(m, submittals);
           }
         },
+        beforeOpen: (details) => ensureLookupIndexes(),
       );
 
   /// Before v15 a delivery photo was kept as `Photo: <path>` in the
@@ -1817,6 +1862,19 @@ class AttendanceDao extends DatabaseAccessor<AppDatabase> with _$AttendanceDaoMi
         ..orderBy([(a) => OrderingTerm.desc(a.punchIn)]))
       .get();
 
+  /// Punches from the day before [day] to the day after, newest first: a
+  /// day's view needs only these, not the site's whole history (thousands
+  /// of rows a year). The margin keeps any time-zone edge in; callers still
+  /// pick the exact day themselves.
+  Future<List<LabourAttendanceData>> aroundDay(String projectId, DateTime day) {
+    final from = DateTime(day.year, day.month, day.day - 1);
+    final to = DateTime(day.year, day.month, day.day + 2);
+    return (select(labourAttendance)
+          ..where((a) => a.projectId.equals(projectId) & a.punchIn.isBiggerOrEqualValue(from) & a.punchIn.isSmallerThanValue(to))
+          ..orderBy([(a) => OrderingTerm.desc(a.punchIn)]))
+        .get();
+  }
+
   /// One id per worker per day on every phone, so two people marking the
   /// same worker's day end up with one row, the later mark winning.
   static String markId(String projectId, String workerId, String day) =>
@@ -2478,6 +2536,8 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
 
   Future<void> markSynced(int id) => (delete(syncOutbox)..where((o) => o.id.equals(id))).go();
 
+  Future<void> markAllSynced(List<int> ids) => (delete(syncOutbox)..where((o) => o.id.isIn(ids))).go();
+
   Future<void> recordFailure(int id, String error) async {
     final row = await (select(syncOutbox)..where((o) => o.id.equals(id))).getSingleOrNull();
     if (row == null) return;
@@ -2502,14 +2562,23 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
   Future<void> noteTransientFailure(int id, String error) =>
       (update(syncOutbox)..where((o) => o.id.equals(id))).write(SyncOutboxCompanion(lastError: Value(error)));
 
-  Future<int> pendingCount() async {
-    final rows = await pending();
-    return rows.length;
-  }
+  /// Counted by the database: the status line asks often, and loading
+  /// every waiting row (payloads and all) just to count them was slow on a
+  /// phone that had been offline for days.
+  Future<int> pendingCount() => _count(syncOutbox.retryCount.isSmallerThanValue(syncOutboxMaxRetries));
 
   /// Rows parked after [syncOutboxMaxRetries] failures, for the sync
   /// status UI -- these will not be retried automatically.
-  Future<int> parkedCount() async => (await parked()).length;
+  Future<int> parkedCount() => _count(syncOutbox.retryCount.isBiggerOrEqualValue(syncOutboxMaxRetries));
+
+  Future<int> _count(Expression<bool> where) async {
+    final n = syncOutbox.id.count();
+    final row = await (selectOnly(syncOutbox)
+          ..addColumns([n])
+          ..where(where))
+        .getSingle();
+    return row.read(n) ?? 0;
+  }
 
   static String key(String table, String recordId) => '$table:$recordId';
 
