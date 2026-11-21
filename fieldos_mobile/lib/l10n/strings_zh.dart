@@ -381,7 +381,8 @@ const stringsZh = <String, String>{
   'Sign out': '登出',
   'Delete my cloud account': '删除我的云端账户',
   'Sign in to share projects, daily reports, issues and chat with your team.': '登录以便与团队分享项目、每日报告、问题和聊天。',
-  'Use your own email. A new email creates an account automatically.': '请使用你自己的电邮。新电邮会自动创建账户。',
+  'New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.':
+      '第一次使用 FieldOS 云端？请使用 Google 继续，或在 iPhone 上使用 Apple。邮箱和密码只用于已有的账户。',
   'Choose a new password': '设定新密码',
   'Check your email': '请查看你的电邮',
   'Code from the email': '电邮中的验证码',
@@ -639,6 +640,7 @@ const stringsZh = <String, String>{
   'Apple sign-in did not go through. Please try again.': 'Apple 登录未成功，请再试一次。',
   'Apple did not share an email address. Please try again, or use a username and password.': 'Apple 没有提供电邮地址。请再试一次，或使用用户名和密码。',
   'Continue with Google': '使用 Google 继续',
+  'or, with an account you already have': '或者，使用已有的账户',
   'More details (optional)': '更多详情（可选）',
   'Report': '举报',
   'Report this message': '举报这条消息',
@@ -1123,7 +1125,8 @@ const stringsZh = <String, String>{
   'Manage or cancel': '管理或取消',
   'Monthly': '每月',
   'Need help? {email}': '需要帮助？{email}',
-  'New cloud accounts are switched off for now. Write to us at the support address and we will help.': '暂时不开放新的云端账户。请写信到客服地址，我们会帮你。',
+  'That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.':
+      '这个邮箱和密码没有打开任何账户。新账户请用“使用 Google 继续”创建，或在 iPhone 上用“使用 Apple 登录”。如果你已有账户，请检查密码。',
   'No FieldOS subscription was found on this {store} account.': '这个 {store} 账户没有 FieldOS 订阅。',
   'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.': '这个 {store} 账户没有 FieldOS 订阅。如果你用另一个账户订阅，请在 {store} 切换到那个账户再试。',
   'No internet connection. Your work is saved on this phone; try again when you are online.': '没有网络。你的工作已保存在这部手机上；上线后再试。',

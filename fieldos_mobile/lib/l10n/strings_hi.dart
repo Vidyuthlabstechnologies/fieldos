@@ -428,8 +428,8 @@ const Map<String, String> stringsHi = {
   'Delete my cloud account': 'मेरा क्लाउड खाता हटाएँ',
   'Sign in to share projects, daily reports, issues and chat with your team.':
       'प्रोजेक्ट, दैनिक रिपोर्ट, समस्याएँ और चैट अपनी टीम के साथ बाँटने के लिए साइन इन करें।',
-  'Use your own email. A new email creates an account automatically.':
-      'अपना ईमेल इस्तेमाल करें। नए ईमेल से खाता अपने आप बन जाता है।',
+  'New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.':
+      'FieldOS क्लाउड में नए हैं? Google से जारी रखें, या iPhone पर Apple से। ईमेल और पासवर्ड पहले से बने खाते के लिए है।',
   'Choose a new password': 'नया पासवर्ड चुनें',
   'Check your email': 'अपना ईमेल देखें',
   'Code from the email': 'ईमेल में आया कोड',
@@ -691,6 +691,7 @@ const Map<String, String> stringsHi = {
   'Apple sign-in did not go through. Please try again.': 'Apple साइन-इन नहीं हुआ। फिर से कोशिश करें।',
   'Apple did not share an email address. Please try again, or use a username and password.': 'Apple ने ईमेल पता नहीं दिया। फिर से कोशिश करें, या यूज़रनेम और पासवर्ड से लॉग इन करें।',
   'Continue with Google': 'Google से जारी रखें',
+  'or, with an account you already have': 'या, पहले से बने खाते से',
   'More details (optional)': 'और जानकारी (वैकल्पिक)',
   'Report': 'रिपोर्ट करें',
   'Report this message': 'इस संदेश की रिपोर्ट करें',
@@ -1361,8 +1362,8 @@ const Map<String, String> stringsHi = {
       'मासिक',
   'Need help? {email}':
       'मदद चाहिए? {email}',
-  'New cloud accounts are switched off for now. Write to us at the support address and we will help.':
-      'नए क्लाउड खाते अभी बंद हैं। सपोर्ट पते पर हमें लिखें, हम मदद करेंगे।',
+  'That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.':
+      'इस ईमेल और पासवर्ड से कोई खाता नहीं खुला। नए खाते "Google से जारी रखें" से बनते हैं, या iPhone पर "Apple से साइन इन करें" से। अगर आपका खाता पहले से है, तो पासवर्ड जाँचें।',
   'No FieldOS subscription was found on this {store} account.':
       'इस {store} खाते पर FieldOS सदस्यता नहीं मिली।',
   'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.':

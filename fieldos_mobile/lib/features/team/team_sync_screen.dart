@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/features/auth/cloud_sign_in_buttons.dart';
+
 import 'package:fieldos_mobile/core/digits_input.dart';
 import 'package:fieldos_mobile/features/tasks/team_roster.dart';
 import 'package:share_plus/share_plus.dart';
@@ -435,9 +437,17 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         Text(tr('Sign in to share projects, daily reports, issues and chat with your team.'),
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        Text(tr('Use your own email. A new email creates an account automatically.'),
+        Text(tr('New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.'),
             style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         const SizedBox(height: 16),
+        CloudSignInButtons(
+          enabled: !_busy,
+          onSignedIn: () => _run(() async {
+            _say(trf('Signed in as {email}.', {'email': ref.read(cloudSyncServiceProvider).email ?? ''}));
+            await _afterSignIn();
+          }),
+          onError: (m) => _say(m, error: true),
+        ),
         TextField(
           controller: _email,
           decoration: InputDecoration(labelText: tr('Email'), prefixIcon: Icon(Icons.alternate_email)),

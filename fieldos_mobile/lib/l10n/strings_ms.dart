@@ -381,7 +381,8 @@ const stringsMs = <String, String>{
   'Sign out': 'Log keluar',
   'Delete my cloud account': 'Padam akaun awan saya',
   'Sign in to share projects, daily reports, issues and chat with your team.': 'Log masuk untuk berkongsi projek, laporan harian, isu dan sembang dengan pasukan anda.',
-  'Use your own email. A new email creates an account automatically.': 'Gunakan e-mel anda sendiri. E-mel baharu akan membuat akaun secara automatik.',
+  'New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.':
+      'Baharu dengan awan FieldOS? Teruskan dengan Google, atau Apple pada iPhone. E-mel dan kata laluan adalah untuk akaun yang anda sudah ada.',
   'Choose a new password': 'Pilih kata laluan baharu',
   'Check your email': 'Semak e-mel anda',
   'Code from the email': 'Kod daripada e-mel',
@@ -639,6 +640,7 @@ const stringsMs = <String, String>{
   'Apple sign-in did not go through. Please try again.': 'Log masuk Apple tidak berjaya. Sila cuba lagi.',
   'Apple did not share an email address. Please try again, or use a username and password.': 'Apple tidak berkongsi alamat e-mel. Sila cuba lagi, atau gunakan nama pengguna dan kata laluan.',
   'Continue with Google': 'Teruskan dengan Google',
+  'or, with an account you already have': 'atau, dengan akaun yang anda sudah ada',
   'More details (optional)': 'Butiran lanjut (pilihan)',
   'Report': 'Laporkan',
   'Report this message': 'Laporkan mesej ini',
@@ -1123,7 +1125,8 @@ const stringsMs = <String, String>{
   'Manage or cancel': 'Urus atau batalkan',
   'Monthly': 'Bulanan',
   'Need help? {email}': 'Perlukan bantuan? {email}',
-  'New cloud accounts are switched off for now. Write to us at the support address and we will help.': 'Akaun awan baharu ditutup buat masa ini. Tulis kepada kami di alamat sokongan dan kami akan membantu.',
+  'That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.':
+      'E-mel dan kata laluan itu tidak membuka sebarang akaun. Akaun baharu dibuat dengan Teruskan dengan Google, atau Log masuk dengan Apple pada iPhone. Jika anda sudah ada akaun, semak kata laluan.',
   'No FieldOS subscription was found on this {store} account.': 'Tiada langganan FieldOS ditemui pada akaun {store} ini.',
   'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.': 'Tiada langganan FieldOS ditemui pada akaun {store} ini. Jika anda melanggan dengan akaun lain, tukar kepadanya dalam {store} dan cuba lagi.',
   'No internet connection. Your work is saved on this phone; try again when you are online.': 'Tiada sambungan internet. Kerja anda disimpan dalam telefon ini; cuba lagi apabila anda dalam talian.',

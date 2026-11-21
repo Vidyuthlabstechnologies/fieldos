@@ -381,7 +381,8 @@ const stringsMl = <String, String>{
   'Sign out': 'സൈൻ ഔട്ട്',
   'Delete my cloud account': 'എന്റെ ക്ലൗഡ് അക്കൗണ്ട് ഡിലീറ്റ് ചെയ്യുക',
   'Sign in to share projects, daily reports, issues and chat with your team.': 'പ്രോജക്റ്റുകൾ, ദിവസ റിപ്പോർട്ടുകൾ, പ്രശ്നങ്ങൾ, ചാറ്റ് എന്നിവ ടീമുമായി ഷെയർ ചെയ്യാൻ സൈൻ ഇൻ ചെയ്യുക.',
-  'Use your own email. A new email creates an account automatically.': 'നിങ്ങളുടെ സ്വന്തം ഇമെയിൽ ഉപയോഗിക്കുക. പുതിയ ഇമെയിൽ ആണെങ്കിൽ അക്കൗണ്ട് തനിയെ ഉണ്ടാകും.',
+  'New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.':
+      'FieldOS ക്ലൗഡിൽ പുതിയതാണോ? Google ഉപയോഗിച്ച് തുടരുക, അല്ലെങ്കിൽ iPhone-ൽ Apple ഉപയോഗിച്ച്. ഇമെയിലും പാസ്‌വേഡും ഇതിനകം ഉള്ള അക്കൗണ്ടിനാണ്.',
   'Choose a new password': 'പുതിയ പാസ്‌വേഡ് തിരഞ്ഞെടുക്കുക',
   'Check your email': 'നിങ്ങളുടെ ഇമെയിൽ പരിശോധിക്കുക',
   'Code from the email': 'ഇമെയിലിലെ കോഡ്',
@@ -639,6 +640,7 @@ const stringsMl = <String, String>{
   'Apple sign-in did not go through. Please try again.': 'Apple സൈൻ ഇൻ നടന്നില്ല. വീണ്ടും ശ്രമിക്കുക.',
   'Apple did not share an email address. Please try again, or use a username and password.': 'Apple ഇമെയിൽ വിലാസം ഷെയർ ചെയ്തില്ല. വീണ്ടും ശ്രമിക്കുക, അല്ലെങ്കിൽ യൂസർനെയിമും പാസ്‌വേഡും ഉപയോഗിക്കുക.',
   'Continue with Google': 'Google ഉപയോഗിച്ച് തുടരുക',
+  'or, with an account you already have': 'അല്ലെങ്കിൽ, ഇതിനകം ഉള്ള അക്കൗണ്ട് ഉപയോഗിച്ച്',
   'More details (optional)': 'കൂടുതൽ വിവരങ്ങൾ (ഓപ്ഷണൽ)',
   'Report': 'റിപ്പോർട്ട് ചെയ്യുക',
   'Report this message': 'ഈ സന്ദേശം റിപ്പോർട്ട് ചെയ്യുക',
@@ -1123,7 +1125,8 @@ const stringsMl = <String, String>{
   'Manage or cancel': 'മാനേജ് ചെയ്യുക അല്ലെങ്കിൽ റദ്ദാക്കുക',
   'Monthly': 'മാസം തോറും',
   'Need help? {email}': 'സഹായം വേണോ? {email}',
-  'New cloud accounts are switched off for now. Write to us at the support address and we will help.': 'പുതിയ ക്ലൗഡ് അക്കൗണ്ടുകൾ ഇപ്പോൾ നിർത്തിവച്ചിരിക്കുന്നു. സപ്പോർട്ട് വിലാസത്തിൽ ഞങ്ങൾക്ക് എഴുതുക, ഞങ്ങൾ സഹായിക്കാം.',
+  'That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.':
+      'ഈ ഇമെയിലും പാസ്‌വേഡും കൊണ്ട് ഒരു അക്കൗണ്ടും തുറന്നില്ല. പുതിയ അക്കൗണ്ടുകൾ "Google ഉപയോഗിച്ച് തുടരുക" വഴി, അല്ലെങ്കിൽ iPhone-ൽ "Apple ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക" വഴി ഉണ്ടാക്കുന്നു. അക്കൗണ്ട് ഇതിനകം ഉണ്ടെങ്കിൽ, പാസ്‌വേഡ് പരിശോധിക്കുക.',
   'No FieldOS subscription was found on this {store} account.': 'ഈ {store} അക്കൗണ്ടിൽ FieldOS സബ്സ്ക്രിപ്ഷൻ ഒന്നും കണ്ടില്ല.',
   'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.': 'ഈ {store} അക്കൗണ്ടിൽ FieldOS സബ്സ്ക്രിപ്ഷൻ ഒന്നും കണ്ടില്ല. മറ്റൊരു അക്കൗണ്ട് വഴിയാണ് സബ്സ്ക്രൈബ് ചെയ്തതെങ്കിൽ, {store}-ൽ അതിലേക്ക് മാറി വീണ്ടും ശ്രമിക്കുക.',
   'No internet connection. Your work is saved on this phone; try again when you are online.': 'ഇന്റർനെറ്റ് കണക്ഷൻ ഇല്ല. നിങ്ങളുടെ ജോലി ഈ ഫോണിൽ സേവ് ചെയ്തിട്ടുണ്ട്; ഓൺലൈനിൽ ആകുമ്പോൾ വീണ്ടും ശ്രമിക്കുക.',
