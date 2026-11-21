@@ -181,7 +181,7 @@ calls the function itself).
   `company_api_keys`, `create_company_api_key` / `revoke_company_api_key`
   (owner only), `api_resources()` (the fixed list) and `api_read()`, which only
   the service role may call.
-- `supabase/migrations/20261121170000_open_api_writes_webhooks.sql`: key
+- `supabase/migrations/20261121190000_open_api_writes_webhooks.sql`: key
   `scopes`; `api_take_call()` (the one locking rate-limit count every call
   goes through); `api_write()` with the fixed field list `api_writable()`,
   `api_audit_log` and `api_idempotency`; `company_webhooks` (secret never

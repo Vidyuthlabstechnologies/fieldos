@@ -1,7 +1,7 @@
 /// Settings > Webhooks (owner only, online): FieldOS calls the company's
 /// own address (Zapier, Make, an ERP) whenever a site record changes, signed
 /// with a secret shown once. Queued and retried on the server
-/// (20261121170000_open_api_writes_webhooks.sql), sent by the
+/// (20261121190000_open_api_writes_webhooks.sql), sent by the
 /// webhook-dispatch edge function. See docs/OPEN_API.md, Webhooks.
 library;
 
