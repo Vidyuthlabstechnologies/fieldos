@@ -6,7 +6,8 @@ name: functions-deploy
 #
 #   account-cleanup    removes a deleted company's files (issue #139)
 #   report-to-github   turns in-app bug and message reports into issues (#142)
-#   public-api         read-only REST for integrations, by company API key (docs/OPEN_API.md)
+#   public-api         REST for integrations, by company API key (docs/OPEN_API.md)
+#   webhook-dispatch   sends company webhooks; pg_cron calls it each minute (docs/OPEN_API.md)
 #
 # Repo secrets it uses (Settings -> Secrets and variables -> Actions):
 #   SUPABASE_URL, SUPABASE_ACCESS_TOKEN   already set for supabase-deploy
@@ -68,10 +69,13 @@ jobs:
           # The open API is called with a company API key, not a Supabase
           # sign-in; api_read() checks the key (docs/OPEN_API.md).
           supabase functions deploy public-api --project-ref "$PROJECT_REF" --use-api --no-verify-jwt --yes
+          # Called by pg_cron through pg_net, which has no sign-in; it only
+          # sends what the database already queued.
+          supabase functions deploy webhook-dispatch --project-ref "$PROJECT_REF" --use-api --no-verify-jwt --yes
 
       - name: Check they are live
         run: |
-          for f in account-cleanup report-to-github public-api; do
+          for f in account-cleanup report-to-github public-api webhook-dispatch; do
             code=$(curl -s -o /dev/null -w '%{http_code}' -X GET "$SUPABASE_URL/functions/v1/$f")
             echo "$f answers $code to a request with no key"
             [ "$code" = "404" ] && { echo "::error::$f is not deployed"; exit 1; }

@@ -3,12 +3,14 @@
 /// Keyed by the Indian English text, like every table (see language.dart).
 library;
 
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_ar.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 
 const stringsAr = <String, String>{
   ...scheduleAr,
+  ...integrationsAr,
   ...consentAr,
   ...overtimeAr,
   'Try again': 'حاول مرة أخرى',
