@@ -22,6 +22,8 @@ import 'dart:convert';
 
 import 'package:supabase/supabase.dart';
 
+import 'package:fieldos_mobile/services/company_plan.dart';
+
 import 'sync_engine.dart';
 
 /// `needsEmailConfirmation`: the account was created but the Supabase
@@ -482,6 +484,7 @@ class CloudSyncService {
       // all that matters.
     }
     await sessionStore?.write(null);
+    await CompanyPlanService.forget(engine.db);
     return AccountDeletion(
       companiesDeleted: res['companies_deleted'] as int,
       companiesLeft: res['companies_left'] as int,
@@ -507,6 +510,8 @@ class CloudSyncService {
       // sign back in.
     }
     await sessionStore?.write(null);
+    // The company plan was this account's, not the phone's.
+    await CompanyPlanService.forget(engine.db);
   }
 
   /// Push everything queued locally, then pull everything RLS allows. Push

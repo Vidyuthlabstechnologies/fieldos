@@ -12,6 +12,9 @@ import 'package:fieldos_mobile/agents/assistant_tools.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/services/company_plan.dart';
 import 'package:fieldos_mobile/services/subscription_access.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_service.dart';
+import 'package:fieldos_mobile/sync/sync_engine.dart';
+import 'package:supabase/supabase.dart';
 
 void main() {
   late AppDatabase db;
@@ -194,5 +197,24 @@ void main() {
 
   test('a build without the cloud has no company plans', () async {
     expect(await service.current(), isEmpty);
+  });
+
+  test('signing out forgets the account\'s company plan, so the next account starts clean', () async {
+    await service.remember([sitePro()]);
+    final now = DateTime.now();
+    expect(await service.access(live: null, now: now), Access.allowed);
+
+    // Nothing listens there: signing out works offline too.
+    final client = SupabaseClient('http://127.0.0.1:9', 'anon');
+    final cloud = CloudSyncService(client: client, engine: SyncEngine(db: db, client: client));
+    await cloud.disableSync();
+
+    expect(await service.remembered(), isEmpty);
+    expect(await service.lastCoveredUntil(), isNull);
+    // A different account signing in whose plan check fails is not let in
+    // on the first account's plan.
+    expect(await service.access(live: null, now: now), Access.blocked);
+    expect(await newActiveSiteBlocked(db, 'c1'), isNull);
+    await client.dispose();
   });
 }

@@ -185,6 +185,16 @@ class CompanyPlanService {
     await db.settingsDao.set(_untilKey, until?.toUtc().toIso8601String() ?? '');
   }
 
+  /// Drops the last answer, when this phone signs out of the cloud
+  /// account it came from. Otherwise a person signing in with another
+  /// account next would carry the first account's company plan (and its 7
+  /// offline days) whenever the server can't be asked straight away.
+  static Future<void> forget(AppDatabase db) async {
+    for (final k in [_plansKey, _untilKey, _checkedKey, _seenKey]) {
+      await db.settingsDao.remove(k);
+    }
+  }
+
   /// The last answer, for offline.
   Future<List<CompanyPlan>> remembered() => rememberedCompanyPlans(db);
 
