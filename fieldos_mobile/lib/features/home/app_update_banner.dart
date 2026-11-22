@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:fieldos_mobile/core/market.dart' show playStoreLink;
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
@@ -12,7 +13,8 @@ import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 class AppUpdateBanner extends ConsumerWidget {
   const AppUpdateBanner({super.key});
 
-  static final playStoreUrl = Uri.parse('https://play.google.com/store/apps/details?id=com.mldynamic.fieldos');
+  /// This country's app (each market is its own store listing).
+  static Uri get playStoreUrl => Uri.parse(playStoreLink);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
