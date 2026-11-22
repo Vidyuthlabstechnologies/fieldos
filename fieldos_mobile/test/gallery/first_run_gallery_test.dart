@@ -4,7 +4,7 @@
 ///
 /// Skipped in normal runs. To render:
 ///
-///   RENDER_SCREENS=1 INDIC_FONTS=<dir of NotoSans*.ttf> flutter test test/gallery/first_run_gallery_test.dart
+///   `RENDER_SCREENS=1 INDIC_FONTS=<dir of NotoSans*.ttf> flutter test test/gallery/first_run_gallery_test.dart`
 ///
 /// The PNGs land in build/screens/first_run/ (1080 px wide).
 library;
