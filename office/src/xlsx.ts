@@ -23,13 +23,16 @@ function colName(i: number): string {
   return s;
 }
 
-/** Sheet names: at most 31 characters, none of \ / ? * [ ] :, unique. */
+/** Sheet names: at most 31 characters, none of \ / ? * [ ] :, unique.
+ * Excel also refuses (as a damaged file) a name that starts or ends with an
+ * apostrophe, and keeps "History" for itself. */
 export function sheetNames(names: string[]): string[] {
-  const used = new Set<string>();
+  const used = new Set<string>(['history']);
+  const tidy = (s: string) => s.trim().replace(/^'+|'+$/g, '').trim();
   return names.map((raw) => {
-    const base = raw.replace(/[\\/?*[\]:]/g, ' ').trim().slice(0, 31) || 'Sheet';
+    const base = tidy(tidy(raw.replace(/[\\/?*[\]:]/g, ' ')).slice(0, 31)) || 'Sheet';
     let name = base;
-    for (let i = 2; used.has(name.toLowerCase()); i++) name = `${base.slice(0, 31 - String(i).length - 1)} ${i}`;
+    for (let i = 2; used.has(name.toLowerCase()); i++) name = `${tidy(base.slice(0, 31 - String(i).length - 1))} ${i}`;
     used.add(name.toLowerCase());
     return name;
   });

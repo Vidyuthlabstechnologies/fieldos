@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Session, SupabaseClient } from '@supabase/supabase-js';
 import {
   lastCompany,
@@ -37,12 +37,21 @@ export function Sites({ db, session }: { db: SupabaseClient; session: Session })
 
   useEffect(fetchCompanies, [fetchCompanies]);
 
+  // Only the answer for the company picked last counts: switching companies
+  // quickly could otherwise let the first company's slower answer land
+  // under the second one's name (and its money table).
+  const latestSites = useRef(0);
   const fetchSites = useCallback(() => {
     if (!companyId) return;
+    const ticket = ++latestSites.current;
     setSites({ state: 'loading' });
     loadSites(db, companyId).then(
-      (list) => setSites({ state: 'ready', value: list }),
-      () => setSites({ state: 'error' }),
+      (list) => {
+        if (ticket === latestSites.current) setSites({ state: 'ready', value: list });
+      },
+      () => {
+        if (ticket === latestSites.current) setSites({ state: 'error' });
+      },
     );
   }, [db, companyId]);
 

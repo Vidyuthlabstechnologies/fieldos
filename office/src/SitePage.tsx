@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Session, SupabaseClient } from '@supabase/supabase-js';
 import { loadRegisters, loadSite, type Site } from './data';
 import { siteHref } from './route';
@@ -29,11 +29,19 @@ export function SitePage({ db, session, id, tab }: { db: SupabaseClient; session
   const now = useMemo(() => new Date(), [load]);
   const current: Tab = (TABS as readonly string[]).includes(tab) ? (tab as Tab) : 'rfis';
 
+  // Back and forward between two sites: only the site now in the address
+  // may fill the page, whichever answer arrives last.
+  const latest = useRef(0);
   const reload = useCallback(() => {
+    const ticket = ++latest.current;
     setLoad({ state: 'loading' });
     Promise.all([loadSite(db, id), loadRegisters(db, id)]).then(
-      ([site, reg]) => setLoad({ state: 'ready', site, reg }),
-      () => setLoad({ state: 'error' }),
+      ([site, reg]) => {
+        if (ticket === latest.current) setLoad({ state: 'ready', site, reg });
+      },
+      () => {
+        if (ticket === latest.current) setLoad({ state: 'error' });
+      },
     );
   }, [db, id]);
   useEffect(reload, [reload]);

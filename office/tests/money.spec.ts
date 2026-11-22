@@ -129,5 +129,7 @@ test('other markets name their own tax and currency, in one tax column', () => {
 
 test('sheet and file names are safe', () => {
   expect(sheetNames(['A/B', 'a/b', 'x'.repeat(40)])).toEqual(['A B', 'a b 2', 'x'.repeat(31)]);
+  // Excel calls the file damaged for these.
+  expect(sheetNames(["'Ravi's Villa'", 'History', "''"])).toEqual(["Ravi's Villa", 'History 2', 'Sheet']);
   expect(fileName('Tower: A/B', 'Money', '2026-11-21')).toBe('Tower A B Money 2026-11-21.xlsx');
 });
