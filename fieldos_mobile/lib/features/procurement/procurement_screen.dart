@@ -233,7 +233,7 @@ class _SuppliersTab extends ConsumerWidget {
               minLines: 5,
               maxLines: 12,
               decoration: const InputDecoration(
-                  hintText: 'Sri Balaji Cement, 9848012345, 36ABCDE1234F1Z5, 1,25,000\nRaju Sand, 15000 advance'),
+                  hintText: 'Sri Balaji Cement, 9848012345, 36ABCDE1234F1Z1, 1,25,000\nRaju Sand, 15000 advance'),
             ),
           ]),
         ),

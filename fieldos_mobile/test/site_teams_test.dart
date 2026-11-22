@@ -213,7 +213,7 @@ void main() {
   group('suppliers pasted with opening balances', () {
     test('reads names, phones, GSTINs, Indian-grouped amounts and advances in any order', () {
       final rows = parseSupplierLines('''
-1. Sri Balaji Cement, 9848012345, 36ABCDE1234F1Z5, 1,25,000
+1. Sri Balaji Cement, 9848012345, 36ABCDE1234F1Z1, 1,25,000
 Raju Sand, 15000 advance
 - Lakshmi Steel\t₹ 2,40,500 Cr\tSteel\tlakshmi@example.com
 Ganesh Hardware; 98480 12345; Rs. 3,500/-
@@ -222,7 +222,7 @@ Tally Party, 12,000 Dr
 ''');
       expect(rows.map((r) => r.name), ['Sri Balaji Cement', 'Raju Sand', 'Lakshmi Steel', 'Ganesh Hardware', 'Tally Party']);
       expect(rows[0].phone, '9848012345');
-      expect(rows[0].gstin, '36ABCDE1234F1Z5');
+      expect(rows[0].gstin, '36ABCDE1234F1Z1');
       expect(rows[0].openingBalance, 125000);
       expect(rows[1].openingBalance, -15000);
       expect(rows[2].openingBalance, 240500);

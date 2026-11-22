@@ -517,7 +517,7 @@ const stringsMs = <String, String>{
   'Unit (cum, sqm, rft, nos)': 'Unit (cum, sqm, rft, nos)',
   'Rate (₹ per unit)': 'Kadar (RM setiap unit)',
   'Who is the bill for? Add the client name.': 'Bil ini untuk siapa? Tambah nama klien.',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.': 'GSTIN itu nampaknya tidak betul. Ia mempunyai 15 aksara, seperti 36ABCDE1234F1Z5.',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.': 'GSTIN itu nampaknya tidak betul. Ia mempunyai 15 aksara, seperti 36ABCDE1234F1Z1.',
   'Add at least one item with a quantity.': 'Tambah sekurang-kurangnya satu item dengan kuantiti.',
   'Bill {number} already exists.': 'Bil {number} sudah wujud.',
   'Your details on bills': 'Butiran anda pada bil',

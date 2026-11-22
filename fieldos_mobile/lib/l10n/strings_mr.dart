@@ -1024,8 +1024,8 @@ const Map<String, String> stringsMr = {
       'दर (प्रति एकक ₹)',
   'Who is the bill for? Add the client name.':
       'बिल कोणासाठी? क्लायंटचे नाव जोडा.',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.':
-      'तो GSTIN बरोबर वाटत नाही. त्यात 15 अक्षरे असतात, 36ABCDE1234F1Z5 सारखी.',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.':
+      'तो GSTIN बरोबर वाटत नाही. त्यात 15 अक्षरे असतात, 36ABCDE1234F1Z1 सारखी.',
   'Add at least one item with a quantity.':
       'किमान एक आयटम प्रमाणासह जोडा.',
   'Bill {number} already exists.':

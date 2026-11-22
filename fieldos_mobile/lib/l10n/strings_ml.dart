@@ -517,7 +517,7 @@ const stringsMl = <String, String>{
   'Unit (cum, sqm, rft, nos)': 'യൂണിറ്റ് (cum, sqm, rft, nos)',
   'Rate (₹ per unit)': 'നിരക്ക് (ഓരോ യൂണിറ്റിനും ₹)',
   'Who is the bill for? Add the client name.': 'ബിൽ ആർക്കാണ്? ക്ലയന്റിന്റെ പേര് ചേർക്കുക.',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.': 'ആ TRN ശരിയല്ലെന്ന് തോന്നുന്നു. അതിന് 15 അക്ഷരങ്ങൾ ഉണ്ട്, 36ABCDE1234F1Z5 പോലെ.',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.': 'ആ TRN ശരിയല്ലെന്ന് തോന്നുന്നു. അതിന് 15 അക്ഷരങ്ങൾ ഉണ്ട്, 36ABCDE1234F1Z1 പോലെ.',
   'Add at least one item with a quantity.': 'അളവുള്ള ഒരു ഐറ്റമെങ്കിലും ചേർക്കുക.',
   'Bill {number} already exists.': 'ബിൽ {number} ഇതിനകം ഉണ്ട്.',
   'Your details on bills': 'ബില്ലുകളിലെ നിങ്ങളുടെ വിവരങ്ങൾ',

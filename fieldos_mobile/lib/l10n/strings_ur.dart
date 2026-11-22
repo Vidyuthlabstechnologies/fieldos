@@ -517,7 +517,7 @@ const stringsUr = <String, String>{
   'Unit (cum, sqm, rft, nos)': 'یونٹ (cum، sqm، rft، nos)',
   'Rate (₹ per unit)': 'ریٹ (₹ فی یونٹ)',
   'Who is the bill for? Add the client name.': 'بل کس کے لیے ہے؟ کلائنٹ کا نام شامل کریں۔',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.': 'یہ TRN درست نہیں لگتا۔ اس میں 15 ہندسے ہوتے ہیں، جیسے 100123456700003۔',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.': 'یہ TRN درست نہیں لگتا۔ اس میں 15 ہندسے ہوتے ہیں، جیسے 100123456700003۔',
   'Add at least one item with a quantity.': 'کم از کم ایک آئٹم مقدار کے ساتھ شامل کریں۔',
   'Bill {number} already exists.': 'بل {number} پہلے سے موجود ہے۔',
   'Your details on bills': 'بلوں پر آپ کی تفصیلات',

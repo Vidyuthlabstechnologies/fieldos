@@ -514,7 +514,7 @@ const stringsRo = <String, String>{
   'Unit (cum, sqm, rft, nos)': 'Unitate (mc, mp, ml, buc.)',
   'Rate (₹ per unit)': 'Preț (₹ pe unitate)',
   'Who is the bill for? Add the client name.': 'Pentru cine e factura? Adaugă numele clientului.',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.': 'Codul de TVA nu pare corect. Are 15 caractere, ca 36ABCDE1234F1Z5.',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.': 'Codul de TVA nu pare corect. Are 15 caractere, ca 36ABCDE1234F1Z1.',
   'Add at least one item with a quantity.': 'Adaugă cel puțin o poziție cu cantitate.',
   'Bill {number} already exists.': 'Factura {number} există deja.',
   'Your details on bills': 'Datele tale pe facturi',

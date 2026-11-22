@@ -947,4 +947,4 @@ class _ContractSumFieldState extends ConsumerState<_ContractSumField> {
 /// The message when [validTaxId] fails.
 String get taxIdError => currentMarket == Market.uae
     ? tr("That TRN doesn't look right. It has 15 digits, like 100123456700003.")
-    : tr('That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.');
+    : tr('That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.');

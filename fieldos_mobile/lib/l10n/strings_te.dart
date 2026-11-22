@@ -570,7 +570,7 @@ const Map<String, String> stringsTe = {
   'Unit (cum, sqm, rft, nos)': 'యూనిట్ (cum, sqm, rft, nos)',
   'Rate (₹ per unit)': 'రేటు (యూనిట్‌కు ₹)',
   'Who is the bill for? Add the client name.': 'బిల్లు ఎవరికి? క్లయింట్ పేరు జోడించండి.',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.': 'ఈ GSTIN సరిగా లేదు. దీనిలో 15 అక్షరాలు ఉంటాయి, ఉదా. 36ABCDE1234F1Z5.',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.': 'ఈ GSTIN సరిగా లేదు. దీనిలో 15 అక్షరాలు ఉంటాయి, ఉదా. 36ABCDE1234F1Z1.',
   'Add at least one item with a quantity.': 'పరిమాణంతో కనీసం ఒక ఐటమ్ జోడించండి.',
   'Bill {number} already exists.': 'బిల్లు {number} ఇప్పటికే ఉంది.',
   'Your details on bills': 'బిల్లులపై మీ వివరాలు',

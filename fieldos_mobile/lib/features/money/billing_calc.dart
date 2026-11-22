@@ -384,7 +384,22 @@ String marketInvoiceTitle({required String ourTaxId}) =>
 
 bool isValidGstin(String gstin) {
   final g = gstin.trim().toUpperCase();
-  return _gstinPattern.hasMatch(g) && gstStates.containsKey(g.substring(0, 2));
+  return _gstinPattern.hasMatch(g) && gstStates.containsKey(g.substring(0, 2)) && g[14] == gstinCheckChar(g);
+}
+
+const _base36 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+/// The 15th character of a GSTIN, worked out from the first 14 (the GSTN's
+/// base-36 check, weights 1 and 2 alternating). One wrong character on a
+/// tax invoice stops the client claiming the GST back, and the shape alone
+/// can't catch a typo, so the check character must match.
+String gstinCheckChar(String gstin) {
+  var sum = 0;
+  for (var i = 0; i < 14; i++) {
+    final v = _base36.indexOf(gstin[i]) * (i.isOdd ? 2 : 1);
+    sum += v ~/ 36 + v % 36;
+  }
+  return _base36[(36 - sum % 36) % 36];
 }
 
 /// Inter-state when both GSTINs are known and their state codes differ.

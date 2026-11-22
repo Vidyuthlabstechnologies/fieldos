@@ -39,10 +39,10 @@ void main() {
     expect(normaliseTaxId('١٠٠١٢٣٤٥٦٧٠٠٠٠٣'), '100123456700003');
     expect(validTaxId(normaliseTaxId('100 123 456 700 003')), isTrue);
     expect(validTaxId('10012345670000'), isFalse);
-    expect(validTaxId('36ABCDE1234F1Z5'), isFalse);
+    expect(validTaxId('36ABCDE1234F1Z1'), isFalse);
     debugSetMarket(Market.india);
-    expect(validTaxId('36ABCDE1234F1Z5'), isTrue);
-    expect(normaliseTaxId(' 36abcde1234f1z5 '), '36ABCDE1234F1Z5');
+    expect(validTaxId('36ABCDE1234F1Z1'), isTrue);
+    expect(normaliseTaxId(' 36abcde1234f1z1 '), '36ABCDE1234F1Z1');
     debugSetMarket(Market.uk);
     expect(validTaxId('GB980780684'), isTrue);
     expect(validTaxId('GB123456789'), isFalse, reason: 'fails the HMRC check');
