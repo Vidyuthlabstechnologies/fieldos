@@ -23,6 +23,12 @@ Built so far (the plan has 7 steps):
    rules in `src/money.ts` mirror the phone's `money_book.dart`. The Excel
    writer (`src/xlsx.ts`) has no dependencies; text goes in as plain
    strings, never formulas.
+4. Schedule (Gantt), read only. Each dated task is a bar, "earlier work"
+   links push late work along, the critical path is red and today is a
+   line; a table under it gives each task's dates, spare days and what it
+   waits for. `src/schedule.ts` is the phone's `schedule_rules.dart` ported
+   line for line, and `tests/schedule.spec.ts` runs the phone's own test
+   cases with the same expected dates; change all of them together.
 
 ## Markets
 

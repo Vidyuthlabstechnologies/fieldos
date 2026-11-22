@@ -127,3 +127,40 @@ tr.voided td.num { text-decoration: line-through; }
   .share .meter { grid-column: 1 / -1; }
 }
 .grid-gap { display: grid; gap: 12px; }
+.gantt {
+  display: grid; grid-template-columns: minmax(140px, 240px) 1fr;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+}
+.gantt-names { border-inline-end: 1px solid var(--line); }
+.gantt-name {
+  display: flex; align-items: center; padding-inline: 12px; font-size: 0.9rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-top: 1px solid var(--line);
+}
+.gantt-name.crit { color: var(--error); font-weight: 600; }
+.gantt-scroll { overflow-x: auto; }
+.gantt svg { display: block; }
+.g-grid { stroke: var(--line); stroke-width: 1; }
+.g-month { stroke: var(--muted); stroke-width: 1; opacity: 0.5; }
+.g-label { fill: var(--muted); font-size: 11px; }
+.g-bar.heading { fill: var(--accent); }
+.g-bar.critical { fill: var(--error); }
+.g-bar.done { fill: var(--muted); opacity: 0.55; }
+.g-planned { fill: none; stroke: var(--muted); stroke-dasharray: 3 3; }
+.g-progress { fill: var(--text); opacity: 0.45; }
+.g-link { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+.g-link.crit { stroke: var(--error); }
+.g-arrow { fill: var(--muted); }
+.g-today { stroke: var(--running); stroke-width: 2; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; list-style: none; margin: 0; padding: 0; color: var(--muted); font-size: 0.85rem; align-self: center; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.swatch { display: inline-block; inline-size: 18px; block-size: 10px; border-radius: 3px; }
+.swatch.planned { border: 1px dashed var(--muted); }
+.swatch.heading { background: var(--accent); }
+.swatch.critical { background: var(--error); }
+.swatch.done { background: var(--muted); opacity: 0.55; }
+.swatch.today { inline-size: 3px; block-size: 14px; background: var(--running); }
+ul.plain { margin: 0; padding-inline-start: 20px; }
+@media (max-width: 640px) {
+  .gantt { grid-template-columns: 110px 1fr; }
+}
+tr.done-row td { color: var(--muted); }

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Defect, Drawing, Registers, Revision, Rfi, Submittal } from './rules';
 import type { Allocation, ClientBill, Expense, Payment, SiteMoney, SupplierInvoice } from './money';
+import type { Constraint, Task } from './schedule';
 
 export type Company = { id: string; name: string; role: string };
 export type Site = {
@@ -186,3 +187,22 @@ export async function loadMoney(db: SupabaseClient, projectIds: string[], withIn
 
 /** Company owners and project managers see every site's money in. */
 export const managesCompany = (role: string) => role === 'owner' || role === 'project_manager';
+
+/** The site's tasks and their "earlier work" links, for the schedule. */
+export async function loadSchedule(db: SupabaseClient, projectId: string): Promise<{ tasks: Task[]; constraints: Constraint[] }> {
+  const [tasks, constraints] = await Promise.all([
+    readAll<Task>((a, b) =>
+      db.from('tasks').select('id, title, status, progress, priority, start_date, due_date').eq('project_id', projectId).order('id').range(a, b),
+    ),
+    readAll<Constraint>((a, b) =>
+      db
+        .from('site_task_constraints')
+        .select('id, task_id, kind, link_id, cleared_at')
+        .eq('project_id', projectId)
+        .eq('kind', 'predecessor')
+        .order('id')
+        .range(a, b),
+    ),
+  ]);
+  return { tasks: tasks.map((x) => ({ ...x, progress: Number(x.progress ?? 0) })), constraints };
+}

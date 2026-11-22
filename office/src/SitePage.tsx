@@ -16,10 +16,11 @@ import {
 import { day } from './format';
 import { label, statusLabel, t } from './strings';
 import { MoneyTab } from './Money';
+import { GanttTab } from './Gantt';
 
 type Load = { state: 'loading' } | { state: 'error' } | { state: 'ready'; site: Site | null; reg: Registers };
 
-const TABS = ['rfis', 'submittals', 'defects', 'drawings', 'money'] as const;
+const TABS = ['rfis', 'submittals', 'defects', 'drawings', 'schedule', 'money'] as const;
 type Tab = (typeof TABS)[number];
 
 export function SitePage({ db, session, id, tab }: { db: SupabaseClient; session: Session; id: string; tab: string }) {
@@ -129,7 +130,7 @@ function SiteBody(props: {
           </a>
         ))}
         <span className="spacer" />
-        {tab !== 'drawings' && tab !== 'money' && (
+        {tab !== 'drawings' && tab !== 'money' && tab !== 'schedule' && (
           <label className="check">
             <input type="checkbox" checked={showClosed} onChange={(e) => setShowClosed(e.target.checked)} data-testid="show-closed" />
             {t.showClosed}
@@ -140,6 +141,7 @@ function SiteBody(props: {
       {tab === 'submittals' && <SubmittalTable reg={reg} now={now} showClosed={showClosed} />}
       {tab === 'defects' && <DefectTable reg={reg} now={now} showClosed={showClosed} />}
       {tab === 'drawings' && <DrawingTable reg={reg} />}
+      {tab === 'schedule' && <GanttTab db={db} site={site} />}
       {tab === 'money' && <MoneyTab db={db} site={site} />}
     </>
   );
