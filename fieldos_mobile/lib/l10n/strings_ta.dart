@@ -4,6 +4,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
@@ -18,6 +19,7 @@ import 'package:fieldos_mobile/l10n/strings_privacy_ta.dart';
 const Map<String, String> stringsTa = {
   ...onboardingTa,
   ...scheduleTa,
+  ...integrationsTa,
   ...consentTa,
   ...overtimeTa,
   'Try again':

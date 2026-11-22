@@ -11,7 +11,10 @@ site and a task the way the app does, then, signed in as B:
     and fails if any of that works;
   * if the public-api function is deployed: no key and a revoked key get
     401, B cannot make a key for A, and A's key reads A's records but never
-    B's (list, by id, by site, change feed).
+    B's (list, by id, by site, change feed);
+  * if writes and webhooks are deployed: a read key cannot write, A's write
+    key cannot add to or change B's site, B cannot add a webhook to A's
+    company, and nobody signed in can read a webhook's secret.
 
 Both accounts are deleted at the end with delete_my_account, whether the
 checks pass or not. Uses only SUPABASE_URL and SUPABASE_ANON_KEY (the public
@@ -184,12 +187,67 @@ def open_api_checks(api: Api, a: Account, b: Account) -> list[str]:
     code, body = get("/changes?limit=500", key)
     if code != 200 or any(c.get("id") in (b.company, b.project, b.task) for c in (body or {}).get("data", [])):
         out.append(f"open API: A's change feed failed or shows B's records (HTTP {code})")
+    out += open_api_write_checks(api, base, a, b, key)
     code, _ = a.rest("POST", "/rest/v1/rpc/revoke_company_api_key", {"p_key_id": made["id"]})
     if code not in (200, 204):
         out.append(f"open API: A could not revoke the key (HTTP {code})")
     code, _ = get("/tasks", key)
     if code != 401:
         out.append(f"open API: a revoked key answered {code}, not 401")
+    return out
+
+
+def open_api_write_checks(api: Api, base: str, a: Account, b: Account, read_key: str) -> list[str]:
+    def send(method: str, path: str, key: str, body: dict) -> int:
+        req = urllib.request.Request(base + path, data=json.dumps(body).encode(), method=method,
+                                     headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=20) as res:
+                return res.status
+        except urllib.error.HTTPError as e:
+            return e.code
+
+    code = send("POST", "/tasks", read_key, {"project_id": a.project, "title": "isolation check"})
+    if code == 405:
+        print("open API: writes are not deployed yet; skipped")
+        return []
+    out: list[str] = []
+    if code != 403:
+        out.append(f"open API: a read-only key's POST answered {code}, not 403")
+    code, made = a.rest("POST", "/rest/v1/rpc/create_company_api_key",
+                        {"p_company_id": a.company, "p_name": "isolation write", "p_scopes": ["read", "write"]})
+    if code != 200 or not isinstance(made, dict) or not made.get("key"):
+        return out + [f"open API: A could not make a write key (HTTP {code})"]
+    wkey = made["key"]
+    try:
+        code = send("POST", "/tasks", wkey, {"project_id": b.project, "title": "planted by A"})
+        if code != 404:
+            out.append(f"open API: A's write key adding a task to B's site answered {code}, not 404")
+        code = send("PATCH", f"/tasks/{b.task}", wkey, {"title": "renamed by A"})
+        if code != 404:
+            out.append(f"open API: A's write key renaming B's task answered {code}, not 404")
+        code = send("POST", "/issues", wkey, {"project_id": b.project, "description": "planted by A"})
+        if code != 404:
+            out.append(f"open API: A's write key adding an issue to B's site answered {code}, not 404")
+        code, _ = b.rest("POST", "/rest/v1/rpc/create_company_webhook",
+                         {"p_company_id": a.company, "p_url": "https://hooks.zapier.com/hooks/catch/0/isolation"})
+        if code == 200:
+            out.append("open API: B added a webhook to A's company")
+        code, hook = a.rest("POST", "/rest/v1/rpc/create_company_webhook",
+                            {"p_company_id": a.company, "p_url": "https://hooks.zapier.com/hooks/catch/0/isolation"})
+        if code == 200 and isinstance(hook, dict):
+            for who in (a, b):
+                code, rows = who.rest("GET", f"/rest/v1/company_webhooks?id=eq.{hook['id']}&select=secret")
+                if code == 200 and rows:
+                    out.append("open API: a webhook's secret is readable")
+            code, rows = b.rest("GET", f"/rest/v1/company_webhooks?id=eq.{hook['id']}&select=id,url")
+            if code == 200 and rows:
+                out.append("open API: B can see A's webhook")
+            a.rest("POST", "/rest/v1/rpc/delete_company_webhook", {"p_webhook_id": hook["id"]})
+        else:
+            out.append(f"open API: A could not add a webhook (HTTP {code})")
+    finally:
+        a.rest("POST", "/rest/v1/rpc/revoke_company_api_key", {"p_key_id": made["id"]})
     return out
 
 

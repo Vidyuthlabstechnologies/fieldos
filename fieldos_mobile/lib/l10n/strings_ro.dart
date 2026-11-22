@@ -4,11 +4,13 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 
 const stringsRo = <String, String>{
   ...onboardingRo,
   ...scheduleRo,
+  ...integrationsRo,
   'Try again': 'Încearcă din nou',
   'Approvals': 'Aprobări',
   'Nothing waiting': 'Nimic în așteptare',

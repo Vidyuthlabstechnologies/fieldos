@@ -6,6 +6,7 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_es.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
@@ -13,6 +14,7 @@ import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 const Map<String, String> stringsEs = {
   ...onboardingEs,
   ...scheduleEs,
+  ...integrationsEs,
   ...consentEs,
   ...overtimeEs,
   'Try again': 'Intenta de nuevo',

@@ -4,11 +4,13 @@
 library;
 
 import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 
 const stringsPl = <String, String>{
   ...onboardingPl,
   ...schedulePl,
+  ...integrationsPl,
   'Try again': 'Spróbuj ponownie',
   'Approvals': 'Zatwierdzenia',
   'Nothing waiting': 'Nic nie czeka',
