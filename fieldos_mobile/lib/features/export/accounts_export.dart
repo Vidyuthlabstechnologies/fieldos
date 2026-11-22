@@ -38,7 +38,10 @@ String _xml(String s) => s
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
-    .replaceAll("'", '&apos;');
+    .replaceAll("'", '&apos;')
+    // XML 1.0 allows no control characters but tab, newline and return;
+    // one pasted into a note would make Tally refuse the whole file.
+    .replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
 
 String _tallyDate(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}';
@@ -200,7 +203,15 @@ String _short(String site) {
   return s.isEmpty ? 'SITE' : (s.length > 6 ? s.substring(0, 6) : s);
 }
 
-String _csv(String s) => s.contains(RegExp(r'[",\n]')) ? '"${s.replaceAll('"', '""')}"' : s;
+// Text typed on site (a payee, a note, a category) opens in Zoho, QuickBooks,
+// Xero or Excel, where a cell starting with = + - @ (or a tab or return)
+// runs as a formula. A leading apostrophe keeps it text, as the audit trail
+// does; amounts are written without this, so they stay numbers. A lone
+// return is quoted too, or a reader splits the row there.
+String _csv(String s) {
+  final t = s.startsWith(RegExp(r'[=+\-@\t\r]')) ? "'$s" : s;
+  return t.contains(RegExp(r'[",\n\r]')) ? '"${t.replaceAll('"', '""')}"' : t;
+}
 
 String _isoDate(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';

@@ -51,7 +51,7 @@ test('a site’s dashboard and registers show what the site raised', async ({ pa
   await page.getByTestId('email').fill(a.email);
   await page.getByTestId('password').fill(a.password);
   await page.getByTestId('sign-in').click();
-  await page.getByRole('link', { name: 'Tower A' }).click();
+  await page.getByTestId('sites').getByRole('link', { name: 'Tower A' }).click();
 
   await expect(page.getByTestId('site-name')).toHaveText('Tower A');
   await expect(page.getByTestId('tile-rfis')).toContainText('2 open');
@@ -112,7 +112,7 @@ test('an empty site says so on each register', async ({ page }) => {
   await page.getByTestId('email').fill(a.email);
   await page.getByTestId('password').fill(a.password);
   await page.getByTestId('sign-in').click();
-  await page.getByRole('link', { name: 'Plot 7' }).click();
+  await page.getByTestId('sites').getByRole('link', { name: 'Plot 7' }).click();
   await expect(page.getByTestId('rfis-empty')).toBeVisible();
   for (const tab of ['submittals', 'defects', 'drawings']) {
     await page.getByTestId(`tab-${tab}`).click();

@@ -30,10 +30,12 @@ jobs:
       - run: deno lint
       - run: deno check index.ts live_test.ts
       - run: deno test core_test.ts
-      - name: account-cleanup, report-to-github and public-api
+      - name: account-cleanup, report-to-github, public-api and webhook-dispatch
+        # public-api's test compares its OpenAPI document with docs/openapi.json,
+        # so it may read the repo's docs folder (and nothing else).
         run: |
-          for f in account-cleanup report-to-github public-api; do
-            (cd ../$f && deno fmt --check && deno lint && deno check index.ts && deno test core_test.ts)
+          for f in account-cleanup report-to-github public-api webhook-dispatch; do
+            (cd ../$f && deno fmt --check && deno lint && deno check index.ts && deno test --allow-read=../../../docs core_test.ts)
           done
 
   db:
@@ -47,9 +49,9 @@ jobs:
         run: supabase start
       - name: Allowance checks
         run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -f supabase/tests/ai_usage_test.sql
-      - name: Account deletion and report filing checks
+      - name: Account deletion, report filing and security hardening checks
         run: |
-          for t in delete_account_test report_filing_test; do
+          for t in delete_account_test report_filing_test security_hardening_test; do
             psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/$t.sql
           done
       - name: Table grants, row level security and SECURITY DEFINER checks

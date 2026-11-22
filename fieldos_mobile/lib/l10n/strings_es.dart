@@ -5,12 +5,16 @@
 /// native speaker's review before launch.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_es.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 
 const Map<String, String> stringsEs = {
+  ...onboardingEs,
   ...scheduleEs,
+  ...integrationsEs,
   ...consentEs,
   ...overtimeEs,
   'Try again': 'Intenta de nuevo',
@@ -383,7 +387,8 @@ const Map<String, String> stringsEs = {
   'Sign out': 'Salir',
   'Delete my cloud account': 'Borrar mi cuenta en la nube',
   'Sign in to share projects, daily reports, issues and chat with your team.': 'Inicia sesión para compartir proyectos, reportes diarios, problemas y chat con tu equipo.',
-  'Use your own email. A new email creates an account automatically.': 'Usa tu propio correo. Un correo nuevo crea una cuenta automáticamente.',
+  'New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.':
+      '¿Nuevo en la nube de FieldOS? Continúa con Google, o con Apple en un iPhone. El correo y la contraseña son para una cuenta que ya tienes.',
   'Choose a new password': 'Elige una contraseña nueva',
   'Check your email': 'Revisa tu correo',
   'Code from the email': 'Código del correo',
@@ -641,6 +646,7 @@ const Map<String, String> stringsEs = {
   'Apple sign-in did not go through. Please try again.': 'No se pudo iniciar sesión con Apple. Intenta de nuevo.',
   'Apple did not share an email address. Please try again, or use a username and password.': 'Apple no compartió un correo. Intenta de nuevo o usa usuario y contraseña.',
   'Continue with Google': 'Continuar con Google',
+  'or, with an account you already have': 'o, con una cuenta que ya tienes',
   'More details (optional)': 'Más detalles (opcional)',
   'Report': 'Reportar',
   'Report this message': 'Reportar este mensaje',
@@ -1125,7 +1131,8 @@ const Map<String, String> stringsEs = {
   'Manage or cancel': 'Administrar o cancelar',
   'Monthly': 'Mensual',
   'Need help? {email}': '¿Necesitas ayuda? {email}',
-  'New cloud accounts are switched off for now. Write to us at the support address and we will help.': 'Las cuentas nuevas en la nube están desactivadas por ahora. Escríbenos al correo de soporte y te ayudamos.',
+  'That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.':
+      'Ese correo y esa contraseña no abrieron ninguna cuenta. Las cuentas nuevas se crean con Continuar con Google, o con Iniciar sesión con Apple en un iPhone. Si ya tienes una cuenta, revisa la contraseña.',
   'No FieldOS subscription was found on this {store} account.': 'No se encontró una suscripción de FieldOS en esta cuenta de {store}.',
   'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.': 'No se encontró una suscripción de FieldOS en esta cuenta de {store}. Si te suscribiste con otra cuenta, cámbiate a ella en {store} e intenta de nuevo.',
   'No internet connection. Your work is saved on this phone; try again when you are online.': 'Sin conexión a internet. Tu trabajo está guardado en este teléfono; intenta de nuevo cuando tengas conexión.',

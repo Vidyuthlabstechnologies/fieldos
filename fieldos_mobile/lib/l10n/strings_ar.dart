@@ -3,12 +3,16 @@
 /// Keyed by the Indian English text, like every table (see language.dart).
 library;
 
+import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_ar.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 
 const stringsAr = <String, String>{
+  ...onboardingAr,
   ...scheduleAr,
+  ...integrationsAr,
   ...consentAr,
   ...overtimeAr,
   'Try again': 'حاول مرة أخرى',
@@ -381,7 +385,8 @@ const stringsAr = <String, String>{
   'Sign out': 'تسجيل الخروج',
   'Delete my cloud account': 'حذف حسابي السحابي',
   'Sign in to share projects, daily reports, issues and chat with your team.': 'سجّل الدخول لمشاركة المشاريع والتقارير اليومية والمشكلات والدردشة مع فريقك.',
-  'Use your own email. A new email creates an account automatically.': 'استخدم بريدك الإلكتروني. البريد الجديد يُنشئ حسابًا تلقائيًا.',
+  'New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.':
+      'جديد على سحابة FieldOS؟ تابع باستخدام Google، أو Apple على iPhone. البريد الإلكتروني وكلمة المرور لحساب لديك بالفعل.',
   'Choose a new password': 'اختر كلمة مرور جديدة',
   'Check your email': 'تحقق من بريدك الإلكتروني',
   'Code from the email': 'الرمز من البريد الإلكتروني',
@@ -639,6 +644,7 @@ const stringsAr = <String, String>{
   'Apple sign-in did not go through. Please try again.': 'لم يكتمل تسجيل الدخول باستخدام Apple. يرجى المحاولة مرة أخرى.',
   'Apple did not share an email address. Please try again, or use a username and password.': 'لم تشارك Apple عنوان بريد إلكتروني. يرجى المحاولة مرة أخرى، أو استخدام اسم المستخدم وكلمة المرور.',
   'Continue with Google': 'المتابعة باستخدام Google',
+  'or, with an account you already have': 'أو بحساب لديك بالفعل',
   'More details (optional)': 'تفاصيل إضافية (اختياري)',
   'Report': 'إبلاغ',
   'Report this message': 'الإبلاغ عن هذه الرسالة',
@@ -1123,7 +1129,8 @@ const stringsAr = <String, String>{
   'Manage or cancel': 'إدارة أو إلغاء',
   'Monthly': 'شهري',
   'Need help? {email}': 'تحتاج مساعدة؟ {email}',
-  'New cloud accounts are switched off for now. Write to us at the support address and we will help.': 'إنشاء حسابات سحابية جديدة متوقف حاليًا. راسلنا على عنوان الدعم وسنساعدك.',
+  'That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.':
+      'لم يفتح هذا البريد الإلكتروني وكلمة المرور أي حساب. تُنشأ الحسابات الجديدة عبر "المتابعة باستخدام Google"، أو "تسجيل الدخول باستخدام Apple" على iPhone. إذا كان لديك حساب بالفعل، فتحقق من كلمة المرور.',
   'No FieldOS subscription was found on this {store} account.': 'لم يُعثر على اشتراك FieldOS في حساب {store} هذا.',
   'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.': 'لم يُعثر على اشتراك FieldOS في حساب {store} هذا. إذا اشتركت بحساب آخر، فانتقل إليه في {store} وحاول مرة أخرى.',
   'No internet connection. Your work is saved on this phone; try again when you are online.': 'لا يوجد اتصال بالإنترنت. عملك محفوظ على هذا الهاتف؛ حاول مرة أخرى عند الاتصال.',

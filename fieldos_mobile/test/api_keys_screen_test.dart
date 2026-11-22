@@ -1,5 +1,6 @@
 /// Settings > API keys on a small phone in Hindi: the owner makes a key and
-/// sees it once, the list shows its prefix, and revoking asks first.
+/// sees it once, the list shows its prefix and whether it can write, changes
+/// made through keys are listed, and revoking asks first.
 library;
 
 import 'package:flutter/material.dart';
@@ -22,10 +23,15 @@ class _FakeKeys implements ApiKeysService {
   Future<List<ApiKey>> list(String companyId) async => [...keys];
 
   @override
-  Future<String> create(String companyId, String name) async {
-    keys.add(ApiKey(id: 'k${keys.length}', name: name, prefix: plain.substring(0, 12), createdAt: DateTime(2026, 11, 14)));
+  Future<String> create(String companyId, String name, {bool write = false}) async {
+    keys.add(ApiKey(id: 'k${keys.length}', name: name, prefix: plain.substring(0, 12), createdAt: DateTime(2026, 11, 14), canWrite: write));
     return plain;
   }
+
+  final changes = <ApiChange>[];
+
+  @override
+  Future<List<ApiChange>> recentChanges(String companyId) async => [...changes];
 
   @override
   Future<void> revoke(String keyId) async {
@@ -61,6 +67,9 @@ void main() {
     await tester.tap(find.byKey(const Key('api-key-new')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('api-key-name')), 'Tally connector');
+    await tester.tap(find.byKey(const Key('api-key-write')));
+    await tester.pump();
+    expect(tester.takeException(), isNull, reason: 'the switch fits a 320 px dialog');
     await tester.tap(find.byKey(const Key('api-key-create')));
     await tester.pumpAndSettle();
     expect(find.text(fake.plain), findsOneWidget, reason: 'shown once');
@@ -70,6 +79,8 @@ void main() {
     expect(find.text(fake.plain), findsNothing);
     expect(find.textContaining('fos_abababab'), findsOneWidget);
     expect(find.text('Tally connector'), findsOneWidget);
+    expect(fake.keys.single.canWrite, isTrue);
+    expect(find.textContaining(tr('reads and writes')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('api-key-revoke-k0')));
     await tester.pumpAndSettle();
@@ -78,5 +89,16 @@ void main() {
     expect(fake.keys.single.revokedAt, isNotNull);
     expect(find.byKey(const Key('api-key-revoke-k0')), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('changes made through keys are listed for the owner', (tester) async {
+    final fake = _FakeKeys()
+      ..changes.add(ApiChange(keyName: 'Zapier', action: 'create', resource: 'tasks', at: DateTime(2026, 11, 21, 10)));
+    await tester.pumpWidget(ProviderScope(
+      overrides: [apiKeysServiceProvider.overrideWithValue(fake)],
+      child: MaterialApp(theme: buildFieldOsTheme(Brightness.light), home: const ApiKeysScreen(companyId: 'c1')),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Zapier added a task'), findsOneWidget);
   });
 }

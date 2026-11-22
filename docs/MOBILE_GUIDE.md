@@ -140,6 +140,32 @@ math, the full procurement chain, the estimation → BOQ → actuals → dashboa
 pipeline, subcontractor CRUD, and Sarvam response parsing. Run `flutter test`
 before any change — as of this writing it's 27/27 passing.
 
+## Speed on cheap phones and weak networks
+
+Most FieldOS users are on a ₹8,000–15,000 Android phone with slow storage
+and a 2G/3G site connection, so a few rules keep it quick:
+
+- **Sync writes in batches.** A pull writes `SyncEngine.applyBatchSize`
+  rows per transaction (never a table whose rows download a file: a
+  transaction must not wait on the network), and reads up to
+  `SyncEngine.pullParallelism` tables at once. A push sends a run of new
+  rows of one table as one request (`pushBatchSize`); a refused batch is
+  retried row by row, so duplicates and refusals are handled as before.
+- **The database is in WAL mode with lookup indexes**
+  (`AppDatabase.tuneConnection`, `ensureLookupIndexes`). New tables get an
+  index on `project_id`/`company_id` automatically; add a column name to
+  `lookupColumns` when screens look rows up by a new link column.
+- **Read only what a screen shows.** A day's view reads that day's rows
+  (`attendanceDao.aroundDay`), not a site's whole history.
+- **Decode images at the size shown**: `cacheWidth` on every thumbnail and
+  on Mitra.
+
+`test/perf/low_end_bench_test.dart` measures a first sync of a busy
+company over a simulated 3G link, a day of offline work being sent, and
+Home's reads (`PERF_BENCH=1 PERF_LABEL=<name> flutter test test/perf/`,
+results in `build/perf/<name>.json`). Run it before and after a change to
+sync or the database.
+
 ## Future work
 
 - Design and build a real sync protocol to the FastAPI backend, so mobile

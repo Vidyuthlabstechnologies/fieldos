@@ -11,5 +11,8 @@
     "include": [
       "core_test.ts"
     ]
+  },
+  "tasks": {
+    "openapi": "deno run --allow-write=../../../docs/openapi.json write_openapi.ts"
   }
 }

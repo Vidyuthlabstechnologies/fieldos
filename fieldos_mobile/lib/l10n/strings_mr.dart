@@ -3,6 +3,8 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
@@ -15,7 +17,9 @@ import 'package:fieldos_mobile/l10n/strings_proof_mr.dart';
 import 'package:fieldos_mobile/l10n/strings_privacy_mr.dart';
 
 const Map<String, String> stringsMr = {
+  ...onboardingMr,
   ...scheduleMr,
+  ...integrationsMr,
   ...consentMr,
   ...overtimeMr,
   'Try again':
@@ -758,8 +762,8 @@ const Map<String, String> stringsMr = {
       'माझे क्लाउड खाते हटवा',
   'Sign in to share projects, daily reports, issues and chat with your team.':
       'टीमसोबत प्रोजेक्ट, दैनिक अहवाल, अडचणी आणि चॅट शेअर करण्यासाठी साइन इन करा.',
-  'Use your own email. A new email creates an account automatically.':
-      'तुमचा स्वतःचा ईमेल वापरा. नवीन ईमेलने आपोआप खाते बनते.',
+  'New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.':
+      'FieldOS क्लाउडवर नवीन आहात? Google ने पुढे जा, किंवा iPhone वर Apple ने. ईमेल आणि पासवर्ड आधीपासून असलेल्या खात्यासाठी आहे.',
   'Choose a new password':
       'नवीन पासवर्ड निवडा',
   'Check your email':
@@ -1274,6 +1278,7 @@ const Map<String, String> stringsMr = {
       'Apple ने ईमेल पत्ता दिला नाही. पुन्हा प्रयत्न करा, किंवा युजरनेम आणि पासवर्ड वापरा.',
   'Continue with Google':
       'Google ने पुढे जा',
+  'or, with an account you already have': 'किंवा, आधीपासून असलेल्या खात्याने',
   'More details (optional)':
       'अधिक माहिती (ऐच्छिक)',
   'Report':
@@ -2248,8 +2253,8 @@ const Map<String, String> stringsMr = {
       'मासिक',
   'Need help? {email}':
       'मदत हवी? {email}',
-  'New cloud accounts are switched off for now. Write to us at the support address and we will help.':
-      'नवीन क्लाउड खाती सध्या बंद आहेत. सपोर्ट पत्त्यावर आम्हाला लिहा, आम्ही मदत करू.',
+  'That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.':
+      'या ईमेल आणि पासवर्डने कोणतेही खाते उघडले नाही. नवीन खाती "Google ने पुढे जा" ने, किंवा iPhone वर "Apple ने साइन इन करा" ने बनतात. तुमचे खाते आधीपासून असेल, तर पासवर्ड तपासा.',
   'No FieldOS subscription was found on this {store} account.':
       'या {store} खात्यावर FieldOS सदस्यता सापडली नाही.',
   'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.':

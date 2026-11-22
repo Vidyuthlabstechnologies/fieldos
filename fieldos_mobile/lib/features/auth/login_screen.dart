@@ -38,6 +38,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _showPassword = false;
   bool _busy = false;
   String? _error;
+
+  /// On a new phone with Google sign-in, the username form waits behind a
+  /// link: Google is one tap, needs no password to remember, and is the
+  /// account Team & sync and a company plan use (pilots sign in that way).
+  bool _passwordFormHidden = false;
   late final _termsTap = TapGestureRecognizer()..onTap = () => openTerms(context);
   late final _privacyTap = TapGestureRecognizer()..onTap = () => openPrivacyPolicy(context);
 
@@ -45,7 +50,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void initState() {
     super.initState();
     ref.read(appDatabaseProvider).userDao.any().then((has) {
-      if (mounted && !has) setState(() => _registering = true);
+      if (mounted && !has) {
+        setState(() {
+          _registering = true;
+          _passwordFormHidden = ref.read(googlePickerProvider).available;
+        });
+      }
     }).catchError((_) {});
   }
 
@@ -240,14 +250,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ],
             ],
             if (ref.watch(googlePickerProvider).available) ...[
-              OutlinedButton.icon(
-                onPressed: _busy ? null : _google,
-                icon: const Icon(Icons.account_circle_outlined),
-                label: Text(tr('Continue with Google')),
-                style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+              // The main button while it is the only way shown; beside the
+              // username form it steps back so the form's own button leads.
+              if (_passwordFormHidden)
+                FilledButton.icon(
+                  key: const Key('login-google'),
+                  onPressed: _busy ? null : _google,
+                  icon: _busy
+                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.account_circle_outlined),
+                  label: Text(tr('Continue with Google')),
+                  style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+                )
+              else
+                OutlinedButton.icon(
+                  key: const Key('login-google'),
+                  onPressed: _busy ? null : _google,
+                  icon: const Icon(Icons.account_circle_outlined),
+                  label: Text(tr('Continue with Google')),
+                  style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                ),
+              const SizedBox(height: 6),
+              Text(
+                tr('Quickest, and no password to remember. Your team joins the same way.'),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 12),
-              Row(children: [
+              if (!_passwordFormHidden) Row(children: [
                 const Expanded(child: Divider()),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -257,72 +287,84 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ]),
               const SizedBox(height: 12),
             ],
-            if (_registering) ...[
+            if (_passwordFormHidden) ...[
+              if (_error != null) ...[
+                FormMessage(_error!),
+                const SizedBox(height: 8),
+              ],
+              TextButton(
+                key: const Key('login-use-password'),
+                onPressed: _busy ? null : () => setState(() => _passwordFormHidden = false),
+                child: Text(tr('Use a username and password instead')),
+              ),
+            ] else ...[
+              if (_registering) ...[
+                TextField(
+                  controller: _name,
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.name],
+                  onSubmitted: (_) => _usernameFocus.requestFocus(),
+                  decoration: InputDecoration(labelText: tr('Your name'), prefixIcon: Icon(Icons.badge_outlined)),
+                ),
+                const SizedBox(height: 12),
+              ],
               TextField(
-                controller: _name,
-                textCapitalization: TextCapitalization.words,
+                controller: _username,
+                focusNode: _usernameFocus,
+                autocorrect: false,
+                enableSuggestions: false,
                 textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.name],
-                onSubmitted: (_) => _usernameFocus.requestFocus(),
-                decoration: InputDecoration(labelText: tr('Your name'), prefixIcon: Icon(Icons.badge_outlined)),
-              ),
-              const SizedBox(height: 12),
-            ],
-            TextField(
-              controller: _username,
-              focusNode: _usernameFocus,
-              autocorrect: false,
-              enableSuggestions: false,
-              textInputAction: TextInputAction.next,
-              autofillHints: [_registering ? AutofillHints.newUsername : AutofillHints.username],
-              onSubmitted: (_) => _passwordFocus.requestFocus(),
-              decoration: InputDecoration(
-                labelText: tr('Username'),
-                prefixIcon: const Icon(Icons.person_outline),
-                helperText: _registering ? tr('For example ravi, or your phone number') : null,
-                helperMaxLines: 2,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _password,
-              focusNode: _passwordFocus,
-              obscureText: !_showPassword,
-              textInputAction: TextInputAction.done,
-              autofillHints: [_registering ? AutofillHints.newPassword : AutofillHints.password],
-              onSubmitted: (_) => _busy ? null : _submit(),
-              decoration: InputDecoration(
-                labelText: tr('Password'),
-                prefixIcon: const Icon(Icons.lock_outline),
-                helperText: _registering ? trf('At least {n} characters', {'n': AuthService.minPasswordLength}) : null,
-                suffixIcon: IconButton(
-                  tooltip: _showPassword ? tr('Hide password') : tr('Show password'),
-                  icon: Icon(_showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined),
-                  onPressed: () => setState(() => _showPassword = !_showPassword),
+                autofillHints: [_registering ? AutofillHints.newUsername : AutofillHints.username],
+                onSubmitted: (_) => _passwordFocus.requestFocus(),
+                decoration: InputDecoration(
+                  labelText: tr('Username'),
+                  prefixIcon: const Icon(Icons.person_outline),
+                  helperText: _registering ? tr('For example ravi, or your phone number') : null,
+                  helperMaxLines: 2,
                 ),
               ),
-            ),
-            if (!_registering)
-              Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: TextButton(onPressed: _forgotPassword, child: Text(tr('Forgot password?'))),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _password,
+                focusNode: _passwordFocus,
+                obscureText: !_showPassword,
+                textInputAction: TextInputAction.done,
+                autofillHints: [_registering ? AutofillHints.newPassword : AutofillHints.password],
+                onSubmitted: (_) => _busy ? null : _submit(),
+                decoration: InputDecoration(
+                  labelText: tr('Password'),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  helperText: _registering ? trf('At least {n} characters', {'n': AuthService.minPasswordLength}) : null,
+                  suffixIcon: IconButton(
+                    tooltip: _showPassword ? tr('Hide password') : tr('Show password'),
+                    icon: Icon(_showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                    onPressed: () => setState(() => _showPassword = !_showPassword),
+                  ),
+                ),
               ),
-            if (_error != null) ...[
+              if (!_registering)
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: TextButton(onPressed: _forgotPassword, child: Text(tr('Forgot password?'))),
+                ),
+              if (_error != null) ...[
+                const SizedBox(height: 8),
+                FormMessage(_error!),
+              ],
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: _busy ? null : _submit,
+                child: _busy
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : Text(_registering ? tr('Create account') : tr('Log in')),
+              ),
               const SizedBox(height: 8),
-              FormMessage(_error!),
+              TextButton(
+                onPressed: _busy ? null : _switchMode,
+                child: Text(_registering ? tr('Already have an account? Log in') : tr('New to FieldOS? Create an account')),
+              ),
             ],
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: _busy ? null : _submit,
-              child: _busy
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(_registering ? tr('Create account') : tr('Log in')),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: _busy ? null : _switchMode,
-              child: Text(_registering ? tr('Already have an account? Log in') : tr('New to FieldOS? Create an account')),
-            ),
             const SizedBox(height: 16),
             Text.rich(
               TextSpan(

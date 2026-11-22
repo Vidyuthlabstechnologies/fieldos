@@ -54,11 +54,21 @@ class ProjectCostSummary {
   /// Forecast less budget; positive means heading over.
   double? get forecastOver => forecast == null || budget <= 0 ? null : forecast! - budget;
 
-  static Future<ProjectCostSummary> forProject(AppDatabase db, Project project) async {
+  /// A caller that has already read the site's lists (the owner's brief)
+  /// passes them in, so each is read from the phone once, not twice.
+  static Future<ProjectCostSummary> forProject(
+    AppDatabase db,
+    Project project, {
+    List<SiteExpense>? expenses,
+    List<MaterialReceipt>? receipts,
+    List<Issue>? issues,
+    List<DprEntry>? dprs,
+    List<Task>? tasks,
+  }) async {
     final boq = await buildProjectBoq(db.estimationDao, project.id);
 
-    final expenses = await db.expenseDao.forProject(project.id);
-    final receipts = await db.materialDao.forProject(project.id);
+    expenses ??= await db.expenseDao.forProject(project.id);
+    receipts ??= await db.materialDao.forProject(project.id);
     final workOrders = await db.workOrderDao.workOrdersFor(project.id);
 
     final actuals = <Map<String, dynamic>>[];
@@ -79,10 +89,10 @@ class ProjectCostSummary {
     final report = await CostControlAgent().run({'budget': boq, 'actuals': actuals});
     final d = report.data;
 
-    final issues = await db.issueDao.forProject(project.id);
+    issues ??= await db.issueDao.forProject(project.id);
     final open = issues.where((i) => i.status != 'resolved').length;
-    final dprs = await db.dprDao.forProject(project.id);
-    final tasks = await db.taskDao.forProject(project.id);
+    dprs ??= await db.dprDao.forProject(project.id);
+    tasks ??= await db.taskDao.forProject(project.id);
 
     final budget = d['project_budget'] as double;
     final noBudget = budget <= 0;

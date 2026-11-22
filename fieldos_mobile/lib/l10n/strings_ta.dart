@@ -3,6 +3,8 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
@@ -15,7 +17,9 @@ import 'package:fieldos_mobile/l10n/strings_proof_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_privacy_ta.dart';
 
 const Map<String, String> stringsTa = {
+  ...onboardingTa,
   ...scheduleTa,
+  ...integrationsTa,
   ...consentTa,
   ...overtimeTa,
   'Try again':
@@ -758,8 +762,8 @@ const Map<String, String> stringsTa = {
       'என் கிளவுட் கணக்கை நீக்கு',
   'Sign in to share projects, daily reports, issues and chat with your team.':
       'உங்கள் டீமுடன் ப்ராஜெக்ட்கள், தினசரி அறிக்கைகள், பிரச்சனைகள் மற்றும் சாட் பகிர உள்நுழையுங்கள்.',
-  'Use your own email. A new email creates an account automatically.':
-      'உங்கள் சொந்த ஈமெயிலைப் பயன்படுத்துங்கள். புதிய ஈமெயில் தானாகவே கணக்கை உருவாக்கும்.',
+  'New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.':
+      'FieldOS கிளவுடுக்கு புதியவரா? Google மூலம் தொடருங்கள், அல்லது iPhone-இல் Apple மூலம். மின்னஞ்சல், கடவுச்சொல் ஏற்கனவே உள்ள கணக்குக்கு மட்டும்.',
   'Choose a new password':
       'புதிய கடவுச்சொல்லைத் தேர்ந்தெடுங்கள்',
   'Check your email':
@@ -1274,6 +1278,7 @@ const Map<String, String> stringsTa = {
       'Apple ஈமெயில் முகவரியைப் பகிரவில்லை. மீண்டும் முயலுங்கள், அல்லது பயனர் பெயர் மற்றும் கடவுச்சொல்லைப் பயன்படுத்துங்கள்.',
   'Continue with Google':
       'Google மூலம் தொடர்',
+  'or, with an account you already have': 'அல்லது, ஏற்கனவே உள்ள கணக்குடன்',
   'More details (optional)':
       'மேலும் விவரங்கள் (விருப்பம்)',
   'Report':
@@ -2248,8 +2253,8 @@ const Map<String, String> stringsTa = {
       'மாதாந்திர',
   'Need help? {email}':
       'உதவி வேண்டுமா? {email}',
-  'New cloud accounts are switched off for now. Write to us at the support address and we will help.':
-      'புதிய கிளவுட் கணக்குகள் தற்போது நிறுத்தப்பட்டுள்ளன. ஆதரவு முகவரிக்கு எழுதுங்கள், உதவுகிறோம்.',
+  'That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.':
+      'இந்த மின்னஞ்சல், கடவுச்சொல்லால் எந்தக் கணக்கும் திறக்கவில்லை. புதிய கணக்குகள் "Google மூலம் தொடர்" அல்லது iPhone-இல் "Apple மூலம் உள்நுழை" மூலம் உருவாகும். ஏற்கனவே கணக்கு இருந்தால், கடவுச்சொல்லைச் சரிபாருங்கள்.',
   'No FieldOS subscription was found on this {store} account.':
       'இந்த {store} கணக்கில் FieldOS சந்தா இல்லை.',
   'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.':

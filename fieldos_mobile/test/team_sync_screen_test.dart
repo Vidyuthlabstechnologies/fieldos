@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:supabase/supabase.dart';
 
+import 'package:fieldos_mobile/auth/google_auth.dart';
 import 'package:fieldos_mobile/core/theme.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
@@ -99,4 +100,80 @@ void main() {
     expect(calls.where((c) => c == '/auth/v1/verify'), hasLength(1));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('new accounts: email sign-up is off, so the screen points to Google, which signs in', (tester) async {
+    final calls = <String>[];
+    final client = SupabaseClient('https://example.supabase.co', 'anon-key',
+        httpClient: MockClient((req) async {
+          calls.add('${req.url.path}?${req.url.query}');
+          if (req.url.path == '/auth/v1/token' && req.url.queryParameters['grant_type'] == 'id_token') {
+            return _json(
+                {'access_token': _jwt, 'token_type': 'bearer', 'expires_in': 3600, 'refresh_token': 'r', 'user': _user()});
+          }
+          return switch (req.url.path) {
+            '/auth/v1/token' =>
+              _json({'code': 400, 'error_code': 'invalid_credentials', 'msg': 'Invalid login credentials'}, 400),
+            '/auth/v1/signup' => _json({'code': 422, 'error_code': 'signup_disabled', 'msg': 'Signups not allowed for this instance'}, 422),
+            '/auth/v1/user' => _json(_user()),
+            _ => _json(<String, Object>{}),
+          };
+        }),
+        authOptions: const AuthClientOptions(authFlowType: AuthFlowType.implicit, autoRefreshToken: false));
+    final db = AppDatabase.memory();
+    final container = ProviderContainer(overrides: [
+      appDatabaseProvider.overrideWithValue(db),
+      cloudSyncClientProvider.overrideWithValue(client),
+      googlePickerProvider.overrideWithValue(_FakeGoogle()),
+    ]);
+    addTearDown(() async {
+      container.dispose();
+      await db.close();
+    });
+    await tester.runAsync(() async {
+      final session = container.read(sessionProvider.notifier);
+      await session.register(username: 'ravi', name: 'Ravi Kumar', password: '123456');
+    });
+    tester.view.physicalSize = const Size(412, 915);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    Future<void> settle() async {
+      for (var i = 0; i < 4; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 40)));
+        await tester.pumpAndSettle();
+      }
+    }
+
+    await tester.pumpWidget(UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(theme: buildFieldOsTheme(Brightness.light), home: const TeamSyncScreen()),
+    ));
+    await settle();
+    expect(find.textContaining('New to FieldOS cloud? Continue with Google'), findsOneWidget);
+    expect(find.byKey(const Key('cloud-google')), findsOneWidget);
+
+    // A new email no longer makes an account: the server refuses, and the
+    // person is told to use Google instead.
+    await tester.enterText(find.widgetWithText(TextField, 'Email'), 'new@example.com');
+    await tester.enterText(find.widgetWithText(TextField, 'Password'), 'some-password');
+    await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
+    await settle();
+    expect(find.textContaining('New accounts are made with Continue with Google'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('cloud-google')));
+    await settle();
+    expect(calls.where((c) => c.contains('grant_type=id_token')), hasLength(1));
+    expect(find.textContaining('Signed in as ravi@example.com'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+}
+
+class _FakeGoogle implements GoogleAccountPicker {
+  @override
+  bool get available => true;
+  @override
+  Future<GoogleIdentityResult?> pick() async =>
+      const GoogleIdentityResult(email: 'ravi@example.com', name: 'Ravi', idToken: 'not-a-real-token');
+  @override
+  Future<void> signOut() async {}
 }

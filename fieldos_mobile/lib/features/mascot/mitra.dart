@@ -50,6 +50,10 @@ class Mitra extends StatelessWidget {
   Widget build(BuildContext context) {
     final calm = still || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
     final asset = calm ? stillAsset(mood) : animatedAsset(mood);
+    // Frames decoded at the size they are shown, not the files' 256 px: on
+    // a 1.5x or 2x cheap phone a 72 dp Mitra needs a quarter of the memory
+    // and decode time per frame (the frames never get bigger than the file).
+    final px = (size * MediaQuery.devicePixelRatioOf(context)).ceil();
     // Its own layer: the animated frames repaint only Mitra, never the
     // list or card around it, so scrolling stays smooth.
     return RepaintBoundary(
@@ -71,6 +75,7 @@ class Mitra extends StatelessWidget {
             fit: BoxFit.contain,
             filterQuality: FilterQuality.medium,
             gaplessPlayback: true,
+            cacheWidth: px,
             // A missing frame must never break the screen it sits on.
             errorBuilder: (_, _, _) => Center(child: BrandMark(size: size * 0.7)),
           ),

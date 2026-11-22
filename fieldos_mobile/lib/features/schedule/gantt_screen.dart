@@ -420,10 +420,13 @@ class _TaskSheet extends ConsumerWidget {
                       tooltip: tr('Remove link'),
                       icon: const Icon(Icons.link_off),
                       onPressed: () => _write(context, ref, () async {
-                        await ref
-                            .read(appDatabaseProvider)
-                            .siteExecutionDao
-                            .clearConstraint(l.id, by: session.user!.id, note: tr('Link removed in the schedule'));
+                        // Every copy of the link (two phones can add it offline).
+                        for (final id in l.ids) {
+                          await ref
+                              .read(appDatabaseProvider)
+                              .siteExecutionDao
+                              .clearConstraint(id, by: session.user!.id, note: tr('Link removed in the schedule'));
+                        }
                       }),
                     )
                   : null,

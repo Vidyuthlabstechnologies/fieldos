@@ -10,6 +10,8 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 
+import 'package:fieldos_mobile/core/market.dart';
+
 /// One worksheet. [rows] hold String, num, DateTime, bool or null cells.
 class XlsxSheet {
   XlsxSheet(this.name, this.headers, this.rows);
@@ -142,11 +144,14 @@ String _sheetXml(XlsxSheet sheet) {
   return sb.toString();
 }
 
-const _stylesXml =
+/// Dates in the market's order: the US reads 08/11/2026 as 11 August.
+String get _dateFormat => market.dateOrder == DateOrder.mdy ? 'mm/dd/yyyy' : 'dd/mm/yyyy';
+
+String get _stylesXml =>
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-    '<numFmts count="2"><numFmt numFmtId="164" formatCode="dd/mm/yyyy"/>'
-    '<numFmt numFmtId="165" formatCode="dd/mm/yyyy hh:mm"/></numFmts>'
+    '<numFmts count="2"><numFmt numFmtId="164" formatCode="$_dateFormat"/>'
+    '<numFmt numFmtId="165" formatCode="$_dateFormat hh:mm"/></numFmts>'
     '<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font>'
     '<font><b/><sz val="11"/><name val="Calibri"/></font></fonts>'
     '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>'

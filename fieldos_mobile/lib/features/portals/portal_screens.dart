@@ -7,6 +7,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/features/auth/cloud_sign_in_buttons.dart';
+
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -103,6 +105,13 @@ class _PortalJoinScreenState extends ConsumerState<PortalJoinScreen> {
             'order is on its way. Clients see their site\'s progress, photos, bills and payments.')),
         const SizedBox(height: 16),
         if (!signedIn) ...[
+          CloudSignInButtons(
+            enabled: !_busy,
+            onSignedIn: () async {
+              if (mounted) setState(() => _message = null);
+            },
+            onError: (m) => _say(m, error: true),
+          ),
           TextField(
               key: const Key('portal-email'),
               controller: _email,

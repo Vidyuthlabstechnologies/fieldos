@@ -3,10 +3,14 @@
 /// Keyed by the Indian English text, like every table (see language.dart).
 library;
 
+import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 
 const stringsPl = <String, String>{
+  ...onboardingPl,
   ...schedulePl,
+  ...integrationsPl,
   'Try again': 'Spróbuj ponownie',
   'Approvals': 'Zatwierdzenia',
   'Nothing waiting': 'Nic nie czeka',
@@ -377,7 +381,8 @@ const stringsPl = <String, String>{
   'Sign out': 'Wyloguj się',
   'Delete my cloud account': 'Usuń moje konto w chmurze',
   'Sign in to share projects, daily reports, issues and chat with your team.': 'Zaloguj się, aby udostępniać zespołowi projekty, raporty dzienne, problemy i czat.',
-  'Use your own email. A new email creates an account automatically.': 'Użyj własnego e-maila. Nowy e-mail automatycznie tworzy konto.',
+  'New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.':
+      'Nowy w chmurze FieldOS? Kontynuuj z Google albo z Apple na iPhonie. E-mail i hasło służą do konta, które już masz.',
   'Choose a new password': 'Wybierz nowe hasło',
   'Check your email': 'Sprawdź e-mail',
   'Code from the email': 'Kod z e-maila',
@@ -636,6 +641,7 @@ const stringsPl = <String, String>{
   'Apple sign-in did not go through. Please try again.': 'Logowanie przez Apple nie powiodło się. Spróbuj ponownie.',
   'Apple did not share an email address. Please try again, or use a username and password.': 'Apple nie udostępnił adresu e-mail. Spróbuj ponownie lub użyj nazwy użytkownika i hasła.',
   'Continue with Google': 'Kontynuuj z Google',
+  'or, with an account you already have': 'albo kontem, które już masz',
   'More details (optional)': 'Więcej szczegółów (opcjonalnie)',
   'Report': 'Zgłoś',
   'Report this message': 'Zgłoś tę wiadomość',
@@ -1120,7 +1126,8 @@ const stringsPl = <String, String>{
   'Manage or cancel': 'Zarządzaj lub anuluj',
   'Monthly': 'Miesięcznie',
   'Need help? {email}': 'Potrzebujesz pomocy? {email}',
-  'New cloud accounts are switched off for now. Write to us at the support address and we will help.': 'Zakładanie nowych kont w chmurze jest na razie wyłączone. Napisz do nas na adres pomocy, a pomożemy.',
+  'That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.':
+      'Ten e-mail i hasło nie otworzyły żadnego konta. Nowe konta zakłada się przez Kontynuuj z Google albo Zaloguj się przez Apple na iPhonie. Jeśli masz już konto, sprawdź hasło.',
   'No FieldOS subscription was found on this {store} account.': 'Na tym koncie {store} nie znaleziono subskrypcji FieldOS.',
   'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.': 'Na tym koncie {store} nie znaleziono subskrypcji FieldOS. Jeśli subskrypcja jest na innym koncie, przełącz się na nie w {store} i spróbuj ponownie.',
   'No internet connection. Your work is saved on this phone; try again when you are online.': 'Brak internetu. Twoja praca jest zapisana na tym telefonie; spróbuj ponownie, gdy będziesz online.',

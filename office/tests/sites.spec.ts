@@ -26,14 +26,14 @@ test('an owner signs in and sees their own sites, never another company’s', as
   await expect(page.getByTestId(`site-${aRunning}`)).toContainText('Running');
   await expect(page.getByTestId(`site-${aPlanned}`)).toContainText('Planning');
   // Running sites come first.
-  await expect(page.locator('tbody tr').first()).toContainText('Tower A');
+  await expect(page.locator('[data-testid=sites] tbody tr').first()).toContainText('Tower A');
   await expect(page.getByTestId(`site-${bSite}`)).toHaveCount(0);
   await expect(page.getByText('Secret Site')).toHaveCount(0);
   await expect(page.getByTestId('company-picker')).toHaveCount(0);
 
   // Search narrows the list.
   await page.getByTestId('site-search').fill('annex');
-  await expect(page.locator('tbody tr')).toHaveCount(1);
+  await expect(page.locator('[data-testid=sites] tbody tr')).toHaveCount(1);
   await page.getByTestId('site-search').fill('');
 
   // Still signed in after a reload; then signs out.
@@ -59,11 +59,11 @@ test('someone in two companies picks one, and the choice is remembered', async (
   await page.getByTestId('password').fill(a.password);
   await page.getByTestId('sign-in').click();
   await expect(page.getByTestId('company-name')).toHaveText('Alpha Constructions');
-  await expect(page.getByText('Alpha Site')).toBeVisible();
+  await expect(page.getByTestId('sites').getByText('Alpha Site')).toBeVisible();
 
   await page.getByTestId('company-picker').selectOption(second);
   await expect(page.getByTestId('company-name')).toHaveText('Zeta Projects');
-  await expect(page.getByText('Zeta Site')).toBeVisible();
+  await expect(page.getByTestId('sites').getByText('Zeta Site')).toBeVisible();
   await expect(page.getByText('Alpha Site')).toHaveCount(0);
 
   await page.reload();

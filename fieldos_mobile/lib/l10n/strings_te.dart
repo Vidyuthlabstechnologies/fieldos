@@ -3,6 +3,8 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_te.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
@@ -15,7 +17,9 @@ import 'package:fieldos_mobile/l10n/strings_proof_te.dart';
 import 'package:fieldos_mobile/l10n/strings_privacy_te.dart';
 
 const Map<String, String> stringsTe = {
+  ...onboardingTe,
   ...scheduleTe,
+  ...integrationsTe,
   ...consentTe,
   ...overtimeTe,
   'Try again': 'మళ్ళీ ప్రయత్నించండి',
@@ -430,8 +434,8 @@ const Map<String, String> stringsTe = {
   'Delete my cloud account': 'నా క్లౌడ్ ఖాతాను తొలగించండి',
   'Sign in to share projects, daily reports, issues and chat with your team.':
       'ప్రాజెక్ట్‌లు, రోజువారీ రిపోర్టులు, సమస్యలు, చాట్‌ను మీ టీమ్‌తో పంచుకోవడానికి సైన్ ఇన్ చేయండి.',
-  'Use your own email. A new email creates an account automatically.':
-      'మీ సొంత ఈమెయిల్ వాడండి. కొత్త ఈమెయిల్‌తో ఖాతా ఆటోమేటిక్‌గా ఏర్పడుతుంది.',
+  'New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.':
+      'FieldOS క్లౌడ్‌కు కొత్తవారా? Googleతో కొనసాగండి, లేదా iPhoneలో Appleతో. ఈమెయిల్, పాస్‌వర్డ్ ఇప్పటికే ఉన్న ఖాతా కోసం.',
   'Choose a new password': 'కొత్త పాస్‌వర్డ్ ఎంచుకోండి',
   'Check your email': 'మీ ఈమెయిల్ చూడండి',
   'Code from the email': 'ఈమెయిల్‌లో వచ్చిన కోడ్',
@@ -693,6 +697,7 @@ const Map<String, String> stringsTe = {
   'Apple sign-in did not go through. Please try again.': 'Apple సైన్-ఇన్ జరగలేదు. మళ్ళీ ప్రయత్నించండి.',
   'Apple did not share an email address. Please try again, or use a username and password.': 'Apple ఈమెయిల్ చిరునామా ఇవ్వలేదు. మళ్ళీ ప్రయత్నించండి, లేదా యూజర్‌నేమ్, పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి.',
   'Continue with Google': 'Googleతో కొనసాగండి',
+  'or, with an account you already have': 'లేదా, ఇప్పటికే ఉన్న ఖాతాతో',
   'More details (optional)': 'మరిన్ని వివరాలు (ఐచ్ఛికం)',
   'Report': 'రిపోర్ట్ చేయండి',
   'Report this message': 'ఈ సందేశాన్ని రిపోర్ట్ చేయండి',
@@ -1363,8 +1368,8 @@ const Map<String, String> stringsTe = {
       'నెలవారీ',
   'Need help? {email}':
       'సహాయం కావాలా? {email}',
-  'New cloud accounts are switched off for now. Write to us at the support address and we will help.':
-      'కొత్త క్లౌడ్ ఖాతాలు ప్రస్తుతం ఆపారు. సపోర్ట్ చిరునామాకు రాయండి, మేము సహాయం చేస్తాం.',
+  'That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.':
+      'ఈ ఈమెయిల్, పాస్‌వర్డ్‌తో ఏ ఖాతా తెరుచుకోలేదు. కొత్త ఖాతాలు "Googleతో కొనసాగండి" ద్వారా, లేదా iPhoneలో "Appleతో సైన్ ఇన్ చేయండి" ద్వారా తయారవుతాయి. మీకు ఇప్పటికే ఖాతా ఉంటే, పాస్‌వర్డ్ చూడండి.',
   'No FieldOS subscription was found on this {store} account.':
       'ఈ {store} ఖాతాలో FieldOS సబ్‌స్క్రిప్షన్ దొరకలేదు.',
   'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.':

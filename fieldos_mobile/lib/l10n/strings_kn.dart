@@ -3,6 +3,8 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
@@ -15,7 +17,9 @@ import 'package:fieldos_mobile/l10n/strings_proof_kn.dart';
 import 'package:fieldos_mobile/l10n/strings_privacy_kn.dart';
 
 const Map<String, String> stringsKn = {
+  ...onboardingKn,
   ...scheduleKn,
+  ...integrationsKn,
   ...consentKn,
   ...overtimeKn,
   'Try again':
@@ -758,8 +762,8 @@ const Map<String, String> stringsKn = {
       'ನನ್ನ ಕ್ಲೌಡ್ ಖಾತೆ ಅಳಿಸಿ',
   'Sign in to share projects, daily reports, issues and chat with your team.':
       'ನಿಮ್ಮ ತಂಡದೊಂದಿಗೆ ಪ್ರಾಜೆಕ್ಟ್, ದಿನದ ವರದಿ, ಸಮಸ್ಯೆಗಳು ಮತ್ತು ಚಾಟ್ ಹಂಚಲು ಸೈನ್ ಇನ್ ಮಾಡಿ.',
-  'Use your own email. A new email creates an account automatically.':
-      'ನಿಮ್ಮ ಸ್ವಂತ ಇಮೇಲ್ ಬಳಸಿ. ಹೊಸ ಇಮೇಲ್ ತಾನಾಗಿ ಖಾತೆ ಮಾಡುತ್ತದೆ.',
+  'New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.':
+      'FieldOS ಕ್ಲೌಡ್‌ಗೆ ಹೊಸಬರೇ? Google ಮೂಲಕ ಮುಂದುವರಿಯಿರಿ, ಅಥವಾ iPhone ನಲ್ಲಿ Apple ಮೂಲಕ. ಇಮೇಲ್ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಈಗಾಗಲೇ ಇರುವ ಖಾತೆಗೆ.',
   'Choose a new password':
       'ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ಆರಿಸಿ',
   'Check your email':
@@ -1274,6 +1278,7 @@ const Map<String, String> stringsKn = {
       'Apple ಇಮೇಲ್ ವಿಳಾಸ ಹಂಚಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ, ಅಥವಾ ಬಳಕೆದಾರ ಹೆಸರು ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಬಳಸಿ.',
   'Continue with Google':
       'Google ಮೂಲಕ ಮುಂದುವರಿಯಿರಿ',
+  'or, with an account you already have': 'ಅಥವಾ, ಈಗಾಗಲೇ ಇರುವ ಖಾತೆಯಿಂದ',
   'More details (optional)':
       'ಇನ್ನಷ್ಟು ವಿವರ (ಐಚ್ಛಿಕ)',
   'Report':
@@ -2248,8 +2253,8 @@ const Map<String, String> stringsKn = {
       'ಮಾಸಿಕ',
   'Need help? {email}':
       'ಸಹಾಯ ಬೇಕೆ? {email}',
-  'New cloud accounts are switched off for now. Write to us at the support address and we will help.':
-      'ಹೊಸ ಕ್ಲೌಡ್ ಖಾತೆಗಳು ಸದ್ಯಕ್ಕೆ ನಿಲ್ಲಿಸಲಾಗಿದೆ. ಸಪೋರ್ಟ್ ವಿಳಾಸಕ್ಕೆ ಬರೆಯಿರಿ, ನಾವು ಸಹಾಯ ಮಾಡುತ್ತೇವೆ.',
+  'That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.':
+      'ಈ ಇಮೇಲ್ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್‌ನಿಂದ ಯಾವ ಖಾತೆಯೂ ತೆರೆಯಲಿಲ್ಲ. ಹೊಸ ಖಾತೆಗಳನ್ನು "Google ಮೂಲಕ ಮುಂದುವರಿಯಿರಿ" ಅಥವಾ iPhone ನಲ್ಲಿ "Apple ಮೂಲಕ ಸೈನ್ ಇನ್" ಮೂಲಕ ಮಾಡಲಾಗುತ್ತದೆ. ಈಗಾಗಲೇ ಖಾತೆ ಇದ್ದರೆ, ಪಾಸ್‌ವರ್ಡ್ ಪರಿಶೀಲಿಸಿ.',
   'No FieldOS subscription was found on this {store} account.':
       'ಈ {store} ಖಾತೆಯಲ್ಲಿ FieldOS ಚಂದಾದಾರಿಕೆ ಸಿಗಲಿಲ್ಲ.',
   'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.':

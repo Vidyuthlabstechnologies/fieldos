@@ -11,9 +11,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/features/auth/cloud_sign_in_buttons.dart';
+
 import 'package:fieldos_mobile/core/digits_input.dart';
 import 'package:fieldos_mobile/features/tasks/team_roster.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:fieldos_mobile/features/team/invite_team.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/brand.dart';
@@ -257,13 +259,23 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
           _say(tr('Enter the join code from your company owner.'), error: true);
           return;
         }
+        // A first company (a new phone, opened from company setup): once
+        // joined, the person belongs on Home, not on this settings screen.
+        final firstCompany = ref.read(sessionProvider).companies.isEmpty;
         final cloud = await ref.read(cloudSyncServiceProvider).joinCompany(code);
         await ref
             .read(sessionProvider.notifier)
             .adoptCloudCompany(id: cloud.companyId, name: cloud.name ?? 'Company', role: cloud.role);
         await _afterLinked(cloud.companyId);
         _code.clear();
-        _say(trf('Joined {company}. Projects will appear after the first sync.', {'company': cloud.name ?? tr('your company')}));
+        final joined = trf('Joined {company}. Projects will appear after the first sync.', {'company': cloud.name ?? tr('your company')});
+        if (firstCompany && mounted) {
+          final nav = Navigator.of(context);
+          showSnack(context, joined);
+          nav.popUntil((r) => r.isFirst);
+          return;
+        }
+        _say(joined);
         await _refresh();
       });
 
@@ -435,9 +447,17 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
         Text(tr('Sign in to share projects, daily reports, issues and chat with your team.'),
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        Text(tr('Use your own email. A new email creates an account automatically.'),
+        Text(tr('New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.'),
             style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         const SizedBox(height: 16),
+        CloudSignInButtons(
+          enabled: !_busy,
+          onSignedIn: () => _run(() async {
+            _say(trf('Signed in as {email}.', {'email': ref.read(cloudSyncServiceProvider).email ?? ''}));
+            await _afterSignIn();
+          }),
+          onError: (m) => _say(m, error: true),
+        ),
         TextField(
           controller: _email,
           decoration: InputDecoration(labelText: tr('Email'), prefixIcon: Icon(Icons.alternate_email)),
@@ -608,9 +628,7 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
               IconButton(
                 tooltip: tr('Share'),
                 icon: const Icon(Icons.share),
-                onPressed: () => SharePlus.instance.share(ShareParams(
-                  text: 'Join our company on FieldOS: open the app, go to Team & sync, sign in and enter join code $code',
-                )),
+                onPressed: () => shareJoinCode(ref, companyId: companyId, companyName: cloud?.name, code: code),
               ),
               if (isOwner)
                 IconButton(
@@ -621,6 +639,21 @@ class _TeamSyncScreenState extends ConsumerState<TeamSyncScreen> {
             ]),
           ),
         ),
+      if (code != null) ...[
+        const SizedBox(height: 4),
+        // The share icon is easy to miss; inviting is the reason most owners
+        // open this screen.
+        FilledButton.icon(
+          key: const Key('send-invite'),
+          icon: const Icon(Icons.send_outlined),
+          label: Text(tr('Send the invite')),
+          onPressed: () => shareJoinCode(ref, companyId: companyId, companyName: cloud?.name, code: code),
+        ),
+        const SizedBox(height: 4),
+        Text(tr('Send it on WhatsApp or SMS. It has the app link and the steps.'),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        const SizedBox(height: 8),
+      ],
       if (_roster == null)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),

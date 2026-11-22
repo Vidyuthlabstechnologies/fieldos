@@ -3,10 +3,14 @@
 /// Keyed by the Indian English text, like every table (see language.dart).
 library;
 
+import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
+import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 
 const stringsRo = <String, String>{
+  ...onboardingRo,
   ...scheduleRo,
+  ...integrationsRo,
   'Try again': 'Încearcă din nou',
   'Approvals': 'Aprobări',
   'Nothing waiting': 'Nimic în așteptare',
@@ -377,7 +381,8 @@ const stringsRo = <String, String>{
   'Sign out': 'Deconectare',
   'Delete my cloud account': 'Șterge contul meu din cloud',
   'Sign in to share projects, daily reports, issues and chat with your team.': 'Conectează-te pentru a distribui echipei proiecte, rapoarte zilnice, probleme și chat.',
-  'Use your own email. A new email creates an account automatically.': 'Folosește propriul email. Un email nou creează automat un cont.',
+  'New to FieldOS cloud? Continue with Google, or Apple on an iPhone. Email and password is for an account you already have.':
+      'Nou în cloudul FieldOS? Continuă cu Google sau cu Apple pe iPhone. E-mailul și parola sunt pentru un cont pe care îl ai deja.',
   'Choose a new password': 'Alege o parolă nouă',
   'Check your email': 'Verifică-ți emailul',
   'Code from the email': 'Codul din email',
@@ -636,6 +641,7 @@ const stringsRo = <String, String>{
   'Apple sign-in did not go through. Please try again.': 'Conectarea cu Apple nu a reușit. Te rugăm să încerci din nou.',
   'Apple did not share an email address. Please try again, or use a username and password.': 'Apple nu a trimis o adresă de email. Te rugăm să încerci din nou sau să folosești un nume de utilizator și o parolă.',
   'Continue with Google': 'Continuă cu Google',
+  'or, with an account you already have': 'sau, cu un cont pe care îl ai deja',
   'More details (optional)': 'Mai multe detalii (opțional)',
   'Report': 'Raportează',
   'Report this message': 'Raportează acest mesaj',
@@ -1120,7 +1126,8 @@ const stringsRo = <String, String>{
   'Manage or cancel': 'Gestionează sau anulează',
   'Monthly': 'Lunar',
   'Need help? {email}': 'Ai nevoie de ajutor? {email}',
-  'New cloud accounts are switched off for now. Write to us at the support address and we will help.': 'Conturile cloud noi sunt oprite deocamdată. Scrie-ne la adresa de asistență și te ajutăm.',
+  'That email and password did not open an account. New accounts are made with Continue with Google, or Sign in with Apple on an iPhone. If you already have an account, check the password.':
+      'Acest e-mail și această parolă nu au deschis niciun cont. Conturile noi se fac cu Continuă cu Google sau cu Conectare cu Apple pe iPhone. Dacă ai deja un cont, verifică parola.',
   'No FieldOS subscription was found on this {store} account.': 'Nu s-a găsit niciun abonament FieldOS pe acest cont {store}.',
   'No FieldOS subscription was found on this {store} account. If you subscribed with another account, switch to it in {store} and try again.': 'Nu s-a găsit niciun abonament FieldOS pe acest cont {store}. Dacă te-ai abonat cu alt cont, comută pe el în {store} și încearcă din nou.',
   'No internet connection. Your work is saved on this phone; try again when you are online.': 'Nu există conexiune la internet. Munca ta e salvată pe acest telefon; încearcă din nou când ești online.',

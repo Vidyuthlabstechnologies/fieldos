@@ -18,7 +18,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:drift/drift.dart' show Value, Variable;
+import 'package:drift/drift.dart' show DriftSqlType, Value, Variable;
 import 'package:http/http.dart' show ClientException;
 import 'package:supabase/supabase.dart';
 
@@ -254,8 +254,22 @@ class SyncEngine {
         final entries = await db.syncOutboxDao.pending();
         var succeeded = 0;
         final blocked = <String>{};
-        for (final entry in entries) {
+        final sentTogether = <int>{};
+        final sendAlone = <int>{};
+        for (var i = 0; i < entries.length; i++) {
+          final entry = entries[i];
+          if (sentTogether.contains(entry.id)) continue;
           final payload = jsonDecode(entry.payload) as Map<String, dynamic>;
+          // New rows of one table in a row (a day of attendance, a batch
+          // of messages) go up in one request instead of one each.
+          final group = await _pushInsertsTogether(entries, i, blocked, sendAlone);
+          if (group > 0) {
+            for (var j = i; j < i + group; j++) {
+              sentTogether.add(entries[j].id);
+            }
+            succeeded += group;
+            continue;
+          }
           if (blocked.contains(entry.recordId) ||
               payload.values.any((v) => v is String && v != entry.recordId && blocked.contains(v))) {
             blocked.add(entry.recordId);
@@ -294,6 +308,64 @@ class SyncEngine {
         }
         return SyncPushResult(succeeded: succeeded, failed: entries.length - succeeded);
       });
+
+  /// Most new rows sent in one request.
+  static const pushBatchSize = 50;
+
+  /// Sends the plain inserts starting at [start] (same table, no file, no
+  /// record twice, the same columns) as one request, and marks them sent.
+  /// Returns how many went, or 0 when there is no such run of two or more,
+  /// or the server refused the batch: then each is sent on its own as
+  /// before, which sorts out duplicates, missing columns and refusals one
+  /// by one. Replaying a batch whose answer was lost is safe the same way.
+  Future<int> _pushInsertsTogether(
+      List<SyncOutboxData> entries, int start, Set<String> blocked, Set<int> sendAlone) async {
+    final first = entries[start];
+    if (sendAlone.contains(first.id)) return 0;
+    final table = first.targetTable;
+    if (first.operation != 'insert' || fileColumns.containsKey(table)) return 0;
+    final until = _missingTablesUntil[table];
+    if (until != null && DateTime.now().isBefore(until)) return 0;
+    final rows = <Map<String, dynamic>>[];
+    final ids = <String>{};
+    Set<String>? columns;
+    for (var j = start; j < entries.length && rows.length < pushBatchSize; j++) {
+      final e = entries[j];
+      if (e.targetTable != table || e.operation != 'insert' || ids.contains(e.recordId) || blocked.contains(e.recordId)) break;
+      final data = _toRemoteIds(jsonDecode(e.payload) as Map<String, dynamic>);
+      if (data.values.any((v) => v is String && v != e.recordId && blocked.contains(v))) break;
+      if (data.containsKey('_local_file_path')) break;
+      columns ??= data.keys.toSet();
+      if (data.length != columns.length || !data.keys.every(columns.contains)) break;
+      // A row pointing at an earlier row of this batch (a reply to a
+      // message) goes in its own request, after it.
+      if (data.values.any((v) => v is String && v != e.recordId && ids.contains(v))) break;
+      rows.add(data);
+      ids.add(e.recordId);
+    }
+    if (rows.length < 2) return 0;
+    try {
+      await client.from(table).insert(rows);
+    } catch (_) {
+      // Not tried as a batch again this run: one bad row would otherwise
+      // cost a failed batch for every row after it.
+      sendAlone.addAll([for (var j = start; j < start + rows.length; j++) entries[j].id]);
+      return 0;
+    }
+    if (table == 'site_expenses') {
+      try {
+        final numbered = await client.from('site_expenses').select('id, voucher_no').inFilter('id', ids.toList());
+        for (final r in numbered) {
+          final n = r['voucher_no'];
+          if (n is num) await db.expenseDao.setServerVoucher(r['id'] as String, n.toInt());
+        }
+      } catch (_) {
+        // The provisional numbers stay until the next pull brings the server's.
+      }
+    }
+    await db.syncOutboxDao.markAllSynced([for (var j = start; j < start + rows.length; j++) entries[j].id]);
+    return rows.length;
+  }
 
   /// Tables whose rows carry a file in Storage, and the column holding its
   /// object path ({projectId}/...). Push uploads the file before the row,
@@ -448,7 +520,7 @@ class SyncEngine {
 
   Future<void> _pullAll() => _synchronized(() async {
         final dirty = await db.syncOutboxDao.dirtyKeys();
-        final keep = {...dirty.map((k) => k.substring(k.indexOf(':') + 1)), ...await db.syncOutboxDao.localOnlyIds()};
+        final keep = {...await _queuedIds(), ...await db.syncOutboxDao.localOnlyIds()};
         final cursorKey = 'sync_cursor:${client.auth.currentUser?.id}';
         final cursor = int.tryParse(await db.settingsDao.get(cursorKey) ?? '');
         // Where the next read of the log starts (see _pullChanges): at or
@@ -682,9 +754,9 @@ class SyncEngine {
   static bool _isMissingOnServer(PostgrestException e) =>
       e.code == 'PGRST202' || e.code == 'PGRST205' || e.code == '42P01' || e.code == '42883';
 
-  Future<void> _apply(String table, Map<String, dynamic> row, Set<String> dirty) async {
+  Future<void> _apply(String table, Map<String, dynamic> row, Set<String> dirty, {Zone? alertZone}) async {
     if (dirty.contains(SyncOutboxDao.key(table, row['id'] as String))) return;
-    await _notifyIfNew(table, row);
+    await _notifyIfNew(table, row, alertZone: alertZone);
     final kept = await _keepLocalOnlyColumns(table, row);
     if (kept != null) {
       try {
@@ -694,6 +766,60 @@ class SyncEngine {
       }
     }
     await _upserters[table]!(row);
+  }
+
+  /// Requests a pull keeps in flight at once. On a weak link most of a
+  /// request's time is the round trip, so a few at a time cut a first sync
+  /// several times over; more would only split a thin link further.
+  static const pullParallelism = 4;
+
+  /// Starts [fetch] for each of [items], at most [pullParallelism] ahead of
+  /// the one being awaited, and yields them in order. Each future is
+  /// listened to straight away, so a failure is never unhandled; it is
+  /// thrown when its turn comes, like a plain sequential loop would.
+  static Iterable<(T, Future<R>)> _prefetch<T, R>(List<T> items, Future<R> Function(T) fetch) sync* {
+    final started = <Future<R>>[];
+    void startUpTo(int n) {
+      while (started.length < n && started.length < items.length) {
+        final f = fetch(items[started.length]);
+        f.ignore();
+        started.add(f);
+      }
+    }
+
+    for (var i = 0; i < items.length; i++) {
+      startUpTo(i + pullParallelism);
+      yield (items[i], started[i]);
+    }
+  }
+
+  /// Rows written to the phone per transaction. One commit per row made a
+  /// cheap phone's storage flush for every row (a first sync of a busy
+  /// company took minutes), and every open screen re-read its lists after
+  /// each one. Small enough that a person's own save never waits long.
+  static const applyBatchSize = 200;
+
+  /// Applies [rows] of [table], [applyBatchSize] per transaction. Tables
+  /// with files download them while applying, so those stay one row at a
+  /// time: a transaction must never wait on the network.
+  Future<void> _applyAll(String table, List<Map<String, dynamic>> rows, Set<String> dirty) async {
+    if (fileColumns.containsKey(table)) {
+      for (final row in rows) {
+        await _apply(table, row, dirty);
+      }
+      return;
+    }
+    // Alerts run outside the transaction: they read settings later on,
+    // after it has closed.
+    final outside = Zone.current;
+    for (var i = 0; i < rows.length; i += applyBatchSize) {
+      final batch = rows.sublist(i, i + applyBatchSize > rows.length ? rows.length : i + applyBatchSize);
+      await db.transaction(() async {
+        for (final row in batch) {
+          await _apply(table, row, dirty, alertZone: outside);
+        }
+      });
+    }
   }
 
   /// Per table, this phone's columns the backend's rows do not carry (its
@@ -720,11 +846,25 @@ class SyncEngine {
         .customSelect('SELECT * FROM $local WHERE id = ?', variables: [Variable<String>(row['id'] as String)])
         .getSingleOrNull();
     if (mine == null) return null;
+    // The raw SQLite value is not the server's JSON shape: a date is stored
+    // as seconds and a yes/no as 0/1. Put them back the way a server row
+    // carries them, or the mapper cannot read them and the kept value is
+    // dropped.
+    final types = {
+      for (final t in db.allTables)
+        if (t.actualTableName == local)
+          for (final c in t.$columns) c.name: c.type,
+    };
     Map<String, dynamic>? out;
     for (final c in lacks) {
       final v = mine.data[c];
       if (v == null || row.containsKey(c)) continue;
-      (out ??= Map.of(row))[c] = v;
+      final type = types[c];
+      (out ??= Map.of(row))[c] = switch (type) {
+        DriftSqlType.dateTime => (db.typeMapping.read(DriftSqlType.dateTime, v) as DateTime).toUtc().toIso8601String(),
+        DriftSqlType.bool => db.typeMapping.read(DriftSqlType.bool, v),
+        _ => v,
+      };
     }
     return out;
   }
@@ -734,21 +874,25 @@ class SyncEngine {
   /// the server no longer has are removed.
   Future<void> _pullEverything(Set<String> dirty, Set<String> keep) async {
     final seen = <String, Set<String>>{};
-    for (final table in _upserters.keys) {
-      final List<Map<String, dynamic>> rows;
+    // Several tables are read at once (on a 3G or 2G link each request is
+    // mostly waiting), but applied one by one in this order.
+    final fetched = _prefetch(_upserters.keys.toList(), (table) async {
       try {
-        rows = await _fetchAll(table);
+        return await _fetchAll(table);
       } on PostgrestException catch (e) {
         if (!_isMissingOnServer(e)) rethrow;
-        continue; // not on this backend yet; nothing to reconcile either
+        return null; // not on this backend yet; nothing to reconcile either
       }
+    });
+    for (final (table, result) in fetched) {
+      final rows = await result;
+      if (rows == null) continue;
       seen[table] = {for (final r in rows) r['id'] as String};
-      for (final row in rows) {
-        await _apply(table, row, dirty);
-      }
+      await _applyAll(table, rows, dirty);
     }
     final sites = seen['projects'] ?? const <String>{};
     if (sites.isEmpty) return;
+    keep = {...keep, ...await _queuedIds()};
     final marks = List.filled(sites.length, '?').join(',');
     for (final MapEntry(key: remote, value: local) in localTableNames.entries) {
       if (!_projectScoped.contains(remote) || !seen.containsKey(remote)) continue;
@@ -820,22 +964,21 @@ class SyncEngine {
         (changed[value.table] ??= []).add(id);
       }
     }
-    for (final table in _upserters.keys) {
-      final ids = changed[table];
-      if (ids == null) continue;
-      for (var i = 0; i < ids.length; i += 100) {
-        final chunk = ids.sublist(i, i + 100 > ids.length ? ids.length : i + 100);
-        final rows = (await client.from(table).select().inFilter('id', chunk)).map(_toLocalIds).toList();
-        final found = <String>{};
-        for (final row in rows) {
-          found.add(row['id'] as String);
-          await _apply(table, row, dirty);
-        }
-        // Changed, but not readable now: deleted since, or no longer
-        // shared with this account (e.g. money-in after a role change).
-        for (final id in chunk) {
-          if (!found.contains(id)) deleted.add((table: table, id: id));
-        }
+    final chunks = <(String, List<String>)>[
+      for (final table in _upserters.keys)
+        if (changed[table] case final ids?)
+          for (var i = 0; i < ids.length; i += 100) (table, ids.sublist(i, i + 100 > ids.length ? ids.length : i + 100)),
+    ];
+    final fetched = _prefetch(chunks,
+        (c) async => (await client.from(c.$1).select().inFilter('id', c.$2)).map(_toLocalIds).toList());
+    for (final ((table, chunk), result) in fetched) {
+      final rows = await result;
+      await _applyAll(table, rows, dirty);
+      final found = {for (final row in rows) row['id'] as String};
+      // Changed, but not readable now: deleted since, or no longer
+      // shared with this account (e.g. money-in after a role change).
+      for (final id in chunk) {
+        if (!found.contains(id)) deleted.add((table: table, id: id));
       }
     }
     // Children before parents.
@@ -859,6 +1002,7 @@ class SyncEngine {
     final linked = (jsonDecode(raw) as List).cast<String>();
     if (linked.isEmpty) return;
     final visible = {for (final r in await _fetchIds('projects')) r};
+    keep = {...keep, ...await _queuedIds()};
     final marks = List.filled(linked.length, '?').join(',');
     final local = await db
         .customSelect('SELECT id FROM projects WHERE company_id IN ($marks)',
@@ -868,6 +1012,48 @@ class SyncEngine {
       final id = r.read<String>('id');
       if (!visible.contains(id) && !keep.contains(id)) await _deleteLocal('projects', id);
     }
+  }
+
+  /// Records queued now. The person keeps working while a pull runs, so
+  /// what was queued when it started is not enough before removing rows the
+  /// server does not have: a site or task saved meanwhile is not there yet.
+  ///
+  /// The sites those records are in count too, so a site no longer shared
+  /// is not removed (with everything in it) while it has unsent work not
+  /// yet tried on the server.
+  Future<Set<String>> _queuedIds() async {
+    final out = <String>{};
+    for (final e in await db.select(db.syncOutbox).get()) {
+      out.add(e.recordId);
+      // Work the server has already refused (removed from the company, the
+      // row gone) can never be sent, so it does not hold the site on the
+      // phone; the incremental_pull cloud test covers that case.
+      if (e.retryCount > 0) continue;
+      final payload = jsonDecode(e.payload);
+      if (payload is! Map<String, dynamic>) continue;
+      final site = await _siteOf(e.targetTable, payload);
+      if (site != null) out.add(site);
+    }
+    return out;
+  }
+
+  /// The site a record is in: its project_id, or its parent's
+  /// ([_children]) for a photo, bill or line under another record.
+  Future<String?> _siteOf(String table, Map<String, dynamic> row) async {
+    if (table == 'projects') return row['id'] as String?;
+    for (var depth = 0; depth < 4; depth++) {
+      final site = row['project_id'];
+      if (site is String) return site;
+      final link = _children.where((c) => c.$1 == table).firstOrNull;
+      final parentId = link == null ? null : row[link.$3];
+      if (link == null || parentId is! String) return null;
+      final parent = await db
+          .customSelect('SELECT * FROM ${localTableNames[link.$2]} WHERE id = ?', variables: [Variable<String>(parentId)])
+          .getSingleOrNull();
+      if (parent == null) return null;
+      (table, row) = (link.$2, parent.data);
+    }
+    return null;
   }
 
   Future<List<String>> _fetchIds(String table) async =>
@@ -1067,13 +1253,18 @@ class SyncEngine {
   /// Tables whose arrival from a colleague is worth an on-device alert.
   static const notifiableTables = {'issues', 'approvals', 'project_messages'};
 
-  Future<void> _notifyIfNew(String table, Map<String, dynamic> row) async {
+  Future<void> _notifyIfNew(String table, Map<String, dynamic> row, {Zone? alertZone}) async {
     final callback = onRemoteRowCreated;
     if (callback == null || !notifiableTables.contains(table)) return;
     final exists = await db
         .customSelect('SELECT 1 FROM $table WHERE id = ?', variables: [Variable<String>(row['id'] as String)])
         .getSingleOrNull();
-    if (exists == null) callback(table, row);
+    if (exists != null) return;
+    if (alertZone == null) {
+      callback(table, row);
+    } else {
+      alertZone.run(() => callback(table, row));
+    }
   }
 
   /// Live updates for one project's tasks -- INSERT/UPDATE/DELETE on the
@@ -1229,16 +1420,36 @@ class SyncEngine {
     _messagesChannel = null;
   }
 
+  /// How long to wait for "Subscribed to PostgreSQL" after the join before
+  /// carrying on anyway, so a server that never sends it cannot hang a screen.
+  static const replicationReadyWait = Duration(seconds: 10);
+
   Future<void> _awaitJoin(RealtimeChannel channel, {required String label}) {
     final completer = Completer<void>();
+    Timer? fallback;
+    void ready() {
+      fallback?.cancel();
+      if (!completer.isCompleted) completer.complete();
+    }
+
+    // `subscribed` only means the join was accepted. Realtime sets up the
+    // table listener after that, which took about 3 s on a freshly started
+    // server, and a row written in between is never delivered (the live
+    // update test missed its task that way in CI). The server says when the
+    // listener is live with a postgres_changes "ok" system message, so wait
+    // for that.
+    channel.onSystemEvents((payload) {
+      if (payload is Map && payload['extension'] == 'postgres_changes' && payload['status'] == 'ok') ready();
+    });
     channel.subscribe((status, error) {
       if (completer.isCompleted) return;
       switch (status) {
         case RealtimeSubscribeStatus.subscribed:
-          completer.complete();
+          fallback ??= Timer(replicationReadyWait, ready);
         case RealtimeSubscribeStatus.channelError:
         case RealtimeSubscribeStatus.timedOut:
         case RealtimeSubscribeStatus.closed:
+          fallback?.cancel();
           completer.completeError(StateError('Realtime channel "$label" failed to join: $status ($error)'));
       }
     });
