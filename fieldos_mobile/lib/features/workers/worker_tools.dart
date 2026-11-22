@@ -83,10 +83,10 @@ List<NewWorker> parseWorkerLines(String text) {
     for (final p in parts.skip(1)) {
       final digits = p.replaceAll(RegExp(r'[\s+\-()]'), '');
       final cleanWage = p.replaceAll(RegExp(r'[₹,\s]|rs\.?|/-|a day|per day', caseSensitive: false), '');
-      if (RegExp(r'^\d{6,}$').hasMatch(digits)) {
+      if (RegExp(r'^\d{6,}$').hasMatch(westernDigits(digits))) {
         phone ??= p;
       } else if (double.tryParse(westernDigits(cleanWage)) != null) {
-        wage ??= double.parse(cleanWage);
+        wage ??= double.parse(westernDigits(cleanWage));
       } else {
         role ??= p;
       }

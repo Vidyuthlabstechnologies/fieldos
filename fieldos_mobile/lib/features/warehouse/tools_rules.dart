@@ -63,7 +63,7 @@ String nextToolCode(Iterable<Tool> tools) {
   for (final t in tools) {
     final m = re.firstMatch(t.code ?? '');
     if (m != null) {
-      final n = int.parse(m.group(1)!);
+      final n = int.tryParse(m.group(1)!) ?? 0;
       if (n > max) max = n;
     }
   }
