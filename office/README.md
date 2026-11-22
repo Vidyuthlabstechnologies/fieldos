@@ -13,6 +13,28 @@ Built so far (the plan has 7 steps):
    (`#/site/<id>/<tab>`), so links can be shared and the host needs no
    rewrite rules. The register rules in `src/rules.ts` mirror the phone's
    `execution_rules.dart`; change both together.
+3. Money, gated by role, with Excel downloads. A site's Money tab shows
+   what was spent (vouchers, filters with their total, spend by category)
+   and supplier invoices to anyone on the site; money received, client
+   bills, the balance and what the client still owes only to the site's
+   owner or project manager, exactly as the server's row security allows
+   (`is_project_owner_or_pm`). Company owners and project managers also get
+   a money table across all sites and one Excel file for all of them. The
+   rules in `src/money.ts` mirror the phone's `money_book.dart`. The Excel
+   writer (`src/xlsx.ts`) has no dependencies; text goes in as plain
+   strings, never formulas.
+4. Schedule (Gantt), read only. Each dated task is a bar, "earlier work"
+   links push late work along, the critical path is red and today is a
+   line; a table under it gives each task's dates, spare days and what it
+   waits for. `src/schedule.ts` is the phone's `schedule_rules.dart` ported
+   line for line, and `tests/schedule.spec.ts` runs the phone's own test
+   cases with the same expected dates; change all of them together.
+
+## Markets
+
+Like the phone, one build per country: `VITE_FIELDOS_MARKET=in|us|my|ae|uk`
+(India by default) sets the currency, the tax's name and the bill names
+(`src/market.ts`, mirroring `lib/core/market.dart`).
 
 ## Address
 
