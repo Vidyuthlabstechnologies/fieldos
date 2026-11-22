@@ -1420,16 +1420,36 @@ class SyncEngine {
     _messagesChannel = null;
   }
 
+  /// How long to wait for "Subscribed to PostgreSQL" after the join before
+  /// carrying on anyway, so a server that never sends it cannot hang a screen.
+  static const replicationReadyWait = Duration(seconds: 10);
+
   Future<void> _awaitJoin(RealtimeChannel channel, {required String label}) {
     final completer = Completer<void>();
+    Timer? fallback;
+    void ready() {
+      fallback?.cancel();
+      if (!completer.isCompleted) completer.complete();
+    }
+
+    // `subscribed` only means the join was accepted. Realtime sets up the
+    // table listener after that, which took about 3 s on a freshly started
+    // server, and a row written in between is never delivered (the live
+    // update test missed its task that way in CI). The server says when the
+    // listener is live with a postgres_changes "ok" system message, so wait
+    // for that.
+    channel.onSystemEvents((payload) {
+      if (payload is Map && payload['extension'] == 'postgres_changes' && payload['status'] == 'ok') ready();
+    });
     channel.subscribe((status, error) {
       if (completer.isCompleted) return;
       switch (status) {
         case RealtimeSubscribeStatus.subscribed:
-          completer.complete();
+          fallback ??= Timer(replicationReadyWait, ready);
         case RealtimeSubscribeStatus.channelError:
         case RealtimeSubscribeStatus.timedOut:
         case RealtimeSubscribeStatus.closed:
+          fallback?.cancel();
           completer.completeError(StateError('Realtime channel "$label" failed to join: $status ($error)'));
       }
     });
