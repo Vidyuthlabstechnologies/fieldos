@@ -30,10 +30,12 @@ jobs:
       - run: deno lint
       - run: deno check index.ts live_test.ts
       - run: deno test core_test.ts
-      - name: account-cleanup, report-to-github and public-api
+      - name: account-cleanup, report-to-github, public-api and webhook-dispatch
+        # public-api's test compares its OpenAPI document with docs/openapi.json,
+        # so it may read the repo's docs folder (and nothing else).
         run: |
-          for f in account-cleanup report-to-github public-api; do
-            (cd ../$f && deno fmt --check && deno lint && deno check index.ts && deno test core_test.ts)
+          for f in account-cleanup report-to-github public-api webhook-dispatch; do
+            (cd ../$f && deno fmt --check && deno lint && deno check index.ts && deno test --allow-read=../../../docs core_test.ts)
           done
 
   db:
