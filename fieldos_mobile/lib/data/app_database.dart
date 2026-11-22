@@ -541,10 +541,14 @@ class AppDatabase extends _$AppDatabase {
   /// The first time sync runs on a version that sends them, queue every one
   /// still on disk (once; a replay of one already sent is harmless, see
   /// SyncEngine.pushPending). Local-only (sample) records stay local.
+  ///
+  /// Queuing what was saved earlier is sync bookkeeping, not a change, so it
+  /// runs in read-only mode too: sync starts with this step, and a refusal
+  /// here kept a phone back online after 7 days from syncing at all.
   Future<int> queueFilesFromBeforeSync() async {
     if (await settingsDao.get(filesQueuedKey) != null) return 0;
     var queued = 0;
-    await transaction(() async {
+    await WriteGuard.serverSync(() => transaction(() async {
       for (final photo in await select(dprPhotos).get()) {
         final dpr = await dprDao.byId(photo.dprEntryId);
         if (dpr == null || !File(photo.photoPath).existsSync()) continue;
@@ -568,7 +572,7 @@ class AppDatabase extends _$AppDatabase {
         queued++;
       }
       await settingsDao.set(filesQueuedKey, DateTime.now().toUtc().toIso8601String());
-    });
+    }));
     return queued;
   }
 }

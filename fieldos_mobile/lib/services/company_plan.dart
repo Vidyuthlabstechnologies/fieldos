@@ -177,8 +177,9 @@ class CompanyPlanService {
     await db.settingsDao.set(_seenKey, at);
     DateTime? until;
     for (final p in plans) {
-      // Covered through the whole last day.
-      final end = DateTime(p.endsOn.year, p.endsOn.month, p.endsOn.day).add(const Duration(days: 1));
+      // Covered through the whole last day, in India time like the
+      // server's ist_today, whatever zone the phone is set to.
+      final end = DateTime.utc(p.endsOn.year, p.endsOn.month, p.endsOn.day + 1).subtract(planDayUtcOffset);
       if (until == null || end.isAfter(until)) until = end;
     }
     await db.settingsDao.set(_untilKey, until?.toUtc().toIso8601String() ?? '');
@@ -227,6 +228,10 @@ class CompanyPlanService {
   Future<String?> checkNewActiveSite(String companyId, {String? reopening}) =>
       newActiveSiteBlocked(db, companyId, reopening: reopening);
 }
+
+/// A plan's days are India days (the server's ist_today, Asia/Kolkata,
+/// UTC+5:30 with no daylight saving): ends_on is the last India date covered.
+const planDayUtcOffset = Duration(hours: 5, minutes: 30);
 
 /// How long a phone on a company plan stays fully usable with no answer
 /// from the server. After that it is read-only until it reaches the server.

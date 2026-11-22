@@ -117,7 +117,7 @@ class _SubscriptionGateState extends ConsumerState<SubscriptionGate> with Widget
     if (firstTime && mounted) {
       final now = DateTime.now();
       final store =
-          accessFor(billingSetUp: true, live: null, lastPaidUntil: await billing.lastPaidUntil(), now: now);
+          accessFor(billingSetUp: true, live: null, lastPaidUntil: await billing.lastPaidUntil(), latestSeen: await billing.latestSeen(now), now: now);
       final remembered = store == Access.allowed ? Access.allowed : await company.access(live: null, now: now);
       if (remembered != Access.blocked && mounted) {
         _set(remembered, reason: await company.readOnlyReason(now));
@@ -131,6 +131,7 @@ class _SubscriptionGateState extends ConsumerState<SubscriptionGate> with Widget
         billingSetUp: true,
         live: results[0] as SubscriptionState?,
         lastPaidUntil: await billing.lastPaidUntil(),
+        latestSeen: await billing.latestSeen(now),
         now: now);
     final access = store == Access.allowed
         ? Access.allowed

@@ -89,6 +89,7 @@ class BillingService {
   final AppDatabase db;
   final String? _apiKey;
   static const _paidUntilKey = 'subscription_paid_until';
+  static const _seenKey = 'subscription_seen_at';
 
   /// The packages behind the plans last shown, by id.
   final Map<String, Package> _packages = {};
@@ -118,7 +119,19 @@ class BillingService {
     // A subscription with no expiry (lifetime) is remembered as far ahead.
     final until = s.active ? (s.expiresAt ?? DateTime.now().add(const Duration(days: 3650))) : null;
     await db.settingsDao.set(_paidUntilKey, until?.toUtc().toIso8601String() ?? '');
+    await db.settingsDao.set(_seenKey, DateTime.now().toUtc().toIso8601String());
     return s;
+  }
+
+  /// The latest time this phone has seen, after noting [now]: what
+  /// [accessFor] measures the offline days from when the clock is set
+  /// back. A store answer starts it again from that moment.
+  Future<DateTime> latestSeen(DateTime now) async {
+    final raw = await db.settingsDao.get(_seenKey);
+    final seen = raw == null || raw.isEmpty ? null : DateTime.tryParse(raw);
+    if (seen != null && !now.isAfter(seen)) return seen;
+    await db.settingsDao.set(_seenKey, now.toUtc().toIso8601String());
+    return now;
   }
 
   Future<DateTime?> lastPaidUntil() async {

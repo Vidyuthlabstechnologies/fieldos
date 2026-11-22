@@ -119,10 +119,12 @@ class SiteExecutionDao {
         final n = _clip(number, 40);
         final ti = _clip(title, 200);
         if (n == null || ti == null) throw ExecutionRefused(tr('Enter the drawing number and title.'));
+        // get(), not getSingleOrNull(): two phones can each have added the
+        // number offline, and two rows made this a crash, not a refusal.
         final same = await (db.select(db.drawings)
               ..where((d) => d.projectId.equals(projectId) & d.number.lower().equals(n.toLowerCase())))
-            .getSingleOrNull();
-        if (same != null) throw ExecutionRefused(trf('Drawing {number} is already in the register.', {'number': n}));
+            .get();
+        if (same.isNotEmpty) throw ExecutionRefused(trf('Drawing {number} is already in the register.', {'number': n}));
         final t = now ?? DateTime.now();
         final row = await db.into(db.drawings).insertReturning(DrawingsCompanion.insert(
             id: _uuid.v4(), projectId: projectId, number: n, title: ti, discipline: Value(discipline), createdBy: by,
@@ -146,8 +148,8 @@ class SiteExecutionDao {
         if (r == null) throw ExecutionRefused(tr('Enter the revision (e.g. R1 or B).'));
         final dup = await (db.select(db.drawingRevisions)
               ..where((x) => x.drawingId.equals(drawingId) & x.rev.lower().equals(r.toLowerCase())))
-            .getSingleOrNull();
-        if (dup != null) throw ExecutionRefused(trf('Revision {rev} is already in the register.', {'rev': r}));
+            .get();
+        if (dup.isNotEmpty) throw ExecutionRefused(trf('Revision {rev} is already in the register.', {'rev': r}));
         final t = now ?? DateTime.now();
         final row = await db.into(db.drawingRevisions).insertReturning(DrawingRevisionsCompanion.insert(
             id: _uuid.v4(),
@@ -777,7 +779,13 @@ class SiteExecutionDao {
         }
         final t = now ?? DateTime.now();
         final line = submittalHistoryLine(x);
-        var history = x.history.isEmpty ? line : '${x.history}\n$line';
+        // Over the column's 8000 characters, the oldest reviews go, whole
+        // lines at a time (cutting the end dropped the review just made).
+        final lines = [if (x.history.isNotEmpty) ...x.history.split('\n'), line];
+        while (lines.length > 1 && lines.join('\n').length > 8000) {
+          lines.removeAt(0);
+        }
+        var history = lines.join('\n');
         if (history.length > 8000) history = history.substring(0, 8000);
         await (db.update(db.submittals)..where((r) => r.id.equals(id))).write(SubmittalsCompanion(
             status: const Value('submitted'),

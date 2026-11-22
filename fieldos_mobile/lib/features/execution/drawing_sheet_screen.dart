@@ -139,6 +139,10 @@ class _DrawingSheetScreenState extends ConsumerState<DrawingSheetScreen> {
             ),
           );
         }
+        // A newly approved revision (from sync, or approved meanwhile) opens
+        // on its first page: the page we were on may not exist in it, and
+        // the screen then said the drawing could not be shown.
+        if (_sheetKey != null && !_sheetKey!.startsWith('${rev.id}/')) _page = 0;
         final key = '${rev.id}/$_page';
         if (_sheetKey != key) {
           _sheetKey = key;

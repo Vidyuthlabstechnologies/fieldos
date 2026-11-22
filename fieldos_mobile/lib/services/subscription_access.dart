@@ -62,6 +62,10 @@ class SubscriptionState {
 /// after its paid-up date, since the store can't be asked offline.
 const offlineGrace = Duration(days: 3);
 
+/// Small clock corrections (the network setting the time) are not a clock
+/// set back.
+const storeClockSkewAllowance = Duration(minutes: 10);
+
 enum Access {
   allowed,
   blocked,
@@ -75,16 +79,21 @@ enum Access {
 /// nothing is locked then, except in a store build.
 /// [live] is the store's answer, or null when it couldn't be reached.
 /// [lastPaidUntil] is the expiry remembered from the last good answer.
+/// [latestSeen] is the latest time this phone has seen: a clock set back
+/// before it (by more than a small correction) is measured from it, so
+/// turning the clock back never stretches the offline days.
 Access accessFor({
   required bool billingSetUp,
   required SubscriptionState? live,
   required DateTime? lastPaidUntil,
+  DateTime? latestSeen,
   required DateTime now,
 }) {
   // A store build always has billing (see release_config.dart); one that
   // somehow lacks it locks rather than giving FieldOS away.
   if (!billingSetUp) return storeRelease ? Access.blocked : Access.allowed;
   if (live != null) return live.active ? Access.allowed : Access.blocked;
+  if (latestSeen != null && now.add(storeClockSkewAllowance).isBefore(latestSeen)) now = latestSeen;
   if (lastPaidUntil != null && now.isBefore(lastPaidUntil.add(offlineGrace))) return Access.allowed;
   return Access.blocked;
 }
