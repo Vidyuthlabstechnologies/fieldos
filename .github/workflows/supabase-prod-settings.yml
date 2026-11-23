@@ -10,11 +10,22 @@ name: supabase-prod-settings
 #   office redirect  adds the office web app's address to Auth's redirect
 #                    list, so "Sign in with Google" works there; addresses
 #                    already on the list are kept
+#   selfie purge     only when the purge_verified_selfies box is ticked:
+#                    runs `select purge_verified_selfies();` once, which
+#                    deletes the stored selfies of check-in days already
+#                    decided (#233). It cannot be undone; the owner OKed it
+#                    on 2026-11-23. account-cleanup / system-logs then
+#                    remove the files.
 #
 # Uses the SUPABASE_URL and SUPABASE_ACCESS_TOKEN secrets supabase-deploy
 # already has.
 on:
   workflow_dispatch:
+    inputs:
+      purge_verified_selfies:
+        description: "Also delete stored selfies of check-in days already decided (cannot be undone)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -78,3 +89,20 @@ jobs:
             echo "Added $OFFICE_URL"
           fi
           echo "## Office redirect on the list: $OFFICE_URL" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Delete selfies of days already decided
+        if: ${{ inputs.purge_verified_selfies }}
+        run: |
+          set -euo pipefail
+          body=$(jq -n '{query: "select purge_verified_selfies() as deleted;"}')
+          code=$(curl -sS -o resp.json -w '%{http_code}' -X POST \
+            "https://api.supabase.com/v1/projects/$REF/database/query" \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H 'Content-Type: application/json' -d "$body")
+          if [ "$code" != "200" ] && [ "$code" != "201" ]; then
+            echo "::error::Supabase answered HTTP $code"; jq -r '.message // .' resp.json || true; exit 1
+          fi
+          n=$(jq -r '.[0].deleted // empty' resp.json)
+          rm -f resp.json
+          [ -n "$n" ] || { echo "::error::no count returned"; exit 1; }
+          echo "Deleted $n stored selfies of decided days"
+          echo "## Selfies of decided days deleted: $n" >> "$GITHUB_STEP_SUMMARY"
