@@ -227,7 +227,7 @@ void main() {
       final q = await db.crmDao.saveQuote(
           leadId: lead.id, lines: const [BillLine(description: 'Brickwork', unit: 'cum', rate: 6500, qty: 10)], by: 'o');
       final pdf = _pdfText(await buildQuotePdf(
-          quote: q, lead: lead, companyName: company.name, profile: const BillingProfile(gstin: '36ABCDE1234F1Z5')));
+          quote: q, lead: lead, companyName: company.name, profile: const BillingProfile(gstin: '36ABCDE1234F1Z1')));
       expect(pdf, contains('GSTIN'));
       expect(quoteShareText(q, lead, company.name), startsWith('Namaste Ramesh'));
     });

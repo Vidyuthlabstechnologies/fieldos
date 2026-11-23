@@ -1024,8 +1024,8 @@ const Map<String, String> stringsTa = {
       'விலை (அலகுக்கு ₹)',
   'Who is the bill for? Add the client name.':
       'பில் யாருக்கு? கிளையன்ட் பெயரைச் சேர்க்கவும்.',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.':
-      'அந்த GSTIN சரியாகத் தெரியவில்லை. அதில் 15 எழுத்துகள் இருக்கும், 36ABCDE1234F1Z5 போல.',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.':
+      'அந்த GSTIN சரியாகத் தெரியவில்லை. அதில் 15 எழுத்துகள் இருக்கும், 36ABCDE1234F1Z1 போல.',
   'Add at least one item with a quantity.':
       'குறைந்தது ஒரு உருப்படியை அளவுடன் சேர்க்கவும்.',
   'Bill {number} already exists.':

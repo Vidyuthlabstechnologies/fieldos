@@ -50,12 +50,28 @@ export function urlOk(raw: string): boolean {
 
 /** A private, loopback, link-local or otherwise non-public address. */
 export function privateAddress(ip: string): boolean {
-  const a = ip.toLowerCase();
+  const a = ip.toLowerCase().replace(/%.*$/, "");
   if (a.includes(":")) {
-    if (a === "::" || a === "::1") return true;
-    const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/.exec(a);
-    if (mapped) return privateAddress(mapped[1]);
-    return /^(fc|fd|fe8|fe9|fea|feb|ff)/.test(a) || a.startsWith("64:ff9b:") || a.startsWith("2001:db8");
+    const g = ipv6Groups(a);
+    if (!g) return true;
+    // An IPv4 address carried inside IPv6 is judged as that IPv4 address:
+    // ::ffff:7f00:1 is 127.0.0.1 written the other way, and a resolver can
+    // hand back either form.
+    const v4 = (hi: number, lo: number) => `${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`;
+    const zeroUpTo = (n: number) => g.slice(0, n).every((x) => x === 0);
+    if (zeroUpTo(8)) return true; // ::
+    if (zeroUpTo(7) && g[7] === 1) return true; // ::1
+    if (zeroUpTo(5) && g[5] === 0xffff) return privateAddress(v4(g[6], g[7])); // ::ffff:a.b.c.d
+    if (zeroUpTo(6)) return privateAddress(v4(g[6], g[7])); // ::a.b.c.d (old "compatible" form)
+    if (g[0] === 0x2002) return privateAddress(v4(g[1], g[2])); // 6to4
+    return (g[0] & 0xfe00) === 0xfc00 || // unique local fc00::/7
+      (g[0] & 0xffc0) === 0xfe80 || // link-local fe80::/10
+      (g[0] & 0xffc0) === 0xfec0 || // old site-local
+      (g[0] & 0xff00) === 0xff00 || // multicast
+      (g[0] === 0x64 && g[1] === 0xff9b) || // NAT64
+      (g[0] === 0x2001 && g[1] === 0xdb8) || // documentation
+      (g[0] === 0x2001 && g[1] === 0) || // Teredo
+      (g[0] === 0x100 && g[1] === 0 && g[2] === 0 && g[3] === 0); // discard 100::/64
   }
   const p = a.split(".").map(Number);
   if (p.length !== 4 || p.some((n) => !Number.isInteger(n) || n < 0 || n > 255)) return true;
@@ -63,6 +79,27 @@ export function privateAddress(ip: string): boolean {
   return x === 0 || x === 10 || x === 127 || (x === 100 && y >= 64 && y <= 127) || (x === 169 && y === 254) ||
     (x === 172 && y >= 16 && y <= 31) || (x === 192 && y === 168) || (x === 192 && y === 0) ||
     (x === 198 && (y === 18 || y === 19)) || x >= 224;
+}
+
+/** The eight 16-bit groups of an IPv6 address, or null if it isn't one. */
+function ipv6Groups(a: string): number[] | null {
+  let s = a;
+  const tail = /(\d+)\.(\d+)\.(\d+)\.(\d+)$/.exec(s);
+  if (tail) {
+    const p = tail.slice(1).map(Number);
+    if (p.some((n) => n > 255)) return null;
+    s = s.slice(0, tail.index) + ((p[0] << 8) | p[1]).toString(16) + ":" + ((p[2] << 8) | p[3]).toString(16);
+  }
+  const halves = s.split("::");
+  if (halves.length > 2) return null;
+  const part = (x: string) => (x === "" ? [] : x.split(":"));
+  const head = part(halves[0]);
+  const rest = halves.length === 2 ? part(halves[1]) : [];
+  const fill = 8 - head.length - rest.length;
+  if (halves.length === 2 ? fill < 1 : fill !== 0) return null;
+  const all = [...head, ...Array(halves.length === 2 ? fill : 0).fill("0"), ...rest];
+  if (all.some((x) => !/^[0-9a-f]{1,4}$/.test(x))) return null;
+  return all.map((x) => parseInt(x, 16));
 }
 
 const hex = (b: ArrayBuffer) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");

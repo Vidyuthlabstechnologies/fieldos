@@ -45,7 +45,7 @@ void main() {
     expect(invoiceTitle(ourGstin: '', gstRate: 0), 'INVOICE');
     debugSetMarket(Market.india);
     expect(invoiceTitle(ourGstin: '', gstRate: 0), 'INVOICE');
-    expect(invoiceTitle(ourGstin: '36ABCDE1234F1Z5', gstRate: 0), 'BILL OF SUPPLY');
+    expect(invoiceTitle(ourGstin: '36ABCDE1234F1Z1', gstRate: 0), 'BILL OF SUPPLY');
   });
 
   test('WhatsApp numbers get this market\'s country code, not India\'s', () {

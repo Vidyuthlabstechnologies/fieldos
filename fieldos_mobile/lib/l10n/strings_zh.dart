@@ -517,7 +517,7 @@ const stringsZh = <String, String>{
   'Unit (cum, sqm, rft, nos)': '单位（cum、sqm、rft、nos）',
   'Rate (₹ per unit)': '单价（每单位 RM）',
   'Who is the bill for? Add the client name.': '账单开给谁？请添加客户名称。',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.': '这个 GSTIN 看起来不对。它应有 15 个字符，例如 36ABCDE1234F1Z5。',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.': '这个 GSTIN 看起来不对。它应有 15 个字符，例如 36ABCDE1234F1Z1。',
   'Add at least one item with a quantity.': '请至少添加一个有数量的项目。',
   'Bill {number} already exists.': '账单 {number} 已存在。',
   'Your details on bills': '账单上的你的资料',

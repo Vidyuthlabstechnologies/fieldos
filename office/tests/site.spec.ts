@@ -120,3 +120,23 @@ test('an empty site says so on each register', async ({ page }) => {
   }
   expect(page.url()).toContain(`#/site/${s}/drawings`);
 });
+
+test('a site with more than 1000 defects counts every one of them', async ({ page }) => {
+  // The server hands out 1000 rows per request; a big handover logs more.
+  const a = await account('many');
+  const s = await site(a, await company(a, 'Handover Co'), 'Block 9');
+  const rows = Array.from({ length: 1205 }, (_, i) => ({
+    id: crypto.randomUUID(), project_id: s, raised_by: a.id, description: `Snag ${i + 1}`, severity: i === 1204 ? 'critical' : 'minor',
+  }));
+  for (let i = 0; i < rows.length; i += 500) {
+    const { error } = await a.db.from('site_defects').insert(rows.slice(i, i + 500));
+    if (error) throw error;
+  }
+  await page.goto('./');
+  await page.getByTestId('email').fill(a.email);
+  await page.getByTestId('password').fill(a.password);
+  await page.getByTestId('sign-in').click();
+  await page.getByTestId('sites').getByRole('link', { name: 'Block 9' }).click();
+  await expect(page.getByTestId('tile-defects')).toContainText('1205 open');
+  await expect(page.getByTestId('tile-defects')).toContainText('1 critical');
+});

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Defect, Drawing, Registers, Revision, Rfi, Submittal } from './rules';
+import { byRaised, type Defect, type Drawing, type Registers, type Revision, type Rfi, type Submittal } from './rules';
 import type { Allocation, ClientBill, Expense, Payment, SiteMoney, SupplierInvoice } from './money';
 import type { Constraint, Task } from './schedule';
 
@@ -74,11 +74,14 @@ export function rememberCompany(id: string): void {
 
 // Everything the site's registers show, read at once.
 export async function loadRegisters(db: SupabaseClient, projectId: string): Promise<Registers> {
-  const read = async <T,>(table: string, cols: string): Promise<T[]> => {
-    const { data, error } = await db.from(table).select(cols).eq('project_id', projectId).order('created_at').limit(5000);
-    if (error) throw error;
-    return (data ?? []) as T[];
-  };
+  // Paged like the money lists: the server hands out at most 1000 rows per
+  // request, and a big handover easily logs more defects than that. Paged
+  // by id (unique, so no row is skipped or repeated between pages), then
+  // put back in the order raised.
+  const read = async <T extends { id: string; created_at: string }>(table: string, cols: string): Promise<T[]> =>
+    byRaised(
+      await readAll<T>((a, b) => db.from(table).select(cols).eq('project_id', projectId).order('id').range(a, b)),
+    );
   const [rfis, submittals, defects, drawings, revisions] = await Promise.all([
     read<Rfi>('site_rfis', 'id, question, asked_of, due_on, answer, answered_at, status, created_at'),
     read<Submittal>(

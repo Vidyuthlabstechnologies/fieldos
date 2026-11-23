@@ -1,4 +1,4 @@
-"""The chat-report half of tools/file_bug_reports.py builds a safe issue body."""
+"""tools/file_bug_reports.py builds issue bodies safe for a public repository."""
 
 import importlib.util
 import os
@@ -15,7 +15,7 @@ def load():
     return mod
 
 
-def test_message_report_body_quotes_user_text():
+def test_message_report_body_leaves_people_out():
     mod = load()
     body = mod.message_report_body({
         "id": "r1", "created_at": "2026-11-08T10:00:00Z", "message_id": "m1",
@@ -24,8 +24,10 @@ def test_message_report_body_quotes_user_text():
                              "project_id": "p1", "created_at": "2026-11-08T09:00:00Z"},
     })
     assert "**Reason:** Spam or fraud" in body
-    assert "pay me '''now'''" in body and "```now```" not in body
-    assert "asks for '''money'''" in body
+    # The repository is public: the chat text, its sender and the note stay in Supabase.
+    for leak in ("pay me", "Ravi", "asks for"):
+        assert leak not in body
+    assert "still in the chat" in body and "added a note:** yes" in body
     assert "24 hours" in body and "message m1" in body
 
 
@@ -33,4 +35,11 @@ def test_deleted_message_still_files():
     mod = load()
     body = mod.message_report_body({"id": "r2", "created_at": "t", "message_id": "m2",
                                     "reason": "other", "details": None, "project_messages": None})
-    assert "(the message has been deleted)" in body and "Something else" in body
+    assert "deleted since" in body and "Something else" in body
+
+
+def test_redact_masks_emails_and_phones_but_not_dates():
+    mod = load()
+    out = mod.redact("call +91 98480 12345 or 9848012345, mail ravi.k@example.co.in, at 2026-11-08 21:03:37, v1.7.7+22")
+    assert "98480" not in out and "9848012345" not in out and "ravi.k@" not in out
+    assert "2026-11-08 21:03:37" in out and "1.7.7+22" in out

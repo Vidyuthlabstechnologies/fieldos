@@ -568,7 +568,7 @@ const Map<String, String> stringsHi = {
   'Unit (cum, sqm, rft, nos)': 'इकाई (cum, sqm, rft, nos)',
   'Rate (₹ per unit)': 'दर (₹ प्रति इकाई)',
   'Who is the bill for? Add the client name.': 'बिल किसके लिए है? क्लाइंट का नाम डालें।',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.': 'यह GSTIN सही नहीं लगता। इसमें 15 अक्षर होते हैं, जैसे 36ABCDE1234F1Z5।',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.': 'यह GSTIN सही नहीं लगता। इसमें 15 अक्षर होते हैं, जैसे 36ABCDE1234F1Z1।',
   'Add at least one item with a quantity.': 'मात्रा के साथ कम से कम एक आइटम जोड़ें।',
   'Bill {number} already exists.': 'बिल {number} पहले से है।',
   'Your details on bills': 'बिलों पर आपकी जानकारी',

@@ -29,7 +29,7 @@ ClientBillsCompanion _bill({String id = 'b1', String number = 'RA-01', String ki
     billNumber: number,
     billDate: DateTime(2026, 11, 6),
     clientName: 'Sai Builders',
-    clientGstin: const Value('36ABCDE1234F1Z5'),
+    clientGstin: const Value('36ABCDE1234F1Z1'),
     linesJson: encodeLines(lines),
     retentionPct: const Value(5),
     tdsPct: const Value(1),
@@ -125,27 +125,35 @@ void main() {
 
   test('the bill heading and place of supply follow the GST registration', () {
     expect(invoiceTitle(ourGstin: '', gstRate: 0), 'INVOICE');
-    expect(invoiceTitle(ourGstin: '36ABCDE1234F1Z5', gstRate: 18), 'TAX INVOICE');
-    expect(invoiceTitle(ourGstin: '36ABCDE1234F1Z5', gstRate: 0), 'BILL OF SUPPLY');
-    expect(placeOfSupply(ourGstin: '36ABCDE1234F1Z5', clientGstin: '29ABCDE1234F1Z5', interState: false),
+    expect(invoiceTitle(ourGstin: '36ABCDE1234F1Z1', gstRate: 18), 'TAX INVOICE');
+    expect(invoiceTitle(ourGstin: '36ABCDE1234F1Z1', gstRate: 0), 'BILL OF SUPPLY');
+    expect(placeOfSupply(ourGstin: '36ABCDE1234F1Z1', clientGstin: '29ABCDE1234F1Z5', interState: false),
         ('Telangana', '36'));
-    expect(placeOfSupply(ourGstin: '36ABCDE1234F1Z5', clientGstin: '29ABCDE1234F1Z5', interState: true),
+    expect(placeOfSupply(ourGstin: '36ABCDE1234F1Z1', clientGstin: '29ABCDE1234F1Z5', interState: true),
         ('Karnataka', '29'));
-    expect(placeOfSupply(ourGstin: '36ABCDE1234F1Z5', interState: true), isNull);
+    expect(placeOfSupply(ourGstin: '36ABCDE1234F1Z1', interState: true), isNull);
     expect(placeOfSupply(ourGstin: '', interState: false), isNull);
   });
 
   test('GSTIN shape and inter-state check', () {
-    expect(isValidGstin('36ABCDE1234F1Z5'), isTrue);
-    expect(isValidGstin(' 36abcde1234f1z5 '), isTrue);
+    expect(isValidGstin('36ABCDE1234F1Z1'), isTrue);
+    expect(isValidGstin(' 36abcde1234f1z1 '), isTrue);
     expect(isValidGstin('99ABCDE1234F1Z5'), isFalse);
     // 97 is "Other Territory" in the GST state code list (offshore areas).
-    expect(isValidGstin('97ABCDE1234F1Z5'), isTrue);
+    expect(isValidGstin('97ABCDE1234F1ZT'), isTrue);
     expect(placeOfSupply(ourGstin: '97ABCDE1234F1Z5', interState: false), ('Other Territory', '97'));
     expect(isValidGstin('36ABCDE1234F1X5'), isFalse);
-    expect(isInterState('36ABCDE1234F1Z5', '37ABCDE1234F1Z5'), isTrue);
-    expect(isInterState('36ABCDE1234F1Z5', '36ZZZZZ1234F1Z5'), isFalse);
-    expect(isInterState('36ABCDE1234F1Z5', null), isFalse);
+    // Real GSTINs, and the same with one character mistyped: the shape is
+    // right but the check character no longer matches.
+    expect(isValidGstin('27AAPFU0939F1ZV'), isTrue);
+    expect(isValidGstin('29AAGCB7383J1Z4'), isTrue);
+    expect(isValidGstin('27AAPFU0939F1ZW'), isFalse);
+    expect(isValidGstin('27AAPFU0938F1ZV'), isFalse);
+    expect(isValidGstin('29AAGBC7383J1Z4'), isFalse, reason: 'two letters swapped');
+    expect(gstinCheckChar('36ABCDE1234F1Z'), '1');
+    expect(isInterState('36ABCDE1234F1Z1', '37ABCDE1234F1Z5'), isTrue);
+    expect(isInterState('36ABCDE1234F1Z1', '36ZZZZZ1234F1Z5'), isFalse);
+    expect(isInterState('36ABCDE1234F1Z1', null), isFalse);
   });
 
   test('project margin', () {
@@ -215,7 +223,7 @@ void main() {
           bill: bill,
           companyName: 'Sai Builders',
           project: project,
-          profile: const BillingProfile(gstin: '36ABCDE1234F1Z5', upiId: 'sai@okhdfc'),
+          profile: const BillingProfile(gstin: '36ABCDE1234F1Z1', upiId: 'sai@okhdfc'),
           previousQty: {_lines.first.itemKey: 10},
         );
         expect(String.fromCharCodes(bytes.take(5)), '%PDF-');

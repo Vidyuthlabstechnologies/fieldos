@@ -514,7 +514,7 @@ const stringsPl = <String, String>{
   'Unit (cum, sqm, rft, nos)': 'Jednostka (m³, m², mb, szt.)',
   'Rate (₹ per unit)': 'Cena (₹ za jednostkę)',
   'Who is the bill for? Add the client name.': 'Dla kogo jest rachunek? Dodaj nazwę klienta.',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.': 'Ten numer VAT wygląda na błędny. Ma 15 znaków, np. 36ABCDE1234F1Z5.',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.': 'Ten numer VAT wygląda na błędny. Ma 15 znaków, np. 36ABCDE1234F1Z1.',
   'Add at least one item with a quantity.': 'Dodaj co najmniej jedną pozycję z ilością.',
   'Bill {number} already exists.': 'Rachunek {number} już istnieje.',
   'Your details on bills': 'Twoje dane na rachunkach',

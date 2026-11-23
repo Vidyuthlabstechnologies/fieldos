@@ -519,7 +519,7 @@ const Map<String, String> stringsEs = {
   'Unit (cum, sqm, rft, nos)': 'Unidad (yd³, ft², ft, pzas)',
   'Rate (₹ per unit)': 'Precio (\$ por unidad)',
   'Who is the bill for? Add the client name.': '¿Para quién es la factura? Agrega el nombre del cliente.',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.': 'Ese GSTIN no parece correcto. Tiene 15 caracteres, como 36ABCDE1234F1Z5.',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.': 'Ese GSTIN no parece correcto. Tiene 15 caracteres, como 36ABCDE1234F1Z1.',
   'Add at least one item with a quantity.': 'Agrega al menos un concepto con cantidad.',
   'Bill {number} already exists.': 'La factura {number} ya existe.',
   'Your details on bills': 'Tus datos en las facturas',

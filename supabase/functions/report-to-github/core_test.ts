@@ -32,7 +32,38 @@ Deno.test("issues read like the ones the old script filed, and user text can't b
   assert(b.body.includes("**Signed in to the cloud:** no"));
   const m = messageIssue(msg);
   assertEquals(m.title, "Message report: Abuse or harassment");
-  assert(m.body.includes("(the message has been deleted)"));
+  assert(m.body.includes("deleted since"));
+});
+
+Deno.test("nothing that identifies a person reaches the public repository", () => {
+  const b = bugIssue({
+    ...bug,
+    message: "Sync fails, call me on +91 98480 12345 or 9848012345, mail ravi.k@example.co.in",
+    contact_email: "ravi.k@example.co.in",
+    recent_errors: "AuthException: user ravi.k@example.co.in not found",
+  });
+  for (const leak of ["ravi.k@example.co.in", "98480 12345", "9848012345"]) {
+    assert(!b.body.includes(leak), leak);
+    assert(!b.title.includes(leak), leak);
+  }
+  assert(b.body.includes("email given (in Supabase, bug_reports)"));
+  assert(b.body.includes("[number removed]"));
+  // Version numbers, short figures and error timestamps stay readable.
+  assert(
+    bugIssue({ ...bug, recent_errors: "2026-11-08 21:03:37.972752Z PlatformException(23)" }).body
+      .includes("2026-11-08 21:03:37.972752Z PlatformException(23)"),
+  );
+  assert(bugIssue({ ...bug, message: "1.7.7+22 shows 2,500 twice" }).body.includes("1.7.7+22 shows 2,500 twice"));
+
+  const m = messageIssue({
+    ...msg,
+    body: "Pay me at 9848012345",
+    details: "He threatened Suresh",
+    sender_name: "Ravi Kumar",
+  });
+  for (const leak of ["9848012345", "Suresh", "Ravi Kumar", "Pay me"]) assert(!m.body.includes(leak), leak);
+  assert(m.body.includes("still in the chat"));
+  assert(m.body.includes("message_reports id m1"));
 });
 
 Deno.test("a crash the app sent on its own is titled and labelled as a crash", () => {

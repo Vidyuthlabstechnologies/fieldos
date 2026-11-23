@@ -1024,8 +1024,8 @@ const Map<String, String> stringsKn = {
       'ದರ (ಘಟಕಕ್ಕೆ ₹)',
   'Who is the bill for? Add the client name.':
       'ಬಿಲ್ ಯಾರಿಗೆ? ಗ್ರಾಹಕರ ಹೆಸರು ಸೇರಿಸಿ.',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.':
-      'ಆ GSTIN ಸರಿಯಾಗಿ ಕಾಣುತ್ತಿಲ್ಲ. ಅದರಲ್ಲಿ 15 ಅಕ್ಷರಗಳಿರುತ್ತವೆ, 36ABCDE1234F1Z5 ಹಾಗೆ.',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.':
+      'ಆ GSTIN ಸರಿಯಾಗಿ ಕಾಣುತ್ತಿಲ್ಲ. ಅದರಲ್ಲಿ 15 ಅಕ್ಷರಗಳಿರುತ್ತವೆ, 36ABCDE1234F1Z1 ಹಾಗೆ.',
   'Add at least one item with a quantity.':
       'ಕನಿಷ್ಠ ಒಂದು ಐಟಂ ಪ್ರಮಾಣದೊಂದಿಗೆ ಸೇರಿಸಿ.',
   'Bill {number} already exists.':

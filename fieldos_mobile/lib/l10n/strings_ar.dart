@@ -517,7 +517,7 @@ const stringsAr = <String, String>{
   'Unit (cum, sqm, rft, nos)': 'الوحدة (م³، م²، قدم طولي، عدد)',
   'Rate (₹ per unit)': 'السعر (₹ لكل وحدة)',
   'Who is the bill for? Add the client name.': 'لمن الفاتورة؟ أضف اسم العميل.',
-  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z5.': 'هذا الرقم الضريبي (TRN) لا يبدو صحيحًا. يتكون من 15 خانة، مثل 36ABCDE1234F1Z5.',
+  'That GSTIN doesn\'t look right. It has 15 characters, like 36ABCDE1234F1Z1.': 'هذا الرقم الضريبي (TRN) لا يبدو صحيحًا. يتكون من 15 خانة، مثل 36ABCDE1234F1Z1.',
   'Add at least one item with a quantity.': 'أضف بندًا واحدًا على الأقل مع كمية.',
   'Bill {number} already exists.': 'الفاتورة {number} موجودة بالفعل.',
   'Your details on bills': 'بياناتك على الفواتير',

@@ -61,11 +61,36 @@ Deno.test("private and special addresses are refused", () => {
       "fe80::1",
       "::ffff:10.0.0.1",
       "224.0.0.1",
+      // IPv4 inside IPv6, in the forms a resolver may print
+      "::ffff:7f00:1",
+      "::ffff:a9fe:a9fe",
+      "0:0:0:0:0:ffff:127.0.0.1",
+      "::127.0.0.1",
+      "2002:7f00:1::1",
+      "2002:c0a8:101::",
+      "0000:0000:0000:0000:0000:0000:0000:0001",
+      "fec0::1",
+      "ff02::1",
+      "64:ff9b::7f00:1",
+      "2001:db8::1",
+      "100::1",
+      "not-an-address",
+      "1::2::3",
     ]
   ) {
     assertEquals(privateAddress(ip), true, ip);
   }
-  for (const ip of ["93.184.216.34", "8.8.8.8", "172.32.0.1", "2606:4700::6810:84e5"]) {
+  for (
+    const ip of [
+      "93.184.216.34",
+      "8.8.8.8",
+      "172.32.0.1",
+      "2606:4700::6810:84e5",
+      "::ffff:5db8:d822",
+      "2002:5db8:d822::1",
+      "2a00:1450:4001:80b::200e",
+    ]
+  ) {
     assertEquals(privateAddress(ip), false, ip);
   }
 });

@@ -65,7 +65,7 @@ void main() {
       contactPhone: const Value('+91 98765 43210'),
       email: const Value('ravi@bharatcement.example'),
       address: const Value('Plot 14, Industrial Area'),
-      gstNumber: const Value('36ABCDE1234F1Z5'),
+      gstNumber: const Value('36ABCDE1234F1Z1'),
       category: const Value('cement'),
       notes: const Value('Net 30 days credit'),
     ));
@@ -89,7 +89,7 @@ void main() {
     expect(vendor['phone'], '+91 98765 43210');
     expect(vendor['email'], 'ravi@bharatcement.example');
     expect(vendor['address'], 'Plot 14, Industrial Area');
-    expect(vendor['gst_number'], '36ABCDE1234F1Z5');
+    expect(vendor['gst_number'], '36ABCDE1234F1Z1');
     expect(vendor['category'], 'cement');
     expect(vendor['notes'], 'Net 30 days credit');
 

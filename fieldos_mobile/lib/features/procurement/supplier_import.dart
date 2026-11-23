@@ -86,7 +86,7 @@ List<NewSupplier> parseSupplierLines(String text) {
         gstin ??= upper;
       } else if (_email.hasMatch(p)) {
         email ??= p;
-      } else if (RegExp(r'^\d{10,13}$').hasMatch(digits)) {
+      } else if (RegExp(r'^\d{10,13}$').hasMatch(westernDigits(digits))) {
         phone ??= p;
       } else if (_amount(p) case final v?) {
         opening ??= v;
