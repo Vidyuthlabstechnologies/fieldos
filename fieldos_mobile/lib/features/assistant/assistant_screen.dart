@@ -104,6 +104,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   Future<void> _agree() async {
     final userId = ref.read(sessionProvider).user?.id ?? '';
     await setAiConsent(ref.read(appDatabaseProvider), userId, true);
+    ref.read(consentRecorderProvider).nudge(userId);
     if (!mounted) return;
     setState(() => _aiAllowed = true);
     if (widget.startListening) _listen();

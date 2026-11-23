@@ -17,6 +17,7 @@ import 'package:fieldos_mobile/features/legal/privacy_notice.dart';
 import 'package:fieldos_mobile/features/team/team_sync_screen.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 
 class PrivacyRightsScreen extends ConsumerStatefulWidget {
   const PrivacyRightsScreen({super.key});
@@ -110,6 +111,7 @@ class _PrivacyRightsScreenState extends ConsumerState<PrivacyRightsScreen> {
                   ? null
                   : (v) async {
                       await setAiConsent(ref.read(appDatabaseProvider), _userId, v);
+                      ref.read(consentRecorderProvider).nudge(_userId);
                       if (mounted) setState(() => _aiAllowed = v);
                     },
             ),
@@ -123,6 +125,7 @@ class _PrivacyRightsScreenState extends ConsumerState<PrivacyRightsScreen> {
                   ? null
                   : (v) async {
                       await setAttendanceConsent(ref.read(appDatabaseProvider), _userId, v);
+                      ref.read(consentRecorderProvider).nudge(_userId);
                       if (mounted) setState(() => _checkInAllowed = v);
                     },
             ),

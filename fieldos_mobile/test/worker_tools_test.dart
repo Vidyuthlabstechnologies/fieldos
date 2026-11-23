@@ -93,6 +93,9 @@ void main() {
     await tester.tap(find.text('Add many'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).last, 'ramesh\nSuresh, Helper, 600\nRaju');
+    // India app: Add waits for the 18-or-older tick.
+    await tester.tap(find.byKey(const Key('worker-age-check')));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Add'));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
     await tester.pumpAndSettle();

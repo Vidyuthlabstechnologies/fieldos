@@ -387,6 +387,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               textAlign: TextAlign.center,
             ),
+            // Terms s.1 and the privacy policy's Children section: FieldOS
+            // is for adults only, so it never needs a parent's verifiable
+            // consent (DPDP Act s.9, Rules 2025 rule 10). Said where the
+            // account is made, not only in the terms.
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                tr('FieldOS is for people aged 18 and over.'),
+                key: const Key('signup-age-note'),
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ],
         ),
       ),

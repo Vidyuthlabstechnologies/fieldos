@@ -796,6 +796,9 @@ Map<String, dynamic> clientBillToSupabaseJson(ClientBill b) => {
       'bill_date': _dateOnly(b.billDate),
       'client_name': b.clientName,
       'client_gstin': b.clientGstin,
+      // Sent only when there is one, so this build can still push bills to
+      // a server that doesn't have the column yet.
+      if (b.clientAddress != null) 'client_address': b.clientAddress,
       'sac': b.sac,
       'lines': b.linesJson,
       'gst_rate': b.gstRate,
@@ -817,6 +820,7 @@ ClientBillsCompanion clientBillFromSupabaseJson(Map<String, dynamic> row) => Cli
       billDate: DateTime.parse(row['bill_date'] as String),
       clientName: row['client_name'] as String,
       clientGstin: Value(row['client_gstin'] as String?),
+      clientAddress: Value(row['client_address'] as String?),
       sac: Value(row['sac'] as String? ?? '995411'),
       linesJson: row['lines'] is String ? row['lines'] as String : jsonEncode(row['lines'] ?? const []),
       gstRate: Value((row['gst_rate'] as num? ?? 18).toDouble()),

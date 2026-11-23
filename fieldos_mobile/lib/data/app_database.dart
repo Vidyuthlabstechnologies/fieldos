@@ -212,7 +212,7 @@ class AppDatabase extends _$AppDatabase {
             );
 
   @override
-  int get schemaVersion => 43;
+  int get schemaVersion => 44;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -470,6 +470,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 43) {
             // Submittals register.
             await _createTableIfMissing(m, submittals);
+          }
+          if (from < 44) {
+            // The client's address on bills (GST invoice rule 46).
+            await _addColumnIfMissing(m, clientBills, clientBills.clientAddress);
           }
         },
         beforeOpen: (details) => ensureLookupIndexes(),

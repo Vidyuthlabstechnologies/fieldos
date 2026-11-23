@@ -11,6 +11,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/core/page_format.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/company/branding.dart';
@@ -159,6 +160,12 @@ Future<Uint8List> buildPayslipPdf({
       ],
       pw.Spacer(),
       t('This is a computer-made payslip.', color: _muted, size: 8),
+      // The labour codes (in force 21 Nov 2025) prescribe the registers and
+      // wage slip an employer keeps. FieldOS helps but does not replace
+      // them, as terms s.8 says.
+      if (isIndia)
+        t('It is not a statutory register. Keep the registers and wage slips the labour codes require.',
+            color: _muted, size: 8),
       if (branding.hasFooter) t(branding.footerLine, size: 7, color: _muted, align: pw.TextAlign.end),
     ]),
   ));

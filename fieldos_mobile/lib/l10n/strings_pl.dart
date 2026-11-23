@@ -3,11 +3,13 @@
 /// Keyed by the Indian English text, like every table (see language.dart).
 library;
 
+import 'package:fieldos_mobile/l10n/strings_compliance.dart';
 import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
 import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 
 const stringsPl = <String, String>{
+  ...compliancePl,
   ...onboardingPl,
   ...schedulePl,
   ...integrationsPl,

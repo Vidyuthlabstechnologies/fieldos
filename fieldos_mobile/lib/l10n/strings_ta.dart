@@ -3,6 +3,7 @@
 /// they are). test/l10n_coverage_test.dart fails when a label has no entry.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_compliance.dart';
 import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
 import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
@@ -17,6 +18,7 @@ import 'package:fieldos_mobile/l10n/strings_proof_ta.dart';
 import 'package:fieldos_mobile/l10n/strings_privacy_ta.dart';
 
 const Map<String, String> stringsTa = {
+  ...complianceTa,
   ...onboardingTa,
   ...scheduleTa,
   ...integrationsTa,

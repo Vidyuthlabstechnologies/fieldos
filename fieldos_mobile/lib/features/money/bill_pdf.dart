@@ -156,6 +156,7 @@ Future<Uint8List> buildBillPdf({
             child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
               t('Bill to', color: _muted),
               t(client, bold: true),
+              if ((bill.clientAddress ?? '').trim().isNotEmpty) t(bill.clientAddress!.trim()),
               if ((bill.clientGstin ?? '').isNotEmpty) t('$regLabel: ${bill.clientGstin}'),
               if (isIndia && pos != null) t('Place of supply: ${pos.$1} (${pos.$2})'),
             ]),

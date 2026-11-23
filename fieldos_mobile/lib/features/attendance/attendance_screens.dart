@@ -21,6 +21,7 @@ import 'package:fieldos_mobile/features/payroll/payroll_screen.dart' show monthL
 import 'package:fieldos_mobile/features/tasks/team_roster.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
 
 /// The sites someone can check in at, with their geofences: the demo site
@@ -118,6 +119,7 @@ class _MyAttendanceScreenState extends ConsumerState<MyAttendanceScreen> {
 
   Future<void> _agree() async {
     await setAttendanceConsent(ref.read(appDatabaseProvider), widget.userId, true);
+    ref.read(consentRecorderProvider).nudge(widget.userId);
     if (!mounted) return;
     setState(() => _agreed = true);
     _locate();

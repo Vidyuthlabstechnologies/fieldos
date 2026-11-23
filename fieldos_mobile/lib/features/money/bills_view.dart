@@ -398,6 +398,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
   DateTime _date = DateTime.now();
   late final _client = TextEditingController(text: widget.project.clientName ?? '');
   final _clientGstin = TextEditingController();
+  final _clientAddress = TextEditingController();
   final _number = TextEditingController();
   final _retention = TextEditingController(text: fmtQty(market.retentionDefaultPct));
   final _tds = TextEditingController(text: '0');
@@ -422,7 +423,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
 
   @override
   void dispose() {
-    for (final c in [_client, _clientGstin, _number, _retention, _tds, _notes]) {
+    for (final c in [_client, _clientGstin, _clientAddress, _number, _retention, _tds, _notes]) {
       c.dispose();
     }
     super.dispose();
@@ -556,6 +557,7 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
         ]);
       _client.text = last.clientName;
       _clientGstin.text = last.clientGstin ?? '';
+      _clientAddress.text = last.clientAddress ?? '';
       _gstRate = last.gstRate;
       _retention.text = fmtQty(last.retentionPct);
       _tds.text = fmtQty(last.tdsPct);
@@ -580,6 +582,15 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
     if (lines.isEmpty) error = tr('Add at least one item with a quantity.');
     if (_kind == 'tax_invoice' && !isValidInvoiceNumber(number)) {
       error = tr('A tax invoice number has up to 16 letters, digits, - or /, like INV-0001.');
+    }
+    // CGST rule 46(e) and (f): a tax invoice shows the recipient's address
+    // when they are GST-registered, or when the taxable value is Rs 50,000
+    // or more for an unregistered one.
+    if (isIndia &&
+        _kind == 'tax_invoice' &&
+        _clientAddress.text.trim().isEmpty &&
+        (gstin.isNotEmpty || billTotals(lines, gstRate: _gstRate, interState: _interState).gross >= 50000)) {
+      error = tr('Add the client\'s address. A tax invoice must show it for a GST-registered client, or when the value is 50,000 or more.');
     }
     final ourGstin = ref.read(billingProfileProvider(widget.project.companyId)).value?.gstin ?? '';
     // GST law: only a registered supplier may charge it.
@@ -616,6 +627,8 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
           billDate: DateTime(_date.year, _date.month, _date.day),
           clientName: client.length > 200 ? client.substring(0, 200) : client,
           clientGstin: Value(gstin.isEmpty ? null : gstin),
+          // The field's maxLength keeps it within the 300-character column.
+          clientAddress: Value(_clientAddress.text.trim().isEmpty ? null : _clientAddress.text.trim()),
           linesJson: encodeLines(lines),
           gstRate: Value(_gstRate),
           interState: Value(_interState),
@@ -748,6 +761,15 @@ class _NewBillScreenState extends ConsumerState<NewBillScreen> {
                     ? tr('Client GSTIN (optional)')
                     : trf("Client's {label} (optional)", {'label': tr(market.tax.registrationLabel)}),
                 counterText: ''),
+          ),
+          TextField(
+            key: const Key('bill-client-address'),
+            controller: _clientAddress,
+            textCapitalization: TextCapitalization.words,
+            maxLength: 300,
+            minLines: 1,
+            maxLines: 3,
+            decoration: InputDecoration(labelText: tr('Client address'), counterText: ''),
           ),
           const SizedBox(height: 12),
           Text(tr(market.tax.name), style: theme.textTheme.labelLarge),

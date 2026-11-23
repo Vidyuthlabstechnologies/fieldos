@@ -11705,6 +11705,18 @@ class $ClientBillsTable extends ClientBills
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _clientAddressMeta = const VerificationMeta(
+    'clientAddress',
+  );
+  @override
+  late final GeneratedColumn<String> clientAddress = GeneratedColumn<String>(
+    'client_address',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _sacMeta = const VerificationMeta('sac');
   @override
   late final GeneratedColumn<String> sac = GeneratedColumn<String>(
@@ -11856,6 +11868,7 @@ class $ClientBillsTable extends ClientBills
     billDate,
     clientName,
     clientGstin,
+    clientAddress,
     sac,
     linesJson,
     gstRate,
@@ -11932,6 +11945,15 @@ class $ClientBillsTable extends ClientBills
         clientGstin.isAcceptableOrUnknown(
           data['client_gstin']!,
           _clientGstinMeta,
+        ),
+      );
+    }
+    if (data.containsKey('client_address')) {
+      context.handle(
+        _clientAddressMeta,
+        clientAddress.isAcceptableOrUnknown(
+          data['client_address']!,
+          _clientAddressMeta,
         ),
       );
     }
@@ -12055,6 +12077,10 @@ class $ClientBillsTable extends ClientBills
         DriftSqlType.string,
         data['${effectivePrefix}client_gstin'],
       ),
+      clientAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_address'],
+      ),
       sac: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}sac'],
@@ -12120,6 +12146,7 @@ class ClientBill extends DataClass implements Insertable<ClientBill> {
   final DateTime billDate;
   final String clientName;
   final String? clientGstin;
+  final String? clientAddress;
   final String sac;
   final String linesJson;
   final double gstRate;
@@ -12140,6 +12167,7 @@ class ClientBill extends DataClass implements Insertable<ClientBill> {
     required this.billDate,
     required this.clientName,
     this.clientGstin,
+    this.clientAddress,
     required this.sac,
     required this.linesJson,
     required this.gstRate,
@@ -12164,6 +12192,9 @@ class ClientBill extends DataClass implements Insertable<ClientBill> {
     map['client_name'] = Variable<String>(clientName);
     if (!nullToAbsent || clientGstin != null) {
       map['client_gstin'] = Variable<String>(clientGstin);
+    }
+    if (!nullToAbsent || clientAddress != null) {
+      map['client_address'] = Variable<String>(clientAddress);
     }
     map['sac'] = Variable<String>(sac);
     map['lines_json'] = Variable<String>(linesJson);
@@ -12193,6 +12224,9 @@ class ClientBill extends DataClass implements Insertable<ClientBill> {
       clientGstin: clientGstin == null && nullToAbsent
           ? const Value.absent()
           : Value(clientGstin),
+      clientAddress: clientAddress == null && nullToAbsent
+          ? const Value.absent()
+          : Value(clientAddress),
       sac: Value(sac),
       linesJson: Value(linesJson),
       gstRate: Value(gstRate),
@@ -12223,6 +12257,7 @@ class ClientBill extends DataClass implements Insertable<ClientBill> {
       billDate: serializer.fromJson<DateTime>(json['billDate']),
       clientName: serializer.fromJson<String>(json['clientName']),
       clientGstin: serializer.fromJson<String?>(json['clientGstin']),
+      clientAddress: serializer.fromJson<String?>(json['clientAddress']),
       sac: serializer.fromJson<String>(json['sac']),
       linesJson: serializer.fromJson<String>(json['linesJson']),
       gstRate: serializer.fromJson<double>(json['gstRate']),
@@ -12248,6 +12283,7 @@ class ClientBill extends DataClass implements Insertable<ClientBill> {
       'billDate': serializer.toJson<DateTime>(billDate),
       'clientName': serializer.toJson<String>(clientName),
       'clientGstin': serializer.toJson<String?>(clientGstin),
+      'clientAddress': serializer.toJson<String?>(clientAddress),
       'sac': serializer.toJson<String>(sac),
       'linesJson': serializer.toJson<String>(linesJson),
       'gstRate': serializer.toJson<double>(gstRate),
@@ -12271,6 +12307,7 @@ class ClientBill extends DataClass implements Insertable<ClientBill> {
     DateTime? billDate,
     String? clientName,
     Value<String?> clientGstin = const Value.absent(),
+    Value<String?> clientAddress = const Value.absent(),
     String? sac,
     String? linesJson,
     double? gstRate,
@@ -12291,6 +12328,9 @@ class ClientBill extends DataClass implements Insertable<ClientBill> {
     billDate: billDate ?? this.billDate,
     clientName: clientName ?? this.clientName,
     clientGstin: clientGstin.present ? clientGstin.value : this.clientGstin,
+    clientAddress: clientAddress.present
+        ? clientAddress.value
+        : this.clientAddress,
     sac: sac ?? this.sac,
     linesJson: linesJson ?? this.linesJson,
     gstRate: gstRate ?? this.gstRate,
@@ -12319,6 +12359,9 @@ class ClientBill extends DataClass implements Insertable<ClientBill> {
       clientGstin: data.clientGstin.present
           ? data.clientGstin.value
           : this.clientGstin,
+      clientAddress: data.clientAddress.present
+          ? data.clientAddress.value
+          : this.clientAddress,
       sac: data.sac.present ? data.sac.value : this.sac,
       linesJson: data.linesJson.present ? data.linesJson.value : this.linesJson,
       gstRate: data.gstRate.present ? data.gstRate.value : this.gstRate,
@@ -12352,6 +12395,7 @@ class ClientBill extends DataClass implements Insertable<ClientBill> {
           ..write('billDate: $billDate, ')
           ..write('clientName: $clientName, ')
           ..write('clientGstin: $clientGstin, ')
+          ..write('clientAddress: $clientAddress, ')
           ..write('sac: $sac, ')
           ..write('linesJson: $linesJson, ')
           ..write('gstRate: $gstRate, ')
@@ -12377,6 +12421,7 @@ class ClientBill extends DataClass implements Insertable<ClientBill> {
     billDate,
     clientName,
     clientGstin,
+    clientAddress,
     sac,
     linesJson,
     gstRate,
@@ -12401,6 +12446,7 @@ class ClientBill extends DataClass implements Insertable<ClientBill> {
           other.billDate == this.billDate &&
           other.clientName == this.clientName &&
           other.clientGstin == this.clientGstin &&
+          other.clientAddress == this.clientAddress &&
           other.sac == this.sac &&
           other.linesJson == this.linesJson &&
           other.gstRate == this.gstRate &&
@@ -12423,6 +12469,7 @@ class ClientBillsCompanion extends UpdateCompanion<ClientBill> {
   final Value<DateTime> billDate;
   final Value<String> clientName;
   final Value<String?> clientGstin;
+  final Value<String?> clientAddress;
   final Value<String> sac;
   final Value<String> linesJson;
   final Value<double> gstRate;
@@ -12444,6 +12491,7 @@ class ClientBillsCompanion extends UpdateCompanion<ClientBill> {
     this.billDate = const Value.absent(),
     this.clientName = const Value.absent(),
     this.clientGstin = const Value.absent(),
+    this.clientAddress = const Value.absent(),
     this.sac = const Value.absent(),
     this.linesJson = const Value.absent(),
     this.gstRate = const Value.absent(),
@@ -12466,6 +12514,7 @@ class ClientBillsCompanion extends UpdateCompanion<ClientBill> {
     required DateTime billDate,
     required String clientName,
     this.clientGstin = const Value.absent(),
+    this.clientAddress = const Value.absent(),
     this.sac = const Value.absent(),
     required String linesJson,
     this.gstRate = const Value.absent(),
@@ -12497,6 +12546,7 @@ class ClientBillsCompanion extends UpdateCompanion<ClientBill> {
     Expression<DateTime>? billDate,
     Expression<String>? clientName,
     Expression<String>? clientGstin,
+    Expression<String>? clientAddress,
     Expression<String>? sac,
     Expression<String>? linesJson,
     Expression<double>? gstRate,
@@ -12519,6 +12569,7 @@ class ClientBillsCompanion extends UpdateCompanion<ClientBill> {
       if (billDate != null) 'bill_date': billDate,
       if (clientName != null) 'client_name': clientName,
       if (clientGstin != null) 'client_gstin': clientGstin,
+      if (clientAddress != null) 'client_address': clientAddress,
       if (sac != null) 'sac': sac,
       if (linesJson != null) 'lines_json': linesJson,
       if (gstRate != null) 'gst_rate': gstRate,
@@ -12543,6 +12594,7 @@ class ClientBillsCompanion extends UpdateCompanion<ClientBill> {
     Value<DateTime>? billDate,
     Value<String>? clientName,
     Value<String?>? clientGstin,
+    Value<String?>? clientAddress,
     Value<String>? sac,
     Value<String>? linesJson,
     Value<double>? gstRate,
@@ -12565,6 +12617,7 @@ class ClientBillsCompanion extends UpdateCompanion<ClientBill> {
       billDate: billDate ?? this.billDate,
       clientName: clientName ?? this.clientName,
       clientGstin: clientGstin ?? this.clientGstin,
+      clientAddress: clientAddress ?? this.clientAddress,
       sac: sac ?? this.sac,
       linesJson: linesJson ?? this.linesJson,
       gstRate: gstRate ?? this.gstRate,
@@ -12604,6 +12657,9 @@ class ClientBillsCompanion extends UpdateCompanion<ClientBill> {
     }
     if (clientGstin.present) {
       map['client_gstin'] = Variable<String>(clientGstin.value);
+    }
+    if (clientAddress.present) {
+      map['client_address'] = Variable<String>(clientAddress.value);
     }
     if (sac.present) {
       map['sac'] = Variable<String>(sac.value);
@@ -12657,6 +12713,7 @@ class ClientBillsCompanion extends UpdateCompanion<ClientBill> {
           ..write('billDate: $billDate, ')
           ..write('clientName: $clientName, ')
           ..write('clientGstin: $clientGstin, ')
+          ..write('clientAddress: $clientAddress, ')
           ..write('sac: $sac, ')
           ..write('linesJson: $linesJson, ')
           ..write('gstRate: $gstRate, ')
@@ -63602,6 +63659,7 @@ typedef $$ClientBillsTableCreateCompanionBuilder =
       required DateTime billDate,
       required String clientName,
       Value<String?> clientGstin,
+      Value<String?> clientAddress,
       Value<String> sac,
       required String linesJson,
       Value<double> gstRate,
@@ -63625,6 +63683,7 @@ typedef $$ClientBillsTableUpdateCompanionBuilder =
       Value<DateTime> billDate,
       Value<String> clientName,
       Value<String?> clientGstin,
+      Value<String?> clientAddress,
       Value<String> sac,
       Value<String> linesJson,
       Value<double> gstRate,
@@ -63681,6 +63740,11 @@ class $$ClientBillsTableFilterComposer
 
   ColumnFilters<String> get clientGstin => $composableBuilder(
     column: $table.clientGstin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get clientAddress => $composableBuilder(
+    column: $table.clientAddress,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -63789,6 +63853,11 @@ class $$ClientBillsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get clientAddress => $composableBuilder(
+    column: $table.clientAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get sac => $composableBuilder(
     column: $table.sac,
     builder: (column) => ColumnOrderings(column),
@@ -63886,6 +63955,11 @@ class $$ClientBillsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get clientAddress => $composableBuilder(
+    column: $table.clientAddress,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get sac =>
       $composableBuilder(column: $table.sac, builder: (column) => column);
 
@@ -63969,6 +64043,7 @@ class $$ClientBillsTableTableManager
                 Value<DateTime> billDate = const Value.absent(),
                 Value<String> clientName = const Value.absent(),
                 Value<String?> clientGstin = const Value.absent(),
+                Value<String?> clientAddress = const Value.absent(),
                 Value<String> sac = const Value.absent(),
                 Value<String> linesJson = const Value.absent(),
                 Value<double> gstRate = const Value.absent(),
@@ -63990,6 +64065,7 @@ class $$ClientBillsTableTableManager
                 billDate: billDate,
                 clientName: clientName,
                 clientGstin: clientGstin,
+                clientAddress: clientAddress,
                 sac: sac,
                 linesJson: linesJson,
                 gstRate: gstRate,
@@ -64013,6 +64089,7 @@ class $$ClientBillsTableTableManager
                 required DateTime billDate,
                 required String clientName,
                 Value<String?> clientGstin = const Value.absent(),
+                Value<String?> clientAddress = const Value.absent(),
                 Value<String> sac = const Value.absent(),
                 required String linesJson,
                 Value<double> gstRate = const Value.absent(),
@@ -64034,6 +64111,7 @@ class $$ClientBillsTableTableManager
                 billDate: billDate,
                 clientName: clientName,
                 clientGstin: clientGstin,
+                clientAddress: clientAddress,
                 sac: sac,
                 linesJson: linesJson,
                 gstRate: gstRate,

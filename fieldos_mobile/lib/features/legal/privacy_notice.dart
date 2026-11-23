@@ -12,6 +12,7 @@ library;
 
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/legal/consent_record.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 /// One item of the notice, as English keys looked up with [trIn].
@@ -293,5 +294,10 @@ Future<bool> aiConsentGiven(AppDatabase db, String userId) async {
   return v != null && v.isNotEmpty && v != '0';
 }
 
-Future<void> setAiConsent(AppDatabase db, String userId, bool given) =>
-    db.settingsDao.set(aiConsentKey(userId), given ? DateTime.now().toUtc().toIso8601String() : '0');
+/// Also queues the choice as proof of consent for the server (see
+/// consent_record.dart).
+Future<void> setAiConsent(AppDatabase db, String userId, bool given) async {
+  final at = DateTime.now().toUtc();
+  await db.settingsDao.set(aiConsentKey(userId), given ? at.toIso8601String() : '0');
+  await queueConsentRecord(db, userId, ConsentPurpose.aiAssistant, given, at: at);
+}
