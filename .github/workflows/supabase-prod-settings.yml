@@ -16,6 +16,11 @@ name: supabase-prod-settings
 #                    decided (#233). It cannot be undone; the owner OKed it
 #                    on 2026-11-23. account-cleanup / system-logs then
 #                    remove the files.
+#   pilot plans      only when the pilot_plans box is ticked: gives each
+#                    pilot owner account (the pilots' domain) a 60-day
+#                    3-site pilot plan, PILOT-<n>, unless one is already
+#                    running. Prints counts only, never the addresses.
+#   cron check       always: lists the background jobs, read only.
 #
 # Uses the SUPABASE_URL and SUPABASE_ACCESS_TOKEN secrets supabase-deploy
 # already has.
@@ -24,6 +29,10 @@ on:
     inputs:
       purge_verified_selfies:
         description: "Also delete stored selfies of check-in days already decided (cannot be undone)"
+        type: boolean
+        default: false
+      pilot_plans:
+        description: "Give the pilot owner accounts their 60-day pilot plan if none is running"
         type: boolean
         default: false
 
@@ -106,3 +115,54 @@ jobs:
           [ -n "$n" ] || { echo "::error::no count returned"; exit 1; }
           echo "Deleted $n stored selfies of decided days"
           echo "## Selfies of decided days deleted: $n" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Pilot company plans
+        if: ${{ inputs.pilot_plans }}
+        run: |
+          set -euo pipefail
+          sql=$(cat <<'SQL'
+          with u as (
+            select lower(email) as e, substring(lower(email) from '^pilot([0-9]+)[.]owner@') as n,
+                   email_confirmed_at is not null as confirmed
+            from auth.users where lower(email) ~ '^pilot[0-9]+[.]owner@pilots[.]mldynamic[.]com$'
+          ), todo as (
+            select * from u where not exists (
+              select 1 from public.company_plans p
+              where p.invoice_ref = 'PILOT-' || u.n and p.ends_on >= public.ist_today())
+          ), granted as (
+            select public.grant_company_plan(p_plan => 'pilot', p_ends_on => public.ist_today() + 60,
+                     p_owner_email => e, p_invoice_ref => 'PILOT-' || n, p_site_limit => 3) as id
+            from todo
+          )
+          select (select count(*) from u) as accounts,
+                 (select count(*) from u where confirmed) as confirmed,
+                 (select count(*) from granted) as granted_now;
+          SQL
+          )
+          run_sql() {
+            body=$(jq -n --arg q "$1" '{query: $q}')
+            code=$(curl -sS -o resp.json -w '%{http_code}' -X POST \
+              "https://api.supabase.com/v1/projects/$REF/database/query" \
+              -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H 'Content-Type: application/json' -d "$body")
+            if [ "$code" != "200" ] && [ "$code" != "201" ]; then
+              echo "::error::Supabase answered HTTP $code"; jq -r '.message // .' resp.json || true; exit 1
+            fi
+          }
+          run_sql "$sql"
+          jq -c '.[0]' resp.json
+          run_sql "select invoice_ref, plan, site_limit, starts_on, ends_on, company_id is not null as on_company from public.company_plans where invoice_ref like 'PILOT-%' and ends_on >= public.ist_today() order by invoice_ref;"
+          jq -c '.[]' resp.json
+          n=$(jq 'length' resp.json); rm -f resp.json
+          echo "## Pilot plans running: $n" >> "$GITHUB_STEP_SUMMARY"
+          [ "$n" -ge 1 ] || { echo "::error::no pilot plan is running after the grant"; exit 1; }
+
+      - name: Background jobs (read only)
+        run: |
+          set -euo pipefail
+          body=$(jq -n '{query: "select jobname, schedule, active from cron.job order by jobname;"}')
+          code=$(curl -sS -o resp.json -w '%{http_code}' -X POST \
+            "https://api.supabase.com/v1/projects/$REF/database/query" \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H 'Content-Type: application/json' -d "$body")
+          [ "$code" = "200" ] || [ "$code" = "201" ] || { echo "::error::HTTP $code"; cat resp.json; exit 1; }
+          jq -c '.[]' resp.json
+          rm -f resp.json
