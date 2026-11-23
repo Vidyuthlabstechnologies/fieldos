@@ -1,0 +1,80 @@
+name: supabase-prod-settings
+
+# One-off production settings that are not migrations, so nobody has to
+# click them in the Supabase dashboard (issue #228). Safe to re-run: each
+# step sets a value and reads it back.
+#
+#   webhook sender   app_config.webhook_dispatch_url -> this project's
+#                    webhook-dispatch function (#224); until it is set,
+#                    company webhooks queue but are never sent
+#   office redirect  adds the office web app's address to Auth's redirect
+#                    list, so "Sign in with Google" works there; addresses
+#                    already on the list are kept
+#
+# Uses the SUPABASE_URL and SUPABASE_ACCESS_TOKEN secrets supabase-deploy
+# already has.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      OFFICE_URL: https://fieldos-mldynamic.netlify.app/office/
+    steps:
+      - name: Check secrets
+        run: |
+          missing=""
+          [ -z "$SUPABASE_URL" ] && missing="$missing SUPABASE_URL"
+          [ -z "$SUPABASE_ACCESS_TOKEN" ] && missing="$missing SUPABASE_ACCESS_TOKEN"
+          if [ -n "$missing" ]; then echo "::error::Missing:$missing"; exit 1; fi
+          ref=$(echo "$SUPABASE_URL" | sed -E 's#https?://([^.]+)\..*#\1#')
+          echo "REF=$ref" >> "$GITHUB_ENV"
+
+      - name: Webhook sender address
+        run: |
+          set -euo pipefail
+          url="https://$REF.supabase.co/functions/v1/webhook-dispatch"
+          sql="insert into public.app_config (id, webhook_dispatch_url) values (true, '$url') on conflict (id) do update set webhook_dispatch_url = excluded.webhook_dispatch_url returning webhook_dispatch_url;"
+          body=$(jq -n --arg q "$sql" '{query: $q}')
+          code=$(curl -sS -o resp.json -w '%{http_code}' -X POST \
+            "https://api.supabase.com/v1/projects/$REF/database/query" \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H 'Content-Type: application/json' -d "$body")
+          if [ "$code" != "200" ] && [ "$code" != "201" ]; then
+            echo "::error::Supabase answered HTTP $code"; jq -r '.message // .' resp.json || true; exit 1
+          fi
+          got=$(jq -r '.[0].webhook_dispatch_url // empty' resp.json)
+          rm -f resp.json
+          [ "$got" = "$url" ] || { echo "::error::webhook_dispatch_url reads back as '$got'"; exit 1; }
+          echo "webhook_dispatch_url = $got"
+          echo "## Webhook sender: $got" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Office app on the Auth redirect list
+        run: |
+          set -euo pipefail
+          api="https://api.supabase.com/v1/projects/$REF/config/auth"
+          code=$(curl -sS -o cur.json -w '%{http_code}' "$api" -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN")
+          [ "$code" = "200" ] || { echo "::error::reading auth config: HTTP $code"; exit 1; }
+          list=$(jq -r '.uri_allow_list // ""' cur.json)
+          rm -f cur.json
+          if printf '%s' "$list" | tr ',' '\n' | grep -qxF "$OFFICE_URL"; then
+            echo "Already on the list."
+          else
+            new=$( [ -z "$list" ] && echo "$OFFICE_URL" || echo "$list,$OFFICE_URL" )
+            body=$(jq -n --arg l "$new" '{uri_allow_list: $l}')
+            code=$(curl -sS -o resp.json -w '%{http_code}' -X PATCH "$api" \
+              -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H 'Content-Type: application/json' -d "$body")
+            if [ "$code" != "200" ]; then
+              echo "::error::Supabase answered HTTP $code"; jq -r '.message // .' resp.json || true; exit 1
+            fi
+            printf '%s' "$(jq -r '.uri_allow_list' resp.json)" | tr ',' '\n' | grep -qxF "$OFFICE_URL" \
+              || { echo "::error::office address not on the list after the update"; exit 1; }
+            rm -f resp.json
+            echo "Added $OFFICE_URL"
+          fi
+          echo "## Office redirect on the list: $OFFICE_URL" >> "$GITHUB_STEP_SUMMARY"
