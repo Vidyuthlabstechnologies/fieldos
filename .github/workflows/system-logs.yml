@@ -1,0 +1,62 @@
+name: system-logs
+
+# Keeps a one-year copy of the Supabase server logs (API gateway, auth,
+# database, edge functions), because the Supabase plan keeps them for one
+# day. CERT-In's directions ask for 180 days kept in India and the DPDP
+# Rules 2025 for one year. tools/export_logs.py writes them to the private
+# system-logs bucket in this project's Mumbai region and deletes copies
+# older than 400 days. It also calls account-cleanup, which removes the
+# files of deleted accounts and verified check-in selfies.
+#
+# Runs every 6 hours, a minute or so each time (free on a public repo).
+# A missed run is caught up by the next one while Supabase still has the
+# logs (one day). Uses the SUPABASE_URL and SUPABASE_ACCESS_TOKEN secrets
+# that supabase-deploy already has; the service role key is fetched at run
+# time and never stored.
+on:
+  schedule:
+    - cron: "20 0,6,12,18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: system-logs
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - name: Skip until the cloud is set up
+        id: ready
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo "SUPABASE_URL / SUPABASE_ACCESS_TOKEN not set yet; nothing to do."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.ready.outputs.ok == 'true'
+
+      - uses: supabase/setup-cli@v3
+        if: steps.ready.outputs.ok == 'true'
+        with:
+          version: latest
+
+      - name: Copy logs to the system-logs bucket
+        if: steps.ready.outputs.ok == 'true'
+        shell: bash
+        run: |
+          ref=$(echo "$SUPABASE_URL" | sed -E 's#^https?://([^.]+)\.supabase\.co.*#\1#')
+          key=$(supabase projects api-keys --project-ref "$ref" -o json \
+            | python3 -c 'import json,sys; print(next(k["api_key"] for k in json.load(sys.stdin) if k["name"]=="service_role"))')
+          echo "::add-mask::$key"
+          SUPABASE_SERVICE_KEY="$key" python3 tools/export_logs.py | tee -a "$GITHUB_STEP_SUMMARY"

@@ -3,19 +3,18 @@
 What to do when something may have gone wrong with security or with personal
 data. Written 23 November 2026 from the CERT-In directions of 28 April 2022
 (under section 70B(6) of the IT Act, 2000) and the Digital Personal Data
-Protection Act, 2023 with the DPDP Rules, 2025. **Not legal advice and not
-reviewed by a lawyer.** The company must fill in the names below and have a
-lawyer read this before relying on it.
+Protection Act, 2023 with the DPDP Rules, 2025. Not legal advice: have the
+company's lawyer read it with the privacy policy and terms.
 
 ## Who
 
 | Role | Person | Contact |
 |---|---|---|
-| Incident lead (decides, starts the clocks) | _owner to name_ | |
-| CERT-In Point of Contact (must be designated and sent to CERT-In) | _owner to name_ | |
-| Grievance Officer / person who answers data questions | _owner to name_ | info@mldynamic.com |
+| Incident lead (decides, starts the clocks) | Varshini CB | info@mldynamic.com |
+| CERT-In Point of Contact (details to be sent to CERT-In) | Varshini CB | info@mldynamic.com, ML Dynamic Solutions Private Limited, 606, 6th Floor, Gowra Fountainhead, Patrika Nagar, Madhapur, Hi-Tech City, Hyderabad, Telangana 500081 |
+| Grievance Officer / person who answers data questions | Varshini CB | info@mldynamic.com |
 | Supabase (database, storage, functions) | developer with Supabase access | |
-| Lawyer | _owner to name_ | |
+| Lawyer | the company's lawyer | |
 
 ## The clocks
 
@@ -59,8 +58,16 @@ and an exported spreadsheet sent to the wrong person can all be breaches.
   with, and the personal data, traffic data and logs of processing kept for
   at least **one year** (rule 8 and the Seventh Schedule purposes).
 
-Today's position: the Supabase project is on the free tier, whose API and
-function logs are kept only for a short time. The auth audit log is a table
-in the Mumbai database and stays until deleted. **Owner decision:** move to a
-plan with longer log retention, or export logs to storage in India each day,
-so that 180 days (CERT-In) and one year (DPDP) can be produced.
+How we meet it: Supabase keeps API gateway, auth, database and edge
+function logs for one day. The `system-logs` workflow runs
+`tools/export_logs.py` every 6 hours and copies them, one gzip JSON-lines
+file per source per 6 hours, into the private `system-logs` Storage bucket
+of the same project, in Mumbai. Copies older than 400 days are deleted. The
+bucket has no access policies, so only the service role can read it. The
+auth audit log (`auth.audit_log_entries`) is a table in the Mumbai database
+and stays until deleted. Supabase's servers keep time with NTP.
+
+To produce logs: download the files for the dates you need from the
+`system-logs` bucket (Supabase dashboard, Storage) and `zcat` them. If a run
+fails, the workflow shows red in Actions; a gap is only lost if no run
+succeeds for a whole day, so check it after any GitHub or Supabase outage.

@@ -422,8 +422,9 @@ class _CheckInNotice extends StatelessWidget {
       const SizedBox(height: 12),
       Text(
         tr('When you check in or out, FieldOS reads your location once and takes a photo with the front camera, so '
-            'your company can see you were at the site. Both are saved with your attendance record, and only the '
-            'owner and project managers see them. Your location is never tracked in the background, and the photo '
+            'your company can see you were at the site. Only the owner and project managers see them. The photo is '
+            'deleted as soon as your day is verified; the location and the result stay with your attendance '
+            'record. Your location is never tracked in the background, and the photo '
             'is never used for face recognition.'),
         style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
       ),

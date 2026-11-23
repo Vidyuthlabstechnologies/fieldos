@@ -71,8 +71,11 @@ void main() {
     final rAway = await admin.from('staff_attendance').select().eq('id', away.id).single();
     expect(rAway['status'], 'pending');
     expect((rAway['in_distance_m'] as num).toDouble(), greaterThan(1000));
-    final photo = await admin.from('attendance_photos').select().eq('id', inside.inPhotoId!).single();
-    expect(photo['file_path'], '$siteId/attendance/${inside.inPhotoId}.jpg');
+    // Inside the site the GPS fix verified the day: no selfie was kept or sent.
+    expect(inside.inPhotoId, isNull);
+    // Away, the selfie goes up for the manager to look at.
+    final photo = await admin.from('attendance_photos').select().eq('id', away.inPhotoId!).single();
+    expect(photo['file_path'], '$siteId/attendance/${away.inPhotoId}.jpg');
     expect(photo['taken_by'], engineer.remoteUserId);
     final stored = await admin.storage.from('documents').download(photo['file_path'] as String);
     expect(stored, isNotEmpty);
@@ -106,12 +109,18 @@ void main() {
     final od = owner.db.staffAttendanceDao;
     final seen = await od.forCompany(company.id);
     expect(seen.map((r) => r.id), containsAll([inside.id, away.id]));
-    expect((await od.photoById(inside.inPhotoId))?.filePath, isNotNull, reason: 'the selfie came down with it');
+    expect((await od.photoById(away.inPhotoId))?.filePath, isNotNull, reason: 'the selfie came down with it');
     await od.review(away.id, approve: true, by: owner.localUserId, note: 'OK, steel came');
     await pushAll(owner);
     final rOk = await admin.from('staff_attendance').select('status, reviewed_by, review_note').eq('id', away.id).single();
     expect(rOk['status'], 'approved');
     expect(rOk['reviewed_by'], owner.remoteUserId);
+    // Decided: the server keeps only the result. The photo row is gone and
+    // its file is queued for account-cleanup.
+    expect(await admin.from('attendance_photos').select('id').eq('id', away.inPhotoId!), isEmpty);
+    final queued = await admin.from('storage_cleanup').select('prefix').eq('prefix', photo['file_path'] as String);
+    expect(queued, hasLength(1));
+    expect(await od.photoById(away.inPhotoId), isNull, reason: 'and the owner\'s phone dropped its copy');
     // The owner cannot check the engineer out.
     await expectLater(
         owner.client.from('staff_attendance').update({'check_out': DateTime.now().toUtc().toIso8601String()}).eq('id', away.id).select(),
@@ -119,6 +128,7 @@ void main() {
 
     await engineer.engine.pullAll();
     expect((await ed.byId(away.id))!.status, 'approved');
+    expect(await ed.photoById(away.inPhotoId), isNull, reason: 'the engineer\'s phone drops the selfie once decided');
 
     // --- People see only their own days -------------------------------------
     final ownDay = await od.checkIn(

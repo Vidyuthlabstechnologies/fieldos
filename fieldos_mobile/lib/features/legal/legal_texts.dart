@@ -50,9 +50,10 @@ const privacyPolicy = LegalDocument(
       'Attendance photos and selfies',
       'When staff check in or out, the app takes a selfie with the front camera and saves it with the '
           'time, the site and the GPS position. A supervisor can also take a photo when punching workers in. '
-          'The photos are part of the company\'s attendance records: the owner and project managers of that '
-          'company can see them, and they are used only to confirm attendance. FieldOS does not use face '
-          'recognition. Before someone\'s first own check-in, the app tells them this and waits for them to '
+          'A check-in selfie is kept only until the day is verified, then deleted (see How long we keep data); '
+          'until then only the owner and project managers of that company can see it, and only to confirm '
+          'attendance. Photos a supervisor takes when punching workers in stay with the company\'s attendance '
+          'records. FieldOS does not use face recognition. Before someone\'s first own check-in, the app tells them this and waits for them to '
           'agree. They can withdraw in Settings, Your privacy; a supervisor can then mark their attendance '
           'instead.',
     ),
@@ -140,7 +141,11 @@ const privacyPolicy = LegalDocument(
     LegalSection(
       'How long we keep data',
       '• Company records stay as long as the company uses FieldOS, and are deleted with the account as '
-          'described below.\n\n• Bug, crash and message reports are kept only as long as needed to fix or '
+          'described below.\n\n• Check-in selfies are kept only until the day is verified: at once when the '
+          'person is at the site, or when an owner or project manager decides on a check-in made away from it. '
+          'They are then deleted from the phone and, within a day, from our cloud, and only the result is '
+          'kept.\n\n• Records of access to our cloud (sign-ins and server request logs) are kept for one year, '
+          'in India, to keep FieldOS secure and as the law requires, and then deleted.\n\n• Bug, crash and message reports are kept only as long as needed to fix or '
           'review them, and never more than 12 months.\n\n• Deleted data can remain in our hosting provider\'s '
           'automatic backups for up to 30 days before they are overwritten.',
     ),
@@ -164,7 +169,7 @@ const privacyPolicy = LegalDocument(
     ),
     LegalSection(
       'Grievance officer',
-      'For any complaint about your personal data, write to the Grievance Officer, ML Dynamic Solutions '
+      'For any complaint about your personal data, write to our Grievance Officer, Varshini CB, ML Dynamic Solutions '
           'Private Limited, at info@mldynamic.com with "Privacy grievance" in the subject. We reply within 30 '
           'days. If you are not satisfied, you can complain to the Data Protection Board of India.',
     ),
@@ -341,7 +346,7 @@ const termsOfUse = LegalDocument(
     ),
     LegalSection(
       '18. Grievance officer',
-      'Complaints about content in FieldOS, or about these terms, can be sent to our Grievance Officer at '
+      'Complaints about content in FieldOS, or about these terms, can be sent to our Grievance Officer, Varshini CB, at '
           'info@mldynamic.com, or by post to the address below, marked "Grievance Officer". We acknowledge a '
           'complaint within 24 hours and resolve it within 15 days of receiving it.',
     ),
