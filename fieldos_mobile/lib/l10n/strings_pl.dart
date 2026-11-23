@@ -3,11 +3,13 @@
 /// Keyed by the Indian English text, like every table (see language.dart).
 library;
 
+import 'package:fieldos_mobile/l10n/strings_compliance.dart';
 import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
 import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 
 const stringsPl = <String, String>{
+  ...compliancePl,
   ...onboardingPl,
   ...schedulePl,
   ...integrationsPl,
@@ -3073,7 +3075,7 @@ const stringsPl = <String, String>{
   'If you do not agree, ask your supervisor to mark your attendance instead.': 'Jeśli się nie zgadzasz, poproś przełożonego, aby zamiast tego oznaczył Twoją obecność.',
   'Photo and location for my attendance': 'Zdjęcie i lokalizacja do mojej obecności',
   'Read once at each check-in and check-out, never in the background': 'Odczytywana raz przy każdym zameldowaniu i wymeldowaniu, nigdy w tle',
-  'When you check in or out, FieldOS reads your location once and takes a photo with the front camera, so your company can see you were at the site. Both are saved with your attendance record, and only the owner and project managers see them. Your location is never tracked in the background, and the photo is never used for face recognition.': 'Gdy się meldujesz lub wymeldowujesz, FieldOS raz odczytuje Twoją lokalizację i robi zdjęcie przednim aparatem, aby Twoja firma widziała, że byłeś na budowie. Oba są zapisywane z Twoim rejestrem obecności i widzą je tylko właściciel oraz kierownicy projektu. Twoja lokalizacja nigdy nie jest śledzona w tle, a zdjęcie nigdy nie służy do rozpoznawania twarzy.',
+  'When you check in or out, FieldOS reads your location once and takes a photo with the front camera, so your company can see you were at the site. Only the owner and project managers see them. The photo is deleted as soon as your day is verified; the location and the result stay with your attendance record. Your location is never tracked in the background, and the photo is never used for face recognition.': 'Gdy się meldujesz lub wymeldowujesz, FieldOS raz odczytuje Twoją lokalizację i robi zdjęcie przednim aparatem, aby Twoja firma widziała, że byłeś na budowie. Widzą je tylko właściciel oraz kierownicy projektu. Zdjęcie jest usuwane, gdy tylko Twój dzień zostanie zweryfikowany; lokalizacja i wynik zostają w Twoim rejestrze obecności. Twoja lokalizacja nigdy nie jest śledzona w tle, a zdjęcie nigdy nie służy do rozpoznawania twarzy.',
   'Projects, site diaries, photos, attendance, pay, CSCS cards and other records your company keeps. They stay on this phone, and in our cloud in Mumbai, India when Team & sync is on, so that your team can see them. Your company is the controller of these records and decides what it keeps.': 'Projekty, dzienniki budowy, zdjęcia, obecność, wynagrodzenia, karty CSCS i inne rejestry prowadzone przez Twoją firmę. Zostają na tym telefonie oraz w naszej chmurze w Mumbaju w Indiach, gdy włączona jest Drużyna i synchronizacja, aby Twój zespół mógł je widzieć. Twoja firma jest administratorem tych danych i decyduje, co przechowuje.',
   'Your location and a selfie when you sign in or out on site, and your location when you set a site location or take a site photo, to show the work was done at the site. The app asks you first. Never in the background. FieldOS does not use face recognition.': 'Twoja lokalizacja i selfie, gdy meldujesz wejście lub wyjście na budowie, oraz Twoja lokalizacja, gdy ustawiasz lokalizację budowy lub robisz zdjęcie budowy, aby pokazać, że praca została wykonana na budowie. Aplikacja najpierw pyta o zgodę. Nigdy w tle. FieldOS nie używa rozpoznawania twarzy.',
   'Data sent outside the UK': 'Dane wysyłane poza Wielką Brytanię',

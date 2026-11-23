@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fieldos_mobile/features/legal/rules_reminder.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart' show Roles;
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
@@ -430,6 +431,8 @@ class _ProjectList extends StatelessWidget {
         ),
         const AppUpdateBanner(),
         const TrialNoticeCard(),
+        // Once a year, the rules (IT Rules 2021 rule 3(1)(c)).
+        const RulesReminderCard(),
         // A new company's first few steps, until they are done or closed.
         GetStartedCard(companyId: company.id, onNewSite: onNewSite),
         // The day's four jobs as big picture buttons, one tap each.

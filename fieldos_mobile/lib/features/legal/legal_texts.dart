@@ -20,7 +20,7 @@ class LegalDocument {
 
 const privacyPolicy = LegalDocument(
   title: 'Privacy policy',
-  updated: '14 November 2026',
+  updated: '23 November 2026',
   intro:
       'FieldOS is made by ML Dynamic Solutions Private Limited. FieldOS stores the projects, reports, '
       'photos, attendance and other site records you create on your phone. If you sign in to Team & sync, '
@@ -50,16 +50,23 @@ const privacyPolicy = LegalDocument(
       'Attendance photos and selfies',
       'When staff check in or out, the app takes a selfie with the front camera and saves it with the '
           'time, the site and the GPS position. A supervisor can also take a photo when punching workers in. '
-          'The photos are part of the company\'s attendance records: the owner and project managers of that '
-          'company can see them, and they are used only to confirm attendance. FieldOS does not use face '
-          'recognition.',
+          'A check-in selfie is kept only until the day is verified, then deleted (see How long we keep data); '
+          'until then only the owner and project managers of that company can see it, and only to confirm '
+          'attendance. Photos a supervisor takes when punching workers in stay with the company\'s attendance '
+          'records. FieldOS does not use face recognition. Before someone\'s first own check-in, the app tells them this and waits for them to '
+          'agree. They can withdraw in Settings, Your privacy; a supervisor can then mark their attendance '
+          'instead.',
     ),
     LegalSection(
       'Salaries, workers and leads',
       'Companies use FieldOS to keep their own records about other people: workers\' names, attendance and '
           'wages, staff salaries and advances, and leads (the name, phone number and enquiry of a possible '
           'customer). The company decides what it records and why. FieldOS stores and processes these records '
-          'only on the company\'s behalf, and only owners and project managers can see salaries and leads.',
+          'only on the company\'s behalf, and only owners and project managers can see salaries and leads. '
+          'For these records the company is the data fiduciary under the Digital Personal Data Protection Act, '
+          '2023: it decides what to record and why, and it is responsible for telling the people concerned. '
+          'FieldOS is its data processor and handles the records only on the company\'s instructions, as '
+          'section 4 of the terms of use sets out.',
     ),
     LegalSection(
       'Change history',
@@ -125,16 +132,20 @@ const privacyPolicy = LegalDocument(
     ),
     LegalSection(
       'Keeping data safe',
-      'We protect data with encryption in transit, access limited by role, and checks that keep each company\'s records apart. If a breach of personal data affects you, we will tell you what happened, what it means for you and what we are doing about it, and we will report it to the Data Protection Board of India, as the law requires.',
+      'We protect data with encryption in transit, access limited by role, and checks that keep each company\'s records apart. If a breach of personal data affects you, we will tell you what happened, what it means for you and what we are doing about it, and we will report it to the Data Protection Board of India, as the law requires. We also report cyber security incidents to CERT-In, India\'s computer emergency response team, within the time its directions set.',
     ),
     LegalSection(
       'Children',
-      'FieldOS is for people aged 18 and over, and we do not knowingly collect personal data of children. Do not record anyone under 18 as a worker: the law does not allow children or adolescents to be employed in building and construction work.',
+      'FieldOS is for people aged 18 and over, and we do not knowingly collect personal data of children. Do not record anyone under 18 as a worker: the law does not allow children or adolescents to be employed in building and construction work. In the India app, whoever adds a worker confirms that the worker is 18 or older.',
     ),
     LegalSection(
       'How long we keep data',
       '• Company records stay as long as the company uses FieldOS, and are deleted with the account as '
-          'described below.\n\n• Bug, crash and message reports are kept only as long as needed to fix or '
+          'described below.\n\n• Check-in selfies are kept only until the day is verified: at once when the '
+          'person is at the site, or when an owner or project manager decides on a check-in made away from it. '
+          'They are then deleted from the phone and, within a day, from our cloud, and only the result is '
+          'kept.\n\n• Records of access to our cloud (sign-ins and server request logs) are kept for one year, '
+          'in India, to keep FieldOS secure and as the law requires, and then deleted.\n\n• Bug, crash and message reports are kept only as long as needed to fix or '
           'review them, and never more than 12 months.\n\n• Deleted data can remain in our hosting provider\'s '
           'automatic backups for up to 30 days before they are overwritten.',
     ),
@@ -154,11 +165,11 @@ const privacyPolicy = LegalDocument(
           'personal data we hold about you, ask us to correct or complete it, ask us to erase it, and nominate '
           'someone to act for you. Email info@mldynamic.com from the address on your account. If your data is '
           'in a company\'s records (for example as a worker or a lead), we pass your request to that company, '
-          'which decides about its own records, and we tell you that we have done so. You can also withdraw your consent at any time, as easily as you gave it: turn off the AI assistant or crash details, or delete your cloud account. Withdrawing does not affect what was done before. In the app, Settings, Your privacy has all of this in one place, with this notice in Hindi, Telugu, Tamil, Kannada and Marathi.',
+          'which decides about its own records, and we tell you that we have done so. You can also withdraw your consent at any time, as easily as you gave it: turn off the AI assistant or crash details, or delete your cloud account. Withdrawing does not affect what was done before. In the app, Settings, Your privacy has all of this in one place, with this notice in Hindi, Telugu, Tamil, Kannada and Marathi. When you agree to or withdraw the AI assistant or the check-in photo and location, the app keeps the date and time and the version of this policy you saw. If you use Team & sync, a copy goes to our cloud database so that we can show what you chose; it is deleted, or no longer linked to you, when you delete your account.',
     ),
     LegalSection(
       'Grievance officer',
-      'For any complaint about your personal data, write to the Grievance Officer, ML Dynamic Solutions '
+      'For any complaint about your personal data, write to our Grievance Officer, Varshini CB, ML Dynamic Solutions '
           'Private Limited, at info@mldynamic.com with "Privacy grievance" in the subject. We reply within 30 '
           'days. If you are not satisfied, you can complain to the Data Protection Board of India.',
     ),
@@ -172,7 +183,7 @@ const privacyPolicy = LegalDocument(
 
 const termsOfUse = LegalDocument(
   title: 'Terms of use',
-  updated: '14 November 2026',
+  updated: '23 November 2026',
   intro:
       'These terms of use ("terms") are an agreement between you and ML Dynamic Solutions Private Limited, '
       'a company incorporated in India ("we", "us"), which makes the FieldOS app and its cloud service '
@@ -218,7 +229,15 @@ const termsOfUse = LegalDocument(
           'policy describes. We do not sell your content or use it for advertising.\n\nYou confirm that you '
           'have the right to put your content into FieldOS, including photos of people and the details of '
           'workers you record, and that you have told them where your law requires it. Keep your own copies of '
-          'anything important; FieldOS can export reports and records.',
+          'anything important; FieldOS can export reports and records.\n\nWhere your content includes '
+          'personal data of other people, such as your workers, staff, leads or clients, your company is the '
+          'data fiduciary for it and we are your data processor. We process it only to provide FieldOS to you, '
+          'following your instructions given through the app; keep it confidential and let only the staff who '
+          'need it to support you see it; protect it with reasonable security safeguards; use only the service '
+          'providers named in the privacy policy, under contracts that protect it in the same way; tell you '
+          'without undue delay if a breach affects it, so that you can meet your own duties; help you answer '
+          'requests from the people it is about; and delete it when your company\'s account is deleted, apart '
+          'from backups, which are overwritten within 30 days.',
     ),
     LegalSection(
       '5. Team chat and other shared content',
@@ -238,7 +257,7 @@ const termsOfUse = LegalDocument(
           'who reported them, and a message you report is hidden on your phone.\n\nWe review every report '
           'within 24 hours. If the content breaks these terms we remove it, and we may warn, suspend or '
           'permanently remove the user who posted it. We may also keep the content and pass it to the police '
-          'or other authorities where the law requires it.',
+          'or other authorities where the law requires it. Once a year the app reminds everyone of these rules.',
     ),
     LegalSection(
       '7. Acceptable use',
@@ -327,7 +346,7 @@ const termsOfUse = LegalDocument(
     ),
     LegalSection(
       '18. Grievance officer',
-      'Complaints about content in FieldOS, or about these terms, can be sent to our Grievance Officer at '
+      'Complaints about content in FieldOS, or about these terms, can be sent to our Grievance Officer, Varshini CB, at '
           'info@mldynamic.com, or by post to the address below, marked "Grievance Officer". We acknowledge a '
           'complaint within 24 hours and resolve it within 15 days of receiving it.',
     ),

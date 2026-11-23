@@ -7,5 +7,5 @@ const Map<String, String> consentZh = {
   'If you do not agree, ask your supervisor to mark your attendance instead.': '如果您不同意，请让主管为您记录考勤。',
   'Photo and location for my attendance': '用于我考勤的照片和位置',
   'Read once at each check-in and check-out, never in the background': '每次签到和签退时读取一次，绝不在后台读取',
-  'When you check in or out, FieldOS reads your location once and takes a photo with the front camera, so your company can see you were at the site. Both are saved with your attendance record, and only the owner and project managers see them. Your location is never tracked in the background, and the photo is never used for face recognition.': '签到或签退时，FieldOS 会读取一次您的位置，并用前置摄像头拍一张照片，让公司看到您在工地。两者都随您的考勤记录保存，只有老板和项目经理能看到。您的位置绝不会在后台被跟踪，照片也绝不会用于人脸识别。',
+  'When you check in or out, FieldOS reads your location once and takes a photo with the front camera, so your company can see you were at the site. Only the owner and project managers see them. The photo is deleted as soon as your day is verified; the location and the result stay with your attendance record. Your location is never tracked in the background, and the photo is never used for face recognition.': '签到或签退时，FieldOS 会读取一次您的位置，并用前置摄像头拍一张照片，让公司看到您在工地。只有老板和项目经理能看到。当天考勤核实后照片会立即删除，位置和核实结果随您的考勤记录保留。您的位置绝不会在后台被跟踪，照片也绝不会用于人脸识别。',
 };

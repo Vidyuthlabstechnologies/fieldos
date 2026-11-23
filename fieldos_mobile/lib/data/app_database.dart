@@ -212,7 +212,7 @@ class AppDatabase extends _$AppDatabase {
             );
 
   @override
-  int get schemaVersion => 43;
+  int get schemaVersion => 44;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -470,6 +470,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 43) {
             // Submittals register.
             await _createTableIfMissing(m, submittals);
+          }
+          if (from < 44) {
+            // The client's address on bills (GST invoice rule 46).
+            await _addColumnIfMissing(m, clientBills, clientBills.clientAddress);
           }
         },
         beforeOpen: (details) => ensureLookupIndexes(),
@@ -4784,7 +4788,16 @@ class StaffAttendanceDao extends DatabaseAccessor<AppDatabase> with _$StaffAtten
             ? 'You are already checked in at this site.'
             : 'You have checked in and out at this site today already.');
       }
-      final photo = await addPhoto(projectId: projectId, filePath: selfiePath, by: userId, takenAt: at, lat: lat, lng: lng);
+      // Selfies are kept only while someone still has to look at them
+      // (data minimisation, DPDP Act s.8(7)): inside the site the GPS fix
+      // has already verified the day, so the photo is deleted at once and
+      // never leaves the phone. A day that waits for a manager keeps it
+      // until the decision (see review() and _dropPhotos()).
+      final within = geo.within == true;
+      final photo = within
+          ? null
+          : await addPhoto(projectId: projectId, filePath: selfiePath, by: userId, takenAt: at, lat: lat, lng: lng);
+      if (within) await _deleteFileQuietly(selfiePath);
       final row = await into(staffAttendance).insertReturning(StaffAttendanceCompanion.insert(
         id: _uuid.v4(),
         companyId: companyId,
@@ -4796,7 +4809,7 @@ class StaffAttendanceDao extends DatabaseAccessor<AppDatabase> with _$StaffAtten
         inLng: Value(lng),
         inAccuracyM: Value(accuracyM),
         inDistanceM: Value(geo.distanceM),
-        inPhotoId: Value(photo.id),
+        inPhotoId: Value(photo?.id),
         withinGeofence: Value(geo.within),
         status: Value(geo.within == true ? 'ok' : 'pending'),
         reason: Value(why),
@@ -4823,9 +4836,13 @@ class StaffAttendanceDao extends DatabaseAccessor<AppDatabase> with _$StaffAtten
         final at = now ?? DateTime.now();
         if (!at.isAfter(r.checkIn)) throw ArgumentError('Check-out is after check-in.');
         final geo = geoCheck(lat, lng, fence);
-        final photo = selfiePath == null || selfiePath.isEmpty
-            ? null
-            : await addPhoto(projectId: r.projectId, filePath: selfiePath, by: r.userId, takenAt: at, lat: lat, lng: lng);
+        // The check-out selfie is kept only for a day a manager still has
+        // to decide; otherwise it is deleted at once.
+        final keep = r.status == 'pending' && selfiePath != null && selfiePath.isNotEmpty;
+        final photo = keep
+            ? await addPhoto(projectId: r.projectId, filePath: selfiePath, by: r.userId, takenAt: at, lat: lat, lng: lng)
+            : null;
+        if (!keep && selfiePath != null && selfiePath.isNotEmpty) await _deleteFileQuietly(selfiePath);
         await (update(staffAttendance)..where((a) => a.id.equals(id))).write(StaffAttendanceCompanion(
           checkOut: Value(at),
           outLat: Value(lat),
@@ -4853,8 +4870,28 @@ class StaffAttendanceDao extends DatabaseAccessor<AppDatabase> with _$StaffAtten
         ));
         final row = (await byId(id))!;
         await _queue(row, 'update');
+        // Decided: only the result is kept, the selfies go.
+        await _dropPhotos([r.inPhotoId, r.outPhotoId]);
         return row;
       });
+
+  /// Deletes check-in selfies on this phone: the file, the row and any
+  /// upload still waiting. The server deletes its copies itself once a day
+  /// is no longer pending (20261123210000_india_compliance.sql). The ids
+  /// stay on the attendance row, because the server keeps a check-in as it
+  /// was made; nothing is found for them any more.
+  Future<void> _dropPhotos(Iterable<String?> ids) async {
+    final list = ids.whereType<String>().toSet().toList();
+    if (list.isEmpty) return;
+    final rows = await (select(attendancePhotos)..where((p) => p.id.isIn(list))).get();
+    for (final p in rows) {
+      await _deleteFileQuietly(p.filePath);
+    }
+    await (delete(attendancePhotos)..where((p) => p.id.isIn(list))).go();
+    await (db.delete(db.syncOutbox)
+          ..where((o) => o.targetTable.equals('attendance_photos') & o.recordId.isIn(list)))
+        .go();
+  }
 
   /// Newest first.
   Future<List<StaffAttendanceData>> forUsers(Iterable<String> userIds, {String? fromDay, String? toDay}) {
@@ -4876,7 +4913,18 @@ class StaffAttendanceDao extends DatabaseAccessor<AppDatabase> with _$StaffAtten
     return q.get();
   }
 
-  Future<void> upsertFromRemote(StaffAttendanceCompanion c) => into(staffAttendance).insertOnConflictUpdate(c);
+  /// A day decided elsewhere (by a manager, or 'ok' on the server) drops
+  /// its selfies here too.
+  Future<void> upsertFromRemote(StaffAttendanceCompanion c) async {
+    await into(staffAttendance).insertOnConflictUpdate(c);
+    final status = c.status.present ? c.status.value : null;
+    if (status != null && status != 'pending') {
+      await _dropPhotos([
+        if (c.inPhotoId.present) c.inPhotoId.value,
+        if (c.outPhotoId.present) c.outPhotoId.value,
+      ]);
+    }
+  }
   Future<void> upsertPhotoFromRemote(AttendancePhotosCompanion c) => into(attendancePhotos).insertOnConflictUpdate(c);
 }
 

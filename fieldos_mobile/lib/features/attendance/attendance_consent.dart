@@ -11,6 +11,7 @@
 library;
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/legal/consent_record.dart';
 
 String attendanceConsentKey(String userId) => 'attendance_consent:$userId';
 
@@ -21,5 +22,10 @@ Future<bool> attendanceConsentGiven(AppDatabase db, String userId) async {
   return v != null && v.isNotEmpty && v != '0';
 }
 
-Future<void> setAttendanceConsent(AppDatabase db, String userId, bool given) =>
-    db.settingsDao.set(attendanceConsentKey(userId), given ? DateTime.now().toUtc().toIso8601String() : '0');
+/// Also queues the choice as proof of consent for the server (see
+/// consent_record.dart).
+Future<void> setAttendanceConsent(AppDatabase db, String userId, bool given) async {
+  final at = DateTime.now().toUtc();
+  await db.settingsDao.set(attendanceConsentKey(userId), given ? at.toIso8601String() : '0');
+  await queueConsentRecord(db, userId, ConsentPurpose.attendancePhotoLocation, given, at: at);
+}

@@ -80,9 +80,9 @@ final usPrivacyPolicy = adaptLegal(
     'Attendance photos and selfies': const LegalSection(
       'Photo check-in',
       'When staff clock in or out, the app takes a photo with the front camera '
-          'and saves it with the time, the job and the GPS position. The photos are part of the '
-          'company\'s time records: the owner and project managers of that company can see them, and they are '
-          'used only to confirm who was on the job. FieldOS does not use face recognition, does not make a face '
+          'and saves it with the time, the job and the GPS position. A check-in photo is kept '
+          'only until the day is verified, then deleted (see How long we keep data); until then only the owner '
+          'and project managers of that company can see it, and only to confirm who was on the job. FieldOS does not use face recognition, does not make a face '
           'template or any other biometric identifier from the photo, and does not compare faces. The app tells '
           'you this and asks you to agree before the first photo check-in.',
     ),
@@ -148,8 +148,10 @@ final usPrivacyPolicy = adaptLegal(
     'How long we keep data': const LegalSection(
       'How long we keep data',
       '• Company records stay as long as the company uses FieldOS, and are deleted with the account as '
-          'described below.\n\n• Check-in photos are part of the company\'s time records: they stay with those records '
-          'and are deleted with them.\n\n• Bug, crash and message reports are kept only as long as needed to fix or '
+          'described below.\n\n• Check-in photos are kept only until the day is verified: at once '
+          'when the person is on the job, or when an owner or project manager decides on a check-in made away '
+          'from it. They are then deleted from the phone and, within a day, from our cloud, and only the result '
+          'is kept.\n\n• Bug, crash and message reports are kept only as long as needed to fix or '
           'review them, and never more than 12 months.\n\n• Deleted data can remain in our hosting provider\'s '
           'automatic backups for up to 30 days before they are overwritten.',
     ),
@@ -275,8 +277,10 @@ final myPrivacyPolicy = adaptLegal(
       'Attendance photos and selfies',
       'When staff check in or out, the app takes a photo with the front camera '
           'and saves it with the time, the site and the GPS position. A supervisor can also take a photo '
-          'when punching workers in. The photos are part of the company\'s attendance records: only the owner and '
-          'project managers of that company can see them, and they are used only to confirm attendance. FieldOS '
+          'when punching workers in. A check-in selfie is kept '
+          'only until the day is verified, then deleted (see How long we keep data); until then only the owner '
+          'and project managers of that company can see it, and only to confirm attendance. Photos a supervisor '
+          'takes when punching workers in stay with the company\'s attendance records. FieldOS '
           'does not use face recognition, and makes no face template or other biometric data from the photo. The '
           'app tells you this and asks you to agree before the first selfie; if you do not agree, your supervisor '
           'can mark your attendance instead, and your pay is never held back for it.',
@@ -327,8 +331,10 @@ final myPrivacyPolicy = adaptLegal(
       'How long we keep data',
       '• Company records stay as long as the company uses FieldOS, and are deleted with the account as described '
           'below. Employers must keep wage and attendance records for at least 6 years under the Employment Act '
-          '1955, so export them before you delete an account.\n\n• Attendance selfies are part of the company\'s '
-          'attendance records: they stay with those records and are deleted with them.'
+          '1955, so export them before you delete an account.\n\n• Attendance selfies are kept only until the day is '
+          'verified: at once when the person is at the site, or when an owner or project manager decides on a '
+          'check-in made away from it. They are then deleted from the phone and, within a day, from our cloud, '
+          'and only the result is kept.'
           '\n\n• Bug, crash and message reports are kept only as long as needed to fix or review them, and never '
           'more than 12 months.\n\n• Deleted data can remain in our hosting provider\'s automatic backups for up '
           'to 30 days before they are overwritten.',
@@ -467,9 +473,10 @@ final aePrivacyPolicy = adaptLegal(
     'Attendance photos and selfies': const LegalSection(
       'Attendance photos and selfies',
       'When staff check in or out, the app takes a photo with the front camera and saves it with the time, the '
-          'site and the GPS position. A supervisor can also take a photo when punching workers in. The photos are '
-          'part of the company\'s attendance records: only the owner and project managers of that company can see '
-          'them, and they are used only to confirm attendance, never for anything else. FieldOS does not use face '
+          'site and the GPS position. A supervisor can also take a photo when punching workers in. A check-in '
+          'selfie is kept only until the day is verified, then deleted (see How long we keep data); until then only '
+          'the owner and project managers of that company can see it, and only to confirm attendance. Photos a '
+          'supervisor takes when punching workers in stay with the company\'s attendance records. FieldOS does not use face '
           'recognition, and makes no face template or other biometric data from the photo. The app tells each person '
           'this and asks them to agree before their first check-in. They can turn it off at any time in Settings, '
           'Your privacy, and a supervisor then marks their attendance instead.',
@@ -519,8 +526,10 @@ final aePrivacyPolicy = adaptLegal(
       'How long we keep data',
       '• Company records stay as long as the company uses FieldOS, and are deleted with the account as described '
           'below. Employers must keep wage records for the period UAE labour law sets, so export them before you '
-          'delete an account.\n\n• Attendance selfies are part of the company\'s attendance records: they stay with '
-          'those records and are deleted with them.\n\n• Bug, crash and message reports are kept '
+          'delete an account.\n\n• Attendance selfies are kept only until the day is '
+          'verified: at once when the person is at the site, or when an owner or project manager decides on a '
+          'check-in made away from it. They are then deleted from the phone and, within a day, from our cloud, '
+          'and only the result is kept.\n\n• Bug, crash and message reports are kept '
           'only as long as needed to fix or review them, and never more than 12 months.\n\n• Deleted data can remain '
           'in our hosting provider\'s automatic backups for up to 30 days before they are overwritten.',
     ),
@@ -647,9 +656,10 @@ final ukPrivacyPolicy = adaptLegal(
     'Attendance photos and selfies': const LegalSection(
       'Attendance photos and selfies',
       'When staff sign in or out on site, the app takes a photo with the front camera and saves it with the time, the '
-          'site and the GPS position. A supervisor can also take a photo when signing operatives in. The photos are part '
-          'of the company\'s attendance records: only the owner and project managers of that company can see them, and '
-          'they are used only to confirm attendance, never for anything else. FieldOS does not use face recognition, '
+          'site and the GPS position. A supervisor can also take a photo when signing operatives in. A sign-in selfie is '
+          'kept only until the day is verified, then deleted (see How long we keep data); until then only the owner '
+          'and project managers of that company can see it, and only to confirm attendance. Photos a supervisor takes '
+          'when signing operatives in stay with the company\'s attendance records. FieldOS does not use face recognition, '
           'and makes no face template or other biometric data from the photo, so it is not special category data. The '
           'app tells each person this and asks them to agree before their first sign-in. They can turn it off at any '
           'time in Settings, Your privacy, and a supervisor then marks their attendance instead.',
@@ -709,8 +719,10 @@ final ukPrivacyPolicy = adaptLegal(
       'How long we keep data',
       '• Company records stay as long as the company uses FieldOS, and are deleted with the account as described '
           'below. Employers must keep payroll and CIS records for at least 3 years after the end of the tax year, and '
-          'VAT records for 6 years, so export them before you delete an account.\n\n• Attendance selfies are part of '
-          'the company\'s attendance records: they stay with those records and are deleted with them.\n\n• Bug, crash '
+          'VAT records for 6 years, so export them before you delete an account.\n\n• Attendance selfies are kept '
+          'only until the day is verified: at once when the person is on site, or when an owner or project manager '
+          'decides on a sign-in made away from it. They are then deleted from the phone and, within a day, from '
+          'our cloud, and only the result is kept.\n\n• Bug, crash '
           'and message reports are kept only as long as needed to fix or review them, and never more than 12 months.'
           '\n\n• Deleted data can remain in our hosting provider\'s automatic backups for up to 30 days before they are '
           'overwritten.',

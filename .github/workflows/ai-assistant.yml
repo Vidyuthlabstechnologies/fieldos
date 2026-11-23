@@ -49,9 +49,9 @@ jobs:
         run: supabase start
       - name: Allowance checks
         run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -f supabase/tests/ai_usage_test.sql
-      - name: Account deletion, report filing, security hardening and site viewer checks
+      - name: Account deletion, report filing, security hardening, site viewer and consent record checks
         run: |
-          for t in delete_account_test report_filing_test security_hardening_test site_viewers_test; do
+          for t in delete_account_test report_filing_test security_hardening_test site_viewers_test consent_records_test; do
             psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/$t.sql
           done
       - name: Table grants, row level security and SECURITY DEFINER checks

@@ -48,7 +48,7 @@ void main() {
     expect(distanceText(2420), '2.4 km');
   });
 
-  test('a check-in inside the site counts at once, with its selfie queued first', () async {
+  test('a check-in inside the site counts at once, and its selfie is deleted at once', () async {
     final at = DateTime(2026, 11, 10, 9, 5);
     final r = await dao().checkIn(
         companyId: companyId, projectId: 'a', userId: 'u1', selfiePath: '/m/selfie_1.jpg', fence: fence,
@@ -57,6 +57,19 @@ void main() {
     expect(r.withinGeofence, isTrue);
     expect(r.day, '2026-11-10');
     expect(r.inAccuracyM, 12);
+    // The GPS fix verified the day, so the selfie is never kept or uploaded.
+    expect(r.inPhotoId, isNull);
+    expect(await db.select(db.attendancePhotos).get(), isEmpty);
+    final queued = [for (final o in await db.syncOutboxDao.pending()) if (o.targetTable != 'projects') o];
+    expect([for (final o in queued) o.targetTable], ['staff_attendance']);
+  });
+
+  test('a day that waits keeps its selfies until a manager decides, then only the result stays', () async {
+    final at = DateTime(2026, 11, 10, 9, 5);
+    final r = await dao().checkIn(
+        companyId: companyId, projectId: 'a', userId: 'u1', selfiePath: '/m/selfie_1.jpg', fence: fence,
+        lat: awayLat, lng: awayLng, reason: 'Meeting the client', now: at);
+    expect(r.status, 'pending');
     final photo = await dao().photoById(r.inPhotoId);
     expect(photo!.filePath, '/m/selfie_1.jpg');
     expect(photo.takenBy, 'u1');
@@ -65,6 +78,27 @@ void main() {
     final photoJson = jsonDecode(queued.first.payload) as Map<String, dynamic>;
     expect(photoJson['file_path'], 'a/attendance/${photo.id}.jpg');
     expect(photoJson['_local_file_path'], '/m/selfie_1.jpg');
+    final out = await dao().checkOut(r.id,
+        fence: fence, selfiePath: '/m/out.jpg', lat: awayLat, lng: awayLng, now: at.add(const Duration(hours: 8)));
+    expect(out.outPhotoId, isNotNull);
+    expect(await db.select(db.attendancePhotos).get(), hasLength(2));
+
+    final ok = await dao().review(r.id, approve: true, by: 'boss', now: DateTime(2026, 11, 10, 18));
+    expect(ok.status, 'approved');
+    expect(ok.reviewedBy, 'boss');
+    expect(await db.select(db.attendancePhotos).get(), isEmpty);
+    final left = [for (final o in await db.syncOutboxDao.pending()) o.targetTable];
+    expect(left, isNot(contains('attendance_photos')), reason: 'a selfie not yet uploaded is never sent');
+  });
+
+  test('a day decided on another phone drops its selfies here when it syncs', () async {
+    final r = await dao().checkIn(
+        companyId: companyId, projectId: 'a', userId: 'u1', selfiePath: '/m/s.jpg', fence: fence, lat: awayLat, lng: awayLng,
+        reason: 'Meeting the client');
+    expect(await db.select(db.attendancePhotos).get(), hasLength(1));
+    await dao().upsertFromRemote(r.copyWith(status: 'approved', reviewedBy: const Value('boss')).toCompanion(true));
+    expect(await db.select(db.attendancePhotos).get(), isEmpty);
+    expect((await dao().byId(r.id))!.status, 'approved');
   });
 
   test('away from the site, without a fix or without a site location: a reason, then it waits', () async {
@@ -100,7 +134,7 @@ void main() {
         fence: fence, selfiePath: '/m/out.jpg', lat: awayLat, lng: awayLng, now: at.add(const Duration(hours: 9, minutes: 30)));
     expect(out.checkOut, at.add(const Duration(hours: 9, minutes: 30)));
     expect(out.outWithin, isFalse);
-    expect(out.outPhotoId, isNotNull);
+    expect(out.outPhotoId, isNull, reason: 'the day is already verified, so the check-out selfie is not kept');
     expect(out.status, 'ok', reason: 'leaving from elsewhere does not undo the day');
     expect(hoursOnSite(out), 9.5);
     expect(() => dao().checkOut(r.id, fence: fence), throwsArgumentError);

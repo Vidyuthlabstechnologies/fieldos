@@ -166,28 +166,34 @@ class _WorkersViewState extends ConsumerState<WorkersView> {
 
   Future<void> _addMany(BuildContext context) async {
     final text = TextEditingController();
+    var adult = !isIndia;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr('Add many workers')),
-        content: SizedBox(
-          width: 400,
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(tr('One worker per line: name, skill, phone, daily wage. Only the name is needed.'),
-                style: Theme.of(ctx).textTheme.bodySmall),
-            const SizedBox(height: 8),
-            TextField(
-              controller: text,
-              minLines: 5,
-              maxLines: 12,
-              decoration: const InputDecoration(hintText: 'Ramesh, Mason, 9848012345, 900\nSuresh, Helper, 600'),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: Text(tr('Add many workers')),
+          content: SizedBox(
+            width: 400,
+            child: SingleChildScrollView(
+              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(tr('One worker per line: name, skill, phone, daily wage. Only the name is needed.'),
+                    style: Theme.of(ctx).textTheme.bodySmall),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: text,
+                  minLines: 5,
+                  maxLines: 12,
+                  decoration: const InputDecoration(hintText: 'Ramesh, Mason, 9848012345, 900\nSuresh, Helper, 600'),
+                ),
+                if (isIndia) WorkerAgeCheck(value: adult, onChanged: (v) => setLocal(() => adult = v), many: true),
+              ]),
             ),
-          ]),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+            FilledButton(onPressed: adult ? () => Navigator.pop(ctx, true) : null, child: Text(tr('Add'))),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Add'))),
-        ],
       ),
     );
     final parsed = parseWorkerLines(text.text);
@@ -228,27 +234,33 @@ class _WorkersViewState extends ConsumerState<WorkersView> {
     final role = TextEditingController();
     final phone = TextEditingController();
     final dailyWage = TextEditingController();
+    var adult = !isIndia;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(tr('Add worker')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: name, decoration: InputDecoration(labelText: tr('Name'))),
-            TextField(controller: role, decoration: InputDecoration(labelText: tr('Role'))),
-            TextField(controller: phone, keyboardType: TextInputType.phone, decoration: InputDecoration(labelText: tr('Phone'))),
-            TextField(
-              controller: dailyWage,
-              decoration: InputDecoration(labelText: tr('Daily wage')),
-              keyboardType: TextInputType.number,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: Text(tr('Add worker')),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: name, decoration: InputDecoration(labelText: tr('Name'))),
+                TextField(controller: role, decoration: InputDecoration(labelText: tr('Role'))),
+                TextField(controller: phone, keyboardType: TextInputType.phone, decoration: InputDecoration(labelText: tr('Phone'))),
+                TextField(
+                  controller: dailyWage,
+                  decoration: InputDecoration(labelText: tr('Daily wage')),
+                  keyboardType: TextInputType.number,
+                ),
+                if (isIndia) WorkerAgeCheck(value: adult, onChanged: (v) => setLocal(() => adult = v)),
+              ],
             ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
+            FilledButton(onPressed: adult ? () => Navigator.of(ctx).pop(true) : null, child: Text(tr('Save'))),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancel'))),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Save'))),
-        ],
       ),
     );
     if (ok != true || name.text.trim().isEmpty || !context.mounted) return;
@@ -319,4 +331,31 @@ class _WorkerTile extends ConsumerWidget {
 
   Widget _statusBadge(String status) =>
       status == 'active' ? const StatusPill('Active', tone: PillTone.ok) : const StatusPill('Not active');
+}
+/// "Every worker is 18 or older", ticked before a worker is added in the
+/// India app. The Child and Adolescent Labour (Prohibition and Regulation)
+/// Act, 1986 bars children (under 14) from any work and adolescents (14 to
+/// 18) from hazardous work, and building and construction work is on its
+/// schedule of hazardous occupations. FieldOS keeps no date of birth (more
+/// personal data than the purpose needs), so the person adding the worker
+/// confirms it. The privacy policy already tells companies not to record
+/// anyone under 18.
+class WorkerAgeCheck extends StatelessWidget {
+  const WorkerAgeCheck({super.key, required this.value, required this.onChanged, this.many = false});
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final bool many;
+
+  @override
+  Widget build(BuildContext context) {
+    return CheckboxListTile(
+      key: const Key('worker-age-check'),
+      contentPadding: EdgeInsets.zero,
+      controlAffinity: ListTileControlAffinity.leading,
+      value: value,
+      onChanged: (v) => onChanged(v ?? false),
+      title: Text(many ? tr('Every worker in this list is 18 or older') : tr('This worker is 18 or older')),
+      subtitle: Text(tr('The law does not allow anyone under 18 to work on a building site.')),
+    );
+  }
 }

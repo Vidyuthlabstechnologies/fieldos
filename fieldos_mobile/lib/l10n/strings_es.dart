@@ -5,6 +5,7 @@
 /// native speaker's review before launch.
 library;
 
+import 'package:fieldos_mobile/l10n/strings_compliance.dart';
 import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
 import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
@@ -12,6 +13,7 @@ import 'package:fieldos_mobile/l10n/strings_consent_es.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 
 const Map<String, String> stringsEs = {
+  ...complianceEs,
   ...onboardingEs,
   ...scheduleEs,
   ...integrationsEs,

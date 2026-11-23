@@ -439,6 +439,8 @@ class ClientBills extends Table {
   DateTimeColumn get billDate => dateTime()();
   TextColumn get clientName => text().withLength(min: 1, max: 200)();
   TextColumn get clientGstin => text().withLength(max: 15).nullable()();
+  // CGST rule 46(e)/(f): the recipient's address on a tax invoice.
+  TextColumn get clientAddress => text().withLength(max: 300).nullable()();
   TextColumn get sac => text().withLength(max: 10).withDefault(const Constant('995411'))();
   TextColumn get linesJson => text()();
   RealColumn get gstRate => real().withDefault(const Constant(18))();

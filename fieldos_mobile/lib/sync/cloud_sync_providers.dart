@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/legal/consent_record.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/ai_backend.dart';
 import 'package:fieldos_mobile/services/bug_report_service.dart';
@@ -113,7 +114,7 @@ final companyPlanServiceProvider = Provider<CompanyPlanService>((ref) {
 class SettingsSessionStore implements SessionStore {
   SettingsSessionStore(this.db);
   final AppDatabase db;
-  static const key = 'cloud_session';
+  static const key = cloudSessionSettingsKey;
 
   @override
   Future<String?> read() async {
@@ -160,10 +161,22 @@ final periodicSyncTriggerProvider = Provider<PeriodicSyncTrigger>((ref) {
     // status line is honest about automatic syncs too.
     onSuccess: (result) async {
       if (result.failed == 0) await db.settingsDao.set('last_sync_at', DateTime.now().toIso8601String());
+      // Online and signed in: a good moment to file any consent choices
+      // made offline.
+      await ref.read(consentRecorderProvider).flush(ref.read(sessionProvider).user?.id ?? '');
     },
   );
   ref.onDispose(trigger.stop);
   return trigger;
+});
+
+/// Proof of consent (consent_record.dart). With no cloud in this build the
+/// choices stay on the phone.
+final consentRecorderProvider = Provider<ConsentRecorder>((ref) {
+  return ConsentRecorder(
+    db: ref.watch(appDatabaseProvider),
+    client: ref.watch(cloudSyncAvailableProvider) ? () => ref.read(cloudSyncClientProvider) : null,
+  );
 });
 
 /// In-app bug reports go to the same cloud project. With no cloud in this

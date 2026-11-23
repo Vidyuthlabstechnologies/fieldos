@@ -21,6 +21,7 @@ import 'package:fieldos_mobile/features/payroll/payroll_screen.dart' show monthL
 import 'package:fieldos_mobile/features/tasks/team_roster.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/sync/cloud_sync_providers.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
 
 /// The sites someone can check in at, with their geofences: the demo site
@@ -118,6 +119,7 @@ class _MyAttendanceScreenState extends ConsumerState<MyAttendanceScreen> {
 
   Future<void> _agree() async {
     await setAttendanceConsent(ref.read(appDatabaseProvider), widget.userId, true);
+    ref.read(consentRecorderProvider).nudge(widget.userId);
     if (!mounted) return;
     setState(() => _agreed = true);
     _locate();
@@ -420,8 +422,9 @@ class _CheckInNotice extends StatelessWidget {
       const SizedBox(height: 12),
       Text(
         tr('When you check in or out, FieldOS reads your location once and takes a photo with the front camera, so '
-            'your company can see you were at the site. Both are saved with your attendance record, and only the '
-            'owner and project managers see them. Your location is never tracked in the background, and the photo '
+            'your company can see you were at the site. Only the owner and project managers see them. The photo is '
+            'deleted as soon as your day is verified; the location and the result stay with your attendance '
+            'record. Your location is never tracked in the background, and the photo '
             'is never used for face recognition.'),
         style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
       ),
