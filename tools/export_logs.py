@@ -41,10 +41,23 @@ KEEP_DAYS = 400
 PAGE = 1000
 MIN_WINDOW = dt.timedelta(seconds=30)
 MGMT = os.environ.get("SUPABASE_MANAGEMENT_API", "https://api.supabase.com")
+# The Management API's logs endpoint rate-limits hard (HTTP 429 after about
+# ten quick queries). Space log queries out, and wait longer on a 429.
+LOG_GAP_SECONDS = float(os.environ.get("LOG_GAP_SECONDS", "6"))
 
 
 def utc(s):
     return s.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+
+def _wait(code, headers, attempt):
+    """Seconds to wait before retry `attempt`: Retry-After on a 429, else backoff."""
+    if code == 429:
+        try:
+            return max(1.0, min(120.0, float((headers or {}).get("Retry-After", ""))))
+        except ValueError:
+            return min(120.0, 15.0 * 2 ** attempt)
+    return 2 ** attempt * 5
 
 
 def call(url, method="GET", body=None, headers=None, raw=None, tries=4):
@@ -60,7 +73,7 @@ def call(url, method="GET", body=None, headers=None, raw=None, tries=4):
         except urllib.error.HTTPError as e:
             detail = e.read().decode()[:300]
             if e.code in (429, 500, 502, 503, 504) and attempt < tries - 1:
-                time.sleep(2 ** attempt * 5)
+                time.sleep(_wait(e.code, e.headers, attempt))
                 continue
             return e.code, detail
         except urllib.error.URLError:
@@ -77,6 +90,7 @@ class Supabase:
         self.ref = urllib.parse.urlparse(self.url).hostname.split(".")[0]
         self.token = token
         self.key = service_key
+        self._last_log_call = 0.0
 
     # -- logs (Management API) --
     def logs(self, source, start, end):
@@ -85,10 +99,17 @@ class Supabase:
             f"where source = '{source}' order by timestamp asc limit {PAGE}"
         )
         q = urllib.parse.urlencode({"sql": sql, "iso_timestamp_start": utc(start), "iso_timestamp_end": utc(end)})
-        code, data = call(
-            f"{MGMT}/v1/projects/{self.ref}/analytics/endpoints/logs?{q}",
-            headers={"Authorization": f"Bearer {self.token}"},
-        )
+        gap = LOG_GAP_SECONDS - (time.monotonic() - self._last_log_call)
+        if gap > 0:
+            time.sleep(gap)
+        try:
+            code, data = call(
+                f"{MGMT}/v1/projects/{self.ref}/analytics/endpoints/logs?{q}",
+                headers={"Authorization": f"Bearer {self.token}"},
+                tries=6,
+            )
+        finally:
+            self._last_log_call = time.monotonic()
         if code != 200 or not isinstance(data, dict):
             raise RuntimeError(f"logs {source} {utc(start)}: HTTP {code} {str(data)[:200]}")
         if data.get("error"):

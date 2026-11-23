@@ -100,3 +100,10 @@ def test_purge_keeps_400_days_and_nothing_else():
     sb = FakeSupabase(files=files)
     assert el.purge(sb, now) == 2
     assert sorted(sb.files) == sorted(f for f in files if f"{keep:%Y/%m/%d}" in f)
+
+
+def test_wait_honours_retry_after_and_backs_off():
+    assert el._wait(429, {"Retry-After": "7"}, 0) == 7.0
+    assert el._wait(429, {}, 0) == 15.0
+    assert el._wait(429, {}, 5) == 120.0
+    assert el._wait(503, {}, 1) == 10
