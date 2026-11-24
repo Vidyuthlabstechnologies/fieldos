@@ -166,3 +166,16 @@ jobs:
           [ "$code" = "200" ] || [ "$code" = "201" ] || { echo "::error::HTTP $code"; cat resp.json; exit 1; }
           jq -c '.[]' resp.json
           rm -f resp.json
+
+      - name: Organisation members (read only, addresses masked)
+        run: |
+          set -euo pipefail
+          h=(-H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN")
+          org=$(curl -sS "${h[@]}" "https://api.supabase.com/v1/projects/$REF" | jq -r '.organization_id // empty')
+          [ -n "$org" ] || { echo "::warning::could not read the project's organisation"; exit 0; }
+          echo "Organisation: $(curl -sS "${h[@]}" "https://api.supabase.com/v1/organizations/$org" | jq -r '.name // "?"')"
+          code=$(curl -sS -o m.json -w '%{http_code}' "${h[@]}" "https://api.supabase.com/v1/organizations/$org/members")
+          if [ "$code" != "200" ]; then echo "::warning::members: HTTP $code"; rm -f m.json; exit 0; fi
+          # Public logs: show only the first letter and the domain of each address.
+          jq -r '.[] | "\(.role_name // "?")  \((.email // "?") | sub("^(?<a>.)[^@]*"; "\(.a)***"))  mfa=\(.mfa_enabled // "?")"' m.json
+          rm -f m.json
