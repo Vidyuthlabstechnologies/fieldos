@@ -116,16 +116,18 @@ before launch.
 | Personal info → Email address, Name | Collected, required for Team & sync, purpose: App functionality, Account management. |
 | Personal info → Phone number | Collected, optional: phone numbers a company records for its leads, workers and suppliers. Purpose: App functionality. |
 | Personal info → Other info | Collected, optional: messages and site details sent to the AI assistant (processed ephemerally by Anthropic or Sarvam; only a usage count is kept). Purpose: App functionality. |
-| Location → Precise location | Collected, optional, purpose: App functionality (attendance geofence, photo location stamp). |
+| Location → Precise location | Collected, optional, purpose: App functionality (attendance geofence, photo location stamp). Read only at check-in, check-out, a worker punch or when setting a site; never in the background. |
 | Audio → Voice or sound recordings | Collected, optional, processed ephemerally, purpose: App functionality. Only the Sarvam fallback sends a recording, and only on phones that can't recognise the chosen language. The phone's own speech recognition is a system service of Google or Apple, not part of the app. |
-| Photos | Collected, optional, purpose: App functionality (site evidence, and attendance selfies, which are never used for face recognition). |
+| Photos | Collected, optional, purpose: App functionality (site evidence, and check-in selfies, which are never used for face recognition). Check-in selfies are kept only until the day is verified, then deleted from the phone and the server (#233). |
 | Files and docs | Collected, optional, purpose: App functionality (project documents). |
 | Messages → Other in-app messages | Collected (team chat), purpose: App functionality. |
 | Financial info → Purchase history | Collected (subscription, via Google Play and RevenueCat), required, not ephemeral, purposes: App functionality, Analytics (RevenueCat's own guidance). |
 | App info and performance → Crash logs, Diagnostics | Collected. Bug reports: only when the user sends one, purpose: App functionality. Google ML Kit (translation) sends diagnostics such as phone model, system and app version, languages, latency and error codes, purpose: Analytics. |
 | Device or other IDs | Collected by Google ML Kit (a per-installation identifier through Firebase Installations), purpose: Analytics. Not an advertising ID. |
 | Personal info → Email address | Also collected, optional, when a user adds it to a bug report so we can reply. |
-| App activity, advertising ID, contacts | Not collected. |
+| App activity → App interactions, Other actions | Collected, required, purpose: Fraud prevention, security and compliance. Consent records (when someone gives or withdraws the AI or check-in consent, DPDP s.6(10)), the 18+ tick when adding a worker (no date of birth is stored), and server request logs kept for one year (CERT-In). Not used for analytics or ads. |
+| Financial info → Other financial info | Collected, optional: bills, expenses and payroll amounts a company enters. Purpose: App functionality. |
+| Advertising ID, contacts | Not collected. |
 
 Sources for the SDK rows: [ML Kit data disclosure](https://developers.google.com/ml-kit/android-data-disclosure)
 and [RevenueCat: Google Play's Data Safety](https://www.revenuecat.com/docs/platform-resources/google-platform-resources/google-plays-data-safety).
