@@ -15,9 +15,27 @@ billing page, not here.
 | 2 | Create the repo secret `BACKUP_PASSPHRASE`: `openssl rand -base64 36`. Save it in the password manager first. Settings > Secrets and variables > Actions. | owner | |
 | 3 | Run the **db-backup** workflow once by hand. Check the run is green and that Dashboard > Storage > `db-backups` has a file. | owner + agent | |
 | 4 | Do one **restore drill** into a scratch project or local stack (`SUPABASE_PRODUCTION_RUNBOOK.md`, "Restoring a backup"). A backup nobody has restored is a hope. | agent | |
-| 5 | Review and merge the server-hardening PRs: **#252** (guard PO and request updates, one live PO per request) and **#253** (change history for wages, attendance marks, POs; the history screen labels). **Do not deploy them yet.** The phone-only PRs (#248 cube wording, #250 consent wording, #254 stalled photos) can ship in the next app build. | owner | |
+| 5 | Review the PRs in the table below. Merge the server ones if you like, but **do not deploy them yet**. The phone-only PRs can ship in the next app build. | owner | |
 | 6 | Pick the app-side build that ships with the wage change (1.8.1+26 is already built) and get it to every real tester on Play. | owner | |
 | 7 | Decide the product questions in `CUSTOMER_REVIEW_2026-11.md` that affect launch: trial length, paywall order, phone-number sign-in. | owner | |
+
+### What is waiting to be deployed
+
+All tested on a local stack; the combined tree passes every test. Migrations apply in filename order, so merging them in any order is safe.
+
+| PR | Migration or function | What it changes | Deploy with |
+|---|---|---|---|
+| #252 | `20261127100000_procurement_update_guards.sql` | PO and request edits guarded; one live PO per request | supabase-deploy |
+| #253 | `20261127110000_history_workers_attendance_orders.sql` | change history for wages, attendance marks, POs | supabase-deploy |
+| #256 | `20261127120000_approval_server_dating.sql` | `received_at` stamp; approval rules use it | supabase-deploy |
+| #255 | `20261127130000_rls_accessible_projects_once.sql` | RLS per query, not per row (~100 tables) | supabase-deploy, then **isolation-check** |
+| #258 | `20261127140000_supplier_approved_orders_only.sql` | supplier sees only approved POs | supabase-deploy |
+| #259 | `20261127150000_late_checkins_need_review.sql` | check-ins over 24 h late wait for a manager | supabase-deploy |
+| #257 | `ai-assistant` function | stops when consent is withdrawn | ai-assistant-deploy (after supabase-deploy) |
+| #251 | `db-backup` workflow | daily encrypted copy | needs `BACKUP_PASSPHRASE` |
+| #248 #250 #254 #260 #261 #262 | app only | cube wording, consent wording, stalled photos, lighter outbox, Home banner, discard prompt | next app build |
+
+The RLS migration (#255) touches the most. After it, run **isolation-check**, and on a real phone confirm that an engineer sees their own site and not another company's.
 
 ## Billing day
 
