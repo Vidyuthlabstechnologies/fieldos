@@ -25,6 +25,9 @@ const siteExecutionTables = {
   'site_submittals': 'submittals',
   'site_approvals': 'site_approvals',
   'site_liaison_logs': 'liaison_logs',
+  'site_quality_tests': 'quality_tests',
+  'site_safety_breaches': 'safety_breaches',
+  'site_gate_checks': 'gate_checks',
 };
 
 /// Tables whose rows are a file on the phone, uploaded to Storage under
@@ -39,6 +42,7 @@ const siteExecutionProjectScoped = {
   'site_task_constraints', 'site_drawings', 'site_drawing_revisions', 'site_rfis', 'site_hold_points',
   'site_defects', 'site_execution_photos', 'site_handover_units', 'site_handover_checks', 'worker_permits',
   'site_drawing_pins', 'site_submittals', 'site_approvals', 'site_liaison_logs',
+  'site_quality_tests', 'site_safety_breaches', 'site_gate_checks',
 };
 
 /// Person columns on these tables, swapped between the phone's and the
@@ -46,7 +50,7 @@ const siteExecutionProjectScoped = {
 /// (owner_id, raised_by, created_by, decided_by, uploaded_by and
 /// assignee_id are already in SyncEngine.userIdColumns.)
 const siteExecutionUserColumns = {
-  'cleared_by', 'answered_by', 'fixed_by', 'closed_by', 'handed_over_by', 'done_by', 'removed_by',
+  'tested_by', 'logged_by', 'checked_by', 'cleared_by', 'answered_by', 'fixed_by', 'closed_by', 'handed_over_by', 'done_by', 'removed_by',
 };
 
 /// Timestamps go to the server in UTC and come back as local time.
@@ -118,6 +122,9 @@ Insertable<DataClass> executionFromRemote(String serverTable, Map<String, dynami
     'site_submittals' => Submittal.fromJson(camel, serializer: _iso),
     'site_approvals' => SiteApproval.fromJson(camel, serializer: _iso),
     'site_liaison_logs' => LiaisonLog.fromJson(camel, serializer: _iso),
+    'site_quality_tests' => QualityTest.fromJson(camel, serializer: _iso),
+    'site_safety_breaches' => SafetyBreach.fromJson(camel, serializer: _iso),
+    'site_gate_checks' => GateCheck.fromJson(camel, serializer: _iso),
     _ => throw ArgumentError('Not a site execution table: $serverTable'),
   };
   return d as Insertable<DataClass>;
@@ -140,5 +147,8 @@ TableInfo<Table, DataClass> executionTable(AppDatabase db, String serverTable) =
       'site_submittals' => db.submittals,
       'site_approvals' => db.siteApprovals,
       'site_liaison_logs' => db.liaisonLogs,
+      'site_quality_tests' => db.qualityTests,
+      'site_safety_breaches' => db.safetyBreaches,
+      'site_gate_checks' => db.gateChecks,
       _ => throw ArgumentError('Not a site execution table: $serverTable'),
     } as TableInfo<Table, DataClass>;

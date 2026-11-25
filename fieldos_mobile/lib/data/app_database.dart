@@ -28,11 +28,13 @@ import 'package:fieldos_mobile/features/money/billing_calc.dart' show BillLine, 
 import 'package:fieldos_mobile/l10n/language.dart' show trf;
 import 'package:fieldos_mobile/data/backup.dart';
 import 'package:fieldos_mobile/data/pre_construction_dao.dart';
+import 'package:fieldos_mobile/data/site_ops_dao.dart';
 import 'package:fieldos_mobile/data/site_execution_dao.dart';
 import 'package:fieldos_mobile/data/write_guard.dart';
 export 'package:fieldos_mobile/data/write_guard.dart' show WriteGuard, ReadOnlyModeException, ReadOnlyReason, readOnlyMessage;
 export 'package:fieldos_mobile/data/site_execution_dao.dart' show SiteExecutionDao, ExecutionRefused;
 export 'package:fieldos_mobile/data/pre_construction_dao.dart' show PreConstructionDao;
+export 'package:fieldos_mobile/data/site_ops_dao.dart' show SiteOpsDao;
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
 
 import 'tables.dart';
@@ -136,6 +138,9 @@ String? _clip(String? s, int max) {
   Submittals,
   SiteApprovals,
   LiaisonLogs,
+  QualityTests,
+  SafetyBreaches,
+  GateChecks,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -483,6 +488,10 @@ class AppDatabase extends _$AppDatabase {
             // Pre-construction approvals and the time spent chasing them.
             await _createTableIfMissing(m, siteApprovals);
             await _createTableIfMissing(m, liaisonLogs);
+            // Quality tests, safety breaches and the security gate log.
+            await _createTableIfMissing(m, qualityTests);
+            await _createTableIfMissing(m, safetyBreaches);
+            await _createTableIfMissing(m, gateChecks);
           }
         },
         beforeOpen: (details) => ensureLookupIndexes(),
@@ -581,6 +590,7 @@ class AppDatabase extends _$AppDatabase {
   CommercialDao get commercialDao => CommercialDao(this);
   SiteExecutionDao get siteExecutionDao => SiteExecutionDao(this);
   PreConstructionDao get preConstructionDao => PreConstructionDao(this);
+  SiteOpsDao get siteOpsDao => SiteOpsDao(this);
   CrmDao get crmDao => CrmDao(this);
   WarehouseDao get warehouseDao => WarehouseDao(this);
   PayrollDao get payrollDao => PayrollDao(this);
@@ -3591,7 +3601,9 @@ class ApprovalChainDao extends DatabaseAccessor<AppDatabase> with _$ApprovalChai
 }
 
 /// The roles a person can have on one site.
-const siteRoleValues = ['owner', 'project_manager', 'site_engineer', 'accounts', 'storekeeper', 'viewer'];
+const siteRoleValues = [
+  'owner', 'project_manager', 'site_engineer', 'accounts', 'storekeeper', 'security', 'quality_officer', 'viewer',
+];
 
 // ---------------------------------------------------------------------------
 // CRM (v21): leads, their history and quotations. Company-wide; the server

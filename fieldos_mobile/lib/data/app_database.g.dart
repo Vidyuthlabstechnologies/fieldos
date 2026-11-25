@@ -58697,6 +58697,2705 @@ class LiaisonLogsCompanion extends UpdateCompanion<LiaisonLog> {
   }
 }
 
+class $QualityTestsTable extends QualityTests
+    with TableInfo<$QualityTestsTable, QualityTest> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QualityTestsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _batchNoMeta = const VerificationMeta(
+    'batchNo',
+  );
+  @override
+  late final GeneratedColumn<String> batchNo = GeneratedColumn<String>(
+    'batch_no',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 60),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _elementMeta = const VerificationMeta(
+    'element',
+  );
+  @override
+  late final GeneratedColumn<String> element = GeneratedColumn<String>(
+    'element',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _parameterMeta = const VerificationMeta(
+    'parameter',
+  );
+  @override
+  late final GeneratedColumn<String> parameter = GeneratedColumn<String>(
+    'parameter',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 20),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ruleMeta = const VerificationMeta('rule');
+  @override
+  late final GeneratedColumn<String> rule = GeneratedColumn<String>(
+    'rule',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 3,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('min'),
+  );
+  static const VerificationMeta _requiredValueMeta = const VerificationMeta(
+    'requiredValue',
+  );
+  @override
+  late final GeneratedColumn<double> requiredValue = GeneratedColumn<double>(
+    'required_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _actualValueMeta = const VerificationMeta(
+    'actualValue',
+  );
+  @override
+  late final GeneratedColumn<double> actualValue = GeneratedColumn<double>(
+    'actual_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ageDaysMeta = const VerificationMeta(
+    'ageDays',
+  );
+  @override
+  late final GeneratedColumn<int> ageDays = GeneratedColumn<int>(
+    'age_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sampledOnMeta = const VerificationMeta(
+    'sampledOn',
+  );
+  @override
+  late final GeneratedColumn<String> sampledOn = GeneratedColumn<String>(
+    'sampled_on',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dueOnMeta = const VerificationMeta('dueOn');
+  @override
+  late final GeneratedColumn<String> dueOn = GeneratedColumn<String>(
+    'due_on',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _testedOnMeta = const VerificationMeta(
+    'testedOn',
+  );
+  @override
+  late final GeneratedColumn<String> testedOn = GeneratedColumn<String>(
+    'tested_on',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _resultMeta = const VerificationMeta('result');
+  @override
+  late final GeneratedColumn<String> result = GeneratedColumn<String>(
+    'result',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pending'),
+  );
+  static const VerificationMeta _officerMeta = const VerificationMeta(
+    'officer',
+  );
+  @override
+  late final GeneratedColumn<String> officer = GeneratedColumn<String>(
+    'officer',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _raisedByMeta = const VerificationMeta(
+    'raisedBy',
+  );
+  @override
+  late final GeneratedColumn<String> raisedBy = GeneratedColumn<String>(
+    'raised_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _testedByMeta = const VerificationMeta(
+    'testedBy',
+  );
+  @override
+  late final GeneratedColumn<String> testedBy = GeneratedColumn<String>(
+    'tested_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    kind,
+    batchNo,
+    element,
+    parameter,
+    unit,
+    rule,
+    requiredValue,
+    actualValue,
+    ageDays,
+    sampledOn,
+    dueOn,
+    testedOn,
+    result,
+    officer,
+    note,
+    raisedBy,
+    testedBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quality_tests';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QualityTest> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('batch_no')) {
+      context.handle(
+        _batchNoMeta,
+        batchNo.isAcceptableOrUnknown(data['batch_no']!, _batchNoMeta),
+      );
+    }
+    if (data.containsKey('element')) {
+      context.handle(
+        _elementMeta,
+        element.isAcceptableOrUnknown(data['element']!, _elementMeta),
+      );
+    }
+    if (data.containsKey('parameter')) {
+      context.handle(
+        _parameterMeta,
+        parameter.isAcceptableOrUnknown(data['parameter']!, _parameterMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_parameterMeta);
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    }
+    if (data.containsKey('rule')) {
+      context.handle(
+        _ruleMeta,
+        rule.isAcceptableOrUnknown(data['rule']!, _ruleMeta),
+      );
+    }
+    if (data.containsKey('required_value')) {
+      context.handle(
+        _requiredValueMeta,
+        requiredValue.isAcceptableOrUnknown(
+          data['required_value']!,
+          _requiredValueMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_requiredValueMeta);
+    }
+    if (data.containsKey('actual_value')) {
+      context.handle(
+        _actualValueMeta,
+        actualValue.isAcceptableOrUnknown(
+          data['actual_value']!,
+          _actualValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('age_days')) {
+      context.handle(
+        _ageDaysMeta,
+        ageDays.isAcceptableOrUnknown(data['age_days']!, _ageDaysMeta),
+      );
+    }
+    if (data.containsKey('sampled_on')) {
+      context.handle(
+        _sampledOnMeta,
+        sampledOn.isAcceptableOrUnknown(data['sampled_on']!, _sampledOnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sampledOnMeta);
+    }
+    if (data.containsKey('due_on')) {
+      context.handle(
+        _dueOnMeta,
+        dueOn.isAcceptableOrUnknown(data['due_on']!, _dueOnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dueOnMeta);
+    }
+    if (data.containsKey('tested_on')) {
+      context.handle(
+        _testedOnMeta,
+        testedOn.isAcceptableOrUnknown(data['tested_on']!, _testedOnMeta),
+      );
+    }
+    if (data.containsKey('result')) {
+      context.handle(
+        _resultMeta,
+        result.isAcceptableOrUnknown(data['result']!, _resultMeta),
+      );
+    }
+    if (data.containsKey('officer')) {
+      context.handle(
+        _officerMeta,
+        officer.isAcceptableOrUnknown(data['officer']!, _officerMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('raised_by')) {
+      context.handle(
+        _raisedByMeta,
+        raisedBy.isAcceptableOrUnknown(data['raised_by']!, _raisedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_raisedByMeta);
+    }
+    if (data.containsKey('tested_by')) {
+      context.handle(
+        _testedByMeta,
+        testedBy.isAcceptableOrUnknown(data['tested_by']!, _testedByMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  QualityTest map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QualityTest(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      batchNo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}batch_no'],
+      ),
+      element: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}element'],
+      ),
+      parameter: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parameter'],
+      )!,
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      ),
+      rule: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rule'],
+      )!,
+      requiredValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}required_value'],
+      )!,
+      actualValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}actual_value'],
+      ),
+      ageDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}age_days'],
+      ),
+      sampledOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sampled_on'],
+      )!,
+      dueOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}due_on'],
+      )!,
+      testedOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tested_on'],
+      ),
+      result: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}result'],
+      )!,
+      officer: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}officer'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      raisedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}raised_by'],
+      )!,
+      testedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tested_by'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $QualityTestsTable createAlias(String alias) {
+    return $QualityTestsTable(attachedDatabase, alias);
+  }
+}
+
+class QualityTest extends DataClass implements Insertable<QualityTest> {
+  final String id;
+  final String projectId;
+
+  /// cube | plaster | paint | bitumen | other
+  final String kind;
+
+  /// Concrete batch, bill or lot number.
+  final String? batchNo;
+
+  /// Where it was taken from: "Column C4, 2nd floor slab".
+  final String? element;
+  final String parameter;
+  final String? unit;
+
+  /// min: the actual must reach the required; max: it must not exceed it.
+  final String rule;
+  final double requiredValue;
+  final double? actualValue;
+
+  /// Age of a cube in days (7, 14, 28), when it has one.
+  final int? ageDays;
+
+  /// yyyy-mm-dd the sample was cast or taken, and the day the test is due.
+  final String sampledOn;
+  final String dueOn;
+  final String? testedOn;
+
+  /// pending | pass | fail
+  final String result;
+
+  /// The quality officer who took the sample and the one who recorded it.
+  final String? officer;
+  final String? note;
+  final String raisedBy;
+  final String? testedBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const QualityTest({
+    required this.id,
+    required this.projectId,
+    required this.kind,
+    this.batchNo,
+    this.element,
+    required this.parameter,
+    this.unit,
+    required this.rule,
+    required this.requiredValue,
+    this.actualValue,
+    this.ageDays,
+    required this.sampledOn,
+    required this.dueOn,
+    this.testedOn,
+    required this.result,
+    this.officer,
+    this.note,
+    required this.raisedBy,
+    this.testedBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || batchNo != null) {
+      map['batch_no'] = Variable<String>(batchNo);
+    }
+    if (!nullToAbsent || element != null) {
+      map['element'] = Variable<String>(element);
+    }
+    map['parameter'] = Variable<String>(parameter);
+    if (!nullToAbsent || unit != null) {
+      map['unit'] = Variable<String>(unit);
+    }
+    map['rule'] = Variable<String>(rule);
+    map['required_value'] = Variable<double>(requiredValue);
+    if (!nullToAbsent || actualValue != null) {
+      map['actual_value'] = Variable<double>(actualValue);
+    }
+    if (!nullToAbsent || ageDays != null) {
+      map['age_days'] = Variable<int>(ageDays);
+    }
+    map['sampled_on'] = Variable<String>(sampledOn);
+    map['due_on'] = Variable<String>(dueOn);
+    if (!nullToAbsent || testedOn != null) {
+      map['tested_on'] = Variable<String>(testedOn);
+    }
+    map['result'] = Variable<String>(result);
+    if (!nullToAbsent || officer != null) {
+      map['officer'] = Variable<String>(officer);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['raised_by'] = Variable<String>(raisedBy);
+    if (!nullToAbsent || testedBy != null) {
+      map['tested_by'] = Variable<String>(testedBy);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  QualityTestsCompanion toCompanion(bool nullToAbsent) {
+    return QualityTestsCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      kind: Value(kind),
+      batchNo: batchNo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(batchNo),
+      element: element == null && nullToAbsent
+          ? const Value.absent()
+          : Value(element),
+      parameter: Value(parameter),
+      unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
+      rule: Value(rule),
+      requiredValue: Value(requiredValue),
+      actualValue: actualValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actualValue),
+      ageDays: ageDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ageDays),
+      sampledOn: Value(sampledOn),
+      dueOn: Value(dueOn),
+      testedOn: testedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(testedOn),
+      result: Value(result),
+      officer: officer == null && nullToAbsent
+          ? const Value.absent()
+          : Value(officer),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      raisedBy: Value(raisedBy),
+      testedBy: testedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(testedBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory QualityTest.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QualityTest(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      batchNo: serializer.fromJson<String?>(json['batchNo']),
+      element: serializer.fromJson<String?>(json['element']),
+      parameter: serializer.fromJson<String>(json['parameter']),
+      unit: serializer.fromJson<String?>(json['unit']),
+      rule: serializer.fromJson<String>(json['rule']),
+      requiredValue: serializer.fromJson<double>(json['requiredValue']),
+      actualValue: serializer.fromJson<double?>(json['actualValue']),
+      ageDays: serializer.fromJson<int?>(json['ageDays']),
+      sampledOn: serializer.fromJson<String>(json['sampledOn']),
+      dueOn: serializer.fromJson<String>(json['dueOn']),
+      testedOn: serializer.fromJson<String?>(json['testedOn']),
+      result: serializer.fromJson<String>(json['result']),
+      officer: serializer.fromJson<String?>(json['officer']),
+      note: serializer.fromJson<String?>(json['note']),
+      raisedBy: serializer.fromJson<String>(json['raisedBy']),
+      testedBy: serializer.fromJson<String?>(json['testedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'kind': serializer.toJson<String>(kind),
+      'batchNo': serializer.toJson<String?>(batchNo),
+      'element': serializer.toJson<String?>(element),
+      'parameter': serializer.toJson<String>(parameter),
+      'unit': serializer.toJson<String?>(unit),
+      'rule': serializer.toJson<String>(rule),
+      'requiredValue': serializer.toJson<double>(requiredValue),
+      'actualValue': serializer.toJson<double?>(actualValue),
+      'ageDays': serializer.toJson<int?>(ageDays),
+      'sampledOn': serializer.toJson<String>(sampledOn),
+      'dueOn': serializer.toJson<String>(dueOn),
+      'testedOn': serializer.toJson<String?>(testedOn),
+      'result': serializer.toJson<String>(result),
+      'officer': serializer.toJson<String?>(officer),
+      'note': serializer.toJson<String?>(note),
+      'raisedBy': serializer.toJson<String>(raisedBy),
+      'testedBy': serializer.toJson<String?>(testedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  QualityTest copyWith({
+    String? id,
+    String? projectId,
+    String? kind,
+    Value<String?> batchNo = const Value.absent(),
+    Value<String?> element = const Value.absent(),
+    String? parameter,
+    Value<String?> unit = const Value.absent(),
+    String? rule,
+    double? requiredValue,
+    Value<double?> actualValue = const Value.absent(),
+    Value<int?> ageDays = const Value.absent(),
+    String? sampledOn,
+    String? dueOn,
+    Value<String?> testedOn = const Value.absent(),
+    String? result,
+    Value<String?> officer = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    String? raisedBy,
+    Value<String?> testedBy = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => QualityTest(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    kind: kind ?? this.kind,
+    batchNo: batchNo.present ? batchNo.value : this.batchNo,
+    element: element.present ? element.value : this.element,
+    parameter: parameter ?? this.parameter,
+    unit: unit.present ? unit.value : this.unit,
+    rule: rule ?? this.rule,
+    requiredValue: requiredValue ?? this.requiredValue,
+    actualValue: actualValue.present ? actualValue.value : this.actualValue,
+    ageDays: ageDays.present ? ageDays.value : this.ageDays,
+    sampledOn: sampledOn ?? this.sampledOn,
+    dueOn: dueOn ?? this.dueOn,
+    testedOn: testedOn.present ? testedOn.value : this.testedOn,
+    result: result ?? this.result,
+    officer: officer.present ? officer.value : this.officer,
+    note: note.present ? note.value : this.note,
+    raisedBy: raisedBy ?? this.raisedBy,
+    testedBy: testedBy.present ? testedBy.value : this.testedBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  QualityTest copyWithCompanion(QualityTestsCompanion data) {
+    return QualityTest(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      batchNo: data.batchNo.present ? data.batchNo.value : this.batchNo,
+      element: data.element.present ? data.element.value : this.element,
+      parameter: data.parameter.present ? data.parameter.value : this.parameter,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      rule: data.rule.present ? data.rule.value : this.rule,
+      requiredValue: data.requiredValue.present
+          ? data.requiredValue.value
+          : this.requiredValue,
+      actualValue: data.actualValue.present
+          ? data.actualValue.value
+          : this.actualValue,
+      ageDays: data.ageDays.present ? data.ageDays.value : this.ageDays,
+      sampledOn: data.sampledOn.present ? data.sampledOn.value : this.sampledOn,
+      dueOn: data.dueOn.present ? data.dueOn.value : this.dueOn,
+      testedOn: data.testedOn.present ? data.testedOn.value : this.testedOn,
+      result: data.result.present ? data.result.value : this.result,
+      officer: data.officer.present ? data.officer.value : this.officer,
+      note: data.note.present ? data.note.value : this.note,
+      raisedBy: data.raisedBy.present ? data.raisedBy.value : this.raisedBy,
+      testedBy: data.testedBy.present ? data.testedBy.value : this.testedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QualityTest(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('kind: $kind, ')
+          ..write('batchNo: $batchNo, ')
+          ..write('element: $element, ')
+          ..write('parameter: $parameter, ')
+          ..write('unit: $unit, ')
+          ..write('rule: $rule, ')
+          ..write('requiredValue: $requiredValue, ')
+          ..write('actualValue: $actualValue, ')
+          ..write('ageDays: $ageDays, ')
+          ..write('sampledOn: $sampledOn, ')
+          ..write('dueOn: $dueOn, ')
+          ..write('testedOn: $testedOn, ')
+          ..write('result: $result, ')
+          ..write('officer: $officer, ')
+          ..write('note: $note, ')
+          ..write('raisedBy: $raisedBy, ')
+          ..write('testedBy: $testedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    projectId,
+    kind,
+    batchNo,
+    element,
+    parameter,
+    unit,
+    rule,
+    requiredValue,
+    actualValue,
+    ageDays,
+    sampledOn,
+    dueOn,
+    testedOn,
+    result,
+    officer,
+    note,
+    raisedBy,
+    testedBy,
+    createdAt,
+    updatedAt,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QualityTest &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.kind == this.kind &&
+          other.batchNo == this.batchNo &&
+          other.element == this.element &&
+          other.parameter == this.parameter &&
+          other.unit == this.unit &&
+          other.rule == this.rule &&
+          other.requiredValue == this.requiredValue &&
+          other.actualValue == this.actualValue &&
+          other.ageDays == this.ageDays &&
+          other.sampledOn == this.sampledOn &&
+          other.dueOn == this.dueOn &&
+          other.testedOn == this.testedOn &&
+          other.result == this.result &&
+          other.officer == this.officer &&
+          other.note == this.note &&
+          other.raisedBy == this.raisedBy &&
+          other.testedBy == this.testedBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class QualityTestsCompanion extends UpdateCompanion<QualityTest> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> kind;
+  final Value<String?> batchNo;
+  final Value<String?> element;
+  final Value<String> parameter;
+  final Value<String?> unit;
+  final Value<String> rule;
+  final Value<double> requiredValue;
+  final Value<double?> actualValue;
+  final Value<int?> ageDays;
+  final Value<String> sampledOn;
+  final Value<String> dueOn;
+  final Value<String?> testedOn;
+  final Value<String> result;
+  final Value<String?> officer;
+  final Value<String?> note;
+  final Value<String> raisedBy;
+  final Value<String?> testedBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const QualityTestsCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.batchNo = const Value.absent(),
+    this.element = const Value.absent(),
+    this.parameter = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.rule = const Value.absent(),
+    this.requiredValue = const Value.absent(),
+    this.actualValue = const Value.absent(),
+    this.ageDays = const Value.absent(),
+    this.sampledOn = const Value.absent(),
+    this.dueOn = const Value.absent(),
+    this.testedOn = const Value.absent(),
+    this.result = const Value.absent(),
+    this.officer = const Value.absent(),
+    this.note = const Value.absent(),
+    this.raisedBy = const Value.absent(),
+    this.testedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  QualityTestsCompanion.insert({
+    required String id,
+    required String projectId,
+    required String kind,
+    this.batchNo = const Value.absent(),
+    this.element = const Value.absent(),
+    required String parameter,
+    this.unit = const Value.absent(),
+    this.rule = const Value.absent(),
+    required double requiredValue,
+    this.actualValue = const Value.absent(),
+    this.ageDays = const Value.absent(),
+    required String sampledOn,
+    required String dueOn,
+    this.testedOn = const Value.absent(),
+    this.result = const Value.absent(),
+    this.officer = const Value.absent(),
+    this.note = const Value.absent(),
+    required String raisedBy,
+    this.testedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       kind = Value(kind),
+       parameter = Value(parameter),
+       requiredValue = Value(requiredValue),
+       sampledOn = Value(sampledOn),
+       dueOn = Value(dueOn),
+       raisedBy = Value(raisedBy);
+  static Insertable<QualityTest> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? kind,
+    Expression<String>? batchNo,
+    Expression<String>? element,
+    Expression<String>? parameter,
+    Expression<String>? unit,
+    Expression<String>? rule,
+    Expression<double>? requiredValue,
+    Expression<double>? actualValue,
+    Expression<int>? ageDays,
+    Expression<String>? sampledOn,
+    Expression<String>? dueOn,
+    Expression<String>? testedOn,
+    Expression<String>? result,
+    Expression<String>? officer,
+    Expression<String>? note,
+    Expression<String>? raisedBy,
+    Expression<String>? testedBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (kind != null) 'kind': kind,
+      if (batchNo != null) 'batch_no': batchNo,
+      if (element != null) 'element': element,
+      if (parameter != null) 'parameter': parameter,
+      if (unit != null) 'unit': unit,
+      if (rule != null) 'rule': rule,
+      if (requiredValue != null) 'required_value': requiredValue,
+      if (actualValue != null) 'actual_value': actualValue,
+      if (ageDays != null) 'age_days': ageDays,
+      if (sampledOn != null) 'sampled_on': sampledOn,
+      if (dueOn != null) 'due_on': dueOn,
+      if (testedOn != null) 'tested_on': testedOn,
+      if (result != null) 'result': result,
+      if (officer != null) 'officer': officer,
+      if (note != null) 'note': note,
+      if (raisedBy != null) 'raised_by': raisedBy,
+      if (testedBy != null) 'tested_by': testedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  QualityTestsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? kind,
+    Value<String?>? batchNo,
+    Value<String?>? element,
+    Value<String>? parameter,
+    Value<String?>? unit,
+    Value<String>? rule,
+    Value<double>? requiredValue,
+    Value<double?>? actualValue,
+    Value<int?>? ageDays,
+    Value<String>? sampledOn,
+    Value<String>? dueOn,
+    Value<String?>? testedOn,
+    Value<String>? result,
+    Value<String?>? officer,
+    Value<String?>? note,
+    Value<String>? raisedBy,
+    Value<String?>? testedBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return QualityTestsCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      kind: kind ?? this.kind,
+      batchNo: batchNo ?? this.batchNo,
+      element: element ?? this.element,
+      parameter: parameter ?? this.parameter,
+      unit: unit ?? this.unit,
+      rule: rule ?? this.rule,
+      requiredValue: requiredValue ?? this.requiredValue,
+      actualValue: actualValue ?? this.actualValue,
+      ageDays: ageDays ?? this.ageDays,
+      sampledOn: sampledOn ?? this.sampledOn,
+      dueOn: dueOn ?? this.dueOn,
+      testedOn: testedOn ?? this.testedOn,
+      result: result ?? this.result,
+      officer: officer ?? this.officer,
+      note: note ?? this.note,
+      raisedBy: raisedBy ?? this.raisedBy,
+      testedBy: testedBy ?? this.testedBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (batchNo.present) {
+      map['batch_no'] = Variable<String>(batchNo.value);
+    }
+    if (element.present) {
+      map['element'] = Variable<String>(element.value);
+    }
+    if (parameter.present) {
+      map['parameter'] = Variable<String>(parameter.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (rule.present) {
+      map['rule'] = Variable<String>(rule.value);
+    }
+    if (requiredValue.present) {
+      map['required_value'] = Variable<double>(requiredValue.value);
+    }
+    if (actualValue.present) {
+      map['actual_value'] = Variable<double>(actualValue.value);
+    }
+    if (ageDays.present) {
+      map['age_days'] = Variable<int>(ageDays.value);
+    }
+    if (sampledOn.present) {
+      map['sampled_on'] = Variable<String>(sampledOn.value);
+    }
+    if (dueOn.present) {
+      map['due_on'] = Variable<String>(dueOn.value);
+    }
+    if (testedOn.present) {
+      map['tested_on'] = Variable<String>(testedOn.value);
+    }
+    if (result.present) {
+      map['result'] = Variable<String>(result.value);
+    }
+    if (officer.present) {
+      map['officer'] = Variable<String>(officer.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (raisedBy.present) {
+      map['raised_by'] = Variable<String>(raisedBy.value);
+    }
+    if (testedBy.present) {
+      map['tested_by'] = Variable<String>(testedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QualityTestsCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('kind: $kind, ')
+          ..write('batchNo: $batchNo, ')
+          ..write('element: $element, ')
+          ..write('parameter: $parameter, ')
+          ..write('unit: $unit, ')
+          ..write('rule: $rule, ')
+          ..write('requiredValue: $requiredValue, ')
+          ..write('actualValue: $actualValue, ')
+          ..write('ageDays: $ageDays, ')
+          ..write('sampledOn: $sampledOn, ')
+          ..write('dueOn: $dueOn, ')
+          ..write('testedOn: $testedOn, ')
+          ..write('result: $result, ')
+          ..write('officer: $officer, ')
+          ..write('note: $note, ')
+          ..write('raisedBy: $raisedBy, ')
+          ..write('testedBy: $testedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SafetyBreachesTable extends SafetyBreaches
+    with TableInfo<$SafetyBreachesTable, SafetyBreach> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SafetyBreachesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _departmentMeta = const VerificationMeta(
+    'department',
+  );
+  @override
+  late final GeneratedColumn<String> department = GeneratedColumn<String>(
+    'department',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _severityMeta = const VerificationMeta(
+    'severity',
+  );
+  @override
+  late final GeneratedColumn<String> severity = GeneratedColumn<String>(
+    'severity',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('minor'),
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 500,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _whoMeta = const VerificationMeta('who');
+  @override
+  late final GeneratedColumn<String> who = GeneratedColumn<String>(
+    'who',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _onDayMeta = const VerificationMeta('onDay');
+  @override
+  late final GeneratedColumn<String> onDay = GeneratedColumn<String>(
+    'on_day',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _actionTakenMeta = const VerificationMeta(
+    'actionTaken',
+  );
+  @override
+  late final GeneratedColumn<String> actionTaken = GeneratedColumn<String>(
+    'action_taken',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _closedAtMeta = const VerificationMeta(
+    'closedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> closedAt = GeneratedColumn<DateTime>(
+    'closed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _closedByMeta = const VerificationMeta(
+    'closedBy',
+  );
+  @override
+  late final GeneratedColumn<String> closedBy = GeneratedColumn<String>(
+    'closed_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 64),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _raisedByMeta = const VerificationMeta(
+    'raisedBy',
+  );
+  @override
+  late final GeneratedColumn<String> raisedBy = GeneratedColumn<String>(
+    'raised_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    department,
+    severity,
+    description,
+    who,
+    onDay,
+    actionTaken,
+    closedAt,
+    closedBy,
+    raisedBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'safety_breaches';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SafetyBreach> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('department')) {
+      context.handle(
+        _departmentMeta,
+        department.isAcceptableOrUnknown(data['department']!, _departmentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_departmentMeta);
+    }
+    if (data.containsKey('severity')) {
+      context.handle(
+        _severityMeta,
+        severity.isAcceptableOrUnknown(data['severity']!, _severityMeta),
+      );
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('who')) {
+      context.handle(
+        _whoMeta,
+        who.isAcceptableOrUnknown(data['who']!, _whoMeta),
+      );
+    }
+    if (data.containsKey('on_day')) {
+      context.handle(
+        _onDayMeta,
+        onDay.isAcceptableOrUnknown(data['on_day']!, _onDayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_onDayMeta);
+    }
+    if (data.containsKey('action_taken')) {
+      context.handle(
+        _actionTakenMeta,
+        actionTaken.isAcceptableOrUnknown(
+          data['action_taken']!,
+          _actionTakenMeta,
+        ),
+      );
+    }
+    if (data.containsKey('closed_at')) {
+      context.handle(
+        _closedAtMeta,
+        closedAt.isAcceptableOrUnknown(data['closed_at']!, _closedAtMeta),
+      );
+    }
+    if (data.containsKey('closed_by')) {
+      context.handle(
+        _closedByMeta,
+        closedBy.isAcceptableOrUnknown(data['closed_by']!, _closedByMeta),
+      );
+    }
+    if (data.containsKey('raised_by')) {
+      context.handle(
+        _raisedByMeta,
+        raisedBy.isAcceptableOrUnknown(data['raised_by']!, _raisedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_raisedByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SafetyBreach map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SafetyBreach(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      department: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}department'],
+      )!,
+      severity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}severity'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      who: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}who'],
+      ),
+      onDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}on_day'],
+      )!,
+      actionTaken: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}action_taken'],
+      ),
+      closedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}closed_at'],
+      ),
+      closedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}closed_by'],
+      ),
+      raisedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}raised_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SafetyBreachesTable createAlias(String alias) {
+    return $SafetyBreachesTable(attachedDatabase, alias);
+  }
+}
+
+class SafetyBreach extends DataClass implements Insertable<SafetyBreach> {
+  final String id;
+  final String projectId;
+
+  /// civil | electrical | plumbing | finishing | mep | security | other
+  final String department;
+
+  /// minor | major | critical
+  final String severity;
+  final String description;
+
+  /// Who or which gang it was, if known.
+  final String? who;
+  final String onDay;
+  final String? actionTaken;
+  final DateTime? closedAt;
+  final String? closedBy;
+  final String raisedBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const SafetyBreach({
+    required this.id,
+    required this.projectId,
+    required this.department,
+    required this.severity,
+    required this.description,
+    this.who,
+    required this.onDay,
+    this.actionTaken,
+    this.closedAt,
+    this.closedBy,
+    required this.raisedBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['department'] = Variable<String>(department);
+    map['severity'] = Variable<String>(severity);
+    map['description'] = Variable<String>(description);
+    if (!nullToAbsent || who != null) {
+      map['who'] = Variable<String>(who);
+    }
+    map['on_day'] = Variable<String>(onDay);
+    if (!nullToAbsent || actionTaken != null) {
+      map['action_taken'] = Variable<String>(actionTaken);
+    }
+    if (!nullToAbsent || closedAt != null) {
+      map['closed_at'] = Variable<DateTime>(closedAt);
+    }
+    if (!nullToAbsent || closedBy != null) {
+      map['closed_by'] = Variable<String>(closedBy);
+    }
+    map['raised_by'] = Variable<String>(raisedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  SafetyBreachesCompanion toCompanion(bool nullToAbsent) {
+    return SafetyBreachesCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      department: Value(department),
+      severity: Value(severity),
+      description: Value(description),
+      who: who == null && nullToAbsent ? const Value.absent() : Value(who),
+      onDay: Value(onDay),
+      actionTaken: actionTaken == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actionTaken),
+      closedAt: closedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closedAt),
+      closedBy: closedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closedBy),
+      raisedBy: Value(raisedBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SafetyBreach.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SafetyBreach(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      department: serializer.fromJson<String>(json['department']),
+      severity: serializer.fromJson<String>(json['severity']),
+      description: serializer.fromJson<String>(json['description']),
+      who: serializer.fromJson<String?>(json['who']),
+      onDay: serializer.fromJson<String>(json['onDay']),
+      actionTaken: serializer.fromJson<String?>(json['actionTaken']),
+      closedAt: serializer.fromJson<DateTime?>(json['closedAt']),
+      closedBy: serializer.fromJson<String?>(json['closedBy']),
+      raisedBy: serializer.fromJson<String>(json['raisedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'department': serializer.toJson<String>(department),
+      'severity': serializer.toJson<String>(severity),
+      'description': serializer.toJson<String>(description),
+      'who': serializer.toJson<String?>(who),
+      'onDay': serializer.toJson<String>(onDay),
+      'actionTaken': serializer.toJson<String?>(actionTaken),
+      'closedAt': serializer.toJson<DateTime?>(closedAt),
+      'closedBy': serializer.toJson<String?>(closedBy),
+      'raisedBy': serializer.toJson<String>(raisedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  SafetyBreach copyWith({
+    String? id,
+    String? projectId,
+    String? department,
+    String? severity,
+    String? description,
+    Value<String?> who = const Value.absent(),
+    String? onDay,
+    Value<String?> actionTaken = const Value.absent(),
+    Value<DateTime?> closedAt = const Value.absent(),
+    Value<String?> closedBy = const Value.absent(),
+    String? raisedBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => SafetyBreach(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    department: department ?? this.department,
+    severity: severity ?? this.severity,
+    description: description ?? this.description,
+    who: who.present ? who.value : this.who,
+    onDay: onDay ?? this.onDay,
+    actionTaken: actionTaken.present ? actionTaken.value : this.actionTaken,
+    closedAt: closedAt.present ? closedAt.value : this.closedAt,
+    closedBy: closedBy.present ? closedBy.value : this.closedBy,
+    raisedBy: raisedBy ?? this.raisedBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SafetyBreach copyWithCompanion(SafetyBreachesCompanion data) {
+    return SafetyBreach(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      department: data.department.present
+          ? data.department.value
+          : this.department,
+      severity: data.severity.present ? data.severity.value : this.severity,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      who: data.who.present ? data.who.value : this.who,
+      onDay: data.onDay.present ? data.onDay.value : this.onDay,
+      actionTaken: data.actionTaken.present
+          ? data.actionTaken.value
+          : this.actionTaken,
+      closedAt: data.closedAt.present ? data.closedAt.value : this.closedAt,
+      closedBy: data.closedBy.present ? data.closedBy.value : this.closedBy,
+      raisedBy: data.raisedBy.present ? data.raisedBy.value : this.raisedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SafetyBreach(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('department: $department, ')
+          ..write('severity: $severity, ')
+          ..write('description: $description, ')
+          ..write('who: $who, ')
+          ..write('onDay: $onDay, ')
+          ..write('actionTaken: $actionTaken, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('closedBy: $closedBy, ')
+          ..write('raisedBy: $raisedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    department,
+    severity,
+    description,
+    who,
+    onDay,
+    actionTaken,
+    closedAt,
+    closedBy,
+    raisedBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SafetyBreach &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.department == this.department &&
+          other.severity == this.severity &&
+          other.description == this.description &&
+          other.who == this.who &&
+          other.onDay == this.onDay &&
+          other.actionTaken == this.actionTaken &&
+          other.closedAt == this.closedAt &&
+          other.closedBy == this.closedBy &&
+          other.raisedBy == this.raisedBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SafetyBreachesCompanion extends UpdateCompanion<SafetyBreach> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> department;
+  final Value<String> severity;
+  final Value<String> description;
+  final Value<String?> who;
+  final Value<String> onDay;
+  final Value<String?> actionTaken;
+  final Value<DateTime?> closedAt;
+  final Value<String?> closedBy;
+  final Value<String> raisedBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const SafetyBreachesCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.department = const Value.absent(),
+    this.severity = const Value.absent(),
+    this.description = const Value.absent(),
+    this.who = const Value.absent(),
+    this.onDay = const Value.absent(),
+    this.actionTaken = const Value.absent(),
+    this.closedAt = const Value.absent(),
+    this.closedBy = const Value.absent(),
+    this.raisedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SafetyBreachesCompanion.insert({
+    required String id,
+    required String projectId,
+    required String department,
+    this.severity = const Value.absent(),
+    required String description,
+    this.who = const Value.absent(),
+    required String onDay,
+    this.actionTaken = const Value.absent(),
+    this.closedAt = const Value.absent(),
+    this.closedBy = const Value.absent(),
+    required String raisedBy,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       department = Value(department),
+       description = Value(description),
+       onDay = Value(onDay),
+       raisedBy = Value(raisedBy);
+  static Insertable<SafetyBreach> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? department,
+    Expression<String>? severity,
+    Expression<String>? description,
+    Expression<String>? who,
+    Expression<String>? onDay,
+    Expression<String>? actionTaken,
+    Expression<DateTime>? closedAt,
+    Expression<String>? closedBy,
+    Expression<String>? raisedBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (department != null) 'department': department,
+      if (severity != null) 'severity': severity,
+      if (description != null) 'description': description,
+      if (who != null) 'who': who,
+      if (onDay != null) 'on_day': onDay,
+      if (actionTaken != null) 'action_taken': actionTaken,
+      if (closedAt != null) 'closed_at': closedAt,
+      if (closedBy != null) 'closed_by': closedBy,
+      if (raisedBy != null) 'raised_by': raisedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SafetyBreachesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? department,
+    Value<String>? severity,
+    Value<String>? description,
+    Value<String?>? who,
+    Value<String>? onDay,
+    Value<String?>? actionTaken,
+    Value<DateTime?>? closedAt,
+    Value<String?>? closedBy,
+    Value<String>? raisedBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SafetyBreachesCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      department: department ?? this.department,
+      severity: severity ?? this.severity,
+      description: description ?? this.description,
+      who: who ?? this.who,
+      onDay: onDay ?? this.onDay,
+      actionTaken: actionTaken ?? this.actionTaken,
+      closedAt: closedAt ?? this.closedAt,
+      closedBy: closedBy ?? this.closedBy,
+      raisedBy: raisedBy ?? this.raisedBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (department.present) {
+      map['department'] = Variable<String>(department.value);
+    }
+    if (severity.present) {
+      map['severity'] = Variable<String>(severity.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (who.present) {
+      map['who'] = Variable<String>(who.value);
+    }
+    if (onDay.present) {
+      map['on_day'] = Variable<String>(onDay.value);
+    }
+    if (actionTaken.present) {
+      map['action_taken'] = Variable<String>(actionTaken.value);
+    }
+    if (closedAt.present) {
+      map['closed_at'] = Variable<DateTime>(closedAt.value);
+    }
+    if (closedBy.present) {
+      map['closed_by'] = Variable<String>(closedBy.value);
+    }
+    if (raisedBy.present) {
+      map['raised_by'] = Variable<String>(raisedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SafetyBreachesCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('department: $department, ')
+          ..write('severity: $severity, ')
+          ..write('description: $description, ')
+          ..write('who: $who, ')
+          ..write('onDay: $onDay, ')
+          ..write('actionTaken: $actionTaken, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('closedBy: $closedBy, ')
+          ..write('raisedBy: $raisedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $GateChecksTable extends GateChecks
+    with TableInfo<$GateChecksTable, GateCheck> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GateChecksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _personNameMeta = const VerificationMeta(
+    'personName',
+  );
+  @override
+  late final GeneratedColumn<String> personName = GeneratedColumn<String>(
+    'person_name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 120,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _workerIdMeta = const VerificationMeta(
+    'workerId',
+  );
+  @override
+  late final GeneratedColumn<String> workerId = GeneratedColumn<String>(
+    'worker_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 36),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _resultMeta = const VerificationMeta('result');
+  @override
+  late final GeneratedColumn<String> result = GeneratedColumn<String>(
+    'result',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('ok'),
+  );
+  static const VerificationMeta _itemMeta = const VerificationMeta('item');
+  @override
+  late final GeneratedColumn<String> item = GeneratedColumn<String>(
+    'item',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _readingMeta = const VerificationMeta(
+    'reading',
+  );
+  @override
+  late final GeneratedColumn<double> reading = GeneratedColumn<double>(
+    'reading',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _checkedByMeta = const VerificationMeta(
+    'checkedBy',
+  );
+  @override
+  late final GeneratedColumn<String> checkedBy = GeneratedColumn<String>(
+    'checked_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    kind,
+    personName,
+    workerId,
+    result,
+    item,
+    reading,
+    note,
+    checkedBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'gate_checks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<GateCheck> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('person_name')) {
+      context.handle(
+        _personNameMeta,
+        personName.isAcceptableOrUnknown(data['person_name']!, _personNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_personNameMeta);
+    }
+    if (data.containsKey('worker_id')) {
+      context.handle(
+        _workerIdMeta,
+        workerId.isAcceptableOrUnknown(data['worker_id']!, _workerIdMeta),
+      );
+    }
+    if (data.containsKey('result')) {
+      context.handle(
+        _resultMeta,
+        result.isAcceptableOrUnknown(data['result']!, _resultMeta),
+      );
+    }
+    if (data.containsKey('item')) {
+      context.handle(
+        _itemMeta,
+        item.isAcceptableOrUnknown(data['item']!, _itemMeta),
+      );
+    }
+    if (data.containsKey('reading')) {
+      context.handle(
+        _readingMeta,
+        reading.isAcceptableOrUnknown(data['reading']!, _readingMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('checked_by')) {
+      context.handle(
+        _checkedByMeta,
+        checkedBy.isAcceptableOrUnknown(data['checked_by']!, _checkedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_checkedByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  GateCheck map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GateCheck(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      personName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}person_name'],
+      )!,
+      workerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}worker_id'],
+      ),
+      result: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}result'],
+      )!,
+      item: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item'],
+      ),
+      reading: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}reading'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      checkedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}checked_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $GateChecksTable createAlias(String alias) {
+    return $GateChecksTable(attachedDatabase, alias);
+  }
+}
+
+class GateCheck extends DataClass implements Insertable<GateCheck> {
+  final String id;
+  final String projectId;
+
+  /// punch_in | punch_out | frisk | breath
+  final String kind;
+  final String personName;
+  final String? workerId;
+
+  /// ok | flagged. A frisk with a prohibited item, or a breath reading
+  /// above zero, is flagged.
+  final String result;
+
+  /// What was found at a frisk (paan parag, gutka, matches).
+  final String? item;
+
+  /// Breathalyser reading in mg/100 ml (blood alcohol), when taken.
+  final double? reading;
+  final String? note;
+  final String checkedBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const GateCheck({
+    required this.id,
+    required this.projectId,
+    required this.kind,
+    required this.personName,
+    this.workerId,
+    required this.result,
+    this.item,
+    this.reading,
+    this.note,
+    required this.checkedBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['kind'] = Variable<String>(kind);
+    map['person_name'] = Variable<String>(personName);
+    if (!nullToAbsent || workerId != null) {
+      map['worker_id'] = Variable<String>(workerId);
+    }
+    map['result'] = Variable<String>(result);
+    if (!nullToAbsent || item != null) {
+      map['item'] = Variable<String>(item);
+    }
+    if (!nullToAbsent || reading != null) {
+      map['reading'] = Variable<double>(reading);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['checked_by'] = Variable<String>(checkedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  GateChecksCompanion toCompanion(bool nullToAbsent) {
+    return GateChecksCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      kind: Value(kind),
+      personName: Value(personName),
+      workerId: workerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(workerId),
+      result: Value(result),
+      item: item == null && nullToAbsent ? const Value.absent() : Value(item),
+      reading: reading == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reading),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      checkedBy: Value(checkedBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory GateCheck.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GateCheck(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      personName: serializer.fromJson<String>(json['personName']),
+      workerId: serializer.fromJson<String?>(json['workerId']),
+      result: serializer.fromJson<String>(json['result']),
+      item: serializer.fromJson<String?>(json['item']),
+      reading: serializer.fromJson<double?>(json['reading']),
+      note: serializer.fromJson<String?>(json['note']),
+      checkedBy: serializer.fromJson<String>(json['checkedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'kind': serializer.toJson<String>(kind),
+      'personName': serializer.toJson<String>(personName),
+      'workerId': serializer.toJson<String?>(workerId),
+      'result': serializer.toJson<String>(result),
+      'item': serializer.toJson<String?>(item),
+      'reading': serializer.toJson<double?>(reading),
+      'note': serializer.toJson<String?>(note),
+      'checkedBy': serializer.toJson<String>(checkedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  GateCheck copyWith({
+    String? id,
+    String? projectId,
+    String? kind,
+    String? personName,
+    Value<String?> workerId = const Value.absent(),
+    String? result,
+    Value<String?> item = const Value.absent(),
+    Value<double?> reading = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    String? checkedBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => GateCheck(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    kind: kind ?? this.kind,
+    personName: personName ?? this.personName,
+    workerId: workerId.present ? workerId.value : this.workerId,
+    result: result ?? this.result,
+    item: item.present ? item.value : this.item,
+    reading: reading.present ? reading.value : this.reading,
+    note: note.present ? note.value : this.note,
+    checkedBy: checkedBy ?? this.checkedBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  GateCheck copyWithCompanion(GateChecksCompanion data) {
+    return GateCheck(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      personName: data.personName.present
+          ? data.personName.value
+          : this.personName,
+      workerId: data.workerId.present ? data.workerId.value : this.workerId,
+      result: data.result.present ? data.result.value : this.result,
+      item: data.item.present ? data.item.value : this.item,
+      reading: data.reading.present ? data.reading.value : this.reading,
+      note: data.note.present ? data.note.value : this.note,
+      checkedBy: data.checkedBy.present ? data.checkedBy.value : this.checkedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GateCheck(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('kind: $kind, ')
+          ..write('personName: $personName, ')
+          ..write('workerId: $workerId, ')
+          ..write('result: $result, ')
+          ..write('item: $item, ')
+          ..write('reading: $reading, ')
+          ..write('note: $note, ')
+          ..write('checkedBy: $checkedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    kind,
+    personName,
+    workerId,
+    result,
+    item,
+    reading,
+    note,
+    checkedBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GateCheck &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.kind == this.kind &&
+          other.personName == this.personName &&
+          other.workerId == this.workerId &&
+          other.result == this.result &&
+          other.item == this.item &&
+          other.reading == this.reading &&
+          other.note == this.note &&
+          other.checkedBy == this.checkedBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class GateChecksCompanion extends UpdateCompanion<GateCheck> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> kind;
+  final Value<String> personName;
+  final Value<String?> workerId;
+  final Value<String> result;
+  final Value<String?> item;
+  final Value<double?> reading;
+  final Value<String?> note;
+  final Value<String> checkedBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const GateChecksCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.personName = const Value.absent(),
+    this.workerId = const Value.absent(),
+    this.result = const Value.absent(),
+    this.item = const Value.absent(),
+    this.reading = const Value.absent(),
+    this.note = const Value.absent(),
+    this.checkedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  GateChecksCompanion.insert({
+    required String id,
+    required String projectId,
+    required String kind,
+    required String personName,
+    this.workerId = const Value.absent(),
+    this.result = const Value.absent(),
+    this.item = const Value.absent(),
+    this.reading = const Value.absent(),
+    this.note = const Value.absent(),
+    required String checkedBy,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       kind = Value(kind),
+       personName = Value(personName),
+       checkedBy = Value(checkedBy);
+  static Insertable<GateCheck> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? kind,
+    Expression<String>? personName,
+    Expression<String>? workerId,
+    Expression<String>? result,
+    Expression<String>? item,
+    Expression<double>? reading,
+    Expression<String>? note,
+    Expression<String>? checkedBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (kind != null) 'kind': kind,
+      if (personName != null) 'person_name': personName,
+      if (workerId != null) 'worker_id': workerId,
+      if (result != null) 'result': result,
+      if (item != null) 'item': item,
+      if (reading != null) 'reading': reading,
+      if (note != null) 'note': note,
+      if (checkedBy != null) 'checked_by': checkedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  GateChecksCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? kind,
+    Value<String>? personName,
+    Value<String?>? workerId,
+    Value<String>? result,
+    Value<String?>? item,
+    Value<double?>? reading,
+    Value<String?>? note,
+    Value<String>? checkedBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return GateChecksCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      kind: kind ?? this.kind,
+      personName: personName ?? this.personName,
+      workerId: workerId ?? this.workerId,
+      result: result ?? this.result,
+      item: item ?? this.item,
+      reading: reading ?? this.reading,
+      note: note ?? this.note,
+      checkedBy: checkedBy ?? this.checkedBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (personName.present) {
+      map['person_name'] = Variable<String>(personName.value);
+    }
+    if (workerId.present) {
+      map['worker_id'] = Variable<String>(workerId.value);
+    }
+    if (result.present) {
+      map['result'] = Variable<String>(result.value);
+    }
+    if (item.present) {
+      map['item'] = Variable<String>(item.value);
+    }
+    if (reading.present) {
+      map['reading'] = Variable<double>(reading.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (checkedBy.present) {
+      map['checked_by'] = Variable<String>(checkedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GateChecksCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('kind: $kind, ')
+          ..write('personName: $personName, ')
+          ..write('workerId: $workerId, ')
+          ..write('result: $result, ')
+          ..write('item: $item, ')
+          ..write('reading: $reading, ')
+          ..write('note: $note, ')
+          ..write('checkedBy: $checkedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -59352,6 +62051,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SubmittalsTable submittals = $SubmittalsTable(this);
   late final $SiteApprovalsTable siteApprovals = $SiteApprovalsTable(this);
   late final $LiaisonLogsTable liaisonLogs = $LiaisonLogsTable(this);
+  late final $QualityTestsTable qualityTests = $QualityTestsTable(this);
+  late final $SafetyBreachesTable safetyBreaches = $SafetyBreachesTable(this);
+  late final $GateChecksTable gateChecks = $GateChecksTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -59446,6 +62148,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     submittals,
     siteApprovals,
     liaisonLogs,
+    qualityTests,
+    safetyBreaches,
+    gateChecks,
     syncOutbox,
   ];
 }
@@ -88032,6 +90737,1233 @@ typedef $$LiaisonLogsTableProcessedTableManager =
       LiaisonLog,
       PrefetchHooks Function()
     >;
+typedef $$QualityTestsTableCreateCompanionBuilder =
+    QualityTestsCompanion Function({
+      required String id,
+      required String projectId,
+      required String kind,
+      Value<String?> batchNo,
+      Value<String?> element,
+      required String parameter,
+      Value<String?> unit,
+      Value<String> rule,
+      required double requiredValue,
+      Value<double?> actualValue,
+      Value<int?> ageDays,
+      required String sampledOn,
+      required String dueOn,
+      Value<String?> testedOn,
+      Value<String> result,
+      Value<String?> officer,
+      Value<String?> note,
+      required String raisedBy,
+      Value<String?> testedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$QualityTestsTableUpdateCompanionBuilder =
+    QualityTestsCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> kind,
+      Value<String?> batchNo,
+      Value<String?> element,
+      Value<String> parameter,
+      Value<String?> unit,
+      Value<String> rule,
+      Value<double> requiredValue,
+      Value<double?> actualValue,
+      Value<int?> ageDays,
+      Value<String> sampledOn,
+      Value<String> dueOn,
+      Value<String?> testedOn,
+      Value<String> result,
+      Value<String?> officer,
+      Value<String?> note,
+      Value<String> raisedBy,
+      Value<String?> testedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$QualityTestsTableFilterComposer
+    extends Composer<_$AppDatabase, $QualityTestsTable> {
+  $$QualityTestsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get batchNo => $composableBuilder(
+    column: $table.batchNo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get element => $composableBuilder(
+    column: $table.element,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get parameter => $composableBuilder(
+    column: $table.parameter,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rule => $composableBuilder(
+    column: $table.rule,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get requiredValue => $composableBuilder(
+    column: $table.requiredValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get actualValue => $composableBuilder(
+    column: $table.actualValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get ageDays => $composableBuilder(
+    column: $table.ageDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sampledOn => $composableBuilder(
+    column: $table.sampledOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dueOn => $composableBuilder(
+    column: $table.dueOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get testedOn => $composableBuilder(
+    column: $table.testedOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get result => $composableBuilder(
+    column: $table.result,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get officer => $composableBuilder(
+    column: $table.officer,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get raisedBy => $composableBuilder(
+    column: $table.raisedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get testedBy => $composableBuilder(
+    column: $table.testedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$QualityTestsTableOrderingComposer
+    extends Composer<_$AppDatabase, $QualityTestsTable> {
+  $$QualityTestsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get batchNo => $composableBuilder(
+    column: $table.batchNo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get element => $composableBuilder(
+    column: $table.element,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get parameter => $composableBuilder(
+    column: $table.parameter,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rule => $composableBuilder(
+    column: $table.rule,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get requiredValue => $composableBuilder(
+    column: $table.requiredValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get actualValue => $composableBuilder(
+    column: $table.actualValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get ageDays => $composableBuilder(
+    column: $table.ageDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sampledOn => $composableBuilder(
+    column: $table.sampledOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dueOn => $composableBuilder(
+    column: $table.dueOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get testedOn => $composableBuilder(
+    column: $table.testedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get result => $composableBuilder(
+    column: $table.result,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get officer => $composableBuilder(
+    column: $table.officer,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get raisedBy => $composableBuilder(
+    column: $table.raisedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get testedBy => $composableBuilder(
+    column: $table.testedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$QualityTestsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QualityTestsTable> {
+  $$QualityTestsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get batchNo =>
+      $composableBuilder(column: $table.batchNo, builder: (column) => column);
+
+  GeneratedColumn<String> get element =>
+      $composableBuilder(column: $table.element, builder: (column) => column);
+
+  GeneratedColumn<String> get parameter =>
+      $composableBuilder(column: $table.parameter, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<String> get rule =>
+      $composableBuilder(column: $table.rule, builder: (column) => column);
+
+  GeneratedColumn<double> get requiredValue => $composableBuilder(
+    column: $table.requiredValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get actualValue => $composableBuilder(
+    column: $table.actualValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get ageDays =>
+      $composableBuilder(column: $table.ageDays, builder: (column) => column);
+
+  GeneratedColumn<String> get sampledOn =>
+      $composableBuilder(column: $table.sampledOn, builder: (column) => column);
+
+  GeneratedColumn<String> get dueOn =>
+      $composableBuilder(column: $table.dueOn, builder: (column) => column);
+
+  GeneratedColumn<String> get testedOn =>
+      $composableBuilder(column: $table.testedOn, builder: (column) => column);
+
+  GeneratedColumn<String> get result =>
+      $composableBuilder(column: $table.result, builder: (column) => column);
+
+  GeneratedColumn<String> get officer =>
+      $composableBuilder(column: $table.officer, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get raisedBy =>
+      $composableBuilder(column: $table.raisedBy, builder: (column) => column);
+
+  GeneratedColumn<String> get testedBy =>
+      $composableBuilder(column: $table.testedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$QualityTestsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QualityTestsTable,
+          QualityTest,
+          $$QualityTestsTableFilterComposer,
+          $$QualityTestsTableOrderingComposer,
+          $$QualityTestsTableAnnotationComposer,
+          $$QualityTestsTableCreateCompanionBuilder,
+          $$QualityTestsTableUpdateCompanionBuilder,
+          (
+            QualityTest,
+            BaseReferences<_$AppDatabase, $QualityTestsTable, QualityTest>,
+          ),
+          QualityTest,
+          PrefetchHooks Function()
+        > {
+  $$QualityTestsTableTableManager(_$AppDatabase db, $QualityTestsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QualityTestsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QualityTestsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QualityTestsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String?> batchNo = const Value.absent(),
+                Value<String?> element = const Value.absent(),
+                Value<String> parameter = const Value.absent(),
+                Value<String?> unit = const Value.absent(),
+                Value<String> rule = const Value.absent(),
+                Value<double> requiredValue = const Value.absent(),
+                Value<double?> actualValue = const Value.absent(),
+                Value<int?> ageDays = const Value.absent(),
+                Value<String> sampledOn = const Value.absent(),
+                Value<String> dueOn = const Value.absent(),
+                Value<String?> testedOn = const Value.absent(),
+                Value<String> result = const Value.absent(),
+                Value<String?> officer = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> raisedBy = const Value.absent(),
+                Value<String?> testedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => QualityTestsCompanion(
+                id: id,
+                projectId: projectId,
+                kind: kind,
+                batchNo: batchNo,
+                element: element,
+                parameter: parameter,
+                unit: unit,
+                rule: rule,
+                requiredValue: requiredValue,
+                actualValue: actualValue,
+                ageDays: ageDays,
+                sampledOn: sampledOn,
+                dueOn: dueOn,
+                testedOn: testedOn,
+                result: result,
+                officer: officer,
+                note: note,
+                raisedBy: raisedBy,
+                testedBy: testedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String kind,
+                Value<String?> batchNo = const Value.absent(),
+                Value<String?> element = const Value.absent(),
+                required String parameter,
+                Value<String?> unit = const Value.absent(),
+                Value<String> rule = const Value.absent(),
+                required double requiredValue,
+                Value<double?> actualValue = const Value.absent(),
+                Value<int?> ageDays = const Value.absent(),
+                required String sampledOn,
+                required String dueOn,
+                Value<String?> testedOn = const Value.absent(),
+                Value<String> result = const Value.absent(),
+                Value<String?> officer = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                required String raisedBy,
+                Value<String?> testedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => QualityTestsCompanion.insert(
+                id: id,
+                projectId: projectId,
+                kind: kind,
+                batchNo: batchNo,
+                element: element,
+                parameter: parameter,
+                unit: unit,
+                rule: rule,
+                requiredValue: requiredValue,
+                actualValue: actualValue,
+                ageDays: ageDays,
+                sampledOn: sampledOn,
+                dueOn: dueOn,
+                testedOn: testedOn,
+                result: result,
+                officer: officer,
+                note: note,
+                raisedBy: raisedBy,
+                testedBy: testedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$QualityTestsTable, QualityTest>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $QualityTestsTable,
+                    QualityTest
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QualityTestsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QualityTestsTable,
+      QualityTest,
+      $$QualityTestsTableFilterComposer,
+      $$QualityTestsTableOrderingComposer,
+      $$QualityTestsTableAnnotationComposer,
+      $$QualityTestsTableCreateCompanionBuilder,
+      $$QualityTestsTableUpdateCompanionBuilder,
+      (
+        QualityTest,
+        BaseReferences<_$AppDatabase, $QualityTestsTable, QualityTest>,
+      ),
+      QualityTest,
+      PrefetchHooks Function()
+    >;
+typedef $$SafetyBreachesTableCreateCompanionBuilder =
+    SafetyBreachesCompanion Function({
+      required String id,
+      required String projectId,
+      required String department,
+      Value<String> severity,
+      required String description,
+      Value<String?> who,
+      required String onDay,
+      Value<String?> actionTaken,
+      Value<DateTime?> closedAt,
+      Value<String?> closedBy,
+      required String raisedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SafetyBreachesTableUpdateCompanionBuilder =
+    SafetyBreachesCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> department,
+      Value<String> severity,
+      Value<String> description,
+      Value<String?> who,
+      Value<String> onDay,
+      Value<String?> actionTaken,
+      Value<DateTime?> closedAt,
+      Value<String?> closedBy,
+      Value<String> raisedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$SafetyBreachesTableFilterComposer
+    extends Composer<_$AppDatabase, $SafetyBreachesTable> {
+  $$SafetyBreachesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get department => $composableBuilder(
+    column: $table.department,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get severity => $composableBuilder(
+    column: $table.severity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get who => $composableBuilder(
+    column: $table.who,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get onDay => $composableBuilder(
+    column: $table.onDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get actionTaken => $composableBuilder(
+    column: $table.actionTaken,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get closedBy => $composableBuilder(
+    column: $table.closedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get raisedBy => $composableBuilder(
+    column: $table.raisedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SafetyBreachesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SafetyBreachesTable> {
+  $$SafetyBreachesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get department => $composableBuilder(
+    column: $table.department,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get severity => $composableBuilder(
+    column: $table.severity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get who => $composableBuilder(
+    column: $table.who,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get onDay => $composableBuilder(
+    column: $table.onDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get actionTaken => $composableBuilder(
+    column: $table.actionTaken,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get closedBy => $composableBuilder(
+    column: $table.closedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get raisedBy => $composableBuilder(
+    column: $table.raisedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SafetyBreachesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SafetyBreachesTable> {
+  $$SafetyBreachesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get department => $composableBuilder(
+    column: $table.department,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get severity =>
+      $composableBuilder(column: $table.severity, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get who =>
+      $composableBuilder(column: $table.who, builder: (column) => column);
+
+  GeneratedColumn<String> get onDay =>
+      $composableBuilder(column: $table.onDay, builder: (column) => column);
+
+  GeneratedColumn<String> get actionTaken => $composableBuilder(
+    column: $table.actionTaken,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get closedAt =>
+      $composableBuilder(column: $table.closedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get closedBy =>
+      $composableBuilder(column: $table.closedBy, builder: (column) => column);
+
+  GeneratedColumn<String> get raisedBy =>
+      $composableBuilder(column: $table.raisedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SafetyBreachesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SafetyBreachesTable,
+          SafetyBreach,
+          $$SafetyBreachesTableFilterComposer,
+          $$SafetyBreachesTableOrderingComposer,
+          $$SafetyBreachesTableAnnotationComposer,
+          $$SafetyBreachesTableCreateCompanionBuilder,
+          $$SafetyBreachesTableUpdateCompanionBuilder,
+          (
+            SafetyBreach,
+            BaseReferences<_$AppDatabase, $SafetyBreachesTable, SafetyBreach>,
+          ),
+          SafetyBreach,
+          PrefetchHooks Function()
+        > {
+  $$SafetyBreachesTableTableManager(
+    _$AppDatabase db,
+    $SafetyBreachesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SafetyBreachesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SafetyBreachesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SafetyBreachesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> department = const Value.absent(),
+                Value<String> severity = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String?> who = const Value.absent(),
+                Value<String> onDay = const Value.absent(),
+                Value<String?> actionTaken = const Value.absent(),
+                Value<DateTime?> closedAt = const Value.absent(),
+                Value<String?> closedBy = const Value.absent(),
+                Value<String> raisedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SafetyBreachesCompanion(
+                id: id,
+                projectId: projectId,
+                department: department,
+                severity: severity,
+                description: description,
+                who: who,
+                onDay: onDay,
+                actionTaken: actionTaken,
+                closedAt: closedAt,
+                closedBy: closedBy,
+                raisedBy: raisedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String department,
+                Value<String> severity = const Value.absent(),
+                required String description,
+                Value<String?> who = const Value.absent(),
+                required String onDay,
+                Value<String?> actionTaken = const Value.absent(),
+                Value<DateTime?> closedAt = const Value.absent(),
+                Value<String?> closedBy = const Value.absent(),
+                required String raisedBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SafetyBreachesCompanion.insert(
+                id: id,
+                projectId: projectId,
+                department: department,
+                severity: severity,
+                description: description,
+                who: who,
+                onDay: onDay,
+                actionTaken: actionTaken,
+                closedAt: closedAt,
+                closedBy: closedBy,
+                raisedBy: raisedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SafetyBreachesTable, SafetyBreach>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SafetyBreachesTable,
+                    SafetyBreach
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SafetyBreachesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SafetyBreachesTable,
+      SafetyBreach,
+      $$SafetyBreachesTableFilterComposer,
+      $$SafetyBreachesTableOrderingComposer,
+      $$SafetyBreachesTableAnnotationComposer,
+      $$SafetyBreachesTableCreateCompanionBuilder,
+      $$SafetyBreachesTableUpdateCompanionBuilder,
+      (
+        SafetyBreach,
+        BaseReferences<_$AppDatabase, $SafetyBreachesTable, SafetyBreach>,
+      ),
+      SafetyBreach,
+      PrefetchHooks Function()
+    >;
+typedef $$GateChecksTableCreateCompanionBuilder =
+    GateChecksCompanion Function({
+      required String id,
+      required String projectId,
+      required String kind,
+      required String personName,
+      Value<String?> workerId,
+      Value<String> result,
+      Value<String?> item,
+      Value<double?> reading,
+      Value<String?> note,
+      required String checkedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$GateChecksTableUpdateCompanionBuilder =
+    GateChecksCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> kind,
+      Value<String> personName,
+      Value<String?> workerId,
+      Value<String> result,
+      Value<String?> item,
+      Value<double?> reading,
+      Value<String?> note,
+      Value<String> checkedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$GateChecksTableFilterComposer
+    extends Composer<_$AppDatabase, $GateChecksTable> {
+  $$GateChecksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get personName => $composableBuilder(
+    column: $table.personName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get workerId => $composableBuilder(
+    column: $table.workerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get result => $composableBuilder(
+    column: $table.result,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get item => $composableBuilder(
+    column: $table.item,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get reading => $composableBuilder(
+    column: $table.reading,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get checkedBy => $composableBuilder(
+    column: $table.checkedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$GateChecksTableOrderingComposer
+    extends Composer<_$AppDatabase, $GateChecksTable> {
+  $$GateChecksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get personName => $composableBuilder(
+    column: $table.personName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get workerId => $composableBuilder(
+    column: $table.workerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get result => $composableBuilder(
+    column: $table.result,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get item => $composableBuilder(
+    column: $table.item,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get reading => $composableBuilder(
+    column: $table.reading,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get checkedBy => $composableBuilder(
+    column: $table.checkedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$GateChecksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GateChecksTable> {
+  $$GateChecksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get personName => $composableBuilder(
+    column: $table.personName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get workerId =>
+      $composableBuilder(column: $table.workerId, builder: (column) => column);
+
+  GeneratedColumn<String> get result =>
+      $composableBuilder(column: $table.result, builder: (column) => column);
+
+  GeneratedColumn<String> get item =>
+      $composableBuilder(column: $table.item, builder: (column) => column);
+
+  GeneratedColumn<double> get reading =>
+      $composableBuilder(column: $table.reading, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get checkedBy =>
+      $composableBuilder(column: $table.checkedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$GateChecksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $GateChecksTable,
+          GateCheck,
+          $$GateChecksTableFilterComposer,
+          $$GateChecksTableOrderingComposer,
+          $$GateChecksTableAnnotationComposer,
+          $$GateChecksTableCreateCompanionBuilder,
+          $$GateChecksTableUpdateCompanionBuilder,
+          (
+            GateCheck,
+            BaseReferences<_$AppDatabase, $GateChecksTable, GateCheck>,
+          ),
+          GateCheck,
+          PrefetchHooks Function()
+        > {
+  $$GateChecksTableTableManager(_$AppDatabase db, $GateChecksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GateChecksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GateChecksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GateChecksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> personName = const Value.absent(),
+                Value<String?> workerId = const Value.absent(),
+                Value<String> result = const Value.absent(),
+                Value<String?> item = const Value.absent(),
+                Value<double?> reading = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> checkedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => GateChecksCompanion(
+                id: id,
+                projectId: projectId,
+                kind: kind,
+                personName: personName,
+                workerId: workerId,
+                result: result,
+                item: item,
+                reading: reading,
+                note: note,
+                checkedBy: checkedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String kind,
+                required String personName,
+                Value<String?> workerId = const Value.absent(),
+                Value<String> result = const Value.absent(),
+                Value<String?> item = const Value.absent(),
+                Value<double?> reading = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                required String checkedBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => GateChecksCompanion.insert(
+                id: id,
+                projectId: projectId,
+                kind: kind,
+                personName: personName,
+                workerId: workerId,
+                result: result,
+                item: item,
+                reading: reading,
+                note: note,
+                checkedBy: checkedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$GateChecksTable, GateCheck>(table),
+                  BaseReferences<_$AppDatabase, $GateChecksTable, GateCheck>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$GateChecksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $GateChecksTable,
+      GateCheck,
+      $$GateChecksTableFilterComposer,
+      $$GateChecksTableOrderingComposer,
+      $$GateChecksTableAnnotationComposer,
+      $$GateChecksTableCreateCompanionBuilder,
+      $$GateChecksTableUpdateCompanionBuilder,
+      (GateCheck, BaseReferences<_$AppDatabase, $GateChecksTable, GateCheck>),
+      GateCheck,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -88478,6 +92410,12 @@ class $AppDatabaseManager {
       $$SiteApprovalsTableTableManager(_db, _db.siteApprovals);
   $$LiaisonLogsTableTableManager get liaisonLogs =>
       $$LiaisonLogsTableTableManager(_db, _db.liaisonLogs);
+  $$QualityTestsTableTableManager get qualityTests =>
+      $$QualityTestsTableTableManager(_db, _db.qualityTests);
+  $$SafetyBreachesTableTableManager get safetyBreaches =>
+      $$SafetyBreachesTableTableManager(_db, _db.safetyBreaches);
+  $$GateChecksTableTableManager get gateChecks =>
+      $$GateChecksTableTableManager(_db, _db.gateChecks);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }

@@ -2007,3 +2007,108 @@ class LiaisonLogs extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+/// A material or work test the quality officer records: concrete cubes,
+/// plaster, paint, bitumen. Holds what the test needs to show ([required])
+/// and what it did show ([actual]); the result follows from the two.
+/// A cube set is logged as one row per age (7, 14, 28 days) so each has
+/// its own due date and reminder.
+class QualityTests extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// cube | plaster | paint | bitumen | other
+  TextColumn get kind => text().withLength(min: 1, max: 20)();
+
+  /// Concrete batch, bill or lot number.
+  TextColumn get batchNo => text().withLength(max: 60).nullable()();
+
+  /// Where it was taken from: "Column C4, 2nd floor slab".
+  TextColumn get element => text().withLength(max: 200).nullable()();
+  TextColumn get parameter => text().withLength(min: 1, max: 100)();
+  TextColumn get unit => text().withLength(max: 20).nullable()();
+
+  /// min: the actual must reach the required; max: it must not exceed it.
+  TextColumn get rule => text().withLength(min: 1, max: 3).withDefault(const Constant('min'))();
+  RealColumn get requiredValue => real()();
+  RealColumn get actualValue => real().nullable()();
+
+  /// Age of a cube in days (7, 14, 28), when it has one.
+  IntColumn get ageDays => integer().nullable()();
+
+  /// yyyy-mm-dd the sample was cast or taken, and the day the test is due.
+  TextColumn get sampledOn => text().withLength(min: 1, max: 10)();
+  TextColumn get dueOn => text().withLength(min: 1, max: 10)();
+  TextColumn get testedOn => text().withLength(max: 10).nullable()();
+
+  /// pending | pass | fail
+  TextColumn get result => text().withLength(min: 1, max: 10).withDefault(const Constant('pending'))();
+
+  /// The quality officer who took the sample and the one who recorded it.
+  TextColumn get officer => text().withLength(max: 120).nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  TextColumn get testedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A breach of site safety rules, logged against the department that
+/// committed it.
+@DataClassName('SafetyBreach')
+class SafetyBreaches extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// civil | electrical | plumbing | finishing | mep | security | other
+  TextColumn get department => text().withLength(min: 1, max: 20)();
+
+  /// minor | major | critical
+  TextColumn get severity => text().withLength(min: 1, max: 10).withDefault(const Constant('minor'))();
+  TextColumn get description => text().withLength(min: 1, max: 500)();
+
+  /// Who or which gang it was, if known.
+  TextColumn get who => text().withLength(max: 120).nullable()();
+  TextColumn get onDay => text().withLength(min: 1, max: 10)();
+  TextColumn get actionTaken => text().withLength(max: 500).nullable()();
+  DateTimeColumn get closedAt => dateTime().nullable()();
+  TextColumn get closedBy => text().withLength(max: 64).nullable()();
+  TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A gate record kept by site security: someone punching in or out, a
+/// frisk for prohibited items, or a breathalyser check.
+class GateChecks extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// punch_in | punch_out | frisk | breath
+  TextColumn get kind => text().withLength(min: 1, max: 10)();
+  TextColumn get personName => text().withLength(min: 1, max: 120)();
+  TextColumn get workerId => text().withLength(max: 36).nullable()();
+
+  /// ok | flagged. A frisk with a prohibited item, or a breath reading
+  /// above zero, is flagged.
+  TextColumn get result => text().withLength(min: 1, max: 10).withDefault(const Constant('ok'))();
+
+  /// What was found at a frisk (paan parag, gutka, matches).
+  TextColumn get item => text().withLength(max: 120).nullable()();
+
+  /// Breathalyser reading in mg/100 ml (blood alcohol), when taken.
+  RealColumn get reading => real().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get checkedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

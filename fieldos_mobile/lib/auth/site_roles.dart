@@ -13,6 +13,8 @@ class SiteRole {
   static const siteEngineer = 'site_engineer';
   static const accounts = 'accounts';
   static const storekeeper = 'storekeeper';
+  static const security = 'security';
+  static const qualityOfficer = 'quality_officer';
   static const viewer = 'viewer';
 
   static const all = siteRoleValues;
@@ -23,6 +25,8 @@ class SiteRole {
         siteEngineer => tr('Site engineer'),
         accounts => tr('Accounts'),
         storekeeper => tr('Storekeeper'),
+        security => tr('Security'),
+        qualityOfficer => tr('Quality officer'),
         viewer => tr('Viewer'),
         _ => role,
       };
@@ -34,6 +38,8 @@ class SiteRole {
         siteEngineer => tr('Records the day: reports, labour, money, material.'),
         accounts => tr('Sees the money and sends packs to accounts.'),
         storekeeper => tr('Receives material and keeps the stock.'),
+        security => tr('Keeps the gate: punch in and out, frisking and breath checks.'),
+        qualityOfficer => tr('Takes samples and records cube, plaster and paint tests.'),
         viewer => tr('Can see the site, changes nothing.'),
         _ => '',
       };

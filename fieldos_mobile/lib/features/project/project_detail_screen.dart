@@ -9,6 +9,7 @@ import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/features/execution/execution_screens.dart';
 import 'package:fieldos_mobile/features/execution/pre_construction_screen.dart';
+import 'package:fieldos_mobile/features/execution/site_ops_screen.dart';
 import 'package:fieldos_mobile/features/schedule/gantt_screen.dart';
 import 'package:fieldos_mobile/features/project/site_notes_screen.dart';
 import 'package:fieldos_mobile/features/portals/portal_share.dart';
@@ -194,6 +195,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (_) => PreConstructionScreen(project: widget.project)));
               }
+              if (v == 'siteops') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => SiteOpsScreen(project: widget.project)));
+              }
               if (v == 'commercial') {
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (_) => CommercialScreen(project: widget.project)));
@@ -305,6 +309,13 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 child: ListTile(
                   leading: const Icon(Icons.account_balance_outlined),
                   title: Text(tr('Approvals and drawings (pre-construction)')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'siteops',
+                child: ListTile(
+                  leading: const Icon(Icons.fact_check_outlined),
+                  title: Text(tr('Quality tests, safety and security gate')),
                 ),
               ),
               PopupMenuItem(

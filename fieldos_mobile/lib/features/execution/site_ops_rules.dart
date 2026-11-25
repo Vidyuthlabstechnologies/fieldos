@@ -1,0 +1,173 @@
+/// Rules for the quality, safety and security consoles, kept free of
+/// Flutter so they can be tested on their own:
+///
+/// - a test passes when the actual value reaches the required one (or stays
+///   under it, for a limit); the result is worked out, never typed;
+/// - a cube set is three tests: 7, 14 and 28 days after casting, each with
+///   its own due date and its own required strength;
+/// - a frisk that finds anything, or a breath reading above zero, is
+///   flagged; who is inside the gate follows each person's last punch.
+library;
+
+import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/execution/execution_rules.dart' show parseDay, ymd;
+import 'package:fieldos_mobile/l10n/language.dart';
+
+// --- Quality ---------------------------------------------------------------------
+
+const qualityKinds = ['cube', 'plaster', 'paint', 'bitumen', 'other'];
+const concreteGrades = ['M15', 'M20', 'M25', 'M30', 'M35', 'M40'];
+
+/// Days after casting a cube is crushed, and the share of the 28-day
+/// strength it must already show (IS 456 working practice).
+const cubeAges = {7: 0.65, 14: 0.90, 28: 1.0};
+
+/// Days ahead that a due test starts to show as "due soon".
+const qualityDueSoonDays = 3;
+
+String qualityKindLabel(String k) => switch (k) {
+      'cube' => tr('Concrete cube'),
+      'plaster' => tr('Plastering'),
+      'paint' => tr('Painting'),
+      'bitumen' => tr('Bitumen work'),
+      _ => tr('Other test'),
+    };
+
+/// The parameter, unit and rule a kind of test usually has.
+({String parameter, String unit, String rule}) qualityPreset(String kind) => switch (kind) {
+      'cube' => (parameter: tr('Compressive strength'), unit: 'N/mm²', rule: 'min'),
+      'plaster' => (parameter: tr('Thickness'), unit: 'mm', rule: 'min'),
+      'paint' => (parameter: tr('Dry film thickness'), unit: 'micron', rule: 'min'),
+      'bitumen' => (parameter: tr('Application rate'), unit: 'kg/m²', rule: 'min'),
+      _ => (parameter: '', unit: '', rule: 'min'),
+    };
+
+/// The grade's strength in N/mm²: M25 is 25.
+double? gradeStrength(String grade) {
+  final m = RegExp(r'^M\s*(\d{2})$', caseSensitive: false).firstMatch(grade.trim());
+  return m == null ? null : double.parse(m.group(1)!);
+}
+
+/// 'pass', 'fail' or 'pending' (no actual value yet).
+String testResult({required String rule, required double required, double? actual}) {
+  if (actual == null) return 'pending';
+  const eps = 1e-9;
+  return rule == 'max' ? (actual <= required + eps ? 'pass' : 'fail') : (actual + eps >= required ? 'pass' : 'fail');
+}
+
+class CubeDue {
+  const CubeDue(this.ageDays, this.dueOn, this.requiredValue);
+  final int ageDays;
+  final String dueOn;
+  final double requiredValue;
+}
+
+/// The 7, 14 and 28-day tests for a pour cast on [castOn].
+List<CubeDue> cubeSchedule(String castOn, String grade) {
+  final cast = parseDay(castOn);
+  final strength = gradeStrength(grade);
+  if (cast == null || strength == null) throw ArgumentError('cast day and grade');
+  return [
+    for (final e in cubeAges.entries)
+      CubeDue(e.key, ymd(DateTime(cast.year, cast.month, cast.day + e.key)), double.parse((strength * e.value).toStringAsFixed(2))),
+  ];
+}
+
+/// overdue | soon | later | done
+String qualityDueState(QualityTest t, DateTime now) {
+  if (t.result != 'pending') return 'done';
+  final due = parseDay(t.dueOn);
+  if (due == null) return 'later';
+  final today = DateTime(now.year, now.month, now.day);
+  if (due.isBefore(today)) return 'overdue';
+  final soon = DateTime(today.year, today.month, today.day + qualityDueSoonDays);
+  return due.isAfter(soon) ? 'later' : 'soon';
+}
+
+String qualityResultLabel(String r) => switch (r) {
+      'pass' => tr('Passed'),
+      'fail' => tr('Failed'),
+      _ => tr('Waiting for the test'),
+    };
+
+class QualitySummary {
+  const QualitySummary({required this.passed, required this.failed, required this.overdue, required this.soon});
+  final int passed;
+  final int failed;
+  final int overdue;
+  final int soon;
+}
+
+QualitySummary summariseQuality(List<QualityTest> all, DateTime now) => QualitySummary(
+      passed: all.where((t) => t.result == 'pass').length,
+      failed: all.where((t) => t.result == 'fail').length,
+      overdue: all.where((t) => qualityDueState(t, now) == 'overdue').length,
+      soon: all.where((t) => qualityDueState(t, now) == 'soon').length,
+    );
+
+// --- Safety ----------------------------------------------------------------------
+
+const safetyDepartments = ['civil', 'electrical', 'plumbing', 'finishing', 'mep', 'security', 'other'];
+const breachSeverities = ['minor', 'major', 'critical'];
+
+String departmentLabel(String d) => switch (d) {
+      'civil' => tr('Civil'),
+      'electrical' => tr('Electrical'),
+      'plumbing' => tr('Plumbing'),
+      'finishing' => tr('Finishing'),
+      'mep' => tr('MEP'),
+      'security' => tr('Security'),
+      _ => tr('Other department'),
+    };
+
+String severityLabel(String s) => switch (s) {
+      'critical' => tr('Critical'),
+      'major' => tr('Major'),
+      _ => tr('Minor'),
+    };
+
+/// Open breaches per department, most first.
+List<MapEntry<String, int>> breachesByDepartment(List<SafetyBreach> all) {
+  final by = <String, int>{};
+  for (final b in all) {
+    by[b.department] = (by[b.department] ?? 0) + 1;
+  }
+  return by.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+}
+
+// --- Security gate ---------------------------------------------------------------
+
+const gateKinds = ['punch_in', 'punch_out', 'frisk', 'breath'];
+
+/// Things a frisk is looking for: they start fires and stain or damage
+/// finished work.
+const prohibitedItems = ['Paan parag', 'Gutka', 'Matches or lighter', 'Alcohol', 'Other'];
+
+String gateKindLabel(String k) => switch (k) {
+      'punch_in' => tr('Punch in'),
+      'punch_out' => tr('Punch out'),
+      'frisk' => tr('Gate frisk'),
+      'breath' => tr('Breathalyser'),
+      _ => k,
+    };
+
+/// A frisk is flagged when something was found; a breath check when the
+/// reading is above zero.
+String gateResult({required String kind, String? item, double? reading}) {
+  if (kind == 'frisk' && (item ?? '').trim().isNotEmpty) return 'flagged';
+  if (kind == 'breath' && (reading ?? 0) > 0) return 'flagged';
+  return 'ok';
+}
+
+/// People whose last punch today was "in".
+List<String> insideTheGate(List<GateCheck> checks, DateTime now) {
+  final today = DateTime(now.year, now.month, now.day);
+  final last = <String, GateCheck>{};
+  final sorted = [...checks]..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+  for (final c in sorted) {
+    if (c.kind != 'punch_in' && c.kind != 'punch_out') continue;
+    if (c.createdAt.isBefore(today)) continue;
+    last[c.personName.trim().toLowerCase()] = c;
+  }
+  return [for (final c in last.values) if (c.kind == 'punch_in') c.personName];
+}

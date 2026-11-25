@@ -239,6 +239,8 @@ class _SiteTeamScreenState extends ConsumerState<SiteTeamScreen> {
         SiteRole.siteEngineer => Icons.engineering_outlined,
         SiteRole.accounts => Icons.account_balance_wallet_outlined,
         SiteRole.storekeeper => Icons.inventory_2_outlined,
+        SiteRole.security => Icons.security_outlined,
+        SiteRole.qualityOfficer => Icons.science_outlined,
         _ => Icons.visibility_outlined,
       };
 }
