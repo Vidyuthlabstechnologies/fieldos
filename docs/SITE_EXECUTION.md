@@ -212,8 +212,9 @@ stage: planning, running or on hold, handed over. Server:
 - Server (migration 20261125130000): a site's owner, project managers and accounts read
   every expense; everyone else only the entries they recorded. Wage rates can be set only
   by those roles. Money received was already owners and project managers only.
-- Known gap: `workers.daily_wage` is still readable by every site member at the API level
-  (phones pull whole rows). The phone hides wages from other roles; the column privilege
-  follows once builds older than 1.8 are retired.
+- `workers.daily_wage`: from build 26 the phone reads rates through `worker_wage_rates()`
+  (money roles only) and no longer pulls the column. Closing the column to API reads is
+  staged in `supabase/deferred/` until builds below 26 are retired; the exact order is in
+  `docs/HANDOVER.md` ("Wage rates: the two-step cut-over").
 - Value engineering (project menu, money roles only): work value done against spend,
   spend per day, spend-ahead alert, delay days and their cost (`value_engineering.dart`).

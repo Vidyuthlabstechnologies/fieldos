@@ -1,5 +1,7 @@
 # Agent Handoff — FieldOS
 
+> **Superseded.** The current handover is [HANDOVER.md](./HANDOVER.md). The text below describes August 2026 and is kept for history; where it disagrees with HANDOVER.md, HANDOVER.md wins.
+
 Read this first if you're a fresh AI agent picking up this project. It's the
 one place that stays current with what's actually true right now, as
 opposed to `docs/*.md`, some of which has drifted (flagged below where

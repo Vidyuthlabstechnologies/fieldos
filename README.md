@@ -13,7 +13,7 @@ for prose detail and [docs/README.md](docs/README.md) for the full
 documentation index.
 
 > **If you're an AI agent picking this project up**: read
-> [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md) first (absolute rules,
+> [docs/HANDOVER.md](docs/HANDOVER.md) first (current state, runbooks, secrets names, open items; the older [AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md) is August 2026 history) (absolute rules,
 > exact current architecture, known gotchas, the entity-sync recipe), then
 > [docs/COMPLETION_PLAN.md](docs/COMPLETION_PLAN.md) (verified ground
 > truth, what's done/partial/not-started, a suggested execution order).
