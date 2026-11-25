@@ -14,6 +14,40 @@ Reviewers: small-builder owner (Hyderabad), junior site engineer (Warangal, Telu
 
 ---
 
+## Status of the findings (27 Nov 2026)
+
+Everything below is a pull request, **none merged and none deployed**. The combined tree (all branches merged) passes the whole Flutter suite (1,552 tests, 0 failures), all 17 SQL tests, the edge-function tests, the Python tests and the analyzer. Deploy order and gates: `docs/SUPABASE_PRO_CUTOVER.md`.
+
+| Finding | Status | PR |
+|---|---|---|
+| #1 No backups | Safety net built (daily encrypted copy, restore drilled); **plan upgrade is yours** | #251 |
+| #2 Any member edits POs and requests | Fixed on the server | #252 |
+| #3 Approval rules dodged by back-dating | Fixed on the server | #256 |
+| #5 No history for wages, attendance marks, POs | Fixed (server + labels) | #253 |
+| #9 AI consent not enforced | Withdrawal now stops processing | #257 |
+| #11 Attendance trust (time) | Late check-ins wait for a manager | #259 |
+| #13 Cube result shown as Failed at 7/14 days | Fixed (wording); full IS 456 acceptance **not built** | #248 |
+| #26 Supplier sees unapproved POs | Fixed on the server | #258 |
+| #28 A stalled photo blocks all sync | Fixed | #254 |
+| #29 Sync failure invisible | Home banner | #261 |
+| #30 Whole outbox loaded on every pull | Fixed | #260 |
+| #33 Spoken report lost on a stray tap | Asks first (2 new strings, **native review needed**) | #262 |
+| #36 Consent wording ("from behind") | Fixed in Hindi, Telugu, Marathi | #250 |
+| **New:** RLS cost grows with the whole table (7.3 s for one user at 9,800 tasks) | Fixed: 58 ms | #255 |
+
+**Not built, and why**
+
+- #4 and #7 (encryption of the phone database, a secure place for the login session): needs native plugins that cannot be built or tested here, and a migration for existing installs.
+- #7 other money data readable by all members, #6 wage columns: the wage lockdown is a runbook step (`HANDOVER.md`) for after Pro; the rest needs a design decision on who sees supplier invoices and PO totals.
+- #14 hold points that really block work, #15 pour cards and safety registers: real features on both phone and server.
+- #16 storekeeper tools: needs a site-scoped screen; opening the company screen would show buttons the server refuses.
+- #17 accounting depth (Sales, Purchase and Journal vouchers, TDS payable, HSN per line, reverse charge, other states' professional tax): a large piece of work with the accountant.
+- #18-#20 (paywall order, 3-day trial, read-only after expiry) and #22 phone-number sign-in: product decisions with revenue effects, and an SMS provider account.
+- #24, #25 portals for clients and sub-contractors, #27 owner fraud reports: feature work.
+- #31, #32 storage clean-up and PDF/XLSX on background isolates, #34, #35: performance work that needs a device to measure.
+- #37-#39 further translation fixes: need native speakers.
+- #7 money as floating point: an integer-paise migration of 25 columns and every calculation.
+
 ## Verified on production, read-only (26 Nov 2026)
 
 Checked with the Supabase CLI against `fieldos-production` (Mumbai, `ap-south-1`) using read-only transactions only. Nothing was changed.
