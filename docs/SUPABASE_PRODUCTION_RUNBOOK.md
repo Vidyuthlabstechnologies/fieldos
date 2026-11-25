@@ -7,8 +7,9 @@ stack — production is configuration, not new engineering.
 
 ## 1. Create the project (your account)
 
-1. Sign up at https://supabase.com (free tier is sufficient to start; the
-   hand-rolled outbox was chosen partly so we never depend on paid tiers).
+1. Sign up at https://supabase.com. The Free plan is fine for building and
+   closed testing, but it has **no backups**: move the project to Pro before
+   the first paying customer (checklist: `SUPABASE_PRO_CUTOVER.md`).
 2. New project → pick a region close to your sites (Mumbai for Hyderabad
    crews), set a strong DB password, save it.
 
@@ -134,6 +135,62 @@ Play Console itself is your account/action (see AGENT_HANDOFF gaps #7).
 
 Follow the two-phone smoke test in `docs/PLAY_STORE_LAUNCH.md` section 6:
 each phone signs in with its own email, B joins A's company by code.
+
+## Backups and restore
+
+Two layers, because a plan's backups alone are not enough:
+
+1. **Supabase's own daily backups** (Pro plan; point-in-time recovery is an
+   add-on). The Free plan has none: `supabase backups list --remote=<ref>`
+   returning `backups: []` means you are on it.
+2. **`db-backup` workflow** (`.github/workflows/db-backup.yml`, `tools/db_backup.py`):
+   every day at 03:00 India time it dumps the database, encrypts it
+   (AES-256) with the `BACKUP_PASSPHRASE` secret and stores it 35 days in the
+   private `db-backups` bucket. Needs the secret `BACKUP_PASSPHRASE`
+   (32+ random characters; keep a copy in the password manager, because
+   without it nothing can be opened). It refuses to store an empty or
+   cut-short dump, and fails the run, so a broken backup shows as a red run.
+
+What they do **not** cover: Storage files (photos, bills, selfies, documents)
+are in neither, and losing the whole Supabase project loses the
+`db-backups` bucket with it. Download a backup by hand to the owner's own
+storage now and then.
+
+### Restoring a backup
+
+Restore into a **new** project (or a local stack to look at the data). Never
+restore over a live production project.
+
+1. Get the file: Dashboard > Storage > `db-backups` > `YYYY/MM/DD/`, download it.
+2. Open it. Check the hashes against `manifest.json` (a wrong passphrase
+   produces garbage, and `tar` fails):
+   ```bash
+   export BACKUP_PASSPHRASE='...'
+   openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:BACKUP_PASSPHRASE \
+     -in fieldos-YYYYMMDDTHHMMSSZ.tar.gz.enc | tar xz
+   shasum -a 256 schema.sql data.sql roles.sql   # compare with manifest.json
+   ```
+3. Make a fresh project and apply the migrations to it: `supabase link
+   --project-ref <new-ref> && supabase db push --remote --yes` (locally:
+   `supabase db reset --no-seed`). Do not load `schema.sql`; the migrations
+   already built the schema, and `schema.sql` is there as a reference.
+4. Empty what the migrations seeded (otherwise `app_config` collides), then
+   load the data, stopping at the first error:
+   ```bash
+   psql "$DB_URL" -v ON_ERROR_STOP=1 -q -f tools/db_restore_clear.sql
+   (echo "SET session_replication_role = replica;"; cat data.sql) | psql "$DB_URL" -v ON_ERROR_STOP=1 -q
+   ```
+5. Check: row counts of `companies`, `projects`, `tasks`, `site_expenses`,
+   `auth.users` match the source; run the **isolation-check** workflow
+   against the new project; sign in on a test phone.
+6. Point the app at the new project only if the old one is truly gone
+   (new `SUPABASE_URL` / `SUPABASE_ANON_KEY` build, then raise the minimum
+   build). Photos and other Storage files have to come from elsewhere.
+
+Tested on 26 Nov 2026 against a local stack: backup, decrypt, wipe, migrate,
+clear, load; company, project, task, expense and user counts matched the
+source exactly. Repeat this drill once on a scratch project after the first
+real backup, and after any change to `tools/db_backup.py`.
 
 ## Known limits to carry forward
 

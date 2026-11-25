@@ -1,0 +1,91 @@
+name: db-backup
+
+# A daily, encrypted copy of the production database, kept 35 days in the
+# private db-backups bucket of the same (Mumbai) project. It is the safety
+# net until the Supabase plan has daily backups of its own (issue #148), and
+# a second copy we control after that. It guards against a bad migration or
+# an accidental delete. It does NOT cover losing the whole Supabase project,
+# and Storage files (photos, bills, selfies) are not in a database dump.
+#
+# Runs at 21:30 UTC (03:00 in India), a minute or so each time, free on a
+# public repo. Needs these repo secrets (the first three exist already):
+#   SUPABASE_URL, SUPABASE_ACCESS_TOKEN, SUPABASE_DB_PASSWORD
+#   BACKUP_PASSPHRASE   NEW. 32+ random characters, for example
+#                       `openssl rand -base64 36`. Keep a copy in the owner's
+#                       password manager: without it no backup can be opened.
+# Until BACKUP_PASSPHRASE is set the run prints a warning and does nothing.
+#
+# Restoring: docs/SUPABASE_PRODUCTION_RUNBOOK.md, "Restoring a backup".
+on:
+  schedule:
+    - cron: "30 21 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ${{ vars.LINUX_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 30
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Check the secrets
+        id: ready
+        run: |
+          missing=""
+          for v in SUPABASE_URL SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD BACKUP_PASSPHRASE; do
+            [ -z "${!v}" ] && missing="$missing $v"
+          done
+          if [ -n "$missing" ]; then
+            echo "::warning::No backup was made. Missing repo secrets:$missing"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.ready.outputs.ok == 'true'
+
+      # Pinned like supabase-deploy: CLI 3.0 changed how --remote works.
+      - uses: supabase/setup-cli@v3
+        if: steps.ready.outputs.ok == 'true'
+        with:
+          version: 3.0.0
+
+      - name: Dump the database
+        if: steps.ready.outputs.ok == 'true'
+        shell: bash
+        run: |
+          ref=$(echo "$SUPABASE_URL" | sed -E 's#^https?://([^.]+)\.supabase\.co.*#\1#')
+          if [ "$ref" = "$SUPABASE_URL" ] || [ -z "$ref" ]; then
+            echo "::error::SUPABASE_URL should look like https://abcdefghijkl.supabase.co"; exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/dump"
+          supabase link --project-ref "$ref"
+          supabase db dump --remote -f "$RUNNER_TEMP/dump/schema.sql"
+          supabase db dump --remote --data-only --use-copy -s public,auth -f "$RUNNER_TEMP/dump/data.sql"
+          supabase db dump --remote --role-only -f "$RUNNER_TEMP/dump/roles.sql"
+          ls -l "$RUNNER_TEMP/dump"
+
+      - name: Encrypt and store the backup
+        if: steps.ready.outputs.ok == 'true'
+        shell: bash
+        run: |
+          ref=$(echo "$SUPABASE_URL" | sed -E 's#^https?://([^.]+)\.supabase\.co.*#\1#')
+          key=$(supabase projects api-keys --project-ref "$ref" -o json \
+            | python3 -c 'import json,sys; print(next(k["api_key"] for k in json.load(sys.stdin) if k["name"]=="service_role"))')
+          echo "::add-mask::$key"
+          DUMP_DIR="$RUNNER_TEMP/dump" SUPABASE_SERVICE_KEY="$key" python3 tools/db_backup.py | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the plain dump from the runner
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/dump"

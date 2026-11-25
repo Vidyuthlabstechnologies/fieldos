@@ -179,6 +179,11 @@ Details and the failure table: `docs/PLAY_STORE_LAUNCH.md` section 10.
 
 - `tools/pilot_check.py` (local, public key pair): a throwaway company walks
   every flow against production, then deletes itself. Run before onboarding.
+- `db-backup` workflow: a daily encrypted copy of the database in the
+  private `db-backups` bucket (35 days). Needs the secret `BACKUP_PASSPHRASE`;
+  until it is set the run only warns. Restore steps and what it does not
+  cover: `docs/SUPABASE_PRODUCTION_RUNBOOK.md`. Moving production to Pro
+  (backups, leaked-password protection, SMTP): `docs/SUPABASE_PRO_CUTOVER.md`.
 - `system-logs` workflow: copies Supabase logs to a private bucket every 6
   hours (one-year retention for CERT-In and DPDP). `tools/export_logs.py`.
 - `bug-reports` / `report-to-github`: in-app bug reports become issues
