@@ -1,40 +1,74 @@
 version: 2
+
+# One grouped PR per ecosystem per month, instead of one PR per package.
+# Major-version bumps are NOT proposed here: they need a hand migration
+# (Riverpod, Tailwind, vitest, react-i18next, ...) and are done deliberately.
+# Security updates still arrive on their own, immediately, regardless of this.
+#
+# No `labels:` on purpose: Dependabot posts a "labels could not be found"
+# comment on every PR when a listed label does not exist in the repo.
 updates:
   # Mobile (fieldos_mobile/) -- the active development target.
   - package-ecosystem: "pub"
     directory: "/fieldos_mobile"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    labels: ["dependencies", "mobile"]
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    groups:
+      pub-minor-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # Frontend (desktop app's UI).
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    labels: ["dependencies", "frontend"]
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    groups:
+      frontend-minor-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # Desktop shell (Tauri CLI, installed via the root package.json).
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 3
-    labels: ["dependencies", "desktop"]
+      interval: "monthly"
+    open-pull-requests-limit: 1
+    groups:
+      desktop-minor-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # Backend (FastAPI).
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    labels: ["dependencies", "backend"]
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    groups:
+      backend-minor-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # The Actions workflows themselves.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-    labels: ["dependencies", "ci"]
+      interval: "monthly"
+    open-pull-requests-limit: 1
+    groups:
+      actions-minor-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
