@@ -15,7 +15,7 @@ billing page, not here.
 | 2 | Create the repo secret `BACKUP_PASSPHRASE`: `openssl rand -base64 36`. Save it in the password manager first. Settings > Secrets and variables > Actions. | owner | |
 | 3 | Run the **db-backup** workflow once by hand. Check the run is green and that Dashboard > Storage > `db-backups` has a file. | owner + agent | |
 | 4 | Do one **restore drill** into a scratch project or local stack (`SUPABASE_PRODUCTION_RUNBOOK.md`, "Restoring a backup"). A backup nobody has restored is a hope. | agent | |
-| 5 | Review and merge the server-hardening PRs (listed below). **Do not deploy them yet.** | owner | |
+| 5 | Review and merge the server-hardening PRs: **#252** (guard PO and request updates, one live PO per request) and **#253** (change history for wages, attendance marks, POs; the history screen labels). **Do not deploy them yet.** The phone-only PRs (#248 cube wording, #250 consent wording, #254 stalled photos) can ship in the next app build. | owner | |
 | 6 | Pick the app-side build that ships with the wage change (1.8.1+26 is already built) and get it to every real tester on Play. | owner | |
 | 7 | Decide the product questions in `CUSTOMER_REVIEW_2026-11.md` that affect launch: trial length, paywall order, phone-number sign-in. | owner | |
 
