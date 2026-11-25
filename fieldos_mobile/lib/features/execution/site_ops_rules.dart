@@ -90,20 +90,32 @@ String qualityResultLabel(String r) => switch (r) {
       _ => tr('Waiting for the test'),
     };
 
+/// A 7 or 14 day cube under its early-age target. IS 456 accepts concrete on
+/// the 28-day strength only; the early cubes are a warning to watch, never a
+/// rejection. The stored result stays 'fail' because the server checks it
+/// against the same target.
+bool isEarlyCubeMiss({required String kind, required String result, int? ageDays}) =>
+    kind == 'cube' && result == 'fail' && ageDays != null && ageDays < 28;
+
 class QualitySummary {
-  const QualitySummary({required this.passed, required this.failed, required this.overdue, required this.soon});
+  const QualitySummary({required this.passed, required this.failed, required this.overdue, required this.soon, this.early = 0});
   final int passed;
   final int failed;
   final int overdue;
   final int soon;
+  final int early;
 }
 
-QualitySummary summariseQuality(List<QualityTest> all, DateTime now) => QualitySummary(
-      passed: all.where((t) => t.result == 'pass').length,
-      failed: all.where((t) => t.result == 'fail').length,
-      overdue: all.where((t) => qualityDueState(t, now) == 'overdue').length,
-      soon: all.where((t) => qualityDueState(t, now) == 'soon').length,
-    );
+QualitySummary summariseQuality(List<QualityTest> all, DateTime now) {
+  final early = all.where((t) => isEarlyCubeMiss(kind: t.kind, result: t.result, ageDays: t.ageDays)).length;
+  return QualitySummary(
+    passed: all.where((t) => t.result == 'pass').length,
+    failed: all.where((t) => t.result == 'fail').length - early,
+    overdue: all.where((t) => qualityDueState(t, now) == 'overdue').length,
+    soon: all.where((t) => qualityDueState(t, now) == 'soon').length,
+    early: early,
+  );
+}
 
 // --- Safety ----------------------------------------------------------------------
 

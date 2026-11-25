@@ -122,6 +122,7 @@ class QualityTestsTab extends ConsumerWidget {
                   [
                     trf('{n} passed', {'n': s.passed}),
                     trf('{n} failed', {'n': s.failed}),
+                    if (s.early > 0) trf('{n} below early target', {'n': s.early}),
                     if (s.overdue > 0) trf('{n} overdue', {'n': s.overdue}),
                     if (s.soon > 0) trf('{n} due soon', {'n': s.soon}),
                   ].join(' · '),
@@ -183,6 +184,9 @@ class QualityTestsTab extends ConsumerWidget {
 
   Widget _pill(QualityTest t, DateTime now) {
     if (t.result == 'pass') return StatusPill(qualityResultLabel('pass'), tone: PillTone.ok);
+    if (isEarlyCubeMiss(kind: t.kind, result: t.result, ageDays: t.ageDays)) {
+      return StatusPill(tr('Below early target'), tone: PillTone.warn);
+    }
     if (t.result == 'fail') return StatusPill(qualityResultLabel('fail'), tone: PillTone.danger);
     return switch (qualityDueState(t, now)) {
       'overdue' => StatusPill(tr('Overdue'), tone: PillTone.danger),
