@@ -256,6 +256,7 @@ class SyncEngine {
         final blocked = <String>{};
         final sentTogether = <int>{};
         final sendAlone = <int>{};
+        var skippedUploads = 0;
         for (var i = 0; i < entries.length; i++) {
           final entry = entries[i];
           if (sentTogether.contains(entry.id)) continue;
@@ -282,6 +283,17 @@ class SyncEngine {
           } catch (e) {
             if (isTransientSyncError(e) || isAuthSyncError(e)) {
               await db.syncOutboxDao.noteTransientFailure(entry.id, e.toString());
+              // A photo or bill that stalls on a weak link is skipped, not
+              // the end of the run: the text records saved after it still go
+              // up, and anything pointing at it waits (blocked). Only a few
+              // are skipped, so a link that is truly down costs a few
+              // timeouts, not one per photo; the first failure of anything
+              // else ends the run as before.
+              if (isTransientSyncError(e) && fileColumns.containsKey(entry.targetTable) && skippedUploads < maxSkippedUploads) {
+                skippedUploads++;
+                blocked.add(entry.recordId);
+                continue;
+              }
               break;
             }
             if (siteLimitOf(e) case final limit?) {
@@ -311,6 +323,9 @@ class SyncEngine {
 
   /// Most new rows sent in one request.
   static const pushBatchSize = 50;
+
+  /// Photos and bills that may stall in one run before it stops.
+  static const maxSkippedUploads = 3;
 
   /// Sends the plain inserts starting at [start] (same table, no file, no
   /// record twice, the same columns) as one request, and marks them sent.
