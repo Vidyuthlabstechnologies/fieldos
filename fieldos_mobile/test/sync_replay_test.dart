@@ -9,6 +9,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase/supabase.dart';
 
+import 'package:fieldos_mobile/auth/site_roles.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/sync/sync_engine.dart';
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
@@ -55,6 +56,10 @@ void main() {
     final engineer = await CloudPhone.signUp('engineer');
     final cloud = await s.owner.service.registerCompany(companyId: s.companyId, name: 'Replay Co');
     await engineer.service.joinCompany(cloud.joinCode!);
+    // Accounts read every expense but may not correct another's (finance
+    // privacy, 2026-11-25); a plain engineer would not even receive it.
+    await s.owner.db.siteTeamDao
+        .setMember(projectId: s.project.id, userId: engineer.remoteUserId, role: SiteRole.accounts);
     // The owner's expense reaches the engineer's phone.
     await s.owner.db.expenseDao.create(SiteExpensesCompanion.insert(
         id: uuid.v4(), projectId: s.project.id, category: 'Material', amount: 1200, incurredOn: '2026-11-09',
