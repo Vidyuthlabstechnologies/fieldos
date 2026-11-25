@@ -2494,6 +2494,22 @@ class WorkerDao extends DatabaseAccessor<AppDatabase> with _$WorkerDaoMixin {
 /// retrying a permanently-broken write forever.
 const int syncOutboxMaxRetries = 5;
 
+/// Work on the phone that has not reached the cloud yet.
+class UnsentWork {
+  const UnsentWork({required this.total, required this.parked, this.oldest});
+  final int total;
+  final int parked;
+  final DateTime? oldest;
+
+  /// Saves wait a few minutes for the next sync as a matter of course, so
+  /// only work that has waited this long, or that failed repeatedly, is worth
+  /// telling the person about.
+  static const warnAfter = Duration(minutes: 30);
+
+  bool needsAttention(DateTime now) =>
+      total > 0 && (parked > 0 || (oldest != null && now.difference(oldest!) >= warnAfter));
+}
+
 /// Settings key for [SyncOutboxDao.localOnlyIds].
 const localOnlyIdsKey = 'local_only_ids';
 
@@ -2630,6 +2646,16 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
   Future<Set<String>> dirtyKeys() async {
     final rows = await select(syncOutbox).get();
     return {for (final r in rows) key(r.targetTable, r.recordId)};
+  }
+
+  /// What is still to send, for the Home banner: how many writes, how many of
+  /// them were parked after repeated failures, and when the oldest was saved.
+  Future<UnsentWork> unsentSummary() async {
+    final n = syncOutbox.id.count();
+    final oldest = syncOutbox.createdAt.min();
+    final all = await (selectOnly(syncOutbox)..addColumns([n, oldest])).getSingle();
+    final parked = await parkedCount();
+    return UnsentWork(total: all.read(n) ?? 0, parked: parked, oldest: all.read(oldest));
   }
 
   /// Gives parked rows another chance (e.g. after the RLS/membership issue

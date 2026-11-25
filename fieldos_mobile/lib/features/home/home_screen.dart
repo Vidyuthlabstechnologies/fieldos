@@ -25,6 +25,7 @@ import 'package:fieldos_mobile/features/brief/owner_brief_screen.dart';
 import 'package:fieldos_mobile/features/dashboard/dashboard_screen.dart';
 import 'package:fieldos_mobile/features/home/app_update_banner.dart';
 import 'package:fieldos_mobile/features/home/quick_actions.dart';
+import 'package:fieldos_mobile/features/home/unsent_work_card.dart';
 import 'package:fieldos_mobile/features/map/site_map_screen.dart';
 import 'package:fieldos_mobile/features/project/new_project_sheet.dart';
 import 'package:fieldos_mobile/features/project/project_detail_screen.dart';
@@ -431,6 +432,7 @@ class _ProjectList extends StatelessWidget {
         ),
         const AppUpdateBanner(),
         const TrialNoticeCard(),
+        UnsentWorkCard(companyId: company.id),
         // Once a year, the rules (IT Rules 2021 rule 3(1)(c)).
         const RulesReminderCard(),
         // A new company's first few steps, until they are done or closed.
