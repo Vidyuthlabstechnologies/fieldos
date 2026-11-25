@@ -3128,4 +3128,6 @@ const Map<String, String> stringsEs = {
   '{amount} spent without a BOQ item.': '{amount} gastados sin partida del presupuesto.',
   'Purchase request': 'Solicitud de compra',
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'Las tareas muestran cuánto avanzó cada trabajo y qué se está atrasando. La viga de cimentación va tarde, así que se marca en rojo antes de que alguien pregunte.',
+  'Throw away what you said?': '¿Descartar lo que dijo?',
+  'Throw it away': 'Descartar',
 };

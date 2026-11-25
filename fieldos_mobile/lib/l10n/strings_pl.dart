@@ -3159,4 +3159,6 @@ const stringsPl = <String, String>{
   '{amount} spent without a BOQ item.': 'Wydano {amount} bez pozycji przedmiaru.',
   'Purchase request': 'Zapotrzebowanie',
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'Zadania pokazują, jak daleko jest każda praca i co się opóźnia. Belka fundamentowa jest opóźniona, więc jest zaznaczona na czerwono, zanim ktoś zapyta.',
+  'Throw away what you said?': 'Odrzucić to, co zostało powiedziane?',
+  'Throw it away': 'Odrzuć',
 };

@@ -3476,4 +3476,6 @@ const Map<String, String> stringsKn = {
   '{amount} spent without a BOQ item.': 'BOQ ಐಟಂ ಇಲ್ಲದೆ {amount} ಖರ್ಚು.',
   'Purchase request': 'ಖರೀದಿ ವಿನಂತಿ',
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'ಪ್ರತಿ ಕೆಲಸ ಎಷ್ಟು ಮುಂದುವರಿದಿದೆ, ಯಾವುದು ಹಿಂದೆ ಬೀಳುತ್ತಿದೆ ಎಂದು ಕೆಲಸಗಳು ತೋರಿಸುತ್ತವೆ. ಗ್ರೌಂಡ್ ಬೀಮ್ ತಡವಾಗಿದೆ, ಹಾಗಾಗಿ ಯಾರೂ ಕೇಳುವ ಮೊದಲೇ ಕೆಂಪಿನಲ್ಲಿ ಗುರುತಿಸಲಾಗಿದೆ.',
+  'Throw away what you said?': 'ನೀವು ಹೇಳಿದ್ದನ್ನು ತೆಗೆದುಹಾಕಬೇಕೇ?',
+  'Throw it away': 'ತೆಗೆದುಹಾಕಿ',
 };

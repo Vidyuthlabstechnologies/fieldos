@@ -3135,4 +3135,6 @@ const stringsMs = <String, String>{
   '{amount} spent without a BOQ item.': '{amount} dibelanjakan tanpa item BQ.',
   'Purchase request': 'Permohonan belian',
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'Tugasan menunjukkan kemajuan setiap kerja dan apa yang tergelincir. Rasuk bumi sudah lewat, jadi ia ditanda merah sebelum sesiapa perlu bertanya.',
+  'Throw away what you said?': 'Buang apa yang anda katakan?',
+  'Throw it away': 'Buang',
 };

@@ -48,17 +48,20 @@ Future<VoiceReport?> showVoiceReportSheet(BuildContext context, {bool forAssista
 enum _Mode { phone, sarvam }
 
 class VoiceReportSheet extends ConsumerStatefulWidget {
-  const VoiceReportSheet({super.key, this.forAssistant = false});
+  const VoiceReportSheet({super.key, this.forAssistant = false, @visibleForTesting this.dictation});
 
   /// Hearing a request for the assistant rather than a site report.
   final bool forAssistant;
+
+  /// Only for tests: stands in for the phone's speech recognizer.
+  final DictationController? dictation;
 
   @override
   ConsumerState<VoiceReportSheet> createState() => _VoiceReportSheetState();
 }
 
 class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
-  final _dictation = DictationController();
+  late final DictationController _dictation = widget.dictation ?? DictationController();
   SpeechLanguage _language = speechLanguages.first;
   _Mode _mode = _Mode.phone;
   bool _loading = true;
@@ -173,6 +176,28 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
     Navigator.pop(context, VoiceReport(text: text, language: _language));
   }
 
+  /// Tapping outside the sheet or pressing back after minutes of speaking used
+  /// to throw the whole report away (customer review: a junior engineer on a
+  /// slab, one hand free). Done, Type instead and Cancel are deliberate and
+  /// are not asked about.
+  bool get _hasSomethingToLose => _dictation.hasText || _recording || _sending != null;
+
+  Future<void> _askBeforeDiscarding() async {
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('Throw away what you said?')),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Keep it'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Throw it away'))),
+        ],
+      ),
+    );
+    if (discard != true || !mounted) return;
+    await _recorder?.cancel();
+    if (mounted) Navigator.pop(context);
+  }
+
   Future<void> _typeInstead() async {
     final text = _dictation.hasText ? await _dictation.finish() : '';
     await _recorder?.cancel();
@@ -251,6 +276,16 @@ class _VoiceReportSheetState extends ConsumerState<VoiceReportSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bottom = MediaQuery.of(context).viewInsets.bottom;
+    return PopScope(
+      canPop: !_hasSomethingToLose,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _askBeforeDiscarding();
+      },
+      child: _sheetBody(theme, bottom),
+    );
+  }
+
+  Widget _sheetBody(ThemeData theme, double bottom) {
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 16 + bottom),
       child: Column(
