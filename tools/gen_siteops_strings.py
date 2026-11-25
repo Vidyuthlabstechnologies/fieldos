@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Writes fieldos_mobile/lib/l10n/strings_siteops.dart from the tables in
 tools/siteops_strings/*.py. Each table row is
-English: (Hindi, Telugu, Tamil, Kannada, Marathi). Run from the repo root.
+English: (Hindi, Telugu, Tamil, Kannada, Marathi); tools/siteops_strings_intl/
+rows are English: (Spanish, Arabic, Malay, Urdu, Chinese, Malayalam, Polish, Romanian). Run from the repo root.
 """
 import glob, importlib.util, os
 
@@ -22,6 +23,27 @@ for i, lang in enumerate(['Hi', 'Te', 'Ta', 'Kn', 'Mr']):
     out.append(f"const Map<String, String> siteOps{lang} = {{")
     for k in sorted(rows):
         out.append(f"  {q(k)}: {q(rows[k][i])},")
+    out.append("};")
+    out.append("")
+# International languages (US, Malaysia, UAE, UK apps): tools/siteops_strings_intl/.
+intl = {}
+for f in sorted(glob.glob(os.path.join(os.path.dirname(__file__), 'siteops_strings_intl', 'part_*.py'))):
+    spec = importlib.util.spec_from_file_location('p', f)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    for k, v in m.T.items():
+        assert len(v) == 8, k
+        intl[k] = v
+assert set(intl) == set(rows), (sorted(set(rows) ^ set(intl)))
+import re
+ph = lambda t: sorted(re.findall(r'\{\w+\}', t))
+for k, v in intl.items():
+    for t in v:
+        assert ph(t) == ph(k), (k, t)
+for i, lang in enumerate(['Es', 'Ar', 'Ms', 'Ur', 'Zh', 'Ml', 'Pl', 'Ro']):
+    out.append(f"const Map<String, String> siteOps{lang} = {{")
+    for k in sorted(intl):
+        out.append(f"  {q(k)}: {q(intl[k][i])},")
     out.append("};")
     out.append("")
 out.append("/// Every English label in these tables.")

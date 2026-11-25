@@ -6,6 +6,7 @@ library;
 import 'package:fieldos_mobile/l10n/strings_compliance.dart';
 import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
 import 'package:fieldos_mobile/l10n/strings_integrations.dart';
+import 'package:fieldos_mobile/l10n/strings_siteops.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_zh.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
@@ -15,6 +16,7 @@ const stringsZh = <String, String>{
   ...onboardingZh,
   ...scheduleZh,
   ...integrationsZh,
+  ...siteOpsZh,
   ...consentZh,
   ...overtimeZh,
   'Try again': '重试',
