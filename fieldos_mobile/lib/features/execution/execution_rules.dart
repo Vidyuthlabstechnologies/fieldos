@@ -23,6 +23,12 @@ const defectSeverities = ['minor', 'major', 'critical'];
 const defectAgeingDays = 7;
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
+
+/// A revision labelled "GFC" is the one issued Good for Construction.
+bool isGfcRevision(String rev) {
+  final r = rev.trim().toUpperCase().replaceAll('.', '');
+  return r == 'GFC' || r.startsWith('GFC ') || r.startsWith('GFC-');
+}
 DateTime? parseDay(String? ymd) => ymd == null ? null : DateTime.tryParse(ymd);
 String ymd(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
@@ -134,6 +140,10 @@ class ExecutionData {
     }
     return best;
   }
+
+  /// True once a revision labelled GFC (Good for Construction) is approved.
+  bool hasGfc(String drawingId) =>
+      revisionsOf(drawingId).any((r) => r.status == 'approved' && isGfcRevision(r.rev));
 
   /// Approved revisions that a later approved one replaced.
   bool isSuperseded(DrawingRevision r) =>

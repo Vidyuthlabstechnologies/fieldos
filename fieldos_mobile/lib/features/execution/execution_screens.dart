@@ -19,6 +19,7 @@ import 'package:fieldos_mobile/features/commercial/commercial_widgets.dart' show
 import 'package:fieldos_mobile/features/execution/drawing_sheet_screen.dart';
 import 'package:fieldos_mobile/features/execution/execution_data.dart';
 import 'package:fieldos_mobile/features/execution/execution_rules.dart';
+import 'package:fieldos_mobile/features/execution/pre_construction_rules.dart' show revisionPresets;
 import 'package:fieldos_mobile/features/execution/submittals_tab.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart';
 import 'package:fieldos_mobile/features/shared/photo_viewer.dart';
@@ -616,6 +617,10 @@ class _DrawingScreen extends ConsumerWidget {
               controller: rev,
               decoration: InputDecoration(labelText: tr('Revision')),
             ),
+            Wrap(spacing: 8, children: [
+              for (final p in revisionPresets(count))
+                ActionChip(key: Key('rev-preset-$p'), label: Text(p), onPressed: () => rev.text = p),
+            ]),
             TextField(
               controller: note,
               decoration: InputDecoration(labelText: tr('What changed (optional)')),

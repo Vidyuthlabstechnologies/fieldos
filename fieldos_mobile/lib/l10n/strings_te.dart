@@ -7,6 +7,7 @@ import 'package:fieldos_mobile/l10n/strings_compliance.dart';
 import 'package:fieldos_mobile/l10n/strings_onboarding.dart';
 import 'package:fieldos_mobile/l10n/strings_integrations.dart';
 import 'package:fieldos_mobile/l10n/strings_schedule.dart';
+import 'package:fieldos_mobile/l10n/strings_siteops.dart';
 import 'package:fieldos_mobile/l10n/strings_consent_te.dart';
 import 'package:fieldos_mobile/l10n/strings_overtime.dart';
 import 'package:fieldos_mobile/l10n/strings_commercial_te.dart';
@@ -21,6 +22,7 @@ const Map<String, String> stringsTe = {
   ...complianceTe,
   ...onboardingTe,
   ...scheduleTe,
+  ...siteOpsTe,
   ...integrationsTe,
   ...consentTe,
   ...overtimeTe,

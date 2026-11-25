@@ -1936,3 +1936,74 @@ class Submittals extends Table {
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
+
+/// One approval or clearance a site waits for before (or while) it builds:
+/// GHMC building permission, Fire NOC, pollution board consent and so on.
+/// The row says where the application stands and whose court the ball is
+/// in, so the bottleneck is visible. Each status change adds a line to
+/// [history], which only grows.
+class SiteApprovals extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// ghmc | hmda | municipality | fire | pollution | electricity | water | rera | airport | other
+  TextColumn get authority => text().withLength(min: 1, max: 20).withDefault(const Constant('other'))();
+  TextColumn get title => text().withLength(min: 1, max: 200)();
+
+  /// File or application number given by the authority.
+  TextColumn get referenceNo => text().withLength(max: 60).nullable()();
+
+  /// not_started | drafting | applied | query_raised | resubmitted | approved | rejected
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('not_started'))();
+
+  /// Whose court the ball is in: us | consultant | authority | client
+  TextColumn get waitingOn => text().withLength(min: 1, max: 20).withDefault(const Constant('us'))();
+
+  /// yyyy-mm-dd
+  TextColumn get appliedOn => text().withLength(max: 10).nullable()();
+  TextColumn get expectedBy => text().withLength(max: 10).nullable()();
+  TextColumn get approvedOn => text().withLength(max: 10).nullable()();
+
+  /// When the clearance lapses (Fire NOC, consent to operate).
+  TextColumn get validUntil => text().withLength(max: 10).nullable()();
+
+  /// The person chasing it for us.
+  TextColumn get liaisonBy => text().withLength(max: 120).nullable()();
+  TextColumn get note => text().withLength(max: 1000).nullable()();
+
+  /// `yyyy-mm-dd|status|waiting on|note`, one line per change, oldest first.
+  TextColumn get history => text().withLength(max: 8000).withDefault(const Constant(''))();
+  TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Time (and money) spent chasing approvals: who went where, for how long,
+/// at what cost. Read and written by the owner and project managers only,
+/// since the cost is the firm's own.
+class LiaisonLogs extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get approvalId => text().withLength(max: 36).nullable()();
+
+  /// yyyy-mm-dd
+  TextColumn get onDay => text().withLength(min: 1, max: 10)();
+  IntColumn get minutes => integer().withDefault(const Constant(0))();
+
+  /// Whose time it was (a director, a liaison officer).
+  TextColumn get person => text().withLength(max: 120).nullable()();
+
+  /// What it cost the firm: the person's time at their rate, plus
+  /// travel and fees.
+  RealColumn get cost => real().withDefault(const Constant(0))();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get loggedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}

@@ -57042,6 +57042,1661 @@ class SubmittalsCompanion extends UpdateCompanion<Submittal> {
   }
 }
 
+class $SiteApprovalsTable extends SiteApprovals
+    with TableInfo<$SiteApprovalsTable, SiteApproval> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SiteApprovalsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorityMeta = const VerificationMeta(
+    'authority',
+  );
+  @override
+  late final GeneratedColumn<String> authority = GeneratedColumn<String>(
+    'authority',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('other'),
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 200,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _referenceNoMeta = const VerificationMeta(
+    'referenceNo',
+  );
+  @override
+  late final GeneratedColumn<String> referenceNo = GeneratedColumn<String>(
+    'reference_no',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 60),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('not_started'),
+  );
+  static const VerificationMeta _waitingOnMeta = const VerificationMeta(
+    'waitingOn',
+  );
+  @override
+  late final GeneratedColumn<String> waitingOn = GeneratedColumn<String>(
+    'waiting_on',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('us'),
+  );
+  static const VerificationMeta _appliedOnMeta = const VerificationMeta(
+    'appliedOn',
+  );
+  @override
+  late final GeneratedColumn<String> appliedOn = GeneratedColumn<String>(
+    'applied_on',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _expectedByMeta = const VerificationMeta(
+    'expectedBy',
+  );
+  @override
+  late final GeneratedColumn<String> expectedBy = GeneratedColumn<String>(
+    'expected_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _approvedOnMeta = const VerificationMeta(
+    'approvedOn',
+  );
+  @override
+  late final GeneratedColumn<String> approvedOn = GeneratedColumn<String>(
+    'approved_on',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _validUntilMeta = const VerificationMeta(
+    'validUntil',
+  );
+  @override
+  late final GeneratedColumn<String> validUntil = GeneratedColumn<String>(
+    'valid_until',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _liaisonByMeta = const VerificationMeta(
+    'liaisonBy',
+  );
+  @override
+  late final GeneratedColumn<String> liaisonBy = GeneratedColumn<String>(
+    'liaison_by',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 1000),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _historyMeta = const VerificationMeta(
+    'history',
+  );
+  @override
+  late final GeneratedColumn<String> history = GeneratedColumn<String>(
+    'history',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 8000),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _raisedByMeta = const VerificationMeta(
+    'raisedBy',
+  );
+  @override
+  late final GeneratedColumn<String> raisedBy = GeneratedColumn<String>(
+    'raised_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    authority,
+    title,
+    referenceNo,
+    status,
+    waitingOn,
+    appliedOn,
+    expectedBy,
+    approvedOn,
+    validUntil,
+    liaisonBy,
+    note,
+    history,
+    raisedBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'site_approvals';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SiteApproval> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('authority')) {
+      context.handle(
+        _authorityMeta,
+        authority.isAcceptableOrUnknown(data['authority']!, _authorityMeta),
+      );
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('reference_no')) {
+      context.handle(
+        _referenceNoMeta,
+        referenceNo.isAcceptableOrUnknown(
+          data['reference_no']!,
+          _referenceNoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('waiting_on')) {
+      context.handle(
+        _waitingOnMeta,
+        waitingOn.isAcceptableOrUnknown(data['waiting_on']!, _waitingOnMeta),
+      );
+    }
+    if (data.containsKey('applied_on')) {
+      context.handle(
+        _appliedOnMeta,
+        appliedOn.isAcceptableOrUnknown(data['applied_on']!, _appliedOnMeta),
+      );
+    }
+    if (data.containsKey('expected_by')) {
+      context.handle(
+        _expectedByMeta,
+        expectedBy.isAcceptableOrUnknown(data['expected_by']!, _expectedByMeta),
+      );
+    }
+    if (data.containsKey('approved_on')) {
+      context.handle(
+        _approvedOnMeta,
+        approvedOn.isAcceptableOrUnknown(data['approved_on']!, _approvedOnMeta),
+      );
+    }
+    if (data.containsKey('valid_until')) {
+      context.handle(
+        _validUntilMeta,
+        validUntil.isAcceptableOrUnknown(data['valid_until']!, _validUntilMeta),
+      );
+    }
+    if (data.containsKey('liaison_by')) {
+      context.handle(
+        _liaisonByMeta,
+        liaisonBy.isAcceptableOrUnknown(data['liaison_by']!, _liaisonByMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('history')) {
+      context.handle(
+        _historyMeta,
+        history.isAcceptableOrUnknown(data['history']!, _historyMeta),
+      );
+    }
+    if (data.containsKey('raised_by')) {
+      context.handle(
+        _raisedByMeta,
+        raisedBy.isAcceptableOrUnknown(data['raised_by']!, _raisedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_raisedByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SiteApproval map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SiteApproval(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      authority: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}authority'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      referenceNo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference_no'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      waitingOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}waiting_on'],
+      )!,
+      appliedOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}applied_on'],
+      ),
+      expectedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}expected_by'],
+      ),
+      approvedOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}approved_on'],
+      ),
+      validUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}valid_until'],
+      ),
+      liaisonBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}liaison_by'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      history: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}history'],
+      )!,
+      raisedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}raised_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SiteApprovalsTable createAlias(String alias) {
+    return $SiteApprovalsTable(attachedDatabase, alias);
+  }
+}
+
+class SiteApproval extends DataClass implements Insertable<SiteApproval> {
+  final String id;
+  final String projectId;
+
+  /// ghmc | hmda | municipality | fire | pollution | electricity | water | rera | airport | other
+  final String authority;
+  final String title;
+
+  /// File or application number given by the authority.
+  final String? referenceNo;
+
+  /// not_started | drafting | applied | query_raised | resubmitted | approved | rejected
+  final String status;
+
+  /// Whose court the ball is in: us | consultant | authority | client
+  final String waitingOn;
+
+  /// yyyy-mm-dd
+  final String? appliedOn;
+  final String? expectedBy;
+  final String? approvedOn;
+
+  /// When the clearance lapses (Fire NOC, consent to operate).
+  final String? validUntil;
+
+  /// The person chasing it for us.
+  final String? liaisonBy;
+  final String? note;
+
+  /// `yyyy-mm-dd|status|waiting on|note`, one line per change, oldest first.
+  final String history;
+  final String raisedBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const SiteApproval({
+    required this.id,
+    required this.projectId,
+    required this.authority,
+    required this.title,
+    this.referenceNo,
+    required this.status,
+    required this.waitingOn,
+    this.appliedOn,
+    this.expectedBy,
+    this.approvedOn,
+    this.validUntil,
+    this.liaisonBy,
+    this.note,
+    required this.history,
+    required this.raisedBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['authority'] = Variable<String>(authority);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || referenceNo != null) {
+      map['reference_no'] = Variable<String>(referenceNo);
+    }
+    map['status'] = Variable<String>(status);
+    map['waiting_on'] = Variable<String>(waitingOn);
+    if (!nullToAbsent || appliedOn != null) {
+      map['applied_on'] = Variable<String>(appliedOn);
+    }
+    if (!nullToAbsent || expectedBy != null) {
+      map['expected_by'] = Variable<String>(expectedBy);
+    }
+    if (!nullToAbsent || approvedOn != null) {
+      map['approved_on'] = Variable<String>(approvedOn);
+    }
+    if (!nullToAbsent || validUntil != null) {
+      map['valid_until'] = Variable<String>(validUntil);
+    }
+    if (!nullToAbsent || liaisonBy != null) {
+      map['liaison_by'] = Variable<String>(liaisonBy);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['history'] = Variable<String>(history);
+    map['raised_by'] = Variable<String>(raisedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  SiteApprovalsCompanion toCompanion(bool nullToAbsent) {
+    return SiteApprovalsCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      authority: Value(authority),
+      title: Value(title),
+      referenceNo: referenceNo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(referenceNo),
+      status: Value(status),
+      waitingOn: Value(waitingOn),
+      appliedOn: appliedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(appliedOn),
+      expectedBy: expectedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expectedBy),
+      approvedOn: approvedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(approvedOn),
+      validUntil: validUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(validUntil),
+      liaisonBy: liaisonBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(liaisonBy),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      history: Value(history),
+      raisedBy: Value(raisedBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SiteApproval.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SiteApproval(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      authority: serializer.fromJson<String>(json['authority']),
+      title: serializer.fromJson<String>(json['title']),
+      referenceNo: serializer.fromJson<String?>(json['referenceNo']),
+      status: serializer.fromJson<String>(json['status']),
+      waitingOn: serializer.fromJson<String>(json['waitingOn']),
+      appliedOn: serializer.fromJson<String?>(json['appliedOn']),
+      expectedBy: serializer.fromJson<String?>(json['expectedBy']),
+      approvedOn: serializer.fromJson<String?>(json['approvedOn']),
+      validUntil: serializer.fromJson<String?>(json['validUntil']),
+      liaisonBy: serializer.fromJson<String?>(json['liaisonBy']),
+      note: serializer.fromJson<String?>(json['note']),
+      history: serializer.fromJson<String>(json['history']),
+      raisedBy: serializer.fromJson<String>(json['raisedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'authority': serializer.toJson<String>(authority),
+      'title': serializer.toJson<String>(title),
+      'referenceNo': serializer.toJson<String?>(referenceNo),
+      'status': serializer.toJson<String>(status),
+      'waitingOn': serializer.toJson<String>(waitingOn),
+      'appliedOn': serializer.toJson<String?>(appliedOn),
+      'expectedBy': serializer.toJson<String?>(expectedBy),
+      'approvedOn': serializer.toJson<String?>(approvedOn),
+      'validUntil': serializer.toJson<String?>(validUntil),
+      'liaisonBy': serializer.toJson<String?>(liaisonBy),
+      'note': serializer.toJson<String?>(note),
+      'history': serializer.toJson<String>(history),
+      'raisedBy': serializer.toJson<String>(raisedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  SiteApproval copyWith({
+    String? id,
+    String? projectId,
+    String? authority,
+    String? title,
+    Value<String?> referenceNo = const Value.absent(),
+    String? status,
+    String? waitingOn,
+    Value<String?> appliedOn = const Value.absent(),
+    Value<String?> expectedBy = const Value.absent(),
+    Value<String?> approvedOn = const Value.absent(),
+    Value<String?> validUntil = const Value.absent(),
+    Value<String?> liaisonBy = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    String? history,
+    String? raisedBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => SiteApproval(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    authority: authority ?? this.authority,
+    title: title ?? this.title,
+    referenceNo: referenceNo.present ? referenceNo.value : this.referenceNo,
+    status: status ?? this.status,
+    waitingOn: waitingOn ?? this.waitingOn,
+    appliedOn: appliedOn.present ? appliedOn.value : this.appliedOn,
+    expectedBy: expectedBy.present ? expectedBy.value : this.expectedBy,
+    approvedOn: approvedOn.present ? approvedOn.value : this.approvedOn,
+    validUntil: validUntil.present ? validUntil.value : this.validUntil,
+    liaisonBy: liaisonBy.present ? liaisonBy.value : this.liaisonBy,
+    note: note.present ? note.value : this.note,
+    history: history ?? this.history,
+    raisedBy: raisedBy ?? this.raisedBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SiteApproval copyWithCompanion(SiteApprovalsCompanion data) {
+    return SiteApproval(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      authority: data.authority.present ? data.authority.value : this.authority,
+      title: data.title.present ? data.title.value : this.title,
+      referenceNo: data.referenceNo.present
+          ? data.referenceNo.value
+          : this.referenceNo,
+      status: data.status.present ? data.status.value : this.status,
+      waitingOn: data.waitingOn.present ? data.waitingOn.value : this.waitingOn,
+      appliedOn: data.appliedOn.present ? data.appliedOn.value : this.appliedOn,
+      expectedBy: data.expectedBy.present
+          ? data.expectedBy.value
+          : this.expectedBy,
+      approvedOn: data.approvedOn.present
+          ? data.approvedOn.value
+          : this.approvedOn,
+      validUntil: data.validUntil.present
+          ? data.validUntil.value
+          : this.validUntil,
+      liaisonBy: data.liaisonBy.present ? data.liaisonBy.value : this.liaisonBy,
+      note: data.note.present ? data.note.value : this.note,
+      history: data.history.present ? data.history.value : this.history,
+      raisedBy: data.raisedBy.present ? data.raisedBy.value : this.raisedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SiteApproval(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('authority: $authority, ')
+          ..write('title: $title, ')
+          ..write('referenceNo: $referenceNo, ')
+          ..write('status: $status, ')
+          ..write('waitingOn: $waitingOn, ')
+          ..write('appliedOn: $appliedOn, ')
+          ..write('expectedBy: $expectedBy, ')
+          ..write('approvedOn: $approvedOn, ')
+          ..write('validUntil: $validUntil, ')
+          ..write('liaisonBy: $liaisonBy, ')
+          ..write('note: $note, ')
+          ..write('history: $history, ')
+          ..write('raisedBy: $raisedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    authority,
+    title,
+    referenceNo,
+    status,
+    waitingOn,
+    appliedOn,
+    expectedBy,
+    approvedOn,
+    validUntil,
+    liaisonBy,
+    note,
+    history,
+    raisedBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SiteApproval &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.authority == this.authority &&
+          other.title == this.title &&
+          other.referenceNo == this.referenceNo &&
+          other.status == this.status &&
+          other.waitingOn == this.waitingOn &&
+          other.appliedOn == this.appliedOn &&
+          other.expectedBy == this.expectedBy &&
+          other.approvedOn == this.approvedOn &&
+          other.validUntil == this.validUntil &&
+          other.liaisonBy == this.liaisonBy &&
+          other.note == this.note &&
+          other.history == this.history &&
+          other.raisedBy == this.raisedBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SiteApprovalsCompanion extends UpdateCompanion<SiteApproval> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> authority;
+  final Value<String> title;
+  final Value<String?> referenceNo;
+  final Value<String> status;
+  final Value<String> waitingOn;
+  final Value<String?> appliedOn;
+  final Value<String?> expectedBy;
+  final Value<String?> approvedOn;
+  final Value<String?> validUntil;
+  final Value<String?> liaisonBy;
+  final Value<String?> note;
+  final Value<String> history;
+  final Value<String> raisedBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const SiteApprovalsCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.authority = const Value.absent(),
+    this.title = const Value.absent(),
+    this.referenceNo = const Value.absent(),
+    this.status = const Value.absent(),
+    this.waitingOn = const Value.absent(),
+    this.appliedOn = const Value.absent(),
+    this.expectedBy = const Value.absent(),
+    this.approvedOn = const Value.absent(),
+    this.validUntil = const Value.absent(),
+    this.liaisonBy = const Value.absent(),
+    this.note = const Value.absent(),
+    this.history = const Value.absent(),
+    this.raisedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SiteApprovalsCompanion.insert({
+    required String id,
+    required String projectId,
+    this.authority = const Value.absent(),
+    required String title,
+    this.referenceNo = const Value.absent(),
+    this.status = const Value.absent(),
+    this.waitingOn = const Value.absent(),
+    this.appliedOn = const Value.absent(),
+    this.expectedBy = const Value.absent(),
+    this.approvedOn = const Value.absent(),
+    this.validUntil = const Value.absent(),
+    this.liaisonBy = const Value.absent(),
+    this.note = const Value.absent(),
+    this.history = const Value.absent(),
+    required String raisedBy,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       title = Value(title),
+       raisedBy = Value(raisedBy);
+  static Insertable<SiteApproval> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? authority,
+    Expression<String>? title,
+    Expression<String>? referenceNo,
+    Expression<String>? status,
+    Expression<String>? waitingOn,
+    Expression<String>? appliedOn,
+    Expression<String>? expectedBy,
+    Expression<String>? approvedOn,
+    Expression<String>? validUntil,
+    Expression<String>? liaisonBy,
+    Expression<String>? note,
+    Expression<String>? history,
+    Expression<String>? raisedBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (authority != null) 'authority': authority,
+      if (title != null) 'title': title,
+      if (referenceNo != null) 'reference_no': referenceNo,
+      if (status != null) 'status': status,
+      if (waitingOn != null) 'waiting_on': waitingOn,
+      if (appliedOn != null) 'applied_on': appliedOn,
+      if (expectedBy != null) 'expected_by': expectedBy,
+      if (approvedOn != null) 'approved_on': approvedOn,
+      if (validUntil != null) 'valid_until': validUntil,
+      if (liaisonBy != null) 'liaison_by': liaisonBy,
+      if (note != null) 'note': note,
+      if (history != null) 'history': history,
+      if (raisedBy != null) 'raised_by': raisedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SiteApprovalsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? authority,
+    Value<String>? title,
+    Value<String?>? referenceNo,
+    Value<String>? status,
+    Value<String>? waitingOn,
+    Value<String?>? appliedOn,
+    Value<String?>? expectedBy,
+    Value<String?>? approvedOn,
+    Value<String?>? validUntil,
+    Value<String?>? liaisonBy,
+    Value<String?>? note,
+    Value<String>? history,
+    Value<String>? raisedBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SiteApprovalsCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      authority: authority ?? this.authority,
+      title: title ?? this.title,
+      referenceNo: referenceNo ?? this.referenceNo,
+      status: status ?? this.status,
+      waitingOn: waitingOn ?? this.waitingOn,
+      appliedOn: appliedOn ?? this.appliedOn,
+      expectedBy: expectedBy ?? this.expectedBy,
+      approvedOn: approvedOn ?? this.approvedOn,
+      validUntil: validUntil ?? this.validUntil,
+      liaisonBy: liaisonBy ?? this.liaisonBy,
+      note: note ?? this.note,
+      history: history ?? this.history,
+      raisedBy: raisedBy ?? this.raisedBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (authority.present) {
+      map['authority'] = Variable<String>(authority.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (referenceNo.present) {
+      map['reference_no'] = Variable<String>(referenceNo.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (waitingOn.present) {
+      map['waiting_on'] = Variable<String>(waitingOn.value);
+    }
+    if (appliedOn.present) {
+      map['applied_on'] = Variable<String>(appliedOn.value);
+    }
+    if (expectedBy.present) {
+      map['expected_by'] = Variable<String>(expectedBy.value);
+    }
+    if (approvedOn.present) {
+      map['approved_on'] = Variable<String>(approvedOn.value);
+    }
+    if (validUntil.present) {
+      map['valid_until'] = Variable<String>(validUntil.value);
+    }
+    if (liaisonBy.present) {
+      map['liaison_by'] = Variable<String>(liaisonBy.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (history.present) {
+      map['history'] = Variable<String>(history.value);
+    }
+    if (raisedBy.present) {
+      map['raised_by'] = Variable<String>(raisedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SiteApprovalsCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('authority: $authority, ')
+          ..write('title: $title, ')
+          ..write('referenceNo: $referenceNo, ')
+          ..write('status: $status, ')
+          ..write('waitingOn: $waitingOn, ')
+          ..write('appliedOn: $appliedOn, ')
+          ..write('expectedBy: $expectedBy, ')
+          ..write('approvedOn: $approvedOn, ')
+          ..write('validUntil: $validUntil, ')
+          ..write('liaisonBy: $liaisonBy, ')
+          ..write('note: $note, ')
+          ..write('history: $history, ')
+          ..write('raisedBy: $raisedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LiaisonLogsTable extends LiaisonLogs
+    with TableInfo<$LiaisonLogsTable, LiaisonLog> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LiaisonLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _approvalIdMeta = const VerificationMeta(
+    'approvalId',
+  );
+  @override
+  late final GeneratedColumn<String> approvalId = GeneratedColumn<String>(
+    'approval_id',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 36),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _onDayMeta = const VerificationMeta('onDay');
+  @override
+  late final GeneratedColumn<String> onDay = GeneratedColumn<String>(
+    'on_day',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _minutesMeta = const VerificationMeta(
+    'minutes',
+  );
+  @override
+  late final GeneratedColumn<int> minutes = GeneratedColumn<int>(
+    'minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _personMeta = const VerificationMeta('person');
+  @override
+  late final GeneratedColumn<String> person = GeneratedColumn<String>(
+    'person',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 120),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _costMeta = const VerificationMeta('cost');
+  @override
+  late final GeneratedColumn<double> cost = GeneratedColumn<double>(
+    'cost',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _loggedByMeta = const VerificationMeta(
+    'loggedBy',
+  );
+  @override
+  late final GeneratedColumn<String> loggedBy = GeneratedColumn<String>(
+    'logged_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    approvalId,
+    onDay,
+    minutes,
+    person,
+    cost,
+    note,
+    loggedBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'liaison_logs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LiaisonLog> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('approval_id')) {
+      context.handle(
+        _approvalIdMeta,
+        approvalId.isAcceptableOrUnknown(data['approval_id']!, _approvalIdMeta),
+      );
+    }
+    if (data.containsKey('on_day')) {
+      context.handle(
+        _onDayMeta,
+        onDay.isAcceptableOrUnknown(data['on_day']!, _onDayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_onDayMeta);
+    }
+    if (data.containsKey('minutes')) {
+      context.handle(
+        _minutesMeta,
+        minutes.isAcceptableOrUnknown(data['minutes']!, _minutesMeta),
+      );
+    }
+    if (data.containsKey('person')) {
+      context.handle(
+        _personMeta,
+        person.isAcceptableOrUnknown(data['person']!, _personMeta),
+      );
+    }
+    if (data.containsKey('cost')) {
+      context.handle(
+        _costMeta,
+        cost.isAcceptableOrUnknown(data['cost']!, _costMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('logged_by')) {
+      context.handle(
+        _loggedByMeta,
+        loggedBy.isAcceptableOrUnknown(data['logged_by']!, _loggedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_loggedByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LiaisonLog map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LiaisonLog(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      approvalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}approval_id'],
+      ),
+      onDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}on_day'],
+      )!,
+      minutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}minutes'],
+      )!,
+      person: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}person'],
+      ),
+      cost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}cost'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      loggedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}logged_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LiaisonLogsTable createAlias(String alias) {
+    return $LiaisonLogsTable(attachedDatabase, alias);
+  }
+}
+
+class LiaisonLog extends DataClass implements Insertable<LiaisonLog> {
+  final String id;
+  final String projectId;
+  final String? approvalId;
+
+  /// yyyy-mm-dd
+  final String onDay;
+  final int minutes;
+
+  /// Whose time it was (a director, a liaison officer).
+  final String? person;
+
+  /// What it cost the firm: the person's time at their rate, plus
+  /// travel and fees.
+  final double cost;
+  final String? note;
+  final String loggedBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const LiaisonLog({
+    required this.id,
+    required this.projectId,
+    this.approvalId,
+    required this.onDay,
+    required this.minutes,
+    this.person,
+    required this.cost,
+    this.note,
+    required this.loggedBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    if (!nullToAbsent || approvalId != null) {
+      map['approval_id'] = Variable<String>(approvalId);
+    }
+    map['on_day'] = Variable<String>(onDay);
+    map['minutes'] = Variable<int>(minutes);
+    if (!nullToAbsent || person != null) {
+      map['person'] = Variable<String>(person);
+    }
+    map['cost'] = Variable<double>(cost);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['logged_by'] = Variable<String>(loggedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  LiaisonLogsCompanion toCompanion(bool nullToAbsent) {
+    return LiaisonLogsCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      approvalId: approvalId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(approvalId),
+      onDay: Value(onDay),
+      minutes: Value(minutes),
+      person: person == null && nullToAbsent
+          ? const Value.absent()
+          : Value(person),
+      cost: Value(cost),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      loggedBy: Value(loggedBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory LiaisonLog.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LiaisonLog(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      approvalId: serializer.fromJson<String?>(json['approvalId']),
+      onDay: serializer.fromJson<String>(json['onDay']),
+      minutes: serializer.fromJson<int>(json['minutes']),
+      person: serializer.fromJson<String?>(json['person']),
+      cost: serializer.fromJson<double>(json['cost']),
+      note: serializer.fromJson<String?>(json['note']),
+      loggedBy: serializer.fromJson<String>(json['loggedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'approvalId': serializer.toJson<String?>(approvalId),
+      'onDay': serializer.toJson<String>(onDay),
+      'minutes': serializer.toJson<int>(minutes),
+      'person': serializer.toJson<String?>(person),
+      'cost': serializer.toJson<double>(cost),
+      'note': serializer.toJson<String?>(note),
+      'loggedBy': serializer.toJson<String>(loggedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  LiaisonLog copyWith({
+    String? id,
+    String? projectId,
+    Value<String?> approvalId = const Value.absent(),
+    String? onDay,
+    int? minutes,
+    Value<String?> person = const Value.absent(),
+    double? cost,
+    Value<String?> note = const Value.absent(),
+    String? loggedBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => LiaisonLog(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    approvalId: approvalId.present ? approvalId.value : this.approvalId,
+    onDay: onDay ?? this.onDay,
+    minutes: minutes ?? this.minutes,
+    person: person.present ? person.value : this.person,
+    cost: cost ?? this.cost,
+    note: note.present ? note.value : this.note,
+    loggedBy: loggedBy ?? this.loggedBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  LiaisonLog copyWithCompanion(LiaisonLogsCompanion data) {
+    return LiaisonLog(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      approvalId: data.approvalId.present
+          ? data.approvalId.value
+          : this.approvalId,
+      onDay: data.onDay.present ? data.onDay.value : this.onDay,
+      minutes: data.minutes.present ? data.minutes.value : this.minutes,
+      person: data.person.present ? data.person.value : this.person,
+      cost: data.cost.present ? data.cost.value : this.cost,
+      note: data.note.present ? data.note.value : this.note,
+      loggedBy: data.loggedBy.present ? data.loggedBy.value : this.loggedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LiaisonLog(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('approvalId: $approvalId, ')
+          ..write('onDay: $onDay, ')
+          ..write('minutes: $minutes, ')
+          ..write('person: $person, ')
+          ..write('cost: $cost, ')
+          ..write('note: $note, ')
+          ..write('loggedBy: $loggedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    approvalId,
+    onDay,
+    minutes,
+    person,
+    cost,
+    note,
+    loggedBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LiaisonLog &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.approvalId == this.approvalId &&
+          other.onDay == this.onDay &&
+          other.minutes == this.minutes &&
+          other.person == this.person &&
+          other.cost == this.cost &&
+          other.note == this.note &&
+          other.loggedBy == this.loggedBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class LiaisonLogsCompanion extends UpdateCompanion<LiaisonLog> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String?> approvalId;
+  final Value<String> onDay;
+  final Value<int> minutes;
+  final Value<String?> person;
+  final Value<double> cost;
+  final Value<String?> note;
+  final Value<String> loggedBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const LiaisonLogsCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.approvalId = const Value.absent(),
+    this.onDay = const Value.absent(),
+    this.minutes = const Value.absent(),
+    this.person = const Value.absent(),
+    this.cost = const Value.absent(),
+    this.note = const Value.absent(),
+    this.loggedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LiaisonLogsCompanion.insert({
+    required String id,
+    required String projectId,
+    this.approvalId = const Value.absent(),
+    required String onDay,
+    this.minutes = const Value.absent(),
+    this.person = const Value.absent(),
+    this.cost = const Value.absent(),
+    this.note = const Value.absent(),
+    required String loggedBy,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       onDay = Value(onDay),
+       loggedBy = Value(loggedBy);
+  static Insertable<LiaisonLog> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? approvalId,
+    Expression<String>? onDay,
+    Expression<int>? minutes,
+    Expression<String>? person,
+    Expression<double>? cost,
+    Expression<String>? note,
+    Expression<String>? loggedBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (approvalId != null) 'approval_id': approvalId,
+      if (onDay != null) 'on_day': onDay,
+      if (minutes != null) 'minutes': minutes,
+      if (person != null) 'person': person,
+      if (cost != null) 'cost': cost,
+      if (note != null) 'note': note,
+      if (loggedBy != null) 'logged_by': loggedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LiaisonLogsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String?>? approvalId,
+    Value<String>? onDay,
+    Value<int>? minutes,
+    Value<String?>? person,
+    Value<double>? cost,
+    Value<String?>? note,
+    Value<String>? loggedBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return LiaisonLogsCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      approvalId: approvalId ?? this.approvalId,
+      onDay: onDay ?? this.onDay,
+      minutes: minutes ?? this.minutes,
+      person: person ?? this.person,
+      cost: cost ?? this.cost,
+      note: note ?? this.note,
+      loggedBy: loggedBy ?? this.loggedBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (approvalId.present) {
+      map['approval_id'] = Variable<String>(approvalId.value);
+    }
+    if (onDay.present) {
+      map['on_day'] = Variable<String>(onDay.value);
+    }
+    if (minutes.present) {
+      map['minutes'] = Variable<int>(minutes.value);
+    }
+    if (person.present) {
+      map['person'] = Variable<String>(person.value);
+    }
+    if (cost.present) {
+      map['cost'] = Variable<double>(cost.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (loggedBy.present) {
+      map['logged_by'] = Variable<String>(loggedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LiaisonLogsCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('approvalId: $approvalId, ')
+          ..write('onDay: $onDay, ')
+          ..write('minutes: $minutes, ')
+          ..write('person: $person, ')
+          ..write('cost: $cost, ')
+          ..write('note: $note, ')
+          ..write('loggedBy: $loggedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -57695,6 +59350,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $WorkerPermitsTable workerPermits = $WorkerPermitsTable(this);
   late final $DrawingPinsTable drawingPins = $DrawingPinsTable(this);
   late final $SubmittalsTable submittals = $SubmittalsTable(this);
+  late final $SiteApprovalsTable siteApprovals = $SiteApprovalsTable(this);
+  late final $LiaisonLogsTable liaisonLogs = $LiaisonLogsTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -57787,6 +59444,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     workerPermits,
     drawingPins,
     submittals,
+    siteApprovals,
+    liaisonLogs,
     syncOutbox,
   ];
 }
@@ -85603,6 +87262,776 @@ typedef $$SubmittalsTableProcessedTableManager =
       Submittal,
       PrefetchHooks Function()
     >;
+typedef $$SiteApprovalsTableCreateCompanionBuilder =
+    SiteApprovalsCompanion Function({
+      required String id,
+      required String projectId,
+      Value<String> authority,
+      required String title,
+      Value<String?> referenceNo,
+      Value<String> status,
+      Value<String> waitingOn,
+      Value<String?> appliedOn,
+      Value<String?> expectedBy,
+      Value<String?> approvedOn,
+      Value<String?> validUntil,
+      Value<String?> liaisonBy,
+      Value<String?> note,
+      Value<String> history,
+      required String raisedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SiteApprovalsTableUpdateCompanionBuilder =
+    SiteApprovalsCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> authority,
+      Value<String> title,
+      Value<String?> referenceNo,
+      Value<String> status,
+      Value<String> waitingOn,
+      Value<String?> appliedOn,
+      Value<String?> expectedBy,
+      Value<String?> approvedOn,
+      Value<String?> validUntil,
+      Value<String?> liaisonBy,
+      Value<String?> note,
+      Value<String> history,
+      Value<String> raisedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$SiteApprovalsTableFilterComposer
+    extends Composer<_$AppDatabase, $SiteApprovalsTable> {
+  $$SiteApprovalsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get authority => $composableBuilder(
+    column: $table.authority,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get referenceNo => $composableBuilder(
+    column: $table.referenceNo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get waitingOn => $composableBuilder(
+    column: $table.waitingOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get appliedOn => $composableBuilder(
+    column: $table.appliedOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get expectedBy => $composableBuilder(
+    column: $table.expectedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get approvedOn => $composableBuilder(
+    column: $table.approvedOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get validUntil => $composableBuilder(
+    column: $table.validUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get liaisonBy => $composableBuilder(
+    column: $table.liaisonBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get history => $composableBuilder(
+    column: $table.history,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get raisedBy => $composableBuilder(
+    column: $table.raisedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SiteApprovalsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SiteApprovalsTable> {
+  $$SiteApprovalsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get authority => $composableBuilder(
+    column: $table.authority,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get referenceNo => $composableBuilder(
+    column: $table.referenceNo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get waitingOn => $composableBuilder(
+    column: $table.waitingOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get appliedOn => $composableBuilder(
+    column: $table.appliedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get expectedBy => $composableBuilder(
+    column: $table.expectedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get approvedOn => $composableBuilder(
+    column: $table.approvedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get validUntil => $composableBuilder(
+    column: $table.validUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get liaisonBy => $composableBuilder(
+    column: $table.liaisonBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get history => $composableBuilder(
+    column: $table.history,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get raisedBy => $composableBuilder(
+    column: $table.raisedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SiteApprovalsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SiteApprovalsTable> {
+  $$SiteApprovalsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get authority =>
+      $composableBuilder(column: $table.authority, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get referenceNo => $composableBuilder(
+    column: $table.referenceNo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get waitingOn =>
+      $composableBuilder(column: $table.waitingOn, builder: (column) => column);
+
+  GeneratedColumn<String> get appliedOn =>
+      $composableBuilder(column: $table.appliedOn, builder: (column) => column);
+
+  GeneratedColumn<String> get expectedBy => $composableBuilder(
+    column: $table.expectedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get approvedOn => $composableBuilder(
+    column: $table.approvedOn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get validUntil => $composableBuilder(
+    column: $table.validUntil,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get liaisonBy =>
+      $composableBuilder(column: $table.liaisonBy, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get history =>
+      $composableBuilder(column: $table.history, builder: (column) => column);
+
+  GeneratedColumn<String> get raisedBy =>
+      $composableBuilder(column: $table.raisedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SiteApprovalsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SiteApprovalsTable,
+          SiteApproval,
+          $$SiteApprovalsTableFilterComposer,
+          $$SiteApprovalsTableOrderingComposer,
+          $$SiteApprovalsTableAnnotationComposer,
+          $$SiteApprovalsTableCreateCompanionBuilder,
+          $$SiteApprovalsTableUpdateCompanionBuilder,
+          (
+            SiteApproval,
+            BaseReferences<_$AppDatabase, $SiteApprovalsTable, SiteApproval>,
+          ),
+          SiteApproval,
+          PrefetchHooks Function()
+        > {
+  $$SiteApprovalsTableTableManager(_$AppDatabase db, $SiteApprovalsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SiteApprovalsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SiteApprovalsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SiteApprovalsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> authority = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String?> referenceNo = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> waitingOn = const Value.absent(),
+                Value<String?> appliedOn = const Value.absent(),
+                Value<String?> expectedBy = const Value.absent(),
+                Value<String?> approvedOn = const Value.absent(),
+                Value<String?> validUntil = const Value.absent(),
+                Value<String?> liaisonBy = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> history = const Value.absent(),
+                Value<String> raisedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SiteApprovalsCompanion(
+                id: id,
+                projectId: projectId,
+                authority: authority,
+                title: title,
+                referenceNo: referenceNo,
+                status: status,
+                waitingOn: waitingOn,
+                appliedOn: appliedOn,
+                expectedBy: expectedBy,
+                approvedOn: approvedOn,
+                validUntil: validUntil,
+                liaisonBy: liaisonBy,
+                note: note,
+                history: history,
+                raisedBy: raisedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                Value<String> authority = const Value.absent(),
+                required String title,
+                Value<String?> referenceNo = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> waitingOn = const Value.absent(),
+                Value<String?> appliedOn = const Value.absent(),
+                Value<String?> expectedBy = const Value.absent(),
+                Value<String?> approvedOn = const Value.absent(),
+                Value<String?> validUntil = const Value.absent(),
+                Value<String?> liaisonBy = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> history = const Value.absent(),
+                required String raisedBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SiteApprovalsCompanion.insert(
+                id: id,
+                projectId: projectId,
+                authority: authority,
+                title: title,
+                referenceNo: referenceNo,
+                status: status,
+                waitingOn: waitingOn,
+                appliedOn: appliedOn,
+                expectedBy: expectedBy,
+                approvedOn: approvedOn,
+                validUntil: validUntil,
+                liaisonBy: liaisonBy,
+                note: note,
+                history: history,
+                raisedBy: raisedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SiteApprovalsTable, SiteApproval>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SiteApprovalsTable,
+                    SiteApproval
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SiteApprovalsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SiteApprovalsTable,
+      SiteApproval,
+      $$SiteApprovalsTableFilterComposer,
+      $$SiteApprovalsTableOrderingComposer,
+      $$SiteApprovalsTableAnnotationComposer,
+      $$SiteApprovalsTableCreateCompanionBuilder,
+      $$SiteApprovalsTableUpdateCompanionBuilder,
+      (
+        SiteApproval,
+        BaseReferences<_$AppDatabase, $SiteApprovalsTable, SiteApproval>,
+      ),
+      SiteApproval,
+      PrefetchHooks Function()
+    >;
+typedef $$LiaisonLogsTableCreateCompanionBuilder =
+    LiaisonLogsCompanion Function({
+      required String id,
+      required String projectId,
+      Value<String?> approvalId,
+      required String onDay,
+      Value<int> minutes,
+      Value<String?> person,
+      Value<double> cost,
+      Value<String?> note,
+      required String loggedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$LiaisonLogsTableUpdateCompanionBuilder =
+    LiaisonLogsCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String?> approvalId,
+      Value<String> onDay,
+      Value<int> minutes,
+      Value<String?> person,
+      Value<double> cost,
+      Value<String?> note,
+      Value<String> loggedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$LiaisonLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $LiaisonLogsTable> {
+  $$LiaisonLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get approvalId => $composableBuilder(
+    column: $table.approvalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get onDay => $composableBuilder(
+    column: $table.onDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get minutes => $composableBuilder(
+    column: $table.minutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get person => $composableBuilder(
+    column: $table.person,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get cost => $composableBuilder(
+    column: $table.cost,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get loggedBy => $composableBuilder(
+    column: $table.loggedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LiaisonLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LiaisonLogsTable> {
+  $$LiaisonLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get approvalId => $composableBuilder(
+    column: $table.approvalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get onDay => $composableBuilder(
+    column: $table.onDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get minutes => $composableBuilder(
+    column: $table.minutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get person => $composableBuilder(
+    column: $table.person,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get cost => $composableBuilder(
+    column: $table.cost,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get loggedBy => $composableBuilder(
+    column: $table.loggedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LiaisonLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LiaisonLogsTable> {
+  $$LiaisonLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get approvalId => $composableBuilder(
+    column: $table.approvalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get onDay =>
+      $composableBuilder(column: $table.onDay, builder: (column) => column);
+
+  GeneratedColumn<int> get minutes =>
+      $composableBuilder(column: $table.minutes, builder: (column) => column);
+
+  GeneratedColumn<String> get person =>
+      $composableBuilder(column: $table.person, builder: (column) => column);
+
+  GeneratedColumn<double> get cost =>
+      $composableBuilder(column: $table.cost, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get loggedBy =>
+      $composableBuilder(column: $table.loggedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$LiaisonLogsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LiaisonLogsTable,
+          LiaisonLog,
+          $$LiaisonLogsTableFilterComposer,
+          $$LiaisonLogsTableOrderingComposer,
+          $$LiaisonLogsTableAnnotationComposer,
+          $$LiaisonLogsTableCreateCompanionBuilder,
+          $$LiaisonLogsTableUpdateCompanionBuilder,
+          (
+            LiaisonLog,
+            BaseReferences<_$AppDatabase, $LiaisonLogsTable, LiaisonLog>,
+          ),
+          LiaisonLog,
+          PrefetchHooks Function()
+        > {
+  $$LiaisonLogsTableTableManager(_$AppDatabase db, $LiaisonLogsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LiaisonLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LiaisonLogsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LiaisonLogsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String?> approvalId = const Value.absent(),
+                Value<String> onDay = const Value.absent(),
+                Value<int> minutes = const Value.absent(),
+                Value<String?> person = const Value.absent(),
+                Value<double> cost = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> loggedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LiaisonLogsCompanion(
+                id: id,
+                projectId: projectId,
+                approvalId: approvalId,
+                onDay: onDay,
+                minutes: minutes,
+                person: person,
+                cost: cost,
+                note: note,
+                loggedBy: loggedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                Value<String?> approvalId = const Value.absent(),
+                required String onDay,
+                Value<int> minutes = const Value.absent(),
+                Value<String?> person = const Value.absent(),
+                Value<double> cost = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                required String loggedBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LiaisonLogsCompanion.insert(
+                id: id,
+                projectId: projectId,
+                approvalId: approvalId,
+                onDay: onDay,
+                minutes: minutes,
+                person: person,
+                cost: cost,
+                note: note,
+                loggedBy: loggedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LiaisonLogsTable, LiaisonLog>(table),
+                  BaseReferences<_$AppDatabase, $LiaisonLogsTable, LiaisonLog>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LiaisonLogsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LiaisonLogsTable,
+      LiaisonLog,
+      $$LiaisonLogsTableFilterComposer,
+      $$LiaisonLogsTableOrderingComposer,
+      $$LiaisonLogsTableAnnotationComposer,
+      $$LiaisonLogsTableCreateCompanionBuilder,
+      $$LiaisonLogsTableUpdateCompanionBuilder,
+      (
+        LiaisonLog,
+        BaseReferences<_$AppDatabase, $LiaisonLogsTable, LiaisonLog>,
+      ),
+      LiaisonLog,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -86045,6 +88474,10 @@ class $AppDatabaseManager {
       $$DrawingPinsTableTableManager(_db, _db.drawingPins);
   $$SubmittalsTableTableManager get submittals =>
       $$SubmittalsTableTableManager(_db, _db.submittals);
+  $$SiteApprovalsTableTableManager get siteApprovals =>
+      $$SiteApprovalsTableTableManager(_db, _db.siteApprovals);
+  $$LiaisonLogsTableTableManager get liaisonLogs =>
+      $$LiaisonLogsTableTableManager(_db, _db.liaisonLogs);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }

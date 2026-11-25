@@ -27,10 +27,12 @@ import 'package:fieldos_mobile/features/warehouse/warehouse_rules.dart';
 import 'package:fieldos_mobile/features/money/billing_calc.dart' show BillLine, encodeLines;
 import 'package:fieldos_mobile/l10n/language.dart' show trf;
 import 'package:fieldos_mobile/data/backup.dart';
+import 'package:fieldos_mobile/data/pre_construction_dao.dart';
 import 'package:fieldos_mobile/data/site_execution_dao.dart';
 import 'package:fieldos_mobile/data/write_guard.dart';
 export 'package:fieldos_mobile/data/write_guard.dart' show WriteGuard, ReadOnlyModeException, ReadOnlyReason, readOnlyMessage;
 export 'package:fieldos_mobile/data/site_execution_dao.dart' show SiteExecutionDao, ExecutionRefused;
+export 'package:fieldos_mobile/data/pre_construction_dao.dart' show PreConstructionDao;
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
 
 import 'tables.dart';
@@ -132,6 +134,8 @@ String? _clip(String? s, int max) {
   WorkerPermits,
   DrawingPins,
   Submittals,
+  SiteApprovals,
+  LiaisonLogs,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -212,7 +216,7 @@ class AppDatabase extends _$AppDatabase {
             );
 
   @override
-  int get schemaVersion => 44;
+  int get schemaVersion => 45;
 
   // v3 shipped with no MigrationStrategy at all -- the default only creates
   // missing tables, never adds columns, so any additive change to an
@@ -475,6 +479,11 @@ class AppDatabase extends _$AppDatabase {
             // The client's address on bills (GST invoice rule 46).
             await _addColumnIfMissing(m, clientBills, clientBills.clientAddress);
           }
+          if (from < 45) {
+            // Pre-construction approvals and the time spent chasing them.
+            await _createTableIfMissing(m, siteApprovals);
+            await _createTableIfMissing(m, liaisonLogs);
+          }
         },
         beforeOpen: (details) => ensureLookupIndexes(),
       );
@@ -571,6 +580,7 @@ class AppDatabase extends _$AppDatabase {
   CloseDao get closeDao => CloseDao(this);
   CommercialDao get commercialDao => CommercialDao(this);
   SiteExecutionDao get siteExecutionDao => SiteExecutionDao(this);
+  PreConstructionDao get preConstructionDao => PreConstructionDao(this);
   CrmDao get crmDao => CrmDao(this);
   WarehouseDao get warehouseDao => WarehouseDao(this);
   PayrollDao get payrollDao => PayrollDao(this);

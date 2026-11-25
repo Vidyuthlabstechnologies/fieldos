@@ -169,3 +169,24 @@ cleared and the history grown; the history is append-only.
 Tests: `test/submittals_test.dart` (rules and the tab on a small phone in
 Hindi) and `test/submittals_cycle_test.dart` (two phones against the local
 stack).
+
+## Pre-construction (2026-11-25)
+
+Site menu > **Approvals and drawings (pre-construction)**. Three tabs:
+
+- **Approvals**: GHMC, HMDA, municipality, Fire NOC, pollution, electricity,
+  water, RERA, airport and other clearances. Each has a status (not
+  started, preparing, applied, query raised, resubmitted, approved,
+  rejected), whose court the ball is in (us, consultant, authority,
+  client), dates, an optional end date for NOCs, and a history that only
+  grows. Open approvals untouched for 7 days show as stuck; the longest
+  wait is named as the bottleneck. A closed approval is never reopened.
+- **Drawing log**: each drawing's revisions in order (Rev 1, Rev 2, GFC).
+  A drawing is Good for Construction once its revision labelled GFC is
+  approved.
+- **Liaison time and cost** (owner and project managers only, enforced in
+  RLS): who went to which office, how long, what it cost.
+
+The project's phase (pre-project, execution, post-project) follows its
+stage: planning, running or on hold, handed over. Server:
+`supabase/migrations/20261125100000_pre_construction.sql`. Phone schema v45.
