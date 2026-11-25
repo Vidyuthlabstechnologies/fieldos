@@ -169,3 +169,51 @@ cleared and the history grown; the history is append-only.
 Tests: `test/submittals_test.dart` (rules and the tab on a small phone in
 Hindi) and `test/submittals_cycle_test.dart` (two phones against the local
 stack).
+
+## Pre-construction (2026-11-25)
+
+Site menu > **Approvals and drawings (pre-construction)**. Three tabs:
+
+- **Approvals**: GHMC, HMDA, municipality, Fire NOC, pollution, electricity,
+  water, RERA, airport and other clearances. Each has a status (not
+  started, preparing, applied, query raised, resubmitted, approved,
+  rejected), whose court the ball is in (us, consultant, authority,
+  client), dates, an optional end date for NOCs, and a history that only
+  grows. Open approvals untouched for 7 days show as stuck; the longest
+  wait is named as the bottleneck. A closed approval is never reopened.
+- **Drawing log**: each drawing's revisions in order (Rev 1, Rev 2, GFC).
+  A drawing is Good for Construction once its revision labelled GFC is
+  approved.
+- **Liaison time and cost** (owner and project managers only, enforced in
+  RLS): who went to which office, how long, what it cost.
+
+The project's phase (pre-project, execution, post-project) follows its
+stage: planning, running or on hold, handed over. Server:
+`supabase/migrations/20261125100000_pre_construction.sql`. Phone schema v45.
+
+## Stage checklists and on-site verification (2026-11-25)
+
+- **Stages**: Footings, Plinth beam, Columns (8 steps), First and Second slab, Dressing
+  (at least one day). Tasks tab, "Add stage checklist": each step becomes a task titled
+  "Columns: Casting". See `activity_templates.dart`.
+- **No 100% without being there**: those tasks carry `verify_required`. "Verify on site"
+  records the phone's position (`site_task_checks`, insert-only) and is refused when the
+  phone is outside the site's radius (150 m when the site sets none). Owners and project
+  managers are exempt. Server: `tasks_verify_guard` (migration 20261125120000). A daily
+  report that takes such a task to 100% keeps it at 99% until it is verified.
+- **Client view**: each stage shows as a milestone (steps done of total), migration
+  20261125140000. Labour-only contracts: record the client's steel and cement as stock
+  with "Supplied by the client" (counts in the stock, costs nothing).
+
+## Money visibility (2026-11-25)
+
+- Four expense heads: Material, Equipment, Labour, Others; tea, food and the like are
+  informal spend inside Others and shown separately (`expense_heads.dart`).
+- Server (migration 20261125130000): a site's owner, project managers and accounts read
+  every expense; everyone else only the entries they recorded. Wage rates can be set only
+  by those roles. Money received was already owners and project managers only.
+- Known gap: `workers.daily_wage` is still readable by every site member at the API level
+  (phones pull whole rows). The phone hides wages from other roles; the column privilege
+  follows once builds older than 1.8 are retired.
+- Value engineering (project menu, money roles only): work value done against spend,
+  spend per day, spend-ahead alert, delay days and their cost (`value_engineering.dart`).

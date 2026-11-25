@@ -22,7 +22,7 @@ Task task({
   DateTime? start,
   DateTime? due,
 }) =>
-    Task(
+    Task(verifyRequired: false, 
       id: id,
       projectId: projectId,
       title: id,

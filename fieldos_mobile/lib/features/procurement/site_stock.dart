@@ -16,7 +16,11 @@ const lowStockShare = 0.15;
 /// started being used (at no cost, so it never adds to the spending).
 const openingStockNote = 'Opening stock';
 
-bool isOpeningStock(MaterialReceipt r) => r.notes == openingStockNote && r.amount == 0 && r.poId == null;
+/// Material the client supplies on a labour-only contract (steel, cement):
+/// it counts in the stock but costs the builder nothing.
+const clientSuppliedNote = 'Supplied by the client';
+
+bool isOpeningStock(MaterialReceipt r) => (r.notes == openingStockNote || r.notes == clientSuppliedNote) && r.amount == 0 && r.poId == null;
 
 class StockLine {
   StockLine(this.name, this.unit);

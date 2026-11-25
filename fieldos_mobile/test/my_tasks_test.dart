@@ -16,7 +16,7 @@ import 'package:fieldos_mobile/sync/cloud_sync_service.dart';
 void main() {
   final now = DateTime(2026, 11, 6, 10);
 
-  Task task(String id, {DateTime? due, String status = 'todo', String? assignee, String project = 'p1'}) => Task(
+  Task task(String id, {DateTime? due, String status = 'todo', String? assignee, String project = 'p1'}) => Task(verifyRequired: false, 
         id: id,
         projectId: project,
         title: id,
@@ -75,7 +75,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final today = DateTime.now();
-    final old = Task(
+    final old = Task(verifyRequired: false, 
       id: 'tw',
       projectId: 'p1',
       title: 'Tower B structure',

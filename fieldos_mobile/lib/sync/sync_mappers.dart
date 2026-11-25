@@ -79,6 +79,7 @@ Map<String, dynamic> taskToSupabaseJson(Task t) => {
       'progress': t.progress,
       'priority': t.priority,
       'start_date': _dateOnly(t.startDate),
+      'verify_required': t.verifyRequired,
     };
 
 Map<String, dynamic> dprEntryToSupabaseJson(DprEntry d) => {
@@ -360,6 +361,7 @@ TasksCompanion taskFromSupabaseJson(Map<String, dynamic> row) => TasksCompanion.
       progress: Value((row['progress'] as num?)?.toInt() ?? 0),
       priority: Value(row['priority'] as String? ?? 'normal'),
       startDate: Value(row['start_date'] == null ? null : DateTime.parse(row['start_date'] as String)),
+      verifyRequired: Value(row['verify_required'] as bool? ?? false),
     );
 
 DprEntriesCompanion dprEntryFromSupabaseJson(Map<String, dynamic> row) => DprEntriesCompanion.insert(

@@ -15,7 +15,7 @@ import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/notification_service.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_bootstrap.dart';
 
-Task _task(String title, DateTime? due, {String status = 'todo'}) => Task(
+Task _task(String title, DateTime? due, {String status = 'todo'}) => Task(verifyRequired: false, 
   id: title,
   projectId: 'p',
   title: title,

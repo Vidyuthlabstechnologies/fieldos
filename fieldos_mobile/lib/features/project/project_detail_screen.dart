@@ -8,6 +8,9 @@ import 'package:uuid/uuid.dart';
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/features/execution/execution_screens.dart';
+import 'package:fieldos_mobile/features/execution/pre_construction_screen.dart';
+import 'package:fieldos_mobile/features/execution/value_engineering_screen.dart';
+import 'package:fieldos_mobile/features/execution/site_ops_screen.dart';
 import 'package:fieldos_mobile/features/schedule/gantt_screen.dart';
 import 'package:fieldos_mobile/features/project/site_notes_screen.dart';
 import 'package:fieldos_mobile/features/portals/portal_share.dart';
@@ -189,6 +192,16 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (_) => SiteExecutionScreen(project: widget.project)));
               }
+              if (v == 'preconstruction') {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => PreConstructionScreen(project: widget.project)));
+              }
+              if (v == 'value') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => ValueEngineeringScreen(project: widget.project)));
+              }
+              if (v == 'siteops') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => SiteOpsScreen(project: widget.project)));
+              }
               if (v == 'commercial') {
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (_) => CommercialScreen(project: widget.project)));
@@ -293,6 +306,28 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                 child: ListTile(
                   leading: const Icon(Icons.view_timeline_outlined),
                   title: Text(tr('Schedule (Gantt chart)')),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'preconstruction',
+                child: ListTile(
+                  leading: const Icon(Icons.account_balance_outlined),
+                  title: Text(tr('Approvals and drawings (pre-construction)')),
+                ),
+              ),
+              if (canSeeMoneyIn(ref.watch(sessionProvider).role))
+                PopupMenuItem(
+                  value: 'value',
+                  child: ListTile(
+                    leading: const Icon(Icons.stacked_line_chart),
+                    title: Text(tr('Value engineering')),
+                  ),
+                ),
+              PopupMenuItem(
+                value: 'siteops',
+                child: ListTile(
+                  leading: const Icon(Icons.fact_check_outlined),
+                  title: Text(tr('Quality tests, safety and security gate')),
                 ),
               ),
               PopupMenuItem(
@@ -543,7 +578,13 @@ class _DprTabState extends ConsumerState<_DprTab> {
         await db.dprDao.addPhoto(DprPhotosCompanion.insert(id: const Uuid().v4(), dprEntryId: dprId, photoPath: path));
       }
       for (final e in draft.taskProgress.entries) {
-        await db.taskDao.setProgress(e.key, e.value);
+        try {
+          await db.taskDao.setProgress(e.key, e.value);
+        } on ExecutionRefused {
+          // Needs an on-site check before 100%: the report keeps the work
+          // done so far and the task stays open until someone verifies it.
+          await db.taskDao.setProgress(e.key, 99);
+        }
       }
       if (draft.taskProgress.isNotEmpty) {
         ref.invalidate(tasksProvider(widget.project.id));

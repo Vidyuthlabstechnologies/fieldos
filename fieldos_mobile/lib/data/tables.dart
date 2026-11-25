@@ -130,6 +130,10 @@ class Tasks extends Table {
   /// finish, which the delay view compares against [dueDate].
   DateTimeColumn get startDate => dateTime().nullable()();
 
+  /// True when the supervisor must be on site, and prove it, before the
+  /// task can be marked 100%.
+  BoolColumn get verifyRequired => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -1930,6 +1934,203 @@ class Submittals extends Table {
   /// Earlier reviews, one line each, oldest first. Only ever grows.
   TextColumn get history => text().withLength(max: 8000).withDefault(const Constant(''))();
   TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// One approval or clearance a site waits for before (or while) it builds:
+/// GHMC building permission, Fire NOC, pollution board consent and so on.
+/// The row says where the application stands and whose court the ball is
+/// in, so the bottleneck is visible. Each status change adds a line to
+/// [history], which only grows.
+class SiteApprovals extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// ghmc | hmda | municipality | fire | pollution | electricity | water | rera | airport | other
+  TextColumn get authority => text().withLength(min: 1, max: 20).withDefault(const Constant('other'))();
+  TextColumn get title => text().withLength(min: 1, max: 200)();
+
+  /// File or application number given by the authority.
+  TextColumn get referenceNo => text().withLength(max: 60).nullable()();
+
+  /// not_started | drafting | applied | query_raised | resubmitted | approved | rejected
+  TextColumn get status => text().withLength(min: 1, max: 20).withDefault(const Constant('not_started'))();
+
+  /// Whose court the ball is in: us | consultant | authority | client
+  TextColumn get waitingOn => text().withLength(min: 1, max: 20).withDefault(const Constant('us'))();
+
+  /// yyyy-mm-dd
+  TextColumn get appliedOn => text().withLength(max: 10).nullable()();
+  TextColumn get expectedBy => text().withLength(max: 10).nullable()();
+  TextColumn get approvedOn => text().withLength(max: 10).nullable()();
+
+  /// When the clearance lapses (Fire NOC, consent to operate).
+  TextColumn get validUntil => text().withLength(max: 10).nullable()();
+
+  /// The person chasing it for us.
+  TextColumn get liaisonBy => text().withLength(max: 120).nullable()();
+  TextColumn get note => text().withLength(max: 1000).nullable()();
+
+  /// `yyyy-mm-dd|status|waiting on|note`, one line per change, oldest first.
+  TextColumn get history => text().withLength(max: 8000).withDefault(const Constant(''))();
+  TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Time (and money) spent chasing approvals: who went where, for how long,
+/// at what cost. Read and written by the owner and project managers only,
+/// since the cost is the firm's own.
+class LiaisonLogs extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get approvalId => text().withLength(max: 36).nullable()();
+
+  /// yyyy-mm-dd
+  TextColumn get onDay => text().withLength(min: 1, max: 10)();
+  IntColumn get minutes => integer().withDefault(const Constant(0))();
+
+  /// Whose time it was (a director, a liaison officer).
+  TextColumn get person => text().withLength(max: 120).nullable()();
+
+  /// What it cost the firm: the person's time at their rate, plus
+  /// travel and fees.
+  RealColumn get cost => real().withDefault(const Constant(0))();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get loggedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A material or work test the quality officer records: concrete cubes,
+/// plaster, paint, bitumen. Holds what the test needs to show ([required])
+/// and what it did show ([actual]); the result follows from the two.
+/// A cube set is logged as one row per age (7, 14, 28 days) so each has
+/// its own due date and reminder.
+class QualityTests extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// cube | plaster | paint | bitumen | other
+  TextColumn get kind => text().withLength(min: 1, max: 20)();
+
+  /// Concrete batch, bill or lot number.
+  TextColumn get batchNo => text().withLength(max: 60).nullable()();
+
+  /// Where it was taken from: "Column C4, 2nd floor slab".
+  TextColumn get element => text().withLength(max: 200).nullable()();
+  TextColumn get parameter => text().withLength(min: 1, max: 100)();
+  TextColumn get unit => text().withLength(max: 20).nullable()();
+
+  /// min: the actual must reach the required; max: it must not exceed it.
+  TextColumn get rule => text().withLength(min: 1, max: 3).withDefault(const Constant('min'))();
+  RealColumn get requiredValue => real()();
+  RealColumn get actualValue => real().nullable()();
+
+  /// Age of a cube in days (7, 14, 28), when it has one.
+  IntColumn get ageDays => integer().nullable()();
+
+  /// yyyy-mm-dd the sample was cast or taken, and the day the test is due.
+  TextColumn get sampledOn => text().withLength(min: 1, max: 10)();
+  TextColumn get dueOn => text().withLength(min: 1, max: 10)();
+  TextColumn get testedOn => text().withLength(max: 10).nullable()();
+
+  /// pending | pass | fail
+  TextColumn get result => text().withLength(min: 1, max: 10).withDefault(const Constant('pending'))();
+
+  /// The quality officer who took the sample and the one who recorded it.
+  TextColumn get officer => text().withLength(max: 120).nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  TextColumn get testedBy => text().withLength(max: 64).nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A breach of site safety rules, logged against the department that
+/// committed it.
+@DataClassName('SafetyBreach')
+class SafetyBreaches extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// civil | electrical | plumbing | finishing | mep | security | other
+  TextColumn get department => text().withLength(min: 1, max: 20)();
+
+  /// minor | major | critical
+  TextColumn get severity => text().withLength(min: 1, max: 10).withDefault(const Constant('minor'))();
+  TextColumn get description => text().withLength(min: 1, max: 500)();
+
+  /// Who or which gang it was, if known.
+  TextColumn get who => text().withLength(max: 120).nullable()();
+  TextColumn get onDay => text().withLength(min: 1, max: 10)();
+  TextColumn get actionTaken => text().withLength(max: 500).nullable()();
+  DateTimeColumn get closedAt => dateTime().nullable()();
+  TextColumn get closedBy => text().withLength(max: 64).nullable()();
+  TextColumn get raisedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// A gate record kept by site security: someone punching in or out, a
+/// frisk for prohibited items, or a breathalyser check.
+class GateChecks extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+
+  /// punch_in | punch_out | frisk | breath
+  TextColumn get kind => text().withLength(min: 1, max: 10)();
+  TextColumn get personName => text().withLength(min: 1, max: 120)();
+  TextColumn get workerId => text().withLength(max: 36).nullable()();
+
+  /// ok | flagged. A frisk with a prohibited item, or a breath reading
+  /// above zero, is flagged.
+  TextColumn get result => text().withLength(min: 1, max: 10).withDefault(const Constant('ok'))();
+
+  /// What was found at a frisk (paan parag, gutka, matches).
+  TextColumn get item => text().withLength(max: 120).nullable()();
+
+  /// Breathalyser reading in mg/100 ml (blood alcohol), when taken.
+  RealColumn get reading => real().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get checkedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Proof that someone stood at the site when they said a task was done:
+/// where the phone was, and how far from the site's centre.
+class TaskChecks extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get taskId => text().withLength(min: 1, max: 36)();
+  RealColumn get lat => real()();
+  RealColumn get lng => real()();
+  RealColumn get accuracyM => real().nullable()();
+
+  /// Metres from the site's centre; null when the site has no location set.
+  RealColumn get distanceM => real().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get checkedBy => text().withLength(min: 1, max: 64)();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 

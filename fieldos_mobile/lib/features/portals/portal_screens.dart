@@ -459,6 +459,25 @@ class ClientHomeScreen extends ConsumerWidget {
                         ]),
                       ),
                     ),
+                    if (s.milestones.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 14, 4, 6),
+                        child: Text(tr('Milestones'), style: theme.textTheme.titleMedium),
+                      ),
+                      for (final m in s.milestones)
+                        Padding(
+                          key: Key('client-milestone-${m.name}'),
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Row(children: [
+                              Expanded(child: Text(tr(m.name))),
+                              Text(trf('{done} of {total} steps', {'done': m.done, 'total': m.total}), style: theme.textTheme.bodySmall),
+                            ]),
+                            const SizedBox(height: 4),
+                            LinearProgressIndicator(value: m.progress, minHeight: 6, borderRadius: BorderRadius.circular(3)),
+                          ]),
+                        ),
+                    ],
                     Padding(
                       padding: const EdgeInsets.fromLTRB(4, 14, 4, 6),
                       child: Text(tr('Daily updates'), style: theme.textTheme.titleMedium),

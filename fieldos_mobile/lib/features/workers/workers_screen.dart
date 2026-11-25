@@ -15,6 +15,7 @@ import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
+import 'package:fieldos_mobile/features/money/expense_heads.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/features/mascot/mitra.dart';
 
@@ -234,6 +235,8 @@ class _WorkersViewState extends ConsumerState<WorkersView> {
     final role = TextEditingController();
     final phone = TextEditingController();
     final dailyWage = TextEditingController();
+    final showWage = await ref.read(siteFinanceProvider(widget.projectId).future);
+    if (!context.mounted) return;
     var adult = !isIndia;
     final ok = await showDialog<bool>(
       context: context,
@@ -247,11 +250,12 @@ class _WorkersViewState extends ConsumerState<WorkersView> {
                 TextField(controller: name, decoration: InputDecoration(labelText: tr('Name'))),
                 TextField(controller: role, decoration: InputDecoration(labelText: tr('Role'))),
                 TextField(controller: phone, keyboardType: TextInputType.phone, decoration: InputDecoration(labelText: tr('Phone'))),
-                TextField(
-                  controller: dailyWage,
-                  decoration: InputDecoration(labelText: tr('Daily wage')),
-                  keyboardType: TextInputType.number,
-                ),
+                if (showWage)
+                  TextField(
+                    controller: dailyWage,
+                    decoration: InputDecoration(labelText: tr('Daily wage')),
+                    keyboardType: TextInputType.number,
+                  ),
                 if (isIndia) WorkerAgeCheck(value: adult, onChanged: (v) => setLocal(() => adult = v)),
               ],
             ),
@@ -294,7 +298,7 @@ class _WorkerTile extends ConsumerWidget {
         subtitle: Text([
           worker.role == null ? '' : tr(worker.role!),
           worker.phone ?? '',
-          worker.dailyWage != null ? trf(market.payHourly ? '{amount} an hour' : '{amount} a day', {'amount': rupees(worker.dailyWage!)}) : '',
+          worker.dailyWage != null && (ref.watch(siteFinanceProvider(projectId)).value ?? false) ? trf(market.payHourly ? '{amount} an hour' : '{amount} a day', {'amount': rupees(worker.dailyWage!)}) : '',
         ].where((e) => e.isNotEmpty).join(' · ')),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

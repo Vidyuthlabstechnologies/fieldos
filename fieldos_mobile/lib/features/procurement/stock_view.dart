@@ -168,9 +168,10 @@ class StockView extends ConsumerWidget {
     final name = TextEditingController();
     final qty = TextEditingController();
     final unit = TextEditingController();
+    var fromClient = false;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setLocal) => AlertDialog(
         title: Text(tr('Stock already on site')),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           Text(tr('What is in the store today, before any GRN in FieldOS. It is not counted as money spent.'),
@@ -195,12 +196,20 @@ class StockView extends ConsumerWidget {
                 child: TextField(
                     key: const Key('opening-unit'), controller: unit, decoration: InputDecoration(labelText: tr('Unit')))),
           ]),
+          SwitchListTile(
+            key: const Key('opening-client-supplied'),
+            contentPadding: EdgeInsets.zero,
+            title: Text(tr('Supplied by the client')),
+            subtitle: Text(tr('Labour-only contract: it counts in the stock, never as your cost.')),
+            value: fromClient,
+            onChanged: (v) => setLocal(() => fromClient = v),
+          ),
         ]),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
           FilledButton(key: const Key('opening-save'), onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Save'))),
         ],
-      ),
+      )),
     );
     final q = double.tryParse(westernDigits(qty.text.trim().replaceAll(',', '')));
     if (ok != true || q == null || q <= 0 || name.text.trim().isEmpty) return;
@@ -213,7 +222,7 @@ class StockView extends ConsumerWidget {
           amount: 0,
           receivedBy: userId,
           receivedOn: DateTime.now(),
-          notes: const Value(openingStockNote),
+          notes: Value(fromClient ? clientSuppliedNote : openingStockNote),
         ));
     ref.invalidate(siteStockProvider(projectId));
     ref.invalidate(receiptsProvider(projectId));

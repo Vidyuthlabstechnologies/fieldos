@@ -16,7 +16,7 @@ import 'package:fieldos_mobile/features/schedule/schedule_rules.dart';
 
 void main() {
   final now = DateTime(2026, 11, 10, 9);
-  Task t(String id, {DateTime? start, DateTime? due, String status = 'todo', int progress = 0}) => Task(
+  Task t(String id, {DateTime? start, DateTime? due, String status = 'todo', int progress = 0}) => Task(verifyRequired: false, 
         id: id,
         projectId: 'p',
         title: 'Task $id',

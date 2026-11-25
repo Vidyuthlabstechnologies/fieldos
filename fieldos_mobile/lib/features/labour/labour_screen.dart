@@ -23,6 +23,7 @@ import 'package:fieldos_mobile/features/labour/wage_sheet_screen.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/location_service.dart';
 import 'package:fieldos_mobile/features/workers/worker_permits.dart';
+import 'package:fieldos_mobile/features/money/expense_heads.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 export 'package:fieldos_mobile/core/geo.dart' show haversineMeters;
@@ -98,20 +99,21 @@ class _LabourViewState extends ConsumerState<LabourView> {
             ),
           ),
           const SizedBox(width: 8),
-          Expanded(
-            child: OutlinedButton.icon(
-              icon: const Icon(Icons.payments),
-              label: Text(tr('Wage sheet')),
-              onPressed: () async {
-                final project = await ref.read(appDatabaseProvider).projectDao.byId(widget.projectId);
-                if (!context.mounted) return;
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => WageSheetScreen(
-                      projectId: widget.projectId, projectName: project?.name ?? 'Site', userId: widget.userId),
-                ));
-              },
+          if (ref.watch(siteFinanceProvider(widget.projectId)).value ?? false)
+            Expanded(
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.payments),
+                label: Text(tr('Wage sheet')),
+                onPressed: () async {
+                  final project = await ref.read(appDatabaseProvider).projectDao.byId(widget.projectId);
+                  if (!context.mounted) return;
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => WageSheetScreen(
+                        projectId: widget.projectId, projectName: project?.name ?? 'Site', userId: widget.userId),
+                  ));
+                },
+              ),
             ),
-          ),
         ]),
         _TodayHeadcount(projectId: widget.projectId),
         const SizedBox(height: 12),
