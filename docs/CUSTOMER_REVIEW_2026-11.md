@@ -14,9 +14,27 @@ Reviewers: small-builder owner (Hyderabad), junior site engineer (Warangal, Telu
 
 ---
 
+## Verified on production, read-only (26 Nov 2026)
+
+Checked with the Supabase CLI against `fieldos-production` (Mumbai, `ap-south-1`) using read-only transactions only. Nothing was changed.
+
+| Check | Result |
+|---|---|
+| Backups | **None.** `backups: []`, `pitr_enabled: false`. There is nothing to restore from. |
+| Scale | 3 companies, 2 projects, 3 members, 17 auth users, 21 MB database, 46 files (586 kB). Pre-launch, so the fix window is open. |
+| RLS | On for all 117 public tables. 10 have no policy (deny-all to app users, by design: config, code and counter tables). |
+| Anonymous role | No table privileges. |
+| Storage | Both buckets (`documents`, `system-logs`) are private. |
+| Deleting a site | No DELETE policy on `projects`: no app user can delete one. |
+| Migrations | 63 applied, latest `20261125150000`. Matches the repo. |
+| PO and requisition updates | UPDATE policies are `has_project_access` with no `WITH CHECK`; no update-guard trigger exists (only `purchase_orders_need_chain`, insert-only). **Finding #2 confirmed live.** |
+| Wage column | `authenticated` can still `select workers.daily_wage`. **Finding #6 confirmed live.** `app_config` min builds are 0. |
+| Security advisor | No ERROR findings. Warnings: leaked-password protection off (a Pro feature), 25 trigger functions without a fixed search_path, the app's own SECURITY DEFINER RPCs callable by signed-in users (by design), 3 duplicate permissive policies, 1 RLS initplan on `bug_reports`. |
+| Sign-in mix | 9 email, 8 Google. |
+
 ## P0: customer data and money
 
-1. **Production Supabase may still be on the Free plan: no backups, no point-in-time recovery.** [owner] Issue #148. The terms and privacy policy promise a 30-day backup window that depends on this. Until it is confirmed, one bad migration or accidental delete is unrecoverable. After upgrading, run and document one restore into a branch project. Also consider a nightly off-site `pg_dump` plus a copy of the storage bucket (the repo is public, so never as a workflow artifact).
+1. **Production has no backups and no point-in-time recovery.** [V live][owner] Issue #148; confirmed with `supabase backups list` on 26 Nov (`backups: []`, `pitr_enabled: false`). The terms and privacy policy promise a 30-day backup window that depends on this. Until it is confirmed, one bad migration or accidental delete is unrecoverable. After upgrading, run and document one restore into a branch project. Also consider a nightly off-site `pg_dump` plus a copy of the storage bucket (the repo is public, so never as a workflow artifact).
 2. **Any site member can edit or raise a purchase order through the API.** [V][server] `purchase_orders` and `purchase_requisitions` update policies are `has_project_access(project_id)` with no `with check` and no guard trigger (`20260823100000_procurement_sync_alignment.sql:17,22`, `20260823110000_purchase_order_insert_membership.sql:8`). The approval-chain trigger runs on insert only, and only when `requisition_id` is set (`20261110900000_approval_rules.sql:181`). An engineer or storekeeper (or a supplier colluding with one) can change `total_amount`, `vendor_id` or `status`, or raise a PO with no chain. Fix: guard trigger like `site_supplier_invoices_only_void`: immutable once approved or issued except for server-checked status steps, `created_by = auth.uid()`, a chain for every PO.
 3. **Approval rules can be skipped by back-dating `created_at`.** [C][server] `approval_chain_complete` applies a rule only if it existed at the row's client-supplied `created_at` (`20261110900000_approval_rules.sql:135`), and `site_expenses` has no server `created_at` stamp. Stamp it server-side.
 4. **Approval is a review step, not a gate; no self-approval ban; limits apply per item so splitting beats them.** [C][server] A PM can approve what they recorded. Add `recorded_by <> decided_by` and a per-payee-per-day total.
