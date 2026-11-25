@@ -2,7 +2,7 @@ name: fieldos_mobile
 description: "FieldOS Mobile — offline-first agentic construction platform (Flutter)."
 publish_to: 'none'
 
-version: 1.7.9+24
+version: 1.8.0+25
 
 environment:
   sdk: ^3.12.2
