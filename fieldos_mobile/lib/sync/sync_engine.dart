@@ -1024,12 +1024,13 @@ class SyncEngine {
   /// yet tried on the server.
   Future<Set<String>> _queuedIds() async {
     final out = <String>{};
-    for (final e in await db.select(db.syncOutbox).get()) {
+    // Work the server has already refused (removed from the company, the
+    // row gone) can never be sent, so it does not hold the site on the
+    // phone; the incremental_pull cloud test covers that case. Only the
+    // record id is read for those, not the payload.
+    out.addAll(await db.syncOutboxDao.refusedRecordIds());
+    for (final e in await db.syncOutboxDao.neverRefused()) {
       out.add(e.recordId);
-      // Work the server has already refused (removed from the company, the
-      // row gone) can never be sent, so it does not hold the site on the
-      // phone; the incremental_pull cloud test covers that case.
-      if (e.retryCount > 0) continue;
       final payload = jsonDecode(e.payload);
       if (payload is! Map<String, dynamic>) continue;
       final site = await _siteOf(e.targetTable, payload);
