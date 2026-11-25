@@ -68,6 +68,13 @@ export interface Deps {
   hasPlan(subscriberId: string): Promise<boolean>;
   /** Whether this account is covered by a company plan (sold by invoice, see the company_plans migration). */
   hasCompanyPlan(userId: string): Promise<boolean>;
+  /**
+   * True when the person's latest recorded choice about the assistant is
+   * "withdrawn" (consent_records, see the india_compliance migration). No
+   * record at all is not a withdrawal: consent given on the phone reaches the
+   * server with the next sync, and an older app never wrote one.
+   */
+  aiConsentWithdrawn(userId: string): Promise<boolean>;
   /** Takes from today's call allowance: the new total, or null when over [limit]. */
   takeUsage(userId: string, kind: "chat", amount: number, limit: number): Promise<number | null>;
   /** Adds [units] (0 just reads) to this month's spend and returns the total. */
@@ -132,6 +139,17 @@ async function route(req: Request, deps: Deps): Promise<Response> {
   const token = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
   const user = token ? await deps.userFromToken(token) : null;
   if (!user) throw new HttpError(401, "signed_out", "Sign in to FieldOS again to use the assistant.");
+
+  // Withdrawing consent has to stop the processing, not only hide the button:
+  // an older or modified app could still call this function. Checked before the
+  // plan, so a person who withdrew is never charged a call or an allowance.
+  if (await deps.aiConsentWithdrawn(user.id)) {
+    throw new HttpError(
+      403,
+      "consent_withdrawn",
+      "You turned off consent for the assistant. Turn it back on in the app's privacy settings to use it again.",
+    );
+  }
 
   // A company plan covers everyone in the company, store subscription or not.
   if (deps.planCheck && !(await deps.hasCompanyPlan(user.id))) {

@@ -62,6 +62,7 @@ function fakeDeps(over: Partial<Deps> = {}) {
     userFromToken: (t) => Promise.resolve(t === "good" ? { id: "u1" } : null),
     hasPlan: (s) => Promise.resolve(s === "u1" || s === "access_REVIEWER123"),
     hasCompanyPlan: () => Promise.resolve(false),
+    aiConsentWithdrawn: () => Promise.resolve(false),
     takeUsage: (u, k, a, l) => {
       calls.usage.push([u, k, a, l]);
       return Promise.resolve(a);
@@ -490,4 +491,42 @@ Deno.test("non-POST and broken JSON", async () => {
   assertEquals((await handle(new Request("http://x", { method: "GET" }), deps)).status, 405);
   const broken = new Request("http://x", { method: "POST", headers: { authorization: "Bearer good" }, body: "{" });
   assertEquals((await handle(broken, deps)).status, 400);
+});
+
+Deno.test("consent: a person who withdrew is refused, charged nothing, and Claude is never called", async () => {
+  const { deps, calls } = fakeDeps({ aiConsentWithdrawn: (u) => Promise.resolve(u === "u1") });
+  const res = await handle(post({ action: "chat", messages: hello }), deps);
+  assertEquals(res.status, 403);
+  assertEquals((await res.json()).error, "consent_withdrawn");
+  assertEquals(calls.claude.length, 0);
+  assertEquals(calls.fallback.length, 0);
+  assertEquals(calls.usage.length, 0, "no allowance is taken");
+  assertEquals(calls.spend.length, 0);
+});
+
+Deno.test("consent: voice is stopped too, not only chat", async () => {
+  const { deps, calls } = fakeDeps({ aiConsentWithdrawn: () => Promise.resolve(true) });
+  const res = await handle(
+    post({ action: "transcribe", language_code: "hi-IN", audio_base64: b64(wav(2)) }),
+    deps,
+  );
+  assertEquals(res.status, 403);
+  assertEquals(calls.sarvam.length, 0, "the recording is not sent to Sarvam");
+});
+
+Deno.test("consent: withdrawal stops a person even with a plan and with the plan check off", async () => {
+  const { deps } = fakeDeps({ planCheck: false, aiConsentWithdrawn: () => Promise.resolve(true) });
+  assertEquals((await handle(post({ action: "chat", messages: hello }), deps)).status, 403);
+  const { deps: d2 } = fakeDeps({ hasCompanyPlan: () => Promise.resolve(true), aiConsentWithdrawn: () => Promise.resolve(true) });
+  assertEquals((await handle(post({ action: "chat", messages: hello }), d2)).status, 403);
+});
+
+Deno.test("consent: no record (not synced yet, or an older app) is not a withdrawal", async () => {
+  const { deps } = fakeDeps({ aiConsentWithdrawn: () => Promise.resolve(false) });
+  assertEquals((await handle(post({ action: "chat", subscriber_id: "u1", messages: hello }), deps)).status, 200);
+});
+
+Deno.test("consent: a signed-out caller still gets 401, not a consent answer", async () => {
+  const { deps } = fakeDeps({ aiConsentWithdrawn: () => Promise.resolve(true) });
+  assertEquals((await handle(post({ action: "chat", messages: hello }, "bad"), deps)).status, 401);
 });
