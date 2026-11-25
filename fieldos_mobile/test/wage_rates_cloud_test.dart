@@ -44,6 +44,11 @@ void main() {
     expect(seen.map((w) => w.name), ['Ramesh']);
     expect(seen.single.dailyWage, isNull, reason: 'an engineer never receives the rate');
 
+    // A rate an older build left on the engineer's phone is cleared.
+    await (engineer.db.update(engineer.db.workers)).write(const WorkersCompanion(dailyWage: Value(123)));
+    await engineer.engine.pullAll();
+    expect((await engineer.db.workerDao.forProject(site.id)).single.dailyWage, isNull);
+
     // A rate typed by the engineer is refused by the server, not stored.
     final mine = await engineer.db.workerDao.create(WorkersCompanion.insert(
         id: uuid.v4(), projectId: site.id, name: 'Suresh', dailyWage: const Value(999)));

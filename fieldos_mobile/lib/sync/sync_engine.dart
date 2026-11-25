@@ -547,7 +547,7 @@ class SyncEngine {
           await db.settingsDao.set(cursorKey, '$head');
           await db.settingsDao.set(settledKey, '$head');
         }
-        await _pullWageRates(dirty);
+        await _pullWageRates(dirty, keep);
         final portalSites = await _pullSubcontractorSites();
         await _dropProjectsNoLongerShared({...keep, ...portalSites});
         await _exchangeSyncStatus();
@@ -1262,14 +1262,16 @@ class SyncEngine {
   /// The wage rates the caller may see, applied to the phone's workers
   /// (those with an unsent local edit keep their own). A backend without
   /// worker_wage_rates() yet (20261125150000) is read the old way, the
-  /// column itself; an account that may not see rates gets none and keeps
-  /// whatever this phone holds (null for a role that never saw one).
-  Future<void> _pullWageRates(Set<String> dirty) async {
+  /// column itself. A rate this account may not see is cleared from the
+  /// phone (an older build may have left one there).
+  Future<void> _pullWageRates(Set<String> dirty, Set<String> keep) async {
     List rows;
+    var authoritative = true;
     try {
       rows = await client.rpc('worker_wage_rates') as List;
     } on PostgrestException catch (e) {
       if (!_isMissingOnServer(e)) rethrow;
+      authoritative = false;
       try {
         rows = (await client.from('workers').select('id,daily_wage')) as List;
       } on PostgrestException catch (e2) {
@@ -1278,11 +1280,23 @@ class SyncEngine {
       }
       rows = [for (final r in rows.cast<Map>()) {'worker_id': r['id'], 'daily_wage': r['daily_wage']}];
     }
+    final visible = <String>{};
     for (final r in rows.cast<Map>()) {
       final id = r['worker_id'] as String;
+      visible.add(id);
       if (dirty.contains(SyncOutboxDao.key('workers', id))) continue;
       final wage = (r['daily_wage'] as num?)?.toDouble();
       await (db.update(db.workers)..where((w) => w.id.equals(id))).write(WorkersCompanion(dailyWage: Value(wage)));
+    }
+    if (!authoritative) return;
+    // A rate this account may not see is not held here either: an older
+    // build may have left one on the phone. Records that only exist on this
+    // phone (the sample site, work not yet sent) are never touched.
+    final held = await (db.select(db.workers)..where((w) => w.dailyWage.isNotNull())).get();
+    for (final w in held) {
+      if (visible.contains(w.id) || keep.contains(w.id) || keep.contains(w.projectId)) continue;
+      if (dirty.contains(SyncOutboxDao.key('workers', w.id))) continue;
+      await (db.update(db.workers)..where((x) => x.id.equals(w.id))).write(const WorkersCompanion(dailyWage: Value(null)));
     }
   }
 
