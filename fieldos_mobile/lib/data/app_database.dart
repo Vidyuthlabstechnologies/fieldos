@@ -2625,6 +2625,16 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
   /// phone that had been offline for days.
   Future<int> pendingCount() => _count(syncOutbox.retryCount.isSmallerThanValue(syncOutboxMaxRetries));
 
+  /// What is still to send, for the Home banner: how many writes, how many of
+  /// them were parked after repeated failures, and when the oldest was saved.
+  Future<UnsentWork> unsentSummary() async {
+    final n = syncOutbox.id.count();
+    final oldest = syncOutbox.createdAt.min();
+    final all = await (selectOnly(syncOutbox)..addColumns([n, oldest])).getSingle();
+    final parked = await parkedCount();
+    return UnsentWork(total: all.read(n) ?? 0, parked: parked, oldest: all.read(oldest));
+  }
+
   /// Rows parked after [syncOutboxMaxRetries] failures, for the sync
   /// status UI -- these will not be retried automatically.
   Future<int> parkedCount() => _count(syncOutbox.retryCount.isBiggerOrEqualValue(syncOutboxMaxRetries));
@@ -2646,16 +2656,6 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
   Future<Set<String>> dirtyKeys() async {
     final rows = await select(syncOutbox).get();
     return {for (final r in rows) key(r.targetTable, r.recordId)};
-  }
-
-  /// What is still to send, for the Home banner: how many writes, how many of
-  /// them were parked after repeated failures, and when the oldest was saved.
-  Future<UnsentWork> unsentSummary() async {
-    final n = syncOutbox.id.count();
-    final oldest = syncOutbox.createdAt.min();
-    final all = await (selectOnly(syncOutbox)..addColumns([n, oldest])).getSingle();
-    final parked = await parkedCount();
-    return UnsentWork(total: all.read(n) ?? 0, parked: parked, oldest: all.read(oldest));
   }
 
   /// Gives parked rows another chance (e.g. after the RLS/membership issue
