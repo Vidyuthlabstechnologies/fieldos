@@ -130,6 +130,10 @@ class Tasks extends Table {
   /// finish, which the delay view compares against [dueDate].
   DateTimeColumn get startDate => dateTime().nullable()();
 
+  /// True when the supervisor must be on site, and prove it, before the
+  /// task can be marked 100%.
+  BoolColumn get verifyRequired => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -2104,6 +2108,27 @@ class GateChecks extends Table {
 
   /// Breathalyser reading in mg/100 ml (blood alcohol), when taken.
   RealColumn get reading => real().nullable()();
+  TextColumn get note => text().withLength(max: 300).nullable()();
+  TextColumn get checkedBy => text().withLength(min: 1, max: 64)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Proof that someone stood at the site when they said a task was done:
+/// where the phone was, and how far from the site's centre.
+class TaskChecks extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId => text().withLength(min: 1, max: 36)();
+  TextColumn get taskId => text().withLength(min: 1, max: 36)();
+  RealColumn get lat => real()();
+  RealColumn get lng => real()();
+  RealColumn get accuracyM => real().nullable()();
+
+  /// Metres from the site's centre; null when the site has no location set.
+  RealColumn get distanceM => real().nullable()();
   TextColumn get note => text().withLength(max: 300).nullable()();
   TextColumn get checkedBy => text().withLength(min: 1, max: 64)();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

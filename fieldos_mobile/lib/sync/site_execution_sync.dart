@@ -28,6 +28,7 @@ const siteExecutionTables = {
   'site_quality_tests': 'quality_tests',
   'site_safety_breaches': 'safety_breaches',
   'site_gate_checks': 'gate_checks',
+  'site_task_checks': 'task_checks',
 };
 
 /// Tables whose rows are a file on the phone, uploaded to Storage under
@@ -42,7 +43,7 @@ const siteExecutionProjectScoped = {
   'site_task_constraints', 'site_drawings', 'site_drawing_revisions', 'site_rfis', 'site_hold_points',
   'site_defects', 'site_execution_photos', 'site_handover_units', 'site_handover_checks', 'worker_permits',
   'site_drawing_pins', 'site_submittals', 'site_approvals', 'site_liaison_logs',
-  'site_quality_tests', 'site_safety_breaches', 'site_gate_checks',
+  'site_quality_tests', 'site_safety_breaches', 'site_gate_checks', 'site_task_checks',
 };
 
 /// Person columns on these tables, swapped between the phone's and the
@@ -125,6 +126,7 @@ Insertable<DataClass> executionFromRemote(String serverTable, Map<String, dynami
     'site_quality_tests' => QualityTest.fromJson(camel, serializer: _iso),
     'site_safety_breaches' => SafetyBreach.fromJson(camel, serializer: _iso),
     'site_gate_checks' => GateCheck.fromJson(camel, serializer: _iso),
+    'site_task_checks' => TaskCheck.fromJson(camel, serializer: _iso),
     _ => throw ArgumentError('Not a site execution table: $serverTable'),
   };
   return d as Insertable<DataClass>;
@@ -150,5 +152,6 @@ TableInfo<Table, DataClass> executionTable(AppDatabase db, String serverTable) =
       'site_quality_tests' => db.qualityTests,
       'site_safety_breaches' => db.safetyBreaches,
       'site_gate_checks' => db.gateChecks,
+      'site_task_checks' => db.taskChecks,
       _ => throw ArgumentError('Not a site execution table: $serverTable'),
     } as TableInfo<Table, DataClass>;

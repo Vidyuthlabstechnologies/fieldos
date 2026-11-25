@@ -180,6 +180,15 @@ class ClientPayment {
   final String mode;
 }
 
+/// One stage of the work as the client sees it.
+class ClientMilestone {
+  const ClientMilestone({required this.name, required this.total, required this.done});
+  final String name;
+  final int total;
+  final int done;
+  double get progress => total == 0 ? 0 : done / total;
+}
+
 class ClientSite {
   const ClientSite({
     required this.id,
@@ -190,10 +199,14 @@ class ClientSite {
     required this.updates,
     required this.bills,
     required this.payments,
+    this.milestones = const [],
   });
   final String id;
   final String name;
   final String companyName;
+
+  /// Stages of the work (Columns, Slab...) with how many steps are done.
+  final List<ClientMilestone> milestones;
   final int tasksTotal;
   final int tasksDone;
   final List<SiteUpdate> updates;
@@ -233,6 +246,13 @@ class ClientSite {
               status: b['status'] as String? ?? 'issued',
               kind: b['kind'] as String? ?? 'ra',
             ),
+        ],
+        milestones: [
+          for (final m in (j['milestones'] as List? ?? const []).cast<Map>())
+            ClientMilestone(
+                name: m['name'] as String? ?? '',
+                total: (m['total'] as num?)?.toInt() ?? 0,
+                done: (m['done'] as num?)?.toInt() ?? 0),
         ],
         payments: [
           for (final p in (j['payments'] as List? ?? const []).cast<Map>())

@@ -198,7 +198,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       final now = DateTime.now();
-      final t = Task(
+      final t = Task(verifyRequired: false, 
           id: 't', projectId: 'p', title: 'Lift pit', status: 'blocked', createdAt: now, updatedAt: now,
           progress: 30, priority: 'normal');
       TasksCompanion? saved;
@@ -230,7 +230,7 @@ void main() {
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
         final now = DateTime.now();
-        final t = Task(
+        final t = Task(verifyRequired: false, 
             id: 't', projectId: 'p', title: 'Lift pit', status: 'blocked', createdAt: now, updatedAt: now,
             progress: 30, priority: 'normal');
         await tester.pumpWidget(MaterialApp(

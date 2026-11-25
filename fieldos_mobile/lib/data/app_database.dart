@@ -141,6 +141,7 @@ String? _clip(String? s, int max) {
   QualityTests,
   SafetyBreaches,
   GateChecks,
+  TaskChecks,
   SyncOutbox,
 ])
 class AppDatabase extends _$AppDatabase {
@@ -492,6 +493,9 @@ class AppDatabase extends _$AppDatabase {
             await _createTableIfMissing(m, qualityTests);
             await _createTableIfMissing(m, safetyBreaches);
             await _createTableIfMissing(m, gateChecks);
+            // Tasks that need an on-site check before 100%, and the checks.
+            await _addColumnIfMissing(m, tasks, tasks.verifyRequired);
+            await _createTableIfMissing(m, taskChecks);
           }
         },
         beforeOpen: (details) => ensureLookupIndexes(),
@@ -959,8 +963,18 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
   }
 
   /// Any change to a task, queued for sync like the others.
-  Future<void> edit(String id, TasksCompanion changes) {
+  Future<void> edit(String id, TasksCompanion changes, {bool asManager = false}) {
     return transaction(() async {
+      final before = await (select(tasks)..where((t) => t.id.equals(id))).getSingleOrNull();
+      if (before != null && before.verifyRequired && !asManager) {
+        final status = changes.status.present ? changes.status.value : before.status;
+        final progress = changes.progress.present ? changes.progress.value : before.progress;
+        final finishing = (status == 'done' || progress >= 100) && before.status != 'done';
+        if (finishing) {
+          final checks = await (db.select(db.taskChecks)..where((c) => c.taskId.equals(id))).get();
+          if (checks.isEmpty) throw ExecutionRefused(trf('Verify "{task}" on site before marking it 100%.', {'task': before.title}));
+        }
+      }
       await (update(tasks)..where((t) => t.id.equals(id))).write(changes.copyWith(updatedAt: Value(DateTime.now())));
       final row = await (select(tasks)..where((t) => t.id.equals(id))).getSingle();
       await db.syncOutboxDao.enqueue(

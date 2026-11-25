@@ -24,5 +24,11 @@ for i, lang in enumerate(['Hi', 'Te', 'Ta', 'Kn', 'Mr']):
         out.append(f"  {q(k)}: {q(rows[k][i])},")
     out.append("};")
     out.append("")
+out.append("/// Every English label in these tables.")
+out.append("const Set<String> siteOpsLabels = {")
+for k in sorted(rows):
+    out.append(f"  {q(k)},")
+out.append("};")
+out.append("")
 open(os.path.join(os.path.dirname(__file__), '..', 'fieldos_mobile', 'lib', 'l10n', 'strings_siteops.dart'), 'w').write("\n".join(out))
 print(len(rows), 'labels')

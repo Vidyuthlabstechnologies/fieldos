@@ -17,6 +17,7 @@ import 'package:fieldos_mobile/features/execution/execution_data.dart';
 import 'package:fieldos_mobile/features/execution/execution_rules.dart';
 import 'package:fieldos_mobile/features/execution/pre_construction_rules.dart';
 import 'package:fieldos_mobile/features/project/project_status.dart';
+import 'package:fieldos_mobile/core/market.dart' show isIndia;
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
 
@@ -262,7 +263,7 @@ class ApprovalsTab extends ConsumerWidget {
                 initialValue: authority,
                 isExpanded: true,
                 decoration: InputDecoration(labelText: tr('Authority')),
-                items: [for (final a in approvalAuthorities) DropdownMenuItem(value: a, child: Text(authorityLabel(a)))],
+                items: [for (final a in approvalAuthorities) if (a != 'rera' || isIndia) DropdownMenuItem(value: a, child: Text(authorityLabel(a)))],
                 onChanged: (v) => set(() => authority = v ?? authority),
               ),
               TextField(

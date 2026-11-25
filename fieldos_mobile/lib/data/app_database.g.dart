@@ -2902,6 +2902,21 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _verifyRequiredMeta = const VerificationMeta(
+    'verifyRequired',
+  );
+  @override
+  late final GeneratedColumn<bool> verifyRequired = GeneratedColumn<bool>(
+    'verify_required',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("verify_required" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2915,6 +2930,7 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     progress,
     priority,
     startDate,
+    verifyRequired,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2997,6 +3013,15 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
       );
     }
+    if (data.containsKey('verify_required')) {
+      context.handle(
+        _verifyRequiredMeta,
+        verifyRequired.isAcceptableOrUnknown(
+          data['verify_required']!,
+          _verifyRequiredMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3050,6 +3075,10 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}start_date'],
       ),
+      verifyRequired: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}verify_required'],
+      )!,
     );
   }
 
@@ -3079,6 +3108,10 @@ class Task extends DataClass implements Insertable<Task> {
   /// When work is planned to start. With [progress] it gives the forecast
   /// finish, which the delay view compares against [dueDate].
   final DateTime? startDate;
+
+  /// True when the supervisor must be on site, and prove it, before the
+  /// task can be marked 100%.
+  final bool verifyRequired;
   const Task({
     required this.id,
     required this.projectId,
@@ -3091,6 +3124,7 @@ class Task extends DataClass implements Insertable<Task> {
     required this.progress,
     required this.priority,
     this.startDate,
+    required this.verifyRequired,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3112,6 +3146,7 @@ class Task extends DataClass implements Insertable<Task> {
     if (!nullToAbsent || startDate != null) {
       map['start_date'] = Variable<DateTime>(startDate);
     }
+    map['verify_required'] = Variable<bool>(verifyRequired);
     return map;
   }
 
@@ -3134,6 +3169,7 @@ class Task extends DataClass implements Insertable<Task> {
       startDate: startDate == null && nullToAbsent
           ? const Value.absent()
           : Value(startDate),
+      verifyRequired: Value(verifyRequired),
     );
   }
 
@@ -3154,6 +3190,7 @@ class Task extends DataClass implements Insertable<Task> {
       progress: serializer.fromJson<int>(json['progress']),
       priority: serializer.fromJson<String>(json['priority']),
       startDate: serializer.fromJson<DateTime?>(json['startDate']),
+      verifyRequired: serializer.fromJson<bool>(json['verifyRequired']),
     );
   }
   @override
@@ -3171,6 +3208,7 @@ class Task extends DataClass implements Insertable<Task> {
       'progress': serializer.toJson<int>(progress),
       'priority': serializer.toJson<String>(priority),
       'startDate': serializer.toJson<DateTime?>(startDate),
+      'verifyRequired': serializer.toJson<bool>(verifyRequired),
     };
   }
 
@@ -3186,6 +3224,7 @@ class Task extends DataClass implements Insertable<Task> {
     int? progress,
     String? priority,
     Value<DateTime?> startDate = const Value.absent(),
+    bool? verifyRequired,
   }) => Task(
     id: id ?? this.id,
     projectId: projectId ?? this.projectId,
@@ -3198,6 +3237,7 @@ class Task extends DataClass implements Insertable<Task> {
     progress: progress ?? this.progress,
     priority: priority ?? this.priority,
     startDate: startDate.present ? startDate.value : this.startDate,
+    verifyRequired: verifyRequired ?? this.verifyRequired,
   );
   Task copyWithCompanion(TasksCompanion data) {
     return Task(
@@ -3214,6 +3254,9 @@ class Task extends DataClass implements Insertable<Task> {
       progress: data.progress.present ? data.progress.value : this.progress,
       priority: data.priority.present ? data.priority.value : this.priority,
       startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      verifyRequired: data.verifyRequired.present
+          ? data.verifyRequired.value
+          : this.verifyRequired,
     );
   }
 
@@ -3230,7 +3273,8 @@ class Task extends DataClass implements Insertable<Task> {
           ..write('updatedAt: $updatedAt, ')
           ..write('progress: $progress, ')
           ..write('priority: $priority, ')
-          ..write('startDate: $startDate')
+          ..write('startDate: $startDate, ')
+          ..write('verifyRequired: $verifyRequired')
           ..write(')'))
         .toString();
   }
@@ -3248,6 +3292,7 @@ class Task extends DataClass implements Insertable<Task> {
     progress,
     priority,
     startDate,
+    verifyRequired,
   );
   @override
   bool operator ==(Object other) =>
@@ -3263,7 +3308,8 @@ class Task extends DataClass implements Insertable<Task> {
           other.updatedAt == this.updatedAt &&
           other.progress == this.progress &&
           other.priority == this.priority &&
-          other.startDate == this.startDate);
+          other.startDate == this.startDate &&
+          other.verifyRequired == this.verifyRequired);
 }
 
 class TasksCompanion extends UpdateCompanion<Task> {
@@ -3278,6 +3324,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
   final Value<int> progress;
   final Value<String> priority;
   final Value<DateTime?> startDate;
+  final Value<bool> verifyRequired;
   final Value<int> rowid;
   const TasksCompanion({
     this.id = const Value.absent(),
@@ -3291,6 +3338,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.progress = const Value.absent(),
     this.priority = const Value.absent(),
     this.startDate = const Value.absent(),
+    this.verifyRequired = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TasksCompanion.insert({
@@ -3305,6 +3353,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.progress = const Value.absent(),
     this.priority = const Value.absent(),
     this.startDate = const Value.absent(),
+    this.verifyRequired = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        projectId = Value(projectId),
@@ -3321,6 +3370,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Expression<int>? progress,
     Expression<String>? priority,
     Expression<DateTime>? startDate,
+    Expression<bool>? verifyRequired,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3335,6 +3385,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
       if (progress != null) 'progress': progress,
       if (priority != null) 'priority': priority,
       if (startDate != null) 'start_date': startDate,
+      if (verifyRequired != null) 'verify_required': verifyRequired,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3351,6 +3402,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Value<int>? progress,
     Value<String>? priority,
     Value<DateTime?>? startDate,
+    Value<bool>? verifyRequired,
     Value<int>? rowid,
   }) {
     return TasksCompanion(
@@ -3365,6 +3417,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
       progress: progress ?? this.progress,
       priority: priority ?? this.priority,
       startDate: startDate ?? this.startDate,
+      verifyRequired: verifyRequired ?? this.verifyRequired,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3405,6 +3458,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
     if (startDate.present) {
       map['start_date'] = Variable<DateTime>(startDate.value);
     }
+    if (verifyRequired.present) {
+      map['verify_required'] = Variable<bool>(verifyRequired.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3425,6 +3481,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
           ..write('progress: $progress, ')
           ..write('priority: $priority, ')
           ..write('startDate: $startDate, ')
+          ..write('verifyRequired: $verifyRequired, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -61396,6 +61453,666 @@ class GateChecksCompanion extends UpdateCompanion<GateCheck> {
   }
 }
 
+class $TaskChecksTable extends TaskChecks
+    with TableInfo<$TaskChecksTable, TaskCheck> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TaskChecksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+    'project_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _taskIdMeta = const VerificationMeta('taskId');
+  @override
+  late final GeneratedColumn<String> taskId = GeneratedColumn<String>(
+    'task_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 36,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _latMeta = const VerificationMeta('lat');
+  @override
+  late final GeneratedColumn<double> lat = GeneratedColumn<double>(
+    'lat',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lngMeta = const VerificationMeta('lng');
+  @override
+  late final GeneratedColumn<double> lng = GeneratedColumn<double>(
+    'lng',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _accuracyMMeta = const VerificationMeta(
+    'accuracyM',
+  );
+  @override
+  late final GeneratedColumn<double> accuracyM = GeneratedColumn<double>(
+    'accuracy_m',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _distanceMMeta = const VerificationMeta(
+    'distanceM',
+  );
+  @override
+  late final GeneratedColumn<double> distanceM = GeneratedColumn<double>(
+    'distance_m',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _checkedByMeta = const VerificationMeta(
+    'checkedBy',
+  );
+  @override
+  late final GeneratedColumn<String> checkedBy = GeneratedColumn<String>(
+    'checked_by',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 64,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    projectId,
+    taskId,
+    lat,
+    lng,
+    accuracyM,
+    distanceM,
+    note,
+    checkedBy,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'task_checks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TaskCheck> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_projectIdMeta);
+    }
+    if (data.containsKey('task_id')) {
+      context.handle(
+        _taskIdMeta,
+        taskId.isAcceptableOrUnknown(data['task_id']!, _taskIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_taskIdMeta);
+    }
+    if (data.containsKey('lat')) {
+      context.handle(
+        _latMeta,
+        lat.isAcceptableOrUnknown(data['lat']!, _latMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_latMeta);
+    }
+    if (data.containsKey('lng')) {
+      context.handle(
+        _lngMeta,
+        lng.isAcceptableOrUnknown(data['lng']!, _lngMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lngMeta);
+    }
+    if (data.containsKey('accuracy_m')) {
+      context.handle(
+        _accuracyMMeta,
+        accuracyM.isAcceptableOrUnknown(data['accuracy_m']!, _accuracyMMeta),
+      );
+    }
+    if (data.containsKey('distance_m')) {
+      context.handle(
+        _distanceMMeta,
+        distanceM.isAcceptableOrUnknown(data['distance_m']!, _distanceMMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('checked_by')) {
+      context.handle(
+        _checkedByMeta,
+        checkedBy.isAcceptableOrUnknown(data['checked_by']!, _checkedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_checkedByMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TaskCheck map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TaskCheck(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}project_id'],
+      )!,
+      taskId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}task_id'],
+      )!,
+      lat: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}lat'],
+      )!,
+      lng: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}lng'],
+      )!,
+      accuracyM: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}accuracy_m'],
+      ),
+      distanceM: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}distance_m'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      checkedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}checked_by'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $TaskChecksTable createAlias(String alias) {
+    return $TaskChecksTable(attachedDatabase, alias);
+  }
+}
+
+class TaskCheck extends DataClass implements Insertable<TaskCheck> {
+  final String id;
+  final String projectId;
+  final String taskId;
+  final double lat;
+  final double lng;
+  final double? accuracyM;
+
+  /// Metres from the site's centre; null when the site has no location set.
+  final double? distanceM;
+  final String? note;
+  final String checkedBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const TaskCheck({
+    required this.id,
+    required this.projectId,
+    required this.taskId,
+    required this.lat,
+    required this.lng,
+    this.accuracyM,
+    this.distanceM,
+    this.note,
+    required this.checkedBy,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['project_id'] = Variable<String>(projectId);
+    map['task_id'] = Variable<String>(taskId);
+    map['lat'] = Variable<double>(lat);
+    map['lng'] = Variable<double>(lng);
+    if (!nullToAbsent || accuracyM != null) {
+      map['accuracy_m'] = Variable<double>(accuracyM);
+    }
+    if (!nullToAbsent || distanceM != null) {
+      map['distance_m'] = Variable<double>(distanceM);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['checked_by'] = Variable<String>(checkedBy);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  TaskChecksCompanion toCompanion(bool nullToAbsent) {
+    return TaskChecksCompanion(
+      id: Value(id),
+      projectId: Value(projectId),
+      taskId: Value(taskId),
+      lat: Value(lat),
+      lng: Value(lng),
+      accuracyM: accuracyM == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accuracyM),
+      distanceM: distanceM == null && nullToAbsent
+          ? const Value.absent()
+          : Value(distanceM),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      checkedBy: Value(checkedBy),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory TaskCheck.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TaskCheck(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      taskId: serializer.fromJson<String>(json['taskId']),
+      lat: serializer.fromJson<double>(json['lat']),
+      lng: serializer.fromJson<double>(json['lng']),
+      accuracyM: serializer.fromJson<double?>(json['accuracyM']),
+      distanceM: serializer.fromJson<double?>(json['distanceM']),
+      note: serializer.fromJson<String?>(json['note']),
+      checkedBy: serializer.fromJson<String>(json['checkedBy']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'taskId': serializer.toJson<String>(taskId),
+      'lat': serializer.toJson<double>(lat),
+      'lng': serializer.toJson<double>(lng),
+      'accuracyM': serializer.toJson<double?>(accuracyM),
+      'distanceM': serializer.toJson<double?>(distanceM),
+      'note': serializer.toJson<String?>(note),
+      'checkedBy': serializer.toJson<String>(checkedBy),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  TaskCheck copyWith({
+    String? id,
+    String? projectId,
+    String? taskId,
+    double? lat,
+    double? lng,
+    Value<double?> accuracyM = const Value.absent(),
+    Value<double?> distanceM = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    String? checkedBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => TaskCheck(
+    id: id ?? this.id,
+    projectId: projectId ?? this.projectId,
+    taskId: taskId ?? this.taskId,
+    lat: lat ?? this.lat,
+    lng: lng ?? this.lng,
+    accuracyM: accuracyM.present ? accuracyM.value : this.accuracyM,
+    distanceM: distanceM.present ? distanceM.value : this.distanceM,
+    note: note.present ? note.value : this.note,
+    checkedBy: checkedBy ?? this.checkedBy,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  TaskCheck copyWithCompanion(TaskChecksCompanion data) {
+    return TaskCheck(
+      id: data.id.present ? data.id.value : this.id,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
+      taskId: data.taskId.present ? data.taskId.value : this.taskId,
+      lat: data.lat.present ? data.lat.value : this.lat,
+      lng: data.lng.present ? data.lng.value : this.lng,
+      accuracyM: data.accuracyM.present ? data.accuracyM.value : this.accuracyM,
+      distanceM: data.distanceM.present ? data.distanceM.value : this.distanceM,
+      note: data.note.present ? data.note.value : this.note,
+      checkedBy: data.checkedBy.present ? data.checkedBy.value : this.checkedBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TaskCheck(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('taskId: $taskId, ')
+          ..write('lat: $lat, ')
+          ..write('lng: $lng, ')
+          ..write('accuracyM: $accuracyM, ')
+          ..write('distanceM: $distanceM, ')
+          ..write('note: $note, ')
+          ..write('checkedBy: $checkedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    projectId,
+    taskId,
+    lat,
+    lng,
+    accuracyM,
+    distanceM,
+    note,
+    checkedBy,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TaskCheck &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.taskId == this.taskId &&
+          other.lat == this.lat &&
+          other.lng == this.lng &&
+          other.accuracyM == this.accuracyM &&
+          other.distanceM == this.distanceM &&
+          other.note == this.note &&
+          other.checkedBy == this.checkedBy &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class TaskChecksCompanion extends UpdateCompanion<TaskCheck> {
+  final Value<String> id;
+  final Value<String> projectId;
+  final Value<String> taskId;
+  final Value<double> lat;
+  final Value<double> lng;
+  final Value<double?> accuracyM;
+  final Value<double?> distanceM;
+  final Value<String?> note;
+  final Value<String> checkedBy;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const TaskChecksCompanion({
+    this.id = const Value.absent(),
+    this.projectId = const Value.absent(),
+    this.taskId = const Value.absent(),
+    this.lat = const Value.absent(),
+    this.lng = const Value.absent(),
+    this.accuracyM = const Value.absent(),
+    this.distanceM = const Value.absent(),
+    this.note = const Value.absent(),
+    this.checkedBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TaskChecksCompanion.insert({
+    required String id,
+    required String projectId,
+    required String taskId,
+    required double lat,
+    required double lng,
+    this.accuracyM = const Value.absent(),
+    this.distanceM = const Value.absent(),
+    this.note = const Value.absent(),
+    required String checkedBy,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       projectId = Value(projectId),
+       taskId = Value(taskId),
+       lat = Value(lat),
+       lng = Value(lng),
+       checkedBy = Value(checkedBy);
+  static Insertable<TaskCheck> custom({
+    Expression<String>? id,
+    Expression<String>? projectId,
+    Expression<String>? taskId,
+    Expression<double>? lat,
+    Expression<double>? lng,
+    Expression<double>? accuracyM,
+    Expression<double>? distanceM,
+    Expression<String>? note,
+    Expression<String>? checkedBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (projectId != null) 'project_id': projectId,
+      if (taskId != null) 'task_id': taskId,
+      if (lat != null) 'lat': lat,
+      if (lng != null) 'lng': lng,
+      if (accuracyM != null) 'accuracy_m': accuracyM,
+      if (distanceM != null) 'distance_m': distanceM,
+      if (note != null) 'note': note,
+      if (checkedBy != null) 'checked_by': checkedBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TaskChecksCompanion copyWith({
+    Value<String>? id,
+    Value<String>? projectId,
+    Value<String>? taskId,
+    Value<double>? lat,
+    Value<double>? lng,
+    Value<double?>? accuracyM,
+    Value<double?>? distanceM,
+    Value<String?>? note,
+    Value<String>? checkedBy,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return TaskChecksCompanion(
+      id: id ?? this.id,
+      projectId: projectId ?? this.projectId,
+      taskId: taskId ?? this.taskId,
+      lat: lat ?? this.lat,
+      lng: lng ?? this.lng,
+      accuracyM: accuracyM ?? this.accuracyM,
+      distanceM: distanceM ?? this.distanceM,
+      note: note ?? this.note,
+      checkedBy: checkedBy ?? this.checkedBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (projectId.present) {
+      map['project_id'] = Variable<String>(projectId.value);
+    }
+    if (taskId.present) {
+      map['task_id'] = Variable<String>(taskId.value);
+    }
+    if (lat.present) {
+      map['lat'] = Variable<double>(lat.value);
+    }
+    if (lng.present) {
+      map['lng'] = Variable<double>(lng.value);
+    }
+    if (accuracyM.present) {
+      map['accuracy_m'] = Variable<double>(accuracyM.value);
+    }
+    if (distanceM.present) {
+      map['distance_m'] = Variable<double>(distanceM.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (checkedBy.present) {
+      map['checked_by'] = Variable<String>(checkedBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TaskChecksCompanion(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('taskId: $taskId, ')
+          ..write('lat: $lat, ')
+          ..write('lng: $lng, ')
+          ..write('accuracyM: $accuracyM, ')
+          ..write('distanceM: $distanceM, ')
+          ..write('note: $note, ')
+          ..write('checkedBy: $checkedBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncOutboxTable extends SyncOutbox
     with TableInfo<$SyncOutboxTable, SyncOutboxData> {
   @override
@@ -62054,6 +62771,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $QualityTestsTable qualityTests = $QualityTestsTable(this);
   late final $SafetyBreachesTable safetyBreaches = $SafetyBreachesTable(this);
   late final $GateChecksTable gateChecks = $GateChecksTable(this);
+  late final $TaskChecksTable taskChecks = $TaskChecksTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -62151,6 +62869,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     qualityTests,
     safetyBreaches,
     gateChecks,
+    taskChecks,
     syncOutbox,
   ];
 }
@@ -63679,6 +64398,7 @@ typedef $$TasksTableCreateCompanionBuilder =
       Value<int> progress,
       Value<String> priority,
       Value<DateTime?> startDate,
+      Value<bool> verifyRequired,
       Value<int> rowid,
     });
 typedef $$TasksTableUpdateCompanionBuilder =
@@ -63694,6 +64414,7 @@ typedef $$TasksTableUpdateCompanionBuilder =
       Value<int> progress,
       Value<String> priority,
       Value<DateTime?> startDate,
+      Value<bool> verifyRequired,
       Value<int> rowid,
     });
 
@@ -63757,6 +64478,11 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
 
   ColumnFilters<DateTime> get startDate => $composableBuilder(
     column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get verifyRequired => $composableBuilder(
+    column: $table.verifyRequired,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -63824,6 +64550,11 @@ class $$TasksTableOrderingComposer
     column: $table.startDate,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get verifyRequired => $composableBuilder(
+    column: $table.verifyRequired,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TasksTableAnnotationComposer
@@ -63869,6 +64600,11 @@ class $$TasksTableAnnotationComposer
 
   GeneratedColumn<DateTime> get startDate =>
       $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<bool> get verifyRequired => $composableBuilder(
+    column: $table.verifyRequired,
+    builder: (column) => column,
+  );
 }
 
 class $$TasksTableTableManager
@@ -63910,6 +64646,7 @@ class $$TasksTableTableManager
                 Value<int> progress = const Value.absent(),
                 Value<String> priority = const Value.absent(),
                 Value<DateTime?> startDate = const Value.absent(),
+                Value<bool> verifyRequired = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TasksCompanion(
                 id: id,
@@ -63923,6 +64660,7 @@ class $$TasksTableTableManager
                 progress: progress,
                 priority: priority,
                 startDate: startDate,
+                verifyRequired: verifyRequired,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -63938,6 +64676,7 @@ class $$TasksTableTableManager
                 Value<int> progress = const Value.absent(),
                 Value<String> priority = const Value.absent(),
                 Value<DateTime?> startDate = const Value.absent(),
+                Value<bool> verifyRequired = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TasksCompanion.insert(
                 id: id,
@@ -63951,6 +64690,7 @@ class $$TasksTableTableManager
                 progress: progress,
                 priority: priority,
                 startDate: startDate,
+                verifyRequired: verifyRequired,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -91964,6 +92704,326 @@ typedef $$GateChecksTableProcessedTableManager =
       GateCheck,
       PrefetchHooks Function()
     >;
+typedef $$TaskChecksTableCreateCompanionBuilder =
+    TaskChecksCompanion Function({
+      required String id,
+      required String projectId,
+      required String taskId,
+      required double lat,
+      required double lng,
+      Value<double?> accuracyM,
+      Value<double?> distanceM,
+      Value<String?> note,
+      required String checkedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$TaskChecksTableUpdateCompanionBuilder =
+    TaskChecksCompanion Function({
+      Value<String> id,
+      Value<String> projectId,
+      Value<String> taskId,
+      Value<double> lat,
+      Value<double> lng,
+      Value<double?> accuracyM,
+      Value<double?> distanceM,
+      Value<String?> note,
+      Value<String> checkedBy,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$TaskChecksTableFilterComposer
+    extends Composer<_$AppDatabase, $TaskChecksTable> {
+  $$TaskChecksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get taskId => $composableBuilder(
+    column: $table.taskId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get lat => $composableBuilder(
+    column: $table.lat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get lng => $composableBuilder(
+    column: $table.lng,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get accuracyM => $composableBuilder(
+    column: $table.accuracyM,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get distanceM => $composableBuilder(
+    column: $table.distanceM,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get checkedBy => $composableBuilder(
+    column: $table.checkedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TaskChecksTableOrderingComposer
+    extends Composer<_$AppDatabase, $TaskChecksTable> {
+  $$TaskChecksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get projectId => $composableBuilder(
+    column: $table.projectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get taskId => $composableBuilder(
+    column: $table.taskId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get lat => $composableBuilder(
+    column: $table.lat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get lng => $composableBuilder(
+    column: $table.lng,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get accuracyM => $composableBuilder(
+    column: $table.accuracyM,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get distanceM => $composableBuilder(
+    column: $table.distanceM,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get checkedBy => $composableBuilder(
+    column: $table.checkedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TaskChecksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TaskChecksTable> {
+  $$TaskChecksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get projectId =>
+      $composableBuilder(column: $table.projectId, builder: (column) => column);
+
+  GeneratedColumn<String> get taskId =>
+      $composableBuilder(column: $table.taskId, builder: (column) => column);
+
+  GeneratedColumn<double> get lat =>
+      $composableBuilder(column: $table.lat, builder: (column) => column);
+
+  GeneratedColumn<double> get lng =>
+      $composableBuilder(column: $table.lng, builder: (column) => column);
+
+  GeneratedColumn<double> get accuracyM =>
+      $composableBuilder(column: $table.accuracyM, builder: (column) => column);
+
+  GeneratedColumn<double> get distanceM =>
+      $composableBuilder(column: $table.distanceM, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get checkedBy =>
+      $composableBuilder(column: $table.checkedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$TaskChecksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TaskChecksTable,
+          TaskCheck,
+          $$TaskChecksTableFilterComposer,
+          $$TaskChecksTableOrderingComposer,
+          $$TaskChecksTableAnnotationComposer,
+          $$TaskChecksTableCreateCompanionBuilder,
+          $$TaskChecksTableUpdateCompanionBuilder,
+          (
+            TaskCheck,
+            BaseReferences<_$AppDatabase, $TaskChecksTable, TaskCheck>,
+          ),
+          TaskCheck,
+          PrefetchHooks Function()
+        > {
+  $$TaskChecksTableTableManager(_$AppDatabase db, $TaskChecksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TaskChecksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TaskChecksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TaskChecksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> projectId = const Value.absent(),
+                Value<String> taskId = const Value.absent(),
+                Value<double> lat = const Value.absent(),
+                Value<double> lng = const Value.absent(),
+                Value<double?> accuracyM = const Value.absent(),
+                Value<double?> distanceM = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> checkedBy = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TaskChecksCompanion(
+                id: id,
+                projectId: projectId,
+                taskId: taskId,
+                lat: lat,
+                lng: lng,
+                accuracyM: accuracyM,
+                distanceM: distanceM,
+                note: note,
+                checkedBy: checkedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String projectId,
+                required String taskId,
+                required double lat,
+                required double lng,
+                Value<double?> accuracyM = const Value.absent(),
+                Value<double?> distanceM = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                required String checkedBy,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TaskChecksCompanion.insert(
+                id: id,
+                projectId: projectId,
+                taskId: taskId,
+                lat: lat,
+                lng: lng,
+                accuracyM: accuracyM,
+                distanceM: distanceM,
+                note: note,
+                checkedBy: checkedBy,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$TaskChecksTable, TaskCheck>(table),
+                  BaseReferences<_$AppDatabase, $TaskChecksTable, TaskCheck>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TaskChecksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TaskChecksTable,
+      TaskCheck,
+      $$TaskChecksTableFilterComposer,
+      $$TaskChecksTableOrderingComposer,
+      $$TaskChecksTableAnnotationComposer,
+      $$TaskChecksTableCreateCompanionBuilder,
+      $$TaskChecksTableUpdateCompanionBuilder,
+      (TaskCheck, BaseReferences<_$AppDatabase, $TaskChecksTable, TaskCheck>),
+      TaskCheck,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncOutboxTableCreateCompanionBuilder =
     SyncOutboxCompanion Function({
       Value<int> id,
@@ -92416,6 +93476,8 @@ class $AppDatabaseManager {
       $$SafetyBreachesTableTableManager(_db, _db.safetyBreaches);
   $$GateChecksTableTableManager get gateChecks =>
       $$GateChecksTableTableManager(_db, _db.gateChecks);
+  $$TaskChecksTableTableManager get taskChecks =>
+      $$TaskChecksTableTableManager(_db, _db.taskChecks);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
 }

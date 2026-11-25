@@ -8,7 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:fieldos_mobile/auth/auth_service.dart' show Roles;
+import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
+import 'package:fieldos_mobile/features/execution/activity_templates.dart';
+import 'package:fieldos_mobile/services/location_service.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/project/task_plan.dart';
@@ -21,6 +25,11 @@ import 'package:fieldos_mobile/l10n/language.dart';
 const taskStatusLabels = {'todo': 'To do', 'in_progress': 'In progress', 'blocked': 'Blocked', 'done': 'Done'};
 
 enum TaskView { all, late, next14 }
+
+final taskChecksProvider = FutureProvider.autoDispose.family<Set<String>, String>((ref, projectId) async {
+  final checks = await ref.watch(appDatabaseProvider).siteOpsDao.checksFor(projectId);
+  return {for (final c in checks) c.taskId};
+});
 
 class TasksTab extends ConsumerStatefulWidget {
   const TasksTab({super.key, required this.project});
@@ -67,9 +76,79 @@ class _TasksTabState extends ConsumerState<TasksTab> {
       ));
       if (mounted) showSnack(context, 'Copied. The copy starts at 0%.');
     } else {
-      await dao.edit(t.id, result);
+      try {
+        await dao.edit(t.id, result, asManager: Roles.canApprove(ref.read(sessionProvider).role));
+      } on ExecutionRefused catch (e) {
+        if (mounted) showSnack(context, e.message, error: true);
+      }
     }
     _refresh();
+  }
+
+  Future<void> _verify(Task t) async {
+    try {
+      final fix = await LocationService().currentFix();
+      await ref.read(appDatabaseProvider).siteOpsDao.verifyTask(t.id,
+          lat: fix.lat, lng: fix.lng, accuracyM: fix.accuracyM, by: ref.read(sessionProvider).user!.id);
+      ref.invalidate(taskChecksProvider(_projectId));
+      if (mounted) showSnack(context, tr('Verified on site. You can now mark it done.'));
+    } on ExecutionRefused catch (e) {
+      if (mounted) showSnack(context, e.message, error: true);
+    } on LocationUnavailable catch (e) {
+      if (mounted) showSnack(context, e.message, error: true);
+    } catch (e) {
+      if (mounted) showSnack(context, trf('Could not save: {error}', {'error': '$e'}), error: true);
+    }
+  }
+
+  Future<void> _stages() async {
+    final picked = <String>{};
+    var start = DateTime.now();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => AlertDialog(
+          title: Text(tr('Add stage checklist')),
+          content: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text(tr('Each step becomes a task that needs an on-site check before it can be marked 100%.')),
+              for (final st in activityStages)
+                CheckboxListTile(
+                  key: Key('stage-${st.id}'),
+                  contentPadding: EdgeInsets.zero,
+                  value: picked.contains(st.id),
+                  title: Text(tr(st.title)),
+                  subtitle: Text(trf('{n} steps', {'n': st.steps.length})),
+                  onChanged: (v) => set(() => v == true ? picked.add(st.id) : picked.remove(st.id)),
+                ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.event_outlined),
+                title: Text(trf('Start {date}', {'date': fmtDate(start, short: true)})),
+                onTap: () async {
+                  final now = DateTime.now();
+                  final d = await pickDate(ctx, initial: start, first: now.subtract(const Duration(days: 365)), last: now.add(const Duration(days: 1095)));
+                  if (d != null) set(() => start = d);
+                },
+              ),
+            ]),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+            FilledButton(key: const Key('stages-save'), onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Add tasks'))),
+          ],
+        ),
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      final n = await ref.read(appDatabaseProvider).siteOpsDao.addStageChecklist(
+          projectId: _projectId, stageIds: [for (final st in activityStages) if (picked.contains(st.id)) st.id], start: start);
+      _refresh();
+      if (mounted) showSnack(context, trf('{n} tasks added.', {'n': n}));
+    } on ExecutionRefused catch (e) {
+      if (mounted) showSnack(context, e.message, error: true);
+    }
   }
 
   @override
@@ -103,6 +182,15 @@ class _TasksTabState extends ConsumerState<TasksTab> {
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
                 children: [
                   _ProgressHeader(tasks: items, lateCount: lateCount),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      key: const Key('stage-checklist'),
+                      icon: const Icon(Icons.account_tree_outlined),
+                      label: Text(tr('Add stage checklist')),
+                      onPressed: _stages,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   SegmentedButton<TaskView>(
                     segments: [
@@ -129,7 +217,15 @@ class _TasksTabState extends ConsumerState<TasksTab> {
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                     ),
-                  for (final t in shown) TaskCard(task: t, now: now, assignee: roster?.labelFor(t.assigneeId), onTap: () => _open(t)),
+                  for (final t in shown)
+                    TaskCard(
+                      task: t,
+                      now: now,
+                      assignee: roster?.labelFor(t.assigneeId),
+                      onTap: () => _open(t),
+                      verified: (ref.watch(taskChecksProvider(_projectId)).value ?? const <String>{}).contains(t.id),
+                      onVerify: t.verifyRequired && t.status != 'done' ? () => _verify(t) : null,
+                    ),
                 ],
               );
             },
@@ -196,7 +292,7 @@ class _ProgressHeader extends StatelessWidget {
 /// One task: title, status, progress bar, dates and how late it is. Also
 /// used on My tasks, where [site] names the project it belongs to.
 class TaskCard extends StatelessWidget {
-  const TaskCard({super.key, required this.task, required this.now, required this.onTap, this.assignee, this.site});
+  const TaskCard({super.key, required this.task, required this.now, required this.onTap, this.assignee, this.site, this.verified = false, this.onVerify});
   final Task task;
   final DateTime now;
   final VoidCallback onTap;
@@ -204,6 +300,11 @@ class TaskCard extends StatelessWidget {
   /// Who it is for ("You", a name), or null when nobody is named.
   final String? assignee;
   final String? site;
+
+  /// The task needs an on-site check and has one; [onVerify] is set while
+  /// it still needs one.
+  final bool verified;
+  final VoidCallback? onVerify;
 
   @override
   Widget build(BuildContext context) {
@@ -285,6 +386,21 @@ class TaskCard extends StatelessWidget {
                   ]),
               ]),
             ],
+            if (onVerify != null)
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: verified
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(tr('Verified on site'), style: theme.textTheme.bodySmall?.copyWith(color: toneColor(context, PillTone.ok))),
+                      )
+                    : TextButton.icon(
+                        key: Key('verify-${t.id}'),
+                        icon: const Icon(Icons.my_location, size: 18),
+                        label: Text(tr('Verify on site')),
+                        onPressed: onVerify,
+                      ),
+              ),
             if (dates.isNotEmpty || lateText != null) ...[
               const SizedBox(height: 6),
               Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
@@ -333,6 +449,7 @@ class _TaskSheetState extends State<_TaskSheet> {
   late DateTime? _start = widget.existing?.startDate;
   late DateTime? _due = widget.existing?.dueDate;
   late String? _assignee = widget.existing?.assigneeId;
+  late bool _verify = widget.existing?.verifyRequired ?? false;
   String? _error;
 
   bool get _editing => widget.existing != null;
@@ -381,6 +498,7 @@ class _TaskSheetState extends State<_TaskSheet> {
         startDate: Value(_start),
         dueDate: Value(_due),
         assigneeId: Value(_assignee),
+        verifyRequired: Value(_verify),
       ),
     );
   }
@@ -459,6 +577,13 @@ class _TaskSheetState extends State<_TaskSheet> {
                 onChanged: (v) => setState(() => _assignee = v),
               ),
             ],
+            SwitchListTile(
+              key: const Key('task-verify-required'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(tr('Needs an on-site check before 100%')),
+              value: _verify,
+              onChanged: (v) => setState(() => _verify = v),
+            ),
             if (_editing) ...[
               const SizedBox(height: 16),
               Row(children: [

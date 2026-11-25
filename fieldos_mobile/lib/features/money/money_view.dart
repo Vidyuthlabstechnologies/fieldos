@@ -35,6 +35,7 @@ import 'package:fieldos_mobile/features/money/voucher_pdf.dart';
 import 'package:fieldos_mobile/features/shared/photo_capture.dart' show CapturedFile;
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/sync/cloud_sync_providers.dart' show cloudLinksProvider;
+import 'package:fieldos_mobile/features/money/expense_heads.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 
 Map<String, String> get paymentModes => {'cash': 'Cash', 'upi': market.instantPaymentName, 'bank': 'Bank transfer', 'cheque': 'Cheque'};
@@ -732,6 +733,21 @@ void _showBreakdown(BuildContext context, List<SiteExpense> shown) {
                 style: theme.textTheme.bodySmall),
             const SizedBox(height: 16),
             for (final c in parts) _BreakdownBar(part: c),
+            const SizedBox(height: 8),
+            Text(tr('By head'), style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            for (final h in headTotals(shown))
+              Padding(
+                key: Key('head-${h.head.name}'),
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(children: [
+                  Expanded(child: Text(expenseHeadLabel(h.head), style: theme.textTheme.titleSmall)),
+                  Text(rupees(h.amount), style: const TextStyle(fontWeight: FontWeight.w600)),
+                ]),
+              ),
+            if (headTotals(shown).last.informal > 0)
+              Text(trf('Of Others, {amount} was tea, food and small informal spend.', {'amount': rupees(headTotals(shown).last.informal)}),
+                  style: theme.textTheme.bodySmall),
           ]),
         ),
       );

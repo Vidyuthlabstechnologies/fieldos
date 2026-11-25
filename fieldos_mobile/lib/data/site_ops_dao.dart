@@ -9,6 +9,8 @@ import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/data/pre_construction_dao.dart' show ymdOf;
+import 'package:fieldos_mobile/core/geo.dart';
+import 'package:fieldos_mobile/features/execution/activity_templates.dart';
 import 'package:fieldos_mobile/features/execution/site_ops_rules.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/sync/site_execution_sync.dart';
@@ -248,6 +250,82 @@ class SiteOpsDao {
               updatedAt: Value(t),
             ));
         await _queue('site_gate_checks', 'insert', row);
+        return row;
+      });
+
+  // --- Stage checklists and on-site checks ------------------------------------------
+
+  /// Adds a task for every step of the chosen stages, each needing an
+  /// on-site check before 100%. Returns how many tasks were added.
+  Future<int> addStageChecklist({
+    required String projectId,
+    required List<String> stageIds,
+    required DateTime start,
+    DateTime? now,
+  }) =>
+      db.transaction(() async {
+        var n = 0;
+        final day = DateTime(start.year, start.month, start.day);
+        for (final id in stageIds) {
+          final stage = stageById(id);
+          if (stage == null) throw ArgumentError.value(id, 'stageId');
+          for (final step in stage.steps) {
+            await db.taskDao.create(TasksCompanion.insert(
+              id: _uuid.v4(),
+              projectId: projectId,
+              title: activityTaskTitle(stage, step),
+              startDate: Value(day),
+              dueDate: Value(stage.minDays > 0 ? DateTime(day.year, day.month, day.day + stage.minDays) : null),
+              verifyRequired: const Value(true),
+            ));
+            n++;
+          }
+        }
+        if (n == 0) throw ExecutionRefused(tr('Pick at least one stage.'));
+        return n;
+      });
+
+  Future<List<TaskCheck>> checksFor(String projectId) =>
+      (db.select(db.taskChecks)..where((c) => c.projectId.equals(projectId))).get();
+
+  /// Records that [by] stood at the site when marking the task done. When
+  /// the site has a location, the phone must be within its radius.
+  Future<TaskCheck> verifyTask(
+    String taskId, {
+    required double lat,
+    required double lng,
+    required String by,
+    double? accuracyM,
+    String? note,
+    DateTime? now,
+  }) =>
+      db.transaction(() async {
+        final task = await (db.select(db.tasks)..where((t) => t.id.equals(taskId))).getSingleOrNull();
+        if (task == null) throw ExecutionRefused(tr('This task is no longer on the phone.'));
+        final fence = await db.geofenceDao.effectiveFor(task.projectId);
+        double? distance;
+        if (fence != null) {
+          distance = haversineMeters(lat, lng, fence.centerLat, fence.centerLng);
+          final allowed = fence.radiusMeters > 0 ? fence.radiusMeters : defaultSiteRadiusM;
+          if (distance > allowed + (accuracyM ?? 0).clamp(0, 50)) {
+            throw ExecutionRefused(trf('You are {n} m from the site. Go to the site to verify.', {'n': distance.round()}));
+          }
+        }
+        final t = now ?? DateTime.now();
+        final row = await db.into(db.taskChecks).insertReturning(TaskChecksCompanion.insert(
+              id: _uuid.v4(),
+              projectId: task.projectId,
+              taskId: taskId,
+              lat: lat,
+              lng: lng,
+              checkedBy: by,
+              accuracyM: Value(accuracyM),
+              distanceM: Value(distance),
+              note: Value(_clip(note, 300)),
+              createdAt: Value(t),
+              updatedAt: Value(t),
+            ));
+        await _queue('site_task_checks', 'insert', row);
         return row;
       });
 }

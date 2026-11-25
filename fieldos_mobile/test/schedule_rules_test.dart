@@ -8,7 +8,7 @@ import 'package:fieldos_mobile/features/schedule/schedule_rules.dart';
 /// which tasks have no spare days, and that links never make a loop.
 void main() {
   final now = DateTime(2026, 11, 10, 9);
-  Task t(String id, {int? start, int? due, String status = 'todo', int progress = 0}) => Task(
+  Task t(String id, {int? start, int? due, String status = 'todo', int progress = 0}) => Task(verifyRequired: false, 
         id: id,
         projectId: 'p',
         title: 'Task $id',
