@@ -8,6 +8,7 @@ library;
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:fieldos_mobile/auth/site_roles.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/features/money/money_book.dart';
 
@@ -32,6 +33,10 @@ void main() {
         id: uuid.v4(), companyId: company.id, name: 'Villa 4', status: const Value('active')));
     expect((await owner.engine.pushPending()).failed, 0);
     await engineer.service.joinCompany(cloud.joinCode!);
+    // Accounts read every expense on the site (finance privacy, 2026-11-25);
+    // a plain engineer sees only their own, so would not show the owner's.
+    await owner.db.siteTeamDao.setMember(projectId: project.id, userId: engineer.remoteUserId, role: SiteRole.accounts);
+    expect((await owner.engine.pushPending()).failed, 0);
     await engineer.engine.pullAll();
 
     // Round 1: both offline, both write V-1. Owner syncs first.

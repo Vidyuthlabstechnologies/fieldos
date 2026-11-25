@@ -547,6 +547,7 @@ class SyncEngine {
           await db.settingsDao.set(cursorKey, '$head');
           await db.settingsDao.set(settledKey, '$head');
         }
+        await _pullWageRates(dirty, keep);
         final portalSites = await _pullSubcontractorSites();
         await _dropProjectsNoLongerShared({...keep, ...portalSites});
         await _exchangeSyncStatus();
@@ -970,7 +971,7 @@ class SyncEngine {
           for (var i = 0; i < ids.length; i += 100) (table, ids.sublist(i, i + 100 > ids.length ? ids.length : i + 100)),
     ];
     final fetched = _prefetch(chunks,
-        (c) async => (await client.from(c.$1).select().inFilter('id', c.$2)).map(_toLocalIds).toList());
+        (c) async => (await client.from(c.$1).select(pullColumns[c.$1] ?? '*').inFilter('id', c.$2)).map(_toLocalIds).toList());
     for (final ((table, chunk), result) in fetched) {
       final rows = await result;
       await _applyAll(table, rows, dirty);
@@ -1248,7 +1249,56 @@ class SyncEngine {
   static const pullPageSize = 500;
 
   Future<List<Map<String, dynamic>>> _fetchAll(String table) async =>
-      (await _fetchPaged(table, '*')).map(_toLocalIds).toList();
+      (await _fetchPaged(table, pullColumns[table] ?? '*')).map(_toLocalIds).toList();
+
+  /// Tables read by an explicit column list rather than `*`. Workers come
+  /// without daily_wage: the rate is read through worker_wage_rates() (see
+  /// [_pullWageRates]), so the column's read privilege can be taken away
+  /// from the table (supabase/deferred/20261125150001_revoke_workers_wage_read.sql)
+  /// without stopping this phone's sync. Keep the list to what the mapper
+  /// reads; a later column added here must also be granted on the server.
+  static const pullColumns = {'workers': 'id,project_id,name,role,phone,status,created_at'};
+
+  /// The wage rates the caller may see, applied to the phone's workers
+  /// (those with an unsent local edit keep their own). A backend without
+  /// worker_wage_rates() yet (20261125150000) is read the old way, the
+  /// column itself. A rate this account may not see is cleared from the
+  /// phone (an older build may have left one there).
+  Future<void> _pullWageRates(Set<String> dirty, Set<String> keep) async {
+    List rows;
+    var authoritative = true;
+    try {
+      rows = await client.rpc('worker_wage_rates') as List;
+    } on PostgrestException catch (e) {
+      if (!_isMissingOnServer(e)) rethrow;
+      authoritative = false;
+      try {
+        rows = (await client.from('workers').select('id,daily_wage')) as List;
+      } on PostgrestException catch (e2) {
+        if (e2.code == '42501') return;
+        rethrow;
+      }
+      rows = [for (final r in rows.cast<Map>()) {'worker_id': r['id'], 'daily_wage': r['daily_wage']}];
+    }
+    final visible = <String>{};
+    for (final r in rows.cast<Map>()) {
+      final id = r['worker_id'] as String;
+      visible.add(id);
+      if (dirty.contains(SyncOutboxDao.key('workers', id))) continue;
+      final wage = (r['daily_wage'] as num?)?.toDouble();
+      await (db.update(db.workers)..where((w) => w.id.equals(id))).write(WorkersCompanion(dailyWage: Value(wage)));
+    }
+    if (!authoritative) return;
+    // A rate this account may not see is not held here either: an older
+    // build may have left one on the phone. Records that only exist on this
+    // phone (the sample site, work not yet sent) are never touched.
+    final held = await (db.select(db.workers)..where((w) => w.dailyWage.isNotNull())).get();
+    for (final w in held) {
+      if (visible.contains(w.id) || keep.contains(w.id) || keep.contains(w.projectId)) continue;
+      if (dirty.contains(SyncOutboxDao.key('workers', w.id))) continue;
+      await (db.update(db.workers)..where((x) => x.id.equals(w.id))).write(const WorkersCompanion(dailyWage: Value(null)));
+    }
+  }
 
   /// Tables whose arrival from a colleague is worth an on-device alert.
   static const notifiableTables = {'issues', 'approvals', 'project_messages'};

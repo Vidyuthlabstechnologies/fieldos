@@ -1,5 +1,7 @@
 # AGENTS.md - AI Agent Instructions for FieldOS
 
+> Start with [docs/HANDOVER.md](docs/HANDOVER.md): current version, runbooks, secret names and open items. This file holds the conventions.
+
 ## Project Context
 
 FieldOS is a fully offline construction site management platform (desktop
@@ -221,6 +223,8 @@ class NewModelOut(BaseModel):
 ```
 
 ### Mobile (Drift) schema changes
+- Labels in the site-operations tables are generated: edit `tools/siteops_strings/` and `tools/siteops_strings_intl/`, then run `python3 tools/gen_siteops_strings.py`.
+- A migration that would break older builds goes in `supabase/deferred/` until the minimum build is raised (see HANDOVER.md, "Wage rates").
 - Every `schemaVersion` bump needs an `if (from < N)` step that leaves an upgraded phone with exactly a fresh install's schema. `test/shipped_schema_upgrade_test.dart` checks this from every shipped schema (v9, v14, v32, v39).
 - When a release ships with a new `schemaVersion`, add its fixture as `tool/upgrade_fixtures/README.md` describes.
 - When a server change would break older app builds, raise the minimum build instead of letting them sync wrongly: `update public.app_config set min_build_android = <build>, min_build_ios = <build>, message = '<short reason>';` (service role, SQL editor). Phones below it stop syncing and show an Update banner on Home; their work stays on the phone (`lib/sync/app_version_gate.dart`). Set it back to 0 to switch it off.

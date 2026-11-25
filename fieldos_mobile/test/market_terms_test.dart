@@ -11,7 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fieldos_mobile/core/market.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/l10n/market_terms.dart';
-import 'package:fieldos_mobile/l10n/strings_siteops.dart' show siteOpsLabels;
 
 import 'l10n_coverage_test.dart' show labelsInSource;
 
@@ -99,11 +98,7 @@ void main() {
       debugSetMarket(m);
       for (final l in AppLanguage.offered.where((l) => l != AppLanguage.en && !AppLanguage.indianLanguages.contains(l))) {
         setCurrentLanguage(l);
-        // The pre-construction, quality, safety, gate and site-check labels
-        // (strings_siteops.dart) are not yet in the international languages;
-        // they read in English there until translated. The Indian
-        // languages are complete (l10n_coverage_test).
-        final untranslated = labels.where((k) => !hasTranslation(l, k) && !siteOpsLabels.contains(k)).toList()..sort();
+        final untranslated = labels.where((k) => !hasTranslation(l, k)).toList()..sort();
         expect(untranslated, isEmpty, reason: '$m ${l.englishName} is missing ${untranslated.length} labels');
       }
     }

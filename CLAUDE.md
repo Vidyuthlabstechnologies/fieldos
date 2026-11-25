@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+Current state, runbooks and open items: [docs/HANDOVER.md](docs/HANDOVER.md).
+
 This project's conventions, code style, patterns, and quick commands live
 in [AGENTS.md](AGENTS.md) -- read that file for the full picture (project
 context, adding a router/page, DB conventions, testing requirements, env
