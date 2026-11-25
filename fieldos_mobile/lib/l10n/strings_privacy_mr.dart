@@ -37,7 +37,7 @@ const Map<String, String> privacyMr = {
   'You can stop this at any time in Settings, Your privacy.': 'तुम्ही हे कधीही Settings, तुमची गोपनीयता मध्ये बंद करू शकता.',
   'Your account': 'तुमचे खाते',
   'Your choices': 'तुमचे पर्याय',
-  'Your location, and a selfie, only when you check in or out, punch a worker in, set a site location or take a site photo, to show the work was done at the site. Never in the background.': 'तुमचे लोकेशन आणि एक सेल्फी, फक्त तुम्ही चेक इन किंवा आउट करता, कामगाराची हजेरी लावता, साइटचे लोकेशन ठरवता किंवा साइटचा फोटो घेता तेव्हाच, काम साइटवर झाले हे दाखवण्यासाठी. कधीही मागून नाही.',
+  'Your location, and a selfie, only when you check in or out, punch a worker in, set a site location or take a site photo, to show the work was done at the site. Never in the background.': 'तुमचे लोकेशन आणि एक सेल्फी, फक्त तुम्ही चेक इन किंवा आउट करता, कामगाराची हजेरी लावता, साइटचे लोकेशन ठरवता किंवा साइटचा फोटो घेता तेव्हाच, काम साइटवर झाले हे दाखवण्यासाठी. कधीही बॅकग्राउंडमध्ये नाही.',
   'Your name, email address and the company you join, so that you can sign in and work with your team.': 'तुमचे नाव, ईमेल पत्ता आणि तुम्ही जोडता ती कंपनी, म्हणजे तुम्ही साइन इन करून तुमच्या टीमसोबत काम करू शकता.',
   'Your privacy': 'तुमची गोपनीयता',
   'Your rights': 'तुमचे अधिकार',
