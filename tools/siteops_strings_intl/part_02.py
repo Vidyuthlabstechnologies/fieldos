@@ -52,4 +52,6 @@ T = {
  "Planned and actual": ("Planificado y real", "المخطط والفعلي", "Dirancang dan sebenar", "منصوبہ اور اصل", "计划与实际", "ആസൂത്രിതവും യഥാർത്ഥവും", "Plan i wykonanie", "Planificat și realizat"),
  "Planned value (time gone)": ("Valor planificado (tiempo transcurrido)", "القيمة المخططة (الوقت المنقضي)", "Nilai dirancang (masa berlalu)", "منصوبہ قدر (گزرا وقت)", "计划价值(已过时间)", "ആസൂത്രിത മൂല്യം (കഴിഞ്ഞ സമയം)", "Wartość planowana (upływ czasu)", "Valoare planificată (timp scurs)"),
  "Plinth beam": ("Viga de arriostre", "جسر القاعدة", "Rasuk plinth", "پلنتھ بیم", "地圈梁", "പ്ലിന്ത് ബീം", "Belka podwalinowa", "Grindă de fundare"),
+ 'Below early target': ('Por debajo de la meta temprana', 'أقل من الهدف المبكر', 'Di bawah sasaran awal', 'ابتدائی ہدف سے کم', '低于早期目标', 'ആദ്യകാല ലക്ഷ്യത്തിന് താഴെ', 'Poniżej wczesnego celu', 'Sub ținta timpurie'),
+ '{n} below early target': ('{n} por debajo de la meta temprana', '{n} أقل من الهدف المبكر', '{n} di bawah sasaran awal', '{n} ابتدائی ہدف سے کم', '{n} 项低于早期目标', '{n} എണ്ണം ആദ്യകാല ലക്ഷ്യത്തിന് താഴെ', '{n} poniżej wczesnego celu', '{n} sub ținta timpurie'),
 }

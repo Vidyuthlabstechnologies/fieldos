@@ -52,7 +52,16 @@ void main() {
     final fourteen = await x.recordTest(set[1].id, actual: 20, by: 'q1');
     expect(fourteen.result, 'fail');
     final s = summariseQuality(await x.qualityFor('p1'), now);
-    expect((s.passed, s.failed, s.overdue, s.soon), (1, 1, 0, 0));
+    expect((s.passed, s.failed, s.early, s.overdue, s.soon), (1, 0, 1, 0, 0), reason: 'a 14-day miss is a warning, not a failure');
+    expect(isEarlyCubeMiss(kind: 'cube', result: fourteen.result, ageDays: fourteen.ageDays), isTrue);
+    expect(isEarlyCubeMiss(kind: 'cube', result: 'fail', ageDays: 28), isFalse, reason: 'the 28-day result decides');
+    expect(isEarlyCubeMiss(kind: 'cube', result: 'pass', ageDays: 7), isFalse);
+    expect(isEarlyCubeMiss(kind: 'paint', result: 'fail', ageDays: 7), isFalse, reason: 'only cubes have early ages');
+    expect(isEarlyCubeMiss(kind: 'cube', result: 'fail'), isFalse, reason: 'no age, no excuse');
+    final twentyEight = await x.recordTest(set[2].id, actual: 24, by: 'q1');
+    expect(twentyEight.result, 'fail');
+    final s2 = summariseQuality(await x.qualityFor('p1'), now);
+    expect((s2.passed, s2.failed, s2.early), (1, 1, 1), reason: 'a missed 28-day cube is a real failure');
 
     final paint = await x.addQualityTest(projectId: 'p1', kind: 'paint', parameter: 'Dry film thickness', unit: 'micron', requiredValue: 60, by: 'u1');
     expect(paint.rule, 'min');
@@ -62,7 +71,7 @@ void main() {
       expect(qualityKindLabel(k), isNot(k));
     }
     final queued = [for (final e in await db.select(db.syncOutbox).get()) if (e.targetTable == 'site_quality_tests') e.operation];
-    expect(queued.length, 6);
+    expect(queued.length, 7);
     expect(executionFromRemote('site_quality_tests', {...executionToRemote('site_quality_tests', fourteen), 'synced_at': 'x'}), isNotNull);
   });
 
