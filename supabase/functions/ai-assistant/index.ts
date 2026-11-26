@@ -67,6 +67,19 @@ const deps: Deps = {
     }
     return data === true;
   },
+  async aiConsentWithdrawn(userId) {
+    const { data, error } = await admin
+      .from("consent_records")
+      .select("granted")
+      .eq("user_id", userId)
+      .eq("purpose", "ai_assistant")
+      .order("given_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(1);
+    // Fail closed: if this cannot be read, the usage tables behind it cannot either.
+    if (error) throw error;
+    return data?.[0]?.granted === false;
+  },
   async takeUsage(userId, kind, amount, limit) {
     const { data, error } = await admin.rpc("ai_usage_take", {
       p_user: userId,
