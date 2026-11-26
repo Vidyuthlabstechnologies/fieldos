@@ -2628,9 +2628,24 @@ class SyncOutboxDao extends DatabaseAccessor<AppDatabase> with _$SyncOutboxDaoMi
   /// including parked rows. Pull and Realtime skip these so an unpushed
   /// local edit is never replaced by an older server copy.
   Future<Set<String>> dirtyKeys() async {
-    final rows = await select(syncOutbox).get();
-    return {for (final r in rows) key(r.targetTable, r.recordId)};
+    // Two short columns, not the rows: a payload is a whole JSON record, and
+    // after weeks offline this runs at the start of every pull and for every
+    // incoming live update.
+    final rows = await (selectOnly(syncOutbox)..addColumns([syncOutbox.targetTable, syncOutbox.recordId])).get();
+    return {for (final r in rows) key(r.read(syncOutbox.targetTable)!, r.read(syncOutbox.recordId)!)};
   }
+
+  /// Record ids of writes that failed at least once, without their payloads.
+  Future<Set<String>> refusedRecordIds() async {
+    final rows = await (selectOnly(syncOutbox)
+          ..addColumns([syncOutbox.recordId])
+          ..where(syncOutbox.retryCount.isBiggerOrEqualValue(1)))
+        .get();
+    return {for (final r in rows) r.read(syncOutbox.recordId)!};
+  }
+
+  /// Writes that have not failed yet (payloads included).
+  Future<List<SyncOutboxData>> neverRefused() => (select(syncOutbox)..where((o) => o.retryCount.equals(0))).get();
 
   /// Gives parked rows another chance (e.g. after the RLS/membership issue
   /// that parked them has been fixed by joining the company).
