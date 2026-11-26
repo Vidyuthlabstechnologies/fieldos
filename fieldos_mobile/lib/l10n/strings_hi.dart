@@ -2592,4 +2592,6 @@ const Map<String, String> stringsHi = {
   '{amount} spent without a BOQ item.': 'बिना BOQ आइटम के {amount} खर्च।',
   'Purchase request': 'खरीद रिक्वेस्ट',
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'काम दिखाते हैं कि हर काम कितना हुआ और क्या पिछड़ रहा है। ग्राउंड बीम देर से है, इसलिए किसी के पूछने से पहले ही वह लाल रंग में दिखता है।',
+  'Throw away what you said?': 'जो आपने बोला, उसे हटा दें?',
+  'Throw it away': 'हटा दें',
 };

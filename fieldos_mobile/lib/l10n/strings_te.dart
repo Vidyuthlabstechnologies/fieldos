@@ -2585,4 +2585,6 @@ const Map<String, String> stringsTe = {
   '{amount} spent without a BOQ item.': 'BOQ ఐటమ్ లేకుండా {amount} ఖర్చు.',
   'Purchase request': 'కొనుగోలు రిక్వెస్ట్',
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'ప్రతి పని ఎంతవరకు వచ్చిందో, ఏది వెనకబడుతోందో పనులు చూపిస్తాయి. గ్రౌండ్ బీమ్ ఆలస్యం, అందుకే ఎవరూ అడగకముందే అది ఎరుపు రంగులో కనిపిస్తుంది.',
+  'Throw away what you said?': 'మీరు చెప్పినది తొలగించాలా?',
+  'Throw it away': 'తొలగించు',
 };

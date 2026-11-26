@@ -3135,4 +3135,6 @@ const stringsZh = <String, String>{
   '{amount} spent without a BOQ item.': '{amount} 支出没有对应的工料清单 (BQ) 项目。',
   'Purchase request': '采购申请',
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': '任务显示每项工作的进度和哪些在落后。地梁延误了，所以还没人问就已用红色标出。',
+  'Throw away what you said?': '放弃您刚才说的内容吗？',
+  'Throw it away': '放弃',
 };

@@ -3138,4 +3138,6 @@ const stringsAr = <String, String>{
   '{amount} spent without a BOQ item.': '{amount} صُرف دون بند في جدول الكميات.',
   'Purchase request': 'طلب شراء',
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'تُظهر المهام مدى تقدم كل عمل وما الذي يتأخر. الجسر الأرضي متأخر، لذلك يظهر باللون الأحمر قبل أن يسأل أحد.',
+  'Throw away what you said?': 'هل تريد تجاهل ما قلته؟',
+  'Throw it away': 'تجاهل',
 };
