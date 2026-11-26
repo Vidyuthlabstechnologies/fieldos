@@ -17,6 +17,10 @@ const historyKinds = {
   'site_attendance': 'Attendance punch',
   'site_supplier_invoices': 'Supplier invoice',
   'site_work_measurements': 'Work measurement',
+  'workers': 'Worker',
+  'site_attendance_marks': 'Attendance',
+  'purchase_orders': 'Purchase order',
+  'purchase_requisitions': 'Purchase request',
 };
 
 /// Fields that are ids or bookkeeping, never shown as a change.
@@ -26,11 +30,13 @@ const _hidden = {
 };
 
 /// Fields holding rupees.
-const moneyFields = {'amount', 'gross', 'net_payable', 'gst_amount', 'rate'};
+const moneyFields = {'amount', 'gross', 'net_payable', 'gst_amount', 'rate', 'daily_wage', 'total_amount', 'estimated_cost'};
 
 /// The label for a field, in English (the screen translates it).
 String fieldLabel(String f) => switch (f) {
-      'amount' => 'Amount',
+      'amount' || 'total_amount' || 'estimated_cost' => 'Amount',
+      'daily_wage' => 'Daily wage',
+      'item_name' => 'Material',
       'category' => 'Category',
       'incurred_on' => 'Date',
       'received_on' => 'Date',
@@ -113,7 +119,7 @@ class HistoryItem {
   String get summary {
     final r = now ?? old;
     final what = r['category'] ?? r['material_name'] ?? r['from_party'] ?? r['worker_name'] ??
-        r['description'] ?? r['bill_number'] ?? r['invoice_number'] ?? r['client_name'];
+        r['description'] ?? r['bill_number'] ?? r['invoice_number'] ?? r['client_name'] ?? r['name'] ?? r['item_name'];
     return [if (what != null) '$what', if (r['paid_to'] != null) '${r['paid_to']}'].join(' · ');
   }
 

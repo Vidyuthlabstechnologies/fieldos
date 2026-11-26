@@ -91,6 +91,53 @@ do $$ begin
   end if;
 end $$;
 
+-- Wage rates, attendance marks and purchase orders and requests are kept too.
+-- Acting as the project manager: the wage guard keeps a rate from anyone who
+-- may not see site money, and the session was last left as an outsider.
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000d1');
+insert into workers (id, project_id, name, role, daily_wage)
+values ('00000000-0000-0000-0000-00000000e0a1', '00000000-0000-0000-0000-00000000a0d1', 'Raju', 'Mason', 700);
+insert into site_attendance_marks (id, project_id, worker_id, day, units, recorded_by)
+values ('00000000-0000-0000-0000-00000000e0b1', '00000000-0000-0000-0000-00000000a0d1',
+        '00000000-0000-0000-0000-00000000e0a1', current_date, 1, '00000000-0000-0000-0000-0000000000d2');
+insert into vendors (id, company_id, name)
+values ('00000000-0000-0000-0000-00000000e0c1', '00000000-0000-0000-0000-00000000c0d1', 'Steel Co');
+insert into purchase_requisitions (id, project_id, item_name, quantity, unit, estimated_cost, requested_by)
+values ('00000000-0000-0000-0000-00000000e0d1', '00000000-0000-0000-0000-00000000a0d1', 'TMT', 5, 'tonne', 40000,
+        '00000000-0000-0000-0000-0000000000d2');
+insert into purchase_orders (id, project_id, vendor_id, requisition_id, total_amount, created_by)
+values ('00000000-0000-0000-0000-00000000e0e1', '00000000-0000-0000-0000-00000000a0d1',
+        '00000000-0000-0000-0000-00000000e0c1', '00000000-0000-0000-0000-00000000e0d1', 40000,
+        '00000000-0000-0000-0000-0000000000d2');
+update workers set daily_wage = 900 where id = '00000000-0000-0000-0000-00000000e0a1';
+update site_attendance_marks set units = 2 where id = '00000000-0000-0000-0000-00000000e0b1';
+update purchase_orders set status = 'delivered' where id = '00000000-0000-0000-0000-00000000e0e1';
+update purchase_requisitions set status = 'ordered' where id = '00000000-0000-0000-0000-00000000e0d1';
+do $$ begin
+  if not exists (select 1 from entry_history where table_name = 'workers' and op = 'update'
+                   and (old_row->>'daily_wage')::numeric = 700 and (new_row->>'daily_wage')::numeric = 900) then
+    raise exception 'a wage change left no history';
+  end if;
+  if not exists (select 1 from entry_history where table_name = 'site_attendance_marks' and op = 'update'
+                   and (old_row->>'units')::numeric = 1 and (new_row->>'units')::numeric = 2) then
+    raise exception 'an attendance change left no history';
+  end if;
+  if not exists (select 1 from entry_history where table_name = 'purchase_orders' and op = 'update'
+                   and old_row->>'status' = 'issued' and new_row->>'status' = 'delivered') then
+    raise exception 'a purchase order change left no history';
+  end if;
+  if not exists (select 1 from entry_history where table_name = 'purchase_requisitions' and op = 'update') then
+    raise exception 'a purchase request change left no history';
+  end if;
+end $$;
+delete from workers where id = '00000000-0000-0000-0000-00000000e0a1';
+do $$ begin
+  if not exists (select 1 from entry_history where table_name = 'workers' and op = 'delete'
+                   and (old_row->>'daily_wage')::numeric = 900) then
+    raise exception 'a deleted worker left no history';
+  end if;
+end $$;
+
 -- Deleting a whole site with entries still works.
 insert into site_expenses (id, project_id, category, amount, incurred_on, recorded_by)
 values ('00000000-0000-0000-0000-00000000ed02', '00000000-0000-0000-0000-00000000a0d2', 'Petty cash', 100,
