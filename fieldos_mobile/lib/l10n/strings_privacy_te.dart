@@ -37,7 +37,7 @@ const Map<String, String> privacyTe = {
   'You can stop this at any time in Settings, Your privacy.': 'దీన్ని ఎప్పుడైనా Settings, మీ గోప్యతలో ఆపవచ్చు.',
   'Your account': 'మీ ఖాతా',
   'Your choices': 'మీ ఎంపికలు',
-  'Your location, and a selfie, only when you check in or out, punch a worker in, set a site location or take a site photo, to show the work was done at the site. Never in the background.': 'మీ లొకేషన్, ఒక సెల్ఫీ, మీరు చెక్ ఇన్ లేదా అవుట్ చేసినప్పుడు, కార్మికుడి హాజరు వేసినప్పుడు, సైట్ లొకేషన్ పెట్టినప్పుడు లేదా సైట్ ఫోటో తీసినప్పుడు మాత్రమే, పని సైట్‌లో జరిగిందని చూపడానికి. ఎప్పుడూ వెనుకనుండి కాదు.',
+  'Your location, and a selfie, only when you check in or out, punch a worker in, set a site location or take a site photo, to show the work was done at the site. Never in the background.': 'మీ లొకేషన్, ఒక సెల్ఫీ, మీరు చెక్ ఇన్ లేదా అవుట్ చేసినప్పుడు, కార్మికుడి హాజరు వేసినప్పుడు, సైట్ లొకేషన్ పెట్టినప్పుడు లేదా సైట్ ఫోటో తీసినప్పుడు మాత్రమే, పని సైట్‌లో జరిగిందని చూపడానికి. ఎప్పుడూ బ్యాక్‌గ్రౌండ్‌లో కాదు.',
   'Your name, email address and the company you join, so that you can sign in and work with your team.': 'మీ పేరు, ఈమెయిల్ చిరునామా, మీరు చేరే కంపెనీ, మీరు సైన్ ఇన్ చేసి మీ బృందంతో పనిచేయడానికి.',
   'Your privacy': 'మీ గోప్యత',
   'Your rights': 'మీ హక్కులు',
