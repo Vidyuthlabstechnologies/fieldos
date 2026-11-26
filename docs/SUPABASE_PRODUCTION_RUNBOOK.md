@@ -180,6 +180,15 @@ restore over a live production project.
    psql "$DB_URL" -v ON_ERROR_STOP=1 -q -f tools/db_restore_clear.sql
    (echo "SET session_replication_role = replica;"; cat data.sql) | psql "$DB_URL" -v ON_ERROR_STOP=1 -q
    ```
+   The backup's `data.sql` also carries every table of Supabase's own `auth`
+   schema. If the project you restore into runs an older auth version than
+   production did (drilled 27 Nov 2026: production had
+   `custom_oauth_providers.client_auth_method`, a local stack did not), the load
+   stops on the first such table. A project created today is on the current
+   version and does not hit this. If you do, load `public` plus the two auth
+   tables that matter, `auth.users` and `auth.identities`, and leave the rest
+   (sessions, refresh tokens, audit log): people sign in again, nothing else is
+   lost.
 5. Check: row counts of `companies`, `projects`, `tasks`, `site_expenses`,
    `auth.users` match the source; run the **isolation-check** workflow
    against the new project; sign in on a test phone.
@@ -187,9 +196,10 @@ restore over a live production project.
    (new `SUPABASE_URL` / `SUPABASE_ANON_KEY` build, then raise the minimum
    build). Photos and other Storage files have to come from elsewhere.
 
-Tested on 26 Nov 2026 against a local stack: backup, decrypt, wipe, migrate,
-clear, load; company, project, task, expense and user counts matched the
-source exactly. Repeat this drill once on a scratch project after the first
+Tested on 26 Nov 2026 against a local stack, and on 27 Nov 2026 with
+production's own first backup (3 companies, 2 projects, 3 members, 17 users, 8
+tasks): backup, decrypt, wipe, migrate, clear, load; the counts matched the
+source exactly both times. Repeat this drill once on a scratch project after the first
 real backup, and after any change to `tools/db_backup.py`.
 
 ## Known limits to carry forward
