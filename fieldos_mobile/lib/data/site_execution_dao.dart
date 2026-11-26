@@ -29,6 +29,14 @@ class ExecutionRefused implements Exception {
   String toString() => message;
 }
 
+/// A task cannot move on while a hold point on it is not released. The server
+/// refuses the same (tasks_hold_point_guard); a separate type because the
+/// daily report must not answer it the way it answers "verify on site first"
+/// (retrying at 99%, which a held task refuses just the same).
+class HoldPointRefused extends ExecutionRefused {
+  HoldPointRefused(super.message);
+}
+
 class SiteExecutionDao {
   SiteExecutionDao(this.db);
   final AppDatabase db;

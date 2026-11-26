@@ -32,7 +32,7 @@ import 'package:fieldos_mobile/data/site_ops_dao.dart';
 import 'package:fieldos_mobile/data/site_execution_dao.dart';
 import 'package:fieldos_mobile/data/write_guard.dart';
 export 'package:fieldos_mobile/data/write_guard.dart' show WriteGuard, ReadOnlyModeException, ReadOnlyReason, readOnlyMessage;
-export 'package:fieldos_mobile/data/site_execution_dao.dart' show SiteExecutionDao, ExecutionRefused;
+export 'package:fieldos_mobile/data/site_execution_dao.dart' show SiteExecutionDao, ExecutionRefused, HoldPointRefused;
 export 'package:fieldos_mobile/data/pre_construction_dao.dart' show PreConstructionDao;
 export 'package:fieldos_mobile/data/site_ops_dao.dart' show SiteOpsDao;
 import 'package:fieldos_mobile/sync/sync_mappers.dart';
@@ -962,10 +962,39 @@ class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
     await edit(id, TasksCompanion(progress: Value(p), status: Value(status)));
   }
 
+  /// Whether a hold point on this task, or one a hold-point constraint on it
+  /// waits for, is not released (pending or rejected).
+  Future<bool> _heldByHoldPoint(String id) async {
+    final direct = await (db.select(db.holdPoints)
+          ..where((h) => h.taskId.equals(id) & h.status.equals('released').not()))
+        .get();
+    if (direct.isNotEmpty) return true;
+    final constraints = await (db.select(db.taskConstraints)
+          ..where((c) => c.taskId.equals(id) & c.kind.equals('hold_point') & c.clearedAt.isNull()))
+        .get();
+    for (final c in constraints) {
+      final link = c.linkId;
+      if (link == null) continue;
+      final hold = await (db.select(db.holdPoints)..where((h) => h.id.equals(link))).getSingleOrNull();
+      if (hold != null && hold.status != 'released') return true;
+    }
+    return false;
+  }
+
   /// Any change to a task, queued for sync like the others.
   Future<void> edit(String id, TasksCompanion changes, {bool asManager = false}) {
     return transaction(() async {
       final before = await (select(tasks)..where((t) => t.id.equals(id))).getSingleOrNull();
+      if (before != null) {
+        // Hold points hold for everyone, managers included: the way past one
+        // is to release it. Going backwards (less progress, reopening) is fine.
+        final progress = changes.progress.present ? changes.progress.value : before.progress;
+        final status = changes.status.present ? changes.status.value : before.status;
+        final moving = progress > before.progress || ((status == 'in_progress' || status == 'done') && status != before.status);
+        if (moving && await _heldByHoldPoint(id)) {
+          throw HoldPointRefused(trf('A hold point on "{task}" is not released yet.', {'task': before.title}));
+        }
+      }
       if (before != null && before.verifyRequired && !asManager) {
         final status = changes.status.present ? changes.status.value : before.status;
         final progress = changes.progress.present ? changes.progress.value : before.progress;

@@ -3140,4 +3140,5 @@ const stringsAr = <String, String>{
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'تُظهر المهام مدى تقدم كل عمل وما الذي يتأخر. الجسر الأرضي متأخر، لذلك يظهر باللون الأحمر قبل أن يسأل أحد.',
   'Throw away what you said?': 'هل تريد تجاهل ما قلته؟',
   'Throw it away': 'تجاهل',
+  'A hold point on "{task}" is not released yet.': 'نقطة التوقف الخاصة بـ "{task}" لم يتم الإفراج عنها بعد.',
 };

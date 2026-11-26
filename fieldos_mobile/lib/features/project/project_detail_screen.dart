@@ -577,9 +577,14 @@ class _DprTabState extends ConsumerState<_DprTab> {
       for (final path in draft.photoPaths) {
         await db.dprDao.addPhoto(DprPhotosCompanion.insert(id: const Uuid().v4(), dprEntryId: dprId, photoPath: path));
       }
+      final held = <String>[];
       for (final e in draft.taskProgress.entries) {
         try {
           await db.taskDao.setProgress(e.key, e.value);
+        } on HoldPointRefused catch (r) {
+          // The report keeps what was written; only this task's percentage is
+          // not recorded, and the person is told why.
+          held.add(r.message);
         } on ExecutionRefused {
           // Needs an on-site check before 100%: the report keeps the work
           // done so far and the task stays open until someone verifies it.
@@ -596,9 +601,10 @@ class _DprTabState extends ConsumerState<_DprTab> {
       unawaited(ref.read(reminderSchedulerProvider).refresh());
       if (!mounted) return;
       final raised = draft.issues.length;
+      final saved = raised == 0 ? tr('Report saved.') : trf('Report saved, and {n} problems raised as issues.', {'n': raised});
       showSnack(
         context,
-        raised == 0 ? tr('Report saved.') : trf('Report saved, and {n} problems raised as issues.', {'n': raised}),
+        held.isEmpty ? saved : '$saved ${held.join(' ')}',
         action: SnackBarAction(label: tr('Share'), onPressed: () => _share(dpr)),
       );
     } catch (e, st) {
