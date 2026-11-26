@@ -11,6 +11,8 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
+import 'package:fieldos_mobile/auth/site_roles.dart';
+import 'package:fieldos_mobile/features/team/site_team_screen.dart' show mySiteAccessProvider;
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
@@ -1191,10 +1193,14 @@ class _QualityTab extends ConsumerWidget {
   }
 
   Future<void> _decideHold(BuildContext context, WidgetRef ref, HoldPoint h, _Me me) async {
-    if (!me.canDecide) {
-      showSnack(context, tr('The owner or a project manager releases hold points.'));
+    // The owner and managers, and the site's quality officer, who is the one
+    // who inspects (the server allows the same, site_execution_guard).
+    final inspects = !me.canDecide && (await ref.read(mySiteAccessProvider(h.projectId).future)).siteRole == SiteRole.qualityOfficer;
+    if (!me.canDecide && !inspects) {
+      if (context.mounted) showSnack(context, tr('The owner or a project manager releases hold points.'));
       return;
     }
+    if (!context.mounted) return;
     var photos = <String>[];
     final note = TextEditingController();
     final release = await showDialog<bool>(

@@ -3488,4 +3488,5 @@ const Map<String, String> stringsTa = {
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'ஒவ்வொரு வேலையும் எவ்வளவு முன்னேறியது, எது பின்தங்குகிறது என்று பணிகள் காட்டும். கிரவுண்ட் பீம் தாமதம், அதனால் யாரும் கேட்கும் முன்பே சிவப்பில் குறிக்கப்படுகிறது.',
   'Throw away what you said?': 'நீங்கள் சொன்னதை நீக்கவா?',
   'Throw it away': 'நீக்கு',
+  'A hold point on "{task}" is not released yet.': '"{task}" மீதுள்ள ஹோல்ட் பாயிண்ட் இன்னும் விடுவிக்கப்படவில்லை.',
 };

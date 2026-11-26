@@ -3140,4 +3140,5 @@ const stringsMl = <String, String>{
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'ഓരോ ജോലിയും എത്രത്തോളം ആയി, എന്താണ് പിന്നോട്ട് പോകുന്നത് എന്ന് ടാസ്കുകൾ കാണിക്കുന്നു. ഗ്രൗണ്ട് ബീം വൈകിയതിനാൽ, ആരെങ്കിലും ചോദിക്കുന്നതിന് മുമ്പേ അത് ചുവപ്പിൽ അടയാളപ്പെടുത്തുന്നു.',
   'Throw away what you said?': 'നിങ്ങൾ പറഞ്ഞത് ഒഴിവാക്കണോ?',
   'Throw it away': 'ഒഴിവാക്കുക',
+  'A hold point on "{task}" is not released yet.': '"{task}" എന്നതിലെ ഹോൾഡ് പോയിന്റ് ഇതുവരെ റിലീസ് ചെയ്തിട്ടില്ല.',
 };

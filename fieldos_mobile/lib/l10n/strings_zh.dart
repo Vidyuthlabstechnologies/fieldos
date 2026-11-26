@@ -3137,4 +3137,5 @@ const stringsZh = <String, String>{
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': '任务显示每项工作的进度和哪些在落后。地梁延误了，所以还没人问就已用红色标出。',
   'Throw away what you said?': '放弃您刚才说的内容吗？',
   'Throw it away': '放弃',
+  'A hold point on "{task}" is not released yet.': '"{task}" 的停工检查点尚未放行。',
 };

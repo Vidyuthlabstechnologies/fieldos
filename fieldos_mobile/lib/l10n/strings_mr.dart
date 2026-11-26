@@ -3478,4 +3478,5 @@ const Map<String, String> stringsMr = {
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'प्रत्येक काम किती पुढे गेले आणि काय मागे पडत आहे ते कामे दाखवतात. ग्राउंड बीम उशिरा आहे, म्हणून कोणी विचारण्याआधीच ते लाल रंगात खुणावले जाते.',
   'Throw away what you said?': 'तुम्ही जे बोललात ते काढून टाकायचे?',
   'Throw it away': 'काढून टाका',
+  'A hold point on "{task}" is not released yet.': '"{task}" वरील होल्ड पॉइंट अजून रिलीज झालेला नाही.',
 };

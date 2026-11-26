@@ -3161,4 +3161,5 @@ const stringsRo = <String, String>{
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'Sarcinile arată cât a avansat fiecare lucrare și ce rămâne în urmă. Grinda de fundație e întârziată, așa că e marcată cu roșu înainte să întrebe cineva.',
   'Throw away what you said?': 'Renunți la ce ai spus?',
   'Throw it away': 'Renunță',
+  'A hold point on "{task}" is not released yet.': 'Punctul de oprire pentru "{task}" nu a fost încă eliberat.',
 };

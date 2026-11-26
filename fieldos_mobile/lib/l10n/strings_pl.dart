@@ -3161,4 +3161,5 @@ const stringsPl = <String, String>{
   'Tasks show how far each job has got and what is slipping. The ground beam is late, so it is marked in red before anyone has to ask.': 'Zadania pokazują, jak daleko jest każda praca i co się opóźnia. Belka fundamentowa jest opóźniona, więc jest zaznaczona na czerwono, zanim ktoś zapyta.',
   'Throw away what you said?': 'Odrzucić to, co zostało powiedziane?',
   'Throw it away': 'Odrzuć',
+  'A hold point on "{task}" is not released yet.': 'Punkt zatrzymania dla "{task}" nie został jeszcze zwolniony.',
 };
