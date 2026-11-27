@@ -192,5 +192,15 @@ void main() {
     await expectLater(outsiderPortal.photoUrl(photoPath), throwsA(anything));
     await expectLater(supplierPortal.photoUrl(photoPath), throwsA(anything),
         reason: 'a supplier is not the site\'s client');
+
+    // The builder changes the code and removes those who joined: the client's
+    // portal empties, the old code is dead, and only the builder could do it.
+    await expectLater(outsiderPortal.resetClientCode(siteId, removeAccess: true), throwsA(isA<PostgrestException>()));
+    expect(await clientPortal.clientPortal(), hasLength(1), reason: 'a stranger changed nothing');
+    final newCode = await ownerPortal.resetClientCode(siteId, removeAccess: true);
+    expect(newCode, isNot(clientCode));
+    expect(await clientPortal.clientPortal(), isEmpty, reason: 'removed');
+    await expectLater(outsiderPortal.join(clientCode), throwsA(isA<PortalJoinError>()), reason: 'the old code is dead');
+    expect((await outsiderPortal.join(newCode)).id, siteId, reason: 'the new one works');
   });
 }
