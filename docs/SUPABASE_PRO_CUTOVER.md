@@ -62,13 +62,9 @@ Why after: a bad migration is exactly what backups are for. Take a manual
 **db-backup** run first, then:
 
 1. Run **supabase-deploy** (applies the merged migrations), then **isolation-check**.
-2. Wage cut-over (`HANDOVER.md`, "Wage rates: the two-step cut-over"):
-   raise `min_build_android/min_build_ios` to 26, wait a day, copy
-   `supabase/deferred/20261125150001_revoke_workers_wage_read.sql` into
-   `supabase/migrations/` with a new timestamp, deploy, run isolation-check,
-   confirm as an engineer account that `select daily_wage from workers` is
-   refused and a 1.8.1 phone still syncs. With 3 companies today this is
-   cheap; it gets harder with every customer on an old build.
+2. Wage cut-over: **done 27 Nov 2026** (`20261128120000_revoke_workers_wage_read.sql`;
+   see `HANDOVER.md`). Still to confirm on a real 1.8.2 phone: an engineer's
+   sync works and shows no wage.
 3. `edge functions`: **functions-deploy** / **ai-assistant-deploy** for any
    function change that was merged.
 4. Tick issues #148 and #147, and update `HANDOVER.md`.

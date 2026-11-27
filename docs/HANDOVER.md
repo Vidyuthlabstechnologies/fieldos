@@ -143,8 +143,9 @@ Goal: stop site members who may not see money from reading
    managers and accounts. From build 26 (1.8.1) the phone pulls workers
    *without* the wage column, reads rates through the function, and clears
    rates it may not see. Older builds keep working unchanged.
-2. **Waiting:** `supabase/deferred/20261125150001_revoke_workers_wage_read.sql`
-   revokes read of the whole `workers` table and grants every column except
+2. **Done 27 Nov 2026** (`20261128120000_revoke_workers_wage_read.sql`,
+   steps below were followed; production had no users on older builds):
+   it revokes read of the whole `workers` table and grants every column except
    the wage. After it, any build below 26 gets `42501` on its workers pull.
    Do it only when: 1.8.1 is live on Play and customers have it
    (`select` active builds from `member_sync_status`/support), then (a)
