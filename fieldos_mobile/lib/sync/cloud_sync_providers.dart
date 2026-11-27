@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase/supabase.dart';
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/data/secret_store.dart';
 import 'package:fieldos_mobile/features/legal/consent_record.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/services/ai_backend.dart';
@@ -90,7 +91,7 @@ final cloudSyncServiceProvider = Provider<CloudSyncService>((ref) {
   final service = CloudSyncService(
     client: ref.watch(cloudSyncClientProvider),
     engine: ref.watch(cloudSyncEngineProvider),
-    sessionStore: SettingsSessionStore(ref.watch(appDatabaseProvider)),
+    sessionStore: SettingsSessionStore(ref.watch(appDatabaseProvider), secrets: ref.watch(secretStoreProvider)),
     freshClient: _resolveConfig().createClient,
   );
   ref.onDispose(service.dispose);
@@ -108,22 +109,80 @@ final companyPlanServiceProvider = Provider<CompanyPlanService>((ref) {
   );
 });
 
-/// Keeps the Supabase session in the app's private local database (the
-/// same place the Sarvam key lives), so a restart resumes cloud sync
-/// without asking for the password again.
+/// The phone's secure store (Keystore or Keychain). Only Android and iOS have
+/// one here; a desktop development build, and the tests that run on the host,
+/// keep the session in the database as before.
+final secretStoreProvider = Provider<SecretStore?>(
+  (ref) => (Platform.isAndroid || Platform.isIOS) ? const PlatformSecretStore() : null,
+);
+
+/// Keeps the Supabase session so a restart resumes cloud sync without asking
+/// for the password again.
+///
+/// The session (its refresh token above all) lives in the phone's secure
+/// store, Keystore or Keychain, not in the app's database. The database holds
+/// only [secureMarker], which does three jobs: it says "the session is in the
+/// secure store", it is non-empty so "a session is saved" checks keep working,
+/// and it is how a fresh install ignores a Keychain item an earlier install
+/// left behind (an iPhone keeps those across uninstalls).
+///
+/// If the secure store is not available or fails, the session is kept in the
+/// database as before: nobody is signed out because of a Keystore problem. A
+/// session an older version saved in the database moves to the secure store the
+/// first time it is read.
 class SettingsSessionStore implements SessionStore {
-  SettingsSessionStore(this.db);
+  SettingsSessionStore(this.db, {this.secrets});
   final AppDatabase db;
+  final SecretStore? secrets;
   static const key = cloudSessionSettingsKey;
+  static const secureMarker = 'secure:v1';
 
   @override
   Future<String?> read() async {
     final v = await db.settingsDao.get(key);
-    return (v == null || v.isEmpty) ? null : v;
+    if (v == null || v.isEmpty) return null;
+    if (v == secureMarker) {
+      try {
+        final s = await secrets?.read(key);
+        return (s == null || s.isEmpty) ? null : s;
+      } catch (_) {
+        return null; // sign in again; nothing else is lost
+      }
+    }
+    // Saved by an older version, in the database: move it.
+    if (secrets != null) {
+      try {
+        await secrets!.write(key, v);
+        await db.settingsDao.set(key, secureMarker);
+      } catch (_) {
+        // Stays where it is.
+      }
+    }
+    return v;
   }
 
   @override
-  Future<void> write(String? sessionJson) => db.settingsDao.set(key, sessionJson ?? '');
+  Future<void> write(String? sessionJson) async {
+    if (sessionJson == null || sessionJson.isEmpty) {
+      try {
+        await secrets?.write(key, null);
+      } catch (_) {
+        // The database entry is what says a session exists.
+      }
+      await db.settingsDao.set(key, '');
+      return;
+    }
+    if (secrets != null) {
+      try {
+        await secrets!.write(key, sessionJson);
+        await db.settingsDao.set(key, secureMarker);
+        return;
+      } catch (_) {
+        // Fall through: keep it in the database rather than lose the session.
+      }
+    }
+    await db.settingsDao.set(key, sessionJson);
+  }
 }
 
 /// Which local companies are registered/joined on the server, so the app
