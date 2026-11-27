@@ -28,7 +28,15 @@ DateFormat? _localFormat(bool withYear) {
     _dateDataReady = true;
   }
   final code = lang.code;
-  final f = withYear ? DateFormat.yMMMd(code) : DateFormat.MMMd(code);
+  // The standard patterns put the month first in Kannada ("ನವೆಂ 6,2026") and
+  // add a stray comma in Telugu and Tamil ("6, నవం 2026"); the day, month and
+  // year in that order is how people there write it.
+  final dayMonthYear = lang == AppLanguage.te || lang == AppLanguage.ta || lang == AppLanguage.kn;
+  final f = dayMonthYear
+      ? DateFormat(withYear ? 'd MMM y' : 'd MMM', code)
+      : withYear
+          ? DateFormat.yMMMd(code)
+          : DateFormat.MMMd(code);
   // Arabic and Urdu would otherwise write the day in their own digits,
   // beside amounts in 0-9.
   return f..useNativeDigits = false;

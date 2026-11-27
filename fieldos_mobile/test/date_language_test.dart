@@ -35,6 +35,18 @@ void main() {
     expect(fmtDate(d, short: true, now: sameYear), contains('lis'));
   });
 
+  test('Telugu, Tamil and Kannada write day, month, year, with no stray comma or month first', () {
+    // Customer review: "6, నవం 2026", "6 நவ., 2026" and "ನವೆಂ 6,2026".
+    for (final l in [AppLanguage.te, AppLanguage.ta, AppLanguage.kn]) {
+      setCurrentLanguage(l);
+      final full = fmtDate(d, now: nextYear);
+      expect(full, matches(RegExp(r'^6 \S+ 2026$')), reason: '${l.code}: $full');
+      final short = fmtDate(d, short: true, now: sameYear);
+      expect(short, matches(RegExp(r'^6 \S+$')), reason: '${l.code}: $short');
+      expect(RegExp('[A-Za-z]').hasMatch(full), isFalse, reason: 'month in English: $full');
+    }
+  });
+
   test('Arabic and Urdu months keep 0-9 digits, like the money beside them', () {
     for (final l in [AppLanguage.ar, AppLanguage.ur]) {
       setCurrentLanguage(l);
