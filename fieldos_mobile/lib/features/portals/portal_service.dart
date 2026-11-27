@@ -165,12 +165,31 @@ class SiteUpdate {
 }
 
 class SiteBill {
-  const SiteBill({required this.number, required this.date, required this.amount, required this.status, required this.kind});
+  const SiteBill({
+    required this.number,
+    required this.date,
+    required this.amount,
+    required this.status,
+    required this.kind,
+    this.gross,
+    this.gstRate,
+    this.retentionPct,
+    this.tdsPct,
+  });
   final String number;
   final DateTime date;
+
+  /// Net payable.
   final double amount;
   final String status;
   final String kind;
+
+  /// How the bill is made up, as the builder recorded it. Null from a server
+  /// that does not send them yet (20261128110000_client_portal_bill_detail.sql).
+  final double? gross;
+  final double? gstRate;
+  final double? retentionPct;
+  final double? tdsPct;
 }
 
 class ClientPayment {
@@ -245,6 +264,10 @@ class ClientSite {
               amount: _d(b['amount']) ?? 0,
               status: b['status'] as String? ?? 'issued',
               kind: b['kind'] as String? ?? 'ra',
+              gross: _d(b['gross']),
+              gstRate: _d(b['gst_rate']),
+              retentionPct: _d(b['retention_pct']),
+              tdsPct: _d(b['tds_pct']),
             ),
         ],
         milestones: [
