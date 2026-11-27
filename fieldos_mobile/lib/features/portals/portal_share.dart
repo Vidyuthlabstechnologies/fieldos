@@ -24,41 +24,94 @@ Future<bool> _ready(BuildContext context, WidgetRef ref) async {
   return context.mounted;
 }
 
-Future<void> _showCode(BuildContext context, {required String title, required String code, required String about, required String share}) =>
-    showDialog<void>(
+/// Shows a portal code to share. [reset] changes it (and, when asked, removes
+/// everyone who joined with it); the new code is then shown in its place.
+/// [share] builds the message for a code.
+Future<void> showPortalCode(
+  BuildContext context, {
+  required String title,
+  required String code,
+  required String about,
+  required String Function(String code) share,
+  required Future<String> Function({required bool removeAccess}) reset,
+}) async {
+  var current = code;
+  while (true) {
+    final change = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(title),
         content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          SelectableText(code, key: const Key('portal-code-shown'), style: Theme.of(ctx).textTheme.headlineSmall),
+          SelectableText(current, key: const Key('portal-code-shown'), style: Theme.of(ctx).textTheme.headlineSmall),
           const SizedBox(height: 8),
           Text(about),
         ]),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Close'))),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Close'))),
+          TextButton(key: const Key('portal-code-change'), onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Change code'))),
           FilledButton.icon(
             icon: const Icon(Icons.share),
             label: Text(tr('Share')),
-            onPressed: () => SharePlus.instance.share(ShareParams(text: share)),
+            onPressed: () => SharePlus.instance.share(ShareParams(text: share(current))),
           ),
         ],
       ),
     );
+    if (change != true || !context.mounted) return;
+    final removeAccess = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => SimpleDialog(title: Text(tr('Change code')), children: [
+        SimpleDialogOption(
+          key: const Key('portal-code-keep'),
+          onPressed: () => Navigator.pop(ctx, false),
+          child: ListTile(
+            title: Text(tr('New code, keep those who joined')),
+            subtitle: Text(tr('The old code stops working. People who already joined keep their access.')),
+          ),
+        ),
+        SimpleDialogOption(
+          key: const Key('portal-code-remove'),
+          onPressed: () => Navigator.pop(ctx, true),
+          child: ListTile(
+            title: Text(tr('New code, remove those who joined')),
+            subtitle: Text(tr('The old code stops working and everyone who joined loses access. '
+                'What is already on their phone stays there.')),
+          ),
+        ),
+        Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Cancel'))),
+        ),
+      ]),
+    );
+    if (removeAccess == null || !context.mounted) return;
+    try {
+      current = await reset(removeAccess: removeAccess);
+    } catch (e, st) {
+      if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
+      return;
+    }
+    if (!context.mounted) return;
+    showSnack(context, tr('Code changed.'));
+  }
+}
 
 Future<void> shareSupplierAccess(BuildContext context, WidgetRef ref, Supplier s) async {
   try {
     if (!await _ready(context, ref)) return;
     final code = await ref.read(portalServiceProvider).supplierCode(s.id);
     if (!context.mounted) return;
-    await _showCode(
+    await showPortalCode(
       context,
       title: trf('App access for {name}', {'name': s.name}),
       code: code,
       about: tr('Free for them. They see only the price requests you send them and their own orders.'),
-      share: trf(
+      share: (code) => trf(
           '{name}: install FieldOS, tap "Supplier or client? Join free with the builder\'s code" and enter {code}. '
           'You can send your prices and tell us when an order is on its way.',
           {'name': s.name, 'code': code}),
+      reset: ({required removeAccess}) =>
+          ref.read(portalServiceProvider).resetSupplierCode(s.id, removeAccess: removeAccess),
     );
   } catch (e, st) {
     if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
@@ -70,16 +123,18 @@ Future<void> shareClientAccess(BuildContext context, WidgetRef ref, Project p) a
     if (!await _ready(context, ref)) return;
     final code = await ref.read(portalServiceProvider).clientCode(p.id);
     if (!context.mounted) return;
-    await _showCode(
+    await showPortalCode(
       context,
       title: trf('Share {site} with the client', {'site': p.name}),
       code: code,
       about: tr('Free for them. They see this site\'s progress, daily updates with photos, bills and payments. '
           'Not costs, suppliers or other sites.'),
-      share: trf(
+      share: (code) => trf(
           'Follow {site} on FieldOS: install it, tap "Supplier or client? Join free with the builder\'s code" and '
           'enter {code}. You will see the progress, photos, bills and payments.',
           {'site': p.name, 'code': code}),
+      reset: ({required removeAccess}) =>
+          ref.read(portalServiceProvider).resetClientCode(p.id, removeAccess: removeAccess),
     );
   } catch (e, st) {
     if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
