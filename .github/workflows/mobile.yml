@@ -46,6 +46,16 @@ jobs:
         working-directory: .
         run: supabase start
 
+      # Every file in supabase/tests, not a hand-picked few: each one rolls
+      # back, and one that fails stops the run.
+      - name: SQL tests (policies, guards, grants, indexes)
+        working-directory: .
+        run: |
+          for f in supabase/tests/*.sql; do
+            echo "== $f"
+            psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -q -f "$f"
+          done
+
       - run: flutter pub get
 
       - run: flutter analyze
