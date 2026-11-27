@@ -35,7 +35,7 @@ void main() {
     expect(gradeStrength('steel'), isNull);
     await expectLater(x.addCubeSet(projectId: 'p1', grade: 'X', castOn: '2026-11-01', by: 'u1'), throwsA(isA<ExecutionRefused>()));
     final set = await x.addCubeSet(projectId: 'p1', grade: 'M25', castOn: '2026-11-01', by: 'u1', batchNo: 'B-7', element: 'Column C4', officer: 'Anil');
-    expect([for (final t in set) (t.ageDays, t.dueOn, t.requiredValue)], [(7, '2026-11-08', 16.25), (14, '2026-11-15', 22.5), (28, '2026-11-29', 25.0)]);
+    expect([for (final t in set) (t.ageDays, t.dueOn, t.requiredValue)], [(7, '2026-11-08', 16.25), (14, '2026-11-15', 22.5), (28, '2026-11-29', 21.0)]);
     expect(testResult(rule: 'min', required: 25, actual: 25), 'pass');
     expect(testResult(rule: 'min', required: 25, actual: 24.9), 'fail');
     expect(testResult(rule: 'max', required: 5, actual: 5.1), 'fail');
@@ -58,7 +58,7 @@ void main() {
     expect(isEarlyCubeMiss(kind: 'cube', result: 'pass', ageDays: 7), isFalse);
     expect(isEarlyCubeMiss(kind: 'paint', result: 'fail', ageDays: 7), isFalse, reason: 'only cubes have early ages');
     expect(isEarlyCubeMiss(kind: 'cube', result: 'fail'), isFalse, reason: 'no age, no excuse');
-    final twentyEight = await x.recordTest(set[2].id, actual: 24, by: 'q1');
+    final twentyEight = await x.recordTest(set[2].id, actual: 20.5, by: 'q1'); // under fck - 4 = 21 for M25
     expect(twentyEight.result, 'fail');
     final s2 = summariseQuality(await x.qualityFor('p1'), now);
     expect((s2.passed, s2.failed, s2.early), (1, 1, 1), reason: 'a missed 28-day cube is a real failure');

@@ -26,7 +26,7 @@ Everything below is a pull request, **none merged and none deployed**. The combi
 | #5 No history for wages, attendance marks, POs | Fixed (server + labels) | #253 |
 | #9 AI consent not enforced | Withdrawal now stops processing | #257 |
 | #11 Attendance trust (time) | Late check-ins wait for a manager | #259 |
-| #13 Cube result shown as Failed at 7/14 days | Fixed (wording); full IS 456 acceptance **not built** | #248 |
+| #13 Cube acceptance not IS 456 | Fixed: warning wording (#248); IS 456 acceptance (#266) | #248, #266 |
 | #26 Supplier sees unapproved POs | Fixed on the server | #258 |
 | #28 A stalled photo blocks all sync | Fixed | #254 |
 | #29 Sync failure invisible | Home banner | #261 |
@@ -39,7 +39,7 @@ Everything below is a pull request, **none merged and none deployed**. The combi
 
 - #4 and #7 (encryption of the phone database, a secure place for the login session): needs native plugins that cannot be built or tested here, and a migration for existing installs.
 - #7 other money data readable by all members, #6 wage columns: the wage lockdown is a runbook step (`HANDOVER.md`) for after Pro; the rest needs a design decision on who sees supplier invoices and PO totals.
-- #14 hold points that really block work, #15 pour cards and safety registers: real features on both phone and server.
+- #14 hold points (**done, #265, live**); #15 pour cards and safety registers: real features on both phone and server.
 - #16 storekeeper tools: needs a site-scoped screen; opening the company screen would show buttons the server refuses.
 - #17 accounting depth (Sales, Purchase and Journal vouchers, TDS payable, HSN per line, reverse charge, other states' professional tax): a large piece of work with the accountant.
 - #18-#20 (paywall order, 3-day trial, read-only after expiry) and #22 phone-number sign-in: product decisions with revenue effects, and an SMS provider account.
@@ -85,7 +85,8 @@ Checked with the Supabase CLI against `fieldos-production` (Mumbai, `ap-south-1`
 
 13. **Cube acceptance is not IS 456.** [V] Each single cube is compared to 65% / 90% / 100% of the grade (`site_ops_rules.dart:23,52-56,66-74`; same rule in `20261125110000_site_ops.sql:119-129`).
     - **[fixed] #248**: a missed 7- or 14-day cube now reads "Below early target" (amber), not "Failed". A missed 28-day cube is still Failed.
-    - Still open [server]: real acceptance needs three specimen values per age, their mean, a 15% spread warning, sample pass at fck+4 (M20-M25) / fck+5 (M30+), rolling 4-sample mean ≥ fck+0.825·s, individual ≥ fck−3, the real crushing date, lab and certificate number, grades above M40, and a cube/pour photo. Needs a schema bump and migration.
+    - **[fixed] 28 Nov, #266**: 28-day acceptance now follows IS 456:2000 clauses 15.4 and 16.1 and Tables 8 and 11, read from the standard's own scan: a sample is three cubes (invalid if one is over 15% from the average), each sample must reach fck - 4 (fck - 3 for M15), and each group of four consecutive samples must reach fck + max(0.825 x s.d., 4) (3 for M15). See `docs/CUBE_ACCEPTANCE.md`. **The reviewer's figures were wrong** (an individual limit of fck - 3 for M20+, and fck + 4/5 for fewer than four samples); the standard says fck - 4, and has no separate rule for fewer than four.
+    - Still open: the real crushing date and lab certificate number, a photo on the cube record, grades above M40, and pour cards.
 14. **Hold points do not hold.** [C] A hold point only adds a "Waiting on N" label in the lookahead (`execution_rules.dart:85-90`); nothing stops a task going to 100% (phone or trigger). Only owner/PM can release one, so a quality officer cannot.
 15. **No pour card or statutory safety records.** [C] No slump, volume, truck/challan, mix design, curing log, cover/bar checks; no toolbox talks, PPE register, incident/near-miss, NCR, BOCW registers or permits. Safety breach log has no photo, injured person, root cause or owner. No audit PDF for quality or safety; quality/safety events are missing from the audit trail; test dates can be back-dated 60 days; gallery photos are not stamped.
 16. **A storekeeper cannot reach tool issue and return.** [V, narrower than first reported] "Stores and tools" is gated by `Roles.canApprove` (owner or manager) at `home_screen.dart:219`, so the `storekeeper` site role is only a label there. The company-wide screen is not safe to open as is: its *Add store*, *Add tool* and *Receive stock* actions are owner/PM only on the server (`20261110410000_stores_tools_payroll.sql:384-418`), so a storekeeper's writes would save on the phone, fail on sync and end up parked. A storekeeper's receipts and usage already live in each site's Procure tab. The server does allow a site team to issue and return tools and transfer stock out of its own site (`:397,426,430`). Fix: a site-scoped tools and stock-out view for the storekeeper role, with the manager-only buttons hidden, not an unlock of the company screen.

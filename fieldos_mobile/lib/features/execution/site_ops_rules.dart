@@ -10,6 +10,7 @@
 library;
 
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/execution/cube_acceptance.dart' show GradeAcceptance, evaluateGrade, gradeOfTest, individualLimit;
 import 'package:fieldos_mobile/features/execution/execution_rules.dart' show parseDay, ymd;
 import 'package:fieldos_mobile/l10n/language.dart';
 
@@ -19,7 +20,11 @@ const qualityKinds = ['cube', 'plaster', 'paint', 'bitumen', 'other'];
 const concreteGrades = ['M15', 'M20', 'M25', 'M30', 'M35', 'M40'];
 
 /// Days after casting a cube is crushed, and the share of the 28-day
-/// strength it must already show (IS 456 working practice).
+/// strength it should already show (working practice, not IS 456: a miss at 7
+/// or 14 days is a warning). The 28-day cube's requirement is not a share of
+/// fck: it is the least one sample may show under IS 456 Table 11 column 3
+/// (fck - 4, or fck - 3 for M15), see [individualLimit]. Whether a group of
+/// four samples is good enough is judged in cube_acceptance.dart.
 const cubeAges = {7: 0.65, 14: 0.90, 28: 1.0};
 
 /// Days ahead that a due test starts to show as "due soon".
@@ -69,7 +74,11 @@ List<CubeDue> cubeSchedule(String castOn, String grade) {
   if (cast == null || strength == null) throw ArgumentError('cast day and grade');
   return [
     for (final e in cubeAges.entries)
-      CubeDue(e.key, ymd(DateTime(cast.year, cast.month, cast.day + e.key)), double.parse((strength * e.value).toStringAsFixed(2))),
+      CubeDue(
+        e.key,
+        ymd(DateTime(cast.year, cast.month, cast.day + e.key)),
+        double.parse((e.key == 28 ? individualLimit(strength) : strength * e.value).toStringAsFixed(2)),
+      ),
   ];
 }
 
@@ -96,6 +105,31 @@ String qualityResultLabel(String r) => switch (r) {
 /// against the same target.
 bool isEarlyCubeMiss({required String kind, required String result, int? ageDays}) =>
     kind == 'cube' && result == 'fail' && ageDays != null && ageDays < 28;
+
+/// IS 456 acceptance of each grade of concrete poured, from the 28-day cube
+/// samples tested so far, in the order they were sampled (cube_acceptance.dart).
+List<GradeAcceptance> concreteAcceptance(List<QualityTest> all) {
+  final byGrade = <String, List<QualityTest>>{};
+  for (final t in all) {
+    if (t.kind != 'cube' || t.ageDays != 28 || t.result == 'pending' || t.actualValue == null) continue;
+    final grade = gradeOfTest(t.parameter);
+    if (grade != null) (byGrade[grade] ??= []).add(t);
+  }
+  return [
+    for (final grade in byGrade.keys.toList()..sort())
+      evaluateGrade(
+        grade,
+        [
+          for (final t in byGrade[grade]!
+            ..sort((a, b) {
+              final c = a.sampledOn.compareTo(b.sampledOn);
+              return c != 0 ? c : a.createdAt.compareTo(b.createdAt);
+            }))
+            t.actualValue!,
+        ],
+      ),
+  ];
+}
 
 class QualitySummary {
   const QualitySummary({required this.passed, required this.failed, required this.overdue, required this.soon, this.early = 0});
