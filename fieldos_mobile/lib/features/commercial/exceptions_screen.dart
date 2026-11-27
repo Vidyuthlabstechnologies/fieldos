@@ -164,15 +164,16 @@ class _ExceptionCard extends ConsumerWidget {
               ),
             if (canResolve && !e.isResolved && e.source == ExceptionSource.dayClose) ...[
               TextButton(onPressed: () => _followUp(context, ref), child: Text(tr('Record a follow-up'))),
-              TextButton(
-                onPressed: () async {
-                  final r = await SiteRecords.load(ref.read(appDatabaseProvider), site.project);
-                  if (!context.mounted) return;
-                  await showCloseSetupSheet(context, project: site.project, current: r.setup, backupFirst: true);
-                  ref.invalidate(inboxExceptionsProvider(companyId));
-                },
-                child: Text(tr('Assign a backup supervisor')),
-              ),
+              if (e.kind == ExceptionKind.missingDayReport)
+                TextButton(
+                  onPressed: () async {
+                    final r = await SiteRecords.load(ref.read(appDatabaseProvider), site.project);
+                    if (!context.mounted) return;
+                    await showCloseSetupSheet(context, project: site.project, current: r.setup, backupFirst: true);
+                    ref.invalidate(inboxExceptionsProvider(companyId));
+                  },
+                  child: Text(tr('Assign a backup supervisor')),
+                ),
             ],
             if (canResolve && !e.isResolved)
               TextButton(onPressed: () => _resolve(context, ref), child: Text(tr('Record a decision'))),

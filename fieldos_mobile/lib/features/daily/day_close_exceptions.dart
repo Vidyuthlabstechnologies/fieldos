@@ -56,6 +56,47 @@ List<CommercialException> dayCloseExceptions(SiteRecords r, List<ExceptionAction
   return withActions(out, actions);
 }
 
+/// Days people were counted for wages but nobody was photographed on site.
+///
+/// Only for a site that has used roll-call photos at all (one that never did
+/// would show this every day, which is noise, not a finding): from then on, a
+/// day with workers marked present or punched in and no punch carrying a
+/// photo stands out, as the place a paid day can be made up (customer review:
+/// "workers paid with no photo"). Nothing can add the photo afterwards, so it
+/// is cleared by a recorded decision.
+List<CommercialException> rollCallPhotoExceptions(SiteRecords r, List<ExceptionAction> actions, {required DateTime now}) {
+  if (r.project.status != 'active') return const [];
+  if (!r.punches.any((p) => p.photoId != null)) return const [];
+  final today = dayOf(now);
+  final out = <CommercialException>[];
+  for (var i = missingDayLookback; i >= 1; i--) {
+    final d = today.subtract(Duration(days: i));
+    final key = markDay(d);
+    final dayPunches = r.punches.where((p) => markDay(p.punchIn.toLocal()) == key).toList();
+    if (dayPunches.any((p) => p.photoId != null)) continue;
+    final counted = <String>{
+      for (final m in r.marks)
+        if (m.day == key && (m.units ?? 0) > 0) m.workerId,
+      for (final p in dayPunches) p.workerId ?? p.workerName,
+    };
+    if (counted.isEmpty) continue;
+    out.add(CommercialException(
+      key: 'no_roll_call_photo:$key',
+      kind: ExceptionKind.noRollCallPhoto,
+      projectId: r.project.id,
+      title: trf('{day}, {date}: {n} counted for wages, no roll-call photo',
+          {'day': fmtDay(d), 'date': fmtDate(d, short: true), 'n': counted.length}),
+      detail: tr('Check who was on site before this is paid.'),
+      source: ExceptionSource.dayClose,
+      sourceId: key,
+      defaultOwnerRole: 'manager',
+      defaultDue: d.add(const Duration(days: 2)),
+      fingerprint: 'photo|${counted.length}',
+    ));
+  }
+  return withActions(out, actions);
+}
+
 /// The exceptions inbox with the daily close's items merged in.
 final inboxExceptionsProvider = FutureProvider.autoDispose.family<List<SiteExceptions>, String>((ref, companyId) async {
   final sites = await ref.watch(companyExceptionsProvider(companyId).future);
@@ -65,7 +106,15 @@ final inboxExceptionsProvider = FutureProvider.autoDispose.family<List<SiteExcep
     for (final s in sites)
       SiteExceptions(s.project, s.data, [
         ...s.items,
-        ...dayCloseExceptions(await SiteRecords.load(db, s.project), s.data.actions, now: now),
+        ...await _closeItems(db, s, now),
       ]),
   ];
 });
+
+Future<List<CommercialException>> _closeItems(AppDatabase db, SiteExceptions s, DateTime now) async {
+  final records = await SiteRecords.load(db, s.project);
+  return [
+    ...dayCloseExceptions(records, s.data.actions, now: now),
+    ...rollCallPhotoExceptions(records, s.data.actions, now: now),
+  ];
+}
