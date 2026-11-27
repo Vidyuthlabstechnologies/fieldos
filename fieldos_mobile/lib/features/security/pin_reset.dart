@@ -203,7 +203,8 @@ final accountReauthProvider = Provider<AccountReauth>((ref) {
   );
 });
 
-final phoneEraserProvider = Provider<PhoneEraser>((ref) => PhoneEraser(ref.watch(appDatabaseProvider)));
+final phoneEraserProvider =
+    Provider<PhoneEraser>((ref) => PhoneEraser(ref.watch(appDatabaseProvider), secrets: ref.watch(secretStoreProvider)));
 
 /// The word typed to confirm erasing, in the person's language.
 String eraseConfirmWord() => tr('ERASE');
