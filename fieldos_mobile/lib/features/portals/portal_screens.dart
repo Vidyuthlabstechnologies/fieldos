@@ -490,13 +490,7 @@ class ClientHomeScreen extends ConsumerWidget {
                         padding: const EdgeInsets.fromLTRB(4, 14, 4, 6),
                         child: Text(tr('Bills'), style: theme.textTheme.titleMedium),
                       ),
-                      for (final b in s.bills)
-                        ListTile(
-                          dense: true,
-                          title: Text('${b.number} · ${fmtDate(b.date, short: true)}'),
-                          trailing: Text(rupees(b.amount)),
-                          subtitle: Text(b.status == 'paid' ? tr('Paid') : tr('To pay')),
-                        ),
+                      for (final b in s.bills) _BillTile(bill: b),
                     ],
                     if (s.payments.isNotEmpty) ...[
                       Padding(
@@ -535,6 +529,86 @@ class _Figure extends StatelessWidget {
 final _photoUrlProvider = FutureProvider.autoDispose.family<String, String>((ref, path) =>
     _online(ref, (s) => s.photoUrl(path)));
 
+/// A site photo full screen, to pinch and look at (customer review: a client
+/// who distrusts the progress claims was given 84 px thumbnails).
+Future<void> _zoomPhoto(BuildContext context, WidgetRef ref, String path) {
+  return showDialog<void>(
+    context: context,
+    builder: (ctx) => Dialog.fullscreen(
+      backgroundColor: Colors.black,
+      child: Stack(children: [
+        Positioned.fill(
+          child: InteractiveViewer(
+            key: const Key('client-photo-zoom'),
+            minScale: 1,
+            maxScale: 5,
+            child: Consumer(
+              builder: (context, ref, _) => ref.watch(_photoUrlProvider(path)).when(
+                    data: (url) => Image.network(url,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, _, _) => const Center(child: Icon(Icons.broken_image_outlined, color: Colors.white54, size: 48))),
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (_, _) => const Center(child: Icon(Icons.image_not_supported_outlined, color: Colors.white54, size: 48)),
+                  ),
+            ),
+          ),
+        ),
+        SafeArea(
+          child: Align(
+            alignment: AlignmentDirectional.topEnd,
+            child: IconButton(
+              key: const Key('client-photo-close'),
+              tooltip: tr('Close'),
+              icon: const Icon(Icons.close, color: Colors.white),
+              onPressed: () => Navigator.pop(ctx),
+            ),
+          ),
+        ),
+      ]),
+    ),
+  );
+}
+
+/// One bill: the net amount up front, and what it is made up of when opened.
+class _BillTile extends StatelessWidget {
+  const _BillTile({required this.bill});
+  final SiteBill bill;
+
+  @override
+  Widget build(BuildContext context) {
+    final b = bill;
+    final rows = <(String, String)>[
+      if (b.gross != null) (tr('Gross'), rupees(b.gross!)),
+      if ((b.gstRate ?? 0) > 0) (tr('GST %'), '${fmtQty(b.gstRate!)}%'),
+      if ((b.retentionPct ?? 0) > 0) (tr('Retention %'), '${fmtQty(b.retentionPct!)}%'),
+      if ((b.tdsPct ?? 0) > 0) (tr('TDS %'), '${fmtQty(b.tdsPct!)}%'),
+      (tr('Net payable'), rupees(b.amount)),
+    ];
+    final title = Text('${b.number} · ${fmtDate(b.date, short: true)}');
+    final subtitle = Text(b.status == 'paid' ? tr('Paid') : tr('To pay'));
+    // An older server sends only the net amount: nothing to open.
+    if (b.gross == null) {
+      return ListTile(dense: true, title: title, trailing: Text(rupees(b.amount)), subtitle: subtitle);
+    }
+    return ExpansionTile(
+      key: Key('client-bill-${b.number}'),
+      dense: true,
+      tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+      title: title,
+      subtitle: subtitle,
+      trailing: Row(mainAxisSize: MainAxisSize.min, children: [Text(rupees(b.amount)), const Icon(Icons.expand_more)]),
+      childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      children: [
+        for (final (label, value) in rows)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(children: [Expanded(child: Text(label)), Text(value, key: Key('client-bill-${b.number}-$label'))]),
+          ),
+      ],
+    );
+  }
+}
+
 class _UpdateCard extends ConsumerWidget {
   const _UpdateCard({required this.update});
   final SiteUpdate update;
@@ -560,18 +634,23 @@ class _UpdateCard extends ConsumerWidget {
                 for (final p in update.photos)
                   Padding(
                     padding: const EdgeInsetsDirectional.only(end: 6),
-                    child: ClipRRect(
+                    child: InkWell(
+                      key: Key('client-photo-$p'),
                       borderRadius: BorderRadius.circular(6),
-                      child: SizedBox(
-                        width: 84,
-                        height: 84,
-                        child: ref.watch(_photoUrlProvider(p)).when(
-                              data: (url) => Image.network(url,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined)),
-                              loading: () => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                              error: (_, _) => const Icon(Icons.image_not_supported_outlined),
-                            ),
+                      onTap: () => _zoomPhoto(context, ref, p),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: SizedBox(
+                          width: 84,
+                          height: 84,
+                          child: ref.watch(_photoUrlProvider(p)).when(
+                                data: (url) => Image.network(url,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined)),
+                                loading: () => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                                error: (_, _) => const Icon(Icons.image_not_supported_outlined),
+                              ),
+                        ),
                       ),
                     ),
                   ),
