@@ -193,6 +193,25 @@ void main() {
     await expectLater(supplierPortal.photoUrl(photoPath), throwsA(anything),
         reason: 'a supplier is not the site\'s client');
 
+    // A change is sent to the client, who answers it once.
+    await expectLater(clientPortal.requestChange(siteId, title: 'Free upgrade', amount: 0), throwsA(isA<PostgrestException>()),
+        reason: 'the client cannot send herself a change');
+    await ownerPortal.requestChange(siteId, title: 'Extra bathroom', description: 'Attached to bedroom 2', amount: 85000, extraDays: 6);
+    final sent = (await ownerPortal.changesFor(siteId)).single;
+    expect((sent.number, sent.status, sent.amount, sent.extraDays), (1, 'pending', 85000.0, 6));
+    final seen = (await clientPortal.clientPortal()).single.changes.single;
+    expect((seen.title, seen.pending), ('Extra bathroom', true));
+    await expectLater(outsiderPortal.decideChange(seen.id, approve: true), throwsA(isA<PostgrestException>()),
+        reason: 'another client cannot answer it');
+    await expectLater(ownerPortal.decideChange(seen.id, approve: true), throwsA(isA<PostgrestException>()),
+        reason: 'the builder cannot answer for her');
+    await clientPortal.decideChange(seen.id, approve: true, note: 'Go ahead');
+    final answered = (await ownerPortal.changesFor(siteId)).single;
+    expect((answered.status, answered.note), ('approved', 'Go ahead'));
+    await expectLater(clientPortal.decideChange(seen.id, approve: false), throwsA(isA<PostgrestException>()),
+        reason: 'an answer is final');
+    await expectLater(ownerPortal.withdrawChange(seen.id), throwsA(isA<PostgrestException>()), reason: 'and so is an approval');
+
     // The builder changes the code and removes those who joined: the client's
     // portal empties, the old code is dead, and only the builder could do it.
     await expectLater(outsiderPortal.resetClientCode(siteId, removeAccess: true), throwsA(isA<PostgrestException>()));
