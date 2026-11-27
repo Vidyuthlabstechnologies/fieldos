@@ -6,6 +6,7 @@ library;
 
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:supabase/supabase.dart';
 
@@ -34,14 +35,66 @@ class RecentErrors {
 /// Uncaught errors go here as well as to [RecentErrors] (issue #153). The
 /// app points [sink] at [BugReportService.reportCrash] once it starts, so a
 /// crash is saved on the phone and sent as a bug report when online.
+///
+/// A crash before the app is up (the database that would hold a report cannot
+/// open, a provider fails on start) used to be dropped, because there was no
+/// [sink] yet, and so was one that killed the app before it could be sent.
+/// Such crashes are now kept, in memory and in a small file ([keepIn]), and
+/// handed to the sink as soon as it exists, this run or the next. Crashes that
+/// end the process with no Dart error (a native crash, an ANR) still need a
+/// native reporter and are not covered.
 class CrashLog {
   CrashLog._();
-  static void Function(Object error, StackTrace? stack)? sink;
+
+  static void Function(Object error, StackTrace? stack)? _sink;
+  static void Function(Object error, StackTrace? stack)? get sink => _sink;
+  static set sink(void Function(Object error, StackTrace? stack)? s) {
+    _sink = s;
+    if (s != null) _replay();
+  }
+
   static bool _busy = false;
+  static final _waiting = <(Object, StackTrace?)>[];
+  static File? _file;
+
+  /// Most crashes kept for a sink that does not exist yet.
+  static const maxWaiting = 5;
+
+  /// Also keeps early crashes in [file], and picks up what a previous run left
+  /// there. Call once, as early as the app's folder can be found.
+  static void keepIn(File file) {
+    _file = file;
+    try {
+      if (file.existsSync()) {
+        for (final line in file.readAsLinesSync()) {
+          try {
+            final j = jsonDecode(line) as Map<String, dynamic>;
+            if (_waiting.length < maxWaiting) {
+              _waiting.add((SavedCrash(j['type'] as String? ?? 'Error', j['message'] as String? ?? ''),
+                  StackTrace.fromString(j['stack'] as String? ?? '')));
+            }
+          } catch (_) {}
+        }
+        file.deleteSync();
+      }
+      // What happened before the file was known.
+      for (final (error, stack) in _waiting) {
+        _persist(error, stack);
+      }
+    } catch (_) {}
+    if (_sink != null) _replay();
+  }
 
   static void record(Object error, StackTrace? stack) {
-    final s = sink;
-    if (s == null || _busy) return; // never report a failure of the reporting itself
+    final s = _sink;
+    if (s == null) {
+      if (_waiting.length < maxWaiting) {
+        _waiting.add((error, stack));
+        _persist(error, stack);
+      }
+      return;
+    }
+    if (_busy) return; // never report a failure of the reporting itself
     _busy = true;
     try {
       s(error, stack);
@@ -50,6 +103,54 @@ class CrashLog {
       _busy = false;
     }
   }
+
+  static void _persist(Object error, StackTrace? stack) {
+    final f = _file;
+    if (f == null) return;
+    try {
+      final type = error is SavedCrash ? error.type : error.runtimeType.toString();
+      final message = error.toString();
+      f.writeAsStringSync(
+        '${jsonEncode({
+          'type': type,
+          'message': message.length > 500 ? message.substring(0, 500) : message,
+          'stack': (stack?.toString() ?? '').split('\n').take(12).join('\n'),
+        })}\n',
+        mode: FileMode.append,
+        flush: true,
+      );
+    } catch (_) {}
+  }
+
+  static void _replay() {
+    if (_waiting.isEmpty) return;
+    final early = [..._waiting];
+    _waiting.clear();
+    try {
+      _file?.deleteSync();
+    } catch (_) {}
+    for (final (error, stack) in early) {
+      record(error, stack);
+    }
+  }
+
+  /// Back to a fresh start, for tests.
+  static void resetForTest() {
+    _sink = null;
+    _busy = false;
+    _file = null;
+    _waiting.clear();
+  }
+}
+
+/// A crash read back from the file a previous run left. Its [type] is what the
+/// error was called then, so the report and its id read as the original's.
+class SavedCrash implements Exception {
+  const SavedCrash(this.type, this.message);
+  final String type;
+  final String message;
+  @override
+  String toString() => message;
 }
 
 /// A short, stable id for a crash: the error's type and its first three
@@ -62,7 +163,7 @@ String crashHash(Object error, StackTrace? stack) {
       .take(3)
       .join('|');
   var h = 0x811c9dc5;
-  for (final c in '${error.runtimeType}|$frames'.codeUnits) {
+  for (final c in '${error is SavedCrash ? error.type : error.runtimeType}|$frames'.codeUnits) {
     h = ((h ^ c) * 0x01000193) & 0xffffffff;
   }
   return h.toRadixString(16).padLeft(8, '0');
@@ -156,7 +257,7 @@ class BugReportService {
     final firstLine = error.toString().split('\n').first;
     final frames = (stack?.toString() ?? '').split('\n').take(12).join('\n');
     await submit(BugReport(
-      message: '[crash $hash] ${error.runtimeType}: ${firstLine.length > 200 ? firstLine.substring(0, 200) : firstLine}',
+      message: '[crash $hash] ${error is SavedCrash ? error.type : error.runtimeType}: ${firstLine.length > 200 ? firstLine.substring(0, 200) : firstLine}',
       appVersion: appVersion,
       platform: platform,
       recentErrors: '$error\n$frames',

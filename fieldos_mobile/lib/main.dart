@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import 'package:fieldos_mobile/features/subscription/subscription_gate.dart' show ReadOnlyBanner;
 import 'package:fieldos_mobile/app.dart';
@@ -17,7 +21,8 @@ import 'package:fieldos_mobile/services/bug_report_service.dart';
 import 'package:fieldos_mobile/services/notification_service.dart' show appNavigatorKey;
 import 'package:fieldos_mobile/sync/sync_config.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   // Keep the last few errors so a bug report can carry them.
   final previous = FlutterError.onError;
   FlutterError.onError = (details) {
@@ -30,6 +35,12 @@ void main() {
     CrashLog.record(error, stack);
     return false;
   };
+  // Crashes before the app is up are kept in a file until they can be sent
+  // (the handlers above already catch anything while this folder is found).
+  try {
+    final dir = await getApplicationSupportDirectory();
+    CrashLog.keepIn(File(p.join(dir.path, 'early_crashes.jsonl')));
+  } catch (_) {}
   // The brand font's licence, listed with the packages' licences.
   LicenseRegistry.addLicense(() async* {
     yield LicenseEntryWithLineBreaks(const ['Inter (font)'], await rootBundle.loadString('assets/fonts/OFL.txt'));
