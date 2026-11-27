@@ -1,8 +1,8 @@
 # FieldOS handover (current state)
 
 **Read this first.** It is the one page kept current for whoever (person or
-coding agent) takes the project over. Last updated 2026-11-27, app **1.8.2+27**,
-phone database schema **45**, 70 Supabase migrations, all of them live on
+coding agent) takes the project over. Last updated 2026-11-27, app **1.8.3+28**,
+phone database schema **45**, 77 Supabase migrations, all of them live on
 production except those in `supabase/deferred/`.
 
 Anything older that disagrees with this page is out of date. The older
