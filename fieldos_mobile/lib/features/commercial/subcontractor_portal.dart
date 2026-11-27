@@ -111,14 +111,12 @@ class _HomeState extends ConsumerState<SubcontractorHomeScreen> {
         data: (sites) => RefreshIndicator(
           onRefresh: _sync,
           child: sites.isEmpty
-              ? ListView(children: [
-                  EmptyState(
+              ? EmptyState(
                     icon: Icons.handshake_outlined,
                     title: tr('No work orders yet'),
                     message: tr('When the builder gives your firm a work order, it appears here after a sync. '
                         'Then you can claim the work you finish.'),
-                  ),
-                ])
+                  )
               : ListView(padding: const EdgeInsets.all(12), children: [
                   for (final s in sites) ...[
                     SectionHeader(s.site.name),

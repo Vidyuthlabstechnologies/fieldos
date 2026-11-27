@@ -105,10 +105,24 @@ class SupplierOrder {
     this.dispatchedOn,
     this.vehicle,
     this.note,
+    this.quantity,
+    this.unit,
+    this.rate,
+    this.gstPct,
+    this.transport,
   });
   final String id;
   final String site;
   final String companyName;
+
+  /// What was ordered, and the rate, GST and transport of the quote it was
+  /// placed at. Null for an order not made from a quote, or from a server that
+  /// does not send them yet (20261128160000_supplier_order_breakup.sql).
+  final double? quantity;
+  final String? unit;
+  final double? rate;
+  final double? gstPct;
+  final double? transport;
 
   /// issued | acknowledged (on the way) | delivered
   final String status;
@@ -136,6 +150,11 @@ class SupplierOrder {
         dispatchedOn: _t(j['dispatched_on']),
         vehicle: j['vehicle'] as String?,
         note: j['supplier_note'] as String?,
+        quantity: _d(j['quantity']),
+        unit: j['unit'] as String?,
+        rate: _d(j['rate']),
+        gstPct: _d(j['gst_pct']),
+        transport: _d(j['transport']),
       );
 }
 

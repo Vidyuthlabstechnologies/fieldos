@@ -142,13 +142,11 @@ class _WeeklyCloseListScreenState extends ConsumerState<WeeklyCloseListScreen> {
             onRefresh: () => ref.refresh(companyWeekCloseProvider(k).future),
             child: weeks.when(
               data: (list) => list.isEmpty
-                  ? ListView(children: [
-                      EmptyState(
+                  ? EmptyState(
                         icon: Icons.fact_check_outlined,
                         title: tr('No running sites'),
                         message: tr('Each running site gets a weekly close here: wages, expenses and deliveries to approve.'),
-                      ),
-                    ])
+                      )
                   : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
                       itemCount: list.length,

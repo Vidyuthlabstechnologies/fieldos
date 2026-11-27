@@ -316,12 +316,10 @@ class SupplierHomeScreen extends ConsumerWidget {
                 RefreshIndicator(onRefresh: () => ref.refresh(supplierPortalProvider.future), child: child);
             return TabBarView(children: [
               refreshable(d.requests.isEmpty
-                  ? ListView(children: [
-                      EmptyState(
+                  ? EmptyState(
                           icon: Icons.request_quote_outlined,
                           title: tr('No price requests yet'),
-                          message: tr('When the site asks you for a price, it shows here. Send your rate in a minute.')),
-                    ])
+                          message: tr('When the site asks you for a price, it shows here. Send your rate in a minute.'))
                   : ListView(padding: const EdgeInsets.all(12), children: [
                       for (final r in d.requests)
                         Card(
@@ -357,12 +355,10 @@ class SupplierHomeScreen extends ConsumerWidget {
                         ),
                     ])),
               refreshable(d.orders.isEmpty
-                  ? ListView(children: [
-                      EmptyState(
+                  ? EmptyState(
                           icon: Icons.local_shipping_outlined,
                           title: tr('No orders yet'),
-                          message: tr('Orders the builder gives you show here, with what the site received.')),
-                    ])
+                          message: tr('Orders the builder gives you show here, with what the site received.'))
                   : ListView(padding: const EdgeInsets.all(12), children: [
                       for (final o in d.orders)
                         Card(
@@ -385,6 +381,16 @@ class SupplierHomeScreen extends ConsumerWidget {
                                     if (o.deliveryDate != null) trf('by {date}', {'date': fmtDate(o.deliveryDate!, short: true)}),
                                   ].join(' · '),
                                   style: theme.textTheme.bodySmall),
+                              if (o.rate != null && o.quantity != null)
+                                Text(
+                                    [
+                                      '${fmtQty(o.quantity!)} ${o.unit ?? ''}'.trim(),
+                                      trf('{rate} a unit', {'rate': rupees(o.rate!, paise: true)}),
+                                      if (o.gstPct != null) '${tr('GST')} ${fmtQty(o.gstPct!)}%',
+                                      if ((o.transport ?? 0) > 0) trf('Transport {amount}', {'amount': rupees(o.transport!)}),
+                                    ].join(' · '),
+                                    key: Key('order-breakup-${o.id}'),
+                                    style: theme.textTheme.bodySmall),
                               if (o.vehicle != null) Text(trf('Vehicle {v}', {'v': o.vehicle!}), style: theme.textTheme.bodySmall),
                               if (o.open)
                                 Align(
@@ -428,12 +434,10 @@ class ClientHomeScreen extends ConsumerWidget {
         data: (sites) => RefreshIndicator(
           onRefresh: () => ref.refresh(clientPortalProvider.future),
           child: sites.isEmpty
-              ? ListView(children: [
-                  EmptyState(
+              ? EmptyState(
                       icon: Icons.home_work_outlined,
                       title: tr('No site yet'),
-                      message: tr('Ask the builder for your site\'s code.')),
-                ])
+                      message: tr('Ask the builder for your site\'s code.'))
               : ListView(padding: const EdgeInsets.all(12), children: [
                   for (final s in sites) ...[
                     Card(
