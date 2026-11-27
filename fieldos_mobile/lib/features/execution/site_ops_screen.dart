@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/core/date_pick.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
 import 'package:fieldos_mobile/data/app_database.dart';
+import 'package:fieldos_mobile/features/execution/cube_acceptance.dart' show GradeAcceptance, checkSpecimens;
 import 'package:fieldos_mobile/features/execution/execution_rules.dart' show parseDay, ymd;
 import 'package:fieldos_mobile/features/execution/site_ops_rules.dart';
 import 'package:fieldos_mobile/features/team/site_team_screen.dart' show mySiteAccessProvider;
@@ -84,6 +85,51 @@ class SiteOpsScreen extends ConsumerWidget {
 
 // --- Quality ---------------------------------------------------------------------
 
+/// One grade of concrete judged as IS 456 asks: the mean of each group of four
+/// samples, and each sample on its own (cube_acceptance.dart).
+class _AcceptanceCard extends StatelessWidget {
+  const _AcceptanceCard(this.a);
+  final GradeAcceptance a;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      key: Key('acceptance-${a.grade}'),
+      margin: const EdgeInsets.only(top: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('${a.grade} · ${tr('Groups of 4 samples (IS 456)')}', style: theme.textTheme.titleSmall),
+          for (final g in a.groups)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Row(children: [
+                Expanded(
+                  child: Text(
+                    '${trf('Samples {a}–{b}', {'a': g.first, 'b': g.last})} · ${tr('Actual')} ${fmtQty(g.mean)} · ${tr('Required')} ≥ ${fmtQty(g.limit)}',
+                    key: Key('acceptance-${a.grade}-${g.first}'),
+                  ),
+                ),
+                StatusPill(g.complies ? tr('Passed') : tr('Failed'), tone: g.complies ? PillTone.ok : PillTone.danger),
+              ]),
+            ),
+          if (a.needed > 0)
+            Padding(padding: const EdgeInsets.only(top: 6), child: Text(trf('{n} of 4 samples in', {'n': a.inOpenGroup}), style: theme.textTheme.bodySmall)),
+          if (a.belowIndividual.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                trf('Samples under the limit of {limit}: {list}', {'limit': fmtQty(a.individualLimit), 'list': a.belowIndividual.join(', ')}),
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
+            ),
+        ]),
+      ),
+    );
+  }
+}
+
 class QualityTestsTab extends ConsumerWidget {
   const QualityTestsTab({super.key, required this.project, required this.canWrite});
   final Project project;
@@ -131,6 +177,7 @@ class QualityTestsTab extends ConsumerWidget {
                 ),
               ),
             ),
+            for (final a in concreteAcceptance(all)) _AcceptanceCard(a),
             for (final t in list)
               Card(
                 key: Key('test-${t.id}'),
@@ -198,11 +245,24 @@ class QualityTestsTab extends ConsumerWidget {
   Future<void> _record(BuildContext context, WidgetRef ref, QualityTest t) async {
     final actual = TextEditingController();
     final note = TextEditingController();
+    // A 28-day cube is judged on a sample of three (IS 456 clause 15.4).
+    final threeCubes = t.kind == 'cube' && t.ageDays == 28;
+    final cubes = [for (var i = 0; i < 3; i++) TextEditingController()];
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr('Record the result')),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
+        content: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+          if (threeCubes)
+            for (var i = 0; i < 3; i++)
+              TextField(
+                key: Key('cube-$i'),
+                controller: cubes[i],
+                autofocus: i == 0,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(labelText: '${trf('Cube {n}', {'n': i + 1})} (${t.unit ?? ''})'),
+              ),
           TextField(
             key: const Key('test-actual'),
             controller: actual,
@@ -212,6 +272,7 @@ class QualityTestsTab extends ConsumerWidget {
           ),
           TextField(controller: note, decoration: InputDecoration(labelText: tr('Note (optional)'))),
         ]),
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
           FilledButton(key: const Key('test-record-save'), onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Save'))),
@@ -219,13 +280,32 @@ class QualityTestsTab extends ConsumerWidget {
       ),
     );
     if (ok != true || !context.mounted) return;
-    final v = double.tryParse(actual.text.trim().replaceAll(',', ''));
+    double? v;
+    String? cubeNote;
+    final typed = cubes.where((c) => c.text.trim().isNotEmpty).length;
+    if (threeCubes && typed > 0) {
+      final values = [for (final c in cubes) double.tryParse(c.text.trim().replaceAll(',', ''))];
+      if (typed != 3 || values.contains(null) || values.any((x) => x! <= 0)) {
+        showSnack(context, tr('Enter all three cubes, or leave them empty and type the average.'), error: true);
+        return;
+      }
+      final check = checkSpecimens(values.cast<double>());
+      if (!check.valid) {
+        showSnack(context, tr('One cube is more than 15% from the average, so this sample is not valid. Cast it again.'), error: true);
+        return;
+      }
+      v = double.parse(check.mean.toStringAsFixed(2));
+      cubeNote = '${values.map((x) => fmtQty(x!)).join(' / ')} ${t.unit ?? ''}'.trim();
+    }
+    v ??= double.tryParse(actual.text.trim().replaceAll(',', ''));
     if (v == null) {
       showSnack(context, tr('Enter the value the test showed.'), error: true);
       return;
     }
+    final fullNote = [?cubeNote, note.text.trim()].where((p) => p.isNotEmpty).join(' · ');
+    final result = v;
     await _run(context, () async {
-      await ref.read(appDatabaseProvider).siteOpsDao.recordTest(t.id, actual: v, note: note.text, by: ref.read(sessionProvider).user!.id);
+      await ref.read(appDatabaseProvider).siteOpsDao.recordTest(t.id, actual: result, note: fullNote, by: ref.read(sessionProvider).user!.id);
     }, () => ref.invalidate(qualityProvider(project.id)));
   }
 
