@@ -16,7 +16,7 @@ Reviewers: small-builder owner (Hyderabad), junior site engineer (Warangal, Telu
 
 ## Status of the findings (27-28 Nov 2026)
 
-**Merged to `master`: everything below. Live on production: all the server work** (70 migrations, isolation-check passed after the RLS rewrite, the AI-assistant function). The final `master` passes the whole reference run (analyzer, every test against a fresh Supabase stack, the Android build). The release bundle 1.8.2+27 is built, signed and checked; **uploading it to Play is the owner's step** (no Play service account is set).
+**Merged to `master`: everything below. Live on production: all the server work** (73 migrations, isolation-check passed after the RLS rewrite, the AI-assistant function). The final `master` passes the whole reference run (analyzer, every test against a fresh Supabase stack, the Android build). The release bundle 1.8.2+27 is built, signed and checked; **uploading it to Play is the owner's step** (no Play service account is set).
 
 | Finding | Status | PR |
 |---|---|---|
@@ -27,6 +27,14 @@ Reviewers: small-builder owner (Hyderabad), junior site engineer (Warangal, Telu
 | #9 AI consent not enforced | Withdrawal stops processing, live | #257 |
 | #11 Attendance trust (time) | Late check-ins wait for a manager, live | #259 |
 | #13 Cube acceptance not IS 456 | Fixed: three cubes per sample, groups of four (`docs/CUBE_ACCEPTANCE.md`) | #248, #266 |
+| #6 Wage rates readable by every site member | **Closed, live** (27 Nov): only owners, project managers and accounts read rates, through `worker_wage_rates()`; production had no users on older builds, so the minimum build was raised to 26 first | #272 |
+| #7 Login session as plain text in the phone's database | Moved to Android Keystore / iOS Keychain with a fallback so nobody is logged out (**check on a real phone**) | #269 |
+| #24 Client sees one net figure per bill, 84 px photos | A bill opens to gross, GST, retention, TDS, net; photos open full screen. Still open: change-order approval by the client, payment milestones, contract value, alerts | #270 |
+| #24, #25, #26 Portal codes permanent | The builder can change a code and remove everyone who joined (client, supplier, sub-contractor) | #273 |
+| #27 Nothing flags workers paid with no photo | A day counted for wages with no roll-call photo goes to the exceptions inbox (only for sites that use the photos). Still open: owner approval for new workers, join-code expiry or approval | #276 |
+| #34 Crashes before the app is up are lost | Kept in a file and sent on the next start. A native crash or ANR still needs a native reporter | #271 |
+| #38 Kannada, Tamil, Telugu date patterns | Day, month, year, no stray comma | #274 |
+| #38 Form refusal messages in English | 23 translated in 13 languages; a test now fails if one is missing | #275 |
 | #14 Hold points do not hold | Fixed on the server (live) and the phone; the quality officer can release | #265 |
 | #26 Supplier sees unapproved POs | Fixed, live | #258 |
 | #28 A stalled photo blocks all sync | Fixed | #254 |
@@ -38,8 +46,7 @@ Reviewers: small-builder owner (Hyderabad), junior site engineer (Warangal, Telu
 
 **Not built, and why**
 
-- #4 and #7 (encrypt the phone database, keep the login session in the phone's secure store): needs native plugins that cannot be built or tested here (no Android SDK), and a migration for installed phones.
-- #6 wage lockdown: **ready, not run.** It breaks any build below 26, and there is no way from here to see which builds the testers have. Steps are in `HANDOVER.md`.
+- #4 (encrypt the phone database): needs a native plugin and a migration for installed phones. (#7, the login session, is done in #269.)
 - #7 other money data readable by all members: needs a decision on who sees supplier invoices and PO totals.
 - #15 pour cards and statutory safety registers; #16 storekeeper tools screen; #17 accounting depth (Sales, Purchase and Journal vouchers, TDS payable, HSN per line, reverse charge, other states' professional tax); #24, #25 and the client, sub-contractor and supplier portals; #27 owner fraud reports: each is a feature of its own, with its own design and translations.
 - #18-#20 paywall order, the 3-day trial, read-only after expiry: product decisions with revenue effect (the trial length is set in the Play and App Store consoles). #22 phone-number sign-in needs an SMS provider account.
