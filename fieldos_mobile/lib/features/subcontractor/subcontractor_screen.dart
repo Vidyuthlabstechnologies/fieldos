@@ -5,7 +5,6 @@ library;
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:fieldos_mobile/auth/auth_service.dart';
@@ -16,6 +15,7 @@ import 'package:fieldos_mobile/data/app_database.dart';
 import 'package:fieldos_mobile/providers.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/features/mascot/mitra.dart';
+import 'package:fieldos_mobile/features/portals/portal_share.dart';
 
 class SubcontractorsScreen extends ConsumerWidget {
   const SubcontractorsScreen({super.key, required this.companyId});
@@ -76,28 +76,16 @@ class SubcontractorsScreen extends ConsumerWidget {
       await service.syncNow();
       final code = await service.subcontractorAccessCode(s.id);
       if (!context.mounted) return;
-      final text = trf(
-          '{name}: install FieldOS, tap "Subcontractor? Join free with the builder\'s code" and enter {code}. '
-          'You will see your work orders and can claim the work you finish.',
-          {'name': s.name, 'code': code});
-      await showDialog<void>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(trf('Access for {name}', {'name': s.name})),
-          content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            SelectableText(code, style: Theme.of(ctx).textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            Text(tr('They see only their own work orders and claims, and use FieldOS free.')),
-          ]),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Close'))),
-            FilledButton.icon(
-              icon: const Icon(Icons.share),
-              label: Text(tr('Share')),
-              onPressed: () => SharePlus.instance.share(ShareParams(text: text)),
-            ),
-          ],
-        ),
+      await showPortalCode(
+        context,
+        title: trf('Access for {name}', {'name': s.name}),
+        code: code,
+        about: tr('They see only their own work orders and claims, and use FieldOS free.'),
+        share: (code) => trf(
+            '{name}: install FieldOS, tap "Subcontractor? Join free with the builder\'s code" and enter {code}. '
+            'You will see your work orders and can claim the work you finish.',
+            {'name': s.name, 'code': code}),
+        reset: ({required removeAccess}) => service.resetSubcontractorCode(s.id, removeAccess: removeAccess),
       );
     } catch (e, st) {
       if (context.mounted) showSnack(context, friendlyError(e, st), error: true);
