@@ -14,39 +14,39 @@ Reviewers: small-builder owner (Hyderabad), junior site engineer (Warangal, Telu
 
 ---
 
-## Status of the findings (27 Nov 2026)
+## Status of the findings (27-28 Nov 2026)
 
-Everything below is a pull request, **none merged and none deployed**. The combined tree (all branches merged) passes the whole Flutter suite (1,552 tests, 0 failures), all 17 SQL tests, the edge-function tests, the Python tests and the analyzer. Deploy order and gates: `docs/SUPABASE_PRO_CUTOVER.md`.
+**Merged to `master`: everything below. Live on production: all the server work** (70 migrations, isolation-check passed after the RLS rewrite, the AI-assistant function). The final `master` passes the whole reference run (analyzer, every test against a fresh Supabase stack, the Android build). The release bundle 1.8.2+27 is built, signed and checked; **uploading it to Play is the owner's step** (no Play service account is set).
 
 | Finding | Status | PR |
 |---|---|---|
-| #1 No backups | Safety net built (daily encrypted copy, restore drilled); **plan upgrade is yours** | #251 |
-| #2 Any member edits POs and requests | Fixed on the server | #252 |
-| #3 Approval rules dodged by back-dating | Fixed on the server | #256 |
-| #5 No history for wages, attendance marks, POs | Fixed (server + labels) | #253 |
-| #9 AI consent not enforced | Withdrawal now stops processing | #257 |
-| #11 Attendance trust (time) | Late check-ins wait for a manager | #259 |
-| #13 Cube acceptance not IS 456 | Fixed: warning wording (#248); IS 456 acceptance (#266) | #248, #266 |
-| #26 Supplier sees unapproved POs | Fixed on the server | #258 |
+| #1 No backups | Daily encrypted copy running (first one taken and restored against production's own data); **the Pro plan upgrade is yours** | #251 |
+| #2 Any member edits POs and requests | Fixed, live | #252 |
+| #3 Approval rules dodged by back-dating | Fixed, live | #256 |
+| #5 No history for wages, attendance marks, POs | Fixed, live | #253 |
+| #9 AI consent not enforced | Withdrawal stops processing, live | #257 |
+| #11 Attendance trust (time) | Late check-ins wait for a manager, live | #259 |
+| #13 Cube acceptance not IS 456 | Fixed: three cubes per sample, groups of four (`docs/CUBE_ACCEPTANCE.md`) | #248, #266 |
+| #14 Hold points do not hold | Fixed on the server (live) and the phone; the quality officer can release | #265 |
+| #26 Supplier sees unapproved POs | Fixed, live | #258 |
 | #28 A stalled photo blocks all sync | Fixed | #254 |
-| #29 Sync failure invisible | Home banner | #261 |
+| #29 Sync failure invisible; no backoff | Home banner; backoff and no overlapping syncs | #261, #267 |
 | #30 Whole outbox loaded on every pull | Fixed | #260 |
-| #33 Spoken report lost on a stray tap | Asks first (2 new strings, **native review needed**) | #262 |
+| #33 Spoken report lost on a stray tap | Asks first (**native review of 2 strings**) | #262 |
 | #36 Consent wording ("from behind") | Fixed in Hindi, Telugu, Marathi | #250 |
-| **New:** RLS cost grows with the whole table (7.3 s for one user at 9,800 tasks) | Fixed: 58 ms | #255 |
+| **New:** RLS cost grew with the whole table (7.3 s at 9,800 tasks) | Fixed: 58 ms, live | #255 |
 
 **Not built, and why**
 
-- #4 and #7 (encryption of the phone database, a secure place for the login session): needs native plugins that cannot be built or tested here, and a migration for existing installs.
-- #7 other money data readable by all members, #6 wage columns: the wage lockdown is a runbook step (`HANDOVER.md`) for after Pro; the rest needs a design decision on who sees supplier invoices and PO totals.
-- #14 hold points (**done, #265, live**); #15 pour cards and safety registers: real features on both phone and server.
-- #16 storekeeper tools: needs a site-scoped screen; opening the company screen would show buttons the server refuses.
-- #17 accounting depth (Sales, Purchase and Journal vouchers, TDS payable, HSN per line, reverse charge, other states' professional tax): a large piece of work with the accountant.
-- #18-#20 (paywall order, 3-day trial, read-only after expiry) and #22 phone-number sign-in: product decisions with revenue effects, and an SMS provider account.
-- #24, #25 portals for clients and sub-contractors, #27 owner fraud reports: feature work.
-- #31, #32 storage clean-up and PDF/XLSX on background isolates, #34, #35: performance work that needs a device to measure.
+- #4 and #7 (encrypt the phone database, keep the login session in the phone's secure store): needs native plugins that cannot be built or tested here (no Android SDK), and a migration for installed phones.
+- #6 wage lockdown: **ready, not run.** It breaks any build below 26, and there is no way from here to see which builds the testers have. Steps are in `HANDOVER.md`.
+- #7 other money data readable by all members: needs a decision on who sees supplier invoices and PO totals.
+- #15 pour cards and statutory safety registers; #16 storekeeper tools screen; #17 accounting depth (Sales, Purchase and Journal vouchers, TDS payable, HSN per line, reverse charge, other states' professional tax); #24, #25 and the client, sub-contractor and supplier portals; #27 owner fraud reports: each is a feature of its own, with its own design and translations.
+- #18-#20 paywall order, the 3-day trial, read-only after expiry: product decisions with revenue effect (the trial length is set in the Play and App Store consoles). #22 phone-number sign-in needs an SMS provider account.
+- #31, #32 storage clean-up and PDF/XLSX off the main thread, #34, #35: need a real device to measure.
 - #37-#39 further translation fixes: need native speakers.
-- #7 money as floating point: an integer-paise migration of 25 columns and every calculation.
+- Money as floating point (25 columns): an integer-paise migration of every calculation.
+- Leaked-password protection, custom SMTP, point-in-time recovery: **need the Pro plan.**
 
 ## Verified on production, read-only (26 Nov 2026)
 
