@@ -46,6 +46,14 @@ void main() {
       expect(sql, startsWith('Something went wrong'));
     });
 
+    test('a decision that is already final says so in plain words, whatever the server wrote', () {
+      final m = friendlyError(const sb.PostgrestException(message: 'this change has already been approved', code: '55000'));
+      expect(m, startsWith('That has already been decided'));
+      expect(m, isNot(contains('approved')));
+      expect(friendlyError(const sb.PostgrestException(message: 'Too many changes are waiting for the client.', code: '23514')),
+          contains('Wait for some answers'));
+    });
+
     test('a feature whose server part is not deployed yet says so, not "something went wrong"', () {
       final m = friendlyError(const sb.PostgrestException(
           message: 'Could not find the function public.client_portal without parameters in the schema cache',

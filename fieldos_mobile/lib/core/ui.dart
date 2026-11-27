@@ -100,12 +100,17 @@ String? _cloudServerMessage(sb.PostgrestException e) {
       return tr('Only the company owner can remove people from the team.');
     case 'the owner cannot be removed':
       return tr('The company owner cannot be removed from the team.');
+    case 'too many changes are waiting for the client.':
+      return tr('Too many changes are waiting for the client. Wait for some answers first.');
   }
   switch (e.code) {
     case 'PGRST301' || 'PGRST302' || 'PGRST303' || '28000':
       return _signInAgainMessage;
     case '42501':
       return tr('Your role in this company does not allow that. Ask the owner.');
+    // The server refuses to change something already decided or withdrawn.
+    case '55000':
+      return tr('That has already been decided, so it cannot be changed. Refresh to see the answer.');
     case 'PGRST202' || 'PGRST205' || '42P01' || '42883':
       return tr('This needs a FieldOS server update that is on its way. Your work is safe on the phone; try again in a day or two.');
   }
