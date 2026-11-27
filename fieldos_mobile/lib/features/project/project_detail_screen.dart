@@ -13,6 +13,7 @@ import 'package:fieldos_mobile/features/execution/value_engineering_screen.dart'
 import 'package:fieldos_mobile/features/execution/site_ops_screen.dart';
 import 'package:fieldos_mobile/features/schedule/gantt_screen.dart';
 import 'package:fieldos_mobile/features/project/site_notes_screen.dart';
+import 'package:fieldos_mobile/features/portals/change_approval.dart' show ClientChangesScreen;
 import 'package:fieldos_mobile/features/portals/portal_share.dart';
 import 'package:fieldos_mobile/core/brand.dart';
 import 'package:fieldos_mobile/core/format.dart';
@@ -217,6 +218,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
               }
               if (v == 'excel') exportProjectToExcel(context, ref, widget.project);
               if (v == 'client') shareClientAccess(context, ref, widget.project);
+              if (v == 'client-changes') {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => ClientChangesScreen(project: widget.project)));
+              }
               if (v == 'pilot') {
                 Navigator.of(context).push(MaterialPageRoute(builder: (_) => PilotScorecardScreen(project: widget.project)));
               }
@@ -372,6 +376,15 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   child: ListTile(
                     leading: const Icon(Icons.person_pin_circle_outlined),
                     title: Text(tr('Share with the client')),
+                  ),
+                ),
+              if (Roles.canApprove(ref.read(sessionProvider).role))
+                PopupMenuItem(
+                  key: const Key('menu-client-changes'),
+                  value: 'client-changes',
+                  child: ListTile(
+                    leading: const Icon(Icons.fact_check_outlined),
+                    title: Text(tr('Client approval of changes')),
                   ),
                 ),
               PopupMenuItem(

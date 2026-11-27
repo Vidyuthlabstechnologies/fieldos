@@ -29,7 +29,8 @@ Reviewers: small-builder owner (Hyderabad), junior site engineer (Warangal, Telu
 | #13 Cube acceptance not IS 456 | Fixed: three cubes per sample, groups of four (`docs/CUBE_ACCEPTANCE.md`) | #248, #266 |
 | #6 Wage rates readable by every site member | **Closed, live** (27 Nov): only owners, project managers and accounts read rates, through `worker_wage_rates()`; production had no users on older builds, so the minimum build was raised to 26 first | #272 |
 | #7 Login session as plain text in the phone's database | Moved to Android Keystore / iOS Keychain with a fallback so nobody is logged out (**check on a real phone**) | #269 |
-| #24 Client sees one net figure per bill, 84 px photos | A bill opens to gross, GST, retention, TDS, net; photos open full screen. Still open: change-order approval by the client, payment milestones, contract value, alerts | #270 |
+| #24 Client sees one net figure per bill, 84 px photos | A bill opens to gross, GST, retention, TDS, net; photos open full screen. Still open: payment milestones, contract value, alerts | #270 |
+| #24 Client cannot approve changes | The builder sends a change (title, what it is, the client's price, days it adds); the client approves or declines once in her portal, the server keeps who, when and the note, and a decision cannot be changed or withdrawn. Online only, by design | this PR |
 | #24, #25, #26 Portal codes permanent | The builder can change a code and remove everyone who joined (client, supplier, sub-contractor) | #273 |
 | #27 Nothing flags workers paid with no photo | A day counted for wages with no roll-call photo goes to the exceptions inbox (only for sites that use the photos). Still open: owner approval for new workers, join-code expiry or approval | #276 |
 | #34 Crashes before the app is up are lost | Kept in a file and sent on the next start. A native crash or ANR still needs a native reporter | #271 |

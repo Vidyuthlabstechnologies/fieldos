@@ -12,6 +12,7 @@ import 'package:fieldos_mobile/features/auth/cloud_sign_in_buttons.dart';
 import 'package:fieldos_mobile/auth/auth_service.dart';
 import 'package:fieldos_mobile/core/format.dart';
 import 'package:fieldos_mobile/core/ui.dart';
+import 'package:fieldos_mobile/features/portals/change_approval.dart';
 import 'package:fieldos_mobile/features/portals/portal_service.dart';
 import 'package:fieldos_mobile/l10n/language.dart';
 import 'package:fieldos_mobile/providers.dart';
@@ -459,6 +460,7 @@ class ClientHomeScreen extends ConsumerWidget {
                         ]),
                       ),
                     ),
+                    ClientChangesSection(changes: s.changes, onChanged: () => ref.invalidate(clientPortalProvider)),
                     if (s.milestones.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(4, 14, 4, 6),

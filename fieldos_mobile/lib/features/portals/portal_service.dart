@@ -208,6 +208,50 @@ class ClientMilestone {
   double get progress => total == 0 ? 0 : done / total;
 }
 
+/// A change the builder sent the client to approve before building it
+/// (20261128150000_client_change_approval.sql). The price is the client's.
+class ChangeRequest {
+  const ChangeRequest({
+    required this.id,
+    required this.number,
+    required this.title,
+    required this.amount,
+    required this.status,
+    this.description,
+    this.extraDays = 0,
+    this.requestedOn,
+    this.decidedOn,
+    this.note,
+  });
+  final String id;
+  final int number;
+  final String title;
+  final String? description;
+  final double amount;
+  final int extraDays;
+
+  /// pending, approved or declined (a withdrawn one is not sent to anyone).
+  final String status;
+  final DateTime? requestedOn;
+  final DateTime? decidedOn;
+  final String? note;
+
+  bool get pending => status == 'pending';
+
+  factory ChangeRequest.fromJson(Map c) => ChangeRequest(
+        id: c['id'] as String,
+        number: (c['number'] as num?)?.toInt() ?? 0,
+        title: c['title'] as String? ?? '',
+        description: c['description'] as String?,
+        amount: _d(c['amount']) ?? 0,
+        extraDays: (c['extra_days'] as num?)?.toInt() ?? 0,
+        status: c['status'] as String? ?? 'pending',
+        requestedOn: _t(c['requested_on']),
+        decidedOn: _t(c['decided_on']),
+        note: c['note'] as String?,
+      );
+}
+
 class ClientSite {
   const ClientSite({
     required this.id,
@@ -219,6 +263,7 @@ class ClientSite {
     required this.bills,
     required this.payments,
     this.milestones = const [],
+    this.changes = const [],
   });
   final String id;
   final String name;
@@ -231,6 +276,9 @@ class ClientSite {
   final List<SiteUpdate> updates;
   final List<SiteBill> bills;
   final List<ClientPayment> payments;
+
+  /// Changes sent for approval, newest first. Empty from an older server.
+  final List<ChangeRequest> changes;
 
   double get billed => bills.fold(0, (t, b) => t + b.amount);
   double get paid => payments.fold(0, (t, p) => t + p.amount);
@@ -281,6 +329,7 @@ class ClientSite {
           for (final p in (j['payments'] as List? ?? const []).cast<Map>())
             ClientPayment(date: _t(p['date']) ?? DateTime(2000), amount: _d(p['amount']) ?? 0, mode: p['mode'] as String? ?? ''),
         ],
+        changes: [for (final c in (j['changes'] as List? ?? const []).cast<Map>()) ChangeRequest.fromJson(c)],
       );
 }
 
@@ -310,6 +359,28 @@ class PortalService {
       companyName: m['company_name'] as String? ?? 'Company',
     );
   }
+
+  /// The client's answer. Final: the server refuses a second one.
+  Future<void> decideChange(String id, {required bool approve, String? note}) =>
+      client.rpc('decide_change_approval', params: {'p_id': id, 'p_approve': approve, 'p_note': note});
+
+  /// Owner or project manager: send a change to the client.
+  Future<void> requestChange(String projectId,
+          {required String title, String? description, required double amount, int extraDays = 0}) =>
+      client.rpc('request_change_approval', params: {
+        'p_project_id': projectId,
+        'p_title': title,
+        'p_description': description,
+        'p_amount': amount,
+        'p_extra_days': extraDays,
+      });
+
+  Future<List<ChangeRequest>> changesFor(String projectId) async => [
+        for (final c in (await client.rpc('change_approvals', params: {'p_project_id': projectId}) as List).cast<Map>())
+          ChangeRequest.fromJson(c),
+      ];
+
+  Future<void> withdrawChange(String id) => client.rpc('withdraw_change_approval', params: {'p_id': id});
 
   Future<SupplierPortalData> supplierPortal() async =>
       SupplierPortalData.fromJson(Map<String, dynamic>.from(await client.rpc('supplier_portal') as Map));
