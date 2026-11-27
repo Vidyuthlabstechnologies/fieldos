@@ -219,6 +219,12 @@ class CloudSyncService {
   Future<String> subcontractorAccessCode(String subcontractorId) async =>
       await client.rpc('subcontractor_access_code', params: {'p_subcontractor_id': subcontractorId}) as String;
 
+  /// Owner or PM: a new code for one subcontractor; the old one stops working.
+  /// With [removeAccess], everyone who joined with it loses access too.
+  Future<String> resetSubcontractorCode(String subcontractorId, {required bool removeAccess}) async =>
+      await client.rpc('reset_subcontractor_code',
+          params: {'p_subcontractor_id': subcontractorId, 'p_remove_access': removeAccess}) as String;
+
   Future<List<CloudMember>> roster(String companyId) async {
     final rows = await client.rpc('company_roster', params: {'p_company_id': companyId}) as List;
     return [

@@ -344,6 +344,14 @@ class PortalService {
   Future<String> clientCode(String projectId) async =>
       await client.rpc('client_access_code', params: {'p_project_id': projectId}) as String;
 
+  /// A new code; the old one stops working. With [removeAccess], everyone who
+  /// joined with it loses access too (20261128130000_portal_code_reset.sql).
+  Future<String> resetSupplierCode(String vendorId, {required bool removeAccess}) async =>
+      await client.rpc('reset_supplier_code', params: {'p_vendor_id': vendorId, 'p_remove_access': removeAccess}) as String;
+
+  Future<String> resetClientCode(String projectId, {required bool removeAccess}) async =>
+      await client.rpc('reset_client_code', params: {'p_project_id': projectId, 'p_remove_access': removeAccess}) as String;
+
   /// Returns how many of them can see it in the app now.
   Future<int> inviteSuppliers(String requestId, List<String> vendorIds) async =>
       (await client.rpc('invite_suppliers_to_quote', params: {'p_request_id': requestId, 'p_vendor_ids': vendorIds}) as num)

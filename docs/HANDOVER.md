@@ -73,8 +73,10 @@ Conventions that bite (details in `AGENTS.md`):
   must pass `shipped_schema_upgrade_test`.
 - A server-side rule is always enforced twice: on the phone and in an RLS
   policy or trigger. Never rely on the phone alone.
-- Money visibility: owners, project managers and accounts see site money;
-  engineers and others see only expenses they recorded. Wage rates likewise.
+- Money visibility: owners, project managers and accounts see a site's
+  expenses; engineers and others see only expenses they recorded. Wage rates
+  likewise. Money received from the client (and the client's bills) is
+  owner and project manager only, on the phone and in the server's policy.
 - Sales and outreach material never states prices. No real call or WhatsApp
   to a prospect without the owner's OK.
 - Never commit secrets. Names of every secret are listed below; values live
